@@ -17,19 +17,19 @@
 
 package zeldaswordskills.item;
 
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
+//import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
+//import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.item.EnumToolMaterial;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import zeldaswordskills.lib.Config;
-import cpw.mods.fml.common.Optional.Interface;
-import cpw.mods.fml.common.Optional.Method;
-import cpw.mods.fml.relauncher.Side;
+//import net.minecraft.item.ItemStack;
+//import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+//import zeldaswordskills.lib.Config;
+//import cpw.mods.fml.common.Optional.Interface;
+//import cpw.mods.fml.common.Optional.Method;
+//import cpw.mods.fml.relauncher.Side;
 
-@Interface(iface="mods.battlegear2.api.IBattlegearWeapon", modid="battlegear2", striprefs = true)
-public class ItemZeldaSwordBG2 extends ItemZeldaSword implements IBattlegearWeapon {
-
+//@Interface(iface="mods.battlegear2.api.IBattlegearWeapon", modid="battlegear2", striprefs = true)
+public class ItemZeldaSwordBG2 extends ItemZeldaSword// implements IBattlegearWeapon {
+{
 	public ItemZeldaSwordBG2(int id, EnumToolMaterial material, float bonusDamage) {
 		this(id, material, bonusDamage, false);
 	}
@@ -37,7 +37,7 @@ public class ItemZeldaSwordBG2 extends ItemZeldaSword implements IBattlegearWeap
 	public ItemZeldaSwordBG2(int id, EnumToolMaterial material, float bonusDamage, boolean twoHanded) {
 		super(id, material, bonusDamage, twoHanded);
 	}
-	
+	/*
 	@Method(modid="battlegear2")
 	@Override
 	public boolean sheatheOnBack(ItemStack stack) {
@@ -77,4 +77,5 @@ public class ItemZeldaSwordBG2 extends ItemZeldaSword implements IBattlegearWeap
 	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
 		return !twoHanded;// && (offhand == null || offhand.getItem() instanceof IShield);
 	}
+	*/
 }
