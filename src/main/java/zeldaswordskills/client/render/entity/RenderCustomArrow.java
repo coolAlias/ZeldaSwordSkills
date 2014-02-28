@@ -26,8 +26,8 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import zeldaswordskills.api.entity.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
+import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;

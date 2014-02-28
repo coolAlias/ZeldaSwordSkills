@@ -37,7 +37,6 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
-import zeldaswordskills.api.entity.EntityArrowCustom;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.lib.Config;

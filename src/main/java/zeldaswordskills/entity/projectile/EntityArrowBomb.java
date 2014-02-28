@@ -27,7 +27,6 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
-import zeldaswordskills.api.entity.EntityArrowCustom;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
 
