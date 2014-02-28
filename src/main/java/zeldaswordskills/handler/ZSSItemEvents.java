@@ -234,7 +234,7 @@ public class ZSSItemEvents
 			BlockWeight weight = (block instanceof ILiftable
 					? ((ILiftable) block).getLiftWeight(player, stack, meta)
 					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
-			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength().weight;
+			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && !block.hasTileEntity(meta)) {
 				player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, stack));
@@ -261,7 +261,7 @@ public class ZSSItemEvents
 			int meta = world.getBlockMetadata(x, y, z);
 			BlockWeight weight = (flag ? ((ISmashable) block).getSmashWeight(player, stack, meta)
 					: (Config.canSmashVanilla() || isVanillaBlockSmashable(block) ? null : BlockWeight.IMPOSSIBLE));
-			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength().weight;
+			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (!flag || !((ISmashable) block).onSmashed(world, player, stack, x, y, z, side)) {
 				if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (!block.hasTileEntity(meta) || flag)) {

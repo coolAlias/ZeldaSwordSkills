@@ -69,7 +69,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISwing
 	}
 
 	@Override
-	public BlockWeight getSmashStrength() {
+	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta) {
 		return strength;
 	}
 	
@@ -79,6 +79,12 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISwing
 	@Override
 	public int getSwingSpeed() {
 		return 30;
+	}
+
+	@Override
+	public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
+		// TODO play hit sound
+		return true;
 	}
 	
 	@Override

@@ -38,8 +38,11 @@ public interface ISmashBlock {
 	
 	/**
 	 * Returns the strength of this item for the purpose of smashing blocks
+	 * Player-, ItemStack-, and Block- sensitive
+	 * @param block the block that was struck
+	 * @param meta the metadata of the block struck
 	 */
-	public BlockWeight getSmashStrength();
+	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta);
 	
 	/**
 	 * Called after the item has successfully smashed (destroyed) a block, making

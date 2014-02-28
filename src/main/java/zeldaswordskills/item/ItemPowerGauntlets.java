@@ -19,6 +19,7 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -56,7 +57,7 @@ public class ItemPowerGauntlets extends Item implements ILiftBlock
 	}
 	
 	@Override
-	public BlockWeight getLiftStrength() {
+	public BlockWeight getLiftStrength(EntityPlayer player, ItemStack stack, Block block, int meta) {
 		return strength;
 	}
 	

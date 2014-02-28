@@ -59,10 +59,8 @@ public class UnpressKeyPacket extends CustomPacket
 		if (side.isClient()) {
 			KeyBinding kb = (KeyBinding) KeyBinding.hash.lookup(keyCode);
 			if (kb != null) {
-				System.out.println("Unpressing one key: " + kb.keyDescription);
 				KeyBinding.setKeyBindState(keyCode, false);
 			} else {
-				System.out.println("Unpressing all keys");
 				KeyBinding.unPressAllKeys();
 			}
 		}
