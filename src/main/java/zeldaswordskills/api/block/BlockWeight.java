@@ -25,6 +25,8 @@ package zeldaswordskills.api.block;
  *
  */
 public enum BlockWeight {
+	/** Used mainly for items that cannot affect vanilla blocks but should still have some interaction */
+	VERY_LIGHT(0.0F),
 	/** Most basic ore blocks, dirt, etc. are in this category, but not stone or logs */
 	LIGHT(5.0F),
 	/** Nearly all normal blocks, including stone, blocks of gold, etc. */
@@ -38,7 +40,7 @@ public enum BlockWeight {
 	/** A category above the category above the heaviest vanilla blocks */
 	EXTREME_II(10000.0F),
 	/** Category for blocks that are impossible to move or smash */
-	IMPOSSIBLE(0.0F);
+	IMPOSSIBLE(6000000.0F); // value of bedrock
 	/** The weight of block that can be lifted with this strength */
 	public final float weight;
 	private BlockWeight(float f) {

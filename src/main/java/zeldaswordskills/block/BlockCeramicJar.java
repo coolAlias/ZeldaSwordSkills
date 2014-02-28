@@ -34,7 +34,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
-import zeldaswordskills.api.item.ISmashBlock;
+import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderCeramicJar;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -47,7 +48,7 @@ import zeldaswordskills.world.gen.DungeonLootLists;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockCeramicJar extends BlockContainer
+public class BlockCeramicJar extends BlockContainer implements ISmashable
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;
@@ -59,6 +60,18 @@ public class BlockCeramicJar extends BlockContainer
 		setStepSound(soundStoneFootstep);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.285F, 0.0F, 0.285F, 0.715F, 0.665F, 0.715F);
+	}
+	
+	@Override
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+		return BlockWeight.VERY_LIGHT;
+	}
+	
+	@Override
+	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+		world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+		world.destroyBlock(x, y, z, false);
+		return true;
 	}
 	
 	@Override
@@ -137,8 +150,7 @@ public class BlockCeramicJar extends BlockContainer
 	
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
-		if (player.getHeldItem() != null && (player.getHeldItem().getItem() instanceof ItemSword ||
-				player.getHeldItem().getItem() instanceof ISmashBlock)) {
+		if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
 			world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 			world.destroyBlock(x, y, z, false);
 		}

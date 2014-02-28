@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -223,7 +224,9 @@ public class ZSSItemEvents
 		if (id > 0 && (player.canPlayerEdit(x, y, z, side, stack) || Block.blocksList[id] instanceof ILiftable)) {
 			Block block = Block.blocksList[id];
 			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (block instanceof ILiftable ? ((ILiftable) block).getLiftWeight() : null);
+			BlockWeight weight = (block instanceof ILiftable
+					? ((ILiftable) block).getLiftWeight(player, stack, meta)
+					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength().weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && !block.hasTileEntity(meta)) {
@@ -251,7 +254,8 @@ public class ZSSItemEvents
 		if (id > 0 && (player.canPlayerEdit(x, y, z, side, stack) || flag)) {
 			Block block = Block.blocksList[id];
 			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (flag ? ((ISmashable) block).getSmashWeight(meta) : null);
+			BlockWeight weight = (flag ? ((ISmashable) block).getSmashWeight(player, stack, meta)
+					: (Config.canSmashVanilla() || isVanillaBlockSmashable(block) ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength().weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (!flag || !((ISmashable) block).onSmashed(world, player, stack, x, y, z, side)) {
@@ -265,6 +269,10 @@ public class ZSSItemEvents
 			}
 		}
 		return world.isAirBlock(x, y, z);
+	}
+	
+	private boolean isVanillaBlockSmashable(Block block) {
+		return block.blockMaterial == Material.glass || block.blockMaterial == Material.ice;
 	}
 
 	public static void initializeDrops() {

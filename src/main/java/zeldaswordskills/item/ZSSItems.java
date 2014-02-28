@@ -415,8 +415,8 @@ public class ZSSItems
 		maskStone = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.invisibility.id, 90, 0)).setUnlocalizedName("zss.mask_stone");
 		maskTruth = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
 		
-		hammer = new ItemHammer(modItemIndex++, BlockWeight.MEDIUM, 8.0F, 50.0F).setUnlocalizedName("zss.hammer");
-		hammerSkull = new ItemHammer(modItemIndex++, BlockWeight.HEAVY, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
+		hammer = new ItemHammer(modItemIndex++, BlockWeight.VERY_LIGHT, 8.0F, 50.0F).setUnlocalizedName("zss.hammer");
+		hammerSkull = new ItemHammer(modItemIndex++, BlockWeight.MEDIUM, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
 		hammerMegaton = new ItemHammer(modItemIndex++, BlockWeight.VERY_HEAVY, 16.0F, 50.0F).setUnlocalizedName("zss.hammer_megaton");
 	}
 

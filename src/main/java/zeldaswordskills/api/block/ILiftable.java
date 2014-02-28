@@ -17,6 +17,9 @@
 
 package zeldaswordskills.api.block;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+
 
 /**
  * 
@@ -33,7 +36,9 @@ public interface ILiftable {
 	/**
 	 * Returns the block's weight for purposes of lifting, allowing
 	 * otherwise unbreakable blocks to be handled efficiently
+	 * @param stack the itemstack used to smash the block
+	 * @param meta the block metadata
 	 */
-	public BlockWeight getLiftWeight();
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta);
 
 }

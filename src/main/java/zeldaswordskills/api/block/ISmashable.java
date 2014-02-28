@@ -42,9 +42,10 @@ public interface ISmashable {
 	/**
 	 * Returns the weight of this block for the purpose of determining
 	 * whether it can be smashed or not by the item used
+	 * @param stack the itemstack used to smash the block
 	 * @param meta the block metadata
 	 */
-	public BlockWeight getSmashWeight(int meta);
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta);
 	
 	/**
 	 * This method is called right before the block smash calculations occur,

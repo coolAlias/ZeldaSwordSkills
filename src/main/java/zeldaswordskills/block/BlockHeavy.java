@@ -59,12 +59,12 @@ public class BlockHeavy extends Block implements ILiftable, ISmashable
 	}
 
 	@Override
-	public BlockWeight getLiftWeight() {
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta) {
 		return weight;
 	}
 	
 	@Override
-	public BlockWeight getSmashWeight(int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
 		return weight != BlockWeight.IMPOSSIBLE ? BlockWeight.values()[weight.ordinal() + 1] : weight;
 	}
 	

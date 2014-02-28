@@ -67,7 +67,7 @@ public class BlockSecretStone extends Block implements ISmashable
 	}
 	
 	@Override
-	public BlockWeight getSmashWeight(int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
 		return (meta < 0x8 ? BlockWeight.VERY_HEAVY : BlockWeight.IMPOSSIBLE);
 	}
 
