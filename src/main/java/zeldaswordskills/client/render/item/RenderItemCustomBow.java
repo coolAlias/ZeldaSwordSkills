@@ -27,12 +27,16 @@ import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
 
+import zeldaswordskills.item.ItemHeroBow;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
  * Renders custom bow in 1st and 3rd person, adding FOV effect (TODO)
+ * 
+ * Parts of this code were adapted from Battlegear2's BowRenderer, so
+ * thanks to them for having an open-source project.
  *
  */
 @SideOnly(Side.CLIENT)
@@ -74,6 +78,20 @@ public class RenderItemCustomBow implements IItemRenderer {
 			Icon icon = stack.getItem().getIcon(stack, 0, player, player.getItemInUse(), player.getItemInUseCount());
 			Tessellator tessellator = Tessellator.instance;
 			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
+			// The following code is copied in large part from Battlegear2's BowRenderer
+			int useDuration = player.getItemInUseDuration();
+			if (useDuration > 0) {
+				int drawAmount = (useDuration > 17 ? 2 : (useDuration > 13 ? 1 : 0));
+				int arrowId = ((ItemHeroBow) stack.getItem()).getArrow(stack);
+				ItemStack arrow = (arrowId > -1 ? new ItemStack(arrowId, 1, 0) : null);
+				if (arrow != null) {
+					icon = arrow.getIconIndex();
+		            GL11.glPushMatrix();
+		            GL11.glTranslatef(-(-3F+drawAmount)/16F, -(-3F+drawAmount)/16F, firstPerson?-0.5F/16F:0.5F/16F);
+		            ItemRenderer.renderItemIn2D(tessellator, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
+		            GL11.glPopMatrix();
+				}
+			}
 			GL11.glPopMatrix();
 		}
 	}

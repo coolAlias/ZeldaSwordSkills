@@ -75,27 +75,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemHeroBow extends ItemBow implements IFairyUpgrade
 {
-	/** Arrow texture suffixes */
-	private static final String[] arrows = {"standard","bomb","bomb_fire","bomb_water","fire","ice","light"};
-
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconStandard;
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconBomb;
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconBombFire;
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconBombWater;
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconFire;
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconIce;
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconLight;
-
-	/** Maps the arrow ID to icon array */
-	@SideOnly(Side.CLIENT)
-	private static Map<Integer, Icon[]> iconMap;
+	private Icon[] iconArray;
 
 	/** Maps arrow IDs to arrow entity class */
 	private static final Map<Integer, Class<? extends EntityArrow>> arrowMap = new HashMap<Integer, Class<? extends EntityArrow>>();
@@ -166,7 +147,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade
 	/**
 	 * Retrieves the arrow id currently nocked in the bow, or -1 for no arrow
 	 */
-	private int getArrow(ItemStack bow) {
+	public int getArrow(ItemStack bow) {
 		return (bow.hasTagCompound() && bow.getTagCompound().hasKey("nockedArrow") ?
 				bow.getTagCompound().getInteger("nockedArrow") : -1);
 	}
@@ -258,7 +239,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade
 		setArrow(bow, null);
 		if (arrowId < 0) { return; }
 
-		// TODO post once BG2 fixes their code
 		if (!Loader.isModLoaded("battlegear2")) {
 			ArrowLooseEvent event = new ArrowLooseEvent(player, bow, ticksInUse);
 			MinecraftForge.EVENT_BUS.post(event);
@@ -413,15 +393,12 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade
 	public Icon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
 		if (usingItem == null) { return itemIcon; }
 		int ticksInUse = stack.getMaxItemUseDuration() - useRemaining;
-		int arrowId = getArrow(stack);
-		Icon[] icons = (iconMap.containsKey(arrowId) ? iconMap.get(arrowId) : iconStandard);
-
-		if (ticksInUse > 18) {
-			return icons[2];
+		if (ticksInUse > 17) {
+			return iconArray[2];
 		} else if (ticksInUse > 13) {
-			return icons[1];
+			return iconArray[1];
 		} else if (ticksInUse > 0) {
-			return icons[0];
+			return iconArray[0];
 		} else {
 			return itemIcon;
 		}
@@ -430,32 +407,11 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[0] + "_0");
-		iconStandard = new Icon[3];
-		iconBomb = new Icon[3];
-		iconBombFire = new Icon[3];
-		iconBombWater = new Icon[3];
-		iconFire = new Icon[3];
-		iconIce = new Icon[3];
-		iconLight = new Icon[3];
-		for (int i = 0; i < iconStandard.length; ++i) {
-			iconStandard[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[0] + "_" + (i + 1));
-			iconBomb[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[1] + "_" + (i + 1));
-			iconBombFire[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[2] + "_" + (i + 1));
-			iconBombWater[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[3] + "_" + (i + 1));
-			iconFire[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[4] + "_" + (i + 1));
-			iconIce[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[5] + "_" + (i + 1));
-			iconLight[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_" + arrows[6] + "_" + (i + 1));
+		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_standard_0");
+		iconArray = new Icon[3];
+		for (int i = 0; i < iconArray.length; ++i) {
+			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_standard_" + (i + 1));
 		}
-
-		iconMap = new HashMap<Integer, Icon[]>();
-		iconMap.put(Item.arrow.itemID, iconStandard);
-		iconMap.put(ZSSItems.arrowBomb.itemID, iconBomb);
-		iconMap.put(ZSSItems.arrowBombFire.itemID, iconBombFire);
-		iconMap.put(ZSSItems.arrowBombWater.itemID, iconBombWater);
-		iconMap.put(ZSSItems.arrowFire.itemID, iconFire);
-		iconMap.put(ZSSItems.arrowIce.itemID, iconIce);
-		iconMap.put(ZSSItems.arrowLight.itemID, iconLight);
 	}
 
 	@Override
