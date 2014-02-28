@@ -44,6 +44,7 @@ import zeldaswordskills.client.render.item.RenderHeldItemBlock;
 import zeldaswordskills.client.render.item.RenderItemBomb;
 import zeldaswordskills.client.render.item.RenderItemBombBag;
 import zeldaswordskills.client.render.item.RenderItemCustomBow;
+import zeldaswordskills.client.render.item.RenderItemHammer;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.TradeHandler;
@@ -114,6 +115,9 @@ public class ZSSItems
 	fairyBottle,
 	gauntletsSilver,
 	gauntletsGolden,
+	hammer,
+	hammerSkull,
+	hammerMegaton,
 	heartPiece,
 	heldBlock,
 	heroBow,
@@ -245,6 +249,9 @@ public class ZSSItems
 	public static void registerRenderers() {
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.bomb.itemID, new RenderItemBomb());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.bombBag.itemID, new RenderItemBombBag());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammer.itemID, new RenderItemHammer());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerMegaton.itemID, new RenderItemHammer());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerSkull.itemID, new RenderItemHammer());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heroBow.itemID, new RenderItemCustomBow());
 		//MinecraftForgeClient.registerItemRenderer(ZSSItems.hookshot.itemID, new RenderItemHookShot());
@@ -327,19 +334,7 @@ public class ZSSItems
 		tunicHeroBoots = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 3).setUnlocalizedName("zss.hero_tunic_boots");
 		bootsHeavy = new ItemArmorBoots(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_heavy");
 		bootsPegasus = new ItemArmorBoots(modItemIndex++, EnumArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_pegasus");
-		/*
-		if (Loader.isModLoaded("battlegear2")) {
-			// TODO uncomment out for release
-			swordKokiri = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.IRON, -1.0F).setUnlocalizedName("zss.sword_kokiri").setMaxDamage(256);
-			swordOrdon = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.IRON, 1.0F).setUnlocalizedName("zss.sword_ordon").setMaxDamage(512);
-			swordGiant = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.IRON, 6.0F, true).setUnlocalizedName("zss.sword_giant").setMaxDamage(32);
-			swordBiggoron = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.IRON, 6.0F, true).setNoItemOnBreak().setUnlocalizedName("zss.sword_biggoron").setMaxDamage(0);
-			swordMaster = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.EMERALD, 2.0F).setMasterSword().setUnlocalizedName("zss.sword_master").setMaxDamage(0);
-			swordTempered = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.EMERALD, 4.0F).setMasterSword().setUnlocalizedName("zss.sword_tempered").setMaxDamage(0);
-			swordGolden = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.EMERALD, 6.0F).setMasterSword().setUnlocalizedName("zss.sword_golden").setMaxDamage(0);
-			swordMasterTrue = new ItemZeldaSwordBG2(modItemIndex++, EnumToolMaterial.EMERALD, 8.0F).setMasterSword().setUnlocalizedName("zss.sword_master_true").setMaxDamage(0);
-		} else {
-		 */
+		
 		swordKokiri = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.IRON, -1.0F).setUnlocalizedName("zss.sword_kokiri").setMaxDamage(256);
 		swordOrdon = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.IRON, 1.0F).setUnlocalizedName("zss.sword_ordon").setMaxDamage(512);
 		swordGiant = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.IRON, 6.0F, true).setUnlocalizedName("zss.sword_giant").setMaxDamage(32);
@@ -348,7 +343,6 @@ public class ZSSItems
 		swordTempered = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.EMERALD, 4.0F).setMasterSword().setUnlocalizedName("zss.sword_tempered").setMaxDamage(0);
 		swordGolden = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.EMERALD, 6.0F).setMasterSword().setUnlocalizedName("zss.sword_golden").setMaxDamage(0);
 		swordMasterTrue = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.EMERALD, 8.0F).setMasterSword().setUnlocalizedName("zss.sword_master_true").setMaxDamage(0);
-		//}
 		swordBroken = new ItemBrokenSword(modItemIndex++).setUnlocalizedName("zss.sword_broken");
 
 		slingshot = new ItemSlingshot(modItemIndex++).setUnlocalizedName("zss.slingshot");
@@ -420,6 +414,10 @@ public class ZSSItems
 		maskSpooky = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_spooky");
 		maskStone = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.invisibility.id, 90, 0)).setUnlocalizedName("zss.mask_stone");
 		maskTruth = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
+		
+		hammer = new ItemHammer(modItemIndex++, BlockWeight.MEDIUM, 8.0F, 50.0F).setUnlocalizedName("zss.hammer");
+		hammerSkull = new ItemHammer(modItemIndex++, BlockWeight.HEAVY, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
+		hammerMegaton = new ItemHammer(modItemIndex++, BlockWeight.VERY_HEAVY, 16.0F, 50.0F).setUnlocalizedName("zss.hammer_megaton");
 	}
 
 	private static void registerItems() {
@@ -452,6 +450,10 @@ public class ZSSItems
 		GameRegistry.registerItem(swordGolden, swordGolden.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(swordMasterTrue, swordMasterTrue.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(swordBroken, swordBroken.getUnlocalizedName().substring(5));
+
+		GameRegistry.registerItem(hammer, hammer.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(hammerSkull, hammerSkull.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(hammerMegaton, hammerMegaton.getUnlocalizedName().substring(5));
 
 		GameRegistry.registerItem(boomerang, boomerang.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(boomerangMagic, boomerangMagic.getUnlocalizedName().substring(5));

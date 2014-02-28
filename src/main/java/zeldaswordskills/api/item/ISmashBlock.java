@@ -17,6 +17,9 @@
 
 package zeldaswordskills.api.item;
 
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.block.BlockWeight;
 
 /**
@@ -37,5 +40,13 @@ public interface ISmashBlock {
 	 * Returns the strength of this item for the purpose of smashing blocks
 	 */
 	public BlockWeight getSmashStrength();
+	
+	/**
+	 * Called after the item has successfully smashed (destroyed) a block, making
+	 * it ideal for damaging the stack, for example; onBlockSmashed may not be
+	 * called if an ISmashable block cancels the smash
+	 * @param meta the metadata of the block before it was destroyed
+	 */
+	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta);
 
 }

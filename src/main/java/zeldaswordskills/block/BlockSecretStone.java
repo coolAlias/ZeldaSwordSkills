@@ -32,6 +32,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.Config;
 import cpw.mods.fml.relauncher.Side;
@@ -45,7 +47,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockSecretStone extends Block
+public class BlockSecretStone extends Block implements ISmashable
 {
 	/** List of all currently available secret blocks */
 	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","quartz_block_chiseled","end_stone"};
@@ -62,6 +64,16 @@ public class BlockSecretStone extends Block
 		setResistance(6.0F);
 		setStepSound(soundStoneFootstep);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
+	}
+	
+	@Override
+	public BlockWeight getSmashWeight(int meta) {
+		return (meta < 0x8 ? BlockWeight.VERY_HEAVY : BlockWeight.IMPOSSIBLE);
+	}
+
+	@Override
+	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+		return false;
 	}
 	
 	@Override

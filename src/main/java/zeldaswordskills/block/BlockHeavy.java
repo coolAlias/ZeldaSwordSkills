@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
+import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
@@ -63,27 +64,21 @@ public class BlockHeavy extends Block implements ILiftable, ISmashable
 	}
 	
 	@Override
-	public BlockWeight getSmashWeight() {
+	public BlockWeight getSmashWeight(int meta) {
 		return weight != BlockWeight.IMPOSSIBLE ? BlockWeight.values()[weight.ordinal() + 1] : weight;
 	}
 	
 	@Override
 	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
-		return true;
-	}
-	
-	@Override
-	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
-		// TODO change this to hammers
-		if (PlayerUtils.isHoldingMasterSword(player) && player.getHeldItem().getItem() == ZSSItems.swordMasterTrue) {
-			if ((weight == BlockWeight.MEDIUM && PlayerUtils.hasItem(player, ZSSItems.gauntletsSilver))
-				|| (weight == BlockWeight.VERY_HEAVY && PlayerUtils.hasItem(player, ZSSItems.gauntletsGolden)))
-			{
+		if (stack.getItem() == ZSSItems.hammerMegaton && PlayerUtils.hasItem(player, ZSSItems.gauntletsGolden)) {
+			((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, this, world.getBlockMetadata(x, y, z));
+			if (!world.isRemote) {
 				world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
 				world.destroyBlock(x, y, z, false);
 			}
+			return true;
 		}
+		return false;
 	}
 	
 	@Override

@@ -42,17 +42,19 @@ public interface ISmashable {
 	/**
 	 * Returns the weight of this block for the purpose of determining
 	 * whether it can be smashed or not by the item used
+	 * @param meta the block metadata
 	 */
-	public BlockWeight getSmashWeight();
+	public BlockWeight getSmashWeight(int meta);
 	
 	/**
-	 * This method is called right before the block is destroyed, allowing
-	 * things like tile entities etc. to be handled or canceling of the smash.
-	 * Note that the checks for getSmashWeight in relation to the player's held
-	 * item have already been processed in order for this method to be called
-	 *  @param stack the stack's item will always be an instance of ISmashBlock
+	 * This method is called right before the block smash calculations occur,
+	 * allowing custom handling of the event by the block in question.
+	 * @param stack the stack's item will always be an instance of ISmashBlock
 	 * @param side the side (face) of the block that was hit
-	 * @return false to cancel the smash, true will allow the block to be destroyed
+	 * @return return true if the smash was handled internally and further
+	 * processing should be canceled, or false to continue with the standard
+	 * smash mechanics; be sure to call ISmashBlock's onBlockSmashed method if
+	 * returning true
 	 */
 	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
 

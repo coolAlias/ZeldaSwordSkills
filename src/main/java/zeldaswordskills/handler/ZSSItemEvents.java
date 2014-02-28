@@ -198,7 +198,7 @@ public class ZSSItemEvents
 		switch(event.action) {
 		case LEFT_CLICK_BLOCK:
 			if (stack != null && stack.getItem() instanceof ISmashBlock) {
-				if (blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
+				if (event.entityPlayer.attackTime > 0 || blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
 					event.useBlock = Result.DENY;
 				}
 			}
@@ -251,17 +251,20 @@ public class ZSSItemEvents
 		if (id > 0 && (player.canPlayerEdit(x, y, z, side, stack) || flag)) {
 			Block block = Block.blocksList[id];
 			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (flag ? ((ISmashable) block).getSmashWeight() : null);
+			BlockWeight weight = (flag ? ((ISmashable) block).getSmashWeight(meta) : null);
 			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength().weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
-			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (!block.hasTileEntity(meta) || flag)) {
-				if ((!flag || ((ISmashable) block).onSmashed(world, player, stack, x, y, z, side)) && !world.isRemote) {
-					world.destroyBlock(x, y, z, false);
-					return true;
+			if (!flag || !((ISmashable) block).onSmashed(world, player, stack, x, y, z, side)) {
+				if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (!block.hasTileEntity(meta) || flag)) {
+					((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, block, meta);
+					if (!world.isRemote) {
+						world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
+						world.destroyBlock(x, y, z, false);
+					}
 				}
 			}
 		}
-		return false;
+		return world.isAirBlock(x, y, z);
 	}
 
 	public static void initializeDrops() {
