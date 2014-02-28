@@ -61,6 +61,7 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(14), UpdateBuffPacket.class);
 		builder.put(Integer.valueOf(15), SyncEntityInfoPacket.class);
 		builder.put(Integer.valueOf(16), PlaySoundPacket.class);
+		builder.put(Integer.valueOf(17), UnpressKeyPacket.class);
 		
 		idMap = builder.build();
 	}

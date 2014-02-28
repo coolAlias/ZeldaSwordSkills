@@ -65,10 +65,13 @@ import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.feature.WorldGenJars;
+import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 /**
@@ -193,13 +196,17 @@ public class ZSSItemEvents
 		}
 	}
 
+	/**
+	 * PlayerInteractEvent is only called on the server
+	 */
 	@ForgeSubscribe
 	public void onInteract(PlayerInteractEvent event) {
 		ItemStack stack = event.entityPlayer.getHeldItem();
 		switch(event.action) {
 		case LEFT_CLICK_BLOCK:
 			if (stack != null && stack.getItem() instanceof ISmashBlock) {
-				if (event.entityPlayer.attackTime > 0 || blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
+				if (blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
+					PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) event.entityPlayer);
 					event.useBlock = Result.DENY;
 				}
 			}
@@ -230,12 +237,10 @@ public class ZSSItemEvents
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength().weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && !block.hasTileEntity(meta)) {
-				if (!world.isRemote) {
-					player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, stack));
-					world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
-							block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
-					world.setBlockToAir(x, y, z);
-				}
+				player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, stack));
+				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
+						block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+				world.setBlockToAir(x, y, z);
 				return true;
 			} else {
 				// TODO play exertion or grunt sound
@@ -261,10 +266,8 @@ public class ZSSItemEvents
 			if (!flag || !((ISmashable) block).onSmashed(world, player, stack, x, y, z, side)) {
 				if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (!block.hasTileEntity(meta) || flag)) {
 					((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, block, meta);
-					if (!world.isRemote) {
-						world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
-						world.destroyBlock(x, y, z, false);
-					}
+					world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
+					world.destroyBlock(x, y, z, false);
 				}
 			}
 		}
