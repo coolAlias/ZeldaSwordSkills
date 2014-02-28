@@ -28,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -150,15 +151,10 @@ public class EntityHookShot extends EntityThrowable
 	}
 	
 	/**
-	 * Returns true if the hookshot can destroy the block at x/y/z
+	 * Returns true if the hookshot can destroy the material type
 	 */
-	protected boolean canDestroyBlock(int x, int y, int z) {
-		if (worldObj.getBlockMaterial(x, y, z) == Material.glass) {
-			return true;
-		} else if (getType().ordinal() / 2 == (ShotType.STONE_SHOT.ordinal() / 2)) {
-			return worldObj.getBlockMaterial(x, y, z) == Material.wood;
-		}
-		return false;
+	protected boolean canDestroyMaterial(Material m) {
+		return m == Material.glass || (m == Material.wood && getType().ordinal() / 2 == (ShotType.STONE_SHOT.ordinal() / 2));
 	}
 	
 	@Override // getVelocity
@@ -180,16 +176,15 @@ public class EntityHookShot extends EntityThrowable
 			}
 			block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
 			if (!inGround && ticksExisted < getMaxDistance()) {
-				motionX = 0.0D;
-				motionY = 0.0D;
-				motionZ = 0.0D;
-				
-				if (canGrabMaterial(block.blockMaterial)) {
+				motionX = motionY = motionZ = 0.0D;
+				boolean flag = block instanceof IHookable;
+				Material m = flag ? ((IHookable) block).getHookableMaterial() : block.blockMaterial;
+				if ((flag && ((IHookable) block).canAlwaysGrab()) || canGrabMaterial(m)) {
 					inGround = true;
 					hitX = mop.blockX + 0.5D;
 					hitY = mop.blockY;
 					hitZ = mop.blockZ + 0.5D;
-				} else if (canDestroyBlock(mop.blockX, mop.blockY, mop.blockZ)) {
+				} else if (canDestroyMaterial(m) && block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ) >= 0.0F) {
 					worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, false);
 					setDead();
 				} else {
@@ -221,7 +216,7 @@ public class EntityHookShot extends EntityThrowable
 	public void onUpdate() {
 		super.onUpdate();
 		if (canUpdate()) {
-			if ((ticksExisted > getMaxDistance() && !inGround && getTarget() == null) || ticksExisted > (getMaxDistance() * 4)) {
+			if ((ticksExisted > getMaxDistance() && !inGround && getTarget() == null) || ticksExisted > (getMaxDistance() * 8)) {
 				if (Config.enableHookshotMissSound()) {
 					worldObj.playSoundAtEntity(getThrower() != null ? getThrower() : this, "random.wood_click", 1.0F, 1.0F);
 				}
