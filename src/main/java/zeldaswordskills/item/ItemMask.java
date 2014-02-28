@@ -36,6 +36,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -54,7 +55,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * TODO will need wornHelm field in player info for this stuff, like boots
  *
  */
-public class ItemMask extends ItemArmor
+public class ItemMask extends ItemArmor implements IZoomHelper
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
@@ -109,6 +110,12 @@ public class ItemMask extends ItemArmor
 	private void setCooldown(ItemStack stack, int time) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
 		stack.getTagCompound().setInteger("cooldown", time);
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public float getMagnificationFactor() {
+		return (this == ZSSItems.maskHawkeye ? 3.0F : 0.0F);
 	}
 	
 	@Override

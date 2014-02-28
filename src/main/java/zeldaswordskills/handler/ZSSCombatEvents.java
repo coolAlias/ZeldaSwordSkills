@@ -22,10 +22,13 @@ import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.event.Event;
 import net.minecraftforge.event.EventPriority;
@@ -34,12 +37,14 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.damage.IDamageType;
 import zeldaswordskills.api.damage.IPostDamageEffect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISwingSpeed;
+import zeldaswordskills.api.item.IZoom;
+import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -69,7 +74,41 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Event handler for all combat-related events
  *
  */
-public class ZSSCombatEvents {
+public class ZSSCombatEvents
+{
+	@ForgeSubscribe
+	@SideOnly(Side.CLIENT)
+	public void updateFOV(FOVUpdateEvent event) {
+		ItemStack stack = (event.entity.isUsingItem() ? event.entity.getItemInUse() : null);
+		if (stack != null) {
+			boolean flag = stack.getItem() instanceof IZoom;
+			if (flag || stack.getItem() == Item.bow) {
+				float magnify = 1.0F;
+				for (ItemStack armor : event.entity.inventory.armorInventory) {
+					if (armor != null && armor.getItem() instanceof IZoomHelper) {
+						magnify += ((IZoomHelper) armor.getItem()).getMagnificationFactor();
+					}
+				}
+				if (flag || magnify != 1.0F) {
+					float maxTime = (flag ? ((IZoom) stack.getItem()).getMaxZoomTime() : 20.0F);
+					float factor = (flag ? ((IZoom) stack.getItem()).getZoomFactor() : 0.15F);
+					float charge = (float) event.entity.getItemInUseDuration() / maxTime;
+					AttributeInstance attributeinstance = event.entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+					float fov = (event.entity.capabilities.allowFlying ? 1.1F : 1.0F);
+					fov *= (attributeinstance.getAttributeValue() / (double) event.entity.capabilities.getWalkSpeed() + 1.0D) / 2.0D;
+					if (event.entity.capabilities.getWalkSpeed() == 0.0F || Float.isNaN(fov) || Float.isInfinite(fov)) {
+						fov = 1.0F;
+					}
+					if (charge > 1.0F) {
+						charge = 1.0F;
+					} else {
+						charge *= charge;
+					}
+					event.newfov = fov * (1.0F - charge * magnify * factor);
+				}
+			}
+		}
+	}
 
 	/**
 	 * If the player is using an ILockOnTarget skill, this event will cancel mouse motion when locked

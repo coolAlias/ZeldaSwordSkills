@@ -33,7 +33,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Renders custom bow in 1st and 3rd person, adding FOV effect (TODO)
+ * Renders custom bow in 1st and 3rd person
  * 
  * Parts of this code were adapted from Battlegear2's BowRenderer, so
  * thanks to them for having an open-source project.

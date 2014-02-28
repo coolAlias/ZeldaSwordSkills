@@ -40,6 +40,7 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -62,7 +63,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * require a special type of slingshot (upgraded) to shoot properly.
  *
  */
-public class ItemSlingshot extends Item implements IFairyUpgrade
+public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 {
 	/** The number of seeds this slingshot will fire per shot */
 	protected final int seedsFired;
@@ -94,6 +95,18 @@ public class ItemSlingshot extends Item implements IFairyUpgrade
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public float getMaxZoomTime() {
+		return 20.0F;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public float getZoomFactor() {
+		return 0.15F;
 	}
 	
 	@Override

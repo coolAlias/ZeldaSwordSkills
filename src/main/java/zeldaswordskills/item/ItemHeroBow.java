@@ -47,6 +47,7 @@ import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.EntityArrowCustom;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -73,7 +74,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * ice arrows; level 3 can shoot all arrow types
  *
  */
-public class ItemHeroBow extends ItemBow implements IFairyUpgrade
+public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom
 {
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
@@ -177,6 +178,18 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade
 
 		setArrow(bow, arrow);
 		return arrow != null;
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public float getMaxZoomTime() {
+		return 20.0F;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public float getZoomFactor() {
+		return 0.15F;
 	}
 
 	@Override
