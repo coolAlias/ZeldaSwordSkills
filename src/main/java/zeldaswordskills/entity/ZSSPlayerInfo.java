@@ -82,14 +82,38 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	
 	/** Number of Super Spin Attack orbs received from the Great Fairy: used to prevent exploits */
 	private int fairySpinOrbsReceived = 0;
+	
+	/** Current stage in the Mask trading sequence */
+	private int maskStage = 0;
+	
+	/** Mask stage value for fully completed sequence */
+	public static final int MASK_COMPLETE = 3;
 
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
+		initSkills();
+	}
+	
+	/**
+	 * Adds all skills to the map at level zero
+	 */
+	private void initSkills() {
 		for (int i = 0; i < SkillBase.MAX_NUM_SKILLS; ++i) {
 			if (SkillBase.getSkillList()[i] != null) {
 				skills.put(SkillBase.getSkillList()[i].id, SkillBase.getSkillList()[i].newInstance());
 			}
 		}
+	}
+	
+	/**
+	 * Resets all data related to skills
+	 */
+	public void resetSkills() {
+		skills.clear();
+		initSkills();
+		validateSkills();
+		fairySpinOrbsReceived = 0;
+		PacketDispatcher.sendPacketToPlayer(new SyncPlayerInfoPacket(this).setReset().makePacket(), (Player) player);
 	}
 
 	/**
@@ -167,6 +191,19 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Increments the number of Super Spin Attack orbs received, returning true if it's the last one */
 	public boolean receiveFairyOrb() {
 		return (++fairySpinOrbsReceived == SkillBase.MAX_LEVEL);
+	}
+	
+	/**
+	 * The player's current progress along the mask quest (% 3 gives stage):
+	 * 0 - can get next mask, 1 - need to sell mask, 2 - need to pay for mask
+	 */
+	public int getCurrentMaskStage() {
+		return maskStage;
+	}
+	
+	/** Increments the mask quest stage by one */
+	public void completeCurrentMaskStage() {
+		++maskStage;
 	}
 
 	/** Returns true if the player has at least one level in the specified skill */
@@ -424,6 +461,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		compound.setInteger("lastBoots", lastBootsID);
 		compound.setInteger("lastHelm", lastHelmID);
 		compound.setInteger("fairySpinOrbsReceived", fairySpinOrbsReceived);
+		compound.setInteger("maskStage", maskStage);
 	}
 
 	@Override
@@ -438,6 +476,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		lastBootsID = compound.getInteger("lastBoots");
 		lastHelmID = compound.getInteger("lastHelm");
 		fairySpinOrbsReceived = compound.getInteger("fairySpinOrbsReceived");
+		maskStage = compound.getInteger("maskStage");
 	}
 
 	@Override

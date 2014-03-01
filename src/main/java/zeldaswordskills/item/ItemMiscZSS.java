@@ -32,6 +32,7 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.lib.Config;
@@ -63,13 +64,13 @@ public class ItemMiscZSS extends Item
 		if (this == ZSSItems.keySkeleton || this == ZSSItems.keySmall) {
 			return ZSSCreativeTabs.tabKeys;
 		} else {
-			return (this == ZSSItems.heartPiece ? ZSSCreativeTabs.tabSkills : super.getCreativeTab());
+			return (this == ZSSItems.heartPiece || this == ZSSItems.skillWiper ? ZSSCreativeTabs.tabSkills : super.getCreativeTab());
 		}
 	}
 	
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (stack.getItem() == ZSSItems.dekuNut) {
+		if (this == ZSSItems.dekuNut) {
 			EntitySeedShot seedShot = new EntitySeedShot(world, player, 0.5F, 1, 0).setType(SeedType.DEKU);
 			seedShot.setDamage(2.5F);
 			if (!player.capabilities.isCreativeMode) {
@@ -77,6 +78,11 @@ public class ItemMiscZSS extends Item
 			}
 			if (!world.isRemote) {
 				world.spawnEntityInWorld(seedShot);
+			}
+		} else if (this == ZSSItems.skillWiper) {
+			if (!world.isRemote) {
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.skill.reset"));
+				ZSSPlayerInfo.get(player).resetSkills();
 			}
 		}
 		return stack;

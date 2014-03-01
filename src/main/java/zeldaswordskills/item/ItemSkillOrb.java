@@ -60,7 +60,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 	
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (ZSSPlayerInfo.get(player) != null && !player.worldObj.isRemote) {
+		if (!player.worldObj.isRemote) {
 			int id = stack.getItemDamage();
 			if (id < SkillBase.MAX_NUM_SKILLS && SkillBase.getSkillList()[id] != null) {
 				if (ZSSPlayerInfo.get(player).grantSkill(SkillBase.getSkillList()[id])) {

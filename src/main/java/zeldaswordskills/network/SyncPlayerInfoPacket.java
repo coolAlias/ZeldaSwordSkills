@@ -37,6 +37,8 @@ public class SyncPlayerInfoPacket extends CustomPacket
 {
 	/** NBTTagCompound used to store and transfer the Player's Info */
 	private NBTTagCompound compound;
+	/** Whether skills should validate; only false when skills reset */
+	private boolean validate = true;
 
 	public SyncPlayerInfoPacket() {}
 
@@ -44,15 +46,25 @@ public class SyncPlayerInfoPacket extends CustomPacket
 		compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 	}
+	
+	/**
+	 * Sets validate to false for reset skills packets
+	 */
+	public SyncPlayerInfoPacket setReset() {
+		validate = false;
+		return this;
+	}
 
 	@Override
 	public void write(ByteArrayDataOutput out) throws IOException {
 		writeNBTTagCompound(compound, out);
+		out.writeBoolean(validate);
 	}
 
 	@Override
 	public void read(ByteArrayDataInput in) throws IOException {
 		compound = readNBTTagCompound(in);
+		validate = in.readBoolean();
 	}
 
 	@Override
@@ -61,7 +73,9 @@ public class SyncPlayerInfoPacket extends CustomPacket
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			if (info != null) {
 				info.loadNBTData(compound);
-				info.validateSkills();
+				if (validate) {
+					info.validateSkills();
+				}
 			} else {
 				throw new ProtocolException("No Skills section");
 			}

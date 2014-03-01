@@ -101,6 +101,7 @@ public class ZSSItems
 	/** Miscellaneous mod items */
 	public static Item
 	skillOrb,
+	skillWiper,
 	bomb,
 	bombBag,
 	boomerang,
@@ -414,16 +415,19 @@ public class ZSSItems
 		maskSpooky = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_spooky");
 		maskStone = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.invisibility.id, 90, 0)).setUnlocalizedName("zss.mask_stone");
 		maskTruth = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
-		
+
 		hammer = new ItemHammer(modItemIndex++, BlockWeight.VERY_LIGHT, 8.0F, 50.0F).setUnlocalizedName("zss.hammer");
 		hammerSkull = new ItemHammer(modItemIndex++, BlockWeight.MEDIUM, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
 		hammerMegaton = new ItemHammer(modItemIndex++, BlockWeight.VERY_HEAVY, 16.0F, 50.0F).setUnlocalizedName("zss.hammer_megaton");
+
+		skillWiper = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.skill_wiper");
 	}
 
 	private static void registerItems() {
 		// SKILL TAB ITEMS
 		GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(heartPiece, heartPiece.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(skillWiper, skillWiper.getUnlocalizedName().substring(5));
 
 		// COMBAT TAB ITEMS
 		GameRegistry.registerItem(tunicHeroHelm, tunicHeroHelm.getUnlocalizedName().substring(5));
