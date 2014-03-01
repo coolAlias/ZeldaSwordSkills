@@ -97,7 +97,7 @@ public class ItemBrokenSword extends Item
 		if (Item.itemsList[par1] instanceof ItemZeldaSword) {
 			return Item.itemsList[par1].getIconFromDamage(-1);
 		} else {
-			return null;
+			return itemIcon;
 		}
 	}
 
