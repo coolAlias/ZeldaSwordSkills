@@ -46,9 +46,6 @@ import zeldaswordskills.world.gen.DungeonLootLists;
  */
 public class RoomBoss extends RoomBase
 {
-	/** Directional values, starting south (+z) and moving clockwise: */
-	public static final int SOUTH = 0, WEST = 1, NORTH = 2, EAST = 3;
-	
 	/** Mapping of cardinal direction to block-orientation values for blocks using 2,3,4,5 (containers, pistons, etc) */
 	public static final int[] facingToOrientation = {3,4,2,5};
 	
@@ -193,7 +190,8 @@ public class RoomBoss extends RoomBase
 		if (te instanceof TileEntityDungeonCore) {
 			TileEntityDungeonCore core = (TileEntityDungeonCore) te;
 			core.setDungeonBoundingBox(bBox);
-			core.setDoorSideAndType(doorSide, type);
+			core.setBossType(type);
+			core.setDoor(ZSSBlocks.doorLocked, doorSide);
 		}
 	}
 	

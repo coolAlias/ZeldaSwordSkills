@@ -49,7 +49,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockDungeonCore extends BlockContainer implements ITileEntityProvider
+public class BlockDungeonCore extends BlockContainer
+	implements IDungeonBlock, ITileEntityProvider
 {
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;

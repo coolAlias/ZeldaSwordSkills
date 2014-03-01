@@ -50,6 +50,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.EntityFairy;
 import zeldaswordskills.entity.EntityOctorok;
@@ -80,17 +81,26 @@ public class TileEntityDungeonCore extends TileEntity
 	/** The bounding box of the associated structure*/
 	protected StructureBoundingBox box;
 	
-	/** Whether room should check for locked door blocks when validating */
-	private boolean isLocked = false;
-	
-	/** Side in which the door is located; always located at centerX or centerZ of that side */
-	private int doorSide;
+	/** Whether this room has a boss type and can trigger events */
+	private boolean isBossRoom = false;
 	
 	/** Type of dungeon which this is, based on biome; only used for locked dungeons */
 	private BossType dungeonType;
 	
 	/** Set to true when the door is unlocked; allows for triggering events */
 	private boolean isOpened;
+	
+	/** Event timer; when it reaches zero, the entity will remove itself */
+	private int eventTimer = 0;
+	
+	/** Type of event that is occurring */
+	private TimedEvent event = null;
+	
+	/** The door's block type, if any */
+	private Block door = null;
+	
+	/** Side in which the door is located; always located at centerX or centerZ of that side */
+	private int doorSide;
 	
 	/** Whether this tile entity is also a fairy spawner */
 	protected boolean isSpawner = false;
@@ -113,12 +123,6 @@ public class TileEntityDungeonCore extends TileEntity
 	/** Number of rupees (emeralds) donated to the fairy */
 	private int rupees = 0;
 	
-	/** Event timer; when it reaches zero, the entity will remove itself */
-	private int eventTimer = 0;
-	
-	/** Type of event that is occurring */
-	private TimedEvent event = null;
-	
 	/** Minecraft game settings difficulty level; set when event triggered */
 	private int difficulty = -1;
 	
@@ -133,11 +137,19 @@ public class TileEntityDungeonCore extends TileEntity
 	/** Returns the bounding box for this dungeon; may be null */
 	public StructureBoundingBox getDungeonBoundingBox() { return box; }
 	
-	/** Sets the side in which the door is located, the dungeon's type, and sets isLocked to true */
-	public void setDoorSideAndType(int side, BossType type) {
-		doorSide = side;
+	/** Sets the boss type for this boss room */
+	public void setBossType(BossType type) {
 		dungeonType = type;
-		isLocked = true;
+		isBossRoom = true;
+	}
+	
+	/**
+	 * Sets the "door" block and side for this room
+	 * @param block the type of block that is acting as a door to this room
+	 */
+	public void setDoor(Block block, int side) {
+		door = block;
+		doorSide = side;
 	}
 	
 	/** Returns whether this tile is a spawner */
@@ -206,7 +218,7 @@ public class TileEntityDungeonCore extends TileEntity
 				//LogHelper.log(Level.INFO, "Failed verification; setting blocks to stone");
 				verifyStructure(true);
 				alreadyVerified = true;
-				if (isLocked) {
+				if (isBossRoom) {
 					isOpened = true;
 				} else {
 					//LogHelper.log(Level.INFO, "Calling removeCoreBlock after all blocks set to stone");
@@ -626,23 +638,22 @@ public class TileEntityDungeonCore extends TileEntity
 	}
 	
 	/**
-	 * Returns false if the structure is locked and the door blocks have been removed
+	 * Returns false if the structure is locked and the door blocks have been removed.
+	 * This is only called when the door and bounding box fields are not null.
 	 */
-	protected boolean verifyDoor() {
-		if (isLocked && box != null && hasWorldObj()) {
-			int x = box.getCenterX();
-			int z = box.getCenterZ();
-			switch(doorSide) {
-			case RoomBoss.SOUTH: z = box.maxZ; break;
-			case RoomBoss.NORTH: z = box.minZ; break;
-			case RoomBoss.EAST: x = box.maxX; break;
-			case RoomBoss.WEST: x = box.minX; break;
-			default: LogHelper.log(Level.WARNING, "Verifying Boss door in Dungeon Core with invalid door side");
-			}
-			for (int y = box.minY; y < box.maxY; ++y) {
-				if (worldObj.getBlockId(x, y, z) == ZSSBlocks.doorLocked.blockID) {
-					return true;
-				}
+	private boolean verifyDoor() {
+		int x = box.getCenterX();
+		int z = box.getCenterZ();
+		switch(doorSide) {
+		case RoomBoss.SOUTH: z = box.maxZ; break;
+		case RoomBoss.NORTH: z = box.minZ; break;
+		case RoomBoss.EAST: x = box.maxX; break;
+		case RoomBoss.WEST: x = box.minX; break;
+		default: LogHelper.log(Level.WARNING, "Verifying door in Dungeon Core with invalid door side");
+		}
+		for (int y = box.minY; y < box.maxY; ++y) {
+			if (worldObj.getBlockId(x, y, z) == door.blockID) {
+				return true;
 			}
 		}
 		return false;
@@ -672,7 +683,7 @@ public class TileEntityDungeonCore extends TileEntity
 	 */
 	protected boolean verifyStructure(boolean replace) {
 		if (box != null && hasWorldObj()) {
-			if (!replace && isLocked) {
+			if (!replace && door != null) {
 				return verifyDoor();
 			}
 			int invalid = 0;
@@ -688,7 +699,8 @@ public class TileEntityDungeonCore extends TileEntity
 									worldObj.setBlock(i, j, k, BlockSecretStone.getIdFromMeta(meta), 0, 2);
 								}
 							} else {
-								if (id != ZSSBlocks.secretStone.blockID && id != ZSSBlocks.dungeonCore.blockID) {
+								Block block = (id > 0 ? Block.blocksList[id] : null);
+								if (!(block instanceof IDungeonBlock)) {
 									//LogHelper.log(Level.WARNING, "Block at " + i + "/" + j + "/" + k + " with id " + id + " is invalid for this structure");
 									if (++invalid > 2) {
 										//LogHelper.log(Level.INFO, "Too many invalid blocks during verification; returning false");
@@ -727,13 +739,17 @@ public class TileEntityDungeonCore extends TileEntity
 			tag.setTag("boxBounds", box.func_143047_a("boxBounds"));
 		}
 		tag.setBoolean("verified", alreadyVerified);
-		tag.setBoolean("isLocked", isLocked);
-		if (isLocked) {
-			tag.setInteger("doorSide", doorSide);
+		tag.setBoolean("isBossRoom", isBossRoom);
+		if (isBossRoom) {
 			tag.setInteger("dungeonType", dungeonType.ordinal());
 			tag.setBoolean("isOpened", isOpened);
 			tag.setInteger("eventTimer", eventTimer);
 			tag.setInteger("eventType", event != null ? event.ordinal() : -1);
+		}
+		tag.setBoolean("hasDoor", door != null);
+		if (door != null) {
+			tag.setInteger("doorBlockId", door.blockID);
+			tag.setInteger("doorSide", doorSide);
 		}
 		tag.setBoolean("isSpawner", isSpawner);
 		if (isSpawner) {
@@ -755,13 +771,18 @@ public class TileEntityDungeonCore extends TileEntity
 			this.box = new StructureBoundingBox(tag.getIntArray("boxBounds"));
 		}
 		alreadyVerified = tag.hasKey("verified") ? tag.getBoolean("verified") : false;
-		isLocked = tag.getBoolean("isLocked");
-		if (isLocked) {
-			doorSide = tag.getInteger("doorSide");
+		// TODO remove after everyone updates
+		isBossRoom = tag.hasKey("isBossRoom") ? tag.getBoolean("isBossRoom") : tag.getBoolean("isLocked");
+		if (isBossRoom) {
 			dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
 			isOpened = tag.getBoolean("isOpened");
 			eventTimer = tag.getInteger("eventTimer");
 			event = (tag.getInteger("eventType") == -1 ? null : TimedEvent.values()[tag.getInteger("eventType") % TimedEvent.values().length]);
+		}
+		if (tag.getBoolean("hasDoor")) {
+			int id = tag.getInteger("doorBlockId");
+			door = id > 0 ? Block.blocksList[id] : null;
+			doorSide = tag.getInteger("doorSide");
 		}
 		isSpawner = tag.getBoolean("isSpawner");
 		if (isSpawner) {

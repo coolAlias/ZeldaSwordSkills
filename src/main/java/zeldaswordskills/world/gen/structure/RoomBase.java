@@ -43,6 +43,9 @@ import zeldaswordskills.util.StructureGenUtils;
  */
 public abstract class RoomBase
 {
+	/** Directional values, starting south (+z) and moving clockwise: */
+	public static final int SOUTH = 0, WEST = 1, NORTH = 2, EAST = 3;
+	
 	/** Whether this particular dungeon was below water */
 	public boolean submerged = false;
 

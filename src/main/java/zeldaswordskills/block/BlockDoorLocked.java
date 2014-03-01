@@ -36,7 +36,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Metadata 0x0 to 0x7 are the key type required to open the door, and 0x8 flags top or bottom.
  *
  */
-public class BlockDoorLocked extends Block
+public class BlockDoorLocked extends Block implements IDungeonBlock
 {
 	@SideOnly(Side.CLIENT)
 	private Icon iconTop;

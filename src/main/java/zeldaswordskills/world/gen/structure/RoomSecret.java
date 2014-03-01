@@ -26,6 +26,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.item.ZSSItems;
@@ -39,6 +40,12 @@ public class RoomSecret extends RoomBase
 {
 	/** Max height any dungeon can reach */
 	protected static final int MAX_HEIGHT = 5;
+	
+	/** Block which will be placed as a door, if any */
+	private Block door = null;
+	
+	/** Side of the structure that the door is on */
+	private int side;
 
 	/**
 	 * Creates a new secret room object ready for generation
@@ -52,7 +59,6 @@ public class RoomSecret extends RoomBase
 	@Override
 	public boolean generate(ZSSMapGenBase mapGen, World world, Random rand, int x, int y, int z) {
 		if (y < bBox.maxY) { return false; }
-
 		inNether = (world.provider.dimensionId == -1);
 		bBox.offset(x, y - bBox.maxY, z);
 		int worldHeight = (inNether ? 128 : world.getHeightValue(bBox.getCenterX(), bBox.getCenterZ()));
@@ -92,30 +98,14 @@ public class RoomSecret extends RoomBase
 			//BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
 			metadata = (inWater ? 1 : 0); // biome != null && biome.biomeName.toLowerCase().contains("beach") && 
 		}
-	}
-	
-	/**
-	 * Makes final checks for submerged, lava, fairy spawners, etc. and adjusts bounding box minY if needed
-	 */
-	protected void checkSpecialCases(World world, Random rand) {
-		BiomeGenBase biome = world.getBiomeGenForCoords(bBox.getCenterX(), bBox.getCenterZ());
-		boolean flag = (!submerged && bBox.maxY > 64 && biome != null);
-		if (inNether && !inLava) {
-			if (rand.nextFloat() < 0.25F) {
-				submerged = true;
-				inLava = true;
-			}
-		} else if (flag && (biome.biomeName.toLowerCase().contains("hill") || biome.biomeName.toLowerCase().contains("mountain"))) {
-			submerged = rand.nextFloat() < Config.getFairySpawnerChance();
-			inMountain = true;
-		}
-		if (submerged && bBox.getXSize() > 3) {
-			--bBox.minY;
+		if (door != null) {
+			metadata |= 8;
 		}
 	}
 	
 	@Override
 	protected void decorateDungeon(World world, Random rand) {
+		if (door != null) { placeDoor(world, rand); }
 		doChestGen(world, rand);
 		placeDungeonCore(world);
 		placeJars(world, rand);
@@ -130,6 +120,9 @@ public class RoomSecret extends RoomBase
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonCore) {
 			((TileEntityDungeonCore) te).setDungeonBoundingBox(bBox);
+			if (door != null) {
+				((TileEntityDungeonCore) te).setDoor(door, side);
+			}
 			if (!inNether && submerged && !inLava && !inOcean && bBox.getXSize() > 4) {
 				if (inMountain || world.rand.nextFloat() < Config.getFairySpawnerChance()) {
 					((TileEntityDungeonCore) te).setSpawner();
@@ -137,11 +130,35 @@ public class RoomSecret extends RoomBase
 			}
 		}
 	}
+	
+	/**
+	 * Makes final checks for submerged, lava, fairy spawners, etc. and adjusts bounding box minY if needed
+	 */
+	private void checkSpecialCases(World world, Random rand) {
+		BiomeGenBase biome = world.getBiomeGenForCoords(bBox.getCenterX(), bBox.getCenterZ());
+		boolean flag = (!submerged && bBox.maxY > 64 && biome != null);
+		if (inNether && !inLava) {
+			if (rand.nextFloat() < 0.25F) {
+				submerged = true;
+				inLava = true;
+			}
+		} else if (flag && (biome.biomeName.toLowerCase().contains("hill") || biome.biomeName.toLowerCase().contains("mountain"))) {
+			submerged = rand.nextFloat() < Config.getFairySpawnerChance();
+			inMountain = true;
+		}
+		if (submerged && bBox.getXSize() > 3) {
+			--bBox.minY;
+		}
+		if (bBox.getYSize() == MAX_HEIGHT && rand.nextInt(8) == 0) {
+			door = (rand.nextInt(8) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.barrierLight);
+			side = rand.nextInt(4);
+		}
+	}
 
 	/**
 	 * Determines location(s) for chest(s), as well as number of items to generate
 	 */
-	protected void doChestGen(World world, Random rand) {
+	private void doChestGen(World world, Random rand) {
 		int rX = bBox.getXSize() - 2;
 		int rY = (inLava && bBox.getYSize() > 3 ? 2 : 1);
 		int rZ = bBox.getZSize() - 2;
@@ -155,7 +172,7 @@ public class RoomSecret extends RoomBase
 	 * Places a chest and generates items at x/y/z in the structure, returning true if successful
 	 * @param first true for first chest generated
 	 */
-	protected boolean generateChestContents(World world, Random rand, int x, int y, int z, boolean first) {
+	private boolean generateChestContents(World world, Random rand, int x, int y, int z, boolean first) {
 		int i1 = StructureGenUtils.getXWithOffset(bBox, x, z);
 		int j1 = StructureGenUtils.getYWithOffset(bBox, y);
 		int k1 = StructureGenUtils.getZWithOffset(bBox, x, z);
@@ -169,6 +186,26 @@ public class RoomSecret extends RoomBase
 				if (first && rand.nextFloat() < Config.getHeartPieceChance()) {
 					WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
 				}
+				// TODO make a config value for special loot chance
+				if (door != null) {
+					ItemStack loot = ChestGenHooks.getInfo(DungeonLootLists.BOSS_LOOT).getOneItem(rand);
+					// TODO add wooden and rusty pegs
+					if (door == ZSSBlocks.barrierLight) {
+						if (rand.nextFloat() < 0.25F) {
+							// TODO remove golden gauntlets - they should be availabe in the rusty peg rooms
+							loot = new ItemStack(ZSSItems.gauntletsGolden);
+						} else if (rand.nextFloat() < 0.25F) {
+							loot = new ItemStack(ZSSItems.hammerSkull);
+						}
+					} else if (door == ZSSBlocks.barrierHeavy) {
+						if (rand.nextFloat() < 0.25F) {
+							loot = new ItemStack(ZSSItems.hammerMegaton);
+						}
+					}
+					if (loot != null) {
+						WorldUtils.addItemToInventoryAtRandom(rand, loot, chest, 3);
+					}
+				}
 			}
 			// this should set the block underneath the chest as stone if it's surrounded by lava
 			if (world.getBlockMaterial(i1, j1 - 1, k1) == Material.lava && bBox.getYSize() > 3) {
@@ -181,9 +218,26 @@ public class RoomSecret extends RoomBase
 	}
 	
 	/**
+	 * Actually places the door; use after determining door side for best results
+	 */
+	private void placeDoor(World world, Random rand) {
+		int x = bBox.getCenterX();
+		int y = bBox.minY + (submerged ? 2 : 1);
+		int z = bBox.getCenterZ();
+		switch(side % 4) {
+		case SOUTH: z = bBox.maxZ; break;
+		case NORTH: z = bBox.minZ; break;
+		case EAST: x = bBox.maxX; break;
+		case WEST: x = bBox.minX; break;
+		}
+		world.setBlock(x, y, z, door.blockID, 0, 2);
+		world.setBlock(x, y + 1, z, door.blockID, 0, 2);
+	}
+	
+	/**
 	 * Adds some random breakable jars, if possible
 	 */
-	protected void placeJars(World world, Random rand) {
+	private void placeJars(World world, Random rand) {
 		int size = bBox.getXSize();
 		if (size > 4) {
 			int n = rand.nextInt(size - 3);

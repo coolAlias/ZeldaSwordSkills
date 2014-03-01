@@ -47,7 +47,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockSecretStone extends Block implements ISmashable
+public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 {
 	/** List of all currently available secret blocks */
 	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","quartz_block_chiseled","end_stone"};

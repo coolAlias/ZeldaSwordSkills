@@ -33,7 +33,7 @@ import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockHeavy extends Block implements ILiftable, ISmashable
+public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmashable
 {
 	/** The weight of this block, i.e. the difficulty of lifting this block */
 	private final BlockWeight weight;
