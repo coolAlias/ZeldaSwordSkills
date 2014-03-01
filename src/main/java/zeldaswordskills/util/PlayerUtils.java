@@ -122,11 +122,11 @@ public class PlayerUtils
 		for (int i = 0; i < player.inventory.getSizeInventory() && required > 0; ++i) {
 			ItemStack invStack = player.inventory.getStackInSlot(i);
 			if (invStack != null && invStack.getItem() == stack.getItem() && invStack.getItemDamage() == stack.getItemDamage()) {
-				if (invStack.stackSize < required) {
+				if (invStack.stackSize <= required) {
 					required -= invStack.stackSize;
 					player.inventory.setInventorySlotContents(i, null);
 				} else {
-					player.inventory.setInventorySlotContents(i, invStack.splitStack(required));
+					player.inventory.setInventorySlotContents(i, invStack.splitStack(invStack.stackSize - required));
 					required = 0;
 					break;
 				}
