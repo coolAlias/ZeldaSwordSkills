@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
@@ -44,7 +45,7 @@ public class GetBombPacket extends CustomPacket {
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isServer()) {
 			ItemStack heldItem = player.getHeldItem();
-			ItemStack mask = player.getCurrentArmor(3);
+			ItemStack mask = player.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (mask != null && mask.getItem() == ZSSItems.maskBlast) {
 				((ItemMask) mask.getItem()).explode(mask, player.worldObj, player.posX, player.posY, player.posZ);
 			} else if (player.isSneaking() && heldItem != null && heldItem.getItem() instanceof ItemBombBag) {

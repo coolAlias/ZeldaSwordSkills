@@ -48,6 +48,7 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.IDungeonBlock;
@@ -565,28 +566,28 @@ public class TileEntityDungeonCore extends TileEntity
 		ItemStack ranged = new ItemStack(Item.bow);
 		switch(difficulty) {
 		case 1:
-			entity.setCurrentItemOrArmor(1, new ItemStack(Item.bootsChain));
-			entity.setCurrentItemOrArmor(2, new ItemStack(Item.legsChain));
-			entity.setCurrentItemOrArmor(3, new ItemStack(Item.plateChain));
-			entity.setCurrentItemOrArmor(4, new ItemStack(Item.helmetChain));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS, new ItemStack(Item.bootsChain));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_LEGS, new ItemStack(Item.legsChain));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, new ItemStack(Item.plateChain));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(Item.helmetChain));
 			melee = new ItemStack(Item.swordIron);
 			ranged.addEnchantment(Enchantment.power, 1);
 			break;
 		case 2:
-			entity.setCurrentItemOrArmor(1, new ItemStack(Item.bootsIron));
-			entity.setCurrentItemOrArmor(2, new ItemStack(Item.legsIron));
-			entity.setCurrentItemOrArmor(3, new ItemStack(Item.plateIron));
-			entity.setCurrentItemOrArmor(4, new ItemStack(Item.helmetIron));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS, new ItemStack(Item.bootsIron));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_LEGS, new ItemStack(Item.legsIron));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, new ItemStack(Item.plateIron));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(Item.helmetIron));
 			melee = new ItemStack(Item.swordIron);
 			melee.addEnchantment(Enchantment.sharpness, 2);
 			ranged.addEnchantment(Enchantment.punch, 1);
 			ranged.addEnchantment(Enchantment.power, 3);
 			break;
 		case 3:
-			entity.setCurrentItemOrArmor(1, new ItemStack(Item.bootsDiamond));
-			entity.setCurrentItemOrArmor(2, new ItemStack(Item.legsDiamond));
-			entity.setCurrentItemOrArmor(3, new ItemStack(Item.plateDiamond));
-			entity.setCurrentItemOrArmor(4, new ItemStack(Item.helmetDiamond));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS, new ItemStack(Item.bootsDiamond));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_LEGS, new ItemStack(Item.legsDiamond));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, new ItemStack(Item.plateDiamond));
+			entity.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(Item.helmetDiamond));
 			melee = new ItemStack(Item.swordDiamond);
 			melee.addEnchantment(Enchantment.sharpness, 4);
 			melee.addEnchantment(Enchantment.fireAspect, 1);

@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.item.ZSSItems;
 
 import com.google.common.io.ByteArrayDataInput;
@@ -62,7 +63,7 @@ public class InLiquidPacket extends CustomPacket
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isClient()) {
-			if (player.getCurrentArmor(0) != null && player.getCurrentArmor(0).getItem() == ZSSItems.bootsHeavy) {
+			if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
 				double d = (inLava ? 1.75D : 1.125D);
 				if (player.onGround) {
 					player.motionX *= d;

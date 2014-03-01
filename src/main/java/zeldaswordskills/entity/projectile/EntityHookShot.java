@@ -30,6 +30,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemHookShot;
@@ -204,7 +205,7 @@ public class EntityHookShot extends EntityThrowable
 			mop.entityHit.attackEntityFrom(new DamageSourceStunIndirect("hookshot", this, getThrower(), 50, 1).setCanStunPlayers().setProjectile(), 1.0F);
 			worldObj.playSoundAtEntity(mop.entityHit, "random.wood_click", 1.0F, 1.0F);
 			EntityPlayer player = (EntityPlayer) getThrower();
-			if (player != null && player.getCurrentArmor(0) != null && player.getCurrentArmor(0).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
+			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
 				setTarget(mop.entityHit);
 			} else {
 				setDead();
@@ -287,7 +288,7 @@ public class EntityHookShot extends EntityThrowable
 		if (target != null && thrower != null) {
 			if (target instanceof EntityLivingBase) {
 				EntityLivingBase entity = (EntityLivingBase) target;
-				if (entity.getCurrentItemOrArmor(1) != null && entity.getCurrentItemOrArmor(1).getItem() == ZSSItems.bootsHeavy) {
+				if (entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS) != null && entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS).getItem() == ZSSItems.bootsHeavy) {
 					return;
 				}
 				ZSSEntityInfo.get((EntityLivingBase) entity).removeBuff(Buff.STUN);

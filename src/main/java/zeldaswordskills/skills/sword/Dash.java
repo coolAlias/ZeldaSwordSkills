@@ -28,6 +28,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
@@ -140,10 +141,10 @@ public class Dash extends SkillActive
 				Vec3 vec3 = player.worldObj.getWorldVec3Pool().getVecFromPool(d0, d1, d2);
 				
 				float f = 1.0F;
-				if (player.getCurrentArmor(0) != null) {
-					if (player.getCurrentArmor(0).getItem() == ZSSItems.bootsPegasus) {
+				if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null) {
+					if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsPegasus) {
 						f = 1.5F;
-					} else if (player.getCurrentArmor(0).getItem() == ZSSItems.bootsHeavy) {
+					} else if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
 						f = 0.2F;
 					}
 				}

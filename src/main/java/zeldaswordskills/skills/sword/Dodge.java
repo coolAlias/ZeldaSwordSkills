@@ -26,6 +26,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -173,7 +174,7 @@ public class Dodge extends SkillActive
 	public boolean onRenderTick(EntityPlayer player) {
 		if (shouldRender()) {
 			double d = 0.05D; // TODO fine-tune this variable
-			if (player.getCurrentArmor(0) != null && player.getCurrentArmor(0).getItem() == ZSSItems.bootsHeavy) {
+			if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
 				d = 0.01D;
 			}
 			

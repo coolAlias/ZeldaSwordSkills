@@ -54,6 +54,7 @@ import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IHandleToss;
@@ -116,7 +117,7 @@ public class ZSSItemEvents
 	public void onBlockHarvest(HarvestDropsEvent event) {
 		if (event.harvester != null) {
 			if (event.block == Block.dirt || event.block == Block.grass) {
-				if (event.harvester.getCurrentArmor(3) != null && event.harvester.getCurrentArmor(3).getItem() == ZSSItems.maskScents && event.world.rand.nextInt(32) == 0) {
+				if (event.harvester.getCurrentArmor(ArmorIndex.WORN_HELM) != null && event.harvester.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == ZSSItems.maskScents && event.world.rand.nextInt(32) == 0) {
 					event.drops.add(event.world.rand.nextInt(4) == 0 ? new ItemStack(Block.mushroomRed) : new ItemStack(Block.mushroomBrown));
 				}
 			} else if (event.block == Block.tallGrass) {
@@ -164,7 +165,8 @@ public class ZSSItemEvents
 			if (stack.getItem() instanceof IHandleToss) {
 				((IHandleToss) stack.getItem()).onItemTossed(item, event.player);
 			}
-			if (!item.isDead && (stack.getItem() instanceof IFairyUpgrade || stack.getItem() == Item.emerald)) {
+			if (!item.isDead && (stack.getItem() == Item.emerald || (stack.getItem() instanceof IFairyUpgrade)
+					&& ((IFairyUpgrade) stack.getItem()).hasFairyUpgrade(stack))) {
 				TileEntityDungeonCore core = WorldUtils.getNearbyFairySpawner(item.worldObj, item.posX, item.posY, item.posZ, true);
 				if (core != null) {
 					core.scheduleItemUpdate(event.player);
@@ -183,7 +185,8 @@ public class ZSSItemEvents
 			if (((IHandlePickup) stack.getItem()).onPickupItem(stack, player)) {
 				if (stack.stackSize < size) {
 					GameRegistry.onPickupNotification(player, event.item);
-					event.item.playSound("random.pop", 0.2F, ((event.item.worldObj.rand.nextFloat() - event.item.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+					event.item.playSound("random.pop", 0.2F, ((event.item.worldObj.rand.nextFloat()
+							- event.item.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 					player.onItemPickup(event.item, size - stack.stackSize);
 				}
 				if (stack.stackSize <= 0) {
