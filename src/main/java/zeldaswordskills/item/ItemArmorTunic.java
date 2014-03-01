@@ -36,6 +36,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -107,7 +108,7 @@ public class ItemArmorTunic extends ItemArmor
 	 * @return true if attack event should be canceled
 	 */
 	public static boolean onFireDamage(EntityLivingBase entity, float damage) {
-		ItemStack stack = entity.getCurrentItemOrArmor(3);
+		ItemStack stack = entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST);
 		if (!entity.worldObj.isRemote && stack != null && stack.getItem() == ZSSItems.tunicGoronChest) {
 			PotionEffect resist = entity.getActivePotionEffect(Potion.fireResistance);
 			if (resist != null && resist.duration > 0) {

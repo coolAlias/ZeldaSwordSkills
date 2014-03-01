@@ -45,6 +45,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -374,7 +375,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom
 		arrow.setArrowItem(arrowId);
 		arrow.setShooter(player);
 
-		if (player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == ZSSItems.maskHawkeye) {
+		if (player.getCurrentArmor(ArmorIndex.WORN_HELM) != null && player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == ZSSItems.maskHawkeye) {
 			EntityLivingBase target = TargetUtils.acquireLookTarget(player, 64, 1.0F);
 			if (target != null) {
 				arrow.setHomingArrow(true);

@@ -36,6 +36,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -69,7 +70,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	 * Armor types as used in armor class: 0 helm, 1 chest, 2 legs, 3 boots
 	 */
 	public ItemMask(int id, EnumArmorMaterial material, int renderIndex) {
-		super(id, material, renderIndex, 0);
+		super(id, material, renderIndex, ArmorIndex.TYPE_HELM);
 		setMaxDamage(0);
 		setCreativeTab(ZSSCreativeTabs.tabMasks);
 	}

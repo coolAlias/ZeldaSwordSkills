@@ -38,6 +38,7 @@ import net.minecraftforge.common.EnumHelper;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.client.render.item.RenderHeldItemBlock;
@@ -320,19 +321,19 @@ public class ZSSItems
 		heartPiece = new ItemMiscZSS(modItemIndex++,12).setUnlocalizedName("zss.heartpiece");
 
 		// COMBAT TAB ITEMS
-		tunicHeroHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 0).setUnlocalizedName("zss.hero_tunic_helm");
-		tunicHeroChest = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 1).setUnlocalizedName("zss.hero_tunic_chest");
-		tunicHeroLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 2).setUnlocalizedName("zss.hero_tunic_legs");
+		tunicHeroHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.hero_tunic_helm");
+		tunicHeroChest = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setUnlocalizedName("zss.hero_tunic_chest");
+		tunicHeroLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.hero_tunic_legs");
 
-		tunicGoronChest = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 1).setUnlocalizedName("zss.goron_tunic_chest");
-		tunicGoronHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 0).setUnlocalizedName("zss.goron_tunic_helm");
-		tunicGoronLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 2).setUnlocalizedName("zss.goron_tunic_legs");
+		tunicGoronChest = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setUnlocalizedName("zss.goron_tunic_chest");
+		tunicGoronHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.goron_tunic_helm");
+		tunicGoronLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.goron_tunic_legs");
 
-		tunicZoraChest = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 1).setEffect(new PotionEffect(Potion.waterBreathing.id, 90, 0)).setUnlocalizedName("zss.zora_tunic_chest");
-		tunicZoraHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 0).setUnlocalizedName("zss.zora_tunic_helm");
-		tunicZoraLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 2).setUnlocalizedName("zss.zora_tunic_legs");
+		tunicZoraChest = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setEffect(new PotionEffect(Potion.waterBreathing.id, 90, 0)).setUnlocalizedName("zss.zora_tunic_chest");
+		tunicZoraHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.zora_tunic_helm");
+		tunicZoraLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.zora_tunic_legs");
 
-		tunicHeroBoots = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), 3).setUnlocalizedName("zss.hero_tunic_boots");
+		tunicHeroBoots = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS).setUnlocalizedName("zss.hero_tunic_boots");
 		bootsHeavy = new ItemArmorBoots(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_heavy");
 		bootsPegasus = new ItemArmorBoots(modItemIndex++, EnumArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_pegasus");
 		

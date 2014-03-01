@@ -43,6 +43,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -91,7 +92,7 @@ public class ItemArmorBoots extends ItemArmor
 	 * Armor types as used in armor class: 0 helm, 1 chest, 2 legs, 3 boots
 	 */
 	public ItemArmorBoots(int id, EnumArmorMaterial material, int renderIndex) {
-		super(id, material, renderIndex, 3);
+		super(id, material, renderIndex, ArmorIndex.TYPE_BOOTS);
 		setMaxDamage(0);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
