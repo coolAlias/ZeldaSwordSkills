@@ -204,7 +204,7 @@ public class EntityHookShot extends EntityThrowable
 		} else if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(new DamageSourceStunIndirect("hookshot", this, getThrower(), 50, 1).setCanStunPlayers().setProjectile(), 1.0F);
 			worldObj.playSoundAtEntity(mop.entityHit, "random.wood_click", 1.0F, 1.0F);
-			EntityPlayer player = (EntityPlayer) getThrower();
+			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
 			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
 				setTarget(mop.entityHit);
 			} else {
