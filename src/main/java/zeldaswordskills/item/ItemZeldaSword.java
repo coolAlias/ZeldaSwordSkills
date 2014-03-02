@@ -19,6 +19,8 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
+import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.enchantment.Enchantment;
@@ -37,6 +39,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.block.BlockSacredFlame;
@@ -50,6 +53,8 @@ import zeldaswordskills.util.WorldUtils;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import cpw.mods.fml.common.Optional.Interface;
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -61,7 +66,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * is able to fix it.
  *
  */
-public class ItemZeldaSword extends ItemSword implements IFairyUpgrade, ISwingSpeed
+@Interface(iface="mods.battlegear2.api.IBattlegearWeapon", modid="battlegear2", striprefs = true)
+public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFairyUpgrade, ISwingSpeed
 {
 	/** Whether this sword requires two hands */
 	protected final boolean twoHanded;
@@ -286,5 +292,45 @@ public class ItemZeldaSword extends ItemSword implements IFairyUpgrade, ISwingSp
 		if (!flag) {
 			stack.addEnchantment(Enchantment.sharpness, 1);
 		}
+	}
+	
+	@Method(modid="battlegear2")
+	@Override
+	public boolean sheatheOnBack(ItemStack stack) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean isOffhandHandDual(ItemStack stack) {
+		return (Config.allowOffhandMaster() || !isMaster) && !twoHanded;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return !twoHanded;// && (offhand == null || offhand.getItem() instanceof IShield);
 	}
 }

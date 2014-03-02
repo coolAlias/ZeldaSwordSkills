@@ -18,9 +18,10 @@ group = "com.google.coolalias008.zeldaswordskills"
 archivesBaseName = "zeldaswordskills"
 
 dependencies {
-	compile files {
-		"lib/antiqueatlas-3.0.0-mc1.6.4-deobf.jar"
-	}
+	compile files (
+		"lib/antiqueatlas-3.0.0-mc1.6.4-deobf.jar",
+		"../run/mods/1.6.4-Battlegear-Bin-1.0.4.8.jar"
+	)
 }
 
 minecraft {
