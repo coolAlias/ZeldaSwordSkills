@@ -32,12 +32,16 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemHookShot.ShotType;
+import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.SyncEntityInfoPacket;
@@ -65,7 +69,8 @@ public class ZSSEntityEvents
 				((LeapingBlow) ZSSPlayerInfo.get(player).getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
 			}
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(4) != null && event.entityLiving.getCurrentItemOrArmor(4).getItem() == ZSSItems.maskBunny) {
+		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null
+				&& event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
 			event.distance -= 5.0F;
 		}
 	}
@@ -88,11 +93,37 @@ public class ZSSEntityEvents
 		if (event.entityLiving.getHeldItem() != null && event.entityLiving.getHeldItem().getItem() == ZSSItems.rocsFeather) {
 			event.entityLiving.motionY += (event.entityLiving.isSprinting() ? 0.30D : 0.15D);
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(1) != null && event.entityLiving.getCurrentItemOrArmor(1).getItem() == ZSSItems.bootsPegasus) {
+		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS) != null
+				&& event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS).getItem() == ZSSItems.bootsPegasus) {
 			event.entityLiving.motionY += 0.15D;
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(4) != null && event.entityLiving.getCurrentItemOrArmor(4).getItem() == ZSSItems.maskBunny) {
+		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null
+				&& event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
 			event.entityLiving.motionY += 0.30D;
+		}
+	}
+	
+	@ForgeSubscribe
+	public void onInteract(EntityInteractEvent event) {
+		boolean flag = event.target instanceof EntityVillager;
+		if (flag) {
+			EntityVillager villager = (EntityVillager) event.target;
+			if (villager.hasCustomNameTag() && villager.getCustomNameTag().contains("Mask Salesman")) {
+				EntityMaskTrader trader = new EntityMaskTrader(villager.worldObj);
+				trader.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
+				trader.setCustomNameTag(villager.getCustomNameTag());
+				if (!trader.worldObj.isRemote) {
+					trader.worldObj.spawnEntityInWorld(trader);
+				}
+				villager.setDead();
+				event.setCanceled(true);
+			}
+		}
+		if (!event.isCanceled() && (flag || event.target instanceof EntityMaskTrader)) {
+			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
+			if (helm != null && helm.getItem() instanceof ItemMask) {
+				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
+			}
 		}
 	}
 

@@ -23,6 +23,7 @@ import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
@@ -34,6 +35,7 @@ import zeldaswordskills.entity.EntityChu.ChuType;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.Config;
 
 /**
  * 
@@ -50,6 +52,8 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	private NBTTagCompound data;
 	/** The type of treasure for which this villager will trade, if any */
 	private int specialTrade = 1;
+	/** The index of the mask that this villager wants, or -1 if none; initial value is masks.size() as a flag */
+	private int desiredMask;
 
 	/** Trade mapping for a single Treasure enum type key to the full trade recipe output */
 	private static final Map<Treasures, MerchantRecipe> treasureTrades = new EnumMap<Treasures, MerchantRecipe>(Treasures.class);
@@ -68,6 +72,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public ZSSVillagerInfo(EntityVillager villager) {
 		this.villager = villager;
 		data = new NBTTagCompound();
+		desiredMask = EntityMaskTrader.getMaskMapSize();
 	}
 
 	public static final void register(EntityVillager villager) {
@@ -76,6 +81,25 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	public static final ZSSVillagerInfo get(EntityVillager villager) {
 		return (ZSSVillagerInfo) villager.getExtendedProperties(SAVE_KEY);
+	}
+	
+	/**
+	 * Returns the mask that this villager desires, or null if none
+	 */
+	public Item getMaskDesired() {
+		if (desiredMask == EntityMaskTrader.getMaskMapSize()) {
+			if (villager.worldObj.rand.nextFloat() < Config.getMaskBuyChance()) {
+				desiredMask = villager.worldObj.rand.nextInt(EntityMaskTrader.getMaskMapSize());
+			} else {
+				desiredMask = -1;
+			}
+		}
+		return (desiredMask > -1 ? EntityMaskTrader.getMask(desiredMask) : null);
+	}
+	
+	/** Completes the mask trade, setting villager to no longer trade for masks */
+	public void onMaskTrade() {
+		desiredMask = -1;
 	}
 
 	/** Returns true if this villager is any type of Hunter */
@@ -246,12 +270,14 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public void saveNBTData(NBTTagCompound compound) {
 		compound.setTag(SAVE_KEY, data);
 		compound.setInteger("specialTrade", specialTrade);
+		compound.setInteger("desiredMask", desiredMask);
 	}
 
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
 		data = (compound.hasKey(SAVE_KEY) ? compound.getCompoundTag(SAVE_KEY) : new NBTTagCompound());
 		specialTrade = compound.getInteger("specialTrade");
+		desiredMask = compound.getInteger("desiredMask");
 	}
 
 	/**

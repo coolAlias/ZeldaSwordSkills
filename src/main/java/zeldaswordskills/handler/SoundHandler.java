@@ -38,6 +38,7 @@ public class SoundHandler {
 		event.manager.addSound(ModInfo.SOUND_BOMB_WHISTLE + ".ogg");
 		event.manager.addSound(ModInfo.SOUND_BOSS_BATTLE + ".ogg");
 		event.manager.addSound(ModInfo.SOUND_BOSS_SPAWN + ".ogg");
+		event.manager.addSound(ModInfo.SOUND_CASH_SALE + ".ogg");
 		event.manager.addSound(ModInfo.SOUND_CHAIN + ".ogg");
 		event.manager.addSound(ModInfo.SOUND_CHU_MERGE + ".ogg");
 		event.manager.addSound(ModInfo.SOUND_CORK + ".ogg");

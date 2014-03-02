@@ -201,6 +201,8 @@ public class Config
 	private static boolean enableTradeBomb;
 	/** [Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased */
 	private static boolean enableArrowTrades;
+	/** [Masks] Chance that a villager will be interested in purchasing a random mask */
+	private static int maskBuyChance;
 	/** Number of trades required before a villager offers other services */
 	private static int friendTradesRequired;
 
@@ -307,7 +309,8 @@ public class Config
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
 		minBombBagPrice = config.get("Trade", "[Bomb Bag] Minimum price (in emeralds) [32-64]", 64).getInt();
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
-		enableArrowTrades = config.get("Item", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
+		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
+		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt();
 		
 		config.save();
 	}
@@ -348,7 +351,6 @@ public class Config
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
 	public static int getHeroBowUpgradeCost() { return MathHelper.clamp_int(heroBowUpgradeCost, 128, 640); }
-	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static boolean enableFireArrowIgnite() { return enableFireArrowIgnite; }
 	public static boolean enableFireArrowMelt() { return enableFireArrowMelt; }
 	public static boolean enableLightArrowNoClip() { return enableLightArrowNoClip; }
@@ -405,6 +407,8 @@ public class Config
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
 	public static int getMinBombBagPrice() { return Math.max(minBombBagPrice, 32); }
+	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
+	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.15F); }
 	public static int getFriendTradesRequired() { return Math.max(friendTradesRequired, 3); }
 
 }

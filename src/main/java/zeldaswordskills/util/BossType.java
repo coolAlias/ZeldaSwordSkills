@@ -140,38 +140,42 @@ public enum BossType
 	private static final ItemStack[] desertItems = {
 		new ItemStack(ZSSItems.boomerang),
 		new ItemStack(ZSSItems.bootsHover),
-		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.EXTENSION.ordinal())
+		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.EXTENSION.ordinal()),
+		new ItemStack(ZSSItems.maskGibdo)
 	};
 	private static final ItemStack[] forestItems = {
 		new ItemStack(ZSSItems.dekuLeaf),
 		new ItemStack(ZSSItems.heroBow),
-		new ItemStack(ZSSItems.hookshot, 1, ShotType.WOOD_SHOT.ordinal())
+		new ItemStack(ZSSItems.hookshot, 1, ShotType.WOOD_SHOT.ordinal()),
 	};
 	private static final ItemStack[] mountainItems = {
 		new ItemStack(ZSSItems.bootsPegasus),
 		new ItemStack(ZSSItems.maskBlast),
-		new ItemStack(ZSSItems.swordBroken, 1, ZSSItems.swordGiant.itemID),
-		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.STONECLAW.ordinal())
+		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.STONECLAW.ordinal()),
+		new ItemStack(ZSSItems.swordBroken, 1, ZSSItems.swordGiant.itemID)
 	};
 	private static final ItemStack[] netherItems = {
 		new ItemStack(ZSSItems.gauntletsSilver),
-		new ItemStack(ZSSItems.tunicGoronChest),
-		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.MULTI.ordinal())
+		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.MULTI.ordinal()),
+		new ItemStack(ZSSItems.tunicGoronChest)
 	};
 	private static final ItemStack[] oceanItems = {
 		new ItemStack(ZSSItems.bootsHeavy),
+		new ItemStack(ZSSItems.maskStone),
+		new ItemStack(ZSSItems.slingshot),
 		new ItemStack(ZSSItems.tunicZoraChest),
-		new ItemStack(ZSSItems.slingshot)
 	};
 	private static final ItemStack[] swampItems = {
 		new ItemStack(ZSSItems.bootsRubber),
-		new ItemStack(ZSSItems.maskHawkeye),
-		new ItemStack(ZSSItems.heroBow)
+		new ItemStack(ZSSItems.hammer),
+		new ItemStack(ZSSItems.heroBow),
+		new ItemStack(ZSSItems.maskHawkeye)
 	};
 	private static final ItemStack[] taigaItems = {
+		new ItemStack(ZSSItems.boomerang),
 		new ItemStack(ZSSItems.bootsHover),
 		new ItemStack(ZSSItems.gauntletsSilver),
-		new ItemStack(ZSSItems.boomerang)
+		new ItemStack(ZSSItems.maskGiants)
 	};
 	
 	/**

@@ -23,12 +23,14 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.CommonProxy;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemMask;
@@ -83,11 +85,11 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Number of Super Spin Attack orbs received from the Great Fairy: used to prevent exploits */
 	private int fairySpinOrbsReceived = 0;
 	
+	/** The last mask borrowed from the Happy Mask Salesman */
+	private Item borrowedMask = null;
+	
 	/** Current stage in the Mask trading sequence */
 	private int maskStage = 0;
-	
-	/** Mask stage value for fully completed sequence */
-	public static final int MASK_COMPLETE = 3;
 
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
@@ -152,12 +154,12 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * and applies / removes modifiers as appropriate
 	 */
 	public void setWearingBoots() {
-		ItemStack boots = player.getCurrentArmor(0);
+		ItemStack boots = player.getCurrentArmor(ArmorIndex.WORN_BOOTS);
 		setFlag(IS_WEARING_BOOTS, (boots != null && boots.getItem() instanceof ItemArmorBoots));
 		lastBootsID = (boots != null ? boots.itemID : -1);
 		ItemArmorBoots.applyAttributeModifiers(boots, player);
 		if (!getFlag(IS_WEARING_BOOTS) && getFlag(IS_WEARING_HELM)) {
-			ItemMask.applyAttributeModifiers(player.getCurrentArmor(3), player);
+			ItemMask.applyAttributeModifiers(player.getCurrentArmor(ArmorIndex.WORN_HELM), player);
 		}
 	}
 
@@ -166,12 +168,12 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * and applies / removes modifiers as appropriate
 	 */
 	public void setWearingHelm() {
-		ItemStack helm = player.getCurrentArmor(3);
+		ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
 		setFlag(IS_WEARING_HELM, (helm != null && helm.getItem() instanceof ItemMask));
 		lastHelmID = (helm != null ? helm.itemID : -1);
 		ItemMask.applyAttributeModifiers(helm, player);
 		if (!getFlag(IS_WEARING_HELM) && getFlag(IS_WEARING_BOOTS)) {
-			ItemArmorBoots.applyAttributeModifiers(player.getCurrentArmor(0), player);
+			ItemArmorBoots.applyAttributeModifiers(player.getCurrentArmor(ArmorIndex.WORN_BOOTS), player);
 		}
 	}
 	
@@ -191,6 +193,16 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Increments the number of Super Spin Attack orbs received, returning true if it's the last one */
 	public boolean receiveFairyOrb() {
 		return (++fairySpinOrbsReceived == SkillBase.MAX_LEVEL);
+	}
+	
+	/** Returns the last mask borrowed, or null if no mask has been borrowed */
+	public Item getBorrowedMask() {
+		return borrowedMask;
+	}
+	
+	/** Sets the mask that the player has borrowed */
+	public void setBorrowedMask(Item item) {
+		borrowedMask = item;
 	}
 	
 	/**
@@ -358,13 +370,16 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		if (getFlag(IS_NAYRU_ACTIVE)) {
 			updateNayru();
 		}
-		if (getFlag(IS_WEARING_BOOTS) && (player.getCurrentArmor(0) == null || player.getCurrentArmor(0).itemID != lastBootsID)) {
+		if (getFlag(IS_WEARING_BOOTS) && (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) == null
+				|| player.getCurrentArmor(ArmorIndex.WORN_BOOTS).itemID != lastBootsID)) {
 			setWearingBoots();
 		}
-		if (getFlag(IS_WEARING_HELM) && (player.getCurrentArmor(3) == null || player.getCurrentArmor(3).itemID != lastHelmID)) {
+		if (getFlag(IS_WEARING_HELM) && (player.getCurrentArmor(ArmorIndex.WORN_HELM) == null
+				|| player.getCurrentArmor(ArmorIndex.WORN_HELM).itemID != lastHelmID)) {
 			setWearingHelm();
 		}
-		if (getFlag(MOBILITY) && !player.onGround && Math.abs(player.motionY) > 0.05D && !player.capabilities.isFlying && player.worldObj.getWorldTime() % 2 == 0) {
+		if (getFlag(MOBILITY) && !player.onGround && Math.abs(player.motionY) > 0.05D
+				&& !player.capabilities.isFlying && player.worldObj.getWorldTime() % 2 == 0) {
 			player.motionX *= 1.15D;
 			player.motionZ *= 1.15D;
 		}
@@ -461,6 +476,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		compound.setInteger("lastBoots", lastBootsID);
 		compound.setInteger("lastHelm", lastHelmID);
 		compound.setInteger("fairySpinOrbsReceived", fairySpinOrbsReceived);
+		compound.setInteger("borrowedMask", borrowedMask != null ? borrowedMask.itemID : -1);
 		compound.setInteger("maskStage", maskStage);
 	}
 
@@ -476,7 +492,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		lastBootsID = compound.getInteger("lastBoots");
 		lastHelmID = compound.getInteger("lastHelm");
 		fairySpinOrbsReceived = compound.getInteger("fairySpinOrbsReceived");
-		maskStage = compound.getInteger("maskStage");
+		int maskID = compound.getInteger("borrowedMask");
+		borrowedMask = maskID > -1 ? Item.itemsList[maskID] : null;
+		// TODO maskStage = compound.getInteger("maskStage");
 	}
 
 	@Override

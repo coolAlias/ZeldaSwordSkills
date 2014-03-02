@@ -35,6 +35,7 @@ import zeldaswordskills.client.render.entity.RenderEntityFairy;
 import zeldaswordskills.client.render.entity.RenderEntityHookShot;
 import zeldaswordskills.client.render.entity.RenderEntityJar;
 import zeldaswordskills.client.render.entity.RenderEntityKeese;
+import zeldaswordskills.client.render.entity.RenderEntityMaskTrader;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
 import zeldaswordskills.client.render.entity.RenderOctorok;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
@@ -101,6 +102,9 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityFairy.class, "fairy", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
 		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
 		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
+		
+		// NPCS
+		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
 	}
 	
 	@SideOnly(Side.CLIENT) 
@@ -114,6 +118,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese());
 		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot());
 		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
+		RenderingRegistry.registerEntityRenderingHandler(EntityMaskTrader.class, new RenderEntityMaskTrader());
 		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderOctorok(new ModelSquid(), 0.7F));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());

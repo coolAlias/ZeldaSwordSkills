@@ -25,9 +25,12 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
-import zeldaswordskills.inventory.container.ContainerPedestal;
+import zeldaswordskills.inventory.ContainerPedestal;
 import zeldaswordskills.lib.ModInfo;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class GuiPedestal extends GuiContainer
 {
 	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/gui/gui_pedestal.png");
@@ -42,27 +45,25 @@ public class GuiPedestal extends GuiContainer
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
 		String s = pedestal.isInvNameLocalized() ? pedestal.getInvName() : I18n.getString(pedestal.getInvName());
-		this.fontRenderer.drawString(s, xSize / 2 - fontRenderer.getStringWidth(s) / 2, 6, 4210752);
-		this.fontRenderer.drawString(I18n.getString("container.inventory"), 8, ySize - 96 + 2, 4210752);
+		fontRenderer.drawString(s, xSize / 2 - fontRenderer.getStringWidth(s) / 2, 6, 4210752);
+		fontRenderer.drawString(I18n.getString("container.inventory"), 8, ySize - 96 + 2, 4210752);
 	}
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float par1, int par2, int par3) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.getTextureManager().bindTexture(texture);
-		int k = (width - xSize) / 2;
-		int l = (height - ySize) / 2;
-		drawTexturedModalRect(k, l, 0, 0, xSize, ySize);
+		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 		int meta = pedestal.worldObj.getBlockMetadata(pedestal.xCoord, pedestal.yCoord, pedestal.zCoord);
 		boolean flag = (meta & 0x8) == 0x8;
 		if (flag || (meta & 0x1) == 0x1) {
-			drawTexturedModalRect(k + 57, l + 7, 176, 0, 62, 31);
+			drawTexturedModalRect(guiLeft + 57, guiTop + 7, 176, 0, 62, 31);
 		}
 		if (flag || (meta & 0x2) == 0x2) {
-			drawTexturedModalRect(k + 26, l + 38, 176, 0, 62, 31);
+			drawTexturedModalRect(guiLeft + 26, guiTop + 38, 176, 0, 62, 31);
 		}
 		if (flag || (meta & 0x4) == 0x4) {
-			drawTexturedModalRect(k + 88, l + 38, 176, 0, 62, 31);
+			drawTexturedModalRect(guiLeft + 88, guiTop + 38, 176, 0, 62, 31);
 		}
 	}
 }

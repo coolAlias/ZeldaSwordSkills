@@ -43,6 +43,7 @@ public class ModInfo {
 	public static final String SOUND_BOSS_BATTLE = ID + ":boss_battle";
 	public static final String SOUND_BOSS_SPAWN = ID + ":boss_spawn";
 	public static final String SOUND_BREAK_JAR = ID + ":ceramic";
+	public static final String SOUND_CASH_SALE = ID + ":cash_sale";
 	public static final String SOUND_CHAIN = ID + ":chain_rattle";
 	public static final String SOUND_CHU_MERGE = ID + ":chu_merge";
 	public static final String SOUND_CORK = ID + ":cork";

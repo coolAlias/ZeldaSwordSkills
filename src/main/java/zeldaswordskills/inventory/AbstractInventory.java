@@ -15,22 +15,14 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.block.tileentity;
+package zeldaswordskills.inventory;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 
-/**
- * 
- * Base class for any tile entity that needs an inventory
- *
- */
-public abstract class TileEntityInventory extends TileEntity implements IInventory
+public abstract class AbstractInventory implements IInventory
 {
-	/** The tile entity's inventory slots need to be initialized during construction */
+	/** The inventory slots need to be initialized during construction */
 	protected ItemStack[] inventory;
 
 	@Override
@@ -71,37 +63,16 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound compound) {
-		super.readFromNBT(compound);
-		NBTTagList items = compound.getTagList("Items");
-		for (int i = 0; i < items.tagCount(); ++i) {
-			NBTTagCompound item = (NBTTagCompound) items.tagAt(i);
-			byte slot = item.getByte("Slot");
-			if (slot >= 0 && slot < inventory.length) {
-				inventory[slot] = ItemStack.loadItemStackFromNBT(item);
-			}
-		}
-	}
-
-	@Override
-	public void writeToNBT(NBTTagCompound compound) {
-		super.writeToNBT(compound);
-		NBTTagList items = new NBTTagList();
-		for (int i = 0; i < inventory.length; ++i) {
-			if (inventory[i] != null) {
-				NBTTagCompound item = new NBTTagCompound();
-				item.setByte("Slot", (byte) i);
-				inventory[i].writeToNBT(item);
-				items.appendTag(item);
-			}
-		}
-		compound.setTag("Items", items);
-	}
-
-	@Override
 	public void openChest() {}
 
 	@Override
 	public void closeChest() {}
 
+	@Override
+	public void onInventoryChanged() {
+		for (int i = 0; i < getSizeInventory(); ++i) {
+			if (getStackInSlot(i) != null && getStackInSlot(i).stackSize == 0)
+				inventory[i] = null;
+		}
+	}
 }

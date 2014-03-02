@@ -186,11 +186,18 @@ public class ZSSItems
 	maskBlast,
 	maskBunny,
 	maskCouples,
+	maskGiants,
+	maskGibdo,
 	maskHawkeye,
+	maskKeaton,
 	maskScents,
 	maskSpooky,
 	maskStone,
-	maskTruth;
+	maskTruth,
+	maskDeku,
+	maskGoron,
+	maskZora,
+	maskFierce;
 
 	/** Special Arrows */
 	public static Item
@@ -336,7 +343,7 @@ public class ZSSItems
 		tunicHeroBoots = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS).setUnlocalizedName("zss.hero_tunic_boots");
 		bootsHeavy = new ItemArmorBoots(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_heavy");
 		bootsPegasus = new ItemArmorBoots(modItemIndex++, EnumArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_pegasus");
-		
+
 		swordKokiri = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.IRON, -1.0F).setUnlocalizedName("zss.sword_kokiri").setMaxDamage(256);
 		swordOrdon = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.IRON, 1.0F).setUnlocalizedName("zss.sword_ordon").setMaxDamage(512);
 		swordGiant = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.IRON, 6.0F, true).setUnlocalizedName("zss.sword_giant").setMaxDamage(32);
@@ -356,7 +363,7 @@ public class ZSSItems
 
 		// MASK TAB ITEMS
 		// TODO next reorganization, move masks here
-		
+
 		// MISCELLANEOUS TAB ITEMS
 		hookshot = new ItemHookShot(modItemIndex++).setUnlocalizedName("zss.hookshot");
 		hookshotAddon = new ItemHookShotUpgrade(modItemIndex++).setUnlocalizedName("zss.hookshot.upgrade");
@@ -375,7 +382,7 @@ public class ZSSItems
 		smallHeart = new ItemPickupOnly(modItemIndex++).setUnlocalizedName("zss.heart");
 		throwingRock = new Item(modItemIndex++).setUnlocalizedName("zss.throwing_rock").setTextureName(ModInfo.ID + ":throwing_rock").setMaxStackSize(16);
 
-		// NEW ITEMS
+		// 0.5.16 NEW ITEMS
 		heroBow = new ItemHeroBow(modItemIndex++).setUnlocalizedName("zss.bow_hero");
 		arrowBomb = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_bomb").setTextureName(ModInfo.ID + ":arrow_bomb").setCreativeTab(ZSSCreativeTabs.tabCombat);
 		arrowBombFire = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_bomb_fire").setTextureName(ModInfo.ID + ":arrow_bomb_fire").setCreativeTab(ZSSCreativeTabs.tabCombat);
@@ -404,18 +411,26 @@ public class ZSSItems
 		dekuLeaf = new ItemDekuLeaf(modItemIndex++).setUnlocalizedName("zss.deku_leaf");
 		boomerang = new ItemBoomerang(modItemIndex++, 4.0F, 12).setUnlocalizedName("zss.boomerang");
 		boomerangMagic = new ItemBoomerang(modItemIndex++, 6.0F, 24).setCaptureAll().setUnlocalizedName("zss.boomerang_magic");
-
+		
+		// 0.5.17 NEW ITEMS:
 		heldBlock = new ItemHeldBlock(modItemIndex++).setUnlocalizedName("zss.held_block");
 		gauntletsSilver = new ItemPowerGauntlets(modItemIndex++, BlockWeight.MEDIUM).setUnlocalizedName("zss.gauntlets_silver");
 		gauntletsGolden = new ItemPowerGauntlets(modItemIndex++, BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.gauntlets_golden");
 		maskBlast = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_blast");
 		// can't use CLOTH as it expects an overlay and crashes when rendering
-		maskBunny = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_bunny");
-		maskCouples = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_couples");
-		maskScents = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_scents");
-		maskSpooky = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_spooky");
+		maskBunny = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(1, 64).setUnlocalizedName("zss.mask_bunny");
+		maskCouples = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(40, 32).setUnlocalizedName("zss.mask_couples");
+		maskGiants = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_giants");
+		maskGibdo = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_gibdo");
+		maskKeaton = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(8, 16).setUnlocalizedName("zss.mask_keaton");
+		maskScents = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(16, 8).setUnlocalizedName("zss.mask_scents");
+		maskSpooky = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(32, 32).setUnlocalizedName("zss.mask_spooky");
 		maskStone = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.invisibility.id, 90, 0)).setUnlocalizedName("zss.mask_stone");
-		maskTruth = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
+		maskTruth = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
+		maskDeku = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_deku");
+		maskGoron = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_goron");
+		maskZora = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_zora");
+		maskFierce = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_fierce");
 
 		hammer = new ItemHammer(modItemIndex++, BlockWeight.VERY_LIGHT, 8.0F, 50.0F).setUnlocalizedName("zss.hammer");
 		hammerSkull = new ItemHammer(modItemIndex++, BlockWeight.MEDIUM, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
@@ -504,12 +519,19 @@ public class ZSSItems
 		GameRegistry.registerItem(maskBlast, maskBlast.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskBunny, maskBunny.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskCouples, maskCouples.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskGiants, maskGiants.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskGibdo, maskGibdo.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskHawkeye, maskHawkeye.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskKeaton, maskKeaton.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskScents, maskScents.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskSpooky, maskSpooky.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskStone, maskStone.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskTruth, maskTruth.getUnlocalizedName().substring(5));
-		
+		GameRegistry.registerItem(maskDeku, maskDeku.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskGoron, maskGoron.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskZora, maskZora.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskFierce, maskFierce.getUnlocalizedName().substring(5));
+
 		// MISCELLANEOUS TAB ITEMS
 		GameRegistry.registerItem(pendant, pendant.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(crystalSpirit, crystalSpirit.getUnlocalizedName().substring(5));

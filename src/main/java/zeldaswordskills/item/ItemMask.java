@@ -17,6 +17,7 @@
 
 package zeldaswordskills.item;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumArmorMaterial;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -39,12 +41,15 @@ import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -60,6 +65,10 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
+	/** Number of rupees to pay back to the Happy Mask Salesman */
+	private int buyPrice;
+	/** Number of rupees a villager will pay for this mask */
+	private int sellPrice;
 	
 	/** Movement bonus for wearing the Bunny Hood */
 	public static final UUID bunnyHoodMoveBonusUUID = UUID.fromString("8412C9F7-9645-4C24-8FD1-6EFB8282E822");
@@ -73,6 +82,27 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		super(id, material, renderIndex, ArmorIndex.TYPE_HELM);
 		setMaxDamage(0);
 		setCreativeTab(ZSSCreativeTabs.tabMasks);
+	}
+	
+	/**
+	 * Sets the buy and sell price for this mask; only for masks in the trading sequence
+	 * @param buy price the player will pay for the mask
+	 * @param sell price the player will receive for selling the mask
+	 */
+	public ItemMask setPrice(int buy, int sell) {
+		buyPrice = buy;
+		sellPrice = sell;
+		return this;
+	}
+	
+	/** The number of rupees to pay back to the Happy Mask Salesman */
+	public int getBuyPrice() {
+		return buyPrice > 0 ? buyPrice : 16;
+	}
+	
+	/** The number of rupees a villager will pay for this mask */
+	public int getSellPrice() {
+		return sellPrice > 0 ? sellPrice : 16;
 	}
 	
 	/**
@@ -164,6 +194,41 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
+			EntityVillager villager = (EntityVillager) entity;
+			if (ZSSVillagerInfo.get(villager).getMaskDesired() == this) {
+				//villager.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(this));
+				ZSSVillagerInfo.get(villager).onMaskTrade();
+				ZSSPlayerInfo.get(player).completeCurrentMaskStage();
+				player.setCurrentItemOrArmor(0, new ItemStack(Item.emerald, getSellPrice()));
+				PlayerUtils.playSound(player, ModInfo.SOUND_CASH_SALE, 1.0F, 1.0F);
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.mask.sold." + player.worldObj.rand.nextInt(4)));
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Called when the player right-clicks on an entity while wearing a mask
+	 * @return returning true will cancel the interact event (preventing trade
+	 * gui from opening for villagers, for example)
+	 */
+	public boolean onInteract(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (!player.worldObj.isRemote) {
+			if (entity instanceof EntityVillager) {
+				EntityVillager villager = (EntityVillager) entity;
+				if (this == ZSSVillagerInfo.get(villager).getMaskDesired()) {
+					new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.mask.desired.0"),
+									StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
+				} else {
+					player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
+				}
+			} else if (entity instanceof EntityMaskTrader) {
+				player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
+			} else {
+				return false;
+			}
+		}
 		return true;
 	}
 
