@@ -47,15 +47,13 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 		weight = strengthRequired;
 		disableStats();
 		setBlockUnbreakable();
-		setResistance(6000000.0F);
+		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundStoneFootstep);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
 	
 	@Override
-	public int getMobilityFlag() {
-		return 2;
-	}
+	public int getMobilityFlag() { return 2; }
 
 	@Override
 	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta) {

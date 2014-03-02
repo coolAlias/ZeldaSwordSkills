@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
@@ -48,12 +49,15 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	public BlockDoorLocked(int id, Material material) {
 		super(id, material);
 		setBlockUnbreakable();
-		setResistance(5000.0F);
+		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundMetalFootstep);
 	}
 	
 	@Override
 	public boolean isOpaqueCube() { return false; }
+	
+	@Override
+	public int getMobilityFlag() { return 2; }
 	
 	@Override
 	public boolean canPlaceBlockAt(World world, int x, int y, int z) {

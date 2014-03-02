@@ -33,6 +33,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.GuiHandler;
@@ -84,6 +85,9 @@ public class BlockPedestal extends BlockContainer
 	public boolean isOpaqueCube() { return false; }
 	
 	@Override
+	public int getMobilityFlag() { return 2; }
+	
+	@Override
 	public boolean canHarvestBlock(EntityPlayer player, int meta) {
 		return meta == 0x8;
 	}
@@ -102,7 +106,7 @@ public class BlockPedestal extends BlockContainer
 		if (world.getBlockMetadata(x, y, z) == 0x8) {
 			return getExplosionResistance(entity);
 		} else {
-			return 5000F;
+			return BlockWeight.IMPOSSIBLE.weight * 3.0F;
 		}
 	}
 	

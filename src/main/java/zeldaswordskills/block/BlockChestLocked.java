@@ -29,6 +29,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -57,7 +58,7 @@ public class BlockChestLocked extends BlockContainer
 	public BlockChestLocked(int id) {
 		super(id, Material.wood);
 		setBlockUnbreakable();
-		setResistance(5000F);
+		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundWoodFootstep);
 		setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
@@ -68,6 +69,9 @@ public class BlockChestLocked extends BlockContainer
 
 	@Override
 	public boolean renderAsNormalBlock() { return false; }
+	
+	@Override
+	public int getMobilityFlag() { return 2; }
 
 	@Override
 	public int getRenderType() { return RenderChestLocked.renderId; }

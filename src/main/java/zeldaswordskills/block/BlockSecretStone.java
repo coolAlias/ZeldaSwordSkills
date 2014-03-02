@@ -87,6 +87,9 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	}
 	
 	@Override
+	public int getMobilityFlag() { return 2; }
+	
+	@Override
 	public boolean canHarvestBlock(EntityPlayer player, int meta) { return false; }
 	
 	@Override
@@ -109,7 +112,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 		if (world.getBlockMetadata(x, y, z) < 0x8) {
 			return getExplosionResistance(entity);
 		} else {
-			return 5000F;
+			return BlockWeight.IMPOSSIBLE.weight * 3.0F;
 		}
 	}
 	

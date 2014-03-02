@@ -55,10 +55,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Masks should all use this class
- * 
- * Bunny Hood: Should also increase evasion, jump, reduce fall damage
- * TODO will need wornHelm field in player info for this stuff, like boots
+ * All types of Masks should use this class
  *
  */
 public class ItemMask extends ItemArmor implements IZoomHelper
