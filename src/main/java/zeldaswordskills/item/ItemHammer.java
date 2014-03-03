@@ -80,7 +80,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	}
 	
 	@Override
-	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta) {}
+	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed) {}
 	
 	@Override
 	public int getSwingSpeed() {
@@ -89,7 +89,9 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 
 	@Override
 	public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-		attacker.worldObj.playSoundAtEntity(attacker, ModInfo.SOUND_HAMMER, (attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		attacker.worldObj.playSoundAtEntity(attacker, ModInfo.SOUND_HAMMER,
+				(attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+				1.0F / (attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		return true;
 	}
 	

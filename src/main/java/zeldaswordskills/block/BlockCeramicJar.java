@@ -34,6 +34,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
+import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
@@ -68,10 +69,10 @@ public class BlockCeramicJar extends BlockContainer implements ISmashable
 	}
 	
 	@Override
-	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
 		world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		world.destroyBlock(x, y, z, false);
-		return true;
+		return Result.ALLOW;
 	}
 	
 	@Override

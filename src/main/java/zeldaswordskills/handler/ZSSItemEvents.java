@@ -258,23 +258,27 @@ public class ZSSItemEvents
 	 */
 	private boolean blockWasSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
 		int id = world.getBlockId(x, y, z);
-		boolean flag = id > 0 ? Block.blocksList[id] instanceof ISmashable : false;
-		if (id > 0 && (player.canPlayerEdit(x, y, z, side, stack) || flag)) {
+		boolean isSmashable = id > 0 ? Block.blocksList[id] instanceof ISmashable : false;
+		Result smashResult = Result.DEFAULT;
+		boolean wasDestroyed = false;
+		if (id > 0 && (player.canPlayerEdit(x, y, z, side, stack) || isSmashable)) {
 			Block block = Block.blocksList[id];
 			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (flag ? ((ISmashable) block).getSmashWeight(player, stack, meta)
+			BlockWeight weight = (isSmashable ? ((ISmashable) block).getSmashWeight(player, stack, meta)
 					: (Config.canSmashVanilla() || isVanillaBlockSmashable(block) ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
-			if (!flag || !((ISmashable) block).onSmashed(world, player, stack, x, y, z, side)) {
-				if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (!block.hasTileEntity(meta) || flag)) {
-					((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, block, meta);
+			smashResult = (isSmashable ? ((ISmashable) block).onSmashed(world, player, stack, x, y, z, side) : smashResult);
+			if (smashResult == Result.DEFAULT) {
+				if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (!block.hasTileEntity(meta) || isSmashable)) {
+					wasDestroyed = true;
 					world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
 					world.destroyBlock(x, y, z, false);
 				}
 			}
+			((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, block, meta, (smashResult == Result.ALLOW || wasDestroyed));
 		}
-		return world.isAirBlock(x, y, z);
+		return (smashResult == Result.ALLOW || wasDestroyed);
 	}
 	
 	private boolean isVanillaBlockSmashable(Block block) {

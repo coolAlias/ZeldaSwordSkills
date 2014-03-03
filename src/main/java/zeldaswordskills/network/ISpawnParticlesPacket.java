@@ -82,7 +82,6 @@ public class ISpawnParticlesPacket extends CustomPacket
 			if (item instanceof ISpawnParticles) {
 				((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r);
 			}
-			//ItemSpiritCrystal.spawnDinParticles(player.worldObj, x, y, z, r);
 		} else {
 			throw new ProtocolException("Particle packets may only be sent to clients");
 		}

@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
@@ -66,8 +67,8 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 	}
 	
 	@Override
-	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		return false;
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+		return Result.DEFAULT;
 	}
 	
 	@Override

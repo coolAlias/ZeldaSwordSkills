@@ -45,11 +45,11 @@ public interface ISmashBlock {
 	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta);
 	
 	/**
-	 * Called after the item has successfully smashed (destroyed) a block, making
-	 * it ideal for damaging the stack, for example; onBlockSmashed may not be
-	 * called if an ISmashable block cancels the smash
-	 * @param meta the metadata of the block before it was destroyed
+	 * Called after the player has attempted to smash a block with the stack,
+	 * making it ideal for damaging the stack, for example
+	 * @param meta the metadata of the block before it was smashed
+	 * @param wasSmashed true if the smash was considered successful
 	 */
-	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta);
+	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed);
 
 }

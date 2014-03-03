@@ -20,6 +20,7 @@ package zeldaswordskills.api.block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.event.Event.Result;
 
 /**
  * 
@@ -52,11 +53,11 @@ public interface ISmashable {
 	 * allowing custom handling of the event by the block in question.
 	 * @param stack the stack's item will always be an instance of ISmashBlock
 	 * @param side the side (face) of the block that was hit
-	 * @return return true if the smash was handled internally and further
-	 * processing should be canceled, or false to continue with the standard
-	 * smash mechanics; be sure to call ISmashBlock's onBlockSmashed method if
-	 * returning true
+	 * @return
+	 * DEFAULT proceeds with the default smash calculations and possible destruction of the block struck
+	 * ALLOW prevents further processing and indicates a successful smash
+	 * DENY prevents further processing and indicates a failed smash attempt
 	 */
-	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
 
 }

@@ -32,6 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -72,8 +73,8 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	}
 
 	@Override
-	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		return false;
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+		return Result.DEFAULT;
 	}
 	
 	@Override

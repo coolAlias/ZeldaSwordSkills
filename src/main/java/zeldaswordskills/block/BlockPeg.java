@@ -29,6 +29,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.item.ISmashBlock;
@@ -82,22 +83,24 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 	}
 
 	@Override
-	public boolean onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
 		world.playSoundEffect(x, y, z, getHitSound(), (world.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		if (side == 1) {
 			int meta = world.getBlockMetadata(x, y, z);
 			int impact = 1 + ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, this, meta).ordinal() - weight.ordinal();
 			if (impact > 0) {
+				boolean flag = meta < MAX_STATE;
 				meta += impact;
 				if (meta > MAX_STATE && impact > 1) {
+					flag = true;
 					world.destroyBlock(x, y, z, false);
 				} else {
 					world.setBlockMetadataWithNotify(x, y, z, Math.min(meta, MAX_STATE), 3);
 				}
+				return (flag ? Result.ALLOW : Result.DENY);
 			}
-			((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, this, Math.min(meta, MAX_STATE));
 		}
-		return true;
+		return Result.DENY;
 	}
 	
 	@Override
