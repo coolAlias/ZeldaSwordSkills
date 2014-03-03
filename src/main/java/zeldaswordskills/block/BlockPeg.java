@@ -64,6 +64,7 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 		disableStats();
 		setTickRandomly(true);
 		setBlockUnbreakable();
+		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundStoneFootstep);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F, 0.75F);
@@ -118,11 +119,6 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 
 	@Override
 	public int getMobilityFlag() { return 2; }
-
-	@Override
-	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		return BlockWeight.IMPOSSIBLE.weight;
-	}
 	
 	@Override
 	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
