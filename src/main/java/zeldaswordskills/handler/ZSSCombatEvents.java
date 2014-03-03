@@ -208,7 +208,7 @@ public class ZSSCombatEvents
 	 * Sets the attack timer for the player if using an ISwingSpeed item
 	 * All other items default to vanilla behavior, which is spam-happy
 	 */
-	@SideOnly(Side.CLIENT)
+	//@SideOnly(Side.CLIENT)
 	public static void setPlayerAttackTime(EntityPlayer player) {
 		if (!player.capabilities.isCreativeMode) {
 			ItemStack stack = player.getHeldItem();

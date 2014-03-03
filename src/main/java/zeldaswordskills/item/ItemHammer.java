@@ -28,22 +28,28 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceStun;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.network.ISpawnParticlesPacket;
+import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISwingSpeed
+public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -83,7 +89,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISwing
 
 	@Override
 	public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-		// TODO play hit sound
+		attacker.worldObj.playSoundAtEntity(attacker, ModInfo.SOUND_HAMMER, (attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		return true;
 	}
 	
@@ -110,7 +116,9 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISwing
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		player.setItemInUse(stack, this.getMaxItemUseDuration(stack));
+		if (player.attackTime == 0) {
+			player.setItemInUse(stack, this.getMaxItemUseDuration(stack));
+		}
 		return stack;
 	}
 	
@@ -118,12 +126,55 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISwing
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
 		if (this == ZSSItems.hammerSkull && player.attackTime == 0) {
 			int ticksInUse = getMaxItemUseDuration(stack) - ticksRemaining;
-			float charge = (float) ticksInUse / 30.0F;
+			float charge = (float) ticksInUse / 40.0F;
 			charge = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
-			if (charge > 0.5F) {
+			if (charge > 0.25F) {
+				if (!player.worldObj.isRemote) {
+					WorldUtils.sendPacketToAllAround(new ISpawnParticlesPacket(player, this, 4.0F).makePacket(), world, player, 4096.0D);
+				}
 				player.swingItem();
-				// TODO spawn particles spreading in a circle like on landing from a fall
-				// TODO attack all nearby entities with stun damage
+				ZSSCombatEvents.setPlayerAttackTime(player);
+				world.playSoundAtEntity(player, ModInfo.SOUND_LEAPINGBLOW, (world.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+				DamageSource specialAttack = new DamageSourceStun("hammer", player, (int)(60 * charge), 5).setCanStunPlayers().setDamageBypassesArmor();
+				float damage = (weaponDamage * charge) / 2.0F;
+				if (damage > 0.5F) {
+					List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(4.0D, 0.0D, 4.0D));
+					for (EntityLivingBase entity : entities) {
+						if (entity != player && entity.onGround) {
+							entity.attackEntityFrom(specialAttack, damage);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void spawnParticles(World world, double x, double y, double z, float radius) {
+		int r = MathHelper.ceiling_float_int(radius);
+		for (int i = 0; i < r; ++i) {
+			for (int k = 0; k < r; ++k) {
+				spawnParticlesAt(world, x + i, y, z + k);
+				spawnParticlesAt(world, x + i, y, z - k);
+				spawnParticlesAt(world, x - i, y, z + k);
+				spawnParticlesAt(world, x - i, y, z - k);
+			}
+		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	private void spawnParticlesAt(World world, double x, double y, double z) {
+		String particle;
+		int posY = MathHelper.floor_double(y);
+		int blockID = world.getBlockId(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
+		if (blockID > 0) {
+			particle = "tilecrack_" + blockID + "_" + world.getBlockMetadata(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
+			for (int i = 0; i < 4; ++i) {
+				double dx = x + world.rand.nextFloat() - 0.5F;
+				double dy = posY + world.rand.nextFloat() * 0.2F;
+				double dz = z + world.rand.nextFloat() - 0.5F;
+				world.spawnParticle(particle, dx, dy, dz, world.rand.nextGaussian(), 0, world.rand.nextGaussian());
 			}
 		}
 	}
