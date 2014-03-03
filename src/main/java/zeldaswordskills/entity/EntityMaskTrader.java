@@ -157,10 +157,12 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 				if (stack != null && stack.getItem() == mask) {
 					player.setCurrentItemOrArmor(0, null);
 					info.setBorrowedMask(null);
+					PlayerUtils.playSound(player, "random.pop", 1.0F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.returned"));
 				} else if (mask != null) {
-					player.addChatMessage(StatCollector.translateToLocalFormatted(
-							"chat.zss.npc.mask_trader.borrowed", mask.getItemDisplayName(new ItemStack(mask))));
+					new TimedChatDialogue(player, Arrays.asList(
+							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.0", mask.getItemDisplayName(new ItemStack(mask))),
+							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.1")));
 				} else {
 					int x = MathHelper.floor_double(posX);
 					int y = MathHelper.floor_double(posY);
@@ -202,15 +204,17 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 						info.completeCurrentMaskStage();
 						if (info.getCurrentMaskStage() == (maskMap.size() * NUM_STAGES)) {
 							new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.0"),
-									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.1")));
-							new TimedAddItem(player, new ItemStack(ZSSItems.maskTruth), 2000);
+									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.1"),
+									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.2"),
+									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.3")));
+							new TimedAddItem(player, new ItemStack(ZSSItems.maskTruth), 4000);
 							info.setBorrowedMask(ZSSItems.maskTruth);
 						} else {
 							player.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.sold"));
 						}
 					} else {
 						new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.npc.mask_trader.penniless.0"),
-								StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.penniless.0", price)));
+								StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.penniless.1", price)));
 					}
 					break;
 				}

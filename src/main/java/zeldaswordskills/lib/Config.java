@@ -310,7 +310,7 @@ public class Config
 		minBombBagPrice = config.get("Trade", "[Bomb Bag] Minimum price (in emeralds) [32-64]", 64).getInt();
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
-		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt();
+		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-25]", 15).getInt();
 		
 		config.save();
 	}
@@ -408,7 +408,7 @@ public class Config
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
 	public static int getMinBombBagPrice() { return Math.max(minBombBagPrice, 32); }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
-	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.15F); }
+	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.25F); }
 	public static int getFriendTradesRequired() { return Math.max(friendTradesRequired, 3); }
 
 }
