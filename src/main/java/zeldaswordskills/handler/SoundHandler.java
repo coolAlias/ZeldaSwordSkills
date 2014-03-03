@@ -68,6 +68,7 @@ public class SoundHandler {
 		// the following have 3
 		for (int i = 1; i < 4; ++i) {
 			event.manager.addSound(ModInfo.SOUND_ARMORBREAK + String.valueOf(i) + ".ogg");
+			event.manager.addSound(ModInfo.SOUND_HAMMER + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_LEAPINGBLOW + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_SLAM + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_SPINATTACK + String.valueOf(i) + ".ogg");
@@ -76,6 +77,7 @@ public class SoundHandler {
 		// 4 files each
 		for (int i = 1; i < 5; ++i) {
 			event.manager.addSound(ModInfo.SOUND_BREAK_JAR + String.valueOf(i) + ".ogg");
+			event.manager.addSound(ModInfo.SOUND_HIT_PEG + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_SHOCK + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_SWORDCUT + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_SWORDMISS + String.valueOf(i) + ".ogg");

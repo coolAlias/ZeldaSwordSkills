@@ -55,6 +55,8 @@ public class ZSSBlocks
 	doorLocked,
 	dungeonCore,
 	pedestal,
+	pegWooden,
+	pegRusty,
 	secretStone,
 	sacredFlame;
 	
@@ -78,6 +80,8 @@ public class ZSSBlocks
 		ceramicJar = new BlockCeramicJar(modBlockIndex++).setUnlocalizedName("zss.ceramic_jar");
 		barrierLight = new BlockHeavy(modBlockIndex++, Material.rock, BlockWeight.MEDIUM).setUnlocalizedName("zss.barrier_light");
 		barrierHeavy = new BlockHeavy(modBlockIndex++, Material.rock, BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.barrier_heavy");
+		pegWooden = new BlockPeg(modBlockIndex++, Material.wood, BlockWeight.VERY_LIGHT).setUnlocalizedName("zss.peg_wooden");
+		pegRusty = new BlockPeg(modBlockIndex++, Material.iron, BlockWeight.MEDIUM).setUnlocalizedName("zss.peg_rusty");
 		
 		register();
 	}
@@ -98,6 +102,8 @@ public class ZSSBlocks
 	private static void register() {
 		GameRegistry.registerBlock(barrierLight, barrierLight.getUnlocalizedName());
 		GameRegistry.registerBlock(barrierHeavy, barrierHeavy.getUnlocalizedName());
+		GameRegistry.registerBlock(pegWooden, pegWooden.getUnlocalizedName());
+		GameRegistry.registerBlock(pegRusty, pegRusty.getUnlocalizedName());
 		GameRegistry.registerBlock(ceramicJar, ItemCeramicJar.class, ceramicJar.getUnlocalizedName());
 		GameRegistry.registerBlock(chestLocked, chestLocked.getUnlocalizedName());
 		GameRegistry.registerBlock(doorLocked, doorLocked.getUnlocalizedName());
