@@ -39,7 +39,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -236,7 +236,7 @@ public class ItemSpiritCrystal extends Item
 					amount *= 0.25F;
 				}
 
-				if (entity.attackEntityFrom(new DamageSourceFireIndirect("Din's Fire", player, player).setMagicDamage(), amount) && !entity.isImmuneToFire()) {
+				if (entity.attackEntityFrom(new DamageSourceIndirect("Din's Fire", player, player).setFireDamage().setMagicDamage(), amount) && !entity.isImmuneToFire()) {
 					if (world.rand.nextFloat() < d10) {
 						entity.setFire(10);
 					}

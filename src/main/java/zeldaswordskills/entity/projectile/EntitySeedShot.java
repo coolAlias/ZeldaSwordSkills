@@ -30,7 +30,7 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.util.WorldUtils;
 
@@ -122,7 +122,7 @@ public class EntitySeedShot extends EntityThrowable
 	public DamageSource getDamageSource() {
 		switch(getType()) {
 		case DEKU: return new DamageSourceStunIndirect("slingshot", this, getThrower(), 80, 2).setCanStunPlayers().setProjectile();
-		case NETHERWART: return new DamageSourceFireIndirect("slingshot", this, getThrower()).setProjectile();
+		case NETHERWART: return new DamageSourceIndirect("slingshot", this, getThrower()).setFireDamage().setProjectile();
 		default: return new EntityDamageSourceIndirect("slingshot", this, getThrower()).setProjectile();
 		}
 	}

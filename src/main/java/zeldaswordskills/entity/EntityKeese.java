@@ -35,10 +35,10 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import zeldaswordskills.api.damage.IDamageSourceStun;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceFire;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceDirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
+import zeldaswordskills.api.damage.IDamageSourceStun;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
@@ -185,7 +185,7 @@ public class EntityKeese extends EntityBat implements IMob
 	 */
 	private DamageSource getDamageSource() {
 		switch(getType()) {
-		case FIRE: return new DamageSourceFire("mob", this);
+		case FIRE: return new DamageSourceDirect("mob", this).setFireDamage();
 		case ICE: return new DamageSourceIce("mob", this, 100, 0);
 		default:
 			if (getShockTime() > 0) {

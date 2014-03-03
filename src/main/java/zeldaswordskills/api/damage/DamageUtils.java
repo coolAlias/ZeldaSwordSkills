@@ -64,7 +64,59 @@ public class DamageUtils
 		return new EntityDamageSourceIndirect("indirectSword", direct, indirect);
 	}
 	
-	public static class DamageSourceShock extends EntityDamageSource implements IDamageType, IDamageSourceStun
+	/**
+	 * Class providing access to protected vanilla methods
+	 */
+	public static class DamageSourceDirect extends EntityDamageSource
+	{
+		/** Creates a basic direct damage source */
+		public DamageSourceDirect(String name, Entity entity) {
+			super(name, entity);
+		}
+		/** Wrapper method for accessing protected vanilla method */
+		public DamageSourceDirect setDamageBypassesArmor() {
+			super.setDamageBypassesArmor();
+			return this;
+		}
+		/** Wrapper method for accessing protected vanilla method */
+		public DamageSourceDirect setFireDamage() {
+			super.setFireDamage();
+			return this;
+		}
+		/** Wrapper method for accessing protected vanilla method */
+		public DamageSourceDirect setDamageAllowedInCreativeMode() {
+			super.setDamageAllowedInCreativeMode();
+			return this;
+		}
+	}
+	
+	/**
+	 * Class providing access to protected vanilla methods
+	 */
+	public static class DamageSourceIndirect extends EntityDamageSourceIndirect
+	{
+		/** Creates a basic indirect damage source */
+		public DamageSourceIndirect(String name, Entity direct, Entity indirect) {
+			super(name, direct, indirect);
+		}
+		/** Wrapper method for accessing protected vanilla method */
+		public DamageSourceIndirect setDamageBypassesArmor() {
+			super.setDamageBypassesArmor();
+			return this;
+		}
+		/** Wrapper method for accessing protected vanilla method */
+		public DamageSourceIndirect setFireDamage() {
+			super.setFireDamage();
+			return this;
+		}
+		/** Wrapper method for accessing protected vanilla method */
+		public DamageSourceIndirect setDamageAllowedInCreativeMode() {
+			super.setDamageAllowedInCreativeMode();
+			return this;
+		}
+	}
+	
+	public static class DamageSourceShock extends DamageSourceDirect implements IDamageType, IDamageSourceStun
 	{
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
@@ -110,7 +162,7 @@ public class DamageUtils
 
 	}
 	
-	public static class DamageSourceShockIndirect extends EntityDamageSourceIndirect implements IDamageType, IDamageSourceStun
+	public static class DamageSourceShockIndirect extends DamageSourceIndirect implements IDamageType, IDamageSourceStun
 	{
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
@@ -156,7 +208,7 @@ public class DamageUtils
 
 	}
 	
-	public static class DamageSourceStun extends EntityDamageSource implements IDamageType,IDamageSourceStun
+	public static class DamageSourceStun extends DamageSourceDirect implements IDamageType,IDamageSourceStun
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -171,7 +223,7 @@ public class DamageUtils
 		private boolean canStunPlayers = false;
 		
 		/**
-		 * Creates an indirect stun damage source
+		 * Creates a direct stun damage source
 		 * @param duration base stun duration, modified by amplifier and -rand.nextInt(duration / 2)
 		 * @param amplifier amount, multiplied by damage received, that may be added to the duration
 		 */
@@ -208,7 +260,7 @@ public class DamageUtils
 
 	}
 	
-	public static class DamageSourceStunIndirect extends EntityDamageSourceIndirect implements IDamageType,IDamageSourceStun
+	public static class DamageSourceStunIndirect extends DamageSourceIndirect implements IDamageType,IDamageSourceStun
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -260,23 +312,7 @@ public class DamageUtils
 
 	}
 	
-	public static class DamageSourceFire extends EntityDamageSource {
-		/** Creates a fire-based EntityDamageSource */
-		public DamageSourceFire(String name, Entity entity) {
-			super(name, entity);
-			setFireDamage();
-		}
-	}
-	
-	public static class DamageSourceFireIndirect extends EntityDamageSourceIndirect {
-		/** Creates a fire-based indirect entity DamageSource */
-		public DamageSourceFireIndirect(String name, Entity direct, Entity indirect) {
-			super(name, direct, indirect);
-			setFireDamage();
-		}
-	}
-	
-	public static class DamageSourceHoly extends EntityDamageSource implements IDamageType
+	public static class DamageSourceHoly extends DamageSourceDirect implements IDamageType
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -294,7 +330,7 @@ public class DamageUtils
 		}
 	}
 	
-	public static class DamageSourceHolyIndirect extends EntityDamageSourceIndirect implements IDamageType
+	public static class DamageSourceHolyIndirect extends DamageSourceIndirect implements IDamageType
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -312,7 +348,7 @@ public class DamageUtils
 		}
 	}
 	
-	public static class DamageSourceIce extends EntityDamageSource implements IDamageType, IPostDamageEffect
+	public static class DamageSourceIce extends DamageSourceDirect implements IDamageType, IPostDamageEffect
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -340,7 +376,7 @@ public class DamageUtils
 		}
 	}
 	
-	public static class DamageSourceIceIndirect extends EntityDamageSourceIndirect implements IDamageType, IPostDamageEffect
+	public static class DamageSourceIceIndirect extends DamageSourceIndirect implements IDamageType, IPostDamageEffect
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;

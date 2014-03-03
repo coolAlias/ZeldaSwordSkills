@@ -34,9 +34,9 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.lib.Config;
@@ -117,7 +117,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected DamageSource getDamageSource() {
 		switch(getType()) {
-		case FIRE: return new DamageSourceFireIndirect("fire arrow", this, getShooter()).setProjectile().setMagicDamage();
+		case FIRE: return new DamageSourceIndirect("fire arrow", this, getShooter()).setFireDamage().setProjectile().setMagicDamage();
 		case ICE: return new DamageSourceIceIndirect("ice arrow", this, getShooter(), 50, 1).setProjectile().setMagicDamage();
 		case LIGHT: return new DamageSourceHolyIndirect("light arrow", this, getShooter()).setProjectile().setMagicDamage();
 		}
