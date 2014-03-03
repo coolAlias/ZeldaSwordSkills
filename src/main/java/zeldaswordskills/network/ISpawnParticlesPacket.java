@@ -20,7 +20,8 @@ package zeldaswordskills.network;
 import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.item.ItemSpiritCrystal;
+import net.minecraft.item.Item;
+import zeldaswordskills.item.ISpawnParticles;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -29,23 +30,28 @@ import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
- * Specific packet due to the high number of particles to spawn and large radius
+ * Packet that calls a specific ISpawnParticles method in the Item class, allowing
+ * each Item to handle its own particle algorithm individually yet spawn them in
+ * all client worlds
  *
  */
-public class SpawnDinParticlesPacket extends CustomPacket
+public class ISpawnParticlesPacket extends CustomPacket
 {
+	/** The Item class which will spawn the particles; must implement ISpawnParticles */
+	private Item item;
 	/** Center of AoE */
 	private double x, y, z;
 	/** Radius in which to spawn the particles */
 	private float r;
 
-	public SpawnDinParticlesPacket() {}
+	public ISpawnParticlesPacket() {}
 	
-	public SpawnDinParticlesPacket(EntityPlayer player, float radius) {
-		this(player.posX, player.posY, player.posZ, radius);
+	public ISpawnParticlesPacket(EntityPlayer player, Item item, float radius) {
+		this(item, player.posX, player.posY, player.posZ, radius);
 	}
 	
-	public SpawnDinParticlesPacket(double posX, double posY, double posZ, float radius) {
+	public ISpawnParticlesPacket(Item item, double posX, double posY, double posZ, float radius) {
+		this.item = item;
 		x = posX;
 		y = posY;
 		z = posZ;
@@ -54,6 +60,7 @@ public class SpawnDinParticlesPacket extends CustomPacket
 
 	@Override
 	public void write(ByteArrayDataOutput out) throws IOException {
+		out.writeInt(item.itemID);
 		out.writeDouble(x);
 		out.writeDouble(y);
 		out.writeDouble(z);
@@ -62,6 +69,7 @@ public class SpawnDinParticlesPacket extends CustomPacket
 
 	@Override
 	public void read(ByteArrayDataInput in) throws IOException {
+		item = Item.itemsList[in.readInt()];
 		x = in.readDouble();
 		y = in.readDouble();
 		z = in.readDouble();
@@ -71,7 +79,10 @@ public class SpawnDinParticlesPacket extends CustomPacket
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isClient()) {
-			ItemSpiritCrystal.spawnDinParticles(player.worldObj, x, y, z, r);
+			if (item instanceof ISpawnParticles) {
+				((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r);
+			}
+			//ItemSpiritCrystal.spawnDinParticles(player.worldObj, x, y, z, r);
 		} else {
 			throw new ProtocolException("Particle packets may only be sent to clients");
 		}

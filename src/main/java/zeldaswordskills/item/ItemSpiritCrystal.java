@@ -46,7 +46,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.SpawnDinParticlesPacket;
+import zeldaswordskills.network.ISpawnParticlesPacket;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -64,7 +64,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 		constantly drains hunger and prevents the use of other magic skills
  *
  */
-public class ItemSpiritCrystal extends Item
+public class ItemSpiritCrystal extends Item implements ISpawnParticles
 {
 	/** The spirit's id, from BlockSacredFlame */
 	private final int spiritType;
@@ -162,7 +162,7 @@ public class ItemSpiritCrystal extends Item
 	private int handleDin(ItemStack stack, World world, EntityPlayer player) {
 		float radius = 5.0F;
 		if (!world.isRemote) {
-			WorldUtils.sendPacketToAllAround(new SpawnDinParticlesPacket(player, radius).makePacket(), world, player, 4096.0D);
+			WorldUtils.sendPacketToAllAround(new ISpawnParticlesPacket(player, this, radius).makePacket(), world, player, 4096.0D);
 			affectDinBlocks(world, player, radius);
 		}
 		affectDinEntities(world, player, radius);
@@ -250,11 +250,9 @@ public class ItemSpiritCrystal extends Item
 		}
 	}
 
-	/**
-	 * Spawns a bunch of particles using the explosion algorithm
-	 */
+	@Override
 	@SideOnly(Side.CLIENT)
-	public static void spawnDinParticles(World world, double posX, double posY, double posZ, float radius) {
+	public void spawnParticles(World world, double posX, double posY, double posZ, float radius) {
 		int i1 = MathHelper.floor_double(posX + radius);
 		int j1 = MathHelper.floor_double(posY + radius);
 		int k1 = MathHelper.floor_double(posZ + radius);
