@@ -209,7 +209,7 @@ public class ZSSCombatEvents
 	 * All other items default to vanilla behavior, which is spam-happy
 	 */
 	@SideOnly(Side.CLIENT)
-	private void setPlayerAttackTime(EntityPlayer player) {
+	public static void setPlayerAttackTime(EntityPlayer player) {
 		if (!player.capabilities.isCreativeMode) {
 			ItemStack stack = player.getHeldItem();
 			if (stack != null && stack.getItem() instanceof ISwingSpeed) {
