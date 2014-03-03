@@ -35,7 +35,7 @@ import cpw.mods.fml.relauncher.Side;
  * all client worlds
  *
  */
-public class ISpawnParticlesPacket extends CustomPacket
+public class PacketISpawnParticles extends CustomPacket
 {
 	/** The Item class which will spawn the particles; must implement ISpawnParticles */
 	private Item item;
@@ -44,13 +44,13 @@ public class ISpawnParticlesPacket extends CustomPacket
 	/** Radius in which to spawn the particles */
 	private float r;
 
-	public ISpawnParticlesPacket() {}
+	public PacketISpawnParticles() {}
 	
-	public ISpawnParticlesPacket(EntityPlayer player, Item item, float radius) {
+	public PacketISpawnParticles(EntityPlayer player, Item item, float radius) {
 		this(item, player.posX, player.posY, player.posZ, radius);
 	}
 	
-	public ISpawnParticlesPacket(Item item, double posX, double posY, double posZ, float radius) {
+	public PacketISpawnParticles(Item item, double posX, double posY, double posZ, float radius) {
 		this.item = item;
 		x = posX;
 		y = posY;

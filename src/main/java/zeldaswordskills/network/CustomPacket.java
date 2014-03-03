@@ -56,7 +56,7 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(9), BombTickPacket.class);
 		builder.put(Integer.valueOf(10), InLiquidPacket.class);
 		builder.put(Integer.valueOf(11), SwordPedestalPacket.class);
-		builder.put(Integer.valueOf(12), ISpawnParticlesPacket.class);
+		builder.put(Integer.valueOf(12), PacketISpawnParticles.class);
 		builder.put(Integer.valueOf(13), SpawnNayruParticlesPacket.class);
 		builder.put(Integer.valueOf(14), UpdateBuffPacket.class);
 		builder.put(Integer.valueOf(15), SyncEntityInfoPacket.class);

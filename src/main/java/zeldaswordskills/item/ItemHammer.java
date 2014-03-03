@@ -41,7 +41,7 @@ import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.ISpawnParticlesPacket;
+import zeldaswordskills.network.PacketISpawnParticles;
 import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
@@ -132,7 +132,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			charge = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
 			if (charge > 0.25F) {
 				if (!player.worldObj.isRemote) {
-					WorldUtils.sendPacketToAllAround(new ISpawnParticlesPacket(player, this, 4.0F).makePacket(), world, player, 4096.0D);
+					WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, 4.0F).makePacket(), world, player, 4096.0D);
 				}
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);

@@ -46,7 +46,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.ISpawnParticlesPacket;
+import zeldaswordskills.network.PacketISpawnParticles;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -162,7 +162,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 	private int handleDin(ItemStack stack, World world, EntityPlayer player) {
 		float radius = 5.0F;
 		if (!world.isRemote) {
-			WorldUtils.sendPacketToAllAround(new ISpawnParticlesPacket(player, this, radius).makePacket(), world, player, 4096.0D);
+			WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, radius).makePacket(), world, player, 4096.0D);
 			affectDinBlocks(world, player, radius);
 		}
 		affectDinEntities(world, player, radius);
