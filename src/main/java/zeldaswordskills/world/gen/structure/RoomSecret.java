@@ -27,6 +27,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.ChestGenHooks;
+import zeldaswordskills.block.BlockPeg;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.item.ZSSItems;
@@ -149,8 +150,12 @@ public class RoomSecret extends RoomBase
 		if (submerged && bBox.getXSize() > 3) {
 			--bBox.minY;
 		}
-		if (bBox.getYSize() == MAX_HEIGHT && rand.nextInt(8) == 0) {
-			door = (rand.nextInt(8) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.barrierLight);
+		if (!submerged && bBox.getXSize() > 5 && rand.nextFloat() < Config.getBarredRoomChance()) {
+			if (rand.nextInt(4) == 0) {
+				door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
+			} else {
+				door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
+			}
 			side = rand.nextInt(4);
 		}
 	}
@@ -162,9 +167,19 @@ public class RoomSecret extends RoomBase
 		int rX = bBox.getXSize() - 2;
 		int rY = (inLava && bBox.getYSize() > 3 ? 2 : 1);
 		int rZ = bBox.getZSize() - 2;
-		generateChestContents(world, rand, rand.nextInt(rX) + 1, rY, rand.nextInt(rZ) + 1, true);
-		if (bBox.getXSize() > 5 && rand.nextFloat() < Config.getDoubleChestChance()) {
-			generateChestContents(world, rand, rand.nextInt(rX) + 1, rY, rand.nextInt(rZ) + 1, false);
+		if (door instanceof BlockPeg) {
+			switch(side) {
+			case SOUTH: rX = 1; break;
+			case NORTH: rX = rZ = 1; break;
+			case EAST: rZ = 1; break;
+			case WEST: rX = rZ = 1; break;
+			}
+			generateChestContents(world, rand, rX, rY, rZ, true);
+		} else {
+			generateChestContents(world, rand, rand.nextInt(rX) + 1, rY, rand.nextInt(rZ) + 1, true);
+			if (bBox.getXSize() > 5 && rand.nextFloat() < Config.getDoubleChestChance()) {
+				generateChestContents(world, rand, rand.nextInt(rX) + 1, rY, rand.nextInt(rZ) + 1, false);
+			}
 		}
 	}
 
@@ -186,19 +201,16 @@ public class RoomSecret extends RoomBase
 				if (first && rand.nextFloat() < Config.getHeartPieceChance()) {
 					WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
 				}
-				// TODO make a config value for special loot chance
 				if (door != null) {
 					ItemStack loot = ChestGenHooks.getInfo(DungeonLootLists.BOSS_LOOT).getOneItem(rand);
-					// TODO add wooden and rusty pegs
-					if (door == ZSSBlocks.barrierLight) {
-						if (rand.nextFloat() < 0.25F) {
-							// TODO remove golden gauntlets - they should be availabe in the rusty peg rooms
-							loot = new ItemStack(ZSSItems.gauntletsGolden);
-						} else if (rand.nextFloat() < 0.25F) {
+					if (rand.nextFloat() < 0.0625F * (1.0F / Math.max(Config.getBarredRoomChance(), 0.1F))) {
+						if (door == ZSSBlocks.pegWooden) {
+							loot = new ItemStack(ZSSItems.gauntletsSilver);
+						} else if (door == ZSSBlocks.barrierLight) {
 							loot = new ItemStack(ZSSItems.hammerSkull);
-						}
-					} else if (door == ZSSBlocks.barrierHeavy) {
-						if (rand.nextFloat() < 0.25F) {
+						} else if (door == ZSSBlocks.pegRusty) {
+							loot = new ItemStack(ZSSItems.gauntletsGolden);
+						} else if (door == ZSSBlocks.barrierHeavy) {
 							loot = new ItemStack(ZSSItems.hammerMegaton);
 						}
 					}
@@ -231,7 +243,7 @@ public class RoomSecret extends RoomBase
 		case WEST: x = bBox.minX; break;
 		}
 		world.setBlock(x, y, z, door.blockID, 0, 2);
-		world.setBlock(x, y + 1, z, door.blockID, 0, 2);
+		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? 0 : door.blockID), 0, 2);
 	}
 	
 	/**

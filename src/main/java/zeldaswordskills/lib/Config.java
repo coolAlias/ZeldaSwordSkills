@@ -89,7 +89,7 @@ public class Config
 	private static boolean enableDungeonCoreTab;
 	/** [Bombs] Minimum fuse time; set to 0 to disable held bomb ticks */
 	private static int bombFuseTime;
-	/** [Bombs] Whether bombs can destroy secret stone only */
+	/** [Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone */
 	private static boolean onlyBombSecretStone;
 	/** [Din's Fire] Whether Din's Fire can set blocks on fire */
 	private static boolean enableDinIgnite;
@@ -164,6 +164,8 @@ public class Config
 	private static int lockedChestChance;
 	/** Chance that a secret room may have two chests */
 	private static int doubleChestChance;
+	/** Chance that a secret room's entrance will be barred by some obstacle */
+	private static int barredRoomChance;
 	/** Chance of a heart piece always appearing in secret room chests */
 	private static int heartPieceChance;
 	/** Chance of a random boss-level item being added to locked chest loot table */
@@ -245,7 +247,7 @@ public class Config
 		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
 		enableDungeonCoreTab = config.get("Item", "[Blocks] Show Dungeon Core (fairy spawner) blocks in the Creative Tabs", true).getBoolean(true);
 		bombFuseTime = config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt();
-		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs can destroy secret stone only", false).getBoolean(false);
+		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone", false).getBoolean(false);
 		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
 		heroBowUpgradeCost = config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt();
@@ -284,9 +286,10 @@ public class Config
 		/*================== LOOT =====================*/
 		lockedChestChance = config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt();
 		doubleChestChance = config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt();
+		barredRoomChance = config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [1-50]", 25).getInt();
 		heartPieceChance = config.get("Loot", "Chance (as a percent) of a heart piece generating in secret room chests [0-100]", 60).getInt();
 		randomBossItemChance = config.get("Loot", "Chance (as a percent) of a random boss-level item being added to locked chest loot table [0-50]", 25).getInt();
-		minNumChestItems = config.get("Loot", "Minimum number of random chest contents for first chest [1-10]", 5).getInt();
+		minNumChestItems = config.get("Loot", "Minimum number of random chest contents for first chest [1-10]", 4).getInt();
 		bombWeight = config.get("Loot", "Weight: Bomb [1-10]", 5).getInt();
 		bombBagWeight = config.get("Loot", "Weight: Bomb Bag (locked chest weight only) [1-10]", 3).getInt();
 		heartPieceWeight = config.get("Loot", "Weight: Heart Piece (vanilla chests only) [1-10]", 1).getInt();
@@ -387,6 +390,7 @@ public class Config
 	/*================== LOOT =====================*/
 	public static float getLockedChestChance() { return MathHelper.clamp_float(lockedChestChance * 0.01F, 0.1F, 0.5F); }
 	public static float getDoubleChestChance() { return MathHelper.clamp_float(doubleChestChance * 0.01F, 0F, 0.25F); }
+	public static float getBarredRoomChance() { return MathHelper.clamp_float(barredRoomChance * 0.01F, 0.01F, 0.5F); }
 	public static float getHeartPieceChance() { return MathHelper.clamp_float(heartPieceChance * 0.01F, 0F, 1F); }
 	public static float getRandomBossItemChance() { return MathHelper.clamp_float(randomBossItemChance * 0.01F, 0F, 0.5F); }
 	public static int getMinNumItems() { return MathHelper.clamp_int(minNumChestItems, 1, 10); }

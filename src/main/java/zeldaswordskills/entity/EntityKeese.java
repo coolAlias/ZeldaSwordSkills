@@ -297,7 +297,9 @@ public class EntityKeese extends EntityBat implements IMob
 			}
 			if (currentFlightTarget == null || rand.nextInt(30) == 0 || currentFlightTarget.getDistanceSquared((int) posX, (int) posY, (int) posZ) < (attackingPlayer != null ? 1.0F : 4.0F)) {
 				attackingPlayer = getLastAttacker() instanceof EntityPlayer ? (EntityPlayer) getLastAttacker() : worldObj.getClosestPlayerToEntity(this, 8.0D);
-				if (attackingPlayer != null && (attackingPlayer.getCurrentArmor(ArmorIndex.WORN_HELM) == null || attackingPlayer.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != ZSSItems.maskSkull)) {
+				if (attackingPlayer != null && !attackingPlayer.capabilities.isCreativeMode &&
+						(attackingPlayer.getCurrentArmor(ArmorIndex.WORN_HELM) == null || attackingPlayer.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != ZSSItems.maskSkull))
+				{
 					currentFlightTarget = new ChunkCoordinates((int) attackingPlayer.posX, (int) attackingPlayer.posY + 1, (int) attackingPlayer.posZ);
 					worldObj.playAuxSFXAtEntity(attackingPlayer, 1015, (int) posX, (int) posY, (int) posZ, 0);
 				} else {
