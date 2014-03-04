@@ -235,9 +235,10 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 	static {
 		int i = 0;
 		maskMap.put(i++, ZSSItems.maskKeaton);
+		maskMap.put(i++, ZSSItems.maskSkull);
 		maskMap.put(i++, ZSSItems.maskSpooky);
-		maskMap.put(i++, ZSSItems.maskBunny);
 		maskMap.put(i++, ZSSItems.maskScents);
 		maskMap.put(i++, ZSSItems.maskCouples);
+		maskMap.put(i++, ZSSItems.maskBunny);
 	}
 }

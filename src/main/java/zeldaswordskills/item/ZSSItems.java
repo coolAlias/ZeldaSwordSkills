@@ -187,11 +187,13 @@ public class ZSSItems
 	maskBlast,
 	maskBunny,
 	maskCouples,
+	maskGerudo,
 	maskGiants,
 	maskGibdo,
 	maskHawkeye,
 	maskKeaton,
 	maskScents,
+	maskSkull,
 	maskSpooky,
 	maskStone,
 	maskTruth,
@@ -374,9 +376,6 @@ public class ZSSItems
 		// BLOCK TAB ITEMS
 		doorLocked = new ItemDoorLocked(modItemIndex++).setUnlocalizedName("zss.doorlocked");
 
-		// MASK TAB ITEMS
-		// TODO next reorganization, move masks here
-
 		// MISCELLANEOUS TAB ITEMS
 		hookshot = new ItemHookShot(modItemIndex++).setUnlocalizedName("zss.hookshot");
 		hookshotAddon = new ItemHookShotUpgrade(modItemIndex++).setUnlocalizedName("zss.hookshot.upgrade");
@@ -429,15 +428,20 @@ public class ZSSItems
 		heldBlock = new ItemHeldBlock(modItemIndex++).setUnlocalizedName("zss.held_block");
 		gauntletsSilver = new ItemPowerGauntlets(modItemIndex++, BlockWeight.MEDIUM).setUnlocalizedName("zss.gauntlets_silver");
 		gauntletsGolden = new ItemPowerGauntlets(modItemIndex++, BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.gauntlets_golden");
+		
+		// MASK TAB ITEMS
+		// TODO next reorganization, move Hawkeye Mask here
 		maskBlast = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_blast");
 		// can't use CLOTH as it expects an overlay and crashes when rendering
 		maskBunny = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(1, 64).setUnlocalizedName("zss.mask_bunny");
 		maskCouples = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(40, 32).setUnlocalizedName("zss.mask_couples");
+		maskGerudo = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_gerudo");
 		maskGiants = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_giants");
 		maskGibdo = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_gibdo");
 		maskKeaton = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(8, 16).setUnlocalizedName("zss.mask_keaton");
-		maskScents = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(16, 8).setUnlocalizedName("zss.mask_scents");
-		maskSpooky = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(32, 32).setUnlocalizedName("zss.mask_spooky");
+		maskScents = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(32, 32).setUnlocalizedName("zss.mask_scents");
+		maskSkull = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(20, 10).setUnlocalizedName("zss.mask_skull");
+		maskSpooky = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(16, 8).setUnlocalizedName("zss.mask_spooky");
 		maskStone = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.invisibility.id, 90, 0)).setUnlocalizedName("zss.mask_stone");
 		maskTruth = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
 		maskDeku = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_deku");
@@ -532,11 +536,13 @@ public class ZSSItems
 		GameRegistry.registerItem(maskBlast, maskBlast.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskBunny, maskBunny.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskCouples, maskCouples.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskGerudo, maskGerudo.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskGiants, maskGiants.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskGibdo, maskGibdo.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskHawkeye, maskHawkeye.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskKeaton, maskKeaton.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskScents, maskScents.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskSkull, maskSkull.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskSpooky, maskSpooky.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskStone, maskStone.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskTruth, maskTruth.getUnlocalizedName().substring(5));

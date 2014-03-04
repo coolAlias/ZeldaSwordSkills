@@ -29,14 +29,14 @@ public class InventoryMaskTrader extends AbstractInventory {
 		new ItemStack(ZSSItems.maskCouples),
 		new ItemStack(ZSSItems.maskKeaton),
 		new ItemStack(ZSSItems.maskScents),
+		new ItemStack(ZSSItems.maskSkull),
 		new ItemStack(ZSSItems.maskSpooky),
 		new ItemStack(ZSSItems.maskTruth),
 		new ItemStack(ZSSItems.maskDeku),
 		new ItemStack(ZSSItems.maskGoron),
-		null,
+		new ItemStack(ZSSItems.maskGerudo),
 		new ItemStack(ZSSItems.maskZora),
-		new ItemStack(ZSSItems.maskFierce),
-		null
+		new ItemStack(ZSSItems.maskFierce)
 	};
 
 	public InventoryMaskTrader() {
