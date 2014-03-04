@@ -31,6 +31,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.item.ItemHookShot.ShotType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemKeyBig;
+import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.LibPotionID;
@@ -196,7 +197,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.bootsRubber, 1, 1, 1),
 			getLoot(ZSSItems.crystalSpirit, 1, 1, 1),
 			getLoot(ZSSItems.dekuLeaf, 1, 1, 1),
-			getLoot(ZSSItems.gauntletsSilver, 1, 1, 1),
+			getLoot(ZSSItems.hammer, 1, 1, 1),
 			getLoot(ZSSItems.heroBow, 1, 1, 1),
 			getLoot(ZSSItems.hookshot, ShotType.WOOD_SHOT.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.EXTENSION.ordinal(), 1, 1, 1),
@@ -204,12 +205,11 @@ public class DungeonLootLists
 			getLoot(ZSSItems.hookshotAddon, AddonType.MULTI.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.keySkeleton, 1, 1, 1),
 			getLoot(ZSSItems.magicMirror, 1, 1, 1),
-			getLoot(ZSSItems.maskBlast, 1, 1, 1),
-			getLoot(ZSSItems.maskHawkeye, 1, 1, 1),
 			getLoot(ZSSItems.masterOre, 1, 1, 1),
 			getLoot(ZSSItems.potionBlue, 1, 1, 1),
 			getLoot(ZSSItems.rocsFeather, 1, 1, 1),
-			getLoot(ZSSItems.slingshot, 1, 1, 1)
+			getLoot(ZSSItems.slingshot, 1, 1, 1),
+			getLoot(ZSSItems.treasure, Treasures.ZELDAS_LETTER.ordinal(), 1, 1, 1),
 		});
 	}
 
@@ -281,7 +281,6 @@ public class DungeonLootLists
 	private static final WeightedRandomChestContent[] oceanLoot = {
 		getLoot(Item.fishingRod, 1, 1, 2),
 		getLoot(Item.fishRaw, 1, 2, 4),
-		// TODO in 1.7: getLoot(Item.potion.itemID,1,LibPotionID.WATER_BREATHING.id), 1, 1, 3),
 		getLoot(ZSSItems.arrowBombWater, 2, 5, 3),
 		getLoot(ZSSItems.bomb,BombType.BOMB_WATER.ordinal(), 1, 2, Config.getBombWeight() * 2),
 		getLoot(ZSSItems.tunicZoraHelm, 1, 1, 1),

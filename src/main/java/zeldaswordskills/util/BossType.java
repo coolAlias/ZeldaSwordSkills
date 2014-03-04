@@ -147,6 +147,7 @@ public enum BossType
 		new ItemStack(ZSSItems.dekuLeaf),
 		new ItemStack(ZSSItems.heroBow),
 		new ItemStack(ZSSItems.hookshot, 1, ShotType.WOOD_SHOT.ordinal()),
+		new ItemStack(ZSSItems.maskHawkeye)
 	};
 	private static final ItemStack[] mountainItems = {
 		new ItemStack(ZSSItems.bootsPegasus),
@@ -155,7 +156,8 @@ public enum BossType
 		new ItemStack(ZSSItems.swordBroken, 1, ZSSItems.swordGiant.itemID)
 	};
 	private static final ItemStack[] netherItems = {
-		new ItemStack(ZSSItems.gauntletsSilver),
+		new ItemStack(ZSSItems.keySkeleton),
+		new ItemStack(ZSSItems.heroBow),
 		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.MULTI.ordinal()),
 		new ItemStack(ZSSItems.tunicGoronChest)
 	};
@@ -163,7 +165,7 @@ public enum BossType
 		new ItemStack(ZSSItems.bootsHeavy),
 		new ItemStack(ZSSItems.maskStone),
 		new ItemStack(ZSSItems.slingshot),
-		new ItemStack(ZSSItems.tunicZoraChest),
+		new ItemStack(ZSSItems.tunicZoraChest)
 	};
 	private static final ItemStack[] swampItems = {
 		new ItemStack(ZSSItems.bootsRubber),

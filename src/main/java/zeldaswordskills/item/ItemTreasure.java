@@ -17,11 +17,13 @@
 
 package zeldaswordskills.item;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -31,10 +33,12 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -60,8 +64,9 @@ public class ItemTreasure extends Item
 		POACHER_SAW("poacher_saw"),
 		POCKET_EGG("pocket_egg"),
 		PRESCRIPTION("prescription"),
-		TENTACLE("tentacle",true,16);
-		
+		TENTACLE("tentacle",true,16),
+		ZELDAS_LETTER("zeldas_letter");
+
 		public final String name;
 		private final boolean canSell;
 		private final int value;
@@ -78,7 +83,7 @@ public class ItemTreasure extends Item
 		/** The price at which the hunter will buy this treasure */
 		public int getValue() { return value; }
 	};
-	
+
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
 
@@ -89,50 +94,73 @@ public class ItemTreasure extends Item
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
-			EntityVillager entityVillager = (EntityVillager) entity;
-			ZSSVillagerInfo villager = ZSSVillagerInfo.get(entityVillager);
-			Treasures treasure = Treasures.values()[stack.getItemDamage() % Treasures.values().length];
-			MerchantRecipe trade = ZSSVillagerInfo.getTreasureTrade(treasure);
-			entityVillager.playLivingSound();
-			if (trade != null && villager.isInterested(treasure, stack)) {
-				ItemStack required = trade.getSecondItemToBuy();
-				if (required == null || PlayerUtils.consumeInventoryItems(player, trade.getSecondItemToBuy())) {
-					PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
-					player.setCurrentItemOrArmor(0, trade.getItemToSell());
-					player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.received", trade.getItemToSell().getDisplayName()));
-					if (villager.onTradedTreasure(treasure, player.getHeldItem())) {
-						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".next"));
-					} else if (treasure == Treasures.CLAIM_CHECK) {
-						MerchantRecipeHelper.addUniqueTrade(entityVillager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Item.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
+		if (!player.worldObj.isRemote) {
+			if (entity instanceof EntityVillager) {
+				EntityVillager villager = (EntityVillager) entity;
+				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
+				Treasures treasure = Treasures.values()[stack.getItemDamage() % Treasures.values().length];
+				MerchantRecipe trade = ZSSVillagerInfo.getTreasureTrade(treasure);
+				villager.playLivingSound();
+				if (treasure == Treasures.ZELDAS_LETTER) {
+					if (villager.hasCustomNameTag() && villager.getCustomNameTag().contains("Mask Salesman")) {
+						EntityMaskTrader trader = new EntityMaskTrader(villager.worldObj);
+						trader.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
+						trader.setCustomNameTag(villager.getCustomNameTag());
+						if (!trader.worldObj.isRemote) {
+							trader.worldObj.spawnEntityInWorld(trader);
+						}
+						villager.setDead();
+						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						List<String> chat = new ArrayList<String>(5);
+						for (int i = 0; i < 5; ++i) {
+							chat.add(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".success." + i));
+						}
+						new TimedChatDialogue(player, chat);
+						player.setCurrentItemOrArmor(0, null);
+					} else {
+						player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".fail"));
+					}
+				} else if (trade != null && villagerInfo.isInterested(treasure, stack)) {
+					ItemStack required = trade.getSecondItemToBuy();
+					if (required == null || PlayerUtils.consumeInventoryItems(player, trade.getSecondItemToBuy())) {
+						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						player.setCurrentItemOrArmor(0, trade.getItemToSell());
+						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));
+						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.received", trade.getItemToSell().getDisplayName()));
+						if (villagerInfo.onTradedTreasure(treasure, player.getHeldItem())) {
+							player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".next"));
+						} else if (treasure == Treasures.CLAIM_CHECK) {
+							MerchantRecipeHelper.addUniqueTrade(villager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Item.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
+						}
+					} else {
+						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : "")));
+					}
+				} else if (treasure.canSell() && villagerInfo.isHunter()) {
+					ItemStack treasureStack = new ItemStack(ZSSItems.treasure,1,treasure.ordinal());
+					int price = villagerInfo.isMonsterHunter() ? treasure.getValue() + treasure.getValue() / 2 : treasure.getValue();
+					if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(treasureStack, new ItemStack(Item.emerald, price)))) {
+						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.new", treasureStack.getDisplayName()));
+					} else {
+						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.old", treasureStack.getDisplayName()));
 					}
 				} else {
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : "")));
+					if (villagerInfo.isFinalTrade(treasure, stack)) {
+						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".wait"));
+					} else {
+						player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure.uninterested"));
+					}
 				}
-			} else if (treasure.canSell() && villager.isHunter()) {
-				ItemStack treasureStack = new ItemStack(ZSSItems.treasure,1,treasure.ordinal());
-				int price = villager.isMonsterHunter() ? treasure.getValue() + treasure.getValue() / 2 : treasure.getValue();
-				if (MerchantRecipeHelper.addToListWithCheck(entityVillager.getRecipes(player), new MerchantRecipe(treasureStack, new ItemStack(Item.emerald, price)))) {
-					PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.new", treasureStack.getDisplayName()));
-				} else {
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.old", treasureStack.getDisplayName()));
-				}
-			} else {
-				if (villager.isFinalTrade(treasure, stack)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".wait"));
-				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure.uninterested"));
-				}
+			} else if (entity instanceof INpc) {
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure.uninterested"));
 			}
 		}
 		return true;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIconFromDamage(int par1) {

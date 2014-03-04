@@ -494,7 +494,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		fairySpinOrbsReceived = compound.getInteger("fairySpinOrbsReceived");
 		int maskID = compound.getInteger("borrowedMask");
 		borrowedMask = maskID > -1 ? Item.itemsList[maskID] : null;
-		// TODO maskStage = compound.getInteger("maskStage");
+		maskStage = compound.getInteger("maskStage");
 	}
 
 	@Override

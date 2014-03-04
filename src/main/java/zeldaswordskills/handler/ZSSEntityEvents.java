@@ -26,6 +26,7 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -42,6 +43,7 @@ import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemHookShot.ShotType;
 import zeldaswordskills.item.ItemMask;
+import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.SyncEntityInfoPacket;
@@ -107,15 +109,16 @@ public class ZSSEntityEvents
 	public void onInteract(EntityInteractEvent event) {
 		boolean flag = event.target instanceof EntityVillager;
 		if (flag) {
-			EntityVillager villager = (EntityVillager) event.target;
-			if (villager.hasCustomNameTag() && villager.getCustomNameTag().contains("Mask Salesman")) {
-				EntityMaskTrader trader = new EntityMaskTrader(villager.worldObj);
-				trader.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
-				trader.setCustomNameTag(villager.getCustomNameTag());
-				if (!trader.worldObj.isRemote) {
-					trader.worldObj.spawnEntityInWorld(trader);
+			ItemStack stack = event.entityPlayer.getHeldItem();
+			if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
+				EntityVillager villager = (EntityVillager) event.target;
+				if (!event.entityPlayer.worldObj.isRemote) {
+					if (villager.hasCustomNameTag() && villager.getCustomNameTag().contains("Mask Salesman")) {
+						event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
+					} else {
+						event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".fail"));
+					}
 				}
-				villager.setDead();
 				event.setCanceled(true);
 			}
 		}
