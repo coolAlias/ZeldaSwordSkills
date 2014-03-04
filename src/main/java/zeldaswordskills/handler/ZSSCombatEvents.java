@@ -56,6 +56,7 @@ import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -218,9 +219,13 @@ public class ZSSCombatEvents
 		if (!player.capabilities.isCreativeMode) {
 			ItemStack stack = player.getHeldItem();
 			if (stack != null && stack.getItem() instanceof ISwingSpeed) {
-				int speed = ((ISwingSpeed) stack.getItem()).getSwingSpeed();
-				player.attackTime = Math.max(player.attackTime, speed);
-				if (!player.worldObj.isRemote) {
+				player.attackTime = Math.max(player.attackTime, ((ISwingSpeed) stack.getItem()).getSwingSpeed());
+				if (player.worldObj.isRemote) {
+					float exhaustion = ((ISwingSpeed) stack.getItem()).getExhaustion();
+					if (exhaustion > 0.0F) {
+						PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(exhaustion).makePacket());
+					}
+				} else {
 					PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) player);
 				}
 			}

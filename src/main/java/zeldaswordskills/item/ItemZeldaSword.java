@@ -115,6 +115,11 @@ public class ItemZeldaSword extends ItemSword implements IFairyUpgrade, ISwingSp
 		givesBrokenItem = false;
 		return this;
 	}
+	
+	@Override
+	public float getExhaustion() {
+		return 0.0F;
+	}
 
 	@Override
 	public int getSwingSpeed() {

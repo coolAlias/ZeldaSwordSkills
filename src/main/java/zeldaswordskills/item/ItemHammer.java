@@ -83,6 +83,11 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed) {}
 	
 	@Override
+	public float getExhaustion() {
+		return (weaponDamage / 16.0F);
+	}
+	
+	@Override
 	public int getSwingSpeed() {
 		return 30;
 	}
@@ -97,7 +102,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 		float f = MathHelper.sqrt_double(dx * dx + dz * dz);
 		if (f > 0.0F) {
 			double resist = 1.0D - target.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
-			double f1 = resist * (weaponDamage / 4.0F) * 0.6000000238418579D;
+			double f1 = resist * (weaponDamage / 8.0F) * 0.6000000238418579D;
 			double k = f1 / f;
 			target.addVelocity(-dx * k, 0.15D * f1, -dz * k);
 		}

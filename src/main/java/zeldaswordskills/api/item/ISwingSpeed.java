@@ -29,6 +29,12 @@ package zeldaswordskills.api.item;
  *
  */
 public interface ISwingSpeed {
+
+	/**
+	 * Optional amount of exhaustion to add each swing, regardless of whether
+	 * anything was struck.
+	 */
+	public float getExhaustion();
 	
 	/**
 	 * The time for which all left-clicks will be prevented after swinging this item;
