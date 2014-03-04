@@ -97,7 +97,7 @@ public class ZSSKeyHandler extends KeyHandler
 				} else if (kb == keys[KEY_BOMB]) {
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
 				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
-					mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("zsskey.chat.toggleat",(Config.toggleAutoTarget() ? StatCollector.translateToLocal("zsskey.chat.enable") : StatCollector.translateToLocal("zsskey.chat.disable"))));
+					mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("key.zss.toggleat",(Config.toggleAutoTarget() ? StatCollector.translateToLocal("key.zss.enable") : StatCollector.translateToLocal("key.zss.disable"))));
 				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
 					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
 				} else {

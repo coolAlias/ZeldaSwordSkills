@@ -36,6 +36,7 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
@@ -55,6 +56,7 @@ import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
@@ -66,6 +68,7 @@ import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -207,6 +210,8 @@ public class ZSSCombatEvents
 	/**
 	 * Sets the attack timer for the player if using an ISwingSpeed item
 	 * All other items default to vanilla behavior, which is spam-happy
+	 * Note that the attackTime is deliberately NOT synced between client
+	 * and server; otherwise the smash mechanics will break
 	 */
 	//@SideOnly(Side.CLIENT)
 	public static void setPlayerAttackTime(EntityPlayer player) {
@@ -215,7 +220,21 @@ public class ZSSCombatEvents
 			if (stack != null && stack.getItem() instanceof ISwingSpeed) {
 				int speed = ((ISwingSpeed) stack.getItem()).getSwingSpeed();
 				player.attackTime = Math.max(player.attackTime, speed);
+				if (!player.worldObj.isRemote) {
+					PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) player);
+				}
 			}
+		}
+	}
+	
+	/**
+	 * Using this event to set attack time on the server side only in order
+	 * to prevent left-click processing on blocks with ISmashBlock items
+	 */
+	@ForgeSubscribe(priority=EventPriority.HIGHEST, receiveCanceled=true)
+	public void onPlayerAttack(AttackEntityEvent event) {
+		if (!event.entityPlayer.worldObj.isRemote) {
+			setPlayerAttackTime(event.entityPlayer);
 		}
 	}
 

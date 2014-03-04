@@ -92,6 +92,15 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 		attacker.worldObj.playSoundAtEntity(attacker, ModInfo.SOUND_HAMMER,
 				(attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F),
 				1.0F / (attacker.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		double dx = 0.15D * (attacker.posX - target.posX);
+		double dz = 0.15D * (attacker.posZ - target.posZ);
+		float f = MathHelper.sqrt_double(dx * dx + dz * dz);
+		if (f > 0.0F) {
+			double resist = 1.0D - target.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
+			double f1 = resist * (weaponDamage / 4.0F) * 0.6000000238418579D;
+			double k = f1 / f;
+			target.addVelocity(-dx * k, 0.15D * f1, -dz * k);
+		}
 		return true;
 	}
 	

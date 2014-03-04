@@ -207,8 +207,9 @@ public class ZSSItemEvents
 		ItemStack stack = event.entityPlayer.getHeldItem();
 		switch(event.action) {
 		case LEFT_CLICK_BLOCK:
-			if (stack != null && stack.getItem() instanceof ISmashBlock) {
+			if (stack != null && stack.getItem() instanceof ISmashBlock && event.entityPlayer.attackTime == 0) {
 				if (blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
+					ZSSCombatEvents.setPlayerAttackTime(event.entityPlayer);
 					PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) event.entityPlayer);
 					event.useBlock = Result.DENY;
 				}
