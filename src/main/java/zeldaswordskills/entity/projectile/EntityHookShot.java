@@ -170,7 +170,7 @@ public class EntityHookShot extends EntityThrowable
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		if (mop.typeOfHit == EnumMovingObjectType.TILE) {
+		if (mop.typeOfHit == EnumMovingObjectType.TILE && getTarget() == null) {
 			Block block = Block.blocksList[worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ)];
 			if (!block.blockMaterial.blocksMovement()) {
 				return;
@@ -201,12 +201,16 @@ public class EntityHookShot extends EntityThrowable
 							posX, posY, posZ, rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
 				}
 			}
-		} else if (mop.entityHit != null) {
+		} else if (mop.entityHit != null && getTarget() == null) {
 			mop.entityHit.attackEntityFrom(new DamageSourceStunIndirect("hookshot", this, getThrower(), 50, 1).setCanStunPlayers().setProjectile(), 1.0F);
 			worldObj.playSoundAtEntity(mop.entityHit, "random.wood_click", 1.0F, 1.0F);
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
-			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
+			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null &&
+					player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
 				setTarget(mop.entityHit);
+				motionX = -motionX;
+				motionY = -motionY;
+				motionZ = -motionZ;
 			} else {
 				setDead();
 			}
@@ -271,10 +275,10 @@ public class EntityHookShot extends EntityThrowable
 			} else if (reachedHook && d < 1.0D) {
 				thrower.motionX = thrower.motionY = thrower.motionZ = 0.0D;
 			} else {
-				double d0 = 0.15D * (hitX - thrower.posX);
-				double d1 = 0.15D * (hitY + (double)(this.height / 3.0F) - thrower.posY);
-				double d2 = 0.15D * (hitZ - thrower.posZ);
-				TargetUtils.setEntityHeading(thrower, d0, d1, d2, 1.0F, 1.0F, true);
+				double dx = 0.15D * (hitX - thrower.posX);
+				double dy = 0.15D * (hitY + (this.height / 3.0F) - thrower.posY);
+				double dz = 0.15D * (hitZ - thrower.posZ);
+				TargetUtils.setEntityHeading(thrower, dx, dy, dz, 1.0F, 1.0F, true);
 			}
 		}
 	}
@@ -287,29 +291,26 @@ public class EntityHookShot extends EntityThrowable
 		EntityLivingBase thrower = getThrower();
 		if (target != null && thrower != null) {
 			if (target instanceof EntityLivingBase) {
-				EntityLivingBase entity = (EntityLivingBase) target;
-				if (entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS) != null && entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS).getItem() == ZSSItems.bootsHeavy) {
-					return;
-				}
-				ZSSEntityInfo.get((EntityLivingBase) entity).removeBuff(Buff.STUN);
+				ZSSEntityInfo.get((EntityLivingBase) target).removeBuff(Buff.STUN);
 			}
 			double d = target.getDistanceSq(thrower.posX, thrower.posY, thrower.posZ);
 			if (!reachedHook) {
-				reachedHook = d < 4.0D;
+				reachedHook = d < 9.0D;
 			}
-			if (reachedHook && d < 4.0D) {
+			if (reachedHook && d < 9.0D) {
 				target.motionX = target.motionY = target.motionZ = 0.0D;
+				motionX = motionY = motionZ = 0.0D;
 			} else {
-				double d0 = 0.15D * (thrower.posX - target.posX);
-				double d1 = 0.15D * (thrower.posY + (double)(this.height / 3.0F) - target.posY);
-				double d2 = 0.15D * (thrower.posZ - target.posZ);
+				double dx = 0.15D * (thrower.posX - target.posX);
+				double dy = 0.15D * (thrower.posY + (this.height / 3.0F) - target.posY);
+				double dz = 0.15D * (thrower.posZ - target.posZ);
 				if (target instanceof EntityLivingBase) {
 					double resist = 1.0D - ((EntityLivingBase) target).getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
-					d0 *= resist;
-					d1 *= resist;
-					d2 *= resist;
+					dx *= resist;
+					dy *= resist;
+					dz *= resist;
 				}
-				TargetUtils.setEntityHeading(target, d0, d1, d2, 1.0F, 1.0F, true);
+				TargetUtils.setEntityHeading(target, dx, dy, dz, 1.0F, 1.0F, true);
 			}
 		}
 	}
