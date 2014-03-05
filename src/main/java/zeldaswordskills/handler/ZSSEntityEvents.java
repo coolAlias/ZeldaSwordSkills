@@ -109,18 +109,22 @@ public class ZSSEntityEvents
 	public void onInteract(EntityInteractEvent event) {
 		boolean flag = event.target instanceof EntityVillager;
 		if (flag) {
-			ItemStack stack = event.entityPlayer.getHeldItem();
-			if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
-				EntityVillager villager = (EntityVillager) event.target;
-				if (!event.entityPlayer.worldObj.isRemote) {
-					if (villager.hasCustomNameTag() && villager.getCustomNameTag().contains("Mask Salesman")) {
+			EntityVillager villager = (EntityVillager) event.target;
+			boolean flag2 = villager.hasCustomNameTag() && villager.getCustomNameTag().contains("Mask Salesman");
+			if (!event.entityPlayer.worldObj.isRemote) {
+				ItemStack stack = event.entityPlayer.getHeldItem();
+				if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
+					if (flag2) {
 						event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
 					} else {
 						event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".fail"));
 					}
+					flag2 = true;
+				} else if (flag2) {
+					event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.closed." + event.entity.worldObj.rand.nextInt(4)));
 				}
-				event.setCanceled(true);
 			}
+			event.setCanceled(flag2);
 		}
 		if (!event.isCanceled() && (flag || event.target instanceof EntityMaskTrader)) {
 			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);

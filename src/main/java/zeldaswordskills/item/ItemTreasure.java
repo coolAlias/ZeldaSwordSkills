@@ -34,6 +34,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityMaskTrader;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
@@ -114,11 +115,15 @@ public class ItemTreasure extends Item
 						}
 						villager.setDead();
 						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
-						List<String> chat = new ArrayList<String>(5);
-						for (int i = 0; i < 5; ++i) {
-							chat.add(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".success." + i));
+						if (ZSSPlayerInfo.get(player).getCurrentMaskStage() == 0) {
+							List<String> chat = new ArrayList<String>(5);
+							for (int i = 0; i < 5; ++i) {
+								chat.add(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".success." + i));
+							}
+							new TimedChatDialogue(player, chat);
+						} else {
+							player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".already_open"));
 						}
-						new TimedChatDialogue(player, chat);
 						player.setCurrentItemOrArmor(0, null);
 					} else {
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".fail"));

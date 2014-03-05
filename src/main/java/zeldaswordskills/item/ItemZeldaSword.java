@@ -66,7 +66,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * is able to fix it.
  *
  */
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs = true)
+@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
 public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFairyUpgrade, ISwingSpeed
 {
 	/** Whether this sword requires two hands */
