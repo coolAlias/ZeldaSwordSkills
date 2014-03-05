@@ -41,7 +41,7 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(new SoundHandler());
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay(Minecraft.getMinecraft()));
 		MinecraftForge.EVENT_BUS.register(new GuiBuffBar(Minecraft.getMinecraft()));
-		TickRegistry.registerTickHandler(new TargetingTickHandler(), Side.CLIENT);
+		TickRegistry.registerTickHandler(new TargetingTickHandler(Minecraft.getMinecraft()), Side.CLIENT);
 	}
 
 	@Override

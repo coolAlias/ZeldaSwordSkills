@@ -45,13 +45,17 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class TargetingTickHandler implements ITickHandler
 {
+	private Minecraft mc;
+	
 	/** The player whose view will update */
 	private EntityPlayer player = null;
 
 	/** Target from player's currently active ILockOnTarget */
 	private Entity target = null;
 
-	public TargetingTickHandler() {}
+	public TargetingTickHandler(Minecraft mc) {
+		this.mc = mc;
+	}
 
 	@Override
 	public EnumSet<TickType> ticks() { return EnumSet.of(TickType.RENDER); }
@@ -61,7 +65,6 @@ public class TargetingTickHandler implements ITickHandler
 
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
-		Minecraft mc = Minecraft.getMinecraft();
 		player = mc.thePlayer;
 		if (player != null && ZSSPlayerInfo.get(player) != null) {
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
