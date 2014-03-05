@@ -83,7 +83,8 @@ public class TargetingTickHandler implements ITickHandler
 				}
 
 				if (skill instanceof SwordBasic && skill.isLockedOn()) {
-					if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) && isVanillaKeyPressed(mc.gameSettings.keyBindJump) && mc.thePlayer.isBlocking()) {
+					if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) &&
+							isVanillaKeyPressed(mc.gameSettings.keyBindJump) && mc.gameSettings.keyBindUseItem.pressed) {
 						skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
 						mc.gameSettings.keyBindUseItem.pressed = false;
 						ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed = false;

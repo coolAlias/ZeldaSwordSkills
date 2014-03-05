@@ -160,6 +160,7 @@ public class ZSSCombatEvents
 							event.setCanceled(true);
 						} else if (skills.hasSkill(SkillBase.dash) && player.onGround && ((Dash) skills.getPlayerSkill(SkillBase.dash)).isRMBDown()) {
 							PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
+							event.setCanceled(player.getItemInUse() == null);
 						} else {
 							performComboAttack(mc, skill);
 						}
