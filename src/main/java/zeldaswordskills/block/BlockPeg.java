@@ -73,8 +73,7 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 	
 	/** Returns appropriate sound based on block material */
 	private String getHitSound() {
-		// TODO need different sounds for metal
-		return blockMaterial == Material.wood ? ModInfo.SOUND_HIT_PEG : ModInfo.SOUND_HIT_PEG;
+		return blockMaterial == Material.iron ? ModInfo.SOUND_HIT_RUSTY : ModInfo.SOUND_HIT_PEG;
 	}
 
 	@Override

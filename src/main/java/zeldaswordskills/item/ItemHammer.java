@@ -80,7 +80,13 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	}
 	
 	@Override
-	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed) {}
+	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed) {
+		if (!wasSmashed) {
+			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_HAMMER,
+					(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		}
+	}
 	
 	@Override
 	public float getExhaustion() {
@@ -107,12 +113,6 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			target.addVelocity(-dx * k, 0.15D * f1, -dz * k);
 		}
 		return true;
-	}
-	
-	@Override
-	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-		// TODO play swing sound
-		return false;
 	}
 	
 	@Override

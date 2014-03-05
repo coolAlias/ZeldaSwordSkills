@@ -69,6 +69,7 @@ public class SoundHandler {
 		for (int i = 1; i < 4; ++i) {
 			event.manager.addSound(ModInfo.SOUND_ARMORBREAK + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_HAMMER + String.valueOf(i) + ".ogg");
+			event.manager.addSound(ModInfo.SOUND_HIT_RUSTY + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_LEAPINGBLOW + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_SLAM + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_SPINATTACK + String.valueOf(i) + ".ogg");

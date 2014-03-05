@@ -54,6 +54,7 @@ public class ModInfo {
 	public static final String SOUND_FLAME_ABSORB = ID + ":flame_absorb";
 	public static final String SOUND_HAMMER = ID + ":hammer";
 	public static final String SOUND_HIT_PEG = ID + ":hit_peg";
+	public static final String SOUND_HIT_RUSTY = ID + ":hit_rusty";
 	public static final String SOUND_LEVELUP = ID + ":levelup";
 	public static final String SOUND_LOCK_CHEST = ID + ":lock_chest";
 	public static final String SOUND_LOCK_DOOR = ID + ":lock_door";
