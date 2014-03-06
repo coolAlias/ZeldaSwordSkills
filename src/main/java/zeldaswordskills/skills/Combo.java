@@ -68,6 +68,12 @@ public class Combo
 	/** Set to true when endCombo method is called */
 	private boolean isFinished = false;
 	
+	/** Internal flag for correcting split damage such as IArmorBreak */
+	private boolean addToLast = false;
+	
+	/** Internal value for last damage */
+	private float lastDamage = 0.0F;
+	
 	/**
 	 * Constructs a new Combo with specified max combo size and time limit and sends an update
 	 * packet to the player with the new Combo instance.
@@ -133,7 +139,13 @@ public class Combo
 	 */
 	public void add(EntityPlayer player, float damage) {
 		if (getSize() < maxComboSize && (comboTimer > 0 || getSize() == 0)) {
-			damageList.add(damage);
+			if (addToLast) {
+				damageList.add(damage + lastDamage);
+				addToLast = false;
+				lastDamage = 0.0F;
+			} else {
+				damageList.add(damage);
+			}
 			comboDamage += damage;
 			PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
 			if (getSize() == maxComboSize) {
@@ -149,9 +161,13 @@ public class Combo
 	/**
 	 * Adds damage damage to combo's total, without incrementing the combo size.
 	 */
-	public void addDamageOnly(EntityPlayer player, float damage) {
+	public void addDamageOnly(EntityPlayer player, float damage, boolean flag) {
 		if (!isFinished()) {
 			comboDamage += damage;
+			addToLast = flag;
+			if (addToLast) {
+				lastDamage = damage;
+			}
 			if (getSize() == 0) {
 				comboTimer = timeLimit;
 			}

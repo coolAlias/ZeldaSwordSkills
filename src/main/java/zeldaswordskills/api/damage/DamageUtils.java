@@ -32,11 +32,29 @@ import net.minecraft.util.EntityDamageSourceIndirect;
  */
 public class DamageUtils
 {
+	public static final String
+	/** Standard armor break damage string */
+	ARMOR_BREAK = "armorBreak",
+	/** Armor break damage that is added on to the last combo hit, rather than as a normal strike */
+	IARMOR_BREAK = "iArmorBreak",
+	/** Used for damage from non-sword skills such as Slam */
+	NON_SWORD = "nonSword",
+	/** Indirect damage caused by sword skills such as Leaping Blow */
+	INDIRECT_SWORD = "indirectSword";
+	
 	/**
 	 * Returns an armor-bypassing physical DamageSource
 	 */
 	public static DamageSource causeArmorBreakDamage(Entity entity) {
-		return new DamageSourceArmorBreak("armorBreak", entity);
+		return new DamageSourceArmorBreak(ARMOR_BREAK, entity);
+	}
+	
+	/**
+	 * Returns IArmorBreak damage, distinguished from regular armor break damage
+	 * because the damage is added on to the last hit for combos
+	 */
+	public static DamageSource causeIArmorBreakDamage(Entity entity) {
+		return new DamageSourceArmorBreak(IARMOR_BREAK, entity);
 	}
 
 	public static class DamageSourceArmorBreak extends EntityDamageSource {
@@ -52,7 +70,7 @@ public class DamageUtils
 	 * @param entity - entity directly responsible for causing the damage
 	 */
 	public static DamageSource causeNonSwordDamage(Entity entity) {
-		return new EntityDamageSource("nonSword", entity);
+		return new EntityDamageSource(NON_SWORD, entity);
 	}
 	
 	/**
@@ -61,7 +79,7 @@ public class DamageUtils
 	 * @param indirect - entity indirectly responsible, typically the player
 	 */
 	public static DamageSource causeIndirectSwordDamage(Entity direct, Entity indirect) {
-		return new EntityDamageSourceIndirect("indirectSword", direct, indirect);
+		return new EntityDamageSourceIndirect(INDIRECT_SWORD, direct, indirect);
 	}
 	
 	/**

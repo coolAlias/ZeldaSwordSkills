@@ -30,6 +30,7 @@ import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.LeapingBlow;
+import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
@@ -47,7 +48,7 @@ public abstract class SkillBase
 {
 	/** Maximum number of skills potentially available */
 	public static final byte MAX_NUM_SKILLS = 16;
-	
+
 	/** Default maximum skill level */
 	public static final byte MAX_LEVEL = 5;
 
@@ -56,7 +57,7 @@ public abstract class SkillBase
 
 	/** Similar to itemsList in Item, giving easy access to any Skill */
 	private static final SkillBase[] skillsList = new SkillBase[MAX_NUM_SKILLS];
-	
+
 	/* ACTIVE SKILLS */
 	public static final SkillBase swordBasic = new SwordBasic("Basic Sword Skill", (byte) skillIndex++);
 	public static final SkillBase armorBreak = new ArmorBreak("Armor Break", (byte) skillIndex++);
@@ -67,13 +68,16 @@ public abstract class SkillBase
 	public static final SkillBase spinAttack = new SpinAttack("Spin Attack", (byte) skillIndex++);
 	public static final SkillBase superSpinAttack = new SpinAttack("Super Spin Attack", (byte) skillIndex++);
 	public static final SkillBase swordBeam = new SwordBeam("Sword Beam", (byte) skillIndex++);
-	
+
 	/* PASSIVE SKILLS */
 	public static final SkillBase bonusHeart = new BonusHeart("Bonus Heart", (byte) skillIndex++);
-	
+
+	/* NEW SKILLS */
+	public static final SkillBase mortalDraw = new MortalDraw("Mortal Draw", (byte) skillIndex++);
+
 	/** Skill's display name */
 	public final String name;
-	
+
 	/** Unlocalized name for language registry */
 	protected final String unlocalizedName;
 
@@ -94,19 +98,19 @@ public abstract class SkillBase
 		if (register) {
 			if (skillsList[id] != null) {
 				LogHelper.log(Level.WARNING,"CONFLICT @ skill " + id + " id already occupied by "
-									+ skillsList[id].name + " while adding " + name);
+						+ skillsList[id].name + " while adding " + name);
 			}
 			skillsList[id] = this;
 		}
 	}
-	
+
 	public SkillBase(SkillBase skill) {
 		this.name = skill.name;
 		this.unlocalizedName = skill.unlocalizedName;
 		this.id = skill.id;
 		this.tooltip.addAll(skill.tooltip);
 	}
-	
+
 	/** Returns the Master Skills List */
 	public static final SkillBase[] getSkillList() { return skillsList; }
 
@@ -127,22 +131,22 @@ public abstract class SkillBase
 
 	/** Returns a new instance of the skill with appropriate class type without registering it to the Skill database */
 	public abstract SkillBase newInstance();
-	
+
 	/** Returns the unlocalized name prefixed by 'skill.' and suffixed by '.name' */
 	public final String getUnlocalizedName() { return "skill.zss." + unlocalizedName + ".name"; }
-	
+
 	/** Returns whether this skill can drop as an orb randomly from mobs */
 	public boolean canDrop() { return true; }
 
 	/** Returns current skill level */
 	public final byte getLevel() { return level; }
-	
+
 	/** Returns max level this skill can reach; override to change */
 	public int getMaxLevel() { return MAX_LEVEL; }
 
 	/** Returns the translated list containing Strings for tooltip display, personalized if appropriate */
 	public final List<String> getDescription() { return (level > 0 ? getDescription() : tooltip); }
-	
+
 	/** Returns a personalized tooltip display containing info about skill at current level */
 	public abstract List<String> getDescription(EntityPlayer player);
 
@@ -151,7 +155,7 @@ public abstract class SkillBase
 
 	/** Translates and adds a single string to the skill's tooltip display */
 	protected final SkillBase addDescription(String string) { tooltip.add(StatCollector.translateToLocal("skill.zss." + string)); return this; }
-	
+
 	/** Translates and adds all entries in the provided list to the skill's tooltip display */
 	protected final SkillBase addDescription(List<String> list) { for (String s : list) { addDescription(s); } return this; }
 
@@ -162,7 +166,7 @@ public abstract class SkillBase
 
 	/** Called each time a skill's level increases; responsible for everything OTHER than increasing the skill's level: applying any bonuses, handling Xp, etc. */
 	protected abstract void levelUp(EntityPlayer player);
-	
+
 	/** Recalculates bonuses, etc. upon player respawn; Override if levelUp does things other than just calculate bonuses! */
 	public void validateSkill(EntityPlayer player) { levelUp(player); }
 
@@ -174,20 +178,20 @@ public abstract class SkillBase
 	 */
 	public final boolean grantSkill(EntityPlayer player, int targetLevel) {
 		if (targetLevel <= level || targetLevel > getMaxLevel()) { return false; }
-		
+
 		byte oldLevel = level;
 		while (level < targetLevel && canIncreaseLevel(player, level + 1)) {
 			++level;
 			levelUp(player);
 		}
-		
+
 		if (!player.worldObj.isRemote && oldLevel < level) {
 			PacketDispatcher.sendPacketToPlayer(new SyncSkillPacket(this).makePacket(), (Player) player);
 		}
-		
+
 		return oldLevel < level;
 	}
-	
+
 	/** This method should be called every update tick */
 	public void onUpdate(EntityPlayer player) {}
 
@@ -196,7 +200,7 @@ public abstract class SkillBase
 
 	/** Reads mutable data from NBT. */
 	public abstract void readFromNBT(NBTTagCompound compound);
-	
+
 	/** Returns a new instance from NBT */
 	public abstract SkillBase loadFromNBT(NBTTagCompound compound);
 

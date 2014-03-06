@@ -63,6 +63,7 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(16), PlaySoundPacket.class);
 		builder.put(Integer.valueOf(17), UnpressKeyPacket.class);
 		builder.put(Integer.valueOf(18), BorrowMaskPacket.class);
+		builder.put(Integer.valueOf(19), MortalDrawPacket.class);
 		
 		idMap = builder.build();
 	}

@@ -61,6 +61,7 @@ public class SoundHandler {
 
 		// the following have 2
 		for (int i = 1; i < 3; ++i) {
+			event.manager.addSound(ModInfo.SOUND_MORTALDRAW + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_ROCK_FALL + String.valueOf(i) + ".ogg");
 			event.manager.addSound(ModInfo.SOUND_WHIRLWIND + String.valueOf(i) + ".ogg");
 		}

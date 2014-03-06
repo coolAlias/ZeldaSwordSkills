@@ -21,6 +21,7 @@ import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.DirtyEntityAccessor;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
@@ -57,6 +58,7 @@ import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.AddExhaustionPacket;
+import zeldaswordskills.network.MortalDrawPacket;
 import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -64,10 +66,12 @@ import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
+import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
@@ -80,6 +84,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ZSSCombatEvents
 {
+	/**
+	 * FOV is determined initially in EntityPlayerSP; fov is recalculated for
+	 * the vanilla bow only in the case that zoom-enhancing gear is worn
+	 */
 	@ForgeSubscribe
 	@SideOnly(Side.CLIENT)
 	public void updateFOV(FOVUpdateEvent event) {
@@ -128,8 +136,10 @@ public class ZSSCombatEvents
 		EntityPlayer player = mc.thePlayer;
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
 		// check pre-conditions for attacking and item use (not stunned, etc.):
-		if (event.buttonstate) {
-			if (event.button == 0) {
+		if (event.buttonstate || event.button == -1) {
+			if (skills.isSkillActive(SkillBase.mortalDraw)) {
+				event.setCanceled(true);
+			} else if (event.button == 0) {
 				Item heldItem = (player.getHeldItem() != null ? player.getHeldItem().getItem() : null);
 				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN) || heldItem instanceof ItemHeldBlock ||
 						(player.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
@@ -148,7 +158,7 @@ public class ZSSCombatEvents
 						// Whether or not ArmorBreak should receive key pressed information for charging up
 						boolean canCharge = true;
 
-						if (!skills.canInteract()) { //(skills.isSkillActive(SkillBase.dash) || skills.isSkillActive(SkillBase.spinAttack) || skills.isSkillActive(SkillBase.leapingBlow))
+						if (!skills.canInteract()) {
 							if (skills.isSkillActive(SkillBase.spinAttack)) {
 								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
 							}
@@ -171,6 +181,9 @@ public class ZSSCombatEvents
 					} else { // Generic ILockOnTarget skill simply attacks; handles possibility of being ICombo
 						performComboAttack(mc, skill);
 					}
+				} else if (skills.hasSkill(SkillBase.mortalDraw) && ((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).isRMBDown() && player.getHeldItem() == null) {
+					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
+					event.setCanceled(true);
 				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
 					performComboAttack(mc, skill);
 				}
@@ -179,8 +192,10 @@ public class ZSSCombatEvents
 			} else if (event.button == 1 && Config.allowVanillaControls() && skill instanceof SwordBasic) {
 				if (skills.isSkillActive(SkillBase.spinAttack) || skills.isSkillActive(SkillBase.leapingBlow)) {
 					event.setCanceled(true);
-				} else if (skills.hasSkill(SkillBase.dash)) {
+				} else if (skills.hasSkill(SkillBase.dash) && PlayerUtils.isHoldingSword(player)) {
 					((Dash) skills.getPlayerSkill(SkillBase.dash)).keyPressed(event.buttonstate);
+				} else if (skills.hasSkill(SkillBase.mortalDraw) && player.getHeldItem() == null) {
+					((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).keyPressed(event.buttonstate);
 				}
 			} else if (event.button == -1) {
 				player.inventory.changeCurrentItem(event.dwheel);
@@ -194,21 +209,22 @@ public class ZSSCombatEvents
 	}
 
 	/**
-	 * Attacks current target if player not currently using an item and ICombo.onAttack
+	 * Attacks current target if player is not currently using an item and ICombo.onAttack
 	 * doesn't return false (i.e. doesn't miss)
 	 * @param skill must implement BOTH ILockOnTarget AND ICombo
 	 */
 	@SideOnly(Side.CLIENT)
-	private void performComboAttack(Minecraft mc, ILockOnTarget skill) {
-		if (!mc.thePlayer.isUsingItem()) {
+	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
+		if (!mc.thePlayer.isUsingItem() || ZSSPlayerInfo.get(mc.thePlayer).isSkillActive(SkillBase.mortalDraw)) {
 			mc.thePlayer.swingItem();
 			setPlayerAttackTime(mc.thePlayer);
 			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
-				mc.playerController.attackEntity(mc.thePlayer, skill.getCurrentTarget());
+				Entity entity = TargetUtils.getMouseOverEntity();
+				mc.playerController.attackEntity(mc.thePlayer, (entity != null ? entity : skill.getCurrentTarget()));
 			}
 		}
 	}
-	
+
 	/**
 	 * Sets the attack timer for the player if using an ISwingSpeed item
 	 * All other items default to vanilla behavior, which is spam-happy
@@ -232,7 +248,7 @@ public class ZSSCombatEvents
 			}
 		}
 	}
-	
+
 	/**
 	 * Using this event to set attack time on the server side only in order
 	 * to prevent left-click processing on blocks with ISmashBlock items
@@ -264,9 +280,15 @@ public class ZSSCombatEvents
 						EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
 						event.setCanceled(((Parry) skills.getPlayerSkill(SkillBase.parry)).parryAttack(player, attacker));
 					}
+				} else if (skills.isSkillActive(SkillBase.mortalDraw) && event.source.getEntity() != null) {
+					if (!player.worldObj.isRemote) {
+						if (((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, event.source.getEntity())) {
+							PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
+							event.setCanceled(true);
+						}
+					}
 				}
 			}
-
 			if (event.source.isFireDamage() && !event.isCanceled()) {
 				event.setCanceled(ItemArmorTunic.onFireDamage(event.entityLiving, event.ammount));
 			}
@@ -289,54 +311,56 @@ public class ZSSCombatEvents
 	@ForgeSubscribe(priority=EventPriority.LOWEST)
 	public void onHurt(LivingHurtEvent event) {
 		// handle armor break first, since it will post LivingHurtEvent once again
-		if (event.source.getEntity() instanceof EntityPlayer) {
+		if (event.source.getEntity() instanceof EntityPlayer && !(event.source instanceof DamageSourceArmorBreak)) {
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
-			// warning: something dirty is about to happen here...
+			ICombo combo = skills.getComboSkill();
+			if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
+				event.ammount += combo.getCombo().getSize();
+			}
 			if (skills.isSkillActive(SkillBase.armorBreak)) {
 				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).onImpact(player, event);
-			} else if (!(event.source instanceof DamageSourceArmorBreak) && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof IArmorBreak) {
+				return;
+			} else if (skills.isSkillActive(SkillBase.mortalDraw)) {
+				player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_MORTALDRAW,
+						(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+						1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).onImpact(player, event);
+			}
+			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof IArmorBreak && event.source.damageType.equals("player")) {
 				float damage = (event.ammount * ((IArmorBreak) player.getHeldItem().getItem()).getPercentArmorIgnored() * 0.01F);
 				// use dirty accessor to avoid checking / setting hurt resistant time
-				DirtyEntityAccessor.damageEntity(event.entityLiving, DamageUtils.causeArmorBreakDamage(player), damage);
+				DirtyEntityAccessor.damageEntity(event.entityLiving, DamageUtils.causeIArmorBreakDamage(player), damage);
 				event.ammount -= damage;
 			}
 		}
-		if (event.ammount <= 0.0F) {
-			return;
-		}
-		
+
 		applyDamageModifiers(event);
-		
+
 		// apply magic armor and combo onHurt last, after other resistances
 		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			if (ZSSPlayerInfo.get(player) != null) {
-				/* TODO magic armor:
+			/* TODO magic armor:
 				if (player.getCurrentArmor(ArmorIndex.WORN_CHEST) != null && player.getCurrentArmor(ArmorIndex.WORN_CHEST).getItem() == ZSSItems.tunicGoronChest) {
 					while (event.ammount > 0 && player.inventory.consumeInventoryItem(Item.emerald.itemID)) {
 						event.ammount -= 1.0F;
 					}
 					event.setCanceled(event.ammount < 0.1F);
 				}
-				 */
-				ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
-				if (combo != null && event.ammount > 0) {
-					combo.onPlayerHurt(player, event);
-				}
+			 */
+			ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
+			if (combo != null && event.ammount > 0) {
+				combo.onPlayerHurt(player, event);
 			}
 		}
-		// add combo damage last, after all resistances and weaknesses are accounted for
+		// update combo last, after all resistances and weaknesses are accounted for
 		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
-			if (ZSSPlayerInfo.get(player) != null) {
-				ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
-				if (combo != null) {
-					combo.onHurtTarget(player, event);
-				}
+			ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
+			if (combo != null) {
+				combo.onHurtTarget(player, event);
 			}
 		}
-		
 		handleSecondaryEffects(event);
 	}
 
@@ -348,12 +372,11 @@ public class ZSSCombatEvents
 				ZSSPlayerInfo.saveProxyData((EntityPlayer) event.entity);
 			}
 		}
-
 		if (event.source.getEntity() instanceof EntityPlayer && event.entity instanceof EntityMob) {
 			ItemZeldaSword.onKilledMob((EntityPlayer) event.source.getEntity(), (EntityMob) event.entity);
 		}
 	}
-	
+
 	/**
 	 * Applies all damage modifiers
 	 */
@@ -366,7 +389,7 @@ public class ZSSCombatEvents
 		applyDamageWeaknesses(event);
 		applyDamageResistances(event);
 	}
-	
+
 	/**
 	 * Modifies damage of LivingHurtEvent based on entity resistances
 	 */
@@ -388,7 +411,7 @@ public class ZSSCombatEvents
 			event.ammount *= 1.0F - (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.RESIST_MAGIC) * 0.01F);
 		}
 	}
-	
+
 	/**
 	 * Modifies damage of LivingHurtEvent based on entity weaknesses
 	 */
@@ -410,7 +433,7 @@ public class ZSSCombatEvents
 			event.ammount *= 1.0F + (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.WEAKNESS_MAGIC) * 0.01F);
 		}
 	}
-	
+
 	/**
 	 * Applies any secondary effects that may occur when a living entity is injured
 	 */

@@ -33,6 +33,7 @@ public class ModInfo {
 	// SWORD SKILL SOUNDS
 	public static final String SOUND_ARMORBREAK = ID + ":armorbreak";
 	public static final String SOUND_LEAPINGBLOW = ID + ":leapingblow";
+	public static final String SOUND_MORTALDRAW = ID + ":mortaldraw";
 	public static final String SOUND_SLAM = ID + ":slam";
 	public static final String SOUND_SPINATTACK = ID + ":spinattack";
 	public static final String SOUND_SWORDCUT = ID + ":swordcut";

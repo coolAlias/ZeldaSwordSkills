@@ -26,6 +26,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
@@ -272,7 +273,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				|| (mouseOver != null && TargetUtils.canReachTarget(player, mouseOver))));
 
 		if (!attackHit && PlayerUtils.isHoldingSword(player)) {
-			PlayerUtils.playSound(player, ModInfo.SOUND_SWORDMISS, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+			PlayerUtils.playSound(player, ModInfo.SOUND_SWORDMISS,
+					(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
 					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 			if (isComboInProgress()) {
 				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
@@ -284,20 +286,20 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
-		if (!PlayerUtils.isHoldingSword(player)) { return; }
+		if (event.source.isProjectile()) { return; }
 		if ((combo == null || combo.isFinished()) && !player.worldObj.isRemote) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit(player));
 		}
-		// AoE damage such as Leaping Blow does not count
-		if (!event.source.damageType.equals("indirectSword")) {
-			// this is called before combo size is increased, so it's effectively size minus one
-			event.ammount += combo.getSize();
-			combo.add(player, event.ammount);
+		boolean flag = event.source.damageType.equals(DamageUtils.IARMOR_BREAK);
+		if (flag || event.source.damageType.equals(DamageUtils.INDIRECT_SWORD)) {
+			combo.addDamageOnly(player, event.ammount, flag);
 		} else {
-			combo.addDamageOnly(player, event.ammount);
+			combo.add(player, event.ammount);
 		}
-		if (event.source.damageType.equals("player")) {
-			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SWORDCUT, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		if (event.source.damageType.equals("player") && PlayerUtils.isHoldingSword(player)) {
+			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SWORDCUT,
+					(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		}
 	}
 
