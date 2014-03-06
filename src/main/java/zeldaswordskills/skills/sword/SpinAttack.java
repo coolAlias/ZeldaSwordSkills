@@ -95,6 +95,7 @@ public class SpinAttack extends SkillActive
 
 	public SpinAttack(String name, byte id) {
 		super(name, id);
+		setDisablesLMB();
 		if (name.contains("Super")) { addDescription("superspinattack.desc.0"); }
 		else { addDescription("spinattack.desc.0"); }
 		addDescription("spinattack.desc.1");
@@ -140,7 +141,7 @@ public class SpinAttack extends SkillActive
 				refreshed = 0;
 				arc = 360F;
 				charge = getChargeTime();
-				superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+				superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) + 1 : 1);
 				isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
 			}
 		}
@@ -183,7 +184,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void keyPressed(KeyBinding key, EntityPlayer player) {
 		if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || key == Minecraft.getMinecraft().gameSettings.keyBindAttack) {
-			if (isActive && getSpinArc() < (360F * (superLevel + 1)) && getSpinArc() == (360F * refreshed)) {
+			if (isActive && getSpinArc() < (360F * superLevel) && getSpinArc() == (360F * refreshed)) {
 				arc += 360F;
 			}
 		} else {
@@ -210,7 +211,7 @@ public class SpinAttack extends SkillActive
 
 	/** Length of arc; decreases as level increases */
 	@SideOnly(Side.CLIENT)
-	private float getSpinArc() { return arc; }//(360 * (superLevel + 1)); }
+	private float getSpinArc() { return arc; }
 
 	/** Initiates spin attack by populating the nearby target list */
 	@SideOnly(Side.CLIENT)

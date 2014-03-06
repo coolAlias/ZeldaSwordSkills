@@ -71,6 +71,7 @@ public class Dodge extends SkillActive
 
 	public Dodge(String name, byte id) {
 		super(name, id);
+		setDisablesLMB();
 		addDescription("dodge.desc.0");
 	}
 
@@ -104,6 +105,7 @@ public class Dodge extends SkillActive
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		if (canUse(player)) {
+			ZSSPlayerInfo.get(player).setCurrentActiveSkill(this);
 			dodgeTimer = getDodgeTime();
 			if (!player.capabilities.isCreativeMode) {
 				player.addExhaustion(getExhaustion());

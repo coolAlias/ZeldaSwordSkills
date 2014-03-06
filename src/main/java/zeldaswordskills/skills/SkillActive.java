@@ -23,6 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -60,6 +61,9 @@ public abstract class SkillActive extends SkillBase
 	/** If false, the skill may not be manually activated; used for passive skills that can be triggered */
 	private boolean allowUserActivation = true;
 	
+	/** If true, further left-click interactions will be canceled while this skill is active */
+	private boolean disablesLMB = false;
+	
 	protected SkillActive(String name, byte id) {
 		super(name, id, true);
 	}
@@ -67,6 +71,7 @@ public abstract class SkillActive extends SkillBase
 	protected SkillActive(SkillActive skill) {
 		super(skill);
 		this.allowUserActivation = skill.allowUserActivation;
+		this.disablesLMB = skill.disablesLMB;
 	}
 	
 	@Override
@@ -91,7 +96,7 @@ public abstract class SkillActive extends SkillBase
 	 * @return true if skill was successfully activated
 	 */
 	public boolean activate(World world, EntityPlayer player) {
-		if (isUserActivationAllowed()) { return trigger(world, player); }
+		if (allowUserActivation) { return trigger(world, player); }
 		return false;
 	}
 	
@@ -110,11 +115,11 @@ public abstract class SkillActive extends SkillBase
 			if (!player.capabilities.isCreativeMode) {
 				player.addExhaustion(getExhaustion());
 			}
-			
 			if (!world.isRemote) {
 				PacketDispatcher.sendPacketToPlayer(new ActivateSkillPacket(this).makePacket(), (Player) player);
+			} else if (disablesLMB) { // only care about this client side
+				ZSSPlayerInfo.get(player).setCurrentActiveSkill(this);
 			}
-			
 			return true;
 		} else {
 			if (level > 0) { player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.skill.use.fail", name)); }
@@ -125,11 +130,11 @@ public abstract class SkillActive extends SkillBase
 	/** Returns true if this skill can currently be used by the player; override to add further conditions */
 	public boolean canUse(EntityPlayer player) { return (level > 0 && player.getFoodStats().getFoodLevel() > 0); }
 	
-	/** Returns true if the skill may be manually activated, as opposed to triggered only */
-	public boolean isUserActivationAllowed() { return allowUserActivation; }
+	/** Disables manual activation of this skill */
+	protected SkillActive disableUserActivation() { allowUserActivation = false; return this; }
 	
-	/** Sets whether skill can be manually activated; returns skill for convenience */
-	public SkillActive setAllowUserActivation(boolean allow) { allowUserActivation = allow; return this; }
+	/** Sets the skill to prevent left-mouse clicks while active */
+	protected SkillActive setDisablesLMB() { disablesLMB = true; return this; }
 	
 	@Override
 	protected void levelUp(EntityPlayer player) {}

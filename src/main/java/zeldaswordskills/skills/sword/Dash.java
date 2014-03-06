@@ -69,6 +69,7 @@ public class Dash extends SkillActive
 	
 	public Dash(String name, byte id) {
 		super(name, id);
+		setDisablesLMB();
 		addDescription(Arrays.asList("dash.desc.0","dash.desc.1"));
 	}
 
@@ -113,7 +114,6 @@ public class Dash extends SkillActive
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		isActive = super.activate(world, player);
-		
 		if (isActive) {
 			ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
 			if (skill != null && skill.isLockedOn()) {
@@ -122,7 +122,6 @@ public class Dash extends SkillActive
 				target = TargetUtils.acquireLookTarget(player, (int) getRange(), getRange(), true);
 			}
 		}
-		
 		return isActive();
 	}
 	

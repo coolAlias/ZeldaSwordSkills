@@ -82,6 +82,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Stores information on the player's Attributes and Passive Skills */
 	private final Map<Byte, SkillBase> skills = new HashMap<Byte, SkillBase>(SkillBase.MAX_NUM_SKILLS);
 	
+	/** ID of currently active skill that prevents left-mouse button interaction */
+	private int currentActiveSkillId = -1;
+	
 	/** Number of Super Spin Attack orbs received from the Great Fairy: used to prevent exploits */
 	private int fairySpinOrbsReceived = 0;
 	
@@ -256,13 +259,20 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			return false;
 		}
 	}
+	
+	/** Used only for skills that disable left-mouse click interactions */
+	public void setCurrentActiveSkill(SkillBase skill) {
+		currentActiveSkillId = skill.id;
+	}
 
 	/**
-	 * Returns true if no animated skills are active
+	 * Returns false any skill is active that prevents left-clicks, such as most skills with animations
 	 */
 	public boolean canInteract() {
-		return (!isSkillActive(SkillBase.armorBreak) && !isSkillActive(SkillBase.dash) && !isSkillActive(SkillBase.dodge)
-				&& !isSkillActive(SkillBase.leapingBlow) && !isSkillActive(SkillBase.parry) && !isSkillActive(SkillBase.spinAttack));
+		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkillList()[currentActiveSkillId])) {
+			currentActiveSkillId = -1;
+		}
+		return currentActiveSkillId == -1;
 	}
 
 	/** Returns the player's actual skill instance or null if the player doesn't have the skill */

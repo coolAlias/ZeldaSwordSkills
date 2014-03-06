@@ -64,6 +64,7 @@ public class LeapingBlow extends SkillActive
 
 	public LeapingBlow(String name, byte id) {
 		super(name, id);
+		setDisablesLMB();
 		addDescription(Arrays.asList("leapingblow.desc.0","leapingblow.desc.1","leapingblow.desc.2"));
 	}
 
@@ -105,6 +106,7 @@ public class LeapingBlow extends SkillActive
 	public boolean activate(World world, EntityPlayer player) {
 		// LeapingBlow is handled all client side, so super.activate is not used
 		if (canUse(player)) {
+			ZSSPlayerInfo.get(player).setCurrentActiveSkill(this);
 			isActive = true;
 			isMaster = (PlayerUtils.isHoldingMasterSword(player) && PlayerUtils.getHealthMissing(player) == 0.0F);
 		}

@@ -69,7 +69,8 @@ public class ArmorBreak extends SkillActive
 	public ArmorBreak(String name, byte id) {
 		super(name, id);
 		addDescription(Arrays.asList("armorbreak.desc.0","armorbreak.desc.1"));
-		setAllowUserActivation(false);
+		disableUserActivation();
+		setDisablesLMB();
 	}
 
 	/** Returns number of ticks required before attack will execute: 20 - level */
@@ -139,6 +140,8 @@ public class ArmorBreak extends SkillActive
 					--charge;
 				}
 				if (charge == 0) {
+					// can't use the standard disable LMB method, since Armor Break will not return true for isActive
+					player.attackTime = 4;
 					player.swingItem();
 					SwordBasic skill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
 					if (skill != null && skill.onAttack(player)) {

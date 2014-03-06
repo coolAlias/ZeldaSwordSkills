@@ -74,6 +74,7 @@ public class Parry extends SkillActive
 
 	public Parry(String name, byte id) {
 		super(name, id);
+		setDisablesLMB();
 		addDescription("parry.desc.0");
 	}
 
