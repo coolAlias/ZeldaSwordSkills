@@ -108,6 +108,9 @@ public class SpinAttack extends SkillActive
 	
 	@Override
 	public List<String> getDescription(EntityPlayer player) {
+		if (!isActive()) {
+			superLevel = ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack);
+		}
 		List<String> desc = new ArrayList<String>(tooltip);
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.2",getChargeTime()));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.3",String.format("%.1f", getRange())));
@@ -141,7 +144,7 @@ public class SpinAttack extends SkillActive
 				refreshed = 0;
 				arc = 360F;
 				charge = getChargeTime();
-				superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) + 1 : 1);
+				superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
 				isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
 			}
 		}
@@ -184,7 +187,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void keyPressed(KeyBinding key, EntityPlayer player) {
 		if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || key == Minecraft.getMinecraft().gameSettings.keyBindAttack) {
-			if (isActive && getSpinArc() < (360F * superLevel) && getSpinArc() == (360F * refreshed)) {
+			if (isActive && getSpinArc() < (360F * (superLevel + 1)) && getSpinArc() == (360F * refreshed)) {
 				arc += 360F;
 			}
 		} else {
@@ -203,11 +206,11 @@ public class SpinAttack extends SkillActive
 
 	/** Max sword range for striking targets */
 	@SideOnly(Side.CLIENT)
-	private float getRange() { return (superLevel > 0 ? 6.0F : 3.0F) + (level * 0.5F); }
+	private float getRange() { return (3.0F + ((superLevel + level) * 0.5F)); }
 
 	/** Returns the spin speed modified based on the skill's level */
 	@SideOnly(Side.CLIENT)
-	public float getSpinSpeed() { return (superLevel > 0 ? 120 : 100F); }
+	public float getSpinSpeed() { return 70 + (5 * (superLevel + level)); }
 
 	/** Length of arc; decreases as level increases */
 	@SideOnly(Side.CLIENT)
