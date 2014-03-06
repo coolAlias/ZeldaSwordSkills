@@ -52,9 +52,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Exhaustion: 0.3F minus 0.02F per level (0.2F at level 5)
  * Notes: For players of equal parry skill, chance to disarm is based solely on timing
  * 
- * TODO continue testing on Zombies and other players, if possible; works on Pigmen
- * TODO parry animation - currently just a swing of the sword
- * 
  * Using vanilla controls, Parry is activated just like the Dodge skill, requiring either a
  * single tap and release, or a double-tap based on the Config settings. Parry never requires
  * a double tap when using the arrow key.

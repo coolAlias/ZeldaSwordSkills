@@ -133,11 +133,9 @@ public class Combo
 	 */
 	public void add(EntityPlayer player, float damage) {
 		if (getSize() < maxComboSize && (comboTimer > 0 || getSize() == 0)) {
-			//++comboSize;
 			damageList.add(damage);
 			comboDamage += damage;
 			PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
-			
 			if (getSize() == maxComboSize) {
 				endCombo(player);
 			} else {
@@ -153,7 +151,6 @@ public class Combo
 	 */
 	public void addDamageOnly(EntityPlayer player, float damage) {
 		if (!isFinished()) {
-			//damageList.add(damage);
 			comboDamage += damage;
 			if (getSize() == 0) {
 				comboTimer = timeLimit;

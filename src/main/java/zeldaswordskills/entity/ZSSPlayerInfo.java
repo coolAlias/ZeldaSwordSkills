@@ -294,7 +294,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public ICombo getComboSkill() {
 		for (SkillBase skill : skills.values()) {
-			if (skill instanceof ICombo && skill instanceof SkillActive && ((SkillActive) skill).isActive()) {
+			if (skill instanceof ICombo && (((ICombo) skill).getCombo() != null ||
+					skill instanceof SkillActive && ((SkillActive) skill).isActive())) {
 				return (ICombo) skill;
 			}
 		}

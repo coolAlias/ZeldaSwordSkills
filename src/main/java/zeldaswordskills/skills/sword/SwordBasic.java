@@ -132,12 +132,10 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public boolean activate(World world, EntityPlayer player) {
 		if (super.activate(world, player)) {
 			isActive = !isActive;
-
 			if (isActive) {
 				if (!isComboInProgress()) {
 					combo = null;
 				}
-				// combo = null; // changed to not negate current combo if still in progress
 				currentTarget = TargetUtils.acquireLookTarget(player, getMaxTargetDistance(), getMaxTargetDistance(), true);
 			} else {
 				currentTarget = null;
@@ -146,34 +144,24 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 					if (packetSent) {
 						packetSent = false;
 					}
-				} else {
-					if (isComboInProgress()) {
-						//combo.endCombo(player); // disabled to allow stringing combos across multiple targeting attempts
-					}
 				}
 			}
-
 			return true;
 		}
-
 		return false;
 	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		//if (!isActive) { return; } // allows combo to be continually updated even when not active
-
 		if (isActive && player.worldObj.isRemote && !packetSent) {
-			if (Minecraft.getMinecraft().currentScreen != null  || !updateTargets(player)) {//|| !isHoldingSword(player)
+			if (Minecraft.getMinecraft().currentScreen != null  || !updateTargets(player)) {
 				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
 				packetSent = true;
 			}
 		}
-
 		if (isComboInProgress()) {
-			if (PlayerUtils.isHoldingSword(player)) {
-				combo.onUpdate(player);
-			}
+			combo.onUpdate(player);
 		}
 	}
 
@@ -205,13 +193,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		EntityLivingBase nextTarget = null;
 		double dTarget = 0;
 		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getMaxTargetDistance(), getMaxTargetDistance());
-
-		for (EntityLivingBase entity : list)
-		{
+		for (EntityLivingBase entity : list) {
 			if (entity == player) { continue; }
-
-			if (entity != currentTarget && entity != prevTarget && isTargetValid(player, entity))
-			{
+			if (entity != currentTarget && entity != prevTarget && isTargetValid(player, entity)) {
 				if (nextTarget == null) {
 					dTarget = player.getDistanceSqToEntity(entity);
 					nextTarget = entity;
@@ -224,7 +208,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				}
 			}
 		}
-
 		if (nextTarget != null) {
 			prevTarget = currentTarget;
 			currentTarget = nextTarget;
@@ -233,7 +216,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			currentTarget = prevTarget;
 			prevTarget = nextTarget;
 		}
-
 		PacketDispatcher.sendPacketToServer(new TargetIdPacket(this).makePacket());
 	}
 
@@ -249,14 +231,12 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if (!isTargetValid(player, prevTarget) || !TargetUtils.isTargetInSight(player, prevTarget)) {
 			prevTarget = null;
 		}
-
 		if (!isTargetValid(player, currentTarget)) {
 			currentTarget = null;
 			if (Config.autoTargetEnabled()) {
 				getNextTarget(player);
 			}
 		}
-
 		return isTargetValid(player, currentTarget);
 	}
 
@@ -287,11 +267,13 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@SideOnly(Side.CLIENT)
 	public boolean onAttack(EntityPlayer player) {
 		Entity mouseOver = TargetUtils.getMouseOverEntity(); // needed to prevent combo from restarting every time new entity hit
-		boolean attackHit = (isLockedOn() && ((TargetUtils.isMouseOverEntity(getCurrentTarget()) && TargetUtils.canReachTarget(player, getCurrentTarget()))
+		boolean attackHit = (isLockedOn() && ((TargetUtils.isMouseOverEntity(getCurrentTarget())
+				&& TargetUtils.canReachTarget(player, getCurrentTarget()))
 				|| (mouseOver != null && TargetUtils.canReachTarget(player, mouseOver))));
 
 		if (!attackHit && PlayerUtils.isHoldingSword(player)) {
-			PlayerUtils.playSound(player, ModInfo.SOUND_SWORDMISS, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+			PlayerUtils.playSound(player, ModInfo.SOUND_SWORDMISS, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 			if (isComboInProgress()) {
 				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
 			}
@@ -303,11 +285,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
 		if (!PlayerUtils.isHoldingSword(player)) { return; }
-		
 		if ((combo == null || combo.isFinished()) && !player.worldObj.isRemote) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit(player));
 		}
-		
 		// AoE damage such as Leaping Blow does not count
 		if (!event.source.damageType.equals("indirectSword")) {
 			// this is called before combo size is increased, so it's effectively size minus one
@@ -316,7 +296,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		} else {
 			combo.addDamageOnly(player, event.ammount);
 		}
-
 		if (event.source.damageType.equals("player")) {
 			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SWORDCUT, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		}

@@ -62,8 +62,12 @@ public class EndComboPacket extends CustomPacket
 		if (side.isServer()) {
 			if (SkillBase.getSkillList()[this.id] instanceof ICombo) {
 				ICombo skill = (ICombo) ZSSPlayerInfo.get(player).getPlayerSkill(this.id);
-				if (skill != null && skill.isComboInProgress()) {
-					skill.getCombo().endCombo(player);
+				if (skill != null) {
+					if (skill.isComboInProgress()) {
+						skill.getCombo().endCombo(player);
+					} else {
+						skill.setCombo(null);
+					}
 				}
 			} else {
 				throw new ProtocolException("Skill with id " + this.id + " is not a member of ICombo; unable to process EndComboPacket");

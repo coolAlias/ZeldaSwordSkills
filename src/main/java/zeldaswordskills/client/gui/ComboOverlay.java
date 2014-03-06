@@ -28,9 +28,12 @@ import net.minecraftforge.event.EventPriority;
 import net.minecraftforge.event.ForgeSubscribe;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.network.EndComboPacket;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
+import zeldaswordskills.skills.SkillBase;
+import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -96,6 +99,10 @@ public class ComboOverlay extends Gui
 				combo = iCombo.getCombo();
 				lastComboSize = combo.getSize();
 				displayStartTime = Minecraft.getSystemTime();
+				if (iCombo.getCombo().isFinished()) {
+					iCombo.setCombo(null);
+					PacketDispatcher.sendPacketToServer(new EndComboPacket((SkillBase) iCombo).makePacket());
+				}
 			}
 		}
 		
