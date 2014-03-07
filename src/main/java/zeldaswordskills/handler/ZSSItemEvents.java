@@ -105,11 +105,34 @@ public class ZSSItemEvents
 			int id = mob.worldObj.rand.nextInt(SkillBase.MAX_NUM_SKILLS);
 			if (SkillBase.getSkillList()[id] != null && SkillBase.getSkillList()[id].canDrop()) {
 				if (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < Config.getRandomMobDropChance()) {
-					orb = new ItemStack(ZSSItems.skillOrb, 1, id);
+					orb = (id == SkillBase.bonusHeart.id ? new ItemStack(ZSSItems.heartPiece) : new ItemStack(ZSSItems.skillOrb, 1, id));
 				}
 			}
 
 			return orb;
+		}
+	}
+
+	@ForgeSubscribe
+	public void onLivingDrops(LivingDropsEvent event) {
+		if (event.source.getEntity() instanceof EntityPlayer) {
+			EntityLivingBase mob = event.entityLiving;
+			ItemStack orb = getOrbDrop(mob);
+			if (orb != null) {
+				ItemStack helm = ((EntityPlayer) event.source.getEntity()).getCurrentArmor(ArmorIndex.WORN_HELM);
+				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
+				if (mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel))) {
+					event.drops.clear();
+					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
+					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
+				}
+			}
+			if (mob instanceof EntityCreeper && mob.worldObj.rand.nextFloat() < Config.getCreeperDropChance()) {
+				event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.bomb)));
+			}
+			if (mob.worldObj.rand.nextInt(50) == 0) {
+				event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.powerPiece)));
+			}
 		}
 	}
 
@@ -129,30 +152,6 @@ public class ZSSItemEvents
 					event.drops.add(new ItemStack(ZSSItems.masterOre));
 					event.harvester.worldObj.playSoundEffect(event.harvester.posX, event.harvester.posY, event.harvester.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
 				}
-			}
-		}
-	}
-
-	@ForgeSubscribe
-	public void onLivingDrops(LivingDropsEvent event) {
-		if (event.source.getEntity() instanceof EntityPlayer) {
-			EntityLivingBase mob = event.entityLiving;
-			ItemStack orb = getOrbDrop(mob);
-			if (orb != null) {
-				if (orb.getItemDamage() == SkillBase.bonusHeart.id) {
-					orb = new ItemStack(ZSSItems.heartPiece);
-				}
-				if (mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + (0.005F * event.lootingLevel))) {
-					event.drops.clear();
-					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
-					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
-				}
-			}
-			if (mob instanceof EntityCreeper && mob.worldObj.rand.nextFloat() < Config.getCreeperDropChance()) {
-				event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.bomb)));
-			}
-			if (mob.worldObj.rand.nextInt(50) == 0) {
-				event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.powerPiece)));
 			}
 		}
 	}
@@ -237,7 +236,7 @@ public class ZSSItemEvents
 			int meta = world.getBlockMetadata(x, y, z);
 			BlockWeight weight = (block instanceof ILiftable
 					? ((ILiftable) block).getLiftWeight(player, stack, meta)
-					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
+							: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && !block.hasTileEntity(meta)) {
@@ -281,7 +280,7 @@ public class ZSSItemEvents
 		}
 		return (smashResult == Result.ALLOW || wasDestroyed);
 	}
-	
+
 	private boolean isVanillaBlockSmashable(Block block) {
 		return block.blockMaterial == Material.glass || block.blockMaterial == Material.ice;
 	}
