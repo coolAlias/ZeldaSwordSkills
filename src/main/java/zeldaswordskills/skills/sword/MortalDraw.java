@@ -42,11 +42,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * MORTAL DRAW
  * Activation: While empty-handed and locked on, hold the block key and attack
  * Effect: The art of drawing the sword, or Battoujutsu, is a risky but deadly move, capable
- * of inflicting mortal wounds on unsuspecting opponents with a lightning-fast blade strike
+ * of inflicting deadly wounds on unsuspecting opponents with a lightning-fast blade strike
  * Exhaustion: 3.0F - (0.2 * level)
  * Damage: If successful, inflicts double damage
- * Duration: Window of attack opportunity is (level + 3) ticks
- * Notes: The first sword found in the action bar will be used for the strike; plan accordingly
+ * Duration: Window of attack opportunity is (level + 2) ticks
+ * Notes:
+ * - The first sword found in the action bar will be used for the strike; plan accordingly
+ * - There is a 1.5s cooldown between uses, representing re-sheathing of the sword
  *
  */
 public class MortalDraw extends SkillActive
@@ -54,6 +56,8 @@ public class MortalDraw extends SkillActive
 	/** Used to track when RMB is held down, since this cannot be checked reliably during LMB MouseEvent */
 	@SideOnly(Side.CLIENT)
 	private boolean isRMBDown;
+	/** Delay before skill can be used again */
+	private static final int DELAY = 30;
 	/** The time remaining during which the skill will succeed */
 	private int attackTimer;
 	/** Nearest sword slot index */
@@ -65,8 +69,8 @@ public class MortalDraw extends SkillActive
 		addDescription(Arrays.asList("mortaldraw.desc.0","mortaldraw.desc.1"));
 	}
 	
-	private int getAttackTime() { return level + 2; }
-
+	private int getAttackTime() { return level + DELAY + 2; }
+	
 	private MortalDraw(MortalDraw skill) { super(skill); }
 	
 	@Override
@@ -75,17 +79,17 @@ public class MortalDraw extends SkillActive
 	@Override
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = new ArrayList<String>(tooltip);
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.mortaldraw.desc.2", getAttackTime()));
+		desc.add(StatCollector.translateToLocalFormatted("skill.zss.mortaldraw.desc.2", (getAttackTime() - DELAY)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.mortaldraw.desc.3", String.format("%.2f", getExhaustion())));
 		return desc;
 	}
 
 	@Override
-	public boolean isActive() { return attackTimer > 0; }
+	public boolean isActive() { return attackTimer > DELAY; }
 	
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && swordSlot > -1 && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && player.getHeldItem() == null;
+		return super.canUse(player) && attackTimer == 0 && swordSlot > -1 && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && player.getHeldItem() == null;
 	}
 
 	@Override
@@ -93,7 +97,7 @@ public class MortalDraw extends SkillActive
 	
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
-		if (!isActive()) {
+		if (attackTimer == 0) {
 			swordSlot = -1;
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
@@ -111,9 +115,9 @@ public class MortalDraw extends SkillActive
 	
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (isActive()) {
+		if (attackTimer > 0) {
 			--attackTimer;
-			if (attackTimer == 0 && !player.worldObj.isRemote) {
+			if (attackTimer == DELAY && !player.worldObj.isRemote) {
 				drawSword(player, null);
 				if (player.getHeldItem() != null) {
 					PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
@@ -144,7 +148,7 @@ public class MortalDraw extends SkillActive
 	 * Call upon landing a mortal draw blow
 	 */
 	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
-		attackTimer = 0;
+		attackTimer = DELAY;
 		event.ammount *= 2.0F;
 	}
 	
