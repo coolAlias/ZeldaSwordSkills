@@ -57,4 +57,11 @@ public class BonusHeart extends SkillPassive
 		attributeinstance.applyModifier(newModifier);
 		player.heal(player.getMaxHealth());
 	}
+	
+	@Override
+	public void validateSkill(EntityPlayer player) {
+		float health = player.getHealth();
+		levelUp(player);
+		player.setHealth(health);
+	}
 }
