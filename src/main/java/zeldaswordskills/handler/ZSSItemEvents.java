@@ -303,6 +303,7 @@ public class ZSSItemEvents
 		addDrop(EntityIronGolem.class, SkillBase.armorBreak.id);
 		addDrop(EntityGhast.class, SkillBase.swordBeam.id);
 		addDrop(EntityWitch.class, SkillBase.swordBeam.id);
+		addDrop(EntityPlayer.class, SkillBase.mortalDraw.id);
 	}
 
 	// TODO move this to a world gen event handler

@@ -119,7 +119,10 @@ public class SpinAttack extends SkillActive
 	}
 	
 	@Override
-	public boolean canDrop() { return !(name.contains("Super")); }
+	public boolean canDrop() { return this == spinAttack; }
+	
+	@Override
+	public boolean isLoot() { return this == spinAttack; }
 
 	@Override
 	public boolean isActive() { return isActive; }

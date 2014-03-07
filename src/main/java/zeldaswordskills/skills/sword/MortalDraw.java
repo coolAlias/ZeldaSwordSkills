@@ -69,14 +69,14 @@ public class MortalDraw extends SkillActive
 		setDisablesLMB();
 		addDescription(Arrays.asList("mortaldraw.desc.0","mortaldraw.desc.1"));
 	}
-	
+
 	private int getAttackTime() { return level + DELAY + 2; }
-	
+
 	private MortalDraw(MortalDraw skill) { super(skill); }
-	
+
 	@Override
 	public MortalDraw newInstance() { return new MortalDraw(this); }
-	
+
 	@Override
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = new ArrayList<String>(tooltip);
@@ -86,8 +86,11 @@ public class MortalDraw extends SkillActive
 	}
 
 	@Override
+	public boolean isLoot() { return false; }
+
+	@Override
 	public boolean isActive() { return attackTimer > DELAY; }
-	
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && attackTimer == 0 && swordSlot > -1 && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && player.getHeldItem() == null;
@@ -95,7 +98,7 @@ public class MortalDraw extends SkillActive
 
 	@Override
 	protected float getExhaustion() { return 3.0F - (0.2F * level); }
-	
+
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		if (attackTimer == 0) {
@@ -113,7 +116,7 @@ public class MortalDraw extends SkillActive
 		}
 		return isActive();
 	}
-	
+
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		if (attackTimer > 0) {
@@ -126,7 +129,7 @@ public class MortalDraw extends SkillActive
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns true if the player was able to draw a sword
 	 */
@@ -144,7 +147,7 @@ public class MortalDraw extends SkillActive
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Call upon landing a mortal draw blow
 	 */
@@ -155,11 +158,11 @@ public class MortalDraw extends SkillActive
 				(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
 				1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 	}
-	
+
 	/** Call whenever RMB changes */
 	@SideOnly(Side.CLIENT)
 	public void keyPressed(boolean pressed) { isRMBDown = pressed; }
-	
+
 	@SideOnly(Side.CLIENT)
 	public boolean isRMBDown() { return isRMBDown; }
 

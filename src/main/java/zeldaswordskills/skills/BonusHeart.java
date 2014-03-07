@@ -50,6 +50,9 @@ public class BonusHeart extends SkillPassive
 	public int getMaxLevel() { return Config.getMaxBonusHearts(); }
 	
 	@Override
+	public boolean isLoot() { return false; }
+	
+	@Override
 	protected void levelUp(EntityPlayer player) {
 		AttributeInstance attributeinstance = player.getEntityAttribute(SharedMonsterAttributes.maxHealth);
 		if (attributeinstance.getModifier(bonusHeartUUID) != null) { attributeinstance.removeModifier(bonusHeartModifier); }

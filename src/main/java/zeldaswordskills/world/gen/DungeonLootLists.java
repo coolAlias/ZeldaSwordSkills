@@ -301,7 +301,7 @@ public class DungeonLootLists
 
 	private static void initSkillOrbLoot() {
 		for (int i = 0; i < SkillBase.MAX_NUM_SKILLS; ++i) {
-			if (SkillBase.getSkillList()[i] != null && i != SkillBase.bonusHeart.id && SkillBase.getSkillList()[i].canDrop()) {
+			if (SkillBase.getSkillList()[i] != null && SkillBase.getSkillList()[i].isLoot()) {
 				skillOrbLootList.add(getLoot(ZSSItems.skillOrb, i, 1, 1, Config.getLockedLootWeight()));
 			}
 		}

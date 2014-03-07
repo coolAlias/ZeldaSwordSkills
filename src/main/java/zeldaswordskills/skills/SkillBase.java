@@ -137,6 +137,9 @@ public abstract class SkillBase
 
 	/** Returns whether this skill can drop as an orb randomly from mobs */
 	public boolean canDrop() { return true; }
+	
+	/** Returns whether this skill can generate as random loot in chests */
+	public boolean isLoot() { return true; }
 
 	/** Returns current skill level */
 	public final byte getLevel() { return level; }
