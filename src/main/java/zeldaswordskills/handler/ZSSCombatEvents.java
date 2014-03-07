@@ -322,9 +322,6 @@ public class ZSSCombatEvents
 				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).onImpact(player, event);
 				return;
 			} else if (skills.isSkillActive(SkillBase.mortalDraw)) {
-				player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_MORTALDRAW,
-						(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-						1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).onImpact(player, event);
 			}
 			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof IArmorBreak && event.source.damageType.equals("player")) {

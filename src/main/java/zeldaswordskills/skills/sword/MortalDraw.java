@@ -29,6 +29,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.MortalDrawPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
@@ -150,6 +151,9 @@ public class MortalDraw extends SkillActive
 	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
 		attackTimer = DELAY;
 		event.ammount *= 2.0F;
+		player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_MORTALDRAW,
+				(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+				1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 	}
 	
 	/** Call whenever RMB changes */
