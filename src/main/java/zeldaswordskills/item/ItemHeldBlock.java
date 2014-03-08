@@ -149,6 +149,9 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 				if (world.setBlock(x, y, z, block.blockID, placedMeta, 3)) {
 					if (world.getBlockId(x, y, z) == block.blockID) {
 						block.onPostBlockPlaced(world, x, y, z, placedMeta);
+						if (block instanceof ILiftable) {
+							((ILiftable) block).onHeldBlockPlaced(world, stack, x, y, z, placedMeta);
+						}
 					}
 					return true;
 				}
@@ -223,13 +226,16 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	 * Copied from ItemBlock with added Block parameter; places the block after
 	 * all other checks have been made
 	 */
-	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, Block block, int metadata) {
-		if (!world.setBlock(x, y, z, block.blockID, metadata, 3)) {
+	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, Block block, int meta) {
+		if (!world.setBlock(x, y, z, block.blockID, meta, 3)) {
 			return false;
 		}
 		if (world.getBlockId(x, y, z) == block.blockID) {
 			block.onBlockPlacedBy(world, x, y, z, player, stack);
-			block.onPostBlockPlaced(world, x, y, z, metadata);
+			block.onPostBlockPlaced(world, x, y, z, meta);
+			if (block instanceof ILiftable) {
+				((ILiftable) block).onHeldBlockPlaced(world, stack, x, y, z, meta);
+			}
 		}
 		return true;
 	}

@@ -237,15 +237,18 @@ public class ZSSItemEvents
 		if (id > 0 && (player.canPlayerEdit(x, y, z, side, stack) || Block.blocksList[id] instanceof ILiftable)) {
 			Block block = Block.blocksList[id];
 			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (block instanceof ILiftable
-					? ((ILiftable) block).getLiftWeight(player, stack, meta)
+			boolean isLiftable = block instanceof ILiftable;
+			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta)
 							: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
-			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && !block.hasTileEntity(meta)) {
+			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (isLiftable || !block.hasTileEntity(meta))) {
 				player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, stack));
 				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
 						block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+				if (isLiftable) {
+					((ILiftable) block).onLifted(world, player, stack, x, y, z, meta);
+				}
 				world.setBlockToAir(x, y, z);
 				return true;
 			} else {
