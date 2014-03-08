@@ -23,6 +23,7 @@ import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCreeper;
@@ -62,6 +63,7 @@ import zeldaswordskills.api.item.ILiftBlock;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityKeese;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
@@ -97,14 +99,14 @@ public class ZSSItemEvents
 	 * Returns the type of skill orb that the mob will drop this time;
 	 * this is not always the same as the stack stored in dropsList
 	 */
-	private static ItemStack getOrbDrop(EntityLivingBase mob) {
+	private static ItemStack getOrbDrop(EntityLivingBase mob, boolean isBoss) {
 		if (dropsList.get(mob.getClass()) != null && mob.worldObj.rand.nextFloat() > Config.getChanceForRandomDrop()) {
 			return dropsList.get(mob.getClass());
 		} else {
 			ItemStack orb = null;
 			int id = mob.worldObj.rand.nextInt(SkillBase.MAX_NUM_SKILLS);
 			if (SkillBase.getSkillList()[id] != null && SkillBase.getSkillList()[id].canDrop()) {
-				if (dropsList.get(mob.getClass()) != null || mob.worldObj.rand.nextFloat() < Config.getRandomMobDropChance()) {
+				if (dropsList.get(mob.getClass()) != null || isBoss || mob.worldObj.rand.nextFloat() < Config.getRandomMobDropChance()) {
 					orb = (id == SkillBase.bonusHeart.id ? new ItemStack(ZSSItems.heartPiece) : new ItemStack(ZSSItems.skillOrb, 1, id));
 				}
 			}
@@ -117,12 +119,13 @@ public class ZSSItemEvents
 	public void onLivingDrops(LivingDropsEvent event) {
 		if (event.source.getEntity() instanceof EntityPlayer) {
 			EntityLivingBase mob = event.entityLiving;
-			ItemStack orb = getOrbDrop(mob);
+			boolean isBoss = mob instanceof IBossDisplayData;
+			boolean flag = ZSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).getSkillLevel(SkillBase.mortalDraw) == SkillBase.mortalDraw.getMaxLevel();
+			ItemStack orb = (isBoss && !flag ? new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.id) : getOrbDrop(mob, isBoss));
 			if (orb != null) {
 				ItemStack helm = ((EntityPlayer) event.source.getEntity()).getCurrentArmor(ArmorIndex.WORN_HELM);
 				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
-				if (mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel))) {
-					event.drops.clear();
+				if (isBoss || mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel))) {
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
 					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
 				}
@@ -302,7 +305,6 @@ public class ZSSItemEvents
 		addDrop(EntityIronGolem.class, SkillBase.armorBreak.id);
 		addDrop(EntityGhast.class, SkillBase.swordBeam.id);
 		addDrop(EntityWitch.class, SkillBase.swordBeam.id);
-		addDrop(EntityPlayer.class, SkillBase.mortalDraw.id);
 	}
 
 	// TODO move this to a world gen event handler

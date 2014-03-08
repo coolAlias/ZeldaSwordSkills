@@ -86,6 +86,9 @@ public class MortalDraw extends SkillActive
 	}
 
 	@Override
+	public boolean canDrop() { return false; }
+
+	@Override
 	public boolean isLoot() { return false; }
 
 	@Override
