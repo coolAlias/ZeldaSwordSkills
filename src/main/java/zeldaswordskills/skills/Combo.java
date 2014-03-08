@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import zeldaswordskills.network.UpdateComboPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -44,9 +44,6 @@ import cpw.mods.fml.common.network.Player;
  */
 public class Combo
 {
-	/** Descriptions to display depending on combo size */
-	private static final String[] labels = {"One hit wonder","Novice","Decent","Good","Great","Perfect","Legendary"};
-	
 	/** Used only to get correct Skill class from player during update */
 	private final byte skillId;
 	
@@ -118,8 +115,10 @@ public class Combo
 	/** Returns true if this combo is finished, i.e. no longer active */
 	public boolean isFinished() { return isFinished; }
 	
-	/** Returns current description of combo; e.g. "Great" */
-	public String getLabel() { return labels[MathHelper.clamp_int(getSize() - 1, 0, labels.length - 1)]; }
+	/** Returns translated current description of combo; e.g. "Great" */
+	public String getLabel() {
+		return StatCollector.translateToLocal("combo.label." + Math.min(getSize(), 10));
+	}
 	
 	/**
 	 * Updates combo timer and triggers combo ending if timer reaches zero

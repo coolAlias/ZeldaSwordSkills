@@ -230,6 +230,21 @@ chat.zss.treasure.zeldas_letter.success.3=Yippee!!! I can finally start selling 
 chat.zss.treasure.zeldas_letter.success.4=I wonder if anyone would be able to help me sell them...
 chat.zss.use.fail.0=That's not going to work... perhaps you should ask someone
 
+combo.combo=Combo
+combo.finished=Finished
+combo.damage=Dmg
+combo.size=Hits
+combo.label.1=One hit wonder
+combo.label.2=Novice
+combo.label.3=Decent
+combo.label.4=Good
+combo.label.5=Great
+combo.label.6=Amazing
+combo.label.7=Unstoppable
+combo.label.8=Perfect
+combo.label.9=Devastating
+combo.label.10=Legendary
+
 creativetab.zss.block=Zelda Blocks
 creativetab.zss.combat=Zelda Combat
 creativetab.zss.keys=Zelda Keys

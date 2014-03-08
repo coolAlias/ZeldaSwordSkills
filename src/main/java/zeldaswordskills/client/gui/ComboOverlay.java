@@ -22,6 +22,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.event.EventPriority;
@@ -114,9 +115,10 @@ public class ComboOverlay extends Gui
 			}
 			// TODO make display look nice
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
-				mc.fontRenderer.drawString((combo.isFinished() ? "Finished! " : "Combo: ") + combo.getLabel(), 10, 10, combo.isFinished() ? 255 : -256);
-				mc.fontRenderer.drawString("Size: " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, -1);
-				mc.fontRenderer.drawString("Dmg: " + String.format("%.1f",combo.getDamage()), 10, 30, -1);
+				String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
+				mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 255 : -256);
+				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, -1);
+				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, -1);
 				List<Float> damageList = combo.getDamageList();
 				for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
 					mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, -1);
