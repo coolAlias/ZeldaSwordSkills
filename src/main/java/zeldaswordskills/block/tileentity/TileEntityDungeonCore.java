@@ -317,7 +317,6 @@ public class TileEntityDungeonCore extends TileEntity
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			if (dungeonType != null) {
 				info.addStat(Stats.STAT_BOSS_ROOMS, 1 << dungeonType.ordinal());
-				System.out.println("Added stat for boss rooms; current total: " + info.getStat(Stats.STAT_BOSS_ROOMS));
 				player.triggerAchievement(ZSSAchievements.bossBattle);
 				// == 127 (or 255 if the End boss room ever gets made)
 				if (info.getStat(Stats.STAT_BOSS_ROOMS) == 127) {

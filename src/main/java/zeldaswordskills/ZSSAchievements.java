@@ -86,10 +86,9 @@ public class ZSSAchievements
 		bossComplete = new Achievement(id++, "boss_complete", -1, -6, ZSSItems.keySkeleton, bossBattle).setSpecial().registerAchievement();
 		skillBasic = new Achievement(id++, "skill.basic", 5, 1, new ItemStack(ZSSItems.skillOrb,1,SkillBase.swordBasic.id), null).registerAchievement();
 		skillGain = new Achievement(id++, "skill.gain", 6, -2, new ItemStack(ZSSItems.skillOrb,1,SkillBase.parry.id), skillBasic).registerAchievement();
-		skillMortal = new Achievement(id++, "skill.mortal", 7, -1, new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.id), skillGain).setSpecial().registerAchievement();
+		skillMortal = new Achievement(id++, "skill.mortal", 6, -4, new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.id), skillGain).setSpecial().registerAchievement();
 		skillMaster = new Achievement(id++, "skill.master", 8, -2, new ItemStack(ZSSItems.skillOrb,1,SkillBase.dodge.id), skillGain).registerAchievement();
 		skillMasterAll = new Achievement(id++, "skill.master_all", 10, -2, new ItemStack(ZSSItems.skillOrb,1,SkillBase.armorBreak.id), skillMaster).setSpecial().registerAchievement();
-		skillSuper = new Achievement(id++, "skill.super", 6, -4, new ItemStack(ZSSItems.skillOrb,1,SkillBase.superSpinAttack.id), skillGain).setSpecial().registerAchievement();
 		skillHeart = new Achievement(id++, "skill.heart", 5, 3, ZSSItems.smallHeart, skillBasic).registerAchievement();
 		skillHeartBar = new Achievement(id++, "skill.heartbar", 5, 5, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.id), skillHeart).registerAchievement();
 		skillHeartsGalore = new Achievement(id++, "skill.hearts_galore", 5, 7, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.id), skillHeartBar).setSpecial().registerAchievement();
@@ -109,6 +108,7 @@ public class ZSSAchievements
 		maskShop = new Achievement(id++, "mask.shop", 0, 8, ZSSItems.maskTruth, maskSold).setSpecial().registerAchievement();
 		swordPendant = new Achievement(id++, "sword.pendant", -6, -4, ZSSItems.pendant, bossBattle).registerAchievement();
 		swordMaster = new Achievement(id++, "sword.master", -8, -2, ZSSItems.swordMaster, swordPendant).registerAchievement();
+		skillSuper = new Achievement(id++, "skill.super", -8, -5, new ItemStack(ZSSItems.skillOrb,1,SkillBase.superSpinAttack.id), swordMaster).setSpecial().registerAchievement();
 		swordTempered = new Achievement(id++, "sword.tempered", -4, -1, ZSSItems.masterOre, swordMaster).registerAchievement();
 		swordEvil = new Achievement(id++, "sword.evil", -6, 0, ZSSItems.swordTempered, swordTempered).registerAchievement();
 		swordGolden = new Achievement(id++, "sword.golden", -6, 2, ZSSItems.swordGolden, swordEvil).registerAchievement();
