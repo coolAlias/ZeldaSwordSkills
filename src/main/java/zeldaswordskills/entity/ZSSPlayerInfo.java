@@ -17,8 +17,11 @@
 
 package zeldaswordskills.entity;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -53,13 +56,23 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	private final static String EXT_PROP_NAME = "ZSSPlayerInfo";
 
 	private final EntityPlayer player;
-	
+
+	public static enum Stats {
+		/** Number of secret rooms this player has opened */
+		STAT_SECRET_ROOMS,
+		/** Bit storage for each type of boss room opened */
+		STAT_BOSS_ROOMS
+	};
+
+	/** ZSS player statistics */
+	private final Map<Stats, Integer> playerStats = new EnumMap<Stats, Integer>(Stats.class);
+
 	/** Set to true when the player receives the bonus starting gear */
 	private byte receivedGear = 0;
-	
+
 	/** Flags for worn gear and other things; none of these should be saved */
 	private byte flags = 0;
-	
+
 	public static final byte
 	/** Flag for whether the player is wearing special boots */
 	IS_WEARING_BOOTS = 1,
@@ -69,36 +82,57 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	IS_NAYRU_ACTIVE = 4,
 	/** Flag for whether the player's lateral movement should be increased while in the air */
 	MOBILITY = 8;
-	
+
 	/** Last equipped special boots */
 	private int lastBootsID = -1;
-	
+
 	/** Last equipped special helm (used for masks) */
 	private int lastHelmID = -1;
-	
+
 	/** Current amount of time hovered */
 	public int hoverTime = 0;
 
 	/** Stores information on the player's Attributes and Passive Skills */
 	private final Map<Byte, SkillBase> skills = new HashMap<Byte, SkillBase>(SkillBase.MAX_NUM_SKILLS);
-	
+
 	/** ID of currently active skill that prevents left-mouse button interaction */
 	private int currentActiveSkillId = -1;
-	
+
 	/** Number of Super Spin Attack orbs received from the Great Fairy: used to prevent exploits */
 	private int fairySpinOrbsReceived = 0;
-	
+
 	/** The last mask borrowed from the Happy Mask Salesman */
 	private Item borrowedMask = null;
-	
+
 	/** Current stage in the Mask trading sequence */
 	private int maskStage = 0;
 
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
+		initStats();
 		initSkills();
 	}
-	
+
+	private void initStats() {
+		for (Stats stat : Stats.values()) {
+			playerStats.put(stat, 0);
+		}
+	}
+
+	/** Gets the player's current stat value */
+	public int getStat(Stats stat) {
+		return playerStats.get(stat);
+	}
+
+	/** Adds the value to the player's stats */
+	public void addStat(Stats stat, int value) {
+		int i = playerStats.remove(stat);
+		switch(stat) {
+		case STAT_BOSS_ROOMS: playerStats.put(stat, i | value); break;
+		default: playerStats.put(stat, i + value);
+		}
+	}
+
 	/**
 	 * Adds all skills to the map at level zero
 	 */
@@ -109,7 +143,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			}
 		}
 	}
-	
+
 	/**
 	 * Resets all data related to skills
 	 */
@@ -129,7 +163,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			receivedGear |= 1;
 		}
 	}
-	
+
 	/**
 	 * Sets a bitflag to true or false; see flags for valid flag ids
 	 */
@@ -140,15 +174,15 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			flags &= ~flag;
 		}
 	}
-	
+
 	/** Returns true if the specified flag is set */
 	public boolean getFlag(byte flag) {
 		return (flags & flag) == flag;
 	}
-	
+
 	/** Activates Nayru's Love effect; should call on both client and server */
 	public void activateNayru() { setFlag(IS_NAYRU_ACTIVE, true); }
-	
+
 	/** Returns whether the player is currently under the effects of Nayru's Love */
 	public boolean isNayruActive() { return getFlag(IS_NAYRU_ACTIVE); }
 
@@ -179,7 +213,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			ItemArmorBoots.applyAttributeModifiers(player.getCurrentArmor(ArmorIndex.WORN_BOOTS), player);
 		}
 	}
-	
+
 	/**
 	 * Returns true if this player meets the skill requirements to receive a Super
 	 * Spin Attack orb from the Great Fairy
@@ -189,25 +223,25 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 				getSkillLevel(SkillBase.superSpinAttack) >= fairySpinOrbsReceived &&
 				getSkillLevel(SkillBase.bonusHeart) >= (fairySpinOrbsReceived * Config.getMaxBonusHearts() / 5));
 	}
-	
+
 	/** Returns whether the player has already received all 5 Super Spin Attack orbs */
 	public boolean hasReceivedAllOrbs() { return (fairySpinOrbsReceived == SkillBase.MAX_LEVEL); }
-	
+
 	/** Increments the number of Super Spin Attack orbs received, returning true if it's the last one */
 	public boolean receiveFairyOrb() {
 		return (++fairySpinOrbsReceived == SkillBase.MAX_LEVEL);
 	}
-	
+
 	/** Returns the last mask borrowed, or null if no mask has been borrowed */
 	public Item getBorrowedMask() {
 		return borrowedMask;
 	}
-	
+
 	/** Sets the mask that the player has borrowed */
 	public void setBorrowedMask(Item item) {
 		borrowedMask = item;
 	}
-	
+
 	/**
 	 * The player's current progress along the mask quest (% 3 gives stage):
 	 * 0 - can get next mask, 1 - need to sell mask, 2 - need to pay for mask
@@ -215,7 +249,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public int getCurrentMaskStage() {
 		return maskStage;
 	}
-	
+
 	/** Increments the mask quest stage by one */
 	public void completeCurrentMaskStage() {
 		++maskStage;
@@ -259,7 +293,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			return false;
 		}
 	}
-	
+
 	/** Used only for skills that disable left-mouse click interactions */
 	public void setCurrentActiveSkill(SkillBase skill) {
 		currentActiveSkillId = skill.id;
@@ -403,7 +437,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			}
 		}
 	}
-	
+
 	/**
 	 * Updates effects of Nayru's Love
 	 */
@@ -483,6 +517,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			taglist.appendTag(skillTag);
 		}
 		compound.setTag("ZeldaSwordSkills", taglist);
+		compound.setIntArray("zssStats", ArrayUtils.toPrimitive(playerStats.values().toArray(new Integer[playerStats.size()])));
 		compound.setByte("ZSSGearReceived", receivedGear);
 		compound.setInteger("lastBoots", lastBootsID);
 		compound.setInteger("lastHelm", lastHelmID);
@@ -498,6 +533,11 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			NBTTagCompound skill = (NBTTagCompound) taglist.tagAt(i);
 			byte id = skill.getByte("id");
 			skills.put(id, SkillBase.getSkillList()[id].loadFromNBT(skill));
+		}
+		int[] stats = compound.getIntArray("zssStats");
+		for (int i = 0; i < stats.length; ++i) {
+			playerStats.put(Stats.values()[i], stats[i]);
+			System.out.println("Loading stat " + i + " from NBT with value " + stats[i]);
 		}
 		receivedGear = compound.getByte("ZSSGearReceived");
 		lastBootsID = compound.getInteger("lastBoots");

@@ -52,6 +52,7 @@ import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
@@ -118,16 +119,18 @@ public class ZSSItemEvents
 	@ForgeSubscribe
 	public void onLivingDrops(LivingDropsEvent event) {
 		if (event.source.getEntity() instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.source.getEntity();
 			EntityLivingBase mob = event.entityLiving;
 			boolean isBoss = mob instanceof IBossDisplayData;
-			boolean flag = ZSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).getSkillLevel(SkillBase.mortalDraw) == SkillBase.mortalDraw.getMaxLevel();
+			boolean flag = ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.mortalDraw) == SkillBase.mortalDraw.getMaxLevel();
 			ItemStack orb = (isBoss && !flag ? new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.id) : getOrbDrop(mob, isBoss));
 			if (orb != null) {
-				ItemStack helm = ((EntityPlayer) event.source.getEntity()).getCurrentArmor(ArmorIndex.WORN_HELM);
+				ItemStack helm = (player).getCurrentArmor(ArmorIndex.WORN_HELM);
 				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
 				if (isBoss || mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel))) {
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
 					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
+					player.triggerAchievement(ZSSAchievements.skillGain);
 				}
 			}
 			if (mob instanceof EntityCreeper && mob.worldObj.rand.nextFloat() < Config.getCreeperDropChance()) {

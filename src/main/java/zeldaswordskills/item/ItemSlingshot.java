@@ -39,6 +39,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -257,10 +258,12 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 		ItemStack stack = item.getEntityItem();
 		if (stack.getItem() == ZSSItems.slingshot && core.consumeRupees(Config.getSlingshotCostOne())) {
 			item.setDead();
+			player.triggerAchievement(ZSSAchievements.fairySlingshot);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.scattershot), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
 		} else if (stack.getItem() == ZSSItems.scattershot && core.consumeRupees(Config.getSlingshotCostTwo())) {
 			item.setDead();
+			player.triggerAchievement(ZSSAchievements.fairySupershot);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.supershot), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
@@ -317,7 +320,11 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 			}
 		}
 		if (playSound) {
+			player.triggerAchievement(ZSSAchievements.fairyEnchantment);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_BLESSING, 1.0F, 1.0F);
+		} else {
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}
 }

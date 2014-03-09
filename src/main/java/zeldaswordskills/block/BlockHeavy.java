@@ -24,6 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.event.Event.Result;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
@@ -63,7 +64,11 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 	
 	@Override
 	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta) {
-		
+		if (this == ZSSBlocks.barrierHeavy) {
+			player.triggerAchievement(ZSSAchievements.heavyLifter);
+		} else if (this == ZSSBlocks.barrierLight) {
+			player.triggerAchievement(ZSSAchievements.movingBlocks);
+		}
 	}
 	
 	@Override

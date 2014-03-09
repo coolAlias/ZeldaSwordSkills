@@ -44,6 +44,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -440,8 +441,15 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom
 		ItemStack stack = item.getEntityItem();
 		int n = getLevel(stack);
 		if (n < 3 && core.consumeRupees((n + 1) * Config.getHeroBowUpgradeCost())) {
-			setLevel(stack, n + 1);
+			setLevel(stack, ++n);
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			player.triggerAchievement(ZSSAchievements.fairyBow);
+			if (n == 3) {
+				player.triggerAchievement(ZSSAchievements.fairyBowMax);
+			}
+		} else {
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}
 

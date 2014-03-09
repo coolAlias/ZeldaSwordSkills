@@ -32,6 +32,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -115,6 +116,7 @@ public class ItemTreasure extends Item
 						}
 						villager.setDead();
 						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						player.triggerAchievement(ZSSAchievements.maskTrader);
 						if (ZSSPlayerInfo.get(player).getCurrentMaskStage() == 0) {
 							List<String> chat = new ArrayList<String>(5);
 							for (int i = 0; i < 5; ++i) {
@@ -135,9 +137,13 @@ public class ItemTreasure extends Item
 						player.setCurrentItemOrArmor(0, trade.getItemToSell());
 						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));
 						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.received", trade.getItemToSell().getDisplayName()));
+						if (treasure == Treasures.TENTACLE) {
+							player.triggerAchievement(ZSSAchievements.treasureFirst);
+						}
 						if (villagerInfo.onTradedTreasure(treasure, player.getHeldItem())) {
 							player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".next"));
 						} else if (treasure == Treasures.CLAIM_CHECK) {
+							player.triggerAchievement(ZSSAchievements.treasureBiggoron);
 							MerchantRecipeHelper.addUniqueTrade(villager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Item.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
 						}
 					} else {

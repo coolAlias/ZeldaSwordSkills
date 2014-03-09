@@ -30,6 +30,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.event.Event.Result;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.item.ISmashBlock;
@@ -90,6 +91,13 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 			if (impact > 0) {
 				boolean flag = meta < MAX_STATE;
 				meta += impact;
+				if (meta >= MAX_STATE) {
+					if (this == ZSSBlocks.pegRusty) {
+						player.triggerAchievement(ZSSAchievements.hardHitter);
+					} else if (this == ZSSBlocks.pegWooden) {
+						player.triggerAchievement(ZSSAchievements.hammerTime);
+					}
+				}
 				if (meta > MAX_STATE && impact > 1) {
 					flag = true;
 					world.destroyBlock(x, y, z, false);

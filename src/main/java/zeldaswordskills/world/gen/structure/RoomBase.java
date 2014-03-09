@@ -107,7 +107,7 @@ public abstract class RoomBase
 		int z = StructureGenUtils.getZWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te instanceof TileEntityPedestal) {
-			((TileEntityPedestal) te).setSword(new ItemStack(ZSSItems.swordMaster));
+			((TileEntityPedestal) te).setSword(new ItemStack(ZSSItems.swordMaster), null);
 		}
 	}
 	

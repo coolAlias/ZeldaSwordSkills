@@ -25,6 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.Packet132TileEntityData;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
@@ -89,7 +90,7 @@ public class TileEntityPedestal extends TileEntityInventory
 	/**
 	 * Places a copy of the sword into the pedestal, returning true if successful
 	 */
-	public boolean setSword(ItemStack stack) {
+	public boolean setSword(ItemStack stack, EntityPlayer player) {
 		if (sword == null && stack != null && stack.getItem() instanceof ItemSword) {
 			if (stack.getItem() == ZSSItems.swordGolden && stack.hasTagCompound() &&
 					stack.getTagCompound().hasKey("SacredFlames") &&
@@ -102,6 +103,9 @@ public class TileEntityPedestal extends TileEntityInventory
 				master.addEnchantment(Enchantment.fireAspect, 2);
 				master.addEnchantment(Enchantment.looting, 3);
 				sword = master;
+				if (player != null) {
+					player.triggerAchievement(ZSSAchievements.swordTrue);
+				}
 			} else {
 				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_SWORDSTRIKE, 1.0F, 1.0F);
 				sword = stack.copy();
@@ -153,6 +157,10 @@ public class TileEntityPedestal extends TileEntityInventory
 			if (playSound) {
 				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_MASTER_SWORD, 1.0F, 1.0F);
 				retrieveSword();
+				EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 8.0D);
+				if (player != null) {
+					player.triggerAchievement(ZSSAchievements.swordMaster);
+				}
 			} else {
 				playSound = true;
 			}

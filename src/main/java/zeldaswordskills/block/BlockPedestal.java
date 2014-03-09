@@ -120,7 +120,7 @@ public class BlockPedestal extends BlockContainer
 			return false;
 		}
 		if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
-			te.setSword(player.getHeldItem());
+			te.setSword(player.getHeldItem(), player);
 			player.setCurrentItemOrArmor(0, null);
 		} else if (world.getBlockMetadata(x, y, z) == 0x8 && te.hasSword()) {
 			te.retrieveSword();

@@ -76,6 +76,7 @@ public class ZSSMain
 		ZSSBlocks.load();
 		ZSSItems.load();
 		ZSSEntities.load();
+		ZSSAchievements.init();
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 	}
 	

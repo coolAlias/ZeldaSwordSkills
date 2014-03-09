@@ -44,6 +44,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemMask;
@@ -209,6 +210,7 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.3")));
 							new TimedAddItem(player, new ItemStack(ZSSItems.maskTruth), 4000);
 							info.setBorrowedMask(ZSSItems.maskTruth);
+							player.triggerAchievement(ZSSAchievements.maskShop);
 						} else {
 							player.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.sold"));
 						}

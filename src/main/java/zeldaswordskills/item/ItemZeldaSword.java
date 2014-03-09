@@ -40,6 +40,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.block.BlockSacredFlame;
@@ -214,6 +215,10 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 			WorldUtils.spawnItemWithRandom(core.worldObj, new ItemStack(ZSSItems.swordGolden), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_BLESSING, 1.0F, 1.0F);
 			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sword.blessing"));
+			player.triggerAchievement(ZSSAchievements.swordGolden);
+		} else {
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}
 
@@ -234,6 +239,9 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 			if (!tag.hasKey("zssHitCount")) { tag.setInteger("zssHitCount", 0); }
 			tag.setInteger("zssHitCount", tag.getInteger("zssHitCount") + 1);
 			stack.setTagCompound(tag);
+			if (tag.getInteger("zssHitCount") > Config.getRequiredKills()) {
+				player.triggerAchievement(ZSSAchievements.swordEvil);
+			}
 		}
 	}
 
@@ -254,6 +262,7 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 				stack.setTagCompound(tag);
 				world.playSoundAtEntity(player, ModInfo.SOUND_FLAME_ABSORB, 1.0F, 1.0F);
 				player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.sword.sacred_flame.new", StatCollector.translateToLocal("misc.zss.sacred_flame.name." + meta)));
+				player.triggerAchievement(ZSSAchievements.swordFlame);
 				addSacredFlameEnchantments(stack, meta);
 				return true;
 			} else {

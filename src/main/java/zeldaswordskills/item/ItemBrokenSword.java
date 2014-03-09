@@ -33,6 +33,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.ModInfo;
@@ -71,6 +72,7 @@ public class ItemBrokenSword extends Item
 					MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 5), new ItemStack(stack.getItemDamage(), 1, 0)));
 				} else if (villager.hasCustomNameTag() && villager.getCustomNameTag().equals("Medigoron")) {
 					if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart) > 9) {
+						player.triggerAchievement(ZSSAchievements.swordBroken);
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.1"));
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.2"));
 						MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 5), new ItemStack(stack.getItemDamage(), 1, 0)));

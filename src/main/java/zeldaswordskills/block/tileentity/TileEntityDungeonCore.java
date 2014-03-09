@@ -45,6 +45,7 @@ import net.minecraft.network.packet.Packet132TileEntityData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
@@ -55,6 +56,8 @@ import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.EntityFairy;
 import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerInfo.Stats;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
@@ -282,6 +285,7 @@ public class TileEntityDungeonCore extends TileEntity
 			for (EntityItem item : list) {
 				ItemStack stack = item.getEntityItem();
 				if (stack.getItem() == Item.emerald) {
+					player.triggerAchievement(ZSSAchievements.fairyEmerald);
 					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, "random.orb", 1.0F, 1.0F);
 					rupees += stack.stackSize;
 					item.setDead();
@@ -307,6 +311,29 @@ public class TileEntityDungeonCore extends TileEntity
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, (meta & ~0x8), 2);
 		} else {
 			worldObj.setBlock(xCoord, yCoord, zCoord, BlockSecretStone.getIdFromMeta(meta), 0, 2);
+		}
+		EntityPlayer player = worldObj.getClosestPlayer((double) xCoord + 0.5D, (double) yCoord + 2.5D, (double) zCoord + 0.5D, 16.0D);
+		if (player != null) {
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+			if (dungeonType != null) {
+				info.addStat(Stats.STAT_BOSS_ROOMS, 1 << dungeonType.ordinal());
+				System.out.println("Added stat for boss rooms; current total: " + info.getStat(Stats.STAT_BOSS_ROOMS));
+				player.triggerAchievement(ZSSAchievements.bossBattle);
+				// == 127 (or 255 if the End boss room ever gets made)
+				if (info.getStat(Stats.STAT_BOSS_ROOMS) == 127) {
+					player.triggerAchievement(ZSSAchievements.bossComplete);
+				}
+				if (dungeonType == BossType.DESERT || dungeonType == BossType.OCEAN || dungeonType == BossType.HELL) {
+					player.triggerAchievement(ZSSAchievements.swordPendant);
+				}
+			} else {
+				info.addStat(Stats.STAT_SECRET_ROOMS, 1);
+				System.out.println("Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
+				player.triggerAchievement(ZSSAchievements.bombsAway);
+				if (info.getStat(Stats.STAT_SECRET_ROOMS) > 49) {
+					player.triggerAchievement(ZSSAchievements.bombJunkie);
+				}
+			}
 		}
 	}
 	

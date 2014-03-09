@@ -34,6 +34,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -62,12 +63,34 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!player.worldObj.isRemote) {
 			int id = stack.getItemDamage();
-			if (id < SkillBase.MAX_NUM_SKILLS && SkillBase.getSkillList()[id] != null) {
-				if (ZSSPlayerInfo.get(player).grantSkill(SkillBase.getSkillList()[id])) {
+			SkillBase skill = (id < SkillBase.MAX_NUM_SKILLS ? SkillBase.getSkillList()[id] : null);
+			if (skill != null) {
+				ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+				if (skills.grantSkill(skill)) {
 					world.playSoundAtEntity(player, ModInfo.SOUND_LEVELUP, 1.0F, 1.0F);
 					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.skill.levelup",
-							StatCollector.translateToLocal(SkillBase.getSkillList()[id].getUnlocalizedName()),
-							ZSSPlayerInfo.get(player).getSkillLevel((byte) id)));
+							StatCollector.translateToLocal(skill.getUnlocalizedName()), skills.getSkillLevel(skill)));
+					if (skill == SkillBase.bonusHeart) {
+						player.triggerAchievement(ZSSAchievements.skillHeart);
+						if (skills.getSkillLevel(skill) > 19) {
+							player.triggerAchievement(ZSSAchievements.skillHeartsGalore);
+						} else if (skills.getSkillLevel(skill) > 9) {
+							player.triggerAchievement(ZSSAchievements.skillHeartBar);
+						}
+					} else if (skill == SkillBase.swordBasic && skills.getSkillLevel(skill) == 1) {
+						player.triggerAchievement(ZSSAchievements.skillBasic);
+					} else if (skills.getSkillLevel(skill) == skill.getMaxLevel()) {
+						player.triggerAchievement(ZSSAchievements.skillMaster);
+						boolean flag = true;
+						for (int i = 0; flag && i < SkillBase.MAX_NUM_SKILLS; ++i) {
+							if (SkillBase.getSkillList()[i] != null && i != SkillBase.bonusHeart.id) {
+								flag = skills.getSkillLevel(SkillBase.getSkillList()[i]) == SkillBase.getSkillList()[i].getMaxLevel();
+							}
+						}
+						if (flag) {
+							player.triggerAchievement(ZSSAchievements.skillMasterAll);
+						}
+					}
 					if (!player.capabilities.isCreativeMode) {
 						--stack.stackSize;
 					}
@@ -166,6 +189,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 					core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_SKILL, 1.0F, 1.0F);
 					WorldUtils.spawnItemWithRandom(core.worldObj, new ItemStack(ZSSItems.skillOrb,1,SkillBase.superSpinAttack.id), core.xCoord, core.yCoord + 2, core.zCoord);
 					item.setDead();
+					player.triggerAchievement(ZSSAchievements.skillSuper);
 				} else {
 					core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));

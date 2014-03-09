@@ -37,6 +37,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IZoomHelper;
@@ -200,6 +201,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 				player.setCurrentItemOrArmor(0, new ItemStack(Item.emerald, getSellPrice()));
 				PlayerUtils.playSound(player, ModInfo.SOUND_CASH_SALE, 1.0F, 1.0F);
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.mask.sold." + player.worldObj.rand.nextInt(4)));
+				player.triggerAchievement(ZSSAchievements.maskSold);
 			}
 		}
 		return true;

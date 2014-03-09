@@ -45,6 +45,8 @@ public class Config
 	private static boolean alwaysPickupHearts;
 	/** Boss health multiplier */
 	private static int bossHealthFactor;
+	/** [Achievements] Starting achievement ID */
+	private static int achievementID;
 	/** [Ceramic Jars] Allow ceramic jars to generate in water */
 	private static boolean allowJarsInWater;
 	/** [Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk */
@@ -224,6 +226,7 @@ public class Config
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
 		bossHealthFactor = config.get("General", "Boss health multiplier, as a percent increase per difficulty level [100-500]", 250).getInt();
+		achievementID = config.get("General", "[Achievements] Starting achievement ID", 50).getInt();
 		allowJarsInWater = config.get("General", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
 		jarGenChance = config.get("General", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt();
 		jarsPerCluster = config.get("General", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt();
@@ -326,6 +329,7 @@ public class Config
 	public static boolean canSmashVanilla() { return enableVanillaSmash; }
 	public static boolean alwaysPickupHearts() { return alwaysPickupHearts; }
 	public static float getBossHealthFactor() { return MathHelper.clamp_float(bossHealthFactor * 0.01F, 1F, 5F); }
+	public static int getStartingAchievementID() { return achievementID; }
 	public static boolean genJarsInWater() { return allowJarsInWater; }
 	public static float getJarGenChance() { return MathHelper.clamp_float(jarGenChance * 0.01F, 0F, 1F); }
 	public static int getJarsPerCluster() { return MathHelper.clamp_int(jarsPerCluster, 2, 20); }

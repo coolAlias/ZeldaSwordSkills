@@ -23,6 +23,7 @@ import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.network.UpdateComboPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -117,7 +118,7 @@ public class Combo
 	
 	/** Returns translated current description of combo; e.g. "Great" */
 	public String getLabel() {
-		return StatCollector.translateToLocal("combo.label." + Math.min(getSize(), 10));
+		return StatCollector.translateToLocal("combo.label." + getSize());
 	}
 	
 	/**
@@ -144,6 +145,11 @@ public class Combo
 				lastDamage = 0.0F;
 			} else {
 				damageList.add(damage);
+			}
+			switch(damageList.size()) {
+			case 3: player.triggerAchievement(ZSSAchievements.comboBasic); break;
+			case 8: player.triggerAchievement(ZSSAchievements.comboPerfect); break;
+			case 12: player.triggerAchievement(ZSSAchievements.comboLegend); break;
 			}
 			comboDamage += damage;
 			PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);

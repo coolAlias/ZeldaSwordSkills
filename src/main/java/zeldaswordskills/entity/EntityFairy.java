@@ -30,6 +30,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.TargetUtils;
@@ -122,6 +123,7 @@ public class EntityFairy extends EntityAmbientCreature
 	protected boolean interact(EntityPlayer player) {
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.itemID == Item.glassBottle.itemID) {
+			player.triggerAchievement(ZSSAchievements.fairyCatcher);
 			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.fairyBottle));
 			if (stack.stackSize > 1) {
 				stack.splitStack(1);

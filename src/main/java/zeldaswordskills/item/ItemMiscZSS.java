@@ -31,6 +31,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
@@ -119,6 +120,7 @@ public class ItemMiscZSS extends Item
 			if (player.inventory.hasItem(ZSSItems.swordMaster.itemID)) {
 				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.new"));
+					player.triggerAchievement(ZSSAchievements.swordTempered);
 				} else {
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.old"));
 				}
