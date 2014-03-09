@@ -105,8 +105,8 @@ public class ItemBrokenSword extends Item
 
 	@Override
 	public String getItemDisplayName(ItemStack stack) {
-		String sword = StatCollector.translateToLocal(Item.itemsList[stack.getItemDamage()].getUnlocalizedName() + ".name");
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + sword;
+		String sword = stack.getItemDamage() > 0 ? (" " + StatCollector.translateToLocal(Item.itemsList[stack.getItemDamage()].getUnlocalizedName() + ".name")) : "";
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + sword;
 	}
 
 	@Override

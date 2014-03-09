@@ -537,7 +537,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		int[] stats = compound.getIntArray("zssStats");
 		for (int i = 0; i < stats.length; ++i) {
 			playerStats.put(Stats.values()[i], stats[i]);
-			System.out.println("Loading stat " + i + " from NBT with value " + stats[i]);
 		}
 		receivedGear = compound.getByte("ZSSGearReceived");
 		lastBootsID = compound.getInteger("lastBoots");
