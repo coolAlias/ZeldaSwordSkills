@@ -42,6 +42,7 @@ public class ZSSAchievements
 	skillBasic,
 	skillSuper,
 	skillGain,
+	skillMortal,
 	skillMaster,
 	skillMasterAll,
 	skillHeart,
@@ -85,8 +86,9 @@ public class ZSSAchievements
 		bossComplete = new Achievement(id++, "boss_complete", -1, -6, ZSSItems.keySkeleton, bossBattle).setSpecial().registerAchievement();
 		skillBasic = new Achievement(id++, "skill.basic", 5, 1, new ItemStack(ZSSItems.skillOrb,1,SkillBase.swordBasic.id), null).registerAchievement();
 		skillGain = new Achievement(id++, "skill.gain", 6, -2, new ItemStack(ZSSItems.skillOrb,1,SkillBase.parry.id), skillBasic).registerAchievement();
+		skillMortal = new Achievement(id++, "skill.mortal", 7, -1, new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.id), skillGain).setSpecial().registerAchievement();
 		skillMaster = new Achievement(id++, "skill.master", 8, -2, new ItemStack(ZSSItems.skillOrb,1,SkillBase.dodge.id), skillGain).registerAchievement();
-		skillMasterAll = new Achievement(id++, "skill.master_all", 10, -2, new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.id), skillMaster).setSpecial().registerAchievement();
+		skillMasterAll = new Achievement(id++, "skill.master_all", 10, -2, new ItemStack(ZSSItems.skillOrb,1,SkillBase.armorBreak.id), skillMaster).setSpecial().registerAchievement();
 		skillSuper = new Achievement(id++, "skill.super", 6, -4, new ItemStack(ZSSItems.skillOrb,1,SkillBase.superSpinAttack.id), skillGain).setSpecial().registerAchievement();
 		skillHeart = new Achievement(id++, "skill.heart", 5, 3, ZSSItems.smallHeart, skillBasic).registerAchievement();
 		skillHeartBar = new Achievement(id++, "skill.heartbar", 5, 5, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.id), skillHeart).registerAchievement();
@@ -128,6 +130,7 @@ public class ZSSAchievements
 				bossComplete,
 				skillBasic,
 				skillGain,
+				skillMortal,
 				skillMaster,
 				skillMasterAll,
 				skillSuper,

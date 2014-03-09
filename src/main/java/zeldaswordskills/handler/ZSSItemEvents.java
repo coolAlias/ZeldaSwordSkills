@@ -131,6 +131,9 @@ public class ZSSItemEvents
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
 					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
 					player.triggerAchievement(ZSSAchievements.skillGain);
+					if (isBoss) {
+						player.triggerAchievement(ZSSAchievements.skillMortal);
+					}
 				}
 			}
 			if (mob instanceof EntityCreeper && mob.worldObj.rand.nextFloat() < Config.getCreeperDropChance()) {
