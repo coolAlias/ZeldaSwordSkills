@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -75,7 +74,7 @@ public class SpinAttack extends SkillActive
 	/** Direction in which to spin */
 	@SideOnly(Side.CLIENT)
 	private boolean clockwise;
-	
+
 	/** Number of degrees to spin; incremented when keypressed and already active for Super Spin Attack */
 	@SideOnly(Side.CLIENT)
 	private float arc;
@@ -83,13 +82,13 @@ public class SpinAttack extends SkillActive
 	/** Entities within range upon activation so no entity targeted more than once */
 	@SideOnly(Side.CLIENT)
 	private List<EntityLivingBase> targets;
-	
+
 	/** Number of times the spin has been 'refreshed' during this activation cycle */
 	private int refreshed;
-	
+
 	/** Whether flame particles should render along the sword's arc */
 	private boolean isFlaming;
-	
+
 	/** The player's Super Spin Attack level will allow multiple spins and extended range */
 	private int superLevel;
 
@@ -105,22 +104,23 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	public SpinAttack newInstance() { return new SpinAttack(this); }
-	
+
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		if (!isActive()) {
 			superLevel = ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack);
 		}
-		List<String> desc = new ArrayList<String>(tooltip);
+		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.2",getChargeTime()));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.3",String.format("%.1f", getRange())));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.4",String.format("%.2f", getExhaustion())));
 		return desc;
 	}
-	
+
 	@Override
 	public boolean canDrop() { return this == spinAttack; }
-	
+
 	@Override
 	public boolean isLoot() { return this == spinAttack; }
 
@@ -131,7 +131,7 @@ public class SpinAttack extends SkillActive
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && PlayerUtils.isHoldingSword(player);
 	}
-	
+
 	@Override
 	protected float getExhaustion() { return 3.0F - (0.2F * level); }
 
@@ -204,7 +204,7 @@ public class SpinAttack extends SkillActive
 	private boolean isKeyPressed() {
 		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT].pressed || ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT].pressed
 				|| (Config.allowVanillaControls() &&
-				(Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed && Minecraft.getMinecraft().gameSettings.keyBindRight.pressed));
+						(Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed && Minecraft.getMinecraft().gameSettings.keyBindRight.pressed));
 	}
 
 	/** Max sword range for striking targets */
@@ -269,7 +269,7 @@ public class SpinAttack extends SkillActive
 
 		return false;
 	}
-	
+
 	@SideOnly(Side.CLIENT)
 	private void spawnParticles(EntityPlayer player) {
 		// TODO these will not show up for other players

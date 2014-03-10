@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -81,8 +80,9 @@ public class Parry extends SkillActive
 	public Parry newInstance() { return new Parry(this); }
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = new ArrayList<String>(tooltip);
+		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.parry.desc.1",(int)(getDisarmChance(player, null) * 100)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.parry.desc.2",String.format("%.2f", getExhaustion())));
 		return desc;

@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,6 +29,8 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -61,13 +62,14 @@ public class SwordBeam extends SkillActive
 	}
 
 	private SwordBeam(SwordBeam skill) { super(skill); }
-	
+
 	@Override
 	public SwordBeam newInstance() { return new SwordBeam(this); }
-	
+
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = new ArrayList<String>(tooltip);
+		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.swordbeam.desc.3",level));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.swordbeam.desc.4",String.format("%.2f", getExhaustion())));
 		return desc;
@@ -75,7 +77,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean isActive() { return false; }
-	
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && checkHealth(player) && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && PlayerUtils.isHoldingSword(player);
@@ -83,7 +85,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	protected float getExhaustion() { return 0.9F - (level * 0.06F); }
-	
+
 	@Override
 	public boolean trigger(World world, EntityPlayer player) {
 		if (super.trigger(world, player)) {
@@ -103,12 +105,12 @@ public class SwordBeam extends SkillActive
 			return false;
 		}
 	}
-	
+
 	/** Returns true if players current health is within the allowed limit */
 	private boolean checkHealth(EntityPlayer player) {
 		return PlayerUtils.getHealthMissing(player) < (0.31F * level);
 	}
-	
+
 	/** Returns player's base damage (with sword) plus 1.0F per level */
 	private float getDamage(EntityPlayer player) {
 		return (float)(level + player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());

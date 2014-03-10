@@ -27,6 +27,8 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -75,7 +77,8 @@ public abstract class SkillActive extends SkillBase
 	}
 	
 	@Override
-	public List<String> getDescription(EntityPlayer player) { return tooltip; }
+	@SideOnly(Side.CLIENT)
+	public List<String> getDescription(EntityPlayer player) { return getDescription(); }
 	
 	/** Returns true if this skill is currently active, however that is defined by the child class */
 	public abstract boolean isActive();

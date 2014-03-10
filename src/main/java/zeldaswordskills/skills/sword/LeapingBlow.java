@@ -74,9 +74,10 @@ public class LeapingBlow extends SkillActive
 	public LeapingBlow newInstance() { return new LeapingBlow(this); }
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = new ArrayList<String>(4);
-		desc.add(tooltip.get(0));
+		desc.add(StatCollector.translateToLocal(tooltip.get(0)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.leapingblow.desc.3",(PlayerUtils.isHoldingMasterSword(player) ? level * 2 : level)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.leapingblow.desc.4",(getPotionDuration(player) / 20)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.leapingblow.desc.5",String.format("%.2f", getExhaustion())));

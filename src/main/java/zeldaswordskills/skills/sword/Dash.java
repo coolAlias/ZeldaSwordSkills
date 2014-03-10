@@ -79,9 +79,10 @@ public class Dash extends SkillActive
 	public Dash newInstance() { return new Dash(this); }
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = new ArrayList<String>(4);
-		desc.add(tooltip.get(0));
+		desc.add(StatCollector.translateToLocal(tooltip.get(0)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dash.desc.2",String.format("%.1f", getRange())));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dash.desc.3",String.format("%.1f", getDamage())));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dash.desc.4",String.format("%.2f", getExhaustion())));

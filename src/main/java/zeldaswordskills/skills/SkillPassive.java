@@ -21,6 +21,8 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class SkillPassive extends SkillBase
 {
@@ -34,7 +36,8 @@ public class SkillPassive extends SkillBase
 	public SkillPassive newInstance() { return new SkillPassive(this); }
 	
 	@Override
-	public List<String> getDescription(EntityPlayer player) { return tooltip; }
+	@SideOnly(Side.CLIENT)
+	public List<String> getDescription(EntityPlayer player) { return getDescription(); }
 	
 	@Override
 	protected void levelUp(EntityPlayer player) {}

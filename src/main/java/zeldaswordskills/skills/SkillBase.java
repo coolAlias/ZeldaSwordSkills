@@ -23,7 +23,6 @@ import java.util.logging.Level;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.network.SyncSkillPacket;
 import zeldaswordskills.skills.sword.ArmorBreak;
@@ -38,6 +37,8 @@ import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -137,7 +138,7 @@ public abstract class SkillBase
 
 	/** Returns whether this skill can drop as an orb randomly from mobs */
 	public boolean canDrop() { return true; }
-	
+
 	/** Returns whether this skill can generate as random loot in chests */
 	public boolean isLoot() { return true; }
 
@@ -147,19 +148,24 @@ public abstract class SkillBase
 	/** Returns max level this skill can reach; override to change */
 	public int getMaxLevel() { return MAX_LEVEL; }
 
-	/** Returns the translated list containing Strings for tooltip display, personalized if appropriate */
-	public final List<String> getDescription() { return (level > 0 ? getDescription() : tooltip); }
+	/** Returns the translated list containing Strings for tooltip display */
+	@SideOnly(Side.CLIENT)
+	public final List<String> getDescription() {
+		List<String> desc = new ArrayList(tooltip.size());
+		for (String s : tooltip) {
+			desc.add(StatCollector.translateToLocal(s));
+		}
+		return desc;
+	}
 
 	/** Returns a personalized tooltip display containing info about skill at current level */
+	@SideOnly(Side.CLIENT)
 	public abstract List<String> getDescription(EntityPlayer player);
 
-	/** Returns this skill's icon resource location */
-	public ResourceLocation getIconTexture() { return null; }// new ResourceLocation(Textures.SKILLS + name.replace(" ", "").toLowerCase() + ".png"); }
+	/** Adds a single untranslated string to the skill's tooltip display */
+	protected final SkillBase addDescription(String string) { tooltip.add("skill.zss." + string); return this; }
 
-	/** Translates and adds a single string to the skill's tooltip display */
-	protected final SkillBase addDescription(String string) { tooltip.add(StatCollector.translateToLocal("skill.zss." + string)); return this; }
-
-	/** Translates and adds all entries in the provided list to the skill's tooltip display */
+	/** Adds all entries in the provided list to the skill's tooltip display */
 	protected final SkillBase addDescription(List<String> list) { for (String s : list) { addDescription(s); } return this; }
 
 	/** Returns true if player meets requirements to learn this skill at target level */

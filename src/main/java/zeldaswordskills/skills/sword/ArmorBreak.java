@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -87,8 +86,9 @@ public class ArmorBreak extends SkillActive
 	public ArmorBreak newInstance() { return new ArmorBreak(this); }
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = new ArrayList<String>(tooltip);
+		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.armorbreak.desc.2",getChargeTime(player)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.armorbreak.desc.3",String.format("%.2f", getExhaustion())));
 		return desc;

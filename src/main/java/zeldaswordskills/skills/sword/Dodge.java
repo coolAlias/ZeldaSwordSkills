@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -84,8 +83,9 @@ public class Dodge extends SkillActive
 	public boolean isActive() { return (dodgeTimer > 0); }
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = new ArrayList<String>(tooltip);
+		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dodge.desc.1",(int)(getDodgeChance(player) * 100)));
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dodge.desc.2",String.format("%.2f", getExhaustion())));
 		return desc;
