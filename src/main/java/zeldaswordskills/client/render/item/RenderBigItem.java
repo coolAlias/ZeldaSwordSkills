@@ -27,9 +27,13 @@ import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
 
-public class RenderItemHammer implements IItemRenderer {
+public class RenderBigItem implements IItemRenderer
+{
+	private final float scale;
 
-	public RenderItemHammer() {}
+	public RenderBigItem(float scale) {
+		this.scale = scale;
+	}
 
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
@@ -57,13 +61,15 @@ public class RenderItemHammer implements IItemRenderer {
 	private void renderEquippedItem(ItemStack stack, EntityLivingBase entity, boolean firstPerson) {
 		if (entity instanceof EntityPlayer) {
 			GL11.glPushMatrix();
+			float f = scale;
 			if (firstPerson) {
-				GL11.glTranslatef(-0.35F, -0.125F, 0.0F);
-				GL11.glScalef(1.75F, 1.75F, 1.75F);
+				f *= 1.75F;
+				GL11.glTranslatef(-0.35F * scale, -0.125F * scale, 0.0F);
 			} else {
-				GL11.glTranslatef(-1.0F, 0.0F, 0.0F);
-				GL11.glScalef(2.0F, 2.0F, 2.0F);
+				f *= 2.0F;
+				GL11.glTranslatef(1.0F - f, -0.125F * scale, 0.05F * scale);
 			}
+			GL11.glScalef(f, f, f);
 			EntityPlayer player = (EntityPlayer) entity;
 			Icon icon = stack.getItem().getIcon(stack, 0, player, player.getItemInUse(), player.getItemInUseCount());
 			Tessellator tessellator = Tessellator.instance;

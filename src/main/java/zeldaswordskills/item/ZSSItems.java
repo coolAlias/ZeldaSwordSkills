@@ -45,7 +45,7 @@ import zeldaswordskills.client.render.item.RenderHeldItemBlock;
 import zeldaswordskills.client.render.item.RenderItemBomb;
 import zeldaswordskills.client.render.item.RenderItemBombBag;
 import zeldaswordskills.client.render.item.RenderItemCustomBow;
-import zeldaswordskills.client.render.item.RenderItemHammer;
+import zeldaswordskills.client.render.item.RenderBigItem;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.TradeHandler;
@@ -260,9 +260,11 @@ public class ZSSItems
 	public static void registerRenderers() {
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.bomb.itemID, new RenderItemBomb());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.bombBag.itemID, new RenderItemBombBag());
-		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammer.itemID, new RenderItemHammer());
-		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerMegaton.itemID, new RenderItemHammer());
-		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerSkull.itemID, new RenderItemHammer());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammer.itemID, new RenderBigItem(1.0F));
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerMegaton.itemID, new RenderBigItem(1.0F));
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerSkull.itemID, new RenderBigItem(1.0F));
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordBiggoron.itemID, new RenderBigItem(0.75F));
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordGiant.itemID, new RenderBigItem(0.75F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heroBow.itemID, new RenderItemCustomBow());
 		//MinecraftForgeClient.registerItemRenderer(ZSSItems.hookshot.itemID, new RenderItemHookShot());
