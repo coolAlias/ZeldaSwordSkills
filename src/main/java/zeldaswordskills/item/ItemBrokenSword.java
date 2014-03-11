@@ -19,6 +19,8 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
+import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -33,6 +35,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -42,6 +45,8 @@ import zeldaswordskills.util.MerchantRecipeHelper;
 
 import com.google.common.collect.Multimap;
 
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -50,7 +55,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Broken version of each sword; can only be repaired by a blacksmith.
  *
  */
-public class ItemBrokenSword extends Item
+@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+public class ItemBrokenSword extends Item implements IBattlegearWeapon
 {
 	public ItemBrokenSword(int id) {
 		super(id);
@@ -60,7 +66,7 @@ public class ItemBrokenSword extends Item
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
@@ -86,13 +92,13 @@ public class ItemBrokenSword extends Item
 			} else {
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
 			}
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIconFromDamage(int par1) {
@@ -122,17 +128,57 @@ public class ItemBrokenSword extends Item
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.sword_broken.desc.0"));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":broken_sword_ordon");
 	}
-	
+
 	@Override
 	public Multimap getItemAttributeModifiers() {
-        Multimap multimap = super.getItemAttributeModifiers();
-        multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", 2.0D, 0));
-        return multimap;
-    }
+		Multimap multimap = super.getItemAttributeModifiers();
+		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", 2.0D, 0));
+		return multimap;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean sheatheOnBack(ItemStack stack) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean isOffhandHandDual(ItemStack stack) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return true;
+	}
 }

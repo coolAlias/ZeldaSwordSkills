@@ -19,6 +19,8 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
+import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.EntityLivingBase;
@@ -33,6 +35,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStun;
 import zeldaswordskills.api.item.IArmorBreak;
@@ -46,10 +49,13 @@ import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
 
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed
+@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed, IBattlegearWeapon
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -57,7 +63,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	private final float weaponDamage;
 	/** Percentage of damage that ignores armor */
 	private final float ignoreArmorAmount;
-	
+
 	public ItemHammer(int id, BlockWeight strength, float damage, float ignoreArmor) {
 		super(id);
 		this.strength = strength;
@@ -78,7 +84,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta) {
 		return strength;
 	}
-	
+
 	@Override
 	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed) {
 		if (!wasSmashed) {
@@ -87,12 +93,12 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		}
 	}
-	
+
 	@Override
 	public float getExhaustion() {
 		return (weaponDamage / 16.0F);
 	}
-	
+
 	@Override
 	public int getSwingSpeed() {
 		return 30;
@@ -114,7 +120,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 		}
 		return true;
 	}
-	
+
 	@Override
 	public int getItemEnchantability() {
 		return 0;
@@ -137,7 +143,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 		}
 		return stack;
 	}
-	
+
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
 		if (this == ZSSItems.hammerSkull && player.attackTime == 0) {
@@ -164,7 +170,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			}
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void spawnParticles(World world, double x, double y, double z, float radius) {
@@ -178,7 +184,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			}
 		}
 	}
-	
+
 	@SideOnly(Side.CLIENT)
 	private void spawnParticlesAt(World world, double x, double y, double z) {
 		String particle;
@@ -194,23 +200,63 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			}
 		}
 	}
-	
+
 	@Override
 	public Multimap getItemAttributeModifiers() {
 		Multimap multimap = super.getItemAttributeModifiers();
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", (double) weaponDamage, 0));
 		return multimap;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean sheatheOnBack(ItemStack stack) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean isOffhandHandDual(ItemStack stack) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return false;
 	}
 }

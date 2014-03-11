@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
+import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -44,6 +46,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
@@ -65,6 +68,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -76,7 +81,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * ice arrows; level 3 can shoot all arrow types
  *
  */
-public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom
+@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattlegearWeapon
 {
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
@@ -181,7 +187,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom
 		setArrow(bow, arrow);
 		return arrow != null;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public float getMaxZoomTime() {
@@ -505,5 +511,45 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom
 		} else {
 			return null;
 		}
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean sheatheOnBack(ItemStack stack) {
+		return true;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean isOffhandHandDual(ItemStack stack) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return false;
 	}
 }

@@ -21,6 +21,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
+import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -39,6 +41,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IZoom;
@@ -53,6 +56,8 @@ import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -64,17 +69,18 @@ import cpw.mods.fml.relauncher.SideOnly;
  * require a special type of slingshot (upgraded) to shoot properly.
  *
  */
-public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
+@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattlegearWeapon
 {
 	/** The number of seeds this slingshot will fire per shot */
 	protected final int seedsFired;
-	
+
 	/** The angle between each seed fragment */
 	protected final float spread;
-	
+
 	/** Maps the seed types to seed Items for consuming seed shot */
 	private static final Map<SeedType, Integer> typeToSeed = new EnumMap(SeedType.class);
-	
+
 	public static void initializeSeeds(){
 		typeToSeed.put(SeedType.COCOA, Item.dyePowder.itemID);
 		typeToSeed.put(SeedType.DEKU, ZSSItems.dekuNut.itemID);
@@ -87,7 +93,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 	public ItemSlingshot(int id) {
 		this(id, 1, 0);
 	}
-	
+
 	public ItemSlingshot(int id, int seedsFired, float spread) {
 		super(id);
 		this.seedsFired = seedsFired;
@@ -97,7 +103,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public float getMaxZoomTime() {
@@ -109,7 +115,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 	public float getZoomFactor() {
 		return 0.15F;
 	}
-	
+
 	@Override
 	public boolean isItemTool(ItemStack stack) { return true; }
 
@@ -148,10 +154,10 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 			if (f == 1.0F) {
 				seedShot.setIsCritical(true);
 			}
-			
+
 			float factor = (seedsFired == 1 ? 2.2F : seedsFired < 4 ? 1.4F : 1.0F); 
 			float damage = (type == SeedType.GRASS ? 1.0F : type == SeedType.NETHERWART || type == SeedType.DEKU ? 1.5F : 1.25F);
-			
+
 			int k = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, stack);
 			if (k > 0) {
 				damage += ((float)(k * 0.25F) + 0.25F);
@@ -165,19 +171,19 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 			if (type == SeedType.NETHERWART || EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, stack) > 0) {
 				seedShot.setFire(100);
 			}
-			
+
 			if (!world.isRemote) {
 				world.spawnEntityInWorld(seedShot);
 			}
 		}
-		
+
 		world.playSoundAtEntity(player, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
 		if (!player.capabilities.isCreativeMode) {
 			int seedId = typeToSeed.get(type);
 			PlayerUtils.consumeInventoryItem(player, seedId, seedId == Item.dyePowder.itemID ? 3 : 0);
 		}
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
@@ -196,7 +202,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Returns true if the player has any type of seed in the inventory
 	 */
@@ -243,7 +249,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 	public void registerIcons(IconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
@@ -252,7 +258,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.slingshot.desc.1", new Object[]{seedsFired}));
 		}
 	}
-	
+
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
 		ItemStack stack = item.getEntityItem();
@@ -270,12 +276,12 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 			addFairyEnchantments(stack, player, core);
 		}
 	}
-	
+
 	@Override
 	public boolean hasFairyUpgrade(ItemStack stack) {
 		return true;
 	}
-	
+
 	/**
 	 * Checks for and adds any applicable fairy enchantments to the slingshot
 	 */
@@ -326,5 +332,45 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
 			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean sheatheOnBack(ItemStack stack) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean isOffhandHandDual(ItemStack stack) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
+		return false;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return false;
 	}
 }
