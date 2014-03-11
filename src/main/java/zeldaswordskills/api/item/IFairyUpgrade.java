@@ -31,8 +31,8 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 public interface IFairyUpgrade {
 	
 	/**
-	 * Called from a fairy spawner during a scheduled update to process any
-	 * upgrade or other effect that should occur
+	 * Called from a fairy spawner during a scheduled update to process any upgrade or other
+	 * effect that should occur; this method is only called if hasFairyUpgrade returns true
 	 */
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core);
 	

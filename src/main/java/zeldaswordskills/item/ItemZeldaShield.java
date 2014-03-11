@@ -27,6 +27,7 @@ import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
@@ -42,11 +43,15 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
+import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
+import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
@@ -58,7 +63,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 	@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowDisplay", modid="battlegear2", striprefs=true),
 	@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
-public class ItemZeldaShield extends Item implements ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;
@@ -245,6 +250,24 @@ public class ItemZeldaShield extends Item implements ISwingSpeed, IShield, IShea
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+	}
+
+	@Override
+	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
+		if (PlayerUtils.hasItem(player, ZSSItems.swordMasterTrue)) {
+			item.setDead();
+			// TODO player.triggerAchievement(ZSSAchievements.shieldMirror);
+			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.shieldMirror), core.xCoord, core.yCoord + 2, core.zCoord);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+		} else {
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.sword"));
+		}
+	}
+
+	@Override
+	public boolean hasFairyUpgrade(ItemStack stack) {
+		return this == ZSSItems.shieldHylian;
 	}
 
 	@Method(modid="battlegear2")

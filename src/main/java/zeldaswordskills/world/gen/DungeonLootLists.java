@@ -180,6 +180,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.keySmall, 1, 1, Config.getSmallKeyWeight()),
 			getLoot(ZSSItems.potionRed, 1, 1, 3),
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
+			getLoot(ZSSItems.shieldDeku, 1, 1, 1),
 			getLoot(ZSSItems.swordBroken, ZSSItems.swordKokiri.itemID, 1, 1, 1)
 		});
 	}
@@ -208,6 +209,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.masterOre, 1, 1, 1),
 			getLoot(ZSSItems.potionBlue, 1, 1, 1),
 			getLoot(ZSSItems.rocsFeather, 1, 1, 1),
+			getLoot(ZSSItems.shieldHylian, 1, 1, 1),
 			getLoot(ZSSItems.slingshot, 1, 1, 1),
 			getLoot(ZSSItems.treasure, Treasures.ZELDAS_LETTER.ordinal(), 1, 1, 1),
 		});

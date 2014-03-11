@@ -115,6 +115,7 @@ public class TradeHandler implements IVillageTradeHandler
 				recipeList.add(new MerchantRecipe(new ItemStack(Item.emerald, 5 + rand.nextInt(4)), new ItemStack(Item.gunpowder, 4), new ItemStack(ZSSItems.bomb)));
 			}
 			recipeList.add(new MerchantRecipe(new ItemStack(Item.emerald, 16), new ItemStack(ZSSItems.swordKokiri)));
+			recipeList.add(new MerchantRecipe(new ItemStack(Item.emerald, 16), new ItemStack(ZSSItems.shieldDeku)));
 			break;
 		case BUTCHER:
 			recipeList.add(new MerchantRecipe(new ItemStack(Item.emerald, 20), new ItemStack(ZSSItems.tunicHeroChest)));
