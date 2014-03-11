@@ -93,9 +93,11 @@ public class RenderItemShield implements IItemRenderer
 						GL11.glRotatef((flag ? 90 : 60), 0.0F, 1.0F, 0.0F);
 						GL11.glRotatef(15, 0.0F, 0.0F, -1.0F);
 						if (flag) {
-							GL11.glTranslatef(-0.5125F, -1.2F, -0.25F);
+							GL11.glTranslatef(-0.45F, -1.2F, -0.25F);
 						} else {
-							GL11.glTranslatef(-0.375F, -1.1F, -0.135F);
+							// For Flush with arm when unarmored, simply use: GL11.glTranslatef(-0.375F, -1.1F, -0.135F);
+							GL11.glRotatef(15, -1.0F, 0.0F, 0.0F);
+							GL11.glTranslatef(-0.385F, -1.1F, -0.325F);
 						}
 					} else {
 						GL11.glRotatef(90, 0.0F, -1.0F, 0.0F);

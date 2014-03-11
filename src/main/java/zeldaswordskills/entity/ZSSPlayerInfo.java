@@ -38,6 +38,7 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemMask;
+import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.AttackBlockedPacket;
@@ -128,8 +129,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * @param damage only used server side to calculate exhaustion: 0.3F * damage
 	 */
 	public void onAttackBlocked(ItemStack shield, float damage) {
-		// TODO set based on shield?
-		blockTime = 20;
+		blockTime = (shield.getItem() instanceof ItemZeldaShield ? ((ItemZeldaShield) shield.getItem()).getRecoveryTime() : 20);
 		player.clearItemInUse();
 		if (!player.worldObj.isRemote) {
 			PacketDispatcher.sendPacketToPlayer(new AttackBlockedPacket(shield).makePacket(), (Player) player);

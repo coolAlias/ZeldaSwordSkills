@@ -42,6 +42,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
+import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.ModInfo;
@@ -57,7 +58,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 	@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowDisplay", modid="battlegear2", striprefs=true),
 	@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
-public class ItemZeldaShield extends Item implements IShield, ISheathed, IArrowCatcher, IArrowDisplay
+public class ItemZeldaShield extends Item implements ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;
@@ -150,6 +151,16 @@ public class ItemZeldaShield extends Item implements IShield, ISheathed, IArrowC
 				}
 			}
 		}
+	}
+
+	@Override
+	public float getExhaustion() {
+		return 0.3F;
+	}
+
+	@Override
+	public int getSwingSpeed() {
+		return 10; // same as BG2 bash speed
 	}
 
 	@Override
