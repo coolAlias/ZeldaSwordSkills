@@ -455,9 +455,9 @@ public class ZSSItems
 		skillWiper = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.skill_wiper");
 
 		// 0.6.1 new items
-		shieldDeku = new ItemZeldaShield(modItemIndex++, 40, 3F, 5F).setUnlocalizedName("zss.shield_deku");
-		shieldHylian = new ItemZeldaShield(modItemIndex++, 30, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
-		shieldMirror = new ItemZeldaShield(modItemIndex++, 30, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
+		shieldDeku = new ItemZeldaShield(modItemIndex++, 30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
+		shieldHylian = new ItemZeldaShield(modItemIndex++, 18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
+		shieldMirror = new ItemZeldaShield(modItemIndex++, 24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
 	}
 
 	private static void registerItems() {

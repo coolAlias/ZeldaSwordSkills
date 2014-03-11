@@ -42,6 +42,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
@@ -256,7 +257,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
 		if (PlayerUtils.hasItem(player, ZSSItems.swordMasterTrue)) {
 			item.setDead();
-			// TODO player.triggerAchievement(ZSSAchievements.shieldMirror);
+			player.triggerAchievement(ZSSAchievements.shieldMirror);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.shieldMirror), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {

@@ -76,7 +76,8 @@ public class ZSSAchievements
 	fairyEnchantment,
 	fairySlingshot,
 	fairySupershot,
-	fairyBoomerang;
+	fairyBoomerang,
+	shieldMirror;
 
 	public static void init() {
 		id = Config.getStartingAchievementID();
@@ -122,6 +123,7 @@ public class ZSSAchievements
 		fairySlingshot = new Achievement(id++, "fairy.slingshot", 4, -3, ZSSItems.slingshot, fairyEnchantment).registerAchievement();
 		fairySupershot = new Achievement(id++, "fairy.supershot", 4, -5, ZSSItems.supershot, fairySlingshot).setSpecial().registerAchievement();
 		fairyBoomerang = new Achievement(id++, "fairy.boomerang", 3, 5, ZSSItems.boomerangMagic, skillHeartBar).setSpecial().registerAchievement();
+		shieldMirror = new Achievement(id++, "shield.mirror", -6, 8, ZSSItems.shieldMirror, swordTrue).setSpecial().registerAchievement();
 
 		page = new AchievementPage("Zelda",
 				bombsAway,
@@ -165,7 +167,8 @@ public class ZSSAchievements
 				fairyEnchantment,
 				fairySlingshot,
 				fairySupershot,
-				fairyBoomerang);
+				fairyBoomerang,
+				shieldMirror);
 		AchievementPage.registerAchievementPage(page);
 	}
 }

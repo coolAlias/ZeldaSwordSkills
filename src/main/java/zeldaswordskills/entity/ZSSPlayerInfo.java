@@ -35,6 +35,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.CommonProxy;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemMask;
@@ -129,6 +130,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * @param damage only used server side to calculate exhaustion: 0.3F * damage
 	 */
 	public void onAttackBlocked(ItemStack shield, float damage) {
+		ZSSCombatEvents.setPlayerAttackTime(player);
 		blockTime = (shield.getItem() instanceof ItemZeldaShield ? ((ItemZeldaShield) shield.getItem()).getRecoveryTime() : 20);
 		player.clearItemInUse();
 		if (!player.worldObj.isRemote) {
