@@ -53,6 +53,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemArmorTunic;
 import zeldaswordskills.item.ItemFairyBottle;
 import zeldaswordskills.item.ItemHeldBlock;
+import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
@@ -231,7 +232,6 @@ public class ZSSCombatEvents
 	 * Note that the attackTime is deliberately NOT synced between client
 	 * and server; otherwise the smash mechanics will break
 	 */
-	//@SideOnly(Side.CLIENT)
 	public static void setPlayerAttackTime(EntityPlayer player) {
 		if (!player.capabilities.isCreativeMode) {
 			ItemStack stack = player.getHeldItem();
@@ -271,26 +271,25 @@ public class ZSSCombatEvents
 		}
 		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			if (ZSSPlayerInfo.get(player) != null) {
-				ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
-				if (skills.isSkillActive(SkillBase.dodge)) {
-					event.setCanceled(((Dodge) skills.getPlayerSkill(SkillBase.dodge)).dodgeAttack(player));
-				} else if (skills.isSkillActive(SkillBase.parry)) {
-					if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
-						EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
-						event.setCanceled(((Parry) skills.getPlayerSkill(SkillBase.parry)).parryAttack(player, attacker));
-					}
-				} else if (skills.isSkillActive(SkillBase.mortalDraw) && event.source.getEntity() != null) {
-					if (!player.worldObj.isRemote) {
-						if (((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, event.source.getEntity())) {
-							PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
-							event.setCanceled(true);
-						}
+			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+			if (skills.isSkillActive(SkillBase.dodge)) {
+				event.setCanceled(((Dodge) skills.getPlayerSkill(SkillBase.dodge)).dodgeAttack(player));
+			} else if (skills.isSkillActive(SkillBase.parry)) {
+				if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
+					EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
+					event.setCanceled(((Parry) skills.getPlayerSkill(SkillBase.parry)).parryAttack(player, attacker));
+				}
+			} else if (skills.isSkillActive(SkillBase.mortalDraw) && event.source.getEntity() != null) {
+				if (!player.worldObj.isRemote) {
+					if (((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, event.source.getEntity())) {
+						PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
+						event.setCanceled(true);
 					}
 				}
 			}
-			if (event.source.isFireDamage() && !event.isCanceled()) {
-				event.setCanceled(ItemArmorTunic.onFireDamage(event.entityLiving, event.ammount));
+			// prevent non-entity sources of fire damage here to avoid hurt animation while in fire / lava
+			if (event.source.isFireDamage() && event.source.getSourceOfDamage() == null && !event.isCanceled()) {
+				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
 			}
 		} else if (!event.isCanceled() && event.entity instanceof EntityLivingBase && event.source.getEntity() != null) {
 			EntityLivingBase entity = (EntityLivingBase) event.entity;
@@ -300,6 +299,41 @@ public class ZSSCombatEvents
 				if (entity.worldObj.rand.nextFloat() < evade - penalty) {
 					entity.worldObj.playSoundAtEntity(entity, ModInfo.SOUND_SWORDMISS, (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 					event.setCanceled(true);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Pre-event to handle shield blocking
+	 */
+	@ForgeSubscribe(priority=EventPriority.NORMAL)
+	public void onPreHurt(LivingHurtEvent event) {
+		if (event.entity instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.entity;
+			ItemStack stack = player.getItemInUse();
+			if (stack != null && stack.getItem() instanceof ItemZeldaShield) {
+				ItemZeldaShield shield = (ItemZeldaShield) stack.getItem();
+				if (ZSSPlayerInfo.get(player).canBlock() && shield.canBlockDamage(stack, event.source)) {
+					boolean shouldBlock = true;
+					Entity opponent = event.source.getEntity();
+					if (opponent != null) {
+						double dx = opponent.posX - event.entity.posX;
+						double dz;
+						for (dz = opponent.posZ - player.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D) {
+							dx = (Math.random() - Math.random()) * 0.01D;
+						}
+
+						float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - player.rotationYaw;
+						yaw = yaw - 90;
+						while (yaw < -180) { yaw+= 360; }
+						while (yaw >= 180) { yaw-=360; }
+						shouldBlock = yaw < 60 && yaw > -60; // all Zelda shields use default block angles
+					}
+					if (shouldBlock) {
+						shield.onBlock(player, stack, event.source, event.ammount);
+						event.setCanceled(true);
+					}
 				}
 			}
 		}
@@ -345,6 +379,12 @@ public class ZSSCombatEvents
 					event.setCanceled(event.ammount < 0.1F);
 				}
 			 */
+			if (event.source.isFireDamage() && !event.isCanceled()) {
+				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
+			}
+			if (!event.isCanceled()) {
+				return;
+			}
 			ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
 			if (combo != null && event.ammount > 0) {
 				combo.onPlayerHurt(player, event);

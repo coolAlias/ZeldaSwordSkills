@@ -64,6 +64,7 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(17), UnpressKeyPacket.class);
 		builder.put(Integer.valueOf(18), BorrowMaskPacket.class);
 		builder.put(Integer.valueOf(19), MortalDrawPacket.class);
+		builder.put(Integer.valueOf(20), AttackBlockedPacket.class);
 		
 		idMap = builder.build();
 	}

@@ -21,8 +21,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,6 +30,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import zeldaswordskills.CommonProxy;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.handler.ZSSKeyHandler;
@@ -39,6 +40,7 @@ import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.network.AttackBlockedPacket;
 import zeldaswordskills.network.SpawnNayruParticlesPacket;
 import zeldaswordskills.network.SyncPlayerInfoPacket;
 import zeldaswordskills.skills.ICombo;
@@ -56,6 +58,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	private final static String EXT_PROP_NAME = "ZSSPlayerInfo";
 
 	private final EntityPlayer player;
+	
+	/** Special block timer for shields; player cannot block while this is greater than zero */
+	private int blockTime = 0;
 
 	public static enum Stats {
 		/** Number of secret rooms this player has opened */
@@ -111,6 +116,25 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		this.player = player;
 		initStats();
 		initSkills();
+	}
+	
+	/** Whether the player is able to block at this time (block timer is zero) */
+	public boolean canBlock() {
+		return blockTime == 0;
+	}
+	
+	/**
+	 * Sets the player's block timer, clears the item in use and adds exhaustion upon blocking an attack
+	 * @param damage only used server side to calculate exhaustion: 0.3F * damage
+	 */
+	public void onAttackBlocked(ItemStack shield, float damage) {
+		// TODO set based on shield?
+		blockTime = 20;
+		player.clearItemInUse();
+		if (!player.worldObj.isRemote) {
+			PacketDispatcher.sendPacketToPlayer(new AttackBlockedPacket(shield).makePacket(), (Player) player);
+			player.addExhaustion(0.3F * damage);
+		}
 	}
 
 	private void initStats() {
@@ -412,6 +436,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * This method should be called every update tick; currently called from LivingUpdateEvent
 	 */
 	public void onUpdate() {
+		if (blockTime > 0) {
+			--blockTime;
+		}
 		if (getFlag(IS_NAYRU_ACTIVE)) {
 			updateNayru();
 		}

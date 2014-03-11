@@ -46,7 +46,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class TargetingTickHandler implements ITickHandler
 {
 	private Minecraft mc;
-	
+
 	/** The player whose view will update */
 	private EntityPlayer player = null;
 

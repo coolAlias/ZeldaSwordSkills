@@ -41,11 +41,12 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.client.render.item.RenderBigItem;
 import zeldaswordskills.client.render.item.RenderHeldItemBlock;
 import zeldaswordskills.client.render.item.RenderItemBomb;
 import zeldaswordskills.client.render.item.RenderItemBombBag;
 import zeldaswordskills.client.render.item.RenderItemCustomBow;
-import zeldaswordskills.client.render.item.RenderBigItem;
+import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.TradeHandler;
@@ -169,7 +170,7 @@ public class ZSSItems
 	bootsPegasus,
 	bootsRubber;
 
-	/** All ZSS Swords */
+	/** Zelda Swords */
 	public static Item
 	swordBroken,
 	swordKokiri,
@@ -180,6 +181,12 @@ public class ZSSItems
 	swordTempered,
 	swordGolden,
 	swordMasterTrue;
+
+	/** Zelda Shields */
+	public static Item
+	shieldDeku,
+	shieldHylian,
+	shieldMirror;
 
 	/** Masks and other headgear */
 	public static Item
@@ -267,6 +274,9 @@ public class ZSSItems
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordGiant.itemID, new RenderBigItem(0.75F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heroBow.itemID, new RenderItemCustomBow());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldDeku.itemID, new RenderItemShield());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldHylian.itemID, new RenderItemShield());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldMirror.itemID, new RenderItemShield());
 		//MinecraftForgeClient.registerItemRenderer(ZSSItems.hookshot.itemID, new RenderItemHookShot());
 	}
 
@@ -443,6 +453,11 @@ public class ZSSItems
 		hammerMegaton = new ItemHammer(modItemIndex++, BlockWeight.VERY_HEAVY, 16.0F, 50.0F).setUnlocalizedName("zss.hammer_megaton");
 
 		skillWiper = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.skill_wiper");
+
+		// 0.6.1 new items
+		shieldDeku = new ItemZeldaShield(modItemIndex++, 40, 3F, 5F).setUnlocalizedName("zss.shield_deku");
+		shieldHylian = new ItemZeldaShield(modItemIndex++, 30, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
+		shieldMirror = new ItemZeldaShield(modItemIndex++, 30, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
 	}
 
 	private static void registerItems() {
@@ -466,6 +481,10 @@ public class ZSSItems
 		GameRegistry.registerItem(bootsHover, bootsHover.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(bootsPegasus, bootsPegasus.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(bootsRubber, bootsRubber.getUnlocalizedName().substring(5));
+
+		GameRegistry.registerItem(shieldDeku, shieldDeku.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(shieldHylian, shieldHylian.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(shieldMirror, shieldMirror.getUnlocalizedName().substring(5));
 
 		GameRegistry.registerItem(swordKokiri, swordKokiri.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(swordOrdon, swordOrdon.getUnlocalizedName().substring(5));

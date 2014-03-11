@@ -220,26 +220,26 @@ public class TargetUtils
 	/**
 	 * Sets an entity's motion along the given vector at the given velocity, with wobble being
 	 * an amount of variation applied to the course.
-	 * @param wobble set to 1.0F for a true heading
+	 * @param wobble set to 0.0F for a true heading
 	 * @param backwards if true, will set the entity's rotation to the opposite direction
 	 */
 	public static void setEntityHeading(Entity entity, double vecX, double vecY, double vecZ, float velocity, float wobble, boolean backwards) {
 		float vectorLength = MathHelper.sqrt_double(vecX * vecX + vecY * vecY + vecZ * vecZ);
-		vecX /= (double) vectorLength;
-		vecY /= (double) vectorLength;
-		vecZ /= (double) vectorLength;
-		vecX += entity.worldObj.rand.nextGaussian() * (double)(entity.worldObj.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) wobble;
-		vecY += entity.worldObj.rand.nextGaussian() * (double)(entity.worldObj.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) wobble;
-		vecZ += entity.worldObj.rand.nextGaussian() * (double)(entity.worldObj.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * (double) wobble;
-		vecX *= (double) velocity;
-		vecY *= (double) velocity;
-		vecZ *= (double) velocity;
+		vecX /= vectorLength;
+		vecY /= vectorLength;
+		vecZ /= vectorLength;
+		vecX += entity.worldObj.rand.nextGaussian() * (entity.worldObj.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * wobble;
+		vecY += entity.worldObj.rand.nextGaussian() * (entity.worldObj.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * wobble;
+		vecZ += entity.worldObj.rand.nextGaussian() * (entity.worldObj.rand.nextBoolean() ? -1 : 1) * 0.007499999832361937D * wobble;
+		vecX *= velocity;
+		vecY *= velocity;
+		vecZ *= velocity;
 		entity.motionX = vecX;
 		entity.motionY = vecY;
 		entity.motionZ = vecZ;
-		float f3 = MathHelper.sqrt_double(vecX * vecX + vecZ * vecZ);
+		float f = MathHelper.sqrt_double(vecX * vecX + vecZ * vecZ);
 		entity.prevRotationYaw = entity.rotationYaw = (backwards ? -1 : 1) * (float)(Math.atan2(vecX, vecZ) * 180.0D / Math.PI);
-		entity.prevRotationPitch = entity.rotationPitch = (backwards ? -1 : 1) * (float)(Math.atan2(vecY, (double) f3) * 180.0D / Math.PI);
+		entity.prevRotationPitch = entity.rotationPitch = (backwards ? -1 : 1) * (float)(Math.atan2(vecY, f) * 180.0D / Math.PI);
 	}
 	
 	/**

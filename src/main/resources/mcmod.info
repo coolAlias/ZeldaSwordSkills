@@ -13,6 +13,6 @@
   "parent": "",
   "screenshots": [],
   "dependencies": ["antiqueatlas","battlegear2"],
-  "dependants": ["combatskills"]
+  "dependants": ["dynamicswordskills"]
 }
 ]
