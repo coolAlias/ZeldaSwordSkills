@@ -105,9 +105,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 		if (this == ZSSItems.shieldDeku) {
 			return !flag;
 		}
-		return !flag || source.isMagicDamage() || source.isFireDamage()
-				// TODO remove this fix for BG2's damn wither arrow:
-				|| (source.getDamageType().equals("wither") && this == ZSSItems.shieldMirror);
+		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && this == ZSSItems.shieldMirror);
 	}
 
 	/**
@@ -120,40 +118,33 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 				(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
 				1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		if (this == ZSSItems.shieldDeku) {
-			float dmg = (source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
+			int dmg = Math.round(source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
 			if (dmg > 0) {
-				shield.damageItem(Math.round(dmg), player);
+				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
 					player.destroyCurrentEquippedItem();
 				}
 			}
 		} else if (this == ZSSItems.shieldMirror) {
-			onMirrorBlock(player, shield, source, damage);
-		}
-	}
-
-	/**
-	 * Use only for the mirror shield to reflect some projectiles; TODO public for access during Battlegear2's ShieldBlockEvent
-	 */
-	public void onMirrorBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
-		if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
-			if (player.worldObj.rand.nextFloat() < (source.isMagicDamage() ? (1F / 3F) : 1.0F)) {
-				Entity projectile = null;
-				try {
-					projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj); 
-				} catch (Exception e) {
-					;
-				}
-				if (projectile != null) {
-					NBTTagCompound data = new NBTTagCompound();
-					source.getSourceOfDamage().writeToNBT(data);
-					projectile.readFromNBT(data);
-					projectile.posX -= projectile.motionX * 2;
-					projectile.posY -= projectile.motionY * 2;
-					projectile.posZ -= projectile.motionZ * 2;
-					TargetUtils.setEntityHeading(projectile, -projectile.motionX, -projectile.motionY,
-							-projectile.motionZ, 1.0F, 2.0F + (20.0F * player.worldObj.rand.nextFloat()), false);
-					player.worldObj.spawnEntityInWorld(projectile);
+			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
+				if (player.worldObj.rand.nextFloat() < (source.isMagicDamage() ? (1F / 3F) : 1.0F)) {
+					Entity projectile = null;
+					try {
+						projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj); 
+					} catch (Exception e) {
+						;
+					}
+					if (projectile != null) {
+						NBTTagCompound data = new NBTTagCompound();
+						source.getSourceOfDamage().writeToNBT(data);
+						projectile.readFromNBT(data);
+						projectile.posX -= projectile.motionX * 2;
+						projectile.posY -= projectile.motionY * 2;
+						projectile.posZ -= projectile.motionZ * 2;
+						TargetUtils.setEntityHeading(projectile, -projectile.motionX, -projectile.motionY,
+								-projectile.motionZ, 1.0F, 2.0F + (20.0F * player.worldObj.rand.nextFloat()), false);
+						player.worldObj.spawnEntityInWorld(projectile);
+					}
 				}
 			}
 		}
@@ -289,7 +280,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 	public boolean catchArrow(ItemStack shield, EntityPlayer player, IProjectile projectile) {
 		if (this == ZSSItems.shieldDeku && projectile instanceof EntityArrow){
 			setArrowCount(shield, getArrowCount(shield) + 1);
-			System.out.println("Catching arrow, current total: " + getArrowCount(shield));
+			// TODO System.out.println("Catching arrow, current total: " + getArrowCount(shield));
 			player.setArrowCountInEntity(player.getArrowCountInEntity() - 1);
 			((EntityArrow) projectile).setDead();
 			return true;

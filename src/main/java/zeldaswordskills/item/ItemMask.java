@@ -257,11 +257,19 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		if (buffInfo.isBuffPermanent(Buff.EVADE_UP)) {
 			buffInfo.removeBuff(Buff.EVADE_UP);
 		}
+		if (buffInfo.isBuffPermanent(Buff.ATTACK_UP)) {
+			buffInfo.removeBuff(Buff.ATTACK_UP);
+		}
 		if (stack != null && info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
+			if (((ItemMask) stack.getItem()).tickingEffect != null) {
+				player.addPotionEffect(new PotionEffect(((ItemMask) stack.getItem()).tickingEffect));
+			}
 			if (stack.getItem() == ZSSItems.maskBunny) {
 				movement.applyModifier(bunnyHoodMoveBonus);
 				info.setFlag(ZSSPlayerInfo.MOBILITY, true);
 				buffInfo.applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
+			} else if (stack.getItem() == ZSSItems.maskMajora) {
+				buffInfo.applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
 			}
 		}
 	}

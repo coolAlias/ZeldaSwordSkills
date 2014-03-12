@@ -206,7 +206,8 @@ public class ZSSItems
 	maskDeku,
 	maskGoron,
 	maskZora,
-	maskFierce;
+	maskFierce,
+	maskMajora;
 
 	/** Special Arrows */
 	public static Item
@@ -458,6 +459,8 @@ public class ZSSItems
 		shieldDeku = new ItemZeldaShield(modItemIndex++, 30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
 		shieldHylian = new ItemZeldaShield(modItemIndex++, 18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
 		shieldMirror = new ItemZeldaShield(modItemIndex++, 24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
+		
+		maskMajora = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.wither.id, 100, 1)).setUnlocalizedName("zss.mask_majora");
 	}
 
 	private static void registerItems() {
@@ -558,6 +561,7 @@ public class ZSSItems
 		GameRegistry.registerItem(maskGoron, maskGoron.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskZora, maskZora.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(maskFierce, maskFierce.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(maskMajora, maskMajora.getUnlocalizedName().substring(5));
 
 		// MISCELLANEOUS TAB ITEMS
 		GameRegistry.registerItem(pendant, pendant.getUnlocalizedName().substring(5));

@@ -20,6 +20,7 @@ package zeldaswordskills;
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntities;
+import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.handler.ZSSEntityEvents;
@@ -95,5 +96,8 @@ public class ZSSMain
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		ZSSItemEvents.initializeDrops();
+		if (Loader.isModLoaded("battlegear2")) {
+			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
+		}
 	}
 }
