@@ -57,24 +57,21 @@ public class RenderBigItem implements IItemRenderer
 		default:
 		}
 	}
-	
+
 	private void renderEquippedItem(ItemStack stack, EntityLivingBase entity, boolean firstPerson) {
-		if (entity instanceof EntityPlayer) {
-			GL11.glPushMatrix();
-			float f = scale;
-			if (firstPerson) {
-				f *= 1.75F;
-				GL11.glTranslatef(-0.35F * scale, -0.125F * scale, 0.0F);
-			} else {
-				f *= 2.0F;
-				GL11.glTranslatef(1.0F - f, -0.125F * scale, 0.05F * scale);
-			}
-			GL11.glScalef(f, f, f);
-			EntityPlayer player = (EntityPlayer) entity;
-			Icon icon = stack.getItem().getIcon(stack, 0, player, player.getItemInUse(), player.getItemInUseCount());
-			Tessellator tessellator = Tessellator.instance;
-			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
-			GL11.glPopMatrix();
+		GL11.glPushMatrix();
+		float f = scale;
+		if (firstPerson) {
+			f *= 1.75F;
+			GL11.glTranslatef(-0.35F * scale, -0.125F * scale, 0.0F);
+		} else {
+			f *= (entity instanceof EntityPlayer ? 2.0F : 1.75F);
+			GL11.glTranslatef(1.0F - f, -0.125F * scale, 0.05F * scale);
 		}
+		GL11.glScalef(f, f, f);
+		Icon icon = stack.getItem().getIcon(stack, 0);
+		Tessellator tessellator = Tessellator.instance;
+		ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
+		GL11.glPopMatrix();
 	}
 }

@@ -68,15 +68,16 @@ public class RenderItemCustomBow implements IItemRenderer {
 	}
 
 	private void renderEquippedBow(ItemStack stack, EntityLivingBase entity, boolean firstPerson) {
+		GL11.glPushMatrix();
+		Tessellator tessellator = Tessellator.instance;
+
 		if (entity instanceof EntityPlayer) {
-			GL11.glPushMatrix();
 			if (!firstPerson) {
 				GL11.glRotated(15.0D, 0.02D, 0.01D, 0.0D);
 				GL11.glTranslated(0.1D, -0.3D, 0.2D);
 			}
 			EntityPlayer player = (EntityPlayer) entity;
 			Icon icon = stack.getItem().getIcon(stack, 0, player, player.getItemInUse(), player.getItemInUseCount());
-			Tessellator tessellator = Tessellator.instance;
 			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 			// The following code is copied in large part from Battlegear2's BowRenderer
 			int useDuration = player.getItemInUseDuration();
@@ -86,13 +87,17 @@ public class RenderItemCustomBow implements IItemRenderer {
 				ItemStack arrow = (arrowId > -1 ? new ItemStack(arrowId, 1, 0) : null);
 				if (arrow != null) {
 					icon = arrow.getIconIndex();
-		            GL11.glPushMatrix();
-		            GL11.glTranslatef(-(-3F+drawAmount)/16F, -(-3F+drawAmount)/16F, firstPerson?-0.5F/16F:0.5F/16F);
-		            ItemRenderer.renderItemIn2D(tessellator, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
-		            GL11.glPopMatrix();
+					GL11.glPushMatrix();
+					GL11.glTranslatef(-(-3F+drawAmount)/16F, -(-3F+drawAmount)/16F, firstPerson?-0.5F/16F:0.5F/16F);
+					ItemRenderer.renderItemIn2D(tessellator, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
+					GL11.glPopMatrix();
 				}
 			}
-			GL11.glPopMatrix();
+		} else {
+			Icon icon = stack.getItem().getIcon(stack, 0);
+			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 		}
+
+		GL11.glPopMatrix();
 	}
 }
