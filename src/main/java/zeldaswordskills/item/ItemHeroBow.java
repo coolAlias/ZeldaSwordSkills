@@ -48,6 +48,7 @@ import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -67,7 +68,6 @@ import zeldaswordskills.util.TargetUtils;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
@@ -239,7 +239,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (!Loader.isModLoaded("battlegear2")) {
+		if (!ZSSMain.isBG2Enabled) {
 			ArrowNockEvent event = new ArrowNockEvent(player, stack);
 			MinecraftForge.EVENT_BUS.post(event);
 			if (event.isCanceled()) {
@@ -260,7 +260,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		setArrow(bow, null);
 		if (arrowId < 0) { return; }
 
-		if (!Loader.isModLoaded("battlegear2")) {
+		if (!ZSSMain.isBG2Enabled) {
 			ArrowLooseEvent event = new ArrowLooseEvent(player, bow, ticksInUse);
 			MinecraftForge.EVENT_BUS.post(event);
 			if (event.isCanceled()) { return; }

@@ -69,6 +69,8 @@ public class ZSSMain
 	public static AntiqueAtlasHelper atlasHelper = new AntiqueAtlasHelper();
 	/** Whether Antique Atlas mod is loaded */
 	public static boolean isAtlasEnabled;
+	/** Whether Battlegear2 mod is loaded */
+	public static boolean isBG2Enabled;
 	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -79,6 +81,7 @@ public class ZSSMain
 		ZSSEntities.load();
 		ZSSAchievements.init();
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
+		isBG2Enabled = Loader.isModLoaded("battlegear2");
 	}
 	
 	@EventHandler
@@ -96,7 +99,7 @@ public class ZSSMain
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		ZSSItemEvents.initializeDrops();
-		if (Loader.isModLoaded("battlegear2")) {
+		if (isBG2Enabled) {
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
 	}
