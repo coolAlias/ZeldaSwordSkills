@@ -159,6 +159,7 @@ public enum BossType
 		new ItemStack(ZSSItems.keySkeleton),
 		new ItemStack(ZSSItems.heroBow),
 		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.MULTI.ordinal()),
+		new ItemStack(ZSSItems.maskMajora),
 		new ItemStack(ZSSItems.tunicGoronChest)
 	};
 	private static final ItemStack[] oceanItems = {
