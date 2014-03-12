@@ -208,7 +208,8 @@ public class ZSSItemEvents
 	}
 
 	/**
-	 * PlayerInteractEvent is only called on the server
+	 * LEFT_CLICK_BLOCK is only called on the server
+	 * RIGHT_CLICK_BLOCK is called on both sides... weird.
 	 */
 	@ForgeSubscribe
 	public void onInteract(PlayerInteractEvent event) {
@@ -249,14 +250,20 @@ public class ZSSItemEvents
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (isLiftable || !block.hasTileEntity(meta))) {
-				stack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack, block, meta);
-				player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, stack));
-				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
-						block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
-				if (isLiftable) {
-					((ILiftable) block).onLifted(world, player, stack, x, y, z, meta);
+				// make a copy for ILiftable#onLifted
+				ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack.copy(), block, meta);
+				if (returnStack != null && returnStack.stackSize <= 0) {
+					returnStack = null;
 				}
-				world.setBlockToAir(x, y, z);
+				if (!world.isRemote) {
+					player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, returnStack));
+					world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
+							block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+					if (isLiftable) {
+						((ILiftable) block).onLifted(world, player, stack, x, y, z, meta);
+					}
+					world.setBlockToAir(x, y, z);
+				}
 				return true;
 			} else {
 				// TODO play exertion or grunt sound
