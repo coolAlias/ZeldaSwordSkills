@@ -28,6 +28,18 @@ minecraft {
 	version = "1.6.4-9.11.1.964"
 }
 
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+tasks.build.dependsOn('sourceJar', 'deobfJar')
+
 processResources
 {
     // replace stuff in mcmod.info, nothing else
@@ -42,4 +54,10 @@ processResources
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+artifacts {
+	archives deobfJar
+	archives sourceJar
+	archives jar
 }

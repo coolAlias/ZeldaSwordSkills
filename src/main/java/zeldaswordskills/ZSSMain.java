@@ -60,7 +60,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 public class ZSSMain
 {
 	@Instance(ModInfo.ID)
-	public static ZSSMain instance = new ZSSMain();
+	public static ZSSMain instance;
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;

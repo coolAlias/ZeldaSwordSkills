@@ -65,17 +65,17 @@ public class RenderEntityChu extends RenderLiving
 	/**
 	 * Determines whether Chu Render should pass or not.
 	 */
-	protected int shouldChuRenderPass(EntityChu chu, int par2, float par3) {
+	protected int shouldChuRenderPass(EntityChu chu, int renderPass, float partialTick) {
 		if (chu.isInvisible()) {
 			return 0;
-		} else if (par2 == 0) {
+		} else if (renderPass == 0) {
 			this.setRenderPassModel(scaleAmount);
 			GL11.glEnable(GL11.GL_NORMALIZE);
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			return 1;
 		} else {
-			if (par2 == 1) {
+			if (renderPass == 1) {
 				GL11.glDisable(GL11.GL_BLEND);
 				GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			}
@@ -100,7 +100,7 @@ public class RenderEntityChu extends RenderLiving
 	}
 
 	@Override
-	protected int shouldRenderPass(EntityLivingBase entity, int par2, float par3) {
-		return this.shouldChuRenderPass((EntityChu) entity, par2, par3);
+	protected int shouldRenderPass(EntityLivingBase entity, int renderPass, float partialTick) {
+		return this.shouldChuRenderPass((EntityChu) entity, renderPass, partialTick);
 	}
 }
