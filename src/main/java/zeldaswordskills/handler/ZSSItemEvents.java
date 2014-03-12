@@ -249,6 +249,7 @@ public class ZSSItemEvents
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (isLiftable || !block.hasTileEntity(meta))) {
+				stack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack, block, meta);
 				player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, stack));
 				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
 						block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);

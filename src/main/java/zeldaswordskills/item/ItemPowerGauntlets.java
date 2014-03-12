@@ -55,18 +55,23 @@ public class ItemPowerGauntlets extends Item implements ILiftBlock
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
-	
+
 	@Override
 	public BlockWeight getLiftStrength(EntityPlayer player, ItemStack stack, Block block, int meta) {
 		return strength;
 	}
-	
+
+	@Override
+	public ItemStack onLiftBlock(EntityPlayer player, ItemStack stack, Block block, int meta) {
+		return stack;
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {

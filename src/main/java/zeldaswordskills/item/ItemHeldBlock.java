@@ -61,7 +61,9 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 		stack.setTagCompound(new NBTTagCompound());
 		stack.getTagCompound().setInteger("blockID", block.blockID);
 		stack.getTagCompound().setInteger("metadata", metadata);
-		stack.getTagCompound().setTag("gauntlets", gauntlets.writeToNBT(new NBTTagCompound()));
+		if (gauntlets != null) {
+			stack.getTagCompound().setTag("gauntlets", gauntlets.writeToNBT(new NBTTagCompound()));
+		}
 		return stack;
 	}
 
