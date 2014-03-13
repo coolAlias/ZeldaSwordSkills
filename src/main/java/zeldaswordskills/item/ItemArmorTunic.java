@@ -172,13 +172,13 @@ public class ItemArmorTunic extends ItemArmor
 	
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		if (toRepair.getItem() == ZSSItems.tunicGoronChest) {
+		if (this == ZSSItems.tunicGoronChest) {
 			// TODO return dodongo scales
 			return stack.getItem() == Item.magmaCream;
-		} else if (toRepair.getItem() == ZSSItems.tunicZoraChest) {
+		} else if (this == ZSSItems.tunicZoraChest) {
 			// TODO return something interesting?
 		}
-		return toRepair.getItem() instanceof ItemArmorTunic && stack.itemID == Block.cloth.blockID;
+		return stack.getItem() == Item.itemsList[Block.cloth.blockID];
 	}
 	
 	@Override

@@ -23,6 +23,7 @@ import mods.battlegear2.api.ISheathed;
 import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -224,6 +225,11 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 	@Override
 	public int getItemEnchantability() {
 		return 0;
+	}
+
+	@Override
+	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
+		return this == ZSSItems.shieldDeku && stack.getItem() == Item.itemsList[Block.planks.blockID];
 	}
 
 	@SideOnly(Side.CLIENT)
