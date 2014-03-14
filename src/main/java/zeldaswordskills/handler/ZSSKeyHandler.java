@@ -55,9 +55,8 @@ public class ZSSKeyHandler extends KeyHandler
 			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
-	public static final String[] desc = { "key.zss.activate.desc","key.zss.next.desc",
-		"key.zss.attack.desc","key.zss.left.desc","key.zss.right.desc","key.zss.down.desc",
-		"key.zss.block.desc","key.zss.bomb.desc","key.zss.toggleat.desc","key.zss.togglebuff.desc"};
+	public static final String[] desc = { "activate","next","attack","left","right","down",
+		"block","bomb","toggleat","togglebuff"};
 
 	/** Default key values */
 	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
@@ -72,7 +71,7 @@ public class ZSSKeyHandler extends KeyHandler
 	public static final void init() {
 		boolean[] repeat = new boolean[desc.length];
 		for (int i = 0; i < desc.length; ++i) {
-			keys[i] = new KeyBinding(desc[i], keyValues[i]);
+			keys[i] = new KeyBinding("key.zss." + desc[i] + ".desc", keyValues[i]);
 			repeat[i] = false;
 		}
 		KeyBindingRegistry.registerKeyBinding(new ZSSKeyHandler(keys, repeat));
@@ -97,7 +96,8 @@ public class ZSSKeyHandler extends KeyHandler
 				} else if (kb == keys[KEY_BOMB]) {
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
 				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
-					mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("key.zss.toggleat",(Config.toggleAutoTarget() ? StatCollector.translateToLocal("key.zss.enable") : StatCollector.translateToLocal("key.zss.disable"))));
+					mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
+							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
 				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
 					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
 				} else {

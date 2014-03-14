@@ -3,7 +3,7 @@
   "modid": "zeldaswordskills",
   "name": "Zelda Sword Skills",
   "description": "Adds sword skills such as Spin Attack from the Zelda game series, as well as many items, blocks, mobs, and dungeons.",
-  "version": "1.6.4-0.6.2",
+  "version": "1.6.4-0.6.3",
   "mcversion": "1.6.4",
   "logoFile": "zss_logo.png",
   "url": "http://www.minecraftforum.net/topic/2239063-164forge-zelda-sword-skills-v0511-magic-and-bug-fixes/",
@@ -13,6 +13,7 @@
   "parent": "",
   "screenshots": [],
   "dependencies": ["antiqueatlas","battlegear2"],
-  "dependants": ["dynamicswordskills"]
+  "dependants": ["dynamicswordskills"],
+  "useDependencyInformation": "true"
 }
 ]

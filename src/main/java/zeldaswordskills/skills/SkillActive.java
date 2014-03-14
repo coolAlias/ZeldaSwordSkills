@@ -125,7 +125,7 @@ public abstract class SkillActive extends SkillBase
 			}
 			return true;
 		} else {
-			if (level > 0) { player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.skill.use.fail", name)); }
+			if (level > 0) { player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.skill.use.fail", getDisplayName())); }
 			return false;
 		}
 	}

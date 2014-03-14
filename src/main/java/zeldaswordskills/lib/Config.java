@@ -307,7 +307,7 @@ public class Config
 		genericMobDropChance = config.get("Drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt();
 		for (int i = 0; i < orbDropChance.length; ++i) {
 			if (SkillBase.getSkillList()[i] != null && SkillBase.getSkillList()[i].canDrop()) {
-				orbDropChance[i] = config.get("Drops", "Chance (in tenths of a percent) for " + SkillBase.getSkillList()[i].name + " [0-10]", 5).getInt();
+				orbDropChance[i] = config.get("Drops", "Chance (in tenths of a percent) for " + SkillBase.getSkillList()[i].getDisplayName() + " [0-10]", 5).getInt();
 			}
 		}
 		/*================== TRADES =====================*/

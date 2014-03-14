@@ -60,24 +60,21 @@ public abstract class SkillBase
 	private static final SkillBase[] skillsList = new SkillBase[MAX_NUM_SKILLS];
 
 	/* ACTIVE SKILLS */
-	public static final SkillBase swordBasic = new SwordBasic("Basic Sword Skill", (byte) skillIndex++);
-	public static final SkillBase armorBreak = new ArmorBreak("Armor Break", (byte) skillIndex++);
-	public static final SkillBase dodge = new Dodge("Dodge", (byte) skillIndex++);
-	public static final SkillBase leapingBlow = new LeapingBlow("Leaping Blow", (byte) skillIndex++);
-	public static final SkillBase parry = new Parry("Parry", (byte) skillIndex++);
-	public static final SkillBase dash = new Dash("Dash", (byte) skillIndex++);
-	public static final SkillBase spinAttack = new SpinAttack("Spin Attack", (byte) skillIndex++);
-	public static final SkillBase superSpinAttack = new SpinAttack("Super Spin Attack", (byte) skillIndex++);
-	public static final SkillBase swordBeam = new SwordBeam("Sword Beam", (byte) skillIndex++);
+	public static final SkillBase swordBasic = new SwordBasic("basicswordskill", (byte) skillIndex++);
+	public static final SkillBase armorBreak = new ArmorBreak("armorbreak", (byte) skillIndex++);
+	public static final SkillBase dodge = new Dodge("dodge", (byte) skillIndex++);
+	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow", (byte) skillIndex++);
+	public static final SkillBase parry = new Parry("parry", (byte) skillIndex++);
+	public static final SkillBase dash = new Dash("dash", (byte) skillIndex++);
+	public static final SkillBase spinAttack = new SpinAttack("spinattack", (byte) skillIndex++);
+	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack", (byte) skillIndex++);
+	public static final SkillBase swordBeam = new SwordBeam("swordbeam", (byte) skillIndex++);
 
 	/* PASSIVE SKILLS */
-	public static final SkillBase bonusHeart = new BonusHeart("Bonus Heart", (byte) skillIndex++);
+	public static final SkillBase bonusHeart = new BonusHeart("bonusheart", (byte) skillIndex++);
 
 	/* NEW SKILLS */
-	public static final SkillBase mortalDraw = new MortalDraw("Mortal Draw", (byte) skillIndex++);
-
-	/** Skill's display name */
-	public final String name;
+	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw", (byte) skillIndex++);
 
 	/** Unlocalized name for language registry */
 	protected final String unlocalizedName;
@@ -92,21 +89,19 @@ public abstract class SkillBase
 	protected final List<String> tooltip = new ArrayList<String>();
 
 	public SkillBase(String name, byte id, boolean register) {
-		this.name = name;
-		this.unlocalizedName = this.name.replace(" ", "").toLowerCase();
+		this.unlocalizedName = name;
 		this.id = id;
 
 		if (register) {
 			if (skillsList[id] != null) {
 				LogHelper.log(Level.WARNING,"CONFLICT @ skill " + id + " id already occupied by "
-						+ skillsList[id].name + " while adding " + name);
+						+ skillsList[id].getDisplayName() + " while adding " + name);
 			}
 			skillsList[id] = this;
 		}
 	}
 
 	public SkillBase(SkillBase skill) {
-		this.name = skill.name;
 		this.unlocalizedName = skill.unlocalizedName;
 		this.id = skill.id;
 		this.tooltip.addAll(skill.tooltip);
@@ -132,6 +127,9 @@ public abstract class SkillBase
 
 	/** Returns a new instance of the skill with appropriate class type without registering it to the Skill database */
 	public abstract SkillBase newInstance();
+
+	/** Returns the translated skill name */
+	public final String getDisplayName() { return StatCollector.translateToLocal(getUnlocalizedName()); }
 
 	/** Returns the unlocalized name prefixed by 'skill.' and suffixed by '.name' */
 	public final String getUnlocalizedName() { return "skill.zss." + unlocalizedName + ".name"; }
