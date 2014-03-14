@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +24,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
@@ -65,7 +63,7 @@ public class LeapingBlow extends SkillActive
 	public LeapingBlow(String name, byte id) {
 		super(name, id);
 		setDisablesLMB();
-		addDescription(Arrays.asList("leapingblow.desc.0","leapingblow.desc.1","leapingblow.desc.2"));
+		addDescription(Arrays.asList("leapingblow.desc.0","leapingblow.desc.1"));
 	}
 
 	private LeapingBlow(LeapingBlow skill) { super(skill); }
@@ -76,11 +74,10 @@ public class LeapingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = new ArrayList<String>(4);
-		desc.add(StatCollector.translateToLocal(tooltip.get(0)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.leapingblow.desc.3",(PlayerUtils.isHoldingMasterSword(player) ? level * 2 : level)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.leapingblow.desc.4",(getPotionDuration(player) / 20)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.leapingblow.desc.5",String.format("%.2f", getExhaustion())));
+		List<String> desc = getDescription();
+		desc.add(getDurationDisplay(getPotionDuration(player), false));
+		desc.add(getDamageDisplay((PlayerUtils.isHoldingMasterSword(player) ? level * 2 : level), true));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 	

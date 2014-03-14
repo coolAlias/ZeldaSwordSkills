@@ -84,7 +84,7 @@ public class Parry extends SkillActive
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.parry.desc.1",(int)(getDisarmChance(player, null) * 100)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.parry.desc.2",String.format("%.2f", getExhaustion())));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 

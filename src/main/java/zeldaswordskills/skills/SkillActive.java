@@ -62,30 +62,30 @@ public abstract class SkillActive extends SkillBase
 {
 	/** If false, the skill may not be manually activated; used for passive skills that can be triggered */
 	private boolean allowUserActivation = true;
-	
+
 	/** If true, further left-click interactions will be canceled while this skill is active */
 	private boolean disablesLMB = false;
-	
+
 	protected SkillActive(String name, byte id) {
 		super(name, id, true);
 	}
-	
+
 	protected SkillActive(SkillActive skill) {
 		super(skill);
 		this.allowUserActivation = skill.allowUserActivation;
 		this.disablesLMB = skill.disablesLMB;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) { return getDescription(); }
-	
+
 	/** Returns true if this skill is currently active, however that is defined by the child class */
 	public abstract boolean isActive();
-	
+
 	/** Amount of exhaustion added to the player each time this skill is used */
 	protected abstract float getExhaustion();
-	
+
 	/**
 	 * Use for player activation of a skill; only triggers if the skill may be manually activated
 	 * This method is called when the skill is used; override to specify effect(s), but be
@@ -102,7 +102,7 @@ public abstract class SkillActive extends SkillBase
 		if (allowUserActivation) { return trigger(world, player); }
 		return false;
 	}
-	
+
 	/**
 	 * Triggers the skill if the player can currently use it, even if the skill may not
 	 * be manually activated (e.g. First Aid)
@@ -129,16 +129,16 @@ public abstract class SkillActive extends SkillBase
 			return false;
 		}
 	}
-	
+
 	/** Returns true if this skill can currently be used by the player; override to add further conditions */
 	public boolean canUse(EntityPlayer player) { return (level > 0 && player.getFoodStats().getFoodLevel() > 0); }
-	
+
 	/** Disables manual activation of this skill */
 	protected SkillActive disableUserActivation() { allowUserActivation = false; return this; }
-	
+
 	/** Sets the skill to prevent left-mouse clicks while active */
 	protected SkillActive setDisablesLMB() { disablesLMB = true; return this; }
-	
+
 	@Override
 	protected void levelUp(EntityPlayer player) {}
 
@@ -147,12 +147,12 @@ public abstract class SkillActive extends SkillBase
 		compound.setByte("id", id);
 		compound.setByte("level", level);
 	}
-	
+
 	@Override
 	public final void readFromNBT(NBTTagCompound compound) {
 		level = compound.getByte("level");
 	}
-	
+
 	@Override
 	public final SkillActive loadFromNBT(NBTTagCompound compound) {
 		SkillActive skill = (SkillActive) getSkillList()[compound.getByte("id")].newInstance();

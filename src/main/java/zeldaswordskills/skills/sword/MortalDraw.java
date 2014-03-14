@@ -81,7 +81,7 @@ public class MortalDraw extends SkillActive
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.mortaldraw.desc.2", (getAttackTime() - DELAY)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.mortaldraw.desc.3", String.format("%.2f", getExhaustion())));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 

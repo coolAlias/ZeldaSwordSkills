@@ -17,14 +17,11 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
@@ -70,7 +67,7 @@ public class Dash extends SkillActive
 	public Dash(String name, byte id) {
 		super(name, id);
 		setDisablesLMB();
-		addDescription(Arrays.asList("dash.desc.0","dash.desc.1"));
+		addDescription("dash.desc.0");
 	}
 
 	private Dash(Dash skill) { super(skill); }
@@ -81,11 +78,10 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = new ArrayList<String>(4);
-		desc.add(StatCollector.translateToLocal(tooltip.get(0)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dash.desc.2",String.format("%.1f", getRange())));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dash.desc.3",String.format("%.1f", getDamage())));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dash.desc.4",String.format("%.2f", getExhaustion())));
+		List<String> desc = getDescription();
+		desc.add(getRangeDisplay(getRange()));
+		desc.add(getDamageDisplay(getDamage(), false));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 

@@ -23,7 +23,6 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
@@ -89,8 +88,8 @@ public class ArmorBreak extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.armorbreak.desc.2",getChargeTime(player)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.armorbreak.desc.3",String.format("%.2f", getExhaustion())));
+		desc.add(getChargeDisplay(getChargeTime(player)));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 

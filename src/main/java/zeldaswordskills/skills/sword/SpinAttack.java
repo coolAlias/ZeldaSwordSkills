@@ -24,7 +24,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -95,7 +94,7 @@ public class SpinAttack extends SkillActive
 	public SpinAttack(String name, byte id) {
 		super(name, id);
 		setDisablesLMB();
-		if (name.contains("Super")) { addDescription("superspinattack.desc.0"); }
+		if (name.toLowerCase().contains("super")) { addDescription("superspinattack.desc.0"); }
 		else { addDescription("spinattack.desc.0"); }
 		addDescription("spinattack.desc.1");
 	}
@@ -112,9 +111,9 @@ public class SpinAttack extends SkillActive
 			superLevel = ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack);
 		}
 		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.2",getChargeTime()));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.3",String.format("%.1f", getRange())));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.spinattack.desc.4",String.format("%.2f", getExhaustion())));
+		desc.add(getChargeDisplay(getChargeTime()));
+		desc.add(getRangeDisplay(getRange()));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 

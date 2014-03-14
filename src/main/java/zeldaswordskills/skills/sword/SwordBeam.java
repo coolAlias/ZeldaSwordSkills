@@ -22,7 +22,6 @@ import java.util.List;
 
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -70,8 +69,8 @@ public class SwordBeam extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.swordbeam.desc.3",level));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.swordbeam.desc.4",String.format("%.2f", getExhaustion())));
+		desc.add(getDamageDisplay(level, true));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 

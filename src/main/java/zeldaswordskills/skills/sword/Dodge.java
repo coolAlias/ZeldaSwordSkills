@@ -87,7 +87,7 @@ public class Dodge extends SkillActive
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
 		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dodge.desc.1",(int)(getDodgeChance(player) * 100)));
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dodge.desc.2",String.format("%.2f", getExhaustion())));
+		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 

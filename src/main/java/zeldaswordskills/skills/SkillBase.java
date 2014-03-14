@@ -95,7 +95,7 @@ public abstract class SkillBase
 		if (register) {
 			if (skillsList[id] != null) {
 				LogHelper.log(Level.WARNING,"CONFLICT @ skill " + id + " id already occupied by "
-						+ skillsList[id].getDisplayName() + " while adding " + name);
+						+ skillsList[id].unlocalizedName + " while adding " + name);
 			}
 			skillsList[id] = this;
 		}
@@ -159,6 +159,37 @@ public abstract class SkillBase
 	/** Returns a personalized tooltip display containing info about skill at current level */
 	@SideOnly(Side.CLIENT)
 	public abstract List<String> getDescription(EntityPlayer player);
+
+	/** Returns a translated description of the skill's AoE, using the value provided */
+	public String getAreaDisplay(double area) {
+		return StatCollector.translateToLocalFormatted("skill.zss.area.desc", String.format("%.1f", area));
+	}
+
+	/** Returns a translated description of the skill's charge time in ticks, using the value provided */
+	public String getChargeDisplay(int chargeTime) {
+		return StatCollector.translateToLocalFormatted("skill.zss.charge.desc", chargeTime);
+	}
+
+	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
+	public String getDamageDisplay(float damage, boolean displayPlus) {
+		return StatCollector.translateToLocalFormatted("skill.zss.damage.desc", (displayPlus ? "+" : ""), String.format("%.1f", damage));
+	}
+
+	/** Returns a translated description of the skill's duration, in ticks or seconds, using the value provided */
+	public String getDurationDisplay(int duration, boolean inTicks) {
+		return StatCollector.translateToLocalFormatted("skill.zss.duration.desc", (inTicks ? duration : duration / 20),
+				(inTicks ? StatCollector.translateToLocal("skill.zss.ticks") : StatCollector.translateToLocal("skill.zss.seconds")));
+	}
+
+	/** Returns a translated description of the skill's exhaustion, using the value provided */
+	public String getExhaustionDisplay(float exhaustion) {
+		return StatCollector.translateToLocalFormatted("skill.zss.exhaustion.desc", String.format("%.2f", exhaustion));
+	}
+
+	/** Returns a translated description of the skill's range, using the value provided */
+	public String getRangeDisplay(double range) {
+		return StatCollector.translateToLocalFormatted("skill.zss.range.desc", String.format("%.1f", range));
+	}
 
 	/** Adds a single untranslated string to the skill's tooltip display */
 	protected final SkillBase addDescription(String string) { tooltip.add("skill.zss." + string); return this; }
