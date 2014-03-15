@@ -33,6 +33,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.lib.ModInfo;
@@ -58,16 +59,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemHookShot extends Item
 {
-	/** Types of HookShot available */
-	public static enum ShotType { WOOD_SHOT, WOOD_SHOT_EXT, STONE_SHOT, STONE_SHOT_EXT, MULTI_SHOT, MULTI_SHOT_EXT };
-
 	protected static final String[] shotNames = {"Hookshot","Stoneshot","Multishot"};
 
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
 
-	public ItemHookShot(int par1) {
-		super(par1);
+	public ItemHookShot(int id) {
+		super(id);
 		setMaxStackSize(1);
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
@@ -75,8 +73,8 @@ public class ItemHookShot extends Item
 	}
 
 	/** Returns this hookshot's enum Type from stack damage value */
-	public ShotType getType(int damage) {
-		return (damage < ShotType.values().length ? ShotType.values()[damage] : ShotType.WOOD_SHOT);
+	public HookshotType getType(int damage) {
+		return (damage < HookshotType.values().length ? HookshotType.values()[damage] : HookshotType.WOOD_SHOT);
 	}
 
 	/** Returns true if this hookshot is the extended version */
@@ -148,7 +146,7 @@ public class ItemHookShot extends Item
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(int itemID, CreativeTabs tab, List list) {
-		for (int i = 0; i < ShotType.values().length; ++i) {
+		for (int i = 0; i < HookshotType.values().length; ++i) {
 			list.add(new ItemStack(itemID, 1, i));
 		}
 	}
@@ -156,8 +154,8 @@ public class ItemHookShot extends Item
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[ShotType.values().length / 2];
-		for (int i = 0; i < ShotType.values().length; ++i) {
+		iconArray = new Icon[HookshotType.values().length / 2];
+		for (int i = 0; i < HookshotType.values().length; ++i) {
 			iconArray[i / 2] = register.registerIcon(ModInfo.ID + ":" + shotNames[getType(i).ordinal() / 2].toLowerCase());
 		}
 	}

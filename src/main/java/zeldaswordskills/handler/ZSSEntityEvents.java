@@ -36,12 +36,12 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.item.ItemHookShot.ShotType;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
@@ -161,7 +161,7 @@ public class ZSSEntityEvents
 			// TODO remove CHEAT for testing on server!!!
 			if (Config.areCheatsEnabled()) {
 				player.inventory.addItemStackToInventory(new ItemStack(Item.swordIron));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT.ordinal()));
+				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()));
 				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bombBag));
 				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));
 				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));

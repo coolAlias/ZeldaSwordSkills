@@ -35,6 +35,7 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
+import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
@@ -56,7 +57,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	private final BlockWeight weight;
 	/** Metadata value that signifies a fully smashed down peg */
 	private static final int MAX_STATE = 3;
-	
+
 	public static final MaterialPeg pegWoodMaterial = new MaterialPeg(MapColor.woodColor);
 	public static final MaterialPeg pegRustyMaterial = new MaterialPeg(MapColor.ironColor);
 
@@ -76,19 +77,24 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F, 0.75F);
 	}
-	
+
 	/** Returns appropriate sound based on block material */
 	private String getHitSound() {
 		return blockMaterial == Material.iron ? ModInfo.SOUND_HIT_RUSTY : ModInfo.SOUND_HIT_PEG;
 	}
-	
+
 	@Override
-	public boolean canAlwaysGrab() {
-		return blockMaterial == pegWoodMaterial;
+	public boolean canAlwaysGrab(HookshotType type, World world, int x, int y, int z) {
+		return type == HookshotType.MULTI_SHOT || type == HookshotType.MULTI_SHOT_EXT;
 	}
 
 	@Override
-	public Material getHookableMaterial() {
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z) {
+		return Result.DENY;
+	}
+
+	@Override
+	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
 		return (blockMaterial == pegWoodMaterial ? Material.wood : Material.iron);
 	}
 
@@ -124,7 +130,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 		}
 		return Result.DENY;
 	}
-	
+
 	@Override
 	public void updateTick(World world, int x, int y, int z, Random rand) {
 		int meta = world.getBlockMetadata(x, y, z);
@@ -132,7 +138,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 			world.setBlockMetadataWithNotify(x, y, z, meta - 1, 3);
 		}
 	}
-	
+
 	@Override
 	public int tickRate(World world) { return 60; }
 
@@ -141,12 +147,12 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public boolean isOpaqueCube() { return false; }
-	
+
 	@Override
 	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
 		return false;
 	}
-	
+
 	@Override
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
 		if (world.getBlockMetadata(x, y, z) >= MAX_STATE) {
@@ -161,7 +167,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 		int meta = Math.min(world.getBlockMetadata(x, y, z), MAX_STATE);
 		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F - (meta * 0.2F), 0.75F);
 	}
-	
+
 	@Override
 	public void setBlockBoundsForItemRender() {
 		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F, 0.75F);

@@ -28,8 +28,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.entity.ZSSVillagerInfo;
-import zeldaswordskills.item.ItemHookShot.ShotType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
@@ -61,37 +61,37 @@ public class TradeHandler implements IVillageTradeHandler
 			VillagerRegistry.instance().registerVillageTradeHandler(i, new TradeHandler());
 		}
 		
-		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT.ordinal()), 
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT.ordinal()),
+		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()), 
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.EXTENSION.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT_EXT.ordinal())));
-		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT.ordinal()),
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal())));
+		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()),
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.EXTENSION.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT_EXT.ordinal())));
-		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,ShotType.MULTI_SHOT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,ShotType.MULTI_SHOT.ordinal()),
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal())));
+		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal()),
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.EXTENSION.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,ShotType.MULTI_SHOT_EXT.ordinal())));
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT_EXT.ordinal())));
 		
-		addTradeToMap(AddonType.STONECLAW, new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT.ordinal()), 
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT.ordinal()),
+		addTradeToMap(AddonType.STONECLAW, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()), 
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.STONECLAW.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT.ordinal())));
-		addTradeToMap(AddonType.STONECLAW, new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT_EXT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,ShotType.WOOD_SHOT_EXT.ordinal()),
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal())));
+		addTradeToMap(AddonType.STONECLAW, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal()),
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.STONECLAW.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT_EXT.ordinal())));
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal())));
 		
 		
-		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT.ordinal()), 
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT.ordinal()),
+		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()), 
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.MULTI.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,ShotType.MULTI_SHOT.ordinal())));
-		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT_EXT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,ShotType.STONE_SHOT_EXT.ordinal()),
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal())));
+		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal()),
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.MULTI.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,ShotType.MULTI_SHOT_EXT.ordinal())));
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT_EXT.ordinal())));
 		
 		ZSSVillagerInfo.initTrades();
 	}

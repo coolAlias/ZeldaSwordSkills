@@ -33,8 +33,8 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.entity.EntityOctorok;
-import zeldaswordskills.item.ItemHookShot.ShotType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
@@ -146,7 +146,7 @@ public enum BossType
 	private static final ItemStack[] forestItems = {
 		new ItemStack(ZSSItems.dekuLeaf),
 		new ItemStack(ZSSItems.heroBow),
-		new ItemStack(ZSSItems.hookshot, 1, ShotType.WOOD_SHOT.ordinal()),
+		new ItemStack(ZSSItems.hookshot, 1, HookshotType.WOOD_SHOT.ordinal()),
 		new ItemStack(ZSSItems.maskHawkeye)
 	};
 	private static final ItemStack[] mountainItems = {

@@ -28,7 +28,7 @@ import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.api.entity.BombType;
-import zeldaswordskills.item.ItemHookShot.ShotType;
+import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemKeyBig;
 import zeldaswordskills.item.ItemTreasure.Treasures;
@@ -200,7 +200,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.dekuLeaf, 1, 1, 1),
 			getLoot(ZSSItems.hammer, 1, 1, 1),
 			getLoot(ZSSItems.heroBow, 1, 1, 1),
-			getLoot(ZSSItems.hookshot, ShotType.WOOD_SHOT.ordinal(), 1, 1, 1),
+			getLoot(ZSSItems.hookshot, HookshotType.WOOD_SHOT.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.EXTENSION.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.STONECLAW.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.MULTI.ordinal(), 1, 1, 1),
