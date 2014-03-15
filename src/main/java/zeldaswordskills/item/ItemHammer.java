@@ -22,6 +22,7 @@ import java.util.List;
 import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockBreakable;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -78,7 +79,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	
 	@Override
 	public boolean canHarvestBlock(Block block) {
-		return block instanceof ISmashable;
+		return block instanceof ISmashable || block instanceof BlockBreakable;
 	}
 
 	@Override
@@ -88,7 +89,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 
 	@Override
 	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta) {
-		return strength;
+		return (block instanceof BlockBreakable) ? strength.next() : strength;
 	}
 
 	@Override

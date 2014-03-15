@@ -93,6 +93,8 @@ public class Config
 	private static int bombFuseTime;
 	/** [Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone */
 	private static boolean onlyBombSecretStone;
+	/** [Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves */
+	private static boolean enableDekuDenude;
 	/** [Din's Fire] Whether Din's Fire can set blocks on fire */
 	private static boolean enableDinIgnite;
 	/** [Din's Fire] Whether Din's Fire can melt unbreakable ice blocks */
@@ -253,6 +255,7 @@ public class Config
 		enableDungeonCoreTab = config.get("Item", "[Blocks] Show Dungeon Core (fairy spawner) blocks in the Creative Tabs", true).getBoolean(true);
 		bombFuseTime = config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt();
 		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone", false).getBoolean(false);
+		enableDekuDenude = config.get("Item", "[Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves", true).getBoolean(true);
 		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
 		heroBowUpgradeCost = config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt();
@@ -358,6 +361,7 @@ public class Config
 	public static boolean isDungeonCoreTabEnabled() { return enableDungeonCoreTab; }
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
 	public static int getBombFuseTime() { return MathHelper.clamp_int(bombFuseTime, 0, 128); }
+	public static boolean canDekuDenude() { return enableDekuDenude; }
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
 	public static int getHeroBowUpgradeCost() { return MathHelper.clamp_int(heroBowUpgradeCost, 128, 640); }

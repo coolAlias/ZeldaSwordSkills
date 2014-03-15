@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockBreakable;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.IBossDisplayData;
@@ -245,11 +246,12 @@ public class ZSSItemEvents
 			Block block = Block.blocksList[id];
 			int meta = world.getBlockMetadata(x, y, z);
 			boolean isLiftable = block instanceof ILiftable;
+			boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
 			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta)
 							: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
-			if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (isLiftable || !block.hasTileEntity(meta))) {
+			if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (isLiftable || !block.hasTileEntity(meta))) {
 				// make a copy for ILiftable#onLifted
 				ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack.copy(), block, meta);
 				if (returnStack != null && returnStack.stackSize <= 0) {
@@ -290,10 +292,13 @@ public class ZSSItemEvents
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			smashResult = (isSmashable ? ((ISmashable) block).onSmashed(world, player, stack, x, y, z, side) : smashResult);
 			if (smashResult == Result.DEFAULT) {
-				if (weight != BlockWeight.IMPOSSIBLE && strength >= resistance && block.isOpaqueCube() && (!block.hasTileEntity(meta) || isSmashable)) {
-					wasDestroyed = true;
-					world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
+				boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
+				if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (!block.hasTileEntity(meta) || isSmashable)) {
+					if (!(block instanceof BlockBreakable)) {
+						world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
+					}
 					world.destroyBlock(x, y, z, false);
+					wasDestroyed = true;
 				}
 			}
 			((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, block, meta, (smashResult == Result.ALLOW || wasDestroyed));

@@ -36,6 +36,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.client.particle.FXCycloneRing;
+import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.WorldUtils;
@@ -114,7 +115,9 @@ public class EntityCyclone extends EntityMobThrowable
 		if (mop.typeOfHit == EnumMovingObjectType.TILE) {
 			Material m = worldObj.getBlockMaterial(mop.blockX, mop.blockY, mop.blockZ);
 			if (m == Material.leaves) {
-				worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, true);
+				if (Config.canDekuDenude()) {
+					worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, true);
+				}
 			} else if (m.blocksMovement()) {
 				if (mop.sideHit == SideHit.TOP) {
 					posY = mop.blockY + 1;
@@ -172,7 +175,7 @@ public class EntityCyclone extends EntityMobThrowable
 			j = chunkposition.y;
 			k = chunkposition.z;
 			Material m = worldObj.getBlockMaterial(i, j, k);
-			if (m == Material.leaves || m == Material.plants || m == Material.vine || m == Material.web) {
+			if ((m == Material.leaves && Config.canDekuDenude()) || m == Material.plants || m == Material.vine || m == Material.web) {
 				worldObj.destroyBlock(i, j, k, true);
 			}
 		}
