@@ -22,6 +22,7 @@ import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
@@ -37,12 +38,14 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.damage.IDamageType;
 import zeldaswordskills.api.damage.IPostDamageEffect;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
@@ -55,6 +58,7 @@ import zeldaswordskills.item.ItemFairyBottle;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ItemZeldaSword;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
@@ -257,6 +261,16 @@ public class ZSSCombatEvents
 	public void onPlayerAttack(AttackEntityEvent event) {
 		if (!event.entityPlayer.worldObj.isRemote) {
 			setPlayerAttackTime(event.entityPlayer);
+		}
+	}
+	
+	@ForgeSubscribe
+	public void onSetAttackTarget(LivingSetAttackTargetEvent event) {
+		if (event.target instanceof EntityPlayer && event.entity instanceof EntityLiving) {
+			ItemStack mask = ((EntityPlayer) event.target).getCurrentArmor(ArmorIndex.WORN_HELM);
+			if (mask != null && mask.getItem() == ZSSItems.maskSpooky && event.entityLiving.func_94060_bK() != event.target) {
+				((EntityLiving) event.entity).setAttackTarget(null);
+			}
 		}
 	}
 

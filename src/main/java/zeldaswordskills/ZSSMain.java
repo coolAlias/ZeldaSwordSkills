@@ -80,25 +80,27 @@ public class ZSSMain
 		ZSSItems.load();
 		ZSSEntities.load();
 		ZSSAchievements.init();
+		DungeonLootLists.initLootLists();
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
+		proxy.initialize();
+		if (Config.areBossDungeonsEnabled() || Config.getAttemptsPerChunk() > 0 || Config.getNetherAttemptsPerChunk() > 0) {
+			MinecraftForge.TERRAIN_GEN_BUS.register(new ZSSWorldGenEvent());
+		}
 	}
 	
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		proxy.initialize();
+		proxy.registerRenderers();
 		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
-		MinecraftForge.TERRAIN_GEN_BUS.register(new ZSSWorldGenEvent());
+		ZSSItemEvents.initializeDrops();
 		NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
-		DungeonLootLists.initLootLists();
-		proxy.registerRenderers();
 	}
 	
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		ZSSItemEvents.initializeDrops();
 		if (isBG2Enabled) {
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}

@@ -36,7 +36,6 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void initialize() {
 		super.initialize();
-		ZSSMain.atlasHelper.registerTextures();
 		ZSSKeyHandler.init();
 		MinecraftForge.EVENT_BUS.register(new SoundHandler());
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay(Minecraft.getMinecraft()));
@@ -51,6 +50,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void registerRenderers() {
+		ZSSMain.atlasHelper.registerTextures();
 		ZSSBlocks.registerRenderers();
 		ZSSEntities.registerRenderers();
 		ZSSItems.registerRenderers();
