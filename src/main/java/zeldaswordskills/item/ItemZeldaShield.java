@@ -40,6 +40,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -60,10 +61,10 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @Optional.InterfaceList(value={
-	@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
-	@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowCatcher", modid="battlegear2", striprefs=true),
-	@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowDisplay", modid="battlegear2", striprefs=true),
-	@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
+		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
+		@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowCatcher", modid="battlegear2", striprefs=true),
+		@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowDisplay", modid="battlegear2", striprefs=true),
+		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
 public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
@@ -139,11 +140,13 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 						NBTTagCompound data = new NBTTagCompound();
 						source.getSourceOfDamage().writeToNBT(data);
 						projectile.readFromNBT(data);
-						projectile.posX -= projectile.motionX * 2;
-						projectile.posY -= projectile.motionY * 2;
-						projectile.posZ -= projectile.motionZ * 2;
-						TargetUtils.setEntityHeading(projectile, -projectile.motionX, -projectile.motionY,
-								-projectile.motionZ, 1.0F, 2.0F + (20.0F * player.worldObj.rand.nextFloat()), false);
+						projectile.posX -= projectile.motionX;
+						projectile.posY -= projectile.motionY;
+						projectile.posZ -= projectile.motionZ;
+						double motionX = (double)(-MathHelper.sin(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
+						double motionZ = (double)(MathHelper.cos(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
+						double motionY = (double)(-MathHelper.sin(player.rotationPitch / 180.0F * (float) Math.PI));
+						TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, 2.0F + (20.0F * player.worldObj.rand.nextFloat()), false);
 						player.worldObj.spawnEntityInWorld(projectile);
 					}
 				}
