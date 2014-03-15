@@ -84,7 +84,7 @@ public class ItemMagicMirror extends Item
 			switch(player.dimension) {
 			case -1:
 				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, ((WorldServer) world).getDefaultTeleporter());
-				double dy = (double) player.worldObj.getHeightValue(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posZ));
+				double dy = player.worldObj.getHeightValue(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posZ));
 				player.setPositionAndUpdate(player.posX, dy + 1, player.posZ);
 				break;
 			case 0:
@@ -141,7 +141,7 @@ public class ItemMagicMirror extends Item
 			return iconArray[3];
 		} else if (ticksInUse > getMaxItemUseDuration(stack) / 3) {
 			return iconArray[2];
-		} else if (ticksInUse > getMaxItemUseDuration(stack) / 4) {
+		} else if (ticksInUse > getMaxItemUseDuration(stack) / 7) {
 			return iconArray[1];
 		} else {
 			return iconArray[0];
