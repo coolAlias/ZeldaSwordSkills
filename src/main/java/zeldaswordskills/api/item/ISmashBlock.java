@@ -32,6 +32,16 @@ import zeldaswordskills.api.block.BlockWeight;
  * 
  * ISmashable blocks can define custom behaviors using the onSmashed method, but all
  * other blocks that meet the smash criteria will simply be destroyed.
+ * 
+ * Note that in Adventure Mode, any Item implementing ISmashBlock should override
+ * the canHarvestBlock method to ensure that it will be able to affect all blocks
+ * that implement ISmashable, just in case the block does not use an Adventure Mode
+ * exempt block material:
+ * 
+ * @Override
+ * public boolean canHarvestBlock(Block block) {
+ * 	return block instanceof ISmashable;
+ * }
  *
  */
 public interface ISmashBlock {

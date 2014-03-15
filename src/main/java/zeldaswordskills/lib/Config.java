@@ -109,6 +109,8 @@ public class Config
 	private static boolean enableAutoBombArrows;
 	/** [Hookshot] Max range of non-extended hookshots */
 	private static int hookshotRange;
+	/** [Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass */
+	private static boolean enableHookshotBreakBlocks;
 	/** [Hookshot] Whether to play the 'itembreak' sound when the hookshot misses */
 	private static boolean enableHookshotSound;
 	/** [Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword */
@@ -259,6 +261,7 @@ public class Config
 		enableLightArrowNoClip = config.get("Item", "[Hero's Bow] Whether the light arrow can penetrate blocks", true).getBoolean(true);
 		enableAutoBombArrows = config.get("Item", "[Hero's Bow] Whether to automate bomb arrow firing when sneaking", true).getBoolean(true);
 		hookshotRange = config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt();
+		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		enableHookshotSound = config.get("Item", "[Hookshot] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
 		temperedRequiredKills = config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt();
 		slingshotUpgradeOne = config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt();
@@ -363,6 +366,7 @@ public class Config
 	public static boolean enableLightArrowNoClip() { return enableLightArrowNoClip; }
 	public static boolean enableAutoBombArrows() { return enableAutoBombArrows; }
 	public static int getHookshotRange() { return MathHelper.clamp_int(hookshotRange, 4, 16); }
+	public static boolean canHookshotBreakBlocks() { return enableHookshotBreakBlocks; }
 	public static boolean enableHookshotMissSound() { return enableHookshotSound; }
 	public static int getRequiredKills() { return MathHelper.clamp_int(temperedRequiredKills, 100, 1000) - 1; }
 	public static int getSlingshotCostOne() { return MathHelper.clamp_int(slingshotUpgradeOne, 64, 320); }

@@ -20,6 +20,7 @@ package zeldaswordskills.block;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
@@ -32,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -48,12 +50,15 @@ import cpw.mods.fml.relauncher.SideOnly;
  * If not destroyed, the peg will eventually pop back up.
  *
  */
-public class BlockPeg extends Block implements IDungeonBlock, ISmashable
+public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmashable
 {
 	/** The weight of this block, i.e. the difficulty of smashing this block */
 	private final BlockWeight weight;
 	/** Metadata value that signifies a fully smashed down peg */
 	private static final int MAX_STATE = 3;
+	
+	public static final MaterialPeg pegWoodMaterial = new MaterialPeg(MapColor.woodColor);
+	public static final MaterialPeg pegRustyMaterial = new MaterialPeg(MapColor.ironColor);
 
 	@SideOnly(Side.CLIENT)
 	private Icon iconTop;
@@ -75,6 +80,16 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 	/** Returns appropriate sound based on block material */
 	private String getHitSound() {
 		return blockMaterial == Material.iron ? ModInfo.SOUND_HIT_RUSTY : ModInfo.SOUND_HIT_PEG;
+	}
+	
+	@Override
+	public boolean canAlwaysGrab() {
+		return blockMaterial == pegWoodMaterial;
+	}
+
+	@Override
+	public Material getHookableMaterial() {
+		return (blockMaterial == pegWoodMaterial ? Material.wood : Material.iron);
 	}
 
 	@Override
@@ -126,9 +141,6 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 
 	@Override
 	public boolean isOpaqueCube() { return false; }
-
-	@Override
-	public int getMobilityFlag() { return 2; }
 	
 	@Override
 	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
@@ -167,5 +179,14 @@ public class BlockPeg extends Block implements IDungeonBlock, ISmashable
 		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_side");
 		iconTop = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top");
 		iconBottom = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_bottom");
+	}
+}
+
+class MaterialPeg extends Material {
+	public MaterialPeg(MapColor color) {
+		super(color);
+		setRequiresTool();
+		setImmovableMobility();
+		setAdventureModeExempt();
 	}
 }

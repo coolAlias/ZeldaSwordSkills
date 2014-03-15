@@ -80,8 +80,8 @@ public class ZSSBlocks
 		ceramicJar = new BlockCeramicJar(modBlockIndex++).setUnlocalizedName("zss.ceramic_jar");
 		barrierLight = new BlockHeavy(modBlockIndex++, Material.rock, BlockWeight.MEDIUM).setUnlocalizedName("zss.barrier_light");
 		barrierHeavy = new BlockHeavy(modBlockIndex++, Material.rock, BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.barrier_heavy");
-		pegWooden = new BlockPeg(modBlockIndex++, Material.wood, BlockWeight.VERY_LIGHT).setUnlocalizedName("zss.peg_wooden");
-		pegRusty = new BlockPeg(modBlockIndex++, Material.iron, BlockWeight.MEDIUM).setUnlocalizedName("zss.peg_rusty");
+		pegWooden = new BlockPeg(modBlockIndex++, BlockPeg.pegWoodMaterial, BlockWeight.VERY_LIGHT).setUnlocalizedName("zss.peg_wooden");
+		pegRusty = new BlockPeg(modBlockIndex++, BlockPeg.pegRustyMaterial, BlockWeight.MEDIUM).setUnlocalizedName("zss.peg_rusty");
 		
 		register();
 	}

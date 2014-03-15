@@ -37,6 +37,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStun;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISmashBlock;
@@ -73,6 +74,11 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
+	}
+	
+	@Override
+	public boolean canHarvestBlock(Block block) {
+		return block instanceof ISmashable;
 	}
 
 	@Override

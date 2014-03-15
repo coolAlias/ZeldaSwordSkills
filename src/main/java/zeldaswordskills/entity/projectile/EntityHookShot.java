@@ -155,7 +155,11 @@ public class EntityHookShot extends EntityThrowable
 	 * Returns true if the hookshot can destroy the material type
 	 */
 	protected boolean canDestroyMaterial(Material m) {
-		return m == Material.glass || (m == Material.wood && getType().ordinal() / 2 == (ShotType.STONE_SHOT.ordinal() / 2));
+		boolean flag = false;
+		if (getThrower() instanceof EntityPlayer) {
+			flag = ((EntityPlayer) getThrower()).capabilities.allowEdit && Config.canHookshotBreakBlocks();
+		}
+		return flag && (m == Material.glass || (m == Material.wood && getType().ordinal() / 2 == (ShotType.STONE_SHOT.ordinal() / 2)));
 	}
 	
 	@Override // getVelocity

@@ -24,18 +24,19 @@ import net.minecraftforge.event.Event.Result;
 
 /**
  * 
- * Interface for blocks that are smashable, even in Adventure Mode.
+ * Interface for blocks that are smashable, even in Adventure Mode. Note that in order
+ * for your block to be smashable in Adventure Mode, it is advisable to create a custom
+ * Material that is adventure mode exempt, though Hammers will be able to affect any
+ * ISmashable block regardless of Material.
  * 
- * Vanilla blocks are only smashable if the player is allowed to edit the
- * world, the block is solid and breakable (e.g. not bedrock), and the
- * item used has sufficient strength to smash the block based on its
- * block resistance value.
+ * Vanilla blocks are only smashable if the player is allowed to edit the world, the block
+ * is solid and breakable (e.g. not bedrock), and the item used has sufficient strength to
+ * smash the block based on its block resistance value.
  * 
- * Vanilla blocks with tile entities cannot be smashed, but ISmashable blocks
- * with tile entities may.
+ * Vanilla blocks with tile entities cannot be smashed, but ISmashable blocks may choose
+ * to allow and handle tile entities.
  * 
- * Note that unless handled specifically in onSmashed, smashed blocks do not
- * drop any items or blocks.
+ * Note that unless handled specifically in onSmashed, smashed blocks do not drop any items.
  *
  */
 public interface ISmashable {
