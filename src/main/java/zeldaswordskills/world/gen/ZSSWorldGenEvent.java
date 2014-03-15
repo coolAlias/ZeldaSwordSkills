@@ -21,6 +21,7 @@ import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
+import zeldaswordskills.lib.Config;
 import zeldaswordskills.world.gen.structure.MapGenBossRoom;
 import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoom;
@@ -38,14 +39,22 @@ public class ZSSWorldGenEvent
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
 			if (event.type == EventType.GLOWSTONE) {
-				netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+				if (Config.getNetherAttemptsPerChunk() > 0) {
+					netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+				}
+				if (Config.areBossDungeonsEnabled()) {
+					netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+				}
 			}
 			break;
 		case 0: // the Overworld
-			if (event.type == EventType.ICE) { 
-				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			if (event.type == EventType.ICE) {
+				if (Config.getAttemptsPerChunk() > 0) {
+					secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+				}
+				if (Config.areBossDungeonsEnabled()) {
+					bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+				}
 			} else if (event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
 				event.setResult(Result.DENY);
 			}

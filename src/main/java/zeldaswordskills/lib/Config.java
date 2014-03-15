@@ -139,6 +139,8 @@ public class Config
 	private static boolean avoidModBlocks;
 	/** Whether boss dungeons are allowed to have windows or not */
 	private static boolean enableWindows;
+	/** Enable Boss Dungeon generation */
+	private static boolean enableBossDungeons;
 	/** Minimum number of chunks between Boss Dungeons in the Overworld */
 	private static int minBossDistance;
 	/** Minimum number of chunks between Boss Dungeons in the Nether */
@@ -279,17 +281,18 @@ public class Config
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
 		enableWindows = config.get("Dungeon Generation", "Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
+		enableBossDungeons = config.get("Dungeon Generation", "Enable Boss Dungeon generation", true).getBoolean(true);
 		mainDungeonDifficulty = config.get("Dungeon Generation", "[Overworld] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt();
 		secretRoomChance = config.get("Dungeon Generation", "[Overworld] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt();
 		minLandDistance = config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt();
 		minOceanDistance = config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between ocean-based secret rooms [2-32]", 6).getInt();
 		minBossDistance = config.get("Dungeon Generation", "[Overworld] Minimum number of chunks between Boss Dungeons [8-128]", 24).getInt();
-		genAttemptsPerChunk = config.get("Dungeon Generation", "[Overworld] Secret room generation attempts per chunk [1-20]", 12).getInt();
+		genAttemptsPerChunk = config.get("Dungeon Generation", "[Overworld] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt();
 		netherDungeonDifficulty = config.get("Dungeon Generation", "[Nether] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt();
 		secretRoomChanceNether = config.get("Dungeon Generation", "[Nether] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt();
 		minDistanceNether = config.get("Dungeon Generation", "[Nether] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt();
 		minBossDistanceNether = config.get("Dungeon Generation", "[Nether] Minimum number of chunks between Boss Dungeons [8-64]", 12).getInt();
-		genAttemptsPerChunkNether = config.get("Dungeon Generation", "[Nether] Secret room generation attempts per chunk [1-20]", 12).getInt();
+		genAttemptsPerChunkNether = config.get("Dungeon Generation", "[Nether] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt();
 		fairySpawnerChance = config.get("Dungeon Generation", "Chance (as a percent) for certain dungeons to have fairy spawners [0-100]", 10).getInt();
 		resetSpawnerTime = config.get("Dungeon Generation", "Maximum number of days required for fairies to replenish [2-10]", 7).getInt();
 		/*================== LOOT =====================*/
@@ -386,6 +389,7 @@ public class Config
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }
+	public static boolean areBossDungeonsEnabled() { return enableBossDungeons; }
 	public static int getMinBossDistance() { return MathHelper.clamp_int(minBossDistance, 8, 128); }
 	public static int getMinLandDistance() { return MathHelper.clamp_int(minLandDistance, 2, 16); }
 	public static int getMinOceanDistance() { return MathHelper.clamp_int(minOceanDistance, 2, 32); }
