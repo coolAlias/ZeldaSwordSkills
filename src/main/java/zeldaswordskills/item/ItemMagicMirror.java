@@ -23,16 +23,19 @@ import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
@@ -80,9 +83,9 @@ public class ItemMagicMirror extends Item
 		if (!world.isRemote && ticksRemaining < (getMaxItemUseDuration(stack) / 2)) {
 			switch(player.dimension) {
 			case -1:
-				player.travelToDimension(0);
-				double dy = (double) player.worldObj.getHeightValue((int) player.posX - 32, (int) player.posZ + 32);
-				player.setPositionAndUpdate(player.posX - 32, dy + 1, player.posZ + 32);
+				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, ((WorldServer) world).getDefaultTeleporter());
+				double dy = (double) player.worldObj.getHeightValue(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posZ));
+				player.setPositionAndUpdate(player.posX, dy + 1, player.posZ);
 				break;
 			case 0:
 				double[] coordinates = getLastPosition(stack);
