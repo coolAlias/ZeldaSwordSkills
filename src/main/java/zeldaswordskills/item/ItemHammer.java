@@ -35,6 +35,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.api.block.BlockWeight;
@@ -180,7 +181,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double x, double y, double z, float radius) {
+	public void spawnParticles(World world, double x, double y, double z, float radius, Vec3 lookVector) {
 		int r = MathHelper.ceiling_float_int(radius);
 		for (int i = 0; i < r; ++i) {
 			for (int k = 0; k < r; ++k) {

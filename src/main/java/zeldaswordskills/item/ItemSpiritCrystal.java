@@ -252,7 +252,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double posX, double posY, double posZ, float radius) {
+	public void spawnParticles(World world, double posX, double posY, double posZ, float radius, Vec3 lookVector) {
 		int i1 = MathHelper.floor_double(posX + radius);
 		int j1 = MathHelper.floor_double(posY + radius);
 		int k1 = MathHelper.floor_double(posZ + radius);

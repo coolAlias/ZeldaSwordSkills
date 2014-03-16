@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.util.Vec3;
 import zeldaswordskills.item.ISpawnParticles;
 
 import com.google.common.io.ByteArrayDataInput;
@@ -43,19 +44,20 @@ public class PacketISpawnParticles extends CustomPacket
 	private double x, y, z;
 	/** Radius in which to spawn the particles */
 	private float r;
+	/** Storage for the normalized look vector of the original player */
+	private double xCoord, yCoord, zCoord;
 
 	public PacketISpawnParticles() {}
-	
+
 	public PacketISpawnParticles(EntityPlayer player, Item item, float radius) {
-		this(item, player.posX, player.posY, player.posZ, radius);
-	}
-	
-	public PacketISpawnParticles(Item item, double posX, double posY, double posZ, float radius) {
 		this.item = item;
-		x = posX;
-		y = posY;
-		z = posZ;
+		x = player.posX;
+		y = player.posY;
+		z = player.posZ;
 		r = radius;
+		xCoord = player.getLookVec().xCoord;
+		yCoord = player.getLookVec().yCoord;
+		zCoord = player.getLookVec().zCoord;
 	}
 
 	@Override
@@ -65,6 +67,9 @@ public class PacketISpawnParticles extends CustomPacket
 		out.writeDouble(y);
 		out.writeDouble(z);
 		out.writeFloat(r);
+		out.writeDouble(xCoord);
+		out.writeDouble(yCoord);
+		out.writeDouble(zCoord);
 	}
 
 	@Override
@@ -74,13 +79,17 @@ public class PacketISpawnParticles extends CustomPacket
 		y = in.readDouble();
 		z = in.readDouble();
 		r = in.readFloat();
+		xCoord = in.readDouble();
+		yCoord = in.readDouble();
+		zCoord = in.readDouble();
 	}
 
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isClient()) {
+			Vec3 vec3 = player.worldObj.getWorldVec3Pool().getVecFromPool(xCoord, yCoord, zCoord);
 			if (item instanceof ISpawnParticles) {
-				((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r);
+				((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r, vec3);
 			}
 		} else {
 			throw new ProtocolException("Particle packets may only be sent to clients");

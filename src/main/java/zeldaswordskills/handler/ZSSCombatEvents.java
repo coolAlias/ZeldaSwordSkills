@@ -386,7 +386,7 @@ public class ZSSCombatEvents
 		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			/* TODO magic armor:
-				if (player.getCurrentArmor(ArmorIndex.WORN_CHEST) != null && player.getCurrentArmor(ArmorIndex.WORN_CHEST).getItem() == ZSSItems.tunicGoronChest) {
+				if (player.getCurrentArmor(ArmorIndex.WORN_CHEST) != null && player.getCurrentArmor(ArmorIndex.WORN_CHEST).getItem() == ZSSItems.armorMagicChest) {
 					while (event.ammount > 0 && player.inventory.consumeInventoryItem(Item.emerald.itemID)) {
 						event.ammount -= 1.0F;
 					}

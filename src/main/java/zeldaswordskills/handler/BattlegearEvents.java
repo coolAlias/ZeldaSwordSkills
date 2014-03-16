@@ -17,6 +17,7 @@
 
 package zeldaswordskills.handler;
 
+import mods.battlegear2.api.PlayerEventChild.ShieldBlockEvent;
 import net.minecraftforge.event.ForgeSubscribe;
 import zeldaswordskills.item.ItemZeldaShield;
 
@@ -27,7 +28,6 @@ import zeldaswordskills.item.ItemZeldaShield;
  */
 public class BattlegearEvents {
 
-	/*
 	@ForgeSubscribe
 	public void onBlocked(ShieldBlockEvent event) {
 		if (event.shield.getItem() instanceof ItemZeldaShield) {
@@ -36,5 +36,4 @@ public class BattlegearEvents {
 			event.damageShield = false;
 		}
 	}
-	*/
 }
