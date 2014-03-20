@@ -325,8 +325,8 @@ public class ZSSCombatEvents
 	public void onPreHurt(LivingHurtEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			ItemStack stack = player.getItemInUse();
-			if (stack != null && stack.getItem() instanceof ItemZeldaShield) {
+			ItemStack stack = player.getHeldItem();
+			if (stack != null && stack.getItem() instanceof ItemZeldaShield && player.isUsingItem()) {
 				ItemZeldaShield shield = (ItemZeldaShield) stack.getItem();
 				if (ZSSPlayerInfo.get(player).canBlock() && shield.canBlockDamage(stack, event.source)) {
 					boolean shouldBlock = true;
