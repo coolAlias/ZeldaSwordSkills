@@ -123,7 +123,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 				1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		if (this == ZSSItems.shieldDeku) {
 			if (source.isProjectile() && source.getSourceOfDamage() instanceof IProjectile) {
-                if (ZSSMain.isBG2Enabled && shield.getItem() instanceof IArrowCatcher){
+                if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
                     if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
                         ((InventoryPlayerBattle) player.inventory).hasChanged = true;
                     }
