@@ -20,6 +20,7 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import mods.battlegear2.api.ISheathed;
+import mods.battlegear2.api.core.InventoryPlayerBattle;
 import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
@@ -45,6 +46,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
@@ -120,6 +122,13 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 				(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
 				1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 		if (this == ZSSItems.shieldDeku) {
+			if (source.isProjectile() && source.getSourceOfDamage() instanceof IProjectile) {
+                if (ZSSMain.isBG2Enabled && shield.getItem() instanceof IArrowCatcher){
+                    if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
+                        ((InventoryPlayerBattle) player.inventory).hasChanged = true;
+                    }
+                }
+            }
 			int dmg = Math.round(source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
@@ -289,7 +298,6 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 	public boolean catchArrow(ItemStack shield, EntityPlayer player, IProjectile projectile) {
 		if (this == ZSSItems.shieldDeku && projectile instanceof EntityArrow){
 			setArrowCount(shield, getArrowCount(shield) + 1);
-			// TODO System.out.println("Catching arrow, current total: " + getArrowCount(shield));
 			player.setArrowCountInEntity(player.getArrowCountInEntity() - 1);
 			((EntityArrow) projectile).setDead();
 			return true;

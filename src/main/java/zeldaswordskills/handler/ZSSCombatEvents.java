@@ -337,7 +337,6 @@ public class ZSSCombatEvents
 						for (dz = opponent.posZ - player.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D) {
 							dx = (Math.random() - Math.random()) * 0.01D;
 						}
-
 						float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - player.rotationYaw;
 						yaw = yaw - 90;
 						while (yaw < -180) { yaw+= 360; }
