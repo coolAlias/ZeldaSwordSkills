@@ -329,18 +329,18 @@ public class ZSSCombatEvents
 			if (stack != null && stack.getItem() instanceof ItemZeldaShield && player.isUsingItem()) {
 				ItemZeldaShield shield = (ItemZeldaShield) stack.getItem();
 				if (ZSSPlayerInfo.get(player).canBlock() && shield.canBlockDamage(stack, event.source)) {
-					boolean shouldBlock = true;
 					Entity opponent = event.source.getEntity();
-					if (opponent != null) {
-						double dx = opponent.posX - event.entity.posX;
+					boolean shouldBlock = opponent != null;
+					if (shouldBlock) {
+						double dx = opponent.posX - player.posX;
 						double dz;
 						for (dz = opponent.posZ - player.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D) {
 							dx = (Math.random() - Math.random()) * 0.01D;
 						}
 						float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - player.rotationYaw;
 						yaw = yaw - 90;
-						while (yaw < -180) { yaw+= 360; }
-						while (yaw >= 180) { yaw-=360; }
+						while (yaw < -180) { yaw += 360; }
+						while (yaw >= 180) { yaw -= 360; }
 						shouldBlock = yaw < 60 && yaw > -60; // all Zelda shields use default block angles
 					}
 					if (shouldBlock) {
