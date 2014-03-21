@@ -51,7 +51,7 @@ public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 		ItemStack sword = pedestal.getSword();
 		if (sword != null) {
 			GL11.glPushMatrix();
-			GL11.glTranslatef((float) dx + 0.5F, (float) dy + 0.9F, (float) dz + 0.5F);
+			GL11.glTranslated(dx + 0.5D, dy + 0.9D, dz + 0.5D);
 			textureManager.bindTexture(textureManager.getResourceLocation(sword.getItemSpriteNumber()));
 			Tessellator tessellator = Tessellator.instance;
 			Icon icon = sword.getItem().getIconFromDamage(sword.getItemDamage());

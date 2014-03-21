@@ -55,7 +55,7 @@ public class RenderTileEntityChestLocked extends TileEntitySpecialRenderer
 		GL11.glPushMatrix();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GL11.glTranslatef((float) dx, (float) dy + 1.0F, (float) dz + 1.0F);
+		GL11.glTranslated(dx, dy + 1.0D, dz + 1.0D);
 		GL11.glScalef(1.0F, -1.0F, -1.0F);
 		GL11.glTranslatef(0.5F, 0.5F, 0.5F);
 		float rotation = (meta == 5 ? -90F : meta == 4 ? 90F : meta == 2 ? 180F : 0F);

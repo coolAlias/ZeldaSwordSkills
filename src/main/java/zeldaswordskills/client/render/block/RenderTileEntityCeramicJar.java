@@ -55,7 +55,7 @@ public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 		GL11.glPushMatrix();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GL11.glTranslatef((float) dx + 0.5F, (float) dy + 1.485F, (float) dz + 0.5F);
+		GL11.glTranslated(dx + 0.5D, dy + 1.485D, dz + 0.5D);
 		GL11.glScalef(1.0F, -1.0F, -1.0F);
 		model.renderAll();
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
