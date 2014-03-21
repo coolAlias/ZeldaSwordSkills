@@ -158,6 +158,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			int ticksInUse = getMaxItemUseDuration(stack) - ticksRemaining;
 			float charge = (float) ticksInUse / 40.0F;
 			charge = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
+			player.addExhaustion(charge * 2.0F);
 			if (charge > 0.25F) {
 				if (!player.worldObj.isRemote) {
 					WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, 4.0F).makePacket(), world, player, 4096.0D);
