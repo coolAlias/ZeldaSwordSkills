@@ -143,13 +143,12 @@ public class TargetUtils
 		double targetY = seeker.posY + seeker.getEyeHeight() - 0.10000000149011612D;
 		double targetZ = seeker.posZ;
 		double distanceTraveled = 0;
-		
+
 		while ((int) distanceTraveled < distance) {
 			targetX += vec3.xCoord;
 			targetY += vec3.yCoord;
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
-			
 			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
 				AxisAlignedBB.getBoundingBox(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius));
 			for (EntityLivingBase target : list) {
@@ -169,12 +168,16 @@ public class TargetUtils
 	 * @param fov seeker's field of view; a wider angle returns true more often
 	 */
 	public static final boolean isTargetInFrontOf(Entity seeker, Entity target, float fov) {
-		double vecX = target.posX - seeker.posX;
-		double vecZ = target.posZ - seeker.posZ;
-		float rotation = (float)(Math.atan2(vecX, vecZ) * 180.0D / Math.PI);
-		while (seeker.rotationYaw > 360.0F) { seeker.rotationYaw -= 360.0F; }
-		//System.out.println("Seeker yaw: " + seeker.rotationYaw + "; calculated angle: " + rotation);
-		return Math.abs(Math.abs(seeker.rotationYaw) - Math.abs(rotation)) < fov;
+		double dx = target.posX - seeker.posX;
+		double dz;
+		for (dz = target.posZ - seeker.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D) {
+			dx = (Math.random() - Math.random()) * 0.01D;
+		}
+		float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - seeker.rotationYaw;
+		yaw = yaw - 90;
+		while (yaw < -180) { yaw += 360; }
+		while (yaw >= 180) { yaw -= 360; }
+		return yaw < fov && yaw > -fov;
 	}
 	
 	/**
@@ -187,11 +190,8 @@ public class TargetUtils
 	/**
 	 * Returns true if the target's position is within the area that the seeker is facing and the target can be seen
 	 */
-	// TODO not quite perfect, sometimes will still target entities behind seeker
 	private static final boolean isTargetInSight(Vec3 vec3, EntityLivingBase seeker, Entity target) {
-		return ((vec3.xCoord < 0 ? target.posX <= seeker.posX : target.posX >= seeker.posX)
-			 && (vec3.zCoord < 0 ? target.posZ <= seeker.posZ : target.posZ >= seeker.posZ)
-			 && seeker.canEntityBeSeen(target));
+		return seeker.canEntityBeSeen(target) && isTargetInFrontOf(seeker, target, 60);
 	}
 	
 	/**
