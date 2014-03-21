@@ -210,15 +210,14 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 	}
 
 	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (this == ZSSItems.shieldMirror && isHeld && entity instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) entity;
+	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
+		if (this == ZSSItems.shieldMirror) {
 			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock()) {
 				Vec3 vec3 = player.getLookVec();
 				double dx = player.posX + vec3.xCoord * 2.0D;
 				double dy = player.posY + player.getEyeHeight() + vec3.yCoord * 2.0D;
 				double dz = player.posZ + vec3.zCoord * 2.0D;
-				List<EntityFireball> list = world.getEntitiesWithinAABB(EntityFireball.class,
+				List<EntityFireball> list = player.worldObj.getEntitiesWithinAABB(EntityFireball.class,
 						AxisAlignedBB.getBoundingBox(dx - 1, dy - 1, dz - 1, dx + 1, dy + 1, dz + 1));
 				for (EntityFireball fireball : list) {
 					DamageSource source = DamageSource.causeFireballDamage(fireball, fireball.shootingEntity);
