@@ -165,7 +165,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 		int level = ZSSPlayerInfo.get(player).getSkillLevel(id);
 		if (level > 0) {
 			if (id != SkillBase.bonusHeart.id) {
-				list.add(StatCollector.translateToLocalFormatted("tooltip.zss.skillorb.desc.level", new Object[] {level, SkillBase.getSkillList()[id].getMaxLevel()} ));
+				list.add(StatCollector.translateToLocalFormatted("tooltip.zss.skillorb.desc.level", level, SkillBase.getSkillList()[id].getMaxLevel()));
 			}
 			list.addAll(ZSSPlayerInfo.get(player).getPlayerSkill(id).getDescription(player));
 		} else {

@@ -353,30 +353,16 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * Returns first ICombo from a currently active skill, if any; ICombo may or may not be in progress
 	 */
 	public ICombo getComboSkill() {
-		for (SkillBase skill : skills.values()) {
-			if (skill instanceof ICombo && (((ICombo) skill).getCombo() != null ||
-					skill instanceof SkillActive && ((SkillActive) skill).isActive())) {
-				return (ICombo) skill;
-			}
+		SkillBase skill = getPlayerSkill(SkillBase.swordBasic);
+		if (skill != null && (((ICombo) skill).getCombo() != null || ((SkillActive) skill).isActive())) {
+			return (ICombo) skill;
 		}
 		return null;
 	}
 
-	/**
-	 * Returns an ILockOnTarget skill, if any, with preference for currently active skill
-	 */
+	/** Returns player's ILockOnTarget skill, if any */
 	public ILockOnTarget getTargetingSkill() {
-		ILockOnTarget planB = null;
-		for (SkillBase skill : skills.values()) {
-			if (skill instanceof ILockOnTarget && skill instanceof SkillActive) {
-				if (((SkillActive) skill).isActive()) {
-					return (ILockOnTarget) skill;
-				} else {
-					planB = (ILockOnTarget) skill;
-				}
-			}
-		}
-		return planB;
+		return (ILockOnTarget) getPlayerSkill(SkillBase.swordBasic);
 	}
 
 	/** Grants a skill with target level of current skill level plus one */

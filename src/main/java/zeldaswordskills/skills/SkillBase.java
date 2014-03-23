@@ -111,6 +111,28 @@ public abstract class SkillBase
 	public static final SkillBase[] getSkillList() { return skillsList; }
 
 	/**
+	 * Returns a leveled skill from an ISkillItem, or null if not possible
+	 */
+	/* TODO
+	public static SkillBase getSkillFromItem(ISkillItem item) {
+		return createLeveledSkill(item.getSkillId(), item.getSkillLevel());
+	}
+	 */
+
+	/**
+	 * Returns a leveled skill from an id and level, capped at the max level for the skill;
+	 * May return null if the id is invalid
+	 */
+	public static SkillBase createLeveledSkill(byte id, byte level) {
+		if (id >= 0 && id < skillsList.length && skillsList[id] != null) {
+			SkillBase skill = skillsList[id].newInstance();
+			skill.level = level;
+			return skill;
+		}
+		return null;
+	}
+
+	/**
 	 * Override equals for List, Set, etc. implementations; may not be necessary
 	 */
 	@Override
