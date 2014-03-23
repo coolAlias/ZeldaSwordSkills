@@ -122,18 +122,16 @@ public class ZSSKeyHandler extends KeyHandler
 		if (kb == keys[KEY_NEXT_TARGET]) {
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK]) {
-			if (PlayerUtils.isHoldingSword(mc.thePlayer)) {
-				if (!canInteract) {
-					if (skills.isSkillActive(SkillBase.spinAttack)) {
-						((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(kb, mc.thePlayer);
-					}
-					return;
-				} else {
-					keys[KEY_ATTACK].pressed = true;
+			if (canInteract) {
+				keys[KEY_ATTACK].pressed = true;
+			} else {
+				if (skills.isSkillActive(SkillBase.spinAttack)) {
+					((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(kb, mc.thePlayer);
 				}
-				if (!canInteract) {
-					// do nothing
-				} else if (skills.hasSkill(SkillBase.dash) && keys[KEY_BLOCK].isPressed() && mc.thePlayer.onGround) {
+				return;
+			}
+			if (PlayerUtils.isHoldingSword(mc.thePlayer)) {
+				if (skills.hasSkill(SkillBase.dash) && keys[KEY_BLOCK].isPressed() && mc.thePlayer.onGround) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
 				} else if (skills.canUseSkill(SkillBase.swordBeam) && mc.thePlayer.isSneaking()) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
@@ -174,9 +172,7 @@ public class ZSSKeyHandler extends KeyHandler
 				((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(mc.thePlayer);
 			}
 		} else if (kb == keys[KEY_BLOCK] && canInteract) {
-			//if (!skills.isSkillActive(SkillBase.leapingBlow)) {
-			keys[KEY_BLOCK].pressed = true; // handled each tick in ZSSPlayerInfo' onUpdate
-			//}
+			keys[KEY_BLOCK].pressed = true;
 		}
 	}
 

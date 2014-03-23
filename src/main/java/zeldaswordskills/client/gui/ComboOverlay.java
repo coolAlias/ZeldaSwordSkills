@@ -107,7 +107,7 @@ public class ComboOverlay extends Gui
 			}
 		}
 		
-		if (combo != null) {
+		if (combo != null && combo.getSize() > 0) {
 			// combo has changed, reset time
 			if (lastComboSize != combo.getSize()) {
 				lastComboSize = combo.getSize();
