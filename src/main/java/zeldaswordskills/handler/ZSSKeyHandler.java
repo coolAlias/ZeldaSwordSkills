@@ -32,13 +32,13 @@ import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
-import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.TickType;
@@ -116,24 +116,24 @@ public class ZSSKeyHandler extends KeyHandler
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract();
 
-		if (!(skill instanceof SkillActive) || !((SkillActive) skill).isActive()) { return; }
-
+		if (skill == null || !skill.isLockedOn()) {
+			return;
+		}
 		if (kb == keys[KEY_NEXT_TARGET]) {
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK]) {
-			if (!canInteract) {
-				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(kb, mc.thePlayer);
+			if (PlayerUtils.isHoldingSword(mc.thePlayer)) {
+				if (!canInteract) {
+					if (skills.isSkillActive(SkillBase.spinAttack)) {
+						((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(kb, mc.thePlayer);
+					}
+					return;
+				} else {
+					keys[KEY_ATTACK].pressed = true;
 				}
-				return;
-			} else {
-				keys[KEY_ATTACK].pressed = true;
-			}
-			// Handle special cases for Art of the Sword; e.g. activating leaping blow
-			if (skill instanceof SwordBasic) {
-				if (skills.isSkillActive(SkillBase.leapingBlow)) {
-					// do nothing, waiting for leaping blow to finish upon landing
-				} else if (skills.hasSkill(SkillBase.dash) && mc.thePlayer.isBlocking() && mc.thePlayer.onGround) {
+				if (!canInteract) {
+					// do nothing
+				} else if (skills.hasSkill(SkillBase.dash) && keys[KEY_BLOCK].isPressed() && mc.thePlayer.onGround) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
 				} else if (skills.canUseSkill(SkillBase.swordBeam) && mc.thePlayer.isSneaking()) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
@@ -147,7 +147,9 @@ public class ZSSKeyHandler extends KeyHandler
 				if (skills.hasSkill(SkillBase.armorBreak)) {
 					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer);
 				}
-			} else { // Generic ILockOnTarget skill simply attacks; handles possibility of being ICombo
+			} else if (skills.hasSkill(SkillBase.mortalDraw) && keys[KEY_BLOCK].isPressed() && mc.thePlayer.getHeldItem() == null) {
+				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
+			} else {
 				mc.thePlayer.swingItem();
 				if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
 					mc.playerController.attackEntity(mc.thePlayer, skill.getCurrentTarget());
@@ -159,7 +161,6 @@ public class ZSSKeyHandler extends KeyHandler
 			} else {
 				keys[KEY_LEFT].pressed = true;
 			}
-			
 			if (skill instanceof SwordBasic && canInteract) {
 				if (skills.hasSkill(SkillBase.dodge)) {
 					((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed(kb, mc.thePlayer);
@@ -168,7 +169,7 @@ public class ZSSKeyHandler extends KeyHandler
 					((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(kb, mc.thePlayer);
 				}
 			}
-		}  else if (kb == keys[KEY_DOWN] && canInteract) {
+		} else if (kb == keys[KEY_DOWN] && canInteract) {
 			if (skill instanceof SwordBasic && skills.hasSkill(SkillBase.parry)) {
 				((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(mc.thePlayer);
 			}
@@ -185,7 +186,7 @@ public class ZSSKeyHandler extends KeyHandler
 			if (kb == keys[KEY_BLOCK]) {
 				keys[KEY_BLOCK].pressed = false;
 			} else if (kb == keys[KEY_ATTACK]) {
-				keys[KEY_ATTACK].pressed = true;
+				keys[KEY_ATTACK].pressed = false;
 			} else if (kb == keys[KEY_LEFT]) {
 				keys[KEY_LEFT].pressed = false;
 			} else if (kb == keys[KEY_RIGHT]) {
