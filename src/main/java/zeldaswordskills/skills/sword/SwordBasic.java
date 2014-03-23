@@ -272,10 +272,12 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				&& TargetUtils.canReachTarget(player, getCurrentTarget()))
 				|| (mouseOver != null && TargetUtils.canReachTarget(player, mouseOver))));
 
-		if (!attackHit && PlayerUtils.isHoldingSword(player)) {
-			PlayerUtils.playSound(player, ModInfo.SOUND_SWORDMISS,
-					(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		if (!attackHit) {
+			if (PlayerUtils.isHoldingSword(player)) {
+				PlayerUtils.playSound(player, ModInfo.SOUND_SWORDMISS,
+						(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
+						1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+			}
 			if (isComboInProgress()) {
 				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
 			}
