@@ -74,7 +74,6 @@ import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
-import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
@@ -159,32 +158,28 @@ public class ZSSCombatEvents
 		if (skill != null && skill.isLockedOn()) {
 			if (event.button == 0 && event.buttonstate) {
 				if (Config.allowVanillaControls() && PlayerUtils.isHoldingSword(player)) {
-					if (skill instanceof SwordBasic) {
-						// Whether or not ArmorBreak should receive key pressed information for charging up
-						boolean canCharge = true;
+					// Whether or not ArmorBreak should receive key pressed information for charging up
+					boolean canCharge = true;
 
-						if (!skills.canInteract()) {
-							if (skills.isSkillActive(SkillBase.spinAttack)) {
-								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
-							}
-							canCharge = false;
-							event.setCanceled(true);
-						} else if (player.isSneaking() && skills.canUseSkill(SkillBase.swordBeam)) {
-							PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
-							// set to canceled to prevent secondary attack from occurring that doesn't occur with dash (thanks to blocking)
-							event.setCanceled(true);
-						} else if (skills.hasSkill(SkillBase.dash) && player.onGround && ((Dash) skills.getPlayerSkill(SkillBase.dash)).isRMBDown()) {
-							PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-							event.setCanceled(player.getItemInUse() == null);
-						} else {
-							performComboAttack(mc, skill);
+					if (!skills.canInteract()) {
+						if (skills.isSkillActive(SkillBase.spinAttack)) {
+							((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
 						}
-						// handle separately so can attack and begin charging without pressing key twice
-						if (skills.hasSkill(SkillBase.armorBreak) && canCharge) {
-							((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player);
-						}
-					} else { // Generic ILockOnTarget skill simply attacks; handles possibility of being ICombo
+						canCharge = false;
+						event.setCanceled(true);
+					} else if (player.isSneaking() && skills.canUseSkill(SkillBase.swordBeam)) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
+						// set to canceled to prevent secondary attack from occurring that doesn't occur with dash (thanks to blocking)
+						event.setCanceled(true);
+					} else if (skills.hasSkill(SkillBase.dash) && player.onGround && ((Dash) skills.getPlayerSkill(SkillBase.dash)).isRMBDown()) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
+						event.setCanceled(player.getItemInUse() == null);
+					} else {
 						performComboAttack(mc, skill);
+					}
+					// handle separately so can attack and begin charging without pressing key twice
+					if (skills.hasSkill(SkillBase.armorBreak) && canCharge) {
+						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player);
 					}
 				} else if (skills.hasSkill(SkillBase.mortalDraw) && ((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).isRMBDown() && player.getHeldItem() == null) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
@@ -194,7 +189,7 @@ public class ZSSCombatEvents
 				}
 				// Setting result to DENY prevents click processing but still sets button.pressed to true
 				event.setResult(Event.Result.DENY);
-			} else if (event.button == 1 && Config.allowVanillaControls() && skill instanceof SwordBasic) {
+			} else if (event.button == 1 && Config.allowVanillaControls()) {
 				if (skills.isSkillActive(SkillBase.spinAttack) || skills.isSkillActive(SkillBase.leapingBlow)) {
 					event.setCanceled(true);
 				} else if (skills.hasSkill(SkillBase.dash) && PlayerUtils.isHoldingSword(player)) {

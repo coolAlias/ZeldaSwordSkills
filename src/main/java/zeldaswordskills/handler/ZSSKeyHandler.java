@@ -160,7 +160,7 @@ public class ZSSKeyHandler extends KeyHandler
 				keys[KEY_LEFT].pressed = true;
 			}
 			if (skill instanceof SwordBasic && canInteract) {
-				if (skills.hasSkill(SkillBase.dodge)) {
+				if (skills.hasSkill(SkillBase.dodge) && mc.thePlayer.onGround) {
 					((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed(kb, mc.thePlayer);
 				}
 				if (skills.hasSkill(SkillBase.spinAttack)) {

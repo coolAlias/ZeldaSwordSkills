@@ -306,7 +306,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * i.e. has the skill and the skill's canUse method returns true
 	 */
 	public boolean canUseSkill(SkillBase skill) {
-		return hasSkill(skill) && (!(skill instanceof SkillActive) || ((SkillActive) getPlayerSkill(skill)).canUse(player));
+		return hasSkill(skill) && skill instanceof SkillActive && ((SkillActive) getPlayerSkill(skill)).canUse(player);
 	}
 
 	/**

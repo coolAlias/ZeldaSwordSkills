@@ -79,13 +79,11 @@ public class TargetingTickHandler implements ITickHandler
 				} else if (skills.isSkillActive(SkillBase.spinAttack)) {
 					flag = ((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).onRenderTick(player);
 				}
-
 				if (!flag && skill.isLockedOn()) {
 					target = skill.getCurrentTarget();
 					updatePlayerView();
 				}
-
-				if (skill instanceof SwordBasic && skill.isLockedOn()) {
+				if (skill instanceof SwordBasic && skill.isLockedOn() && skills.canInteract()) {
 					if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) &&
 							isVanillaKeyPressed(mc.gameSettings.keyBindJump) && player.isUsingItem()) {
 						skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
@@ -98,24 +96,13 @@ public class TargetingTickHandler implements ITickHandler
 						if (isVanillaKeyPressed(mc.gameSettings.keyBindLeft) || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
 							if (skills.hasSkill(SkillBase.spinAttack) && mc.gameSettings.keyBindLeft.pressed && mc.gameSettings.keyBindRight.pressed) {
 								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindLeft, mc.thePlayer);
-							} else if (skills.hasSkill(SkillBase.dodge)) {
+							} else if (skills.hasSkill(SkillBase.dodge) && mc.thePlayer.onGround) {
 								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
 							}
 						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack) && skills.hasSkill(SkillBase.parry)) {
 							((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
 						}
 					}
-					/*
-					if (isVanillaKeyPressed(mc.gameSettings.keyBindLeft) || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
-						if (skills.hasSkill(SkillBase.spinAttack) && mc.gameSettings.keyBindLeft.pressed && mc.gameSettings.keyBindRight.pressed) {
-							((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindLeft, mc.thePlayer);
-						} else if (skills.hasSkill(SkillBase.dodge)) {
-							((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
-						}
-					} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack) && skills.hasSkill(SkillBase.parry)) {
-						((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
-					}
-					 */
 				}
 			}
 		}
