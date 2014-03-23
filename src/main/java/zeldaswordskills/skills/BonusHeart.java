@@ -47,7 +47,7 @@ public class BonusHeart extends SkillPassive
 	public BonusHeart newInstance() { return new BonusHeart(this); }
 	
 	@Override
-	public int getMaxLevel() { return Config.getMaxBonusHearts(); }
+	public byte getMaxLevel() { return Config.getMaxBonusHearts(); }
 	
 	@Override
 	public boolean isLoot() { return false; }

@@ -144,7 +144,7 @@ public abstract class SkillBase
 	public final byte getLevel() { return level; }
 
 	/** Returns max level this skill can reach; override to change */
-	public int getMaxLevel() { return MAX_LEVEL; }
+	public byte getMaxLevel() { return MAX_LEVEL; }
 
 	/** Returns the translated list containing Strings for tooltip display */
 	@SideOnly(Side.CLIENT)

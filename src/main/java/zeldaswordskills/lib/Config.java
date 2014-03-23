@@ -382,7 +382,7 @@ public class Config
 	/*================== SKILLS =====================*/
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return doubleTap; }
-	public static int getMaxBonusHearts() { return MathHelper.clamp_int(maxBonusHearts, 0, 50); }
+	public static byte getMaxBonusHearts() { return (byte) MathHelper.clamp_int(maxBonusHearts, 0, 50); }
 	public static boolean autoTargetEnabled() { return autoTarget; }
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }

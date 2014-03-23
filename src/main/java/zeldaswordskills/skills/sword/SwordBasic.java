@@ -127,7 +127,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	protected float getExhaustion() { return 0.0F; }
 
 	@Override
-	public int getMaxLevel() { return (MAX_LEVEL * 2); }
+	public byte getMaxLevel() { return (MAX_LEVEL * 2); }
 
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
