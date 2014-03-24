@@ -26,33 +26,38 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class SkillPassive extends SkillBase
 {
+	/**
+	 * Constructs the first instance of a skill and stores it in the skill list
+	 * @param name	this is the unlocalized name and should not contain any spaces
+	 * @param id	the skill's id should be unique
+	 */
 	protected SkillPassive(String name, byte id) {
 		super(name, id, true);
 	}
 
 	protected SkillPassive(SkillBase skill) { super(skill); }
-	
+
 	@Override
 	public SkillPassive newInstance() { return new SkillPassive(this); }
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) { return getDescription(); }
-	
+
 	@Override
 	protected void levelUp(EntityPlayer player) {}
-	
+
 	@Override
 	public final void writeToNBT(NBTTagCompound compound) {
 		compound.setByte("id", id);
 		compound.setByte("level", level);
 	}
-	
+
 	@Override
 	public final void readFromNBT(NBTTagCompound compound) {
 		level = compound.getByte("level");
 	}
-	
+
 	@Override
 	public final SkillPassive loadFromNBT(NBTTagCompound compound) {
 		SkillPassive skill = (SkillPassive) getSkillList()[compound.getByte("id")].newInstance();

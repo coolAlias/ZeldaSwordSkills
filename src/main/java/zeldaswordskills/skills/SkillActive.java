@@ -66,6 +66,11 @@ public abstract class SkillActive extends SkillBase
 	/** If true, further left-click interactions will be canceled while this skill is active */
 	private boolean disablesLMB = false;
 
+	/**
+	 * Constructs the first instance of a skill and stores it in the skill list
+	 * @param name	this is the unlocalized name and should not contain any spaces
+	 * @param id	the skill's id should be unique
+	 */
 	protected SkillActive(String name, byte id) {
 		super(name, id, true);
 	}

@@ -88,10 +88,16 @@ public abstract class SkillBase
 	/** Contains descriptions for tooltip display */
 	protected final List<String> tooltip = new ArrayList<String>();
 
+	/**
+	 * Constructs the first instance of a skill and stores it in the skill list
+	 * @param name		this is the unlocalized name and should not contain any spaces
+	 * @param id		the skill's id should be unique
+	 * @param register	whether to register the skill, adding the skill to the skill list;
+	 * 					seems to always be true since skills are declared statically
+	 */
 	public SkillBase(String name, byte id, boolean register) {
 		this.unlocalizedName = name;
 		this.id = id;
-
 		if (register) {
 			if (skillsList[id] != null) {
 				LogHelper.log(Level.WARNING,"CONFLICT @ skill " + id + " id already occupied by "
