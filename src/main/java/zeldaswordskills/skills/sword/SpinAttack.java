@@ -74,6 +74,10 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private boolean clockwise;
 
+	/** Used to allow vanilla keys to determine spin direction */
+	@SideOnly(Side.CLIENT)
+	private boolean wasKeyPressed;
+
 	/** Number of degrees to spin; incremented when keypressed and already active for Super Spin Attack */
 	@SideOnly(Side.CLIENT)
 	private float arc;
@@ -194,7 +198,10 @@ public class SpinAttack extends SkillActive
 				arc += 360F;
 			}
 		} else {
-			clockwise = (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls() && key != ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT]));
+			if (!wasKeyPressed) {
+				clockwise = (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls() && key == Minecraft.getMinecraft().gameSettings.keyBindRight));
+				wasKeyPressed = true;
+			}
 			activate(player.worldObj, player);
 		}
 	}
@@ -242,6 +249,7 @@ public class SpinAttack extends SkillActive
 		if (currentSpin >= getSpinArc()) {
 			currentSpin = 0.0F;
 			isActive = false;
+			wasKeyPressed = false;
 		} else if (currentSpin > (360F * refreshed)) {
 			startSpin(player.worldObj, player);
 		}

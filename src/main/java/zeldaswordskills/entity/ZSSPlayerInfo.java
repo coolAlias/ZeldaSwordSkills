@@ -290,15 +290,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Returns the player's skill level for given skill, or 0 if the player doesn't have that skill */
 	public byte getSkillLevel(SkillBase skill) { return getSkillLevel(skill.id); }
 
-	/**
-	 * Returns the player's skill level for given skill, or 0 if the player doesn't have that skill
-	 */
+	/** Returns the player's skill level for given skill, or 0 if the player doesn't have that skill */
 	public byte getSkillLevel(byte id) {
-		if (skills.containsKey(id)) {
-			return skills.get(id).getLevel();
-		} else {
-			return 0;
-		}
+		return (skills.containsKey(id) ? skills.get(id).getLevel() : 0);
 	}
 
 	/**
@@ -338,15 +332,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
 	public SkillBase getPlayerSkill(SkillBase skill) { return getPlayerSkill(skill.id); }
 
-	/**
-	 * Returns the player's actual skill instance or null if the player doesn't have the skill
-	 */
+	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
 	public SkillBase getPlayerSkill(byte id) {
-		if (skills.containsKey(id)) {
-			return skills.get(id);
-		} else {
-			return null;
-		}
+		return (skills.containsKey(id) ? skills.get(id) : null);
 	}
 
 	/**

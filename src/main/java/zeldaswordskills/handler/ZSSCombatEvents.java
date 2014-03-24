@@ -140,7 +140,7 @@ public class ZSSCombatEvents
 		EntityPlayer player = mc.thePlayer;
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
 		// check pre-conditions for attacking and item use (not stunned, etc.):
-		if (event.buttonstate || event.button == -1) {
+		if (event.buttonstate || event.dwheel != 0) {
 			if (skills.isSkillActive(SkillBase.mortalDraw)) {
 				event.setCanceled(true);
 			} else if (event.button == 0) {
@@ -197,9 +197,6 @@ public class ZSSCombatEvents
 				} else if (skills.hasSkill(SkillBase.mortalDraw) && player.getHeldItem() == null) {
 					((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).keyPressed(event.buttonstate);
 				}
-			} else if (event.button == -1) {
-				player.inventory.changeCurrentItem(event.dwheel);
-				event.setCanceled(true);
 			}
 		} else { // not locked on to a target, normal item swing
 			if (event.button == 0 && event.buttonstate) {

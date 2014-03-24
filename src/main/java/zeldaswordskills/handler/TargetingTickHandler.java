@@ -69,7 +69,6 @@ public class TargetingTickHandler implements ITickHandler
 		if (player != null && ZSSPlayerInfo.get(player) != null) {
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
 			ILockOnTarget skill = skills.getTargetingSkill();
-
 			if (skill != null) {
 				// Flag is true if an animation is in progress
 				boolean flag = false;
@@ -94,9 +93,9 @@ public class TargetingTickHandler implements ITickHandler
 						}
 					} else if (Config.allowVanillaControls()) {
 						if (isVanillaKeyPressed(mc.gameSettings.keyBindLeft) || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
-							if (skills.hasSkill(SkillBase.spinAttack) && mc.gameSettings.keyBindLeft.pressed && mc.gameSettings.keyBindRight.pressed) {
-								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindLeft, mc.thePlayer);
-							} else if (skills.hasSkill(SkillBase.dodge) && mc.thePlayer.onGround) {
+							if (skills.hasSkill(SkillBase.spinAttack)) {
+								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
+							} else if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
 								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
 							}
 						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack) && skills.hasSkill(SkillBase.parry)) {

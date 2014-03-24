@@ -121,12 +121,12 @@ public abstract class SkillBase
 
 	/**
 	 * Returns a leveled skill from an id and level, capped at the max level for the skill;
-	 * May return null if the id is invalid
+	 * May return null if the id is invalid or level is less than 1
 	 */
-	public static SkillBase createLeveledSkill(byte id, byte level) {
-		if (id >= 0 && id < skillsList.length && skillsList[id] != null) {
+	public static SkillBase createLeveledSkill(int id, byte level) {
+		if (id >= 0 && id < skillsList.length && skillsList[id] != null && level > 0) {
 			SkillBase skill = skillsList[id].newInstance();
-			skill.level = level;
+			skill.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
 			return skill;
 		}
 		return null;
