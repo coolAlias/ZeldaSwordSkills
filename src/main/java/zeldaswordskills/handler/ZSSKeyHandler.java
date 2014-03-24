@@ -37,7 +37,6 @@ import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
-import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
@@ -131,7 +130,7 @@ public class ZSSKeyHandler extends KeyHandler
 				return;
 			}
 			if (PlayerUtils.isHoldingSword(mc.thePlayer)) {
-				if (skills.hasSkill(SkillBase.dash) && keys[KEY_BLOCK].isPressed() && mc.thePlayer.onGround) {
+				if (skills.hasSkill(SkillBase.dash) && keys[KEY_BLOCK].pressed && mc.thePlayer.onGround) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
 				} else if (skills.canUseSkill(SkillBase.swordBeam) && mc.thePlayer.isSneaking()) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
@@ -145,7 +144,7 @@ public class ZSSKeyHandler extends KeyHandler
 				if (skills.hasSkill(SkillBase.armorBreak)) {
 					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer);
 				}
-			} else if (skills.hasSkill(SkillBase.mortalDraw) && keys[KEY_BLOCK].isPressed() && mc.thePlayer.getHeldItem() == null) {
+			} else if (skills.hasSkill(SkillBase.mortalDraw) && keys[KEY_BLOCK].pressed && mc.thePlayer.getHeldItem() == null) {
 				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
 			} else {
 				mc.thePlayer.swingItem();
@@ -159,7 +158,7 @@ public class ZSSKeyHandler extends KeyHandler
 			} else {
 				keys[KEY_LEFT].pressed = true;
 			}
-			if (skill instanceof SwordBasic && canInteract) {
+			if (canInteract) {
 				if (skills.hasSkill(SkillBase.dodge) && mc.thePlayer.onGround) {
 					((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed(kb, mc.thePlayer);
 				}
@@ -168,7 +167,7 @@ public class ZSSKeyHandler extends KeyHandler
 				}
 			}
 		} else if (kb == keys[KEY_DOWN] && canInteract) {
-			if (skill instanceof SwordBasic && skills.hasSkill(SkillBase.parry)) {
+			if (skills.hasSkill(SkillBase.parry)) {
 				((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(mc.thePlayer);
 			}
 		} else if (kb == keys[KEY_BLOCK] && canInteract) {

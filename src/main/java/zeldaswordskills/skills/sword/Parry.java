@@ -61,7 +61,7 @@ public class Parry extends SkillActive
 	/** Timer during which player is considered actively parrying */
 	private int parryTimer = 0;
 	
-	/** Only for vanilla activation: Current number of ticks remaining before dodge will not activate */
+	/** Only for vanilla activation: Current number of ticks remaining before skill will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 	
