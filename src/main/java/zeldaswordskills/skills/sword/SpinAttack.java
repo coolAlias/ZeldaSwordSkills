@@ -198,11 +198,18 @@ public class SpinAttack extends SkillActive
 				arc += 360F;
 			}
 		} else {
-			if (!wasKeyPressed) {
-				clockwise = (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls() && key == Minecraft.getMinecraft().gameSettings.keyBindRight));
+			// prevents activation of Dodge from interfering with spin direction
+			if (wasKeyPressed) {
+				wasKeyPressed = false;
+			} else {
+				clockwise = (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] ||
+						(Config.allowVanillaControls() && key == Minecraft.getMinecraft().gameSettings.keyBindRight));
 				wasKeyPressed = true;
 			}
-			activate(player.worldObj, player);
+			if (isKeyPressed()) {
+				wasKeyPressed = false;
+				activate(player.worldObj, player);
+			}
 		}
 	}
 
@@ -249,7 +256,6 @@ public class SpinAttack extends SkillActive
 		if (currentSpin >= getSpinArc()) {
 			currentSpin = 0.0F;
 			isActive = false;
-			wasKeyPressed = false;
 		} else if (currentSpin > (360F * refreshed)) {
 			startSpin(player.worldObj, player);
 		}

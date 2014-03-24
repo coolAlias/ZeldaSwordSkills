@@ -96,7 +96,8 @@ public class MortalDraw extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && attackTimer == 0 && swordSlot > -1 && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && player.getHeldItem() == null;
+		return super.canUse(player) && attackTimer == 0 && swordSlot > -1 && player.getHeldItem() == null
+				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
 
 	@Override

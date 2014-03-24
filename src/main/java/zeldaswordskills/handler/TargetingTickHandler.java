@@ -95,7 +95,8 @@ public class TargetingTickHandler implements ITickHandler
 						if (isVanillaKeyPressed(mc.gameSettings.keyBindLeft) || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
 							if (skills.hasSkill(SkillBase.spinAttack)) {
 								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
-							} else if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
+							}
+							if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
 								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
 							}
 						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack) && skills.hasSkill(SkillBase.parry)) {
