@@ -53,6 +53,9 @@ public class TargetingTickHandler implements ITickHandler
 	/** Target from player's currently active ILockOnTarget */
 	private Entity target = null;
 
+	/** Whether the left movement key has been pressed; used every tick */
+	boolean isLeftPressed;
+
 	public TargetingTickHandler(Minecraft mc) {
 		this.mc = mc;
 	}
@@ -92,12 +95,13 @@ public class TargetingTickHandler implements ITickHandler
 							((Dash) skills.getPlayerSkill(SkillBase.dash)).keyPressed(false);
 						}
 					} else if (Config.allowVanillaControls()) {
-						if (isVanillaKeyPressed(mc.gameSettings.keyBindLeft) || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
+						isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);
+						if (isLeftPressed || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
 							if (skills.hasSkill(SkillBase.spinAttack)) {
-								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
+								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
 							}
 							if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
-								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((mc.gameSettings.keyBindLeft.pressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
+								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
 							}
 						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack) && skills.hasSkill(SkillBase.parry)) {
 							((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
