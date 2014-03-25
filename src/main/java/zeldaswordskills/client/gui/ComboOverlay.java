@@ -46,7 +46,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class ComboOverlay extends Gui
 {
-	private Minecraft mc;
+	private final Minecraft mc;
 	
 	/** Texture location for the targeting overlay */
 	//private static final ResourceLocation targetTexture = new ResourceLocation(ModInfo.ID, "textures/gui/targeting_overlay.png");
@@ -69,9 +69,9 @@ public class ComboOverlay extends Gui
 	/** Length of time combo pop-up will display */
 	private static final long DISPLAY_TIME = 5000;
 
-	public ComboOverlay(Minecraft mc) {
+	public ComboOverlay() {
 		super();
-		this.mc = mc;
+		this.mc = Minecraft.getMinecraft();
 	}
 
 	@ForgeSubscribe(priority = EventPriority.NORMAL)

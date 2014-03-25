@@ -117,11 +117,12 @@ public abstract class SkillBase
 	public static final SkillBase[] getSkillList() { return skillsList; }
 
 	/**
-	 * Returns a leveled skill from an ISkillItem, or null if not possible
+	 * Returns a leveled skill from an ISkillItem using {@link ISkillItem#getSkillId(ItemStack)}
+	 * and {@link ISkillItem#getSkillLevel(ItemStack)}, or null if not possible
 	 */
 	/* TODO
-	public static SkillBase getSkillFromItem(ISkillItem item) {
-		return createLeveledSkill(item.getSkillId(), item.getSkillLevel());
+	public static final SkillBase getSkillFromItem(final ItemStack stack, final ISkillItem item) {
+		return createLeveledSkill(item.getSkillId(stack), item.getSkillLevel(stack));
 	}
 	 */
 
@@ -129,7 +130,7 @@ public abstract class SkillBase
 	 * Returns a leveled skill from an id and level, capped at the max level for the skill;
 	 * May return null if the id is invalid or level is less than 1
 	 */
-	public static SkillBase createLeveledSkill(int id, byte level) {
+	public static final SkillBase createLeveledSkill(final int id, final byte level) {
 		if (id >= 0 && id < skillsList.length && skillsList[id] != null && level > 0) {
 			SkillBase skill = skillsList[id].newInstance();
 			skill.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
@@ -138,13 +139,12 @@ public abstract class SkillBase
 		return null;
 	}
 
+	/**
+	 * Note that mutable objects such as this are not suitable as Map keys
+	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id;
-		result = prime * result + level;
-		return result;
+		return 31 * (31 + id) + level;
 	}
 
 	@Override

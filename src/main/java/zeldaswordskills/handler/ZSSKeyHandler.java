@@ -48,6 +48,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class ZSSKeyHandler extends KeyHandler
 {
+	private final Minecraft mc;
+
 	/** Key index for easy handling and retrieval of keys and key descriptions */
 	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
 			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_BOMB = 7,
@@ -76,7 +78,10 @@ public class ZSSKeyHandler extends KeyHandler
 		KeyBindingRegistry.registerKeyBinding(new ZSSKeyHandler(keys, repeat));
 	}
 
-	public ZSSKeyHandler(KeyBinding[] keys, boolean[] repeat) { super(keys, repeat); }
+	private ZSSKeyHandler(KeyBinding[] keys, boolean[] repeat) {
+		super(keys, repeat);
+		this.mc = Minecraft.getMinecraft();
+	}
 
 	@Override
 	public String getLabel() { return StatCollector.translateToLocal("key.zss.label"); }
@@ -87,7 +92,6 @@ public class ZSSKeyHandler extends KeyHandler
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
 		if (tickEnd) {
-			Minecraft mc = Minecraft.getMinecraft();
 			if (mc.inGameHasFocus && ZSSPlayerInfo.get(mc.thePlayer) != null) {
 				if (kb == keys[KEY_SKILL_ACTIVATE]) {
 					SkillBase skill = ZSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillBase.swordBasic);
@@ -100,7 +104,7 @@ public class ZSSKeyHandler extends KeyHandler
 				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
 					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
 				} else {
-					handleTargetingKeys(mc, kb);
+					handleTargetingKeys(kb);
 				}
 			}
 		}
@@ -109,7 +113,7 @@ public class ZSSKeyHandler extends KeyHandler
 	/**
 	 * All ILockOnTarget skill related keys are handled here
 	 */
-	private void handleTargetingKeys(Minecraft mc, KeyBinding kb)
+	private void handleTargetingKeys(KeyBinding kb)
 	{
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
 		ILockOnTarget skill = skills.getTargetingSkill();

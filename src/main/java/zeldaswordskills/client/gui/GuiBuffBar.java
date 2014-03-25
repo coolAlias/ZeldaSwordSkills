@@ -49,7 +49,7 @@ public class GuiBuffBar extends Gui
 	/** Whether the buff bar should be displayed */
 	public static boolean shouldDisplay;
 	
-	private Minecraft mc;
+	private final Minecraft mc;
 	
 	/** Buff icons texture sheet */
 	private final ResourceLocation textures;
@@ -58,10 +58,10 @@ public class GuiBuffBar extends Gui
 	private static final int ICON_SPACING = ICON_SIZE + 2;
 	private static final int ICONS_PER_ROW = 8;
 
-	public GuiBuffBar(Minecraft mc) {
+	public GuiBuffBar() {
 		super();
 		shouldDisplay = Config.isBuffBarEnabled();
-		this.mc = mc;
+		this.mc = Minecraft.getMinecraft();
 		this.textures = new ResourceLocation(ModInfo.ID, "textures/gui/bufficons.png");
 	}
 	

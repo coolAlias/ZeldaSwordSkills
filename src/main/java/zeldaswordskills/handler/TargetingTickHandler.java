@@ -44,7 +44,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class TargetingTickHandler implements ITickHandler
 {
-	private Minecraft mc;
+	private final Minecraft mc;
 
 	/** The player whose view will update */
 	private EntityPlayer player = null;
@@ -55,8 +55,8 @@ public class TargetingTickHandler implements ITickHandler
 	/** Whether the left movement key has been pressed; used every tick */
 	boolean isLeftPressed;
 
-	public TargetingTickHandler(Minecraft mc) {
-		this.mc = mc;
+	public TargetingTickHandler() {
+		this.mc = Minecraft.getMinecraft();
 	}
 
 	@Override

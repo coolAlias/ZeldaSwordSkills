@@ -17,7 +17,6 @@
 
 package zeldaswordskills;
 
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.client.gui.ComboOverlay;
@@ -38,9 +37,9 @@ public class ClientProxy extends CommonProxy {
 		super.initialize();
 		ZSSKeyHandler.init();
 		MinecraftForge.EVENT_BUS.register(new SoundHandler());
-		MinecraftForge.EVENT_BUS.register(new ComboOverlay(Minecraft.getMinecraft()));
-		MinecraftForge.EVENT_BUS.register(new GuiBuffBar(Minecraft.getMinecraft()));
-		TickRegistry.registerTickHandler(new TargetingTickHandler(Minecraft.getMinecraft()), Side.CLIENT);
+		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
+		MinecraftForge.EVENT_BUS.register(new GuiBuffBar());
+		TickRegistry.registerTickHandler(new TargetingTickHandler(), Side.CLIENT);
 	}
 
 	@Override
