@@ -31,7 +31,6 @@ import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
-import zeldaswordskills.skills.sword.SwordBasic;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 import cpw.mods.fml.relauncher.Side;
@@ -85,7 +84,7 @@ public class TargetingTickHandler implements ITickHandler
 					target = skill.getCurrentTarget();
 					updatePlayerView();
 				}
-				if (skill instanceof SwordBasic && skill.isLockedOn() && skills.canInteract()) {
+				if (skill.isLockedOn() && skills.canInteract()) {
 					if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) &&
 							isVanillaKeyPressed(mc.gameSettings.keyBindJump) && player.isUsingItem()) {
 						skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);

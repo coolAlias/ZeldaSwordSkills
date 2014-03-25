@@ -138,19 +138,25 @@ public abstract class SkillBase
 		return null;
 	}
 
-	/**
-	 * Override equals for List, Set, etc. implementations; may not be necessary
-	 */
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		result = prime * result + level;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
-		} else if (o != null && this.getClass() == o.getClass()) {
-			SkillBase skill = (SkillBase) o;
-			return skill.id == this.id && skill.level == this.level;
-		} else {
+		}
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
 		}
+		SkillBase skill = (SkillBase) obj;
+		return (skill.id == this.id && skill.level == this.level);
 	}
 
 	/** Returns a new instance of the skill with appropriate class type without registering it to the Skill database */

@@ -227,7 +227,7 @@ public class SpinAttack extends SkillActive
 
 	/** Returns the spin speed modified based on the skill's level */
 	@SideOnly(Side.CLIENT)
-	public float getSpinSpeed() { return 70 + (5 * (superLevel + level)); }
+	public float getSpinSpeed() { return 70 + (3 * (superLevel + level)); }
 
 	/** Length of arc; decreases as level increases */
 	@SideOnly(Side.CLIENT)

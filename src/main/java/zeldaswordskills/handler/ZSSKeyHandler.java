@@ -88,7 +88,7 @@ public class ZSSKeyHandler extends KeyHandler
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
 		if (tickEnd) {
 			Minecraft mc = Minecraft.getMinecraft();
-			if (mc.currentScreen == null && ZSSPlayerInfo.get(mc.thePlayer) != null) {
+			if (mc.inGameHasFocus && ZSSPlayerInfo.get(mc.thePlayer) != null) {
 				if (kb == keys[KEY_SKILL_ACTIVATE]) {
 					SkillBase skill = ZSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillBase.swordBasic);
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(skill).makePacket());
