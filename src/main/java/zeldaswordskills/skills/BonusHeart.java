@@ -36,8 +36,8 @@ public class BonusHeart extends SkillPassive
 	private static final UUID bonusHeartUUID = UUID.fromString("14ED99DA-D333-4621-90C8-81C968A082E3");
 	private static final AttributeModifier bonusHeartModifier = (new AttributeModifier(bonusHeartUUID, "ZSS Bonus Heart", 2.0D, 0)).setSaved(true);
 	
-	public BonusHeart(String name, byte id) {
-		super(name, id);
+	protected BonusHeart(String name) {
+		super(name);
 		addDescription("bonusheart.desc.0");
 	}
 	

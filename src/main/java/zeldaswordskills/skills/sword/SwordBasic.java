@@ -88,8 +88,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Left / Right arrow (hold) - Spin Attack
  * Down arrow (tap) - Parry/Disarm
  * 
- * TODO adjust getNextTarget algorithm - doesn't feel 'wide' enough to get nearby enemies
- *
  */
 public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 {
@@ -110,8 +108,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	/** Set to a new instance each time a combo begins */
 	private Combo combo = null;
 
-	public SwordBasic(String name, byte id) {
-		super(name, id);
+	public SwordBasic(String name) {
+		super(name);
 		addDescription(Arrays.asList("basicswordskill.desc.0","basicswordskill.desc.1"));
 	}
 

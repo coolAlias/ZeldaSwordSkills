@@ -18,6 +18,8 @@
 package zeldaswordskills.lib;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.Configuration;
@@ -200,7 +202,7 @@ public class Config
 	/** Chance for unmapped mob to drop an orb */
 	private static int genericMobDropChance;
 	/** Individual drop chances for skill orbs and heart pieces */
-	private static int[] orbDropChance = new int[SkillBase.MAX_NUM_SKILLS];
+	private static Map<Byte, Integer> orbDropChance;// = new int[SkillBase.MAX_NUM_SKILLS];
 	
 	/*================== TRADES =====================*/
 	/** [Bomb Bag] Enable random villager trades for bomb bags */
@@ -314,11 +316,22 @@ public class Config
 		creeperDrop = config.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt();
 		randomDropChance = config.get("Drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt();
 		genericMobDropChance = config.get("Drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt();
-		for (int i = 0; i < orbDropChance.length; ++i) {
-			if (SkillBase.getSkillList()[i] != null && SkillBase.getSkillList()[i].canDrop()) {
-				orbDropChance[i] = config.get("Drops", "Chance (in tenths of a percent) for " + SkillBase.getSkillList()[i].getDisplayName() + " [0-10]", 5).getInt();
+		orbDropChance = new HashMap<Byte, Integer>(SkillBase.getNumSkills());
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (skill.canDrop()) {
+				orbDropChance.put(skill.getId(), config.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt());
 			}
 		}
+		/*
+		for (int i = 0; i < orbDropChance.length; ++i) {
+			SkillBase skill = SkillBase.getSkill(i);
+			//if (SkillBase.getSkillList()[i] != null && SkillBase.getSkillList()[i].canDrop()) {
+			if (skill != null && skill.canDrop()) {
+				//orbDropChance[i] = config.get("Drops", "Chance (in tenths of a percent) for " + SkillBase.getSkillList()[i].getDisplayName() + " [0-10]", 5).getInt();
+				orbDropChance[i] = config.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt();
+			}
+		}
+		*/
 		/*================== TRADES =====================*/
 		friendTradesRequired = config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt();
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
@@ -422,7 +435,7 @@ public class Config
 	public static float getCreeperDropChance() { return MathHelper.clamp_float(creeperDrop * 0.01F, 0F, 1.0F); }
 	public static float getChanceForRandomDrop() { return MathHelper.clamp_float(randomDropChance * 0.01F, 0F, 1.0F); }
 	public static float getRandomMobDropChance() { return MathHelper.clamp_float(genericMobDropChance * 0.0F, 0F, 1.0F); }
-	public static float getDropChance(int orbID) { return MathHelper.clamp_float(orbDropChance[orbID] * 0.001F, 0.0F, 0.01F); }
+	public static float getDropChance(int orbID) { return MathHelper.clamp_float(orbDropChance.get((byte) orbID) * 0.001F, 0.0F, 0.01F); }
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }

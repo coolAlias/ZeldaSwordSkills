@@ -18,7 +18,10 @@
 package zeldaswordskills.skills;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -47,40 +50,37 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public abstract class SkillBase
 {
-	/** Maximum number of skills potentially available */
-	public static final byte MAX_NUM_SKILLS = 16;
-
 	/** Default maximum skill level */
 	public static final byte MAX_LEVEL = 5;
 
 	/** For convenience in providing initial id values */
-	private static int skillIndex = 0;
+	private static byte skillIndex = 0;
 
-	/** Similar to itemsList in Item, giving easy access to any Skill */
-	private static final SkillBase[] skillsList = new SkillBase[MAX_NUM_SKILLS];
+	/** Map containing all registered skills */
+	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
 
 	/* ACTIVE SKILLS */
-	public static final SkillBase swordBasic = new SwordBasic("basicswordskill", (byte) skillIndex++);
-	public static final SkillBase armorBreak = new ArmorBreak("armorbreak", (byte) skillIndex++);
-	public static final SkillBase dodge = new Dodge("dodge", (byte) skillIndex++);
-	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow", (byte) skillIndex++);
-	public static final SkillBase parry = new Parry("parry", (byte) skillIndex++);
-	public static final SkillBase dash = new Dash("dash", (byte) skillIndex++);
-	public static final SkillBase spinAttack = new SpinAttack("spinattack", (byte) skillIndex++);
-	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack", (byte) skillIndex++);
-	public static final SkillBase swordBeam = new SwordBeam("swordbeam", (byte) skillIndex++);
+	public static final SkillBase swordBasic = new SwordBasic("basicswordskill");
+	public static final SkillBase armorBreak = new ArmorBreak("armorbreak");
+	public static final SkillBase dodge = new Dodge("dodge");
+	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow");
+	public static final SkillBase parry = new Parry("parry");
+	public static final SkillBase dash = new Dash("dash");
+	public static final SkillBase spinAttack = new SpinAttack("spinattack");
+	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack");
+	public static final SkillBase swordBeam = new SwordBeam("swordbeam");
 
 	/* PASSIVE SKILLS */
-	public static final SkillBase bonusHeart = new BonusHeart("bonusheart", (byte) skillIndex++);
+	public static final SkillBase bonusHeart = new BonusHeart("bonusheart");
 
 	/* NEW SKILLS */
-	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw", (byte) skillIndex++);
+	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw");
 
 	/** Unlocalized name for language registry */
 	protected final String unlocalizedName;
 
-	/** Internal id for skill; needed mainly for prerequisites */
-	public final byte id;
+	/** IDs are determined internally; used as key to retrieve skill instance from skills map */
+	private byte id;
 
 	/** Mutable field storing current level for this instance of SkillBase */
 	protected byte level = 0;
@@ -91,30 +91,54 @@ public abstract class SkillBase
 	/**
 	 * Constructs the first instance of a skill and stores it in the skill list
 	 * @param name		this is the unlocalized name and should not contain any spaces
-	 * @param id		the skill's id should be unique
 	 * @param register	whether to register the skill, adding the skill to the skill list;
 	 * 					seems to always be true since skills are declared statically
 	 */
-	public SkillBase(String name, byte id, boolean register) {
+	protected SkillBase(String name, boolean register) {
 		this.unlocalizedName = name;
-		this.id = id;
+		this.id = skillIndex++;
 		if (register) {
-			if (skillsList[id] != null) {
+			if (skillsMap.containsKey(id)) {
 				LogHelper.log(Level.WARNING,"CONFLICT @ skill " + id + " id already occupied by "
-						+ skillsList[id].unlocalizedName + " while adding " + name);
+						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
 			}
-			skillsList[id] = this;
+			skillsMap.put(id, this);
 		}
 	}
 
-	public SkillBase(SkillBase skill) {
+	/**
+	 * Copy constructor creates a level zero version of the skill
+	 */
+	protected SkillBase(SkillBase skill) {
 		this.unlocalizedName = skill.unlocalizedName;
 		this.id = skill.id;
 		this.tooltip.addAll(skill.tooltip);
 	}
 
-	/** Returns the Master Skills List */
-	public static final SkillBase[] getSkillList() { return skillsList; }
+	/** Returns true if the id provided is mapped to a skill */
+	public static final boolean doesSkillExist(int id) {
+		return (id >= 0 && id <= Byte.MAX_VALUE && skillsMap.containsKey((byte) id));
+	}
+	
+	/** Returns a new instance of the skill with id, or null if it doesn't exist */
+	public static final SkillBase getNewSkillInstance(byte id) {
+		return (skillsMap.containsKey(id) ? skillsMap.get(id).newInstance() : null);
+	}
+	
+	/** Returns the instance of the skill stored in the map if it exists, or null */
+	public static final SkillBase getSkill(int id) {
+		return (doesSkillExist(id) ? skillsMap.get((byte) id) : null);
+	}
+	
+	/** Returns an iterable collection of all the skills in the map */
+	public static final Collection<SkillBase> getSkills() {
+		return skillsMap.values();
+	}
+
+	/** Returns the total number of registered skills */
+	public static final int getNumSkills() {
+		return skillsMap.size();
+	}
 
 	/**
 	 * Returns a leveled skill from an ISkillItem using {@link ISkillItem#getSkillId(ItemStack)}
@@ -131,8 +155,8 @@ public abstract class SkillBase
 	 * May return null if the id is invalid or level is less than 1
 	 */
 	public static final SkillBase createLeveledSkill(final int id, final byte level) {
-		if (id >= 0 && id < skillsList.length && skillsList[id] != null && level > 0) {
-			SkillBase skill = skillsList[id].newInstance();
+		if (doesSkillExist(id) && level > 0) {
+			SkillBase skill = getNewSkillInstance((byte) id);
 			skill.level = (level > skill.getMaxLevel() ? skill.getMaxLevel() : level);
 			return skill;
 		}
@@ -173,6 +197,9 @@ public abstract class SkillBase
 
 	/** Returns whether this skill can generate as random loot in chests */
 	public boolean isLoot() { return true; }
+
+	/** Each skill's ID can be used as a key to retrieve it from the map */
+	public final byte getId() { return id; }
 
 	/** Returns current skill level */
 	public final byte getLevel() { return level; }

@@ -170,11 +170,10 @@ public class ZSSEntityEvents
 				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));
 				player.inventory.addItemStackToInventory(new ItemStack(Item.monsterPlacer.itemID,64,57)); // 92 cow, 57 pigman
 				player.inventory.addItemStackToInventory(new ItemStack(Item.beefCooked,64));
-				for (int i = 0; i < SkillBase.MAX_NUM_SKILLS; ++i) {
-					SkillBase skill = SkillBase.getSkillList()[i]; 
-					if (skill != null && ZSSPlayerInfo.get(player).getSkillLevel(skill) < 1) {
+				for (SkillBase skill : SkillBase.getSkills()) {
+					if (ZSSPlayerInfo.get(player).getSkillLevel(skill) < 1) {
 						ZSSPlayerInfo.get(player).grantSkill(skill);
-						player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.skillOrb,1,skill.id));
+						player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.skillOrb,1,skill.getId()));
 					}
 				}
 			} else {

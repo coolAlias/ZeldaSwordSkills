@@ -54,8 +54,9 @@ public class DungeonLootLists
 	public static void setCategoryStats(ChestGenHooks category, int min, int max, WeightedRandomChestContent[] contents) {
 		category.setMin(min);
 		category.setMax(max);
-		for (WeightedRandomChestContent item : contents)
+		for (WeightedRandomChestContent item : contents) {
 			category.addItem(item);
+		}
 	}
 
 	/** Item version: Creates a weighted chest content for a generic item with the min, max, and weight */
@@ -100,20 +101,16 @@ public class DungeonLootLists
 	 * Generates the chest contents for non-boss secret rooms, adding appropriate location-based items and locked chest loot
 	 */
 	public static void generateChestContents(World world, Random rand, IInventory chest, RoomBase room, boolean isLockedChest) {
-		// use vanilla methods to allow contents to overwrite each other
 		ChestGenHooks info = ChestGenHooks.getInfo(BASIC_LOOT);
 		WeightedRandomChestContent.generateChestContents(rand, info.getItems(rand), chest, info.getCount(rand));
 		int n = rand.nextInt(3);
 		if (n > 0 && (isLockedChest || rand.nextInt(4) == 0)) {
 			if (room.inLava) {
 				WeightedRandomChestContent.generateChestContents(rand, lavaLoot, chest, n);
-				//WorldUtils.generateRandomChestContents(rand, lavaLootList.toArray(new WeightedRandomChestContent[lavaLootList.size()]), chest, n, true);
 			} else if (room.inOcean) {
 				WeightedRandomChestContent.generateChestContents(rand, oceanLoot, chest, n);
-				//WorldUtils.generateRandomChestContents(rand, oceanLootList.toArray(new WeightedRandomChestContent[oceanLootList.size()]), chest, n, true);
 			} else if (room.inMountain) {
 				WeightedRandomChestContent.generateChestContents(rand, mountainLoot, chest, n);
-				//WorldUtils.generateRandomChestContents(rand, mountainLootList.toArray(new WeightedRandomChestContent[mountainLootList.size()]), chest, n, true);
 			} else {
 				WeightedRandomChestContent.generateChestContents(rand, regularLoot, chest, n);
 			}
@@ -146,7 +143,7 @@ public class DungeonLootLists
 		generateChestContents(world, rand, chest, room, true);
 		ChestGenHooks info = ChestGenHooks.getInfo(BOSS_LOOT);
 		WeightedRandomChestContent.generateChestContents(rand, info.getItems(rand), chest, info.getCount(rand));
-		WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.id), chest, 3);
+		WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), chest, 3);
 		// special items that always generate, i.e. the Pendants of Virtue
 		ItemStack stack = room.getBossType().getSpecialItem();
 		if (stack != null) {
@@ -302,9 +299,9 @@ public class DungeonLootLists
 	};
 
 	private static void initSkillOrbLoot() {
-		for (int i = 0; i < SkillBase.MAX_NUM_SKILLS; ++i) {
-			if (SkillBase.getSkillList()[i] != null && SkillBase.getSkillList()[i].isLoot()) {
-				skillOrbLootList.add(getLoot(ZSSItems.skillOrb, i, 1, 1, Config.getLockedLootWeight()));
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (skill.isLoot()) {
+				skillOrbLootList.add(getLoot(ZSSItems.skillOrb, skill.getId(), 1, 1, Config.getLockedLootWeight()));
 			}
 		}
 	}

@@ -44,7 +44,7 @@ public class EndComboPacket extends CustomPacket
 	public EndComboPacket() {}
 	
 	public EndComboPacket(SkillBase skill) {
-		this.id = skill.id;
+		this.id = skill.getId();
 	}
 	
 	@Override
@@ -60,7 +60,8 @@ public class EndComboPacket extends CustomPacket
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isServer()) {
-			if (SkillBase.getSkillList()[this.id] instanceof ICombo) {
+			//if (SkillBase.getSkillList()[this.id] instanceof ICombo) {
+			if (SkillBase.getSkill(this.id) instanceof ICombo) {
 				ICombo skill = (ICombo) ZSSPlayerInfo.get(player).getPlayerSkill(this.id);
 				if (skill != null) {
 					if (skill.isComboInProgress()) {

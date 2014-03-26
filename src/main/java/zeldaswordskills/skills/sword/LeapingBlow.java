@@ -60,8 +60,8 @@ public class LeapingBlow extends SkillActive
 	/** Whether the player is wielding a Master Sword */
 	private boolean isMaster;
 
-	public LeapingBlow(String name, byte id) {
-		super(name, id);
+	public LeapingBlow(String name) {
+		super(name);
 		setDisablesLMB();
 		addDescription(Arrays.asList("leapingblow.desc.0","leapingblow.desc.1"));
 	}

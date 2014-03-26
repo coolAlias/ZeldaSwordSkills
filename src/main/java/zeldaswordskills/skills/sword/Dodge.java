@@ -68,8 +68,8 @@ public class Dodge extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private KeyBinding keyPressed;
 
-	public Dodge(String name, byte id) {
-		super(name, id);
+	public Dodge(String name) {
+		super(name);
 		setDisablesLMB();
 		addDescription("dodge.desc.0");
 	}

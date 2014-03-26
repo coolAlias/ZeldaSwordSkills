@@ -64,8 +64,8 @@ public class Dash extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private boolean isRMBDown;
 	
-	public Dash(String name, byte id) {
-		super(name, id);
+	public Dash(String name) {
+		super(name);
 		setDisablesLMB();
 		addDescription("dash.desc.0");
 	}

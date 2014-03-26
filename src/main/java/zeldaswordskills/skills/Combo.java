@@ -80,7 +80,7 @@ public class Combo
 	 * @param xpType the Attribute that receives xp gained from combo
 	 */
 	public Combo(EntityPlayer player, SkillBase skill, int maxComboSize, int timeLimit) {
-		this.skillId = skill.id;
+		this.skillId = skill.getId();
 		this.maxComboSize = maxComboSize;
 		this.timeLimit = timeLimit;
 		PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);

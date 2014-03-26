@@ -95,8 +95,8 @@ public class SpinAttack extends SkillActive
 	/** The player's Super Spin Attack level will allow multiple spins and extended range */
 	private int superLevel;
 
-	public SpinAttack(String name, byte id) {
-		super(name, id);
+	public SpinAttack(String name) {
+		super(name);
 		setDisablesLMB();
 		if (name.toLowerCase().contains("super")) { addDescription("superspinattack.desc.0"); }
 		else { addDescription("spinattack.desc.0"); }

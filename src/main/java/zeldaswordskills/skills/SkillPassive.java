@@ -29,10 +29,9 @@ public class SkillPassive extends SkillBase
 	/**
 	 * Constructs the first instance of a skill and stores it in the skill list
 	 * @param name	this is the unlocalized name and should not contain any spaces
-	 * @param id	the skill's id should be unique
 	 */
-	protected SkillPassive(String name, byte id) {
-		super(name, id, true);
+	protected SkillPassive(String name) {
+		super(name, true);
 	}
 
 	protected SkillPassive(SkillBase skill) { super(skill); }
@@ -49,7 +48,7 @@ public class SkillPassive extends SkillBase
 
 	@Override
 	public final void writeToNBT(NBTTagCompound compound) {
-		compound.setByte("id", id);
+		compound.setByte("id", getId());
 		compound.setByte("level", level);
 	}
 
@@ -60,7 +59,7 @@ public class SkillPassive extends SkillBase
 
 	@Override
 	public final SkillPassive loadFromNBT(NBTTagCompound compound) {
-		SkillPassive skill = (SkillPassive) getSkillList()[compound.getByte("id")].newInstance();
+		SkillPassive skill = (SkillPassive) getNewSkillInstance(compound.getByte("id"));
 		skill.readFromNBT(compound);
 		return skill;
 	}

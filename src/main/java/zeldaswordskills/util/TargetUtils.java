@@ -270,4 +270,18 @@ public class TargetUtils
 		}
 		return true;
 	}
+
+	/**
+	 * Knocks the pushed entity back slightly as though struck by the pushing entity
+	 */
+	public static final void knockTargetBack(EntityLivingBase pushedEntity, EntityLivingBase pushingEntity) {
+		if (pushedEntity.canBePushed()) {
+			double dx = pushedEntity.posX - pushingEntity.posX;
+			double dz;
+			for (dz = pushedEntity.posZ - pushingEntity.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D){
+				dx = (Math.random() - Math.random()) * 0.01D;
+			}
+			pushedEntity.knockBack(pushingEntity, 0, -dx, -dz);
+		}
+	}
 }

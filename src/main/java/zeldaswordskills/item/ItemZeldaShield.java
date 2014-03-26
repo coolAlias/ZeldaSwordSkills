@@ -189,14 +189,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_HAMMER,
 					(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
 					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
-			if (target.canBePushed()) {
-				double dx = target.posX - player.posX;
-				double dz;
-				for (dz = target.posZ - player.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D){
-					dx = (Math.random() - Math.random()) * 0.01D;
-				}
-				((EntityLivingBase) target).knockBack(player, 0, -dx, -dz);
-			}
+			TargetUtils.knockTargetBack((EntityLivingBase) target, player);
 		}
 		return true;
 	}

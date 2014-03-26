@@ -91,8 +91,8 @@ public class ZSSItemEvents
 
 	/** Adds a mob-class to skill orb mapping */
 	public static void addDrop(Class<? extends EntityLivingBase> mobClass, int orbID) {
-		if (orbID < SkillBase.MAX_NUM_SKILLS && SkillBase.getSkillList()[orbID] != null) {
-			ItemStack stack = new ItemStack(ZSSItems.skillOrb, 1, SkillBase.getSkillList()[orbID].id);
+		if (SkillBase.doesSkillExist(orbID)) {
+			ItemStack stack = new ItemStack(ZSSItems.skillOrb, 1, orbID);
 			dropsList.put(mobClass, stack);
 		}
 	}
@@ -106,10 +106,10 @@ public class ZSSItemEvents
 			return dropsList.get(mob.getClass());
 		} else {
 			ItemStack orb = null;
-			int id = mob.worldObj.rand.nextInt(SkillBase.MAX_NUM_SKILLS);
-			if (SkillBase.getSkillList()[id] != null && SkillBase.getSkillList()[id].canDrop()) {
+			int id = mob.worldObj.rand.nextInt(SkillBase.getNumSkills());
+			if (SkillBase.doesSkillExist(id) && SkillBase.getSkill(id).canDrop()) {
 				if (dropsList.get(mob.getClass()) != null || isBoss || mob.worldObj.rand.nextFloat() < Config.getRandomMobDropChance()) {
-					orb = (id == SkillBase.bonusHeart.id ? new ItemStack(ZSSItems.heartPiece) : new ItemStack(ZSSItems.skillOrb, 1, id));
+					orb = (id == SkillBase.bonusHeart.getId() ? new ItemStack(ZSSItems.heartPiece) : new ItemStack(ZSSItems.skillOrb, 1, id));
 				}
 			}
 
@@ -124,7 +124,7 @@ public class ZSSItemEvents
 			EntityLivingBase mob = event.entityLiving;
 			boolean isBoss = mob instanceof IBossDisplayData;
 			boolean flag = ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.mortalDraw) == SkillBase.mortalDraw.getMaxLevel();
-			ItemStack orb = (isBoss && !flag ? new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.id) : getOrbDrop(mob, isBoss));
+			ItemStack orb = (isBoss && !flag ? new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.getId()) : getOrbDrop(mob, isBoss));
 			if (orb != null) {
 				ItemStack helm = (player).getCurrentArmor(ArmorIndex.WORN_HELM);
 				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
@@ -311,22 +311,22 @@ public class ZSSItemEvents
 	}
 
 	public static void initializeDrops() {
-		addDrop(EntityZombie.class, SkillBase.swordBasic.id);
-		addDrop(EntitySkeleton.class, SkillBase.swordBasic.id);
-		addDrop(EntityEnderman.class, SkillBase.dodge.id);
-		addDrop(EntityKeese.class, SkillBase.dodge.id);
-		addDrop(EntitySilverfish.class, SkillBase.dash.id);
-		addDrop(EntityHorse.class, SkillBase.dash.id);
-		addDrop(EntityPigZombie.class, SkillBase.parry.id);
-		addDrop(EntityOcelot.class, SkillBase.parry.id);
-		addDrop(EntitySpider.class, SkillBase.leapingBlow.id);
-		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow.id);
-		addDrop(EntityBlaze.class, SkillBase.spinAttack.id);
-		addDrop(EntityBat.class, SkillBase.spinAttack.id);
-		addDrop(EntityCreeper.class, SkillBase.armorBreak.id);
-		addDrop(EntityIronGolem.class, SkillBase.armorBreak.id);
-		addDrop(EntityGhast.class, SkillBase.swordBeam.id);
-		addDrop(EntityWitch.class, SkillBase.swordBeam.id);
+		addDrop(EntityZombie.class, SkillBase.swordBasic.getId());
+		addDrop(EntitySkeleton.class, SkillBase.swordBasic.getId());
+		addDrop(EntityEnderman.class, SkillBase.dodge.getId());
+		addDrop(EntityKeese.class, SkillBase.dodge.getId());
+		addDrop(EntitySilverfish.class, SkillBase.dash.getId());
+		addDrop(EntityHorse.class, SkillBase.dash.getId());
+		addDrop(EntityPigZombie.class, SkillBase.parry.getId());
+		addDrop(EntityOcelot.class, SkillBase.parry.getId());
+		addDrop(EntitySpider.class, SkillBase.leapingBlow.getId());
+		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow.getId());
+		addDrop(EntityBlaze.class, SkillBase.spinAttack.getId());
+		addDrop(EntityBat.class, SkillBase.spinAttack.getId());
+		addDrop(EntityCreeper.class, SkillBase.armorBreak.getId());
+		addDrop(EntityIronGolem.class, SkillBase.armorBreak.getId());
+		addDrop(EntityGhast.class, SkillBase.swordBeam.getId());
+		addDrop(EntityWitch.class, SkillBase.swordBeam.getId());
 	}
 
 	// TODO move this to a world gen event handler

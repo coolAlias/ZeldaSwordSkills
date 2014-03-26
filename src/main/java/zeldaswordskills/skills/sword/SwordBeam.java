@@ -55,8 +55,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class SwordBeam extends SkillActive
 {
-	public SwordBeam(String name, byte id) {
-		super(name, id);
+	public SwordBeam(String name) {
+		super(name);
 		addDescription(Arrays.asList("swordbeam.desc.0","swordbeam.desc.1","swordbeam.desc.2"));
 	}
 

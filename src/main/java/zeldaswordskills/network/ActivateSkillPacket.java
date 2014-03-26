@@ -56,7 +56,7 @@ public class ActivateSkillPacket extends CustomPacket
 	@Override
 	public void write(ByteArrayDataOutput out) throws IOException {
 		out.writeBoolean(this.wasTriggered);
-		out.writeByte(skill.id);
+		out.writeByte(skill.getId());
 	}
 
 	@Override

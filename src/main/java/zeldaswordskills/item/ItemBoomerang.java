@@ -110,7 +110,7 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWea
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
-		if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart.id) >= Config.getMaxBonusHearts() / 2) {
+		if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart) >= Config.getMaxBonusHearts() / 2) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairyBoomerang);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.boomerangMagic), core.xCoord, core.yCoord + 2, core.zCoord);

@@ -59,7 +59,7 @@ public class TargetIdPacket extends CustomPacket
 	 */
 	public TargetIdPacket(SkillBase skill) throws IllegalArgumentException {
 		if (skill instanceof ILockOnTarget) {
-			this.skillId = skill.id;
+			this.skillId = skill.getId();
 			this.entity = ((ILockOnTarget) skill).getCurrentTarget();
 		} else {
 			throw new IllegalArgumentException("Parameter 'skill' must be an instance of ILockOnTarget while constructing TargetIdPacket");

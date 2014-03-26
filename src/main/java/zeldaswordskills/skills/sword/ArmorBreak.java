@@ -64,8 +64,8 @@ public class ArmorBreak extends SkillActive
 	/** Current charge time */
 	private int charge = 0;
 
-	public ArmorBreak(String name, byte id) {
-		super(name, id);
+	public ArmorBreak(String name) {
+		super(name);
 		addDescription(Arrays.asList("armorbreak.desc.0","armorbreak.desc.1"));
 		disableUserActivation();
 		setDisablesLMB();

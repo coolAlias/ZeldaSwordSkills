@@ -45,7 +45,7 @@ public class SyncSkillPacket extends CustomPacket
 	public SyncSkillPacket() {}
 
 	public SyncSkillPacket(SkillBase skill) {
-		id = skill.id;
+		id = skill.getId();
 		compound = new NBTTagCompound();
 		skill.writeToNBT(compound);
 	}

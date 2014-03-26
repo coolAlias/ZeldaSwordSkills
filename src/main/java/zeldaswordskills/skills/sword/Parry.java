@@ -33,6 +33,7 @@ import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -68,8 +69,8 @@ public class Parry extends SkillActive
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
 
-	public Parry(String name, byte id) {
-		super(name, id);
+	public Parry(String name) {
+		super(name);
 		setDisablesLMB();
 		addDescription("parry.desc.0");
 	}
@@ -155,14 +156,12 @@ public class Parry extends SkillActive
 			parryTimer = getParryDelay(); // fix probable bug where player can disarm multiple opponents at once
 			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SWORDSTRIKE, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
 			playMissSound = false;
-			
+			TargetUtils.knockTargetBack(attacker, player);
 			if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
 				disarm(attacker);
 			}
-
 			return true;
 		}
-
 		return false;
 	}
 
@@ -177,7 +176,6 @@ public class Parry extends SkillActive
 		if (attacker instanceof EntityPlayer) {
 			penalty = 0.1F * ZSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
 		}
-
 		return ((level * 0.1F) - penalty + bonus);
 	}
 

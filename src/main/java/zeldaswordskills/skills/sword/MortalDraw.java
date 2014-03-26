@@ -63,8 +63,8 @@ public class MortalDraw extends SkillActive
 	/** Nearest sword slot index */
 	private int swordSlot;
 
-	public MortalDraw(String name, byte id) {
-		super(name, id);
+	public MortalDraw(String name) {
+		super(name);
 		setDisablesLMB();
 		addDescription(Arrays.asList("mortaldraw.desc.0","mortaldraw.desc.1"));
 	}

@@ -55,7 +55,7 @@ import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ZSSPlayerInfo implements IExtendedEntityProperties
+public final class ZSSPlayerInfo implements IExtendedEntityProperties
 {
 	private final static String EXT_PROP_NAME = "ZSSPlayerInfo";
 
@@ -100,7 +100,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public int hoverTime = 0;
 
 	/** Stores information on the player's Attributes and Passive Skills */
-	private final Map<Byte, SkillBase> skills = new HashMap<Byte, SkillBase>(SkillBase.MAX_NUM_SKILLS);
+	private final Map<Byte, SkillBase> skills;
 
 	/** ID of currently active skill that prevents left-mouse button interaction */
 	private int currentActiveSkillId = -1;
@@ -116,6 +116,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
+		skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
 		initStats();
 		initSkills();
 	}
@@ -163,10 +164,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * Adds all skills to the map at level zero
 	 */
 	private void initSkills() {
-		for (int i = 0; i < SkillBase.MAX_NUM_SKILLS; ++i) {
-			if (SkillBase.getSkillList()[i] != null) {
-				skills.put(SkillBase.getSkillList()[i].id, SkillBase.getSkillList()[i].newInstance());
-			}
+		for (SkillBase skill : SkillBase.getSkills()) {
+			skills.put(skill.getId(), skill.newInstance());
 		}
 	}
 
@@ -251,7 +250,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/** Returns whether the player has already received all 5 Super Spin Attack orbs */
-	public boolean hasReceivedAllOrbs() { return (fairySpinOrbsReceived == SkillBase.MAX_LEVEL); }
+	public boolean hasReceivedAllOrbs() {
+		return (fairySpinOrbsReceived == SkillBase.MAX_LEVEL);
+	}
 
 	/** Increments the number of Super Spin Attack orbs received, returning true if it's the last one */
 	public boolean receiveFairyOrb() {
@@ -282,13 +283,19 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/** Returns true if the player has at least one level in the specified skill */
-	public boolean hasSkill(SkillBase skill) { return hasSkill(skill.id); }
+	public boolean hasSkill(SkillBase skill) {
+		return hasSkill(skill.getId());
+	}
 
 	/** Returns true if the player has at least one level in the specified skill (of any class) */
-	private boolean hasSkill(byte id) { return getSkillLevel(id) > 0; }
+	public boolean hasSkill(byte id) {
+		return getSkillLevel(id) > 0;
+	}
 
 	/** Returns the player's skill level for given skill, or 0 if the player doesn't have that skill */
-	public byte getSkillLevel(SkillBase skill) { return getSkillLevel(skill.id); }
+	public byte getSkillLevel(SkillBase skill) {
+		return getSkillLevel(skill.getId());
+	}
 
 	/** Returns the player's skill level for given skill, or 0 if the player doesn't have that skill */
 	public byte getSkillLevel(byte id) {
@@ -307,8 +314,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * Returns true if the player has the skill and the skill is currently active
 	 */
 	public boolean isSkillActive(SkillBase skill) {
-		if (skills.containsKey(skill.id) && skills.get(skill.id) instanceof SkillActive) {
-			return (getSkillLevel(skill) > 0 && ((SkillActive) skills.get(skill.id)).isActive());
+		if (skill instanceof SkillActive && skills.containsKey(skill.getId())) {
+			return (getSkillLevel(skill) > 0 && ((SkillActive) skills.get(skill.getId())).isActive());
 		} else {
 			return false;
 		}
@@ -316,21 +323,23 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/** Used only for skills that disable left-mouse click interactions */
 	public void setCurrentActiveSkill(SkillBase skill) {
-		currentActiveSkillId = skill.id;
+		currentActiveSkillId = skill.getId();
 	}
 
 	/**
 	 * Returns false any skill is active that prevents left-clicks, such as most skills with animations
 	 */
 	public boolean canInteract() {
-		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkillList()[currentActiveSkillId])) {
+		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkill(currentActiveSkillId))) {
 			currentActiveSkillId = -1;
 		}
 		return currentActiveSkillId == -1;
 	}
 
 	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
-	public SkillBase getPlayerSkill(SkillBase skill) { return getPlayerSkill(skill.id); }
+	public SkillBase getPlayerSkill(SkillBase skill) {
+		return getPlayerSkill(skill.getId());
+	}
 
 	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
 	public SkillBase getPlayerSkill(byte id) {
@@ -354,13 +363,15 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/** Grants a skill with target level of current skill level plus one */
-	public boolean grantSkill(SkillBase skill) { return grantSkill(skill.id, (byte)(getSkillLevel(skill) + 1)); }
+	public boolean grantSkill(SkillBase skill) {
+		return grantSkill(skill.getId(), (byte)(getSkillLevel(skill) + 1));
+	}
 
 	/**
 	 * Grants skill to player if player meets the requirements; returns true if skill learned
 	 */
 	public boolean grantSkill(byte id, byte targetLevel) {
-		SkillBase skill = skills.containsKey(id) ? (SkillBase) skills.get(id) : SkillBase.getSkillList()[id].newInstance();
+		SkillBase skill = skills.containsKey(id) ? (SkillBase) skills.get(id) : SkillBase.getNewSkillInstance(id);
 		if (skill.grantSkill(player, targetLevel)) {
 			skills.put(id, skill);
 			return true;
@@ -370,7 +381,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/** Returns true if the player successfully activates his/her skill */
-	public boolean activateSkill(World world, SkillBase skill) { return activateSkill(world, skill.id); }
+	public boolean activateSkill(World world, SkillBase skill) {
+		return activateSkill(world, skill.getId());
+	}
 
 	/**
 	 * Returns true if the player successfully activates his/her skill
@@ -384,7 +397,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/** Returns true if the skill was triggered (e.g. activated without player input) */
-	public boolean triggerSkill(World world, SkillBase skill) { return triggerSkill(world, skill.id); }
+	public boolean triggerSkill(World world, SkillBase skill) {
+		return triggerSkill(world, skill.getId());
+	}
 
 	/**
 	 * Returns true if the skill was successfully triggered (e.g. activated without player input)
@@ -403,8 +418,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	@SideOnly(Side.CLIENT)
 	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
-		if (id < SkillBase.MAX_NUM_SKILLS && SkillBase.getSkillList()[id] != null) {
-			skills.put(id, SkillBase.getSkillList()[id].newInstance().loadFromNBT(compound));
+		if (SkillBase.doesSkillExist(id)) {
+			skills.put(id, SkillBase.getNewSkillInstance(id).loadFromNBT(compound));
 		}
 	}
 
@@ -535,7 +550,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		for (int i = 0; i < taglist.tagCount(); ++i) {
 			NBTTagCompound skill = (NBTTagCompound) taglist.tagAt(i);
 			byte id = skill.getByte("id");
-			skills.put(id, SkillBase.getSkillList()[id].loadFromNBT(skill));
+			skills.put(id, SkillBase.getNewSkillInstance(id).loadFromNBT(skill));
 		}
 		int[] stats = compound.getIntArray("zssStats");
 		for (int i = 0; i < stats.length; ++i) {
