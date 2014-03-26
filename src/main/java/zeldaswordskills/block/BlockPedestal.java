@@ -115,10 +115,10 @@ public class BlockPedestal extends BlockContainer
 	
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		TileEntityPedestal te = (TileEntityPedestal) world.getBlockTileEntity(x, y, z);
-		if (te == null || player.isSneaking()) {
+		if (player.isSneaking() || !(world.getBlockTileEntity(x, y, z) instanceof TileEntityPedestal)) {
 			return false;
 		}
+		TileEntityPedestal te = (TileEntityPedestal) world.getBlockTileEntity(x, y, z);
 		if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
 			te.setSword(player.getHeldItem(), player);
 			player.setCurrentItemOrArmor(0, null);
