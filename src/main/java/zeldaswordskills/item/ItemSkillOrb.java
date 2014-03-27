@@ -84,7 +84,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 						boolean flag = true;
 						for (SkillBase check : SkillBase.getSkills()) {
 							if (check.getId() != SkillBase.bonusHeart.getId()) {
-								flag = skills.getSkillLevel(skill) == skill.getMaxLevel();
+								flag = skills.getSkillLevel(check) == check.getMaxLevel();
 								if (!flag) { break; }
 							}
 						}
