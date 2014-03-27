@@ -80,7 +80,7 @@ public abstract class SkillBase
 	protected final String unlocalizedName;
 
 	/** IDs are determined internally; used as key to retrieve skill instance from skills map */
-	private byte id;
+	private final byte id;
 
 	/** Mutable field storing current level for this instance of SkillBase */
 	protected byte level = 0;
@@ -119,17 +119,17 @@ public abstract class SkillBase
 	public static final boolean doesSkillExist(int id) {
 		return (id >= 0 && id <= Byte.MAX_VALUE && skillsMap.containsKey((byte) id));
 	}
-	
+
 	/** Returns a new instance of the skill with id, or null if it doesn't exist */
 	public static final SkillBase getNewSkillInstance(byte id) {
 		return (skillsMap.containsKey(id) ? skillsMap.get(id).newInstance() : null);
 	}
-	
+
 	/** Returns the instance of the skill stored in the map if it exists, or null */
 	public static final SkillBase getSkill(int id) {
 		return (doesSkillExist(id) ? skillsMap.get((byte) id) : null);
 	}
-	
+
 	/** Returns an iterable collection of all the skills in the map */
 	public static final Collection<SkillBase> getSkills() {
 		return skillsMap.values();
@@ -163,9 +163,7 @@ public abstract class SkillBase
 		return null;
 	}
 
-	/**
-	 * Note that mutable objects such as this are not suitable as Map keys
-	 */
+	/** Note that mutable objects such as this are not suitable as Map keys */
 	@Override
 	public int hashCode() {
 		return 31 * (31 + id) + level;
@@ -187,10 +185,14 @@ public abstract class SkillBase
 	public abstract SkillBase newInstance();
 
 	/** Returns the translated skill name */
-	public final String getDisplayName() { return StatCollector.translateToLocal(getUnlocalizedName()); }
+	public final String getDisplayName() {
+		return StatCollector.translateToLocal(getUnlocalizedName());
+	}
 
 	/** Returns the unlocalized name prefixed by 'skill.' and suffixed by '.name' */
-	public final String getUnlocalizedName() { return "skill.zss." + unlocalizedName + ".name"; }
+	public final String getUnlocalizedName() {
+		return "skill.zss." + unlocalizedName + ".name";
+	}
 
 	/** Returns whether this skill can drop as an orb randomly from mobs */
 	public boolean canDrop() { return true; }
@@ -253,10 +255,16 @@ public abstract class SkillBase
 	}
 
 	/** Adds a single untranslated string to the skill's tooltip display */
-	protected final SkillBase addDescription(String string) { tooltip.add("skill.zss." + string); return this; }
+	protected final SkillBase addDescription(String string) {
+		tooltip.add("skill.zss." + string);
+		return this;
+	}
 
 	/** Adds all entries in the provided list to the skill's tooltip display */
-	protected final SkillBase addDescription(List<String> list) { for (String s : list) { addDescription(s); } return this; }
+	protected final SkillBase addDescription(List<String> list) {
+		for (String s : list) { addDescription(s); }
+		return this;
+	}
 
 	/** Returns true if player meets requirements to learn this skill at target level */
 	protected boolean canIncreaseLevel(EntityPlayer player, int targetLevel) {
@@ -267,27 +275,30 @@ public abstract class SkillBase
 	protected abstract void levelUp(EntityPlayer player);
 
 	/** Recalculates bonuses, etc. upon player respawn; Override if levelUp does things other than just calculate bonuses! */
-	public void validateSkill(EntityPlayer player) { levelUp(player); }
+	public void validateSkill(EntityPlayer player) {
+		levelUp(player);
+	}
 
 	/** Shortcut method to grant skill at current level + 1 */
-	public final boolean grantSkill(EntityPlayer player) { return grantSkill(player, level + 1); }
+	public final boolean grantSkill(EntityPlayer player) {
+		return grantSkill(player, level + 1);
+	}
 
 	/**
 	 * Attempts to level up the skill to target level, returning true if skill's level increased (not necessarily to the target level)
 	 */
 	public final boolean grantSkill(EntityPlayer player, int targetLevel) {
-		if (targetLevel <= level || targetLevel > getMaxLevel()) { return false; }
-
+		if (targetLevel <= level || targetLevel > getMaxLevel()) {
+			return false;
+		}
 		byte oldLevel = level;
 		while (level < targetLevel && canIncreaseLevel(player, level + 1)) {
 			++level;
 			levelUp(player);
 		}
-
 		if (!player.worldObj.isRemote && oldLevel < level) {
 			PacketDispatcher.sendPacketToPlayer(new SyncSkillPacket(this).makePacket(), (Player) player);
 		}
-
 		return oldLevel < level;
 	}
 

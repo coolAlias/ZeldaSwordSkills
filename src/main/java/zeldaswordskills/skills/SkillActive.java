@@ -82,7 +82,9 @@ public abstract class SkillActive extends SkillBase
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) { return getDescription(); }
+	public List<String> getDescription(EntityPlayer player) {
+		return getDescription();
+	}
 
 	/** Returns true if this skill is currently active, however that is defined by the child class */
 	public abstract boolean isActive();
@@ -103,8 +105,7 @@ public abstract class SkillActive extends SkillBase
 	 * @return true if skill was successfully activated
 	 */
 	public boolean activate(World world, EntityPlayer player) {
-		if (allowUserActivation) { return trigger(world, player); }
-		return false;
+		return (allowUserActivation ? trigger(world, player) : false);
 	}
 
 	/**
@@ -135,13 +136,21 @@ public abstract class SkillActive extends SkillBase
 	}
 
 	/** Returns true if this skill can currently be used by the player; override to add further conditions */
-	public boolean canUse(EntityPlayer player) { return (level > 0 && player.getFoodStats().getFoodLevel() > 0); }
+	public boolean canUse(EntityPlayer player) {
+		return (level > 0 && player.getFoodStats().getFoodLevel() > 0);
+	}
 
 	/** Disables manual activation of this skill */
-	protected SkillActive disableUserActivation() { allowUserActivation = false; return this; }
+	protected SkillActive disableUserActivation() {
+		allowUserActivation = false;
+		return this;
+	}
 
 	/** Sets the skill to prevent left-mouse clicks while active */
-	protected SkillActive setDisablesLMB() { disablesLMB = true; return this; }
+	protected SkillActive setDisablesLMB() {
+		disablesLMB = true;
+		return this;
+	}
 
 	@Override
 	protected void levelUp(EntityPlayer player) {}

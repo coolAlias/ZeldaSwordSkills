@@ -24,7 +24,6 @@ import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.ForgeSubscribe;
@@ -36,7 +35,6 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -89,7 +87,7 @@ public class ZSSEntityEvents
 			}
 		}
 	}
-	
+
 	@ForgeSubscribe
 	public void onJump(LivingJumpEvent event) {
 		if (event.entityLiving.getHeldItem() != null && event.entityLiving.getHeldItem().getItem() == ZSSItems.rocsFeather) {
@@ -104,7 +102,7 @@ public class ZSSEntityEvents
 			event.entityLiving.motionY += 0.30D;
 		}
 	}
-	
+
 	@ForgeSubscribe
 	public void onInteract(EntityInteractEvent event) {
 		boolean flag = event.target instanceof EntityVillager;
@@ -158,29 +156,9 @@ public class ZSSEntityEvents
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ZSSPlayerInfo.loadProxyData(player);
 			PacketDispatcher.sendPacketToPlayer(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)).makePacket(), (Player) player);
-			// TODO remove CHEAT for testing on server!!!
-			if (Config.areCheatsEnabled()) {
-				player.inventory.addItemStackToInventory(new ItemStack(Item.swordIron));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bombBag));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));
-				player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.bomb));
-				player.inventory.addItemStackToInventory(new ItemStack(Item.monsterPlacer.itemID,64,57)); // 92 cow, 57 pigman
-				player.inventory.addItemStackToInventory(new ItemStack(Item.beefCooked,64));
-				for (SkillBase skill : SkillBase.getSkills()) {
-					if (ZSSPlayerInfo.get(player).getSkillLevel(skill) < 1) {
-						ZSSPlayerInfo.get(player).grantSkill(skill);
-						player.inventory.addItemStackToInventory(new ItemStack(ZSSItems.skillOrb,1,skill.getId()));
-					}
-				}
-			} else {
-				ZSSPlayerInfo.get(player).verifyStartingGear();
-			}
+			ZSSPlayerInfo.get(player).verifyStartingGear();
 		}
-		
+
 		if (!event.entity.worldObj.isRemote && !Config.areVanillaBuffsDisabled() && event.entity instanceof EntityLivingBase) {
 			initBuffs((EntityLivingBase) event.entity);
 		}
@@ -198,7 +176,7 @@ public class ZSSEntityEvents
 			ZSSPlayerInfo.register((EntityPlayer) event.entity);
 		}
 	}
-	
+
 	/**
 	 * Applies permanent buffs / debuffs to vanilla mobs
 	 */

@@ -206,10 +206,14 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/** Activates Nayru's Love effect; should call on both client and server */
-	public void activateNayru() { setFlag(IS_NAYRU_ACTIVE, true); }
+	public void activateNayru() {
+		setFlag(IS_NAYRU_ACTIVE, true);
+	}
 
 	/** Returns whether the player is currently under the effects of Nayru's Love */
-	public boolean isNayruActive() { return getFlag(IS_NAYRU_ACTIVE); }
+	public boolean isNayruActive() {
+		return getFlag(IS_NAYRU_ACTIVE);
+	}
 
 	/**
 	 * Checks whether player is wearing special boots based on currently equipped gear
@@ -471,23 +475,17 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		}
 	}
 
-	/**
-	 * Used to register these extended properties for the player during EntityConstructing event
-	 */
+	/** Used to register these extended properties for the player during EntityConstructing event */
 	public static final void register(EntityPlayer player) {
 		player.registerExtendedProperties(EXT_PROP_NAME, new ZSSPlayerInfo(player));
 	}
 
-	/**
-	 * Returns ExtendedPlayer properties for player
-	 */
+	/** Returns ExtendedPlayer properties for player */
 	public static final ZSSPlayerInfo get(EntityPlayer player) {
 		return (ZSSPlayerInfo) player.getExtendedProperties(EXT_PROP_NAME);
 	}
 
-	/**
-	 * Makes it look nicer in the methods save/loadProxyData
-	 */
+	/** Makes it look nicer in the methods save/loadProxyData */
 	private static final String getSaveKey(EntityPlayer player) {
 		return player.username + ":" + EXT_PROP_NAME;
 	}

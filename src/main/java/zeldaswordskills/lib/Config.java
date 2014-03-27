@@ -73,8 +73,6 @@ public class Config
 	private static int keeseSwarmSize;
 	/** [Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30] */
 	private static int sacredRefreshRate;
-	/** Enable cheat-mode, granting player a level in every skill upon joining the world */
-	private static boolean enableCheats = false;
 	/** Whether to show a chat message when striking secret blocks */
 	private static boolean showSecretMessage;
 	/** [Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs */
@@ -202,8 +200,7 @@ public class Config
 	/** Chance for unmapped mob to drop an orb */
 	private static int genericMobDropChance;
 	/** Individual drop chances for skill orbs and heart pieces */
-	private static Map<Byte, Integer> orbDropChance;// = new int[SkillBase.MAX_NUM_SKILLS];
-	
+	private static Map<Byte, Integer> orbDropChance;
 	/*================== TRADES =====================*/
 	/** [Bomb Bag] Enable random villager trades for bomb bags */
 	private static boolean enableTradeBombBag;
@@ -247,7 +244,6 @@ public class Config
 		keeseSwarmChance = config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmSize = config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt();
 		sacredRefreshRate = config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt();
-		//enableCheats = config.get("Skills", "Enable cheats", false).getBoolean(false);
 		showSecretMessage = config.get("General", "Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
 		/*================== Buff Bar HUD =====================*/
@@ -322,16 +318,6 @@ public class Config
 				orbDropChance.put(skill.getId(), config.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt());
 			}
 		}
-		/*
-		for (int i = 0; i < orbDropChance.length; ++i) {
-			SkillBase skill = SkillBase.getSkill(i);
-			//if (SkillBase.getSkillList()[i] != null && SkillBase.getSkillList()[i].canDrop()) {
-			if (skill != null && skill.canDrop()) {
-				//orbDropChance[i] = config.get("Drops", "Chance (in tenths of a percent) for " + SkillBase.getSkillList()[i].getDisplayName() + " [0-10]", 5).getInt();
-				orbDropChance[i] = config.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt();
-			}
-		}
-		*/
 		/*================== TRADES =====================*/
 		friendTradesRequired = config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt();
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
@@ -362,7 +348,6 @@ public class Config
 	public static int getJarClustersPerChunkNether() { return MathHelper.clamp_int(jarClustersPerChunkNether, 1, 20); }
 	public static int getJarsPerClusterNether() { return MathHelper.clamp_int(jarsPerClusterNether, 2, 20); }
 	public static int getSacredFlameRefreshRate() { return MathHelper.clamp_int(sacredRefreshRate, 0, 30); }
-	public static boolean areCheatsEnabled() { return enableCheats; }
 	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
 	/*================== MOBS =====================*/
