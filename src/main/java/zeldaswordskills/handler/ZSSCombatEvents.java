@@ -354,7 +354,7 @@ public class ZSSCombatEvents
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
 			ICombo combo = skills.getComboSkill();
-			if (combo != null && combo.getCombo() != null && !combo.getCombo().isFinished()) {
+			if (combo != null && combo.isComboInProgress()) {
 				event.ammount += combo.getCombo().getSize();
 			}
 			if (skills.isSkillActive(SkillBase.armorBreak)) {
@@ -387,7 +387,7 @@ public class ZSSCombatEvents
 			if (event.source.isFireDamage() && !event.isCanceled()) {
 				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
 			}
-			if (!event.isCanceled()) {
+			if (event.isCanceled()) {
 				return;
 			}
 			ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();

@@ -298,7 +298,8 @@ public class EntityChu extends EntityLiving implements IMob
 				case YELLOW: targetBiome = BiomeGenBase.desert; break;
 				}
 				
-				if (targetBiome != null && biome == targetBiome && posY > 50.0D && posY < 70.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor()) {
+				if (targetBiome != null && biome == targetBiome && posY > 50.0D && posY < 70.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor()
+						&& worldObj.getBlockLightValue(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)) <= rand.nextInt(8)) {
 					return super.getCanSpawnHere();
 				}
 
