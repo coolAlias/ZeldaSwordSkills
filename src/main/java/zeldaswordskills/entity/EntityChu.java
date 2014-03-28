@@ -86,23 +86,23 @@ public class EntityChu extends EntityLiving implements IMob
 	private static final int CHU_TYPE_INDEX = 17;
 	/** Data watcher index for shock time so entity can render appropriately */
 	private static final int SHOCK_INDEX = 18;
-	
+
 	/** Slime fields */
 	public float squishAmount;
-    public float squishFactor;
-    public float prevSquishFactor;
+	public float squishFactor;
+	public float prevSquishFactor;
 
-    /** the time between each jump of the slime */
-    private int slimeJumpDelay;
+	/** the time between each jump of the slime */
+	private int slimeJumpDelay;
 
 	public EntityChu(World world) {
 		super(world);
-        yOffset = 0.0F;
-        slimeJumpDelay = rand.nextInt(20) + 10;
+		yOffset = 0.0F;
+		slimeJumpDelay = rand.nextInt(20) + 10;
 		setType(getInitialType());
 		setSize((1 << rand.nextInt(3)));
 	}
-	
+
 	@Override
 	protected void entityInit() {
 		super.entityInit();
@@ -110,11 +110,11 @@ public class EntityChu extends EntityLiving implements IMob
 		dataWatcher.addObject(CHU_TYPE_INDEX, (byte)(ChuType.RED.ordinal()));
 		dataWatcher.addObject(SHOCK_INDEX, 0);
 	}
-	
+
 	protected EntityChu createInstance() {
 		return new EntityChu(worldObj);
 	}
-	
+
 	/**
 	 * Returns a randomized type to set for this Chu during construction
 	 */
@@ -132,18 +132,18 @@ public class EntityChu extends EntityLiving implements IMob
 		}
 		return ChuType.RED;
 	}
-	
+
 	/** Returns this Chu's type */
 	public ChuType getType() {
 		return ChuType.values()[dataWatcher.getWatchableObjectByte(CHU_TYPE_INDEX)];
 	}
-	
+
 	/** Sets this Chu's type */
 	public void setType(ChuType type) {
 		dataWatcher.updateObject(CHU_TYPE_INDEX, (byte)(type.ordinal()));
 		applyTypeTraits();
 	}
-	
+
 	/**
 	 * Applies traits based on Chu's type
 	 */
@@ -164,27 +164,27 @@ public class EntityChu extends EntityLiving implements IMob
 		default:
 		}
 	}
-	
+
 	/** Whether this chu type can shock; always true for Yellow, sometimes true for Blue */
 	protected boolean canChuTypeShock() {
 		return (getType() == ChuType.YELLOW || (getType() == ChuType.BLUE && rand.nextInt(80) == 0));
 	}
-	
+
 	/** Returns the amount of time remaining for which this Chu is electrified */
 	public int getShockTime() {
 		return dataWatcher.getWatchableObjectInt(SHOCK_INDEX);
 	}
-	
+
 	/** Sets the amount of time this Chu will remain electrified */
 	public void setShockTime(int time) {
 		dataWatcher.updateObject(SHOCK_INDEX, time);
 	}
-	
+
 	/** Returns max time affected entities will be stunned when shocked */
 	protected int getMaxStunTime() {
 		return (getSize() * worldObj.difficultySetting * 10);
 	}
-	
+
 	/** Random interval between shocks */
 	protected int getShockInterval() {
 		return (getType() == ChuType.YELLOW ? 160 : 320);
@@ -196,24 +196,24 @@ public class EntityChu extends EntityLiving implements IMob
 	public int getSize() {
 		return dataWatcher.getWatchableObjectByte(CHU_SIZE_INDEX);
 	}
-	
+
 	protected void setSize(int size) {
 		dataWatcher.updateObject(CHU_SIZE_INDEX, new Byte((byte) size));
-        setSize(0.6F * (float) size, 0.6F * (float) size);
-        setPosition(posX, posY, posZ);
-        getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((double)((size + 1) * (size + 1)));
-        setHealth(getMaxHealth());
-        experienceValue = size + (getType().ordinal() + 1);
+		setSize(0.6F * (float) size, 0.6F * (float) size);
+		setPosition(posX, posY, posZ);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((double)((size + 1) * (size + 1)));
+		setHealth(getMaxHealth());
+		experienceValue = size + (getType().ordinal() + 1);
 	}
-	
+
 	@Override
 	protected void fall(float f) {}
-	
+
 	@Override
 	public int getTotalArmorValue() {
 		return getSize() + (getType().ordinal() * 2);
 	}
-	
+
 	@Override
 	protected int getDropItemId() {
 		return ZSSItems.jellyChu.itemID;
@@ -232,7 +232,7 @@ public class EntityChu extends EntityLiving implements IMob
 			}
 		}
 	}
-	
+
 	@Override
 	protected void dropRareDrop(int par1) {
 		switch(par1) {
@@ -290,14 +290,14 @@ public class EntityChu extends EntityLiving implements IMob
 			if (worldObj.difficultySetting > 0) {
 				BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
 				BiomeGenBase targetBiome = null;
-				
+
 				switch(getType()) {
 				case RED: targetBiome = BiomeGenBase.swampland; break;
 				case GREEN: targetBiome = BiomeGenBase.plains; break;
 				case BLUE: targetBiome = BiomeGenBase.taiga; break;
 				case YELLOW: targetBiome = BiomeGenBase.desert; break;
 				}
-				
+
 				if (targetBiome != null && biome == targetBiome && posY > 50.0D && posY < 70.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor()
 						&& worldObj.getBlockLightValue(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)) <= rand.nextInt(8)) {
 					return super.getCanSpawnHere();
@@ -312,10 +312,16 @@ public class EntityChu extends EntityLiving implements IMob
 			return false;
 		}
 	}
-	
+
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
-		if (getShockTime() > 0) {
+		// workaround to prevent recursive splitting and merging in some situations
+		if (source == DamageSource.drown) {
+			setAir(300);
+			return false;
+		} else if (source == DamageSource.inWall) {
+			return false;
+		} else if (getShockTime() > 0) {
 			if (source instanceof EntityDamageSourceIndirect) {
 				if (source.isMagicDamage()) {
 					return super.attackEntityFrom(source, amount);
@@ -329,18 +335,18 @@ public class EntityChu extends EntityLiving implements IMob
 				source.getEntity().attackEntityFrom(new DamageSourceShock("shock", this, getMaxStunTime(), getDamage()), getDamage());
 				worldObj.playSoundAtEntity(this, ModInfo.SOUND_SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
-			
+
 			return false;
 		}
-		
+
 		return super.attackEntityFrom(source, amount);
 	}
-	
+
 	/** The amount of damage this chu will cause when attacking */
 	protected int getDamage() {
 		return getSize() + getType().ordinal();
 	}
-	
+
 	/**
 	 * Gets the type-specific damage source, taking shock time into account
 	 */
@@ -353,7 +359,7 @@ public class EntityChu extends EntityLiving implements IMob
 		default: return new EntityDamageSource("mob", this);
 		}
 	}
-	
+
 	@Override
 	public void onCollideWithPlayer(EntityPlayer player) {
 		double d = 0.36D * (getSize() * getSize());
@@ -364,7 +370,7 @@ public class EntityChu extends EntityLiving implements IMob
 			}
 		}
 	}
-	
+
 	/**
 	 * Handles any secondary effects that may occur when the player is damaged by this Chu
 	 */
@@ -406,31 +412,31 @@ public class EntityChu extends EntityLiving implements IMob
 			i = getSize();
 			setSize(0.6F * (float)i, 0.6F * (float)i);
 		}
-		
+
 		int time = getShockTime();
 		if (time > 0) {
 			setShockTime(time - 1);
 		}
 	}
-	
+
 	@SideOnly(Side.CLIENT)
 	public void spawnParticlesOnLanding() {
 		int i = getSize();
 		float r = 1.0F, g = 1.0F, b = 1.0F;
-		
+
 		switch(getType()) {
 		case RED: r = 0.65F; g = 0.25F; b = 0.3F; break;
 		case BLUE: r = 0.25F; g = 0.4F; b = 0.75F; break;
 		case YELLOW: g = 0.65F; b = 0.0F; break;
 		default:
 		}
-		
+
 		for (int j = 0; j < i * 8; ++j) {
 			float f = rand.nextFloat() * (float) Math.PI * 2.0F;
 			float f1 = rand.nextFloat() * 0.5F + 0.5F;
 			float f2 = MathHelper.sin(f) * (float) i * 0.5F * f1;
 			float f3 = MathHelper.cos(f) * (float) i * 0.5F * f1;
-			
+
 			EntityFX particle = new EntityBreakingFX(worldObj, posX + (double) f2, boundingBox.minY, posZ + (double) f3, Item.slimeBall);
 			if (particle != null) {
 				particle.setRBGColorF(r, g, b);
@@ -438,7 +444,7 @@ public class EntityChu extends EntityLiving implements IMob
 			}
 		}
 	}
-	
+
 	@Override
 	protected void updateEntityActionState() {
 		despawnEntity();
@@ -479,7 +485,7 @@ public class EntityChu extends EntityLiving implements IMob
 			attemptMerge();
 		}
 	}
-	
+
 	@Override
 	public void setDead() {
 		int i = getSize();
@@ -495,7 +501,7 @@ public class EntityChu extends EntityLiving implements IMob
 				worldObj.spawnEntityInWorld(chu);
 			}
 		}
-		
+
 		super.setDead();
 	}
 
@@ -508,7 +514,7 @@ public class EntityChu extends EntityLiving implements IMob
 	protected int getJumpDelay() {
 		return rand.nextInt(20) + 10;
 	}
-	
+
 	private void attemptMerge() {
 		int i = getSize();
 		if (!worldObj.isRemote && i < 3 && getHealth() < (getMaxHealth() / 2) && rand.nextInt(16) == 0) {
@@ -535,7 +541,7 @@ public class EntityChu extends EntityLiving implements IMob
 		compound.setInteger("Size", getSize() - 1);
 		compound.setInteger("ChuType", getType().ordinal());
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
