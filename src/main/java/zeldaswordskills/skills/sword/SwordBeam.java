@@ -107,7 +107,7 @@ public class SwordBeam extends SkillActive
 
 	/** Returns true if players current health is within the allowed limit */
 	private boolean checkHealth(EntityPlayer player) {
-		return PlayerUtils.getHealthMissing(player) < (0.31F * level);
+		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) < (0.31F * level);
 	}
 
 	/** Returns player's base damage (with sword) plus 1.0F per level */

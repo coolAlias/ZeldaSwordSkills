@@ -25,7 +25,6 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import zeldaswordskills.client.model.ModelCube;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -33,38 +32,15 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderEntitySwordBeam extends Render
 {
-	/** Basic cube model */
-	ModelCube model = new ModelCube(2);
-	
-	/** Use XP Orb texture for now */
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/sword_beam.png");
+	private final ResourceLocation texture;
 
 	public RenderEntitySwordBeam() {
+		texture = new ResourceLocation(ModInfo.ID + ":textures/entity/sword_beam.png");
 		shadowSize = 0.25F;
 		shadowOpaque = 0.75F;
 	}
 
 	public void renderBeam(Entity entity, double x, double y, double z, float yaw, float partialTick) {
-		/*
-		GL11.glPushMatrix();
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
-		GL11.glTranslated(x, y, z);
-		GL11.glRotatef(yaw, 0, 1, 0);
-		float roll = ((float) entity.ticksExisted + partialTick) * 40;
-		while (roll > 360) roll -= 360;
-		GL11.glRotatef(roll, 0.8F, 0F, -0.6F);
-		Minecraft.getMinecraft().renderEngine.bindTexture(getEntityTexture(entity));
-		Tessellator.instance.setBrightness(0xf000f0);
-		model.render(entity);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glPopMatrix();
-		*/
 		GL11.glPushMatrix();
 		GL11.glTranslated(x, y, z);
 		GL11.glEnable(GL11.GL_BLEND);
