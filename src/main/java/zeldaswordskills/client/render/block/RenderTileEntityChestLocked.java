@@ -39,10 +39,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class RenderTileEntityChestLocked extends TileEntitySpecialRenderer
 {
 	/** Chest model texture */
-	protected static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/chest_locked.png");
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/chest_locked.png");
 
 	/** The normal small chest model. */
-	protected ModelChest chestModel = new ModelChest();
+	private ModelChest chestModel = new ModelChest();
 
 	public RenderTileEntityChestLocked() {}
 

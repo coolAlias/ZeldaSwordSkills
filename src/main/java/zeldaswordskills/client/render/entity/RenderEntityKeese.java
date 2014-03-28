@@ -33,16 +33,15 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderEntityKeese extends RenderBat
 {
-	private final ResourceLocation base, cursed, fire, ice, thunder, thunder_shock;
+	private static final ResourceLocation base = new ResourceLocation(ModInfo.ID, "textures/entity/keese_base.png");
+	private static final ResourceLocation cursed = new ResourceLocation(ModInfo.ID, "textures/entity/keese_cursed.png");
+	private static final ResourceLocation fire = new ResourceLocation(ModInfo.ID, "textures/entity/keese_fire.png");
+	private static final ResourceLocation ice = new ResourceLocation(ModInfo.ID, "textures/entity/keese_ice.png");
+	private static final ResourceLocation thunder = new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder.png");
+	private static final ResourceLocation thunder_shock = new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder_shock.png");
 
 	public RenderEntityKeese() {
 		super();
-		base = new ResourceLocation(ModInfo.ID, "textures/entity/keese_base.png");
-		cursed = new ResourceLocation(ModInfo.ID, "textures/entity/keese_cursed.png");
-		fire = new ResourceLocation(ModInfo.ID, "textures/entity/keese_fire.png");
-		ice = new ResourceLocation(ModInfo.ID, "textures/entity/keese_ice.png");
-		thunder = new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder.png");
-		thunder_shock = new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder_shock.png");
 	}
 
 	protected ResourceLocation getKeeseTextures(EntityKeese keese) {

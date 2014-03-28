@@ -36,7 +36,7 @@ import zeldaswordskills.lib.ModInfo;
 public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 {
 	/** Ceramic jar model texture */
-	protected static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/ceramic_jar.png");
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/ceramic_jar.png");
 	
 	private ModelCeramicJar model = new ModelCeramicJar();
 

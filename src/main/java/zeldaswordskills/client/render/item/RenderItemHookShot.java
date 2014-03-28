@@ -34,13 +34,14 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderItemHookShot implements IItemRenderer
 {
-	protected final ResourceLocation texture;
-	
-	protected final ModelHookShot model;
-	
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/entity/hookshot.png");
+
+	private final ModelHookShot model = new ModelHookShot();
+
+	private final Minecraft mc;
+
 	public RenderItemHookShot() {
-		texture = new ResourceLocation(ModInfo.ID, "textures/entity/hookshot.png");
-		model = new ModelHookShot();
+		mc = Minecraft.getMinecraft();
 	}
 
 	@Override
@@ -56,9 +57,7 @@ public class RenderItemHookShot implements IItemRenderer
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		GL11.glPushMatrix();
-		Minecraft mc = Minecraft.getMinecraft();
 		mc.renderEngine.bindTexture(texture);
-
 		if(data[1] instanceof EntityPlayer) {
 			if (type == ItemRenderType.EQUIPPED) {
 				// par2 is rotation, par3 is up-down, par4 left-right
@@ -70,7 +69,7 @@ public class RenderItemHookShot implements IItemRenderer
 				GL11.glRotatef(90, 1F, 0.15F, 0.1F);
 				GL11.glScalef(1.5F, 1.5F, 1.5F);
 				GL11.glTranslatef(0.9F, 0F, 0.6F);
-				
+
 				PRETTY CLOSE:
 				GL11.glRotatef(90, 1.8F, 0.6F, 0.6F);
 				GL11.glScalef(1.5F, 1.5F, 1.5F);
@@ -79,7 +78,7 @@ public class RenderItemHookShot implements IItemRenderer
 				GL11.glRotatef(90, 1F, 0F, 1F); // 3 parameter is vertical rotation
 				GL11.glScalef(1.5F, 1.5F, 1.5F);
 				GL11.glTranslatef(0.7F, -0.2F, 1F);
-				*/
+				 */
 			} else {
 				GL11.glRotatef(90, 1F, -0.5F, 0.5F);
 				GL11.glScalef(1.7F, 1.7F, 1.7F);
@@ -89,14 +88,14 @@ public class RenderItemHookShot implements IItemRenderer
 				GL11.glRotatef(90, 1F, -0.5F, 0.5F);
 				GL11.glScalef(1.7F, 1.7F, 1.7F);
 				GL11.glTranslatef(0.8F, -0.15F, 0.45F);
-				
+
 				BASELINE:
 				// translatef in order of lower-higher
 				// par2 is left-right, par3 is forward-back
 				GL11.glRotatef(90, 1F, -0.5F, 0.5F);
 				GL11.glScalef(1.7F, 1.7F, 1.7F);
 				GL11.glTranslatef(0.5F, -0.4F, 0.7F);
-				*/
+				 */
 			}
 		} else {
 			// Entity rendering is working:

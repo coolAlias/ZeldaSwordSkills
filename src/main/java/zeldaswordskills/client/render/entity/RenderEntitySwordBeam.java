@@ -32,10 +32,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderEntitySwordBeam extends Render
 {
-	private final ResourceLocation texture;
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/sword_beam.png");
 
 	public RenderEntitySwordBeam() {
-		texture = new ResourceLocation(ModInfo.ID + ":textures/entity/sword_beam.png");
 		shadowSize = 0.25F;
 		shadowOpaque = 0.75F;
 	}

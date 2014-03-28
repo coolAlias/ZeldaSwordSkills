@@ -36,9 +36,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 {
-	protected static final ResourceLocation glint = new ResourceLocation("textures/misc/enchanted_item_glint.png");
+	private static final ResourceLocation glint = new ResourceLocation("textures/misc/enchanted_item_glint.png");
 
-	protected final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+	private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
 	
 	public RenderTileEntityPedestal() {}
 
