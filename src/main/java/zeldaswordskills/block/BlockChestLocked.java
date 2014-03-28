@@ -94,12 +94,16 @@ public class BlockChestLocked extends BlockContainer
 	
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int par6, float par7, float par8, float par9) {
+		if (world.isRemote) {
+			return true;
+		}
 		TileEntity te = world.getBlockTileEntity(x, y, z);
+		if (!(te instanceof IInventory)) {
+			return false;
+		}
 		if (player.capabilities.isCreativeMode && !player.isSneaking()) {
-			if (te instanceof IInventory) {
-				player.displayGUIChest((IInventory) te);
-				return true;
-			}
+			player.displayGUIChest((IInventory) te);
+			return true;
 		} else if (canUnlock(player)) {
 			IInventory inv = (IInventory) te;
 			int meta = world.getBlockMetadata(x, y, z);
@@ -141,15 +145,12 @@ public class BlockChestLocked extends BlockContainer
 		if (Block.opaqueCubeLookup[l] && !Block.opaqueCubeLookup[i1]) {
 			meta = 3;
 		}
-
 		if (Block.opaqueCubeLookup[i1] && !Block.opaqueCubeLookup[l]) {
 			meta = 2;
 		}
-
 		if (Block.opaqueCubeLookup[j1] && !Block.opaqueCubeLookup[k1]) {
 			meta = 5;
 		}
-
 		if (Block.opaqueCubeLookup[k1] && !Block.opaqueCubeLookup[j1]) {
 			meta = 4;
 		}

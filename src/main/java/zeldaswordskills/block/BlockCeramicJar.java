@@ -129,7 +129,7 @@ public class BlockCeramicJar extends BlockContainer implements ISmashable
 	
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		if (player.getHeldItem() == null) {
+		if (!world.isRemote && player.getHeldItem() == null) {
 			ItemStack jarStack = new ItemStack(this);
 			TileEntity te = world.getBlockTileEntity(x, y, z);
 			if (te instanceof IInventory) {
@@ -151,7 +151,7 @@ public class BlockCeramicJar extends BlockContainer implements ISmashable
 	
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
-		if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
+		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
 			world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 			world.destroyBlock(x, y, z, false);
 		}

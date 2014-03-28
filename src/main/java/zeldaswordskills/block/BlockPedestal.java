@@ -94,48 +94,45 @@ public class BlockPedestal extends BlockContainer
 	
 	@Override
 	public float getBlockHardness(World world, int x, int y, int z) {
-		if (world.getBlockMetadata(x, y, z) != 0x8) {
-			return -1.0F; // not breakable by tool
-		} else {
-			return blockHardness;
-		}
+		return (world.getBlockMetadata(x, y, z) == 0x8 ? blockHardness : -1.0F);
 	}
 	
 	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		if (world.getBlockMetadata(x, y, z) == 0x8) {
-			return getExplosionResistance(entity);
-		} else {
-			return BlockWeight.IMPOSSIBLE.weight * 3.0F;
-		}
+		return (world.getBlockMetadata(x, y, z) == 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 	
 	@Override
-	public int damageDropped(int meta) { return (meta == 0x8 ? 0x8 : 0x0); }
+	public int damageDropped(int meta) {
+		return (meta == 0x8 ? 0x8 : 0x0);
+	}
 	
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (player.isSneaking() || !(world.getBlockTileEntity(x, y, z) instanceof TileEntityPedestal)) {
 			return false;
 		}
-		TileEntityPedestal te = (TileEntityPedestal) world.getBlockTileEntity(x, y, z);
-		if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
-			te.setSword(player.getHeldItem(), player);
-			player.setCurrentItemOrArmor(0, null);
-		} else if (world.getBlockMetadata(x, y, z) == 0x8 && te.hasSword()) {
-			te.retrieveSword();
-		} else {
-			player.openGui(ZSSMain.instance, GuiHandler.GUI_PEDESTAL, world, x, y, z);
+		if (!world.isRemote) {
+			TileEntityPedestal te = (TileEntityPedestal) world.getBlockTileEntity(x, y, z);
+			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
+				te.setSword(player.getHeldItem(), player);
+				player.setCurrentItemOrArmor(0, null);
+			} else if (world.getBlockMetadata(x, y, z) == 0x8 && te.hasSword()) {
+				te.retrieveSword();
+			} else {
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_PEDESTAL, world, x, y, z);
+			}
 		}
-
 		return true;
 	}
 	
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
-		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if (te instanceof TileEntityPedestal) {
-			((TileEntityPedestal) te).changeOrientation();
+		if (!world.isRemote) {
+			TileEntity te = world.getBlockTileEntity(x, y, z);
+			if (te instanceof TileEntityPedestal) {
+				((TileEntityPedestal) te).changeOrientation();
+			}
 		}
 	}
 	

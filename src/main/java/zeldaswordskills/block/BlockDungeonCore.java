@@ -82,20 +82,12 @@ public class BlockDungeonCore extends BlockContainer
 
 	@Override
 	public float getBlockHardness(World world, int x, int y, int z) {
-		if (world.getBlockMetadata(x, y, z) < 0x8) {
-			return blockHardness;
-		} else {
-			return -1.0F; // not breakable by tool
-		}
+		return (world.getBlockMetadata(x, y, z) < 0x8 ? blockHardness : -1.0F);
 	}
 
 	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		if (world.getBlockMetadata(x, y, z) < 0x8) {
-			return getExplosionResistance(entity);
-		} else {
-			return BlockWeight.IMPOSSIBLE.weight * 3.0F;
-		}
+		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 
 	@Override

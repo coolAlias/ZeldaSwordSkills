@@ -100,8 +100,8 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
-		if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
-			if (player.worldObj.isRemote && Config.showSecretMessage()) {
+		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
+			if (Config.showSecretMessage()) {
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.block.secret"));
 			}
 			world.playSoundAtEntity(player, "random.break", 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
@@ -110,11 +110,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	
 	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		if (world.getBlockMetadata(x, y, z) < 0x8) {
-			return getExplosionResistance(entity);
-		} else {
-			return BlockWeight.IMPOSSIBLE.weight * 3.0F;
-		}
+		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 	
 	@Override

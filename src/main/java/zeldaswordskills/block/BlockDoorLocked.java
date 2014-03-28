@@ -66,11 +66,13 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.keySkeleton && player.inventory.consumeInventoryItem(ZSSItems.keySkeleton.itemID)) {
-			world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
-			world.setBlockToAir(x, y, z);
-		} else {
-			world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+		if (!world.isRemote) {
+			if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.keySkeleton && player.inventory.consumeInventoryItem(ZSSItems.keySkeleton.itemID)) {
+				world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+				world.setBlockToAir(x, y, z);
+			} else {
+				world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			}
 		}
 		return false;
 	}
