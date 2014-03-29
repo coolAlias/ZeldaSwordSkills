@@ -30,12 +30,12 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
-import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
+import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
@@ -136,13 +136,12 @@ public class ZSSKeyHandler extends KeyHandler
 			if (PlayerUtils.isHoldingSword(mc.thePlayer)) {
 				if (skills.hasSkill(SkillBase.dash) && keys[KEY_BLOCK].pressed && mc.thePlayer.onGround) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
+				} else if (skills.hasSkill(SkillBase.risingCut) && ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).canExecute(mc.thePlayer)) {
+					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
 				} else if (skills.canUseSkill(SkillBase.swordBeam) && mc.thePlayer.isSneaking()) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
 				} else {
-					mc.thePlayer.swingItem();
-					if (((ICombo) skill).onAttack(mc.thePlayer)) {
-						mc.playerController.attackEntity(mc.thePlayer, skill.getCurrentTarget());
-					}
+					ZSSCombatEvents.performComboAttack(mc, skill);
 				}
 				// handle separately so can attack and begin charging without pressing key twice
 				if (skills.hasSkill(SkillBase.armorBreak)) {
@@ -151,10 +150,7 @@ public class ZSSKeyHandler extends KeyHandler
 			} else if (skills.hasSkill(SkillBase.mortalDraw) && keys[KEY_BLOCK].pressed && mc.thePlayer.getHeldItem() == null) {
 				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
 			} else {
-				mc.thePlayer.swingItem();
-				if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
-					mc.playerController.attackEntity(mc.thePlayer, skill.getCurrentTarget());
-				}
+				ZSSCombatEvents.performComboAttack(mc, skill);
 			}
 		} else if (kb == keys[KEY_LEFT] || kb == keys[KEY_RIGHT]) {
 			if (kb == keys[KEY_RIGHT]) {

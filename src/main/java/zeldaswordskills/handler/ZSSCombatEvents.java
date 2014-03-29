@@ -73,6 +73,7 @@ import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
+import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
@@ -136,6 +137,9 @@ public class ZSSCombatEvents
 	@ForgeSubscribe
 	@SideOnly(Side.CLIENT)
 	public void onMouseChanged(MouseEvent event) {
+		if (event.button == -1 && event.dwheel == 0) {
+			return;
+		}
 		Minecraft mc = Minecraft.getMinecraft();
 		EntityPlayer player = mc.thePlayer;
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
@@ -167,13 +171,16 @@ public class ZSSCombatEvents
 						}
 						canCharge = false;
 						event.setCanceled(true);
+					} else if (skills.hasSkill(SkillBase.dash) && player.onGround && ((Dash) skills.getPlayerSkill(SkillBase.dash)).isRMBDown()) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
+						event.setCanceled(player.getItemInUse() == null);
+					} else if (skills.hasSkill(SkillBase.risingCut) && ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).canExecute(player)) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
+						canCharge = false;
 					} else if (player.isSneaking() && skills.canUseSkill(SkillBase.swordBeam)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
 						// set to canceled to prevent secondary attack from occurring that doesn't occur with dash (thanks to blocking)
 						event.setCanceled(true);
-					} else if (skills.hasSkill(SkillBase.dash) && player.onGround && ((Dash) skills.getPlayerSkill(SkillBase.dash)).isRMBDown()) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-						event.setCanceled(player.getItemInUse() == null);
 					} else {
 						performComboAttack(mc, skill);
 					}
@@ -190,7 +197,7 @@ public class ZSSCombatEvents
 				// Setting result to DENY prevents click processing but still sets button.pressed to true
 				event.setResult(Event.Result.DENY);
 			} else if (event.button == 1 && Config.allowVanillaControls()) {
-				if (skills.isSkillActive(SkillBase.spinAttack) || skills.isSkillActive(SkillBase.leapingBlow)) {
+				if (!skills.canInteract() && event.buttonstate) {
 					event.setCanceled(true);
 				} else if (skills.hasSkill(SkillBase.dash) && PlayerUtils.isHoldingSword(player)) {
 					((Dash) skills.getPlayerSkill(SkillBase.dash)).keyPressed(event.buttonstate);
@@ -212,7 +219,7 @@ public class ZSSCombatEvents
 	 */
 	@SideOnly(Side.CLIENT)
 	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
-		if (!mc.thePlayer.isUsingItem() || ZSSPlayerInfo.get(mc.thePlayer).isSkillActive(SkillBase.mortalDraw)) {
+		if (!mc.thePlayer.isUsingItem()) {
 			mc.thePlayer.swingItem();
 			setPlayerAttackTime(mc.thePlayer);
 			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
@@ -398,9 +405,12 @@ public class ZSSCombatEvents
 		// update combo last, after all resistances and weaknesses are accounted for
 		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
-			ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
-			if (combo != null) {
-				combo.onHurtTarget(player, event);
+			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+			if (skills.getComboSkill() != null) {
+				skills.getComboSkill().onHurtTarget(player, event);
+			}
+			if (skills.isSkillActive(SkillBase.risingCut)) {
+				((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onImpact(event.entity);
 			}
 		}
 		handleSecondaryEffects(event);

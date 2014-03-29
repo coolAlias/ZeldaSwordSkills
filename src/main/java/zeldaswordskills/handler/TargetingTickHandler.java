@@ -30,6 +30,7 @@ import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
+import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
@@ -79,19 +80,24 @@ public class TargetingTickHandler implements ITickHandler
 					flag = ((Dodge) skills.getPlayerSkill(SkillBase.dodge)).onRenderTick(player);
 				} else if (skills.isSkillActive(SkillBase.spinAttack)) {
 					flag = ((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).onRenderTick(player);
+				} else if (skills.isSkillActive(SkillBase.risingCut)) {
+					flag = ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onRenderTick(player);
 				}
 				if (!flag && skill.isLockedOn()) {
 					target = skill.getCurrentTarget();
 					updatePlayerView();
 				}
 				if (skill.isLockedOn() && skills.canInteract()) {
-					if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) &&
-							isVanillaKeyPressed(mc.gameSettings.keyBindJump) && player.isUsingItem()) {
-						skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
-						mc.gameSettings.keyBindUseItem.pressed = false;
-						ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed = false;
-						if (skills.hasSkill(SkillBase.dash)) {
-							((Dash) skills.getPlayerSkill(SkillBase.dash)).keyPressed(false);
+					if (isVanillaKeyPressed(mc.gameSettings.keyBindJump)) {
+						if (skills.hasSkill(SkillBase.risingCut) && !skills.isSkillActive(SkillBase.risingCut) && !player.isUsingItem() && player.isSneaking()) {
+							((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).keyPressed();
+						} else if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) && player.isUsingItem()) {
+							skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
+							mc.gameSettings.keyBindUseItem.pressed = false;
+							ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed = false;
+							if (skills.hasSkill(SkillBase.dash)) {
+								((Dash) skills.getPlayerSkill(SkillBase.dash)).keyPressed(false);
+							}
 						}
 					} else if (Config.allowVanillaControls()) {
 						isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);

@@ -43,7 +43,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Activation: While empty-handed and locked on, hold the block key and attack
  * Effect: The art of drawing the sword, or Battoujutsu, is a risky but deadly move, capable
  * of inflicting deadly wounds on unsuspecting opponents with a lightning-fast blade strike
- * Exhaustion: 3.0F - (0.2 * level)
+ * Exhaustion: 3.0F - (0.2F * level)
  * Damage: If successful, inflicts double damage
  * Duration: Window of attack opportunity is (level + 2) ticks
  * Notes:

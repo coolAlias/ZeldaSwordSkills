@@ -34,6 +34,7 @@ import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
+import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.skills.sword.SwordBeam;
@@ -75,6 +76,7 @@ public abstract class SkillBase
 
 	/* NEW SKILLS */
 	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw");
+	public static final SkillBase risingCut = new RisingCut("risingcut");
 
 	/** Unlocalized name for language registry */
 	protected final String unlocalizedName;

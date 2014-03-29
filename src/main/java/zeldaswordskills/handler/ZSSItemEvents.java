@@ -65,6 +65,7 @@ import zeldaswordskills.api.item.ILiftBlock;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityKeese;
+import zeldaswordskills.entity.EntityOctorok;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
@@ -327,6 +328,7 @@ public class ZSSItemEvents
 		addDrop(EntityIronGolem.class, SkillBase.armorBreak.getId());
 		addDrop(EntityGhast.class, SkillBase.swordBeam.getId());
 		addDrop(EntityWitch.class, SkillBase.swordBeam.getId());
+		addDrop(EntityOctorok.class, SkillBase.risingCut.getId());
 	}
 
 	// TODO move this to a world gen event handler

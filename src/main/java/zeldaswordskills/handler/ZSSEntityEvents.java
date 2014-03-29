@@ -63,10 +63,15 @@ public class ZSSEntityEvents
 	 */
 	@ForgeSubscribe
 	public void onFall(LivingFallEvent event) {
-		if (event.entity instanceof EntityPlayer && event.entity.worldObj.isRemote) {
+		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			if (ZSSPlayerInfo.get(player) != null && ZSSPlayerInfo.get(player).isSkillActive(SkillBase.leapingBlow)) {
-				((LeapingBlow) ZSSPlayerInfo.get(player).getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
+			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+			if (event.entity.worldObj.isRemote && skills.isSkillActive(SkillBase.leapingBlow)) {
+				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
+			}
+			if (skills.reduceFallAmount > 0.0F) {
+				event.distance -= skills.reduceFallAmount;
+				skills.reduceFallAmount = 0.0F;
 			}
 		}
 		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null

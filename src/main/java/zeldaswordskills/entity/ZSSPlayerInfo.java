@@ -114,6 +114,9 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Current stage in the Mask trading sequence */
 	private int maskStage = 0;
 
+	/** Reduces fall damage next impact; used for Rising Cut */
+	public float reduceFallAmount = 0.0F;
+
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
 		skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
@@ -548,7 +551,7 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		for (int i = 0; i < taglist.tagCount(); ++i) {
 			NBTTagCompound skill = (NBTTagCompound) taglist.tagAt(i);
 			byte id = skill.getByte("id");
-			skills.put(id, SkillBase.getNewSkillInstance(id).loadFromNBT(skill));
+			skills.put(id, SkillBase.getSkill(id).loadFromNBT(skill));
 		}
 		int[] stats = compound.getIntArray("zssStats");
 		for (int i = 0; i < stats.length; ++i) {

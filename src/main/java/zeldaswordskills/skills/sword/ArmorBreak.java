@@ -44,7 +44,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Description: Unleash a powerful blow that ignores armor
  * Activation: hold the 'up' arrow for (20 - level) ticks
  * Effect: Unleashes an attack that inflicts normal sword damage but ignores armor
- * Exhaustion: 1.2F - (0.06F * level)
+ * Exhaustion: 3.0F - (0.2F * level)
  * Special: May only be used while locked on to a target
  * 			Charge time is reduced by 5 ticks when wielding a Master Sword
  * 
@@ -102,7 +102,7 @@ public class ArmorBreak extends SkillActive
 	}
 
 	@Override
-	protected float getExhaustion() { return 1.2F - (level * 0.06F); }
+	protected float getExhaustion() { return 3.0F - (0.2F * level); }
 
 	/** Called when key first pressed; initiates charging */
 	@SideOnly(Side.CLIENT)
