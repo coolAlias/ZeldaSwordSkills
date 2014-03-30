@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
+import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.SyncSkillPacket;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dash;
@@ -194,6 +195,11 @@ public abstract class SkillBase
 	/** Returns the unlocalized name prefixed by 'skill.' and suffixed by '.name' */
 	public final String getUnlocalizedName() {
 		return "skill.zss." + unlocalizedName + ".name";
+	}
+
+	/** Returns texture path for the skill's icon */
+	public String getIconTexture() {
+		return ModInfo.ID + ":skillorb_" + unlocalizedName;
 	}
 
 	/** Returns whether this skill can drop as an orb randomly from mobs */

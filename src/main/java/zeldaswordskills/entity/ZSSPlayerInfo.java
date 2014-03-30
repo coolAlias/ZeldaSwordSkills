@@ -99,7 +99,7 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Current amount of time hovered */
 	public int hoverTime = 0;
 
-	/** Stores information on the player's Attributes and Passive Skills */
+	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
 
 	/** ID of currently active skill that prevents left-mouse button interaction */

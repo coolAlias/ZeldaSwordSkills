@@ -34,14 +34,20 @@ public class SkillPassive extends SkillBase
 		super(name, true);
 	}
 
-	protected SkillPassive(SkillBase skill) { super(skill); }
+	protected SkillPassive(SkillBase skill) {
+		super(skill);
+	}
 
 	@Override
-	public SkillPassive newInstance() { return new SkillPassive(this); }
+	public SkillPassive newInstance() {
+		return new SkillPassive(this);
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) { return getDescription(); }
+	public List<String> getDescription(EntityPlayer player) {
+		return getDescription();
+	}
 
 	@Override
 	protected void levelUp(EntityPlayer player) {}

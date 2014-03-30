@@ -24,6 +24,7 @@ import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.ModInfo;
 
 /**
  * 
@@ -35,23 +36,36 @@ public class BonusHeart extends SkillPassive
 {
 	private static final UUID bonusHeartUUID = UUID.fromString("14ED99DA-D333-4621-90C8-81C968A082E3");
 	private static final AttributeModifier bonusHeartModifier = (new AttributeModifier(bonusHeartUUID, "ZSS Bonus Heart", 2.0D, 0)).setSaved(true);
-	
+
 	protected BonusHeart(String name) {
 		super(name);
 		addDescription("bonusheart.desc.0");
 	}
-	
-	private BonusHeart(BonusHeart skill) { super(skill); }
-	
+
+	private BonusHeart(BonusHeart skill) {
+		super(skill);
+	}
+
 	@Override
-	public BonusHeart newInstance() { return new BonusHeart(this); }
-	
+	public BonusHeart newInstance() {
+		return new BonusHeart(this);
+	}
+
 	@Override
-	public byte getMaxLevel() { return Config.getMaxBonusHearts(); }
-	
+	public byte getMaxLevel() {
+		return Config.getMaxBonusHearts();
+	}
+
 	@Override
-	public boolean isLoot() { return false; }
-	
+	public String getIconTexture() {
+		return ModInfo.ID + ":heart_container";
+	}
+
+	@Override
+	public boolean isLoot() {
+		return false;
+	}
+
 	@Override
 	protected void levelUp(EntityPlayer player) {
 		AttributeInstance attributeinstance = player.getEntityAttribute(SharedMonsterAttributes.maxHealth);
@@ -60,7 +74,7 @@ public class BonusHeart extends SkillPassive
 		attributeinstance.applyModifier(newModifier);
 		player.heal(player.getMaxHealth());
 	}
-	
+
 	@Override
 	public void validateSkill(EntityPlayer player) {
 		float health = player.getHealth();

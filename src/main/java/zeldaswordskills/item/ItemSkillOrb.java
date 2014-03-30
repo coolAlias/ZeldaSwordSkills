@@ -147,7 +147,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 	public void registerIcons(IconRegister register) {
 		icons = new ArrayList<Icon>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
-			icons.add(register.registerIcon(ModInfo.ID + ":skillorb" + String.valueOf(skill.getId() + 1)));
+			icons.add(register.registerIcon(skill.getIconTexture()));
 		}
 	}
 
@@ -167,7 +167,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 			}
 		}
 	}
-	
+
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
 		if (!ZSSPlayerInfo.get(player).hasReceivedAllOrbs()) {
