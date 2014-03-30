@@ -39,6 +39,7 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.Optional;
@@ -82,7 +83,7 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWea
 		player.swingItem();
 		player.addExhaustion(0.3F);
 		if (!world.isRemote) {
-			world.playSoundAtEntity(player, ModInfo.SOUND_WHOOSH, 1.0F, 1.0F);
+			world.playSoundAtEntity(player, Sounds.WHOOSH, 1.0F, 1.0F);
 			world.spawnEntityInWorld(new EntityBoomerang(world, player).setCaptureAll(captureAll).
 					setRange(range).setInvStack(stack, player.inventory.currentItem).setDamage(damage));
 			player.setCurrentItemOrArmor(0, null);
@@ -114,9 +115,9 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWea
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairyBoomerang);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.boomerangMagic), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}

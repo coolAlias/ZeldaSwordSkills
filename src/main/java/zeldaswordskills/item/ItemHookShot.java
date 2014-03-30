@@ -37,6 +37,7 @@ import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -101,7 +102,7 @@ public class ItemHookShot extends Item
 		shot.setType(getType(stack.getItemDamage()));
 		if (!player.worldObj.isRemote) {
 			player.worldObj.spawnEntityInWorld(shot);
-			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_CHAIN, 1.0F, 1.0F);
+			player.worldObj.playSoundAtEntity(player, Sounds.HOOKSHOT, 1.0F, 1.0F);
 		}
 		return stack;
 	}
@@ -109,7 +110,7 @@ public class ItemHookShot extends Item
 	@Override
 	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
 		if (count % 9 == 8 && !player.worldObj.isRemote) {
-			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_CHAIN, 1.0F, 1.0F);
+			player.worldObj.playSoundAtEntity(player, Sounds.HOOKSHOT, 1.0F, 1.0F);
 		}
 	}
 

@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -27,11 +26,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.network.SpawnLeapingBlowPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -56,21 +56,24 @@ public class LeapingBlow extends SkillActive
 {
 	/** Set to true when jumping and 'attack' key pressed; set to false upon landing */
 	private boolean isActive = false;
-	
+
 	/** Whether the player is wielding a Master Sword */
 	private boolean isMaster;
 
 	public LeapingBlow(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription(Arrays.asList("leapingblow.desc.0","leapingblow.desc.1"));
 	}
 
-	private LeapingBlow(LeapingBlow skill) { super(skill); }
+	private LeapingBlow(LeapingBlow skill) {
+		super(skill);
+	}
 
 	@Override
-	public LeapingBlow newInstance() { return new LeapingBlow(this); }
-	
+	public LeapingBlow newInstance() {
+		return new LeapingBlow(this);
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
@@ -80,26 +83,34 @@ public class LeapingBlow extends SkillActive
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
-	
+
 	@Override
-	public boolean isActive() { return isActive; }
-	
+	public boolean isActive() {
+		return isActive;
+	}
+
 	@Override
-	protected float getExhaustion() { return 2.0F - (0.1F * level); }
-	
+	protected float getExhaustion() {
+		return 2.0F - (0.1F * level);
+	}
+
 	/** Returns player's base damage (which includes all attribute bonuses) plus 1.0F per level */
 	private float getDamage(EntityPlayer player) {
-		return (float)((PlayerUtils.isHoldingMasterSword(player) ? level * 2 : level) + player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
+		return (float)((PlayerUtils.isHoldingMasterSword(player) ? level * 2 : level)
+				+ player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
 	}
-	
+
 	/** Duration of weakness effect; used for tooltip display only */
-	private int getPotionDuration(EntityPlayer player) { return ((PlayerUtils.isHoldingMasterSword(player) ? 110 : 50) + (level * 10)); }
-	
+	private int getPotionDuration(EntityPlayer player) {
+		return ((PlayerUtils.isHoldingMasterSword(player) ? 110 : 50) + (level * 10));
+	}
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && !player.onGround && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && !isActive() && !player.onGround && PlayerUtils.isHoldingSword(player)
+				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
-	
+
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		// LeapingBlow is handled all client side, so super.activate is not used
@@ -110,7 +121,7 @@ public class LeapingBlow extends SkillActive
 		}
 		return isActive();
 	}
-	
+
 	/**
 	 * Called from Forge fall Events
 	 * @param distance distance fallen, passed from Forge fall Event
@@ -118,11 +129,9 @@ public class LeapingBlow extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void onImpact(EntityPlayer player, float distance) {
 		SwordBasic swordSkill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
-		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isHoldingSword(player))
-		{
+		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isHoldingSword(player)) {
 			player.swingItem();
 			isActive = false;
-
 			if (distance < 1.0F) {
 				if (swordSkill.onAttack(player)) {
 					Minecraft.getMinecraft().playerController.attackEntity(player, swordSkill.getCurrentTarget());
@@ -133,7 +142,7 @@ public class LeapingBlow extends SkillActive
 			}
 		}
 	}
-	
+
 	/**
 	 * Called upon receipt of SpawnLeapingBlowPacket on server; spawns the entity
 	 */
@@ -141,7 +150,7 @@ public class LeapingBlow extends SkillActive
 		this.isMaster = isMaster;
 		Entity entity = new EntityLeapingBlow(world, player).setDamage(getDamage(player)).setLevel(level, isMaster);
 		world.spawnEntityInWorld(entity);
-		//world.playSoundAtEntity(player, ModInfo.SOUND_YELL, 1.0F, 1.0F / (world.rand.nextFloat() * 0.2F + 0.95F));
-		world.playSoundAtEntity(player, ModInfo.SOUND_LEAPINGBLOW, (world.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+		//world.playSoundAtEntity(player, Sounds.YELL, 1.0F, 1.0F / (world.rand.nextFloat() * 0.2F + 0.95F));
+		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.LEAPING_BLOW, 0.4F, 0.5F);
 	}
 }

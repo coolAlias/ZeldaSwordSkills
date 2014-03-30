@@ -34,7 +34,7 @@ import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -111,7 +111,7 @@ public class BlockChestLocked extends BlockContainer
 			world.setBlock(x, y, z, Block.chest.blockID);
 			keepInventory = false;
 			world.setBlockMetadataWithNotify(x, y, z, meta, 3);
-			world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_CHEST, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			world.playSoundAtEntity(player, Sounds.LOCK_CHEST, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 
 			// copy the old inventory to the new chest
 			TileEntity chest = world.getBlockTileEntity(x, y, z);
@@ -123,7 +123,7 @@ public class BlockChestLocked extends BlockContainer
 			}
 			return true;
 		} else {
-			world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			world.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}
 		return false;
 	}

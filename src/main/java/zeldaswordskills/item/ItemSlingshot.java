@@ -52,6 +52,7 @@ import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
@@ -266,12 +267,12 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairySlingshot);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.scattershot), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else if (stack.getItem() == ZSSItems.scattershot && core.consumeRupees(Config.getSlingshotCostTwo())) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairySupershot);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.supershot), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
 			addFairyEnchantments(stack, player, core);
 		}
@@ -327,9 +328,9 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 		}
 		if (playSound) {
 			player.triggerAchievement(ZSSAchievements.fairyEnchantment);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_BLESSING, 1.0F, 1.0F);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}

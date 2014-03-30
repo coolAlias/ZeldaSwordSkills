@@ -29,11 +29,12 @@ import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -98,15 +99,17 @@ public class SpinAttack extends SkillActive
 	public SpinAttack(String name) {
 		super(name);
 		setDisablesLMB();
-		if (name.toLowerCase().contains("super")) { addDescription("superspinattack.desc.0"); }
-		else { addDescription("spinattack.desc.0"); }
-		addDescription("spinattack.desc.1");
+		addDescription(getUnlocalizedDescription(2).replace("super", ""));
 	}
 
-	private SpinAttack(SpinAttack skill) { super(skill); }
+	private SpinAttack(SpinAttack skill) {
+		super(skill);
+	}
 
 	@Override
-	public SpinAttack newInstance() { return new SpinAttack(this); }
+	public SpinAttack newInstance() {
+		return new SpinAttack(this);
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -122,22 +125,30 @@ public class SpinAttack extends SkillActive
 	}
 
 	@Override
-	public boolean canDrop() { return this == spinAttack; }
-
-	@Override
-	public boolean isLoot() { return this == spinAttack; }
-
-	@Override
-	public boolean isActive() { return isActive; }
-
-	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && ZSSPlayerInfo.get(player).isSkillActive(swordBasic)
-				&& PlayerUtils.isHoldingSword(player);
+	public boolean canDrop() {
+		return this == spinAttack;
 	}
 
 	@Override
-	protected float getExhaustion() { return 3.0F - (0.2F * level); }
+	public boolean isLoot() {
+		return this == spinAttack;
+	}
+
+	@Override
+	public boolean isActive() {
+		return isActive;
+	}
+
+	@Override
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
+				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+	}
+
+	@Override
+	protected float getExhaustion() {
+		return 3.0F - (0.2F * level);
+	}
 
 	/**
 	 * Activation only occurs client side, so server is never notified; this is intentional
@@ -181,11 +192,15 @@ public class SpinAttack extends SkillActive
 
 	/** Returns time required before spin will execute */
 	@SideOnly(Side.CLIENT)
-	private int getChargeTime() { return 20 - (level * 2); }
+	private int getChargeTime() {
+		return 20 - (level * 2);
+	}
 
 	/** Returns true if the skill is still charging up */
 	@SideOnly(Side.CLIENT)
-	public boolean isCharging() { return charge > 0; }
+	public boolean isCharging() {
+		return charge > 0;
+	}
 
 	/**
 	 * Sets direction of spin and activates skill when left or right arrow key pressed
@@ -194,7 +209,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void keyPressed(KeyBinding key, EntityPlayer player) {
 		if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || key == Minecraft.getMinecraft().gameSettings.keyBindAttack) {
-			if (isActive && getSpinArc() < (360F * (superLevel + 1)) && getSpinArc() == (360F * refreshed)) {
+			if (isActive && arc < (360F * (superLevel + 1)) && arc == (360F * refreshed)) {
 				arc += 360F;
 			}
 		} else {
@@ -217,31 +232,33 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
 		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT].pressed || ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT].pressed
-				|| (Config.allowVanillaControls() &&
-						(Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed && Minecraft.getMinecraft().gameSettings.keyBindRight.pressed));
+				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed
+						&& Minecraft.getMinecraft().gameSettings.keyBindRight.pressed));
 	}
 
 	/** Max sword range for striking targets */
 	@SideOnly(Side.CLIENT)
-	private float getRange() { return (3.0F + ((superLevel + level) * 0.5F)); }
+	private float getRange() {
+		return (3.0F + ((superLevel + level) * 0.5F));
+	}
 
 	/** Returns the spin speed modified based on the skill's level */
 	@SideOnly(Side.CLIENT)
-	public float getSpinSpeed() { return 70 + (3 * (superLevel + level)); }
-
-	/** Length of arc; decreases as level increases */
-	@SideOnly(Side.CLIENT)
-	private float getSpinArc() { return arc; }
+	public float getSpinSpeed() {
+		return 70 + (3 * (superLevel + level));
+	}
 
 	/** Initiates spin attack by populating the nearby target list */
 	@SideOnly(Side.CLIENT)
 	private void startSpin(World world, EntityPlayer player) {
 		++refreshed;
-		PlayerUtils.playSound(player, ModInfo.SOUND_SPINATTACK, (world.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (world.rand.nextFloat() * 0.4F + 0.6F));
-		// TODO PlayerUtils.playSound(player, ModInfo.SOUND_YELL, (world.rand.nextFloat() * 0.4F + 0.5F), world.rand.nextFloat() * 0.2F + 0.95F);
+		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SPIN_ATTACK, 0.4F, 0.5F);
+		// TODO PlayerUtils.playSound(player, Sounds.YELL, (world.rand.nextFloat() * 0.4F + 0.5F), world.rand.nextFloat() * 0.2F + 0.95F);
 		PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(getExhaustion()).makePacket());
 		targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(getRange(), 0.0D, getRange()));
-		if (targets.contains(player)) { targets.remove(player); }
+		if (targets.contains(player)) {
+			targets.remove(player);
+		}
 	}
 
 	/**
@@ -253,7 +270,7 @@ public class SpinAttack extends SkillActive
 		player.setAngles((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
 		// 0.15D is the multiplier from Entity.setAngles
 		currentSpin += getSpinSpeed() * 0.15D;
-		if (currentSpin >= getSpinArc()) {
+		if (currentSpin >= arc) {
 			currentSpin = 0.0F;
 			isActive = false;
 		} else if (currentSpin > (360F * refreshed)) {
@@ -275,12 +292,10 @@ public class SpinAttack extends SkillActive
 					targets.remove(target);
 				}
 			}
-
 			spawnParticles(player);
 			incrementSpin(player);
 			return true;
 		}
-
 		return false;
 	}
 

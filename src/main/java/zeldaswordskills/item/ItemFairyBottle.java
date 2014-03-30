@@ -33,6 +33,7 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityFairy;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -60,7 +61,7 @@ public class ItemFairyBottle extends Item {
 		for (int i = 0; i < InventoryPlayer.getHotbarSize(); ++i) {
 			ItemStack stack = player.inventory.getStackInSlot(i);
 			if (stack != null && stack.getItem() instanceof ItemFairyBottle) {
-				player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_FAIRY_LIVING, 1.0F, 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.FAIRY_LAUGH, 0.4F, 0.5F);
 				player.setHealth(10F);
 				player.inventory.setInventorySlotContents(i, new ItemStack(Item.glassBottle));
 				return true;
@@ -94,7 +95,7 @@ public class ItemFairyBottle extends Item {
 		}
 		
 		if (used) {
-			world.playSoundAtEntity(player, ModInfo.SOUND_CORK, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 1.0F));
+			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.CORK, 0.4F, 1.0F);
 			if (!player.capabilities.isCreativeMode) {
 				--stack.stackSize;
 				if (stack.stackSize <= 0) {

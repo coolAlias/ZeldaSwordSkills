@@ -60,7 +60,7 @@ import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.network.MortalDrawPacket;
@@ -77,6 +77,7 @@ import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
@@ -310,7 +311,7 @@ public class ZSSCombatEvents
 			if (evade > 0.0F) {
 				float penalty = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_DOWN) * 0.01F;
 				if (entity.worldObj.rand.nextFloat() < evade - penalty) {
-					entity.worldObj.playSoundAtEntity(entity, ModInfo.SOUND_SWORDMISS, (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+					WorldUtils.playSoundAtEntity(entity.worldObj, entity, Sounds.SWORD_MISS, 0.4F, 0.5F);
 					event.setCanceled(true);
 				}
 			}
@@ -413,6 +414,7 @@ public class ZSSCombatEvents
 				((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onImpact(event.entity);
 			}
 		}
+		
 		handleSecondaryEffects(event);
 	}
 

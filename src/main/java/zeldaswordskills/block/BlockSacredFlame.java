@@ -42,6 +42,7 @@ import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -114,7 +115,7 @@ public class BlockSacredFlame extends BlockContainer
 				int n = stack.stackSize;
 				player.setCurrentItemOrArmor(0, new ItemStack(meta == DIN ? ZSSItems.arrowFire :
 					meta == NAYRU ? ZSSItems.arrowIce : ZSSItems.arrowLight, n));
-				world.playSoundAtEntity(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+				world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 				if (Config.getArrowsConsumeFlame() && world.rand.nextInt(80) < n) {
 					extinguishFlame(world, x, y, z);
 				}
@@ -124,7 +125,7 @@ public class BlockSacredFlame extends BlockContainer
 				case FARORE: player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalFarore)); break;
 				case NAYRU: player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalNayru)); break;
 				}
-				world.playSoundAtEntity(player, ModInfo.SOUND_FLAME_ABSORB, 1.0F, 1.0F);
+				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
 				extinguishFlame(world, x, y, z);
 			} else if (stack.getItem() instanceof ItemSpiritCrystal) {
 				if (stack.getItemDamage() > 0) {
@@ -136,7 +137,7 @@ public class BlockSacredFlame extends BlockContainer
 					}
 
 					if (stack.getItemDamage() == 0) {
-						world.playSoundAtEntity(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						if (world.rand.nextInt(stack.getMaxDamage()) < damage) {
 							extinguishFlame(world, x, y, z);
 						}

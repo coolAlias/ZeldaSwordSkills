@@ -19,7 +19,7 @@ package zeldaswordskills.handler;
 
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.event.ForgeSubscribe;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -35,55 +35,56 @@ public class SoundHandler {
 	@ForgeSubscribe
 	public void onLoadSound(SoundLoadEvent event) {
 		// the following sounds have only 1 file each
-		event.manager.addSound(ModInfo.SOUND_BOMB_WHISTLE + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_BOSS_BATTLE + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_BOSS_SPAWN + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_CASH_SALE + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_CHAIN + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_CHU_MERGE + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_CORK + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_FAIRY_BLESSING + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_FAIRY_LAUGH + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_FAIRY_LIVING + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_FAIRY_SKILL + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_FLAME_ABSORB + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_LEVELUP + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_LOCK_CHEST + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_LOCK_DOOR + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_LOCK_RATTLE + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_MAGIC_FAIL + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_MASTER_SWORD + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_SECRET_MEDLEY + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_SPECIAL_DROP + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_SUCCESS + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_WEB_SPLAT + ".ogg");
-		event.manager.addSound(ModInfo.SOUND_WHOOSH + ".ogg");
+		event.manager.addSound(Sounds.BOMB_WHISTLE + ".ogg");
+		event.manager.addSound(Sounds.BOSS_BATTLE + ".ogg");
+		event.manager.addSound(Sounds.BOSS_SPAWN + ".ogg");
+		event.manager.addSound(Sounds.CASH_SALE + ".ogg");
+		event.manager.addSound(Sounds.HOOKSHOT + ".ogg");
+		event.manager.addSound(Sounds.CHU_MERGE + ".ogg");
+		event.manager.addSound(Sounds.CORK + ".ogg");
+		event.manager.addSound(Sounds.FAIRY_BLESSING + ".ogg");
+		event.manager.addSound(Sounds.FAIRY_LAUGH + ".ogg");
+		event.manager.addSound(Sounds.FAIRY_LIVING + ".ogg");
+		event.manager.addSound(Sounds.FAIRY_SKILL + ".ogg");
+		event.manager.addSound(Sounds.FLAME_ABSORB + ".ogg");
+		event.manager.addSound(Sounds.LEVELUP + ".ogg");
+		event.manager.addSound(Sounds.LOCK_CHEST + ".ogg");
+		event.manager.addSound(Sounds.LOCK_DOOR + ".ogg");
+		event.manager.addSound(Sounds.LOCK_RATTLE + ".ogg");
+		event.manager.addSound(Sounds.MAGIC_FAIL + ".ogg");
+		event.manager.addSound(Sounds.MAGIC_FIRE + ".ogg");
+		event.manager.addSound(Sounds.MAGIC_ICE + ".ogg");
+		event.manager.addSound(Sounds.MASTER_SWORD + ".ogg");
+		event.manager.addSound(Sounds.SECRET_MEDLEY + ".ogg");
+		event.manager.addSound(Sounds.SPECIAL_DROP + ".ogg");
+		event.manager.addSound(Sounds.SUCCESS + ".ogg");
+		event.manager.addSound(Sounds.WEB_SPLAT + ".ogg");
+		event.manager.addSound(Sounds.WHOOSH + ".ogg");
 
 		// the following have 2
 		for (int i = 1; i < 3; ++i) {
-			event.manager.addSound(ModInfo.SOUND_MORTALDRAW + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_ROCK_FALL + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_WHIRLWIND + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.MORTAL_DRAW + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.ROCK_FALL + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.WHIRLWIND + String.valueOf(i) + ".ogg");
 		}
 		
 		// the following have 3
 		for (int i = 1; i < 4; ++i) {
-			event.manager.addSound(ModInfo.SOUND_ARMORBREAK + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_HAMMER + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_HIT_RUSTY + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_LEAPINGBLOW + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_SLAM + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_SPINATTACK + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_YELL + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.ARMOR_BREAK + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.HAMMER + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.HIT_RUSTY + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.LEAPING_BLOW + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.SLAM + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.SPIN_ATTACK + String.valueOf(i) + ".ogg");
 		}
 		// 4 files each
 		for (int i = 1; i < 5; ++i) {
-			event.manager.addSound(ModInfo.SOUND_BREAK_JAR + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_HIT_PEG + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_SHOCK + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_SWORDCUT + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_SWORDMISS + String.valueOf(i) + ".ogg");
-			event.manager.addSound(ModInfo.SOUND_SWORDSTRIKE + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.BREAK_JAR + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.HIT_PEG + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.SHOCK + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.SWORD_CUT + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.SWORD_MISS + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.SWORD_STRIKE + String.valueOf(i) + ".ogg");
 		}
 	}
 }

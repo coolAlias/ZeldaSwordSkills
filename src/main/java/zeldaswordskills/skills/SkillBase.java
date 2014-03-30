@@ -62,22 +62,22 @@ public abstract class SkillBase
 	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
 
 	/* ACTIVE SKILLS */
-	public static final SkillBase swordBasic = new SwordBasic("basicswordskill");
-	public static final SkillBase armorBreak = new ArmorBreak("armorbreak");
-	public static final SkillBase dodge = new Dodge("dodge");
-	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow");
-	public static final SkillBase parry = new Parry("parry");
-	public static final SkillBase dash = new Dash("dash");
-	public static final SkillBase spinAttack = new SpinAttack("spinattack");
-	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack");
-	public static final SkillBase swordBeam = new SwordBeam("swordbeam");
+	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDefaultDescriptions(2);
+	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDefaultDescriptions(2);
+	public static final SkillBase dodge = new Dodge("dodge").addDefaultDescriptions(1);
+	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow").addDefaultDescriptions(2);
+	public static final SkillBase parry = new Parry("parry").addDefaultDescriptions(1);
+	public static final SkillBase dash = new Dash("dash").addDefaultDescriptions(1);
+	public static final SkillBase spinAttack = new SpinAttack("spinattack").addDefaultDescriptions(1);
+	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack").addDefaultDescriptions(1);
+	public static final SkillBase swordBeam = new SwordBeam("swordbeam").addDefaultDescriptions(3);
 
 	/* PASSIVE SKILLS */
-	public static final SkillBase bonusHeart = new BonusHeart("bonusheart");
+	public static final SkillBase bonusHeart = new BonusHeart("bonusheart").addDefaultDescriptions(1);
 
 	/* NEW SKILLS */
-	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw");
-	public static final SkillBase risingCut = new RisingCut("risingcut");
+	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDefaultDescriptions(2);
+	public static final SkillBase risingCut = new RisingCut("risingcut").addDefaultDescriptions(2);
 
 	/** Unlocalized name for language registry */
 	protected final String unlocalizedName;
@@ -203,19 +203,62 @@ public abstract class SkillBase
 	}
 
 	/** Returns whether this skill can drop as an orb randomly from mobs */
-	public boolean canDrop() { return true; }
+	public boolean canDrop() {
+		return true;
+	}
 
 	/** Returns whether this skill can generate as random loot in chests */
-	public boolean isLoot() { return true; }
+	public boolean isLoot() {
+		return true;
+	}
 
 	/** Each skill's ID can be used as a key to retrieve it from the map */
-	public final byte getId() { return id; }
+	public final byte getId() {
+		return id;
+	}
 
 	/** Returns current skill level */
-	public final byte getLevel() { return level; }
+	public final byte getLevel() {
+		return level;
+	}
 
 	/** Returns max level this skill can reach; override to change */
-	public byte getMaxLevel() { return MAX_LEVEL; }
+	public byte getMaxLevel() {
+		return MAX_LEVEL;
+	}
+
+	/**
+	 * Returns the key used by the language file for getting the description n
+	 * Language file should contain key "skill.zss.{unlocalizedName}.desc.n"
+	 * @param n if less than zero, ".n" will not be appended
+	 */
+	protected final String getUnlocalizedDescription(int n) {
+		return "skill.zss." + unlocalizedName + ".desc" + (n < 0 ? "" : ("." + n));
+	}
+
+	/**
+	 * Adds n description keys to the tooltip using the default key:
+	 * {@link SkillBase#getUnlocalizedDescription(int n) getUnlocalizedDescription}
+	 * @param n the number of descriptions to add should be at least 1
+	 */
+	protected final SkillBase addDefaultDescriptions(int n) {
+		for (int i = 1; i <= n; ++i) {
+			tooltip.add(getUnlocalizedDescription(i));
+		}
+		return this;
+	}
+
+	/** Adds a single untranslated string to the skill's tooltip display */
+	protected final SkillBase addDescription(String string) {
+		tooltip.add(string);
+		return this;
+	}
+
+	/** Adds all entries in the provided list to the skill's tooltip display */
+	protected final SkillBase addDescription(List<String> list) {
+		for (String s : list) { tooltip.add(s); }
+		return this;
+	}
 
 	/** Returns the translated list containing Strings for tooltip display */
 	@SideOnly(Side.CLIENT)
@@ -260,18 +303,6 @@ public abstract class SkillBase
 	/** Returns a translated description of the skill's range, using the value provided */
 	public String getRangeDisplay(double range) {
 		return StatCollector.translateToLocalFormatted("skill.zss.range.desc", String.format("%.1f", range));
-	}
-
-	/** Adds a single untranslated string to the skill's tooltip display */
-	protected final SkillBase addDescription(String string) {
-		tooltip.add("skill.zss." + string);
-		return this;
-	}
-
-	/** Adds all entries in the provided list to the skill's tooltip display */
-	protected final SkillBase addDescription(List<String> list) {
-		for (String s : list) { addDescription(s); }
-		return this;
 	}
 
 	/** Returns true if player meets requirements to learn this skill at target level */

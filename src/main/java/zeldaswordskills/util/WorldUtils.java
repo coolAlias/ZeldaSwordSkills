@@ -254,7 +254,27 @@ public class WorldUtils
 		}
 		return null;
 	}
+
+	/**
+	 * Plays a sound on the server (sends a packet if on the client) with randomized volume and pitch
+	 * @param f		Volume: nextFloat() * f + add
+	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
+	 */
+	public static void playSoundAtEntity(World world, Entity entity, String sound, float f, float add) {
+		playSoundAt(world, entity.posX, entity.posY, entity.posZ, sound, f, add);
+	}
 	
+	/**
+	 * Plays a sound on the server with randomized volume and pitch
+	 * @param f		Volume: nextFloat() * f + add
+	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
+	 */
+	public static void playSoundAt(World world, double x, double y, double z, String sound, float f, float add) {
+		float volume = world.rand.nextFloat() * f + add;
+		float pitch = 1.0F / (world.rand.nextFloat() * f + add);
+		world.playSoundEffect(x, y, z, sound, volume, pitch);
+	}
+
 	/**
 	 * Shortcut method sends the packet to all players within the distance squared of the player
 	 */

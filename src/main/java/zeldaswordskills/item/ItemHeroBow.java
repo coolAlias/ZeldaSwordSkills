@@ -62,6 +62,7 @@ import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityArrowElemental.ElementType;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.TargetUtils;
 
@@ -448,13 +449,13 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		int n = getLevel(stack);
 		if (n < 3 && core.consumeRupees((n + 1) * Config.getHeroBowUpgradeCost())) {
 			setLevel(stack, ++n);
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			player.triggerAchievement(ZSSAchievements.fairyBow);
 			if (n == 3) {
 				player.triggerAchievement(ZSSAchievements.fairyBowMax);
 			}
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}

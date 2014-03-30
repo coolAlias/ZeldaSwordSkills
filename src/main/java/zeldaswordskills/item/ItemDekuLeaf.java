@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityCyclone;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -64,7 +65,7 @@ public class ItemDekuLeaf extends Item
 			if (player.onGround) {
 				player.addExhaustion(10.0F);
 				if (!world.isRemote) {
-					world.playSoundAtEntity(player, ModInfo.SOUND_WHOOSH, 1.0F, 1.0F);
+					world.playSoundAtEntity(player, Sounds.WHOOSH, 1.0F, 1.0F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));
 				}
 			} else {

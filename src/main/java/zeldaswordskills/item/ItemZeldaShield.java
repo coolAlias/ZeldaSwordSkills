@@ -54,6 +54,7 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -118,9 +119,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 	 */
 	public void onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
 		ZSSPlayerInfo.get(player).onAttackBlocked(shield, damage);
-		player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_HAMMER,
-				(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-				1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.HAMMER, 0.4F, 0.5F);
 		if (this == ZSSItems.shieldDeku) {
 			if (source.isProjectile() && source.getSourceOfDamage() instanceof IProjectile) {
                 if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
@@ -186,9 +185,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity target) {
 		if (target instanceof EntityLivingBase) {
-			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_HAMMER,
-					(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.HAMMER, 0.4F, 0.5F);
 			TargetUtils.knockTargetBack((EntityLivingBase) target, player);
 		}
 		return true;
@@ -216,9 +213,7 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 					DamageSource source = DamageSource.causeFireballDamage(fireball, fireball.shootingEntity);
 					if (canBlockDamage(stack, source) && fireball.attackEntityFrom(DamageSource.causePlayerDamage(player), 1.0F)) {
 						ZSSPlayerInfo.get(player).onAttackBlocked(stack, 1.0F);
-						player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_HAMMER,
-								(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-								1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+						WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.HAMMER, 0.4F, 0.5F);
 						break;
 					}
 				}
@@ -260,9 +255,9 @@ public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed,
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.shieldMirror);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.shieldMirror), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, ModInfo.SOUND_FAIRY_LAUGH, 1.0F, 1.0F);
+			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.sword"));
 		}
 	}

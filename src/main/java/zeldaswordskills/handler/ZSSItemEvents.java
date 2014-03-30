@@ -70,7 +70,7 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
@@ -131,7 +131,7 @@ public class ZSSItemEvents
 				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
 				if (isBoss || mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel))) {
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
-					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
+					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, Sounds.SPECIAL_DROP, 1.0F, 1.0F);
 					player.triggerAchievement(ZSSAchievements.skillGain);
 					if (isBoss) {
 						player.triggerAchievement(ZSSAchievements.skillMortal);
@@ -161,7 +161,7 @@ public class ZSSItemEvents
 			} else if (event.block == Block.oreIron) {
 				if (event.world.rand.nextFloat() < (0.005F * event.fortuneLevel)) {
 					event.drops.add(new ItemStack(ZSSItems.masterOre));
-					event.harvester.worldObj.playSoundEffect(event.harvester.posX, event.harvester.posY, event.harvester.posZ, ModInfo.SOUND_SPECIAL_DROP, 1.0F, 1.0F);
+					event.harvester.worldObj.playSoundEffect(event.harvester.posX, event.harvester.posY, event.harvester.posZ, Sounds.SPECIAL_DROP, 1.0F, 1.0F);
 				}
 			}
 		}
@@ -296,7 +296,7 @@ public class ZSSItemEvents
 				boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
 				if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (!block.hasTileEntity(meta) || isSmashable)) {
 					if (!(block instanceof BlockBreakable)) {
-						world.playSoundAtEntity(player, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
+						world.playSoundAtEntity(player, Sounds.ROCK_FALL, 1.0F, 1.0F);
 					}
 					world.destroyBlock(x, y, z, false);
 					wasDestroyed = true;

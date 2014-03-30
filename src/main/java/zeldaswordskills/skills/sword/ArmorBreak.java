@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -29,11 +28,12 @@ import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -44,7 +44,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Description: Unleash a powerful blow that ignores armor
  * Activation: hold the 'up' arrow for (20 - level) ticks
  * Effect: Unleashes an attack that inflicts normal sword damage but ignores armor
- * Exhaustion: 3.0F - (0.2F * level)
+ * Exhaustion: 2.0F - (0.1F * level)
  * Special: May only be used while locked on to a target
  * 			Charge time is reduced by 5 ticks when wielding a Master Sword
  * 
@@ -66,9 +66,8 @@ public class ArmorBreak extends SkillActive
 
 	public ArmorBreak(String name) {
 		super(name);
-		addDescription(Arrays.asList("armorbreak.desc.0","armorbreak.desc.1"));
-		disableUserActivation();
 		setDisablesLMB();
+		disableUserActivation();
 	}
 
 	/** Returns number of ticks required before attack will execute: 20 - level */
@@ -77,13 +76,19 @@ public class ArmorBreak extends SkillActive
 	}
 
 	/** Returns true if the skill is still charging up */
-	public boolean isCharging() { return charge > 0; }
+	public boolean isCharging() {
+		return charge > 0;
+	}
 
-	private ArmorBreak(ArmorBreak skill) { super(skill); }
+	private ArmorBreak(ArmorBreak skill) {
+		super(skill);
+	}
 
 	@Override
-	public ArmorBreak newInstance() { return new ArmorBreak(this); }
-	
+	public ArmorBreak newInstance() {
+		return new ArmorBreak(this);
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
@@ -94,19 +99,26 @@ public class ArmorBreak extends SkillActive
 	}
 
 	@Override
-	public boolean isActive() { return activeTimer > 0; }
-
-	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && PlayerUtils.isHoldingSword(player);
+	public boolean isActive() {
+		return activeTimer > 0;
 	}
 
 	@Override
-	protected float getExhaustion() { return 3.0F - (0.2F * level); }
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
+				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+	}
+
+	@Override
+	protected float getExhaustion() {
+		return 2.0F - (0.1F * level);
+	}
 
 	/** Called when key first pressed; initiates charging */
 	@SideOnly(Side.CLIENT)
-	public void keyPressed(EntityPlayer player) { charge = getChargeTime(player); }
+	public void keyPressed(EntityPlayer player) {
+		charge = getChargeTime(player);
+	}
 
 	/** Returns true if skill should continue charging up (key is still held down) */
 	@SideOnly(Side.CLIENT)
@@ -124,7 +136,6 @@ public class ArmorBreak extends SkillActive
 				player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 			}
 		}
-
 		return isActive();
 	}
 
@@ -151,7 +162,7 @@ public class ArmorBreak extends SkillActive
 				charge = 0;
 			}
 		}
-		
+
 		if (isActive()) {
 			--activeTimer;
 		}
@@ -164,7 +175,7 @@ public class ArmorBreak extends SkillActive
 	 */
 	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
 		activeTimer = 0;
-		player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_ARMORBREAK, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.ARMOR_BREAK, 0.4F, 0.5F);
 		DirtyEntityAccessor.damageEntity(event.entityLiving, DamageUtils.causeArmorBreakDamage(player), event.ammount);
 		event.ammount = 0.0F;
 	}

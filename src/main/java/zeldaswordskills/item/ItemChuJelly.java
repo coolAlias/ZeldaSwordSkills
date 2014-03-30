@@ -37,6 +37,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityChu.ChuType;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -78,7 +79,7 @@ public class ItemChuJelly extends Item
 					MerchantRecipe trade = new MerchantRecipe(new ItemStack(stack.getItem(), 4, type.ordinal()),
 							new ItemStack(Item.emerald, (type.ordinal() + 1) * 8), new ItemStack(jellyMap.get(type)));
 					if (MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-						player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						player.worldObj.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.jelly.new_stock"));
 						PlayerUtils.addItemToInventory(player, new ItemStack(jellyMap.get(type)));
 					} else {

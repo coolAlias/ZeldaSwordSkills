@@ -39,6 +39,7 @@ import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -80,7 +81,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	/** Returns appropriate sound based on block material */
 	private String getHitSound() {
-		return blockMaterial == Material.iron ? ModInfo.SOUND_HIT_RUSTY : ModInfo.SOUND_HIT_PEG;
+		return blockMaterial == Material.iron ? Sounds.HIT_RUSTY : Sounds.HIT_PEG;
 	}
 
 	@Override

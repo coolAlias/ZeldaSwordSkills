@@ -46,6 +46,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.PacketISpawnParticles;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.WorldUtils;
@@ -108,7 +109,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 			} else {
 				player.setItemInUse(stack, getMaxItemUseDuration(stack));
 				// TODO different and shorter sound for DIN
-				String sound = (spiritType == BlockSacredFlame.DIN ? ModInfo.SOUND_SUCCESS : ModInfo.SOUND_FLAME_ABSORB);
+				String sound = (spiritType == BlockSacredFlame.DIN ? Sounds.SUCCESS : Sounds.FLAME_ABSORB);
 				player.playSound(sound, 1.0F, 1.0F);
 			}
 
@@ -116,7 +117,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 				stack = new ItemStack(ZSSItems.crystalSpirit);
 			}
 		} else {
-			player.playSound(ModInfo.SOUND_MAGIC_FAIL, 1.0F, 1.0F);
+			player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 		}
 		return stack;
 	}
@@ -290,17 +291,17 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 			if (coordinates != null) {
 				if (getDimension(stack) == player.worldObj.provider.dimensionId) {
 					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
-					player.playSound(ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+					player.playSound(Sounds.SUCCESS, 1.0F, 1.0F);
 					return costToUse;
 				} else {
-					player.playSound(ModInfo.SOUND_MAGIC_FAIL, 1.0F, 1.0F);
+					player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 					if (world.isRemote) {
 						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.spirit_crystal.farore.fail.dimension",
 								new Object[]{StatCollector.translateToLocal(getUnlocalizedName() + ".name")}));
 					}
 				}
 			} else {
-				player.playSound(ModInfo.SOUND_MAGIC_FAIL, 1.0F, 1.0F);
+				player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 				if (world.isRemote) {
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.farore.fail.mark"));
 				}
@@ -316,7 +317,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 	private int handleNayru(ItemStack stack, World world, EntityPlayer player) {
 		if (canUse(stack)) {
 			ZSSPlayerInfo.get(player).activateNayru();
-			world.playSoundAtEntity(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+			world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 			return costToUse;
 		}
 		return 0;
@@ -331,7 +332,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		stack.getTagCompound().setDouble("zssFWposX", player.posX);
 		stack.getTagCompound().setDouble("zssFWposY", player.posY);
 		stack.getTagCompound().setDouble("zssFWposZ", player.posZ);
-		world.playSoundAtEntity(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+		world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 	}
 	
 	/**

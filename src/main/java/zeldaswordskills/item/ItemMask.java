@@ -49,6 +49,7 @@ import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
@@ -199,7 +200,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 				ZSSVillagerInfo.get(villager).onMaskTrade();
 				ZSSPlayerInfo.get(player).completeCurrentMaskStage();
 				player.setCurrentItemOrArmor(0, new ItemStack(Item.emerald, getSellPrice()));
-				PlayerUtils.playSound(player, ModInfo.SOUND_CASH_SALE, 1.0F, 1.0F);
+				PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.mask.sold." + player.worldObj.rand.nextInt(4)));
 				player.triggerAchievement(ZSSAchievements.maskSold);
 			}

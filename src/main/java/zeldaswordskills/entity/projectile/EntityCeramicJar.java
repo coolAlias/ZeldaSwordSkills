@@ -27,7 +27,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 
@@ -47,7 +47,7 @@ public class EntityCeramicJar extends EntityThrowable
 	public EntityCeramicJar(World world, double x, double y, double z) {
 		super(world, x, y, z);
 	}
-	
+
 	/**
 	 * Sets the stack that will drop upon impact
 	 */
@@ -55,10 +55,10 @@ public class EntityCeramicJar extends EntityThrowable
 		this.stack = stack.copy();
 		return this;
 	}
-	
+
 	@Override
 	protected float func_70182_d() { return 1.0F; }
-	
+
 	@Override
 	protected float getGravityVelocity() { return 0.1F; }
 
@@ -67,26 +67,23 @@ public class EntityCeramicJar extends EntityThrowable
 		if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), 2.0F);
 		}
-
 		for (int i = 0; i < 20; ++i) {
 			worldObj.spawnParticle("tilecrack_" + ZSSBlocks.ceramicJar.blockID + "_0", posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
 		}
-		
-		worldObj.playSoundEffect(posX, posY, posZ, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 0.5F));
-		
+
+		WorldUtils.playSoundAtEntity(worldObj, this, Sounds.BREAK_JAR, 0.4F, 0.5F);
+
 		if (stack == null && rand.nextFloat() < Config.getJarDropChance()) {
 			stack = ChestGenHooks.getInfo(DungeonLootLists.JAR_DROPS).getOneItem(rand);
 		}
-		
 		if (stack != null) {
 			WorldUtils.spawnItemWithRandom(worldObj, stack, (int) posX, (int) posY + 1, (int) posZ);
 		}
-
 		if (!worldObj.isRemote) {
 			setDead();
 		}
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
@@ -96,7 +93,7 @@ public class EntityCeramicJar extends EntityThrowable
 			compound.setTag("jarItem", item);
 		}
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

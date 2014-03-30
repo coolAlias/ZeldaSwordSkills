@@ -44,7 +44,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 
 public class EntityKeese extends EntityBat implements IMob
 {
@@ -276,7 +276,7 @@ public class EntityKeese extends EntityBat implements IMob
 		if (time > 0) {
 			setShockTime(time - 1);
 			if (time % 8 > 6 && rand.nextInt(4) == 0) {
-				worldObj.playSoundAtEntity(this, ModInfo.SOUND_SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
 		}
 		if (!worldObj.isRemote && worldObj.difficultySetting == 0) {
@@ -348,7 +348,7 @@ public class EntityKeese extends EntityBat implements IMob
 					}
 				} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityLivingBase) {
 					source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
-					worldObj.playSoundAtEntity(this, ModInfo.SOUND_SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+					worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 				}
 				
 				return false;

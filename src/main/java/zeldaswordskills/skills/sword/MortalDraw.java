@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.Entity;
@@ -28,10 +27,11 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.MortalDrawPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
@@ -66,33 +66,45 @@ public class MortalDraw extends SkillActive
 	public MortalDraw(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription(Arrays.asList("mortaldraw.desc.0","mortaldraw.desc.1"));
 	}
 
-	private int getAttackTime() { return level + DELAY + 2; }
+	private int getAttackTime() {
+		return level + DELAY + 2;
+	}
 
-	private MortalDraw(MortalDraw skill) { super(skill); }
+	private MortalDraw(MortalDraw skill) {
+		super(skill);
+	}
 
 	@Override
-	public MortalDraw newInstance() { return new MortalDraw(this); }
+	public MortalDraw newInstance() {
+		return new MortalDraw(this);
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.mortaldraw.desc.2", (getAttackTime() - DELAY)));
+		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(3),
+				(getAttackTime() - DELAY)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 
 	@Override
-	public boolean canDrop() { return false; }
+	public boolean canDrop() {
+		return false;
+	}
 
 	@Override
-	public boolean isLoot() { return false; }
+	public boolean isLoot() {
+		return false;
+	}
 
 	@Override
-	public boolean isActive() { return attackTimer > DELAY; }
+	public boolean isActive() {
+		return attackTimer > DELAY;
+	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
@@ -101,7 +113,9 @@ public class MortalDraw extends SkillActive
 	}
 
 	@Override
-	protected float getExhaustion() { return 3.0F - (0.2F * level); }
+	protected float getExhaustion() {
+		return 3.0F - (0.2F * level);
+	}
 
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
@@ -158,16 +172,17 @@ public class MortalDraw extends SkillActive
 	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
 		attackTimer = DELAY;
 		event.ammount *= 2.0F;
-		player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_MORTALDRAW,
-				(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-				1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.MORTAL_DRAW, 0.4F, 0.5F);
 	}
 
 	/** Call whenever RMB changes */
 	@SideOnly(Side.CLIENT)
-	public void keyPressed(boolean pressed) { isRMBDown = pressed; }
+	public void keyPressed(boolean pressed) {
+		isRMBDown = pressed;
+	}
 
 	@SideOnly(Side.CLIENT)
-	public boolean isRMBDown() { return isRMBDown; }
-
+	public boolean isRMBDown() {
+		return isRMBDown;
+	}
 }

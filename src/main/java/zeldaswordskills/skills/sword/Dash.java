@@ -28,11 +28,12 @@ import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -67,13 +68,16 @@ public class Dash extends SkillActive
 	public Dash(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription("dash.desc.0");
 	}
 
-	private Dash(Dash skill) { super(skill); }
+	private Dash(Dash skill) {
+		super(skill);
+	}
 	
 	@Override
-	public Dash newInstance() { return new Dash(this); }
+	public Dash newInstance() {
+		return new Dash(this);
+	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -86,18 +90,25 @@ public class Dash extends SkillActive
 	}
 
 	@Override
-	public boolean isActive() { return isActive; }
+	public boolean isActive() {
+		return isActive;
+	}
 	
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
+				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
 	
 	/** Damage is base damage plus 1.0F per level */
-	private float getDamage() { return (4.0F + level); }
+	private float getDamage() {
+		return (4.0F + level);
+	}
 	
 	/** Range increases by 1 block per level */
-	private double getRange() { return (3.0D + level); }
+	private double getRange() {
+		return (3.0D + level);
+	}
 	
 	/** Deactivates skill and resets local variables */
 	private void deactivate() {
@@ -106,7 +117,9 @@ public class Dash extends SkillActive
 	}
 	
 	@Override
-	protected float getExhaustion() { return 1.0F - (0.1F * level); }
+	protected float getExhaustion() {
+		return 1.0F - (0.1F * level);
+	}
 	
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
@@ -155,7 +168,7 @@ public class Dash extends SkillActive
 					}
 					player.motionX = player.motionZ = 0.0D;
 					player.addVelocity(-vec3.xCoord, 0.0D, -vec3.zCoord);
-					player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SLAM, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+					WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SLAM, 0.4F, 0.5F);
 					deactivate();
 				}
 				
@@ -169,9 +182,12 @@ public class Dash extends SkillActive
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public void keyPressed(boolean pressed) { isRMBDown = pressed; }
+	public void keyPressed(boolean pressed) {
+		isRMBDown = pressed;
+	}
 	
 	@SideOnly(Side.CLIENT)
-	public boolean isRMBDown() { return isRMBDown; }
-	
+	public boolean isRMBDown() {
+		return isRMBDown;
+	}
 }

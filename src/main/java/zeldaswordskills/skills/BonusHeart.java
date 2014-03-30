@@ -39,7 +39,6 @@ public class BonusHeart extends SkillPassive
 
 	protected BonusHeart(String name) {
 		super(name);
-		addDescription("bonusheart.desc.0");
 	}
 
 	private BonusHeart(BonusHeart skill) {

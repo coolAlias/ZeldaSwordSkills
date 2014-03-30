@@ -37,7 +37,7 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.client.particle.FXCycloneRing;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -103,7 +103,7 @@ public class EntityCyclone extends EntityMobThrowable
 				setDead();
 				releaseDrops();
 			} else if (ticksExisted % 6 == 5) {
-				worldObj.playSoundAtEntity(this, ModInfo.SOUND_WHIRLWIND, 0.6F, 1.0F);
+				worldObj.playSoundAtEntity(this, Sounds.WHIRLWIND, 0.6F, 1.0F);
 			}
 		} else {
 			spawnParticleRing();

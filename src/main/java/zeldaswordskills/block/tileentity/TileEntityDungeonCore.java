@@ -61,6 +61,7 @@ import zeldaswordskills.entity.ZSSPlayerInfo.Stats;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;
@@ -226,7 +227,7 @@ public class TileEntityDungeonCore extends TileEntity
 					isOpened = true;
 				} else {
 					//LogHelper.log(Level.INFO, "Calling removeCoreBlock after all blocks set to stone");
-					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 					removeCoreBlock();
 				}
 			} else if (isSpawner) {
@@ -247,7 +248,7 @@ public class TileEntityDungeonCore extends TileEntity
 			StructureGenUtils.replaceMaterialWith(worldObj, box.minX, box.maxX, box.minY, box.maxY, box.minZ, box.maxZ, Material.lava, 0, 0);
 			WorldUtils.spawnXPOrbsWithRandom(worldObj, worldObj.rand, xCoord, box.getCenterY() + 1, zCoord, 1000 * difficulty);
 			// TODO play victory music
-			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			ZSSMain.atlasHelper.placeCustomTile(worldObj, ModInfo.ATLAS_DUNGEON_ID + dungeonType.ordinal() + "_fin", xCoord, yCoord, zCoord);
 			removeCoreBlock();
 		} else {
@@ -343,7 +344,7 @@ public class TileEntityDungeonCore extends TileEntity
 	 */
 	protected boolean triggerEvent() {
 		difficulty = worldObj.difficultySetting;
-		//TODO worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_BOSS_BATTLE, 1.0F, 1.0F);
+		//TODO worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.BOSS_BATTLE, 1.0F, 1.0F);
 		fillDoor();
 		removeHinderBlock();
 		generateBossMobs(4);
@@ -407,14 +408,14 @@ public class TileEntityDungeonCore extends TileEntity
 			break;
 		case OCEAN_BATTLE:
 			if (eventTimer < 1201 && eventTimer % (140 - (difficulty * 20)) == 0) {
-				worldObj.playSoundEffect(xCoord + 0.5D, box.getCenterY(), zCoord + 0.5D, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
+				worldObj.playSoundEffect(xCoord + 0.5D, box.getCenterY(), zCoord + 0.5D, Sounds.ROCK_FALL, 1.0F, 1.0F);
 				StructureGenUtils.fillWithoutReplace(worldObj, box.minX + 1, box.maxX, box.maxY-1, box.maxY, box.minZ + 1, box.maxZ, Block.sand.blockID, 0, 3);
 			}
 			break;
 		case FOREST_BATTLE:
 			if (eventTimer % 400 == 0) {
 				for (int i = 0; i < (difficulty + 2); ++i) {
-					setRandomBlockTo(Block.web.blockID, 0, ModInfo.SOUND_WEB_SPLAT);
+					setRandomBlockTo(Block.web.blockID, 0, Sounds.WEB_SPLAT);
 				}
 			}
 			if (eventTimer % 600 == 0) {
@@ -431,7 +432,7 @@ public class TileEntityDungeonCore extends TileEntity
 					EntityBomb bomb = new EntityBomb(worldObj).setRadius(radius).addTime((3 - difficulty) * 16);
 					bomb.setPosition(x, y, z);
 					if (!worldObj.isRemote) {
-						worldObj.playSoundEffect(x, y, z, ModInfo.SOUND_BOMB_WHISTLE, 1.0F, 1.0F);
+						worldObj.playSoundEffect(x, y, z, Sounds.BOMB_WHISTLE, 1.0F, 1.0F);
 						worldObj.spawnEntityInWorld(bomb);
 					}
 				}
@@ -659,7 +660,7 @@ public class TileEntityDungeonCore extends TileEntity
 				float radius = 1.5F + (float)(difficulty * 0.5F);
 				CustomExplosion.createExplosion(worldObj, x, y, z, radius, BombType.BOMB_STANDARD);
 			}
-			worldObj.playSoundEffect(x + 0.5D, box.getCenterY(), z + 0.5D, ModInfo.SOUND_ROCK_FALL, 1.0F, 1.0F);
+			worldObj.playSoundEffect(x + 0.5D, box.getCenterY(), z + 0.5D, Sounds.ROCK_FALL, 1.0F, 1.0F);
 			StructureGenUtils.destroyBlocksAround(worldObj, x - 1, x + 2, y, box.maxY - 2, z - 1, z + 2, -1, false);
 		}
 	}
@@ -693,7 +694,7 @@ public class TileEntityDungeonCore extends TileEntity
 		//LogHelper.log(Level.INFO, "Verifying structure after core block broken at " + xCoord + "/" + yCoord + "/" + zCoord);
 		if (!alreadyVerified) {
 			//LogHelper.log(Level.INFO, "Wasn't already verified: removing structure after core block broken");
-			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_SECRET_MEDLEY, 1.0F, 1.0F);
+			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			verifyStructure(true);
 		}
 		while (rupees > 0) {

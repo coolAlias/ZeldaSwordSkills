@@ -26,6 +26,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -52,7 +53,7 @@ public class ItemPickupOnly extends Item implements IHandlePickup {
 				return false;
 			}
 		} else if (this == ZSSItems.powerPiece) {
-			PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 0.6F, 1.0F);
+			PlayerUtils.playSound(player, Sounds.SUCCESS, 0.6F, 1.0F);
 			ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_UP, 600, 100);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, 600, 25);
 			ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_STUN, 600, 100);

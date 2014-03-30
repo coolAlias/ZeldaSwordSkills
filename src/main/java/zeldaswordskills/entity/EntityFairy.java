@@ -32,7 +32,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -103,7 +103,7 @@ public class EntityFairy extends EntityAmbientCreature
 
 	@Override
 	protected String getLivingSound() {
-		return ModInfo.SOUND_FAIRY_LIVING;
+		return Sounds.FAIRY_LIVING;
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class EntityFairy extends EntityAmbientCreature
 				}
 			}
 			
-			worldObj.playSoundAtEntity(player, ModInfo.SOUND_CORK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+			worldObj.playSoundAtEntity(player, Sounds.CORK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			setDead();
 			return true;
 		} else {

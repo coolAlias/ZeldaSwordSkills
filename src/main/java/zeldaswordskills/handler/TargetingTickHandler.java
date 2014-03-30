@@ -61,7 +61,9 @@ public class TargetingTickHandler implements ITickHandler
 	}
 
 	@Override
-	public EnumSet<TickType> ticks() { return EnumSet.of(TickType.RENDER); }
+	public EnumSet<TickType> ticks() {
+		return EnumSet.of(TickType.RENDER);
+	}
 
 	@Override
 	public String getLabel() { return null; }
@@ -129,7 +131,9 @@ public class TargetingTickHandler implements ITickHandler
 	 * (when isPressed() is still true) or while the key is held down (pressed is true).
 	 */
 	@SideOnly(Side.CLIENT)
-	private boolean isVanillaKeyPressed(KeyBinding key) { return key.isPressed() && key.pressed; }
+	private boolean isVanillaKeyPressed(KeyBinding key) {
+		return key.isPressed() && key.pressed;
+	}
 
 	/**
 	 * Rotates the player to face the current target

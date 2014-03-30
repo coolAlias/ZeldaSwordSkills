@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -68,10 +69,10 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote) {
 			if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.keySkeleton && player.inventory.consumeInventoryItem(ZSSItems.keySkeleton.itemID)) {
-				world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+				world.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 				world.setBlockToAir(x, y, z);
 			} else {
-				world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+				world.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 			}
 		}
 		return false;

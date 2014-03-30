@@ -38,7 +38,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 
@@ -151,7 +151,7 @@ public class EntityBoomerang extends EntityMobThrowable
 			setDead();
 		} else {
 			if (ticksExisted % 4 == 0) {
-				worldObj.playSoundAtEntity(this, ModInfo.SOUND_SWORDMISS, (rand.nextFloat() * 0.4F + 0.5F), 1.0F / (rand.nextFloat() * 0.4F + 0.5F));
+				WorldUtils.playSoundAtEntity(worldObj, this, Sounds.SWORD_MISS, 0.4F, 0.5F);
 			}
 			captureDrops();
 			captureXpOrbs();

@@ -49,7 +49,7 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -201,7 +201,7 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 				case 2: // need to pay for mask
 					int price = (mask instanceof ItemMask ? ((ItemMask) mask).getBuyPrice() : 16);
 					if (PlayerUtils.consumeInventoryItems(player, new ItemStack(Item.emerald, price))) {
-						PlayerUtils.playSound(player, ModInfo.SOUND_CASH_SALE, 1.0F, 1.0F);
+						PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
 						info.completeCurrentMaskStage();
 						if (info.getCurrentMaskStage() == (maskMap.size() * NUM_STAGES)) {
 							new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.0"),

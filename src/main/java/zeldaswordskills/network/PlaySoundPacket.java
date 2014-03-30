@@ -35,26 +35,35 @@ import cpw.mods.fml.relauncher.Side;
 public class PlaySoundPacket extends CustomPacket
 {
 	private String sound;
-	
+
 	private float volume;
-	
+
 	private float pitch;
+
 	/** Coordinates at which to play the sound; used on the server side */
 	private double x, y, z;
 
 	public PlaySoundPacket() {}
-	
-	public PlaySoundPacket(String sound, float volume, float pitch) {
-		this(sound, volume, pitch, null);
-	}
-	
-	public PlaySoundPacket(String sound, float volume, float pitch, Entity entity) {
+
+	public PlaySoundPacket(String sound, float volume, float pitch, double x, double y, double z) {
 		this.sound = sound;
 		this.volume = volume;
 		this.pitch = pitch;
-		this.x = (entity != null ? entity.posX : 0);
-		this.y = (entity != null ? entity.posY : 0);
-		this.z = (entity != null ? entity.posZ : 0);
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	/**
+	 * @param entity entity can be null when sending packet to client; sound played at player's position
+	 */
+	public PlaySoundPacket(String sound, float volume, float pitch, Entity entity) {
+		this(sound, volume, pitch, (entity != null ? entity.posX : 0),
+				(entity != null ? entity.posY : 0), (entity != null ? entity.posZ : 0));
+	}
+
+	public PlaySoundPacket(String sound, float volume, float pitch) {
+		this(sound, volume, pitch, null);
 	}
 
 	@Override

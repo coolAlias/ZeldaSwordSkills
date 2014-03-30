@@ -29,11 +29,12 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -61,45 +62,54 @@ public class Parry extends SkillActive
 {
 	/** Timer during which player is considered actively parrying */
 	private int parryTimer = 0;
-	
+
 	/** Only for vanilla activation: Current number of ticks remaining before skill will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
-	
+
 	/** Notification to play miss sound; set to true when activated and false when attack parried */
 	private boolean playMissSound;
 
 	public Parry(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription("parry.desc.0");
 	}
 
-	private Parry(Parry skill) { super(skill); }
+	private Parry(Parry skill) {
+		super(skill);
+	}
 
 	@Override
-	public Parry newInstance() { return new Parry(this); }
-	
+	public Parry newInstance() {
+		return new Parry(this);
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.parry.desc.1",(int)(getDisarmChance(player, null) * 100)));
+		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(2),
+				(int)(getDisarmChance(player, null) * 100)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
 
 	@Override
-	public boolean isActive() { return (parryTimer > 0); }
-
-	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && PlayerUtils.isHoldingSword(player);
+	public boolean isActive() {
+		return (parryTimer > 0);
 	}
 
 	@Override
-	protected float getExhaustion() { return 0.3F - (0.02F * level); }
-	
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
+				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+	}
+
+	@Override
+	protected float getExhaustion() {
+		return 0.3F - (0.02F * level);
+	}
+
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		if (super.activate(world, player)) {
@@ -116,7 +126,7 @@ public class Parry extends SkillActive
 		if (isActive()) {
 			if (--parryTimer <= getParryDelay() && playMissSound) {
 				playMissSound = false;
-				player.playSound(ModInfo.SOUND_SWORDMISS, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 			}
 		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
 			if (!Config.requiresDoubleTap() && !Minecraft.getMinecraft().gameSettings.keyBindBack.pressed) {
@@ -129,7 +139,9 @@ public class Parry extends SkillActive
 	}
 
 	/** Number of ticks before player may attempt to parry again */
-	private int getParryDelay() { return (5 - (level / 2)); }
+	private int getParryDelay() {
+		return (5 - (level / 2));
+	}
 
 	/**
 	 * Sets the key pressed and starts the key timer;
@@ -146,7 +158,7 @@ public class Parry extends SkillActive
 			}
 		}
 	}
-	
+
 	/**
 	 * Attempts to parry the incoming attack and possibly disarms the attacker
 	 * @return true if the attack was parried and the attack event should be canceled
@@ -154,7 +166,7 @@ public class Parry extends SkillActive
 	public boolean parryAttack(EntityPlayer player, EntityLivingBase attacker) {
 		if (parryTimer > getParryDelay() && attacker.getHeldItem() != null) {
 			parryTimer = getParryDelay(); // fix probable bug where player can disarm multiple opponents at once
-			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SWORDSTRIKE, (player.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 			playMissSound = false;
 			TargetUtils.knockTargetBack(attacker, player);
 			if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {

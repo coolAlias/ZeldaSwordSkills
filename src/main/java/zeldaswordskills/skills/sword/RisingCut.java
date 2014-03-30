@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -60,7 +59,6 @@ public class RisingCut extends SkillActive
 	public RisingCut(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription(Arrays.asList(name + ".desc.0", name + ".desc.1"));
 	}
 
 	private RisingCut(RisingCut skill) {

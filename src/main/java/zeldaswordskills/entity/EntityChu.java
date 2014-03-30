@@ -36,13 +36,13 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
-import zeldaswordskills.api.damage.IDamageSourceStun;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
+import zeldaswordskills.api.damage.IDamageSourceStun;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -333,7 +333,7 @@ public class EntityChu extends EntityLiving implements IMob
 				}
 			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityLivingBase) {
 				source.getEntity().attackEntityFrom(new DamageSourceShock("shock", this, getMaxStunTime(), getDamage()), getDamage());
-				worldObj.playSoundAtEntity(this, ModInfo.SOUND_SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
 
 			return false;
@@ -479,7 +479,7 @@ public class EntityChu extends EntityLiving implements IMob
 			}
 		}
 		if (getShockTime() % 8 > 6 && rand.nextInt(4) == 0) {
-			worldObj.playSoundAtEntity(this, ModInfo.SOUND_SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+			worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 		}
 		if (onGround) {
 			attemptMerge();
@@ -521,7 +521,7 @@ public class EntityChu extends EntityLiving implements IMob
 			List<EntityChu> list = worldObj.getEntitiesWithinAABB(EntityChu.class, boundingBox.expand(2.0D, 1.0D, 2.0D));
 			for (EntityChu chu : list) {
 				if (chu != this && chu.getSize() == this.getSize() && chu.getHealth() < (chu.getMaxHealth() / 2)) {
-					worldObj.playSoundAtEntity(this, ModInfo.SOUND_CHU_MERGE, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+					worldObj.playSoundAtEntity(this, Sounds.CHU_MERGE, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 					EntityChu newChu = createInstance();
 					newChu.setSize(i * 2);
 					newChu.setType(this.getType().ordinal() < chu.getType().ordinal() ? chu.getType() : this.getType());

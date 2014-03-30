@@ -17,7 +17,6 @@
 
 package zeldaswordskills.skills.sword;
 
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -28,7 +27,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.CustomPacket.ProtocolException;
 import zeldaswordskills.network.EndComboPacket;
@@ -39,6 +38,7 @@ import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -110,22 +110,31 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	public SwordBasic(String name) {
 		super(name);
-		addDescription(Arrays.asList("basicswordskill.desc.0","basicswordskill.desc.1"));
 	}
 
-	private SwordBasic(SwordBasic skill) { super(skill); }
+	private SwordBasic(SwordBasic skill) {
+		super(skill);
+	}
 
 	@Override
-	public SwordBasic newInstance() { return new SwordBasic(this); }
+	public SwordBasic newInstance() {
+		return new SwordBasic(this);
+	}
 
 	@Override
-	public boolean isActive() { return isActive; }
+	public boolean isActive() {
+		return isActive;
+	}
 
 	@Override
-	protected float getExhaustion() { return 0.0F; }
+	protected float getExhaustion() {
+		return 0.0F;
+	}
 
 	@Override
-	public byte getMaxLevel() { return (MAX_LEVEL * 2); }
+	public byte getMaxLevel() {
+		return (MAX_LEVEL * 2);
+	}
 
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
@@ -165,10 +174,14 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	public final boolean isLockedOn() { return currentTarget != null; }
+	public final boolean isLockedOn() {
+		return currentTarget != null;
+	}
 
 	@Override
-	public final EntityLivingBase getCurrentTarget() { return currentTarget; }
+	public final EntityLivingBase getCurrentTarget() {
+		return currentTarget;
+	}
 
 	@Override
 	public void setCurrentTarget(Side side, Entity entity) throws ProtocolException {
@@ -219,7 +232,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	/** Returns max distance at which targets may be acquired or remain targetable */
-	private final int getMaxTargetDistance() { return (6 + level); }
+	private final int getMaxTargetDistance() {
+		return (6 + level);
+	}
 
 	/**
 	 * Updates targets, setting to null if no longer valid and acquiring new target if necessary
@@ -248,19 +263,29 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	public final Combo getCombo() { return combo; }
+	public final Combo getCombo() {
+		return combo;
+	}
 
 	@Override
-	public final void setCombo(Combo combo) { this.combo = combo; }
+	public final void setCombo(Combo combo) {
+		this.combo = combo;
+	}
 
 	@Override
-	public final boolean isComboInProgress() { return (combo != null && !combo.isFinished()); }
+	public final boolean isComboInProgress() {
+		return (combo != null && !combo.isFinished());
+	}
 
 	/** Returns the max combo size attainable (2 plus skill level) */
-	private final int getMaxComboSize() { return (2 + level); }
+	private final int getMaxComboSize() {
+		return (2 + level);
+	}
 
 	/** Returns amount of time allowed between successful attacks before combo terminates */
-	private final int getComboTimeLimit(EntityPlayer player) { return (20 + (level * 2)); }
+	private final int getComboTimeLimit(EntityPlayer player) {
+		return (20 + (level * 2));
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -272,9 +297,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 		if (!attackHit) {
 			if (PlayerUtils.isHoldingSword(player)) {
-				PlayerUtils.playSound(player, ModInfo.SOUND_SWORDMISS,
-						(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-						1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 			}
 			if (isComboInProgress()) {
 				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
@@ -297,9 +320,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			combo.add(player, event.ammount);
 		}
 		if (event.source.damageType.equals("player") && PlayerUtils.isHoldingSword(player)) {
-			player.worldObj.playSoundAtEntity(player, ModInfo.SOUND_SWORDCUT,
-					(player.worldObj.rand.nextFloat() * 0.4F + 0.5F),
-					1.0F / (player.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_CUT, 0.4F, 0.5F);
 		}
 	}
 

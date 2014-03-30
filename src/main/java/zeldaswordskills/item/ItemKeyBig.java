@@ -35,8 +35,10 @@ import net.minecraft.world.World;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -93,7 +95,7 @@ public class ItemKeyBig extends Item
 		if (world.getBlockId(x, y, z) == ZSSBlocks.doorLocked.blockID) {
 			if (stack.getItemDamage() == (world.getBlockMetadata(x, y, z) & ~0x8)) {
 				--stack.stackSize;
-				world.playSoundAtEntity(player, ModInfo.SOUND_LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+				WorldUtils.playSoundAtEntity(world, player, Sounds.LOCK_DOOR, 0.4F, 0.5F);
 				world.setBlockToAir(x, y, z);
 				return true;
 			}

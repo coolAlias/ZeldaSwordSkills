@@ -43,7 +43,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import cpw.mods.fml.relauncher.Side;
@@ -70,7 +70,7 @@ public class BlockCeramicJar extends BlockContainer implements ISmashable
 	
 	@Override
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 		world.destroyBlock(x, y, z, false);
 		return Result.ALLOW;
 	}
@@ -152,7 +152,7 @@ public class BlockCeramicJar extends BlockContainer implements ISmashable
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
-			world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.destroyBlock(x, y, z, false);
 		}
 	}
@@ -170,14 +170,14 @@ public class BlockCeramicJar extends BlockContainer implements ISmashable
 	
 	@Override
 	public void onBlockDestroyedByExplosion(World world, int x, int y, int z, Explosion explosion) {
-		world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 		world.destroyBlock(x, y, z, false);
 	}
 	
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
 		if (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot) {
-			world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.destroyBlock(x, y, z, false);
 		}
 	}
@@ -185,7 +185,7 @@ public class BlockCeramicJar extends BlockContainer implements ISmashable
 	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, int blockID) {
 		if (!canBlockStay(world, x, y, z)) {
-			world.playSoundEffect(x, y, z, ModInfo.SOUND_BREAK_JAR, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.destroyBlock(x, y, z, false);
 		}
 	}

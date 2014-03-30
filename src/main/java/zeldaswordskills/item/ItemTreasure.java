@@ -38,6 +38,7 @@ import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -115,7 +116,7 @@ public class ItemTreasure extends Item
 							trader.worldObj.spawnEntityInWorld(trader);
 						}
 						villager.setDead();
-						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.triggerAchievement(ZSSAchievements.maskTrader);
 						if (ZSSPlayerInfo.get(player).getCurrentMaskStage() == 0) {
 							List<String> chat = new ArrayList<String>(5);
@@ -133,7 +134,7 @@ public class ItemTreasure extends Item
 				} else if (trade != null && villagerInfo.isInterested(treasure, stack)) {
 					ItemStack required = trade.getSecondItemToBuy();
 					if (required == null || PlayerUtils.consumeInventoryItems(player, trade.getSecondItemToBuy())) {
-						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.setCurrentItemOrArmor(0, trade.getItemToSell());
 						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));
 						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.received", trade.getItemToSell().getDisplayName()));
@@ -153,7 +154,7 @@ public class ItemTreasure extends Item
 					ItemStack treasureStack = new ItemStack(ZSSItems.treasure,1,treasure.ordinal());
 					int price = villagerInfo.isMonsterHunter() ? treasure.getValue() + treasure.getValue() / 2 : treasure.getValue();
 					if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(treasureStack, new ItemStack(Item.emerald, price)))) {
-						PlayerUtils.playSound(player, ModInfo.SOUND_SUCCESS, 1.0F, 1.0F);
+						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.new", treasureStack.getDisplayName()));
 					} else {
 						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.old", treasureStack.getDisplayName()));

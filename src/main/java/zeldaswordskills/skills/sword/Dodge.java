@@ -71,22 +71,28 @@ public class Dodge extends SkillActive
 	public Dodge(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription("dodge.desc.0");
 	}
 
-	private Dodge(Dodge skill) { super(skill); }
+	private Dodge(Dodge skill) {
+		super(skill);
+	}
 
 	@Override
-	public Dodge newInstance() { return new Dodge(this); }
+	public Dodge newInstance() {
+		return new Dodge(this);
+	}
 
 	@Override
-	public boolean isActive() { return (dodgeTimer > 0); }
+	public boolean isActive() {
+		return (dodgeTimer > 0);
+	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted("skill.zss.dodge.desc.1",(int)(getDodgeChance(player) * 100)));
+		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(2),
+				(int)(getDodgeChance(player) * 100)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		return desc;
 	}
@@ -97,7 +103,9 @@ public class Dodge extends SkillActive
 	}
 	
 	@Override
-	protected float getExhaustion() { return 0.05F; }
+	protected float getExhaustion() {
+		return 0.05F;
+	}
 
 	/**
 	 * Doesn't send packet back to client as it's too slow; client activated directly
@@ -115,7 +123,9 @@ public class Dodge extends SkillActive
 	}
 
 	/** Amount of time dodge will remain active */
-	private int getDodgeTime() { return (5 + level); }
+	private int getDodgeTime() {
+		return (5 + level);
+	}
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
@@ -164,32 +174,26 @@ public class Dodge extends SkillActive
 		}
 	}
 
-	/** Returns whether the animation should update or not this tick */
-	@SideOnly(Side.CLIENT)
-	public boolean shouldRender() { return dodgeTimer > level; }
-
 	/**
 	 * Updates the dodge animation each render tick
 	 * @return returns true if animation is in progress
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player) {
-		if (shouldRender()) {
-			double d = 0.05D; // TODO fine-tune this variable
+		if (dodgeTimer > level) {
+			double d = 0.05D;
 			if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
 				d = 0.01D;
 			}
-			
 			Vec3 vec3 = player.getLookVec();
-			if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls() && keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight)) {
+			if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls()
+					&& keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight)) {
 				player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 			} else {
 				player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
 			}
-
 			return true;
 		}
-
 		return false;
 	}
 }
