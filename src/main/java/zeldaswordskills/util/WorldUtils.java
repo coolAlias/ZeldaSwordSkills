@@ -166,8 +166,8 @@ public class WorldUtils
 	 * Populates a list with blocks that can be affected within the given radius
 	 * @param targetBlock the block id to target, or -1 if all blocks may be targeted
 	 */
-	public static HashSet getAffectedBlocksList(World world, Random rand, float radius, double posX, double posY, double posZ, int targetBlock) {
-		HashSet hashset = new HashSet();
+	public static HashSet<ChunkPosition> getAffectedBlocksList(World world, Random rand, float radius, double posX, double posY, double posZ, int targetBlock) {
+		HashSet<ChunkPosition> hashset = new HashSet<ChunkPosition>();
 		for (int i = 0; i < MAX_RADIUS; ++i) {
 			for (int j = 0; j < MAX_RADIUS; ++j) {
 				for (int k = 0; k < MAX_RADIUS; ++k) {

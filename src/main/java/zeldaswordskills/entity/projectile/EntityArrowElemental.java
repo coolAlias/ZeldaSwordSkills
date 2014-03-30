@@ -17,9 +17,8 @@
 
 package zeldaswordskills.entity.projectile;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -221,17 +220,13 @@ public class EntityArrowElemental extends EntityArrowCustom
 	 */
 	protected boolean affectBlocks() {
 		boolean flag = false;
-		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, -1));
-		Iterator iterator;
-		ChunkPosition chunkposition;
+		Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, -1));
 		int i, j, k, l;
 		
-		iterator = affectedBlockPositions.iterator();
-		while (iterator.hasNext()) {
-			chunkposition = (ChunkPosition)iterator.next();
-			i = chunkposition.x;
-			j = chunkposition.y;
-			k = chunkposition.z;
+		for (ChunkPosition position : affectedBlocks) {
+			i = position.x;
+			j = position.y;
+			k = position.z;
 			l = worldObj.getBlockId(i, j, k);
 			
 			switch(getType()) {
