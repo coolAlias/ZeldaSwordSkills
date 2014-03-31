@@ -34,7 +34,6 @@ import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
-import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -252,7 +251,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private void startSpin(World world, EntityPlayer player) {
 		++refreshed;
-		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SPIN_ATTACK, 0.4F, 0.5F);
+		PlayerUtils.playRandomizedSound(player, Sounds.SPIN_ATTACK, 0.4F, 0.5F);
 		// TODO PlayerUtils.playSound(player, Sounds.YELL, (world.rand.nextFloat() * 0.4F + 0.5F), world.rand.nextFloat() * 0.2F + 0.95F);
 		PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(getExhaustion()).makePacket());
 		targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(getRange(), 0.0D, getRange()));

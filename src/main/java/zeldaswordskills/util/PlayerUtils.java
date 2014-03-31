@@ -141,7 +141,8 @@ public class PlayerUtils
 	
 	/**
 	 * Sends a packet to the client to play a sound on the client side only, or
-	 * sends a packet to the server to play a sound on the server for all to hear
+	 * sends a packet to the server to play a sound on the server for all to hear.
+	 * To avoid playing a sound twice, only call the method from one side or the other, not both.
 	 */
 	public static void playSound(EntityPlayer player, String sound, float volume, float pitch) {
 		if (player.worldObj.isRemote) {
@@ -149,5 +150,19 @@ public class PlayerUtils
 		} else {
 			PacketDispatcher.sendPacketToPlayer(new PlaySoundPacket(sound, volume, pitch).makePacket(), (Player) player);
 		}
+	}
+
+	/**
+	 * Plays a sound with randomized volume and pitch.
+	 * Sends a packet to the client to play a sound on the client side only, or
+	 * sends a packet to the server to play a sound on the server for all to hear.
+	 * To avoid playing a sound twice, only call the method from one side or the other, not both.
+	 * @param f		Volume: nextFloat() * f + add
+	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
+	 */
+	public static void playRandomizedSound(EntityPlayer player, String sound, float f, float add) {
+		float volume = player.worldObj.rand.nextFloat() * f + add;
+		float pitch = 1.0F / (player.worldObj.rand.nextFloat() * f + add);
+		playSound(player, sound, volume, pitch);
 	}
 }

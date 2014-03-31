@@ -121,7 +121,6 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		this.player = player;
 		skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
 		initStats();
-		initSkills();
 	}
 	
 	/** Whether the player is able to block at this time (block timer is zero) */
@@ -164,21 +163,15 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Adds all skills to the map at level zero
-	 */
-	private void initSkills() {
-		for (SkillBase skill : SkillBase.getSkills()) {
-			skills.put(skill.getId(), skill.newInstance());
-		}
-	}
-
-	/**
 	 * Resets all data related to skills
 	 */
 	public void resetSkills() {
-		skills.clear();
-		initSkills();
+		// need level zero skills for validation, specifically for attribute-affecting skills
+		for (SkillBase skill : SkillBase.getSkills()) {
+			skills.put(skill.getId(), skill.newInstance());
+		}
 		validateSkills();
+		skills.clear();
 		fairySpinOrbsReceived = 0;
 		PacketDispatcher.sendPacketToPlayer(new SyncPlayerInfoPacket(this).setReset().makePacket(), (Player) player);
 	}
@@ -547,6 +540,7 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
+		skills.clear(); // allows skills to reset on client without re-adding all the skills
 		NBTTagList taglist = compound.getTagList("ZeldaSwordSkills");
 		for (int i = 0; i < taglist.tagCount(); ++i) {
 			NBTTagCompound skill = (NBTTagCompound) taglist.tagAt(i);

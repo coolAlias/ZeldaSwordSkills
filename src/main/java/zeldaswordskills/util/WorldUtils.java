@@ -256,7 +256,7 @@ public class WorldUtils
 	}
 
 	/**
-	 * Plays a sound on the server (sends a packet if on the client) with randomized volume and pitch
+	 * Plays a sound on the server with randomized volume and pitch; no effect if called on client
 	 * @param f		Volume: nextFloat() * f + add
 	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
 	 */
@@ -265,7 +265,7 @@ public class WorldUtils
 	}
 	
 	/**
-	 * Plays a sound on the server with randomized volume and pitch
+	 * Plays a sound on the server with randomized volume and pitch; no effect if called on client
 	 * @param f		Volume: nextFloat() * f + add
 	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
 	 */
