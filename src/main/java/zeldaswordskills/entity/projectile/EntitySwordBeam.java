@@ -27,6 +27,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.skills.sword.SwordBeam;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -128,10 +132,17 @@ public class EntitySwordBeam extends EntityThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (!worldObj.isRemote) {
+			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
+			SwordBeam skill = (player != null ? (SwordBeam) ZSSPlayerInfo.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
 			if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
-				if (getThrower() instanceof EntityPlayer && entity.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) getThrower()), damage)) {
-					entity.worldObj.playSoundAtEntity(entity, "damage.hit", (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+				if (player != null) {
+					if (skill != null) {
+						skill.onImpact(player, false);
+					}
+					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage)) {
+						WorldUtils.playSoundAtEntity(worldObj, entity, "damage.hit", 0.4F, 0.5F);
+					}
 				}
 				if (!isMaster) {
 					setDead();
@@ -139,6 +150,9 @@ public class EntitySwordBeam extends EntityThrowable
 			} else {
 				int blockID = worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ);
 				if (Block.blocksList[blockID] != null && Block.blocksList[blockID].blockMaterial.blocksMovement()) {
+					if (player != null && skill != null) {
+						skill.onImpact(player, true);
+					}
 					setDead();
 				}
 			}

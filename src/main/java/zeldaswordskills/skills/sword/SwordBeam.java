@@ -25,8 +25,11 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
+import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -37,7 +40,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Activation: attack while sneaking and at near full health
  * Effect: Shoots a ranged beam, damaging a single target
  * Damage: Base sword damage (without other bonuses), +1 extra damage per skill level
- * Range: Approximately 12 blocks, plus one block per level (TODO test max distance)
+ * Range: Approximately 12 blocks, plus one block per level
  * Exhaustion: 3.0F - (0.2F * level)
  * Special:
  * 	- May only be used while locked on to a target
@@ -54,6 +57,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class SwordBeam extends SkillActive
 {
+	/** Used to end combo if the sword beam fails to strike a target */
+	private int missTimer;
+
 	public SwordBeam(String name) {
 		super(name);
 	}
@@ -92,10 +98,24 @@ public class SwordBeam extends SkillActive
 	}
 
 	@Override
+	public void onUpdate(EntityPlayer player) {
+		if (missTimer > 0 && !player.worldObj.isRemote) {
+			--missTimer;
+			if (missTimer == 0) {
+				ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
+				if (combo != null && combo.isComboInProgress()) {
+					combo.getCombo().endCombo(player);
+				}
+			}
+		}
+	}
+
+	@Override
 	public boolean trigger(World world, EntityPlayer player) {
 		if (super.trigger(world, player)) {
 			if (!world.isRemote) {
-				// TODO play sound
+				missTimer = 12 + level;
+				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.WHOOSH, 0.4F, 0.5F);
 				Vec3 vec3 = player.getLookVec();
 				EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level);
 				beam.setDamage(getDamage(player));
@@ -109,6 +129,14 @@ public class SwordBeam extends SkillActive
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Call upon impacting a target to determine whether combo should be terminated
+	 * @param endCombo true if the combo should be terminated
+	 */
+	public void onImpact(EntityPlayer player, boolean endCombo) {
+		missTimer = (endCombo && missTimer > 0 ? 1 : 0);
 	}
 
 	/** Returns true if players current health is within the allowed limit */
