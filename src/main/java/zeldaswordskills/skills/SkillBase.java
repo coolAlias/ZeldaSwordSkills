@@ -39,6 +39,7 @@ import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.skills.sword.SwordBeam;
+import zeldaswordskills.skills.sword.SwordBreak;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -77,6 +78,7 @@ public abstract class SkillBase
 
 	/* NEW SKILLS */
 	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDefaultDescriptions(2);
+	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDefaultDescriptions(2);
 	public static final SkillBase risingCut = new RisingCut("risingcut").addDefaultDescriptions(2);
 
 	/** Unlocalized name for language registry */

@@ -32,6 +32,7 @@ import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
+import zeldaswordskills.skills.sword.SwordBreak;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 import cpw.mods.fml.relauncher.Side;
@@ -110,8 +111,12 @@ public class TargetingTickHandler implements ITickHandler
 							if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
 								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
 							}
-						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack) && skills.hasSkill(SkillBase.parry)) {
-							((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
+						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack)) {
+							if (player.isUsingItem() && skills.hasSkill(SkillBase.swordBreak)) {
+								((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(player);
+							} else if (skills.hasSkill(SkillBase.parry)) {
+								((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
+							}
 						}
 					}
 				}

@@ -75,6 +75,7 @@ import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
+import zeldaswordskills.skills.sword.SwordBreak;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -292,6 +293,11 @@ public class ZSSCombatEvents
 				if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
 					EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
 					event.setCanceled(((Parry) skills.getPlayerSkill(SkillBase.parry)).parryAttack(player, attacker));
+				}
+			} else if (skills.isSkillActive(SkillBase.swordBreak)) {
+				if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
+					EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
+					event.setCanceled(((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).breakAttack(player, attacker));
 				}
 			} else if (skills.isSkillActive(SkillBase.mortalDraw) && event.source.getEntity() != null) {
 				if (!player.worldObj.isRemote) {

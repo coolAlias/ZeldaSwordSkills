@@ -37,6 +37,7 @@ import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
+import zeldaswordskills.skills.sword.SwordBreak;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
@@ -167,7 +168,9 @@ public class ZSSKeyHandler extends KeyHandler
 				}
 			}
 		} else if (kb == keys[KEY_DOWN] && canInteract) {
-			if (skills.hasSkill(SkillBase.parry)) {
+			if (mc.thePlayer.isUsingItem() && skills.hasSkill(SkillBase.swordBreak)) {
+				((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(mc.thePlayer);
+			} else if (skills.hasSkill(SkillBase.parry)) {
 				((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(mc.thePlayer);
 			}
 		} else if (kb == keys[KEY_BLOCK] && canInteract) {
