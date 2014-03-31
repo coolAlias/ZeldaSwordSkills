@@ -39,6 +39,10 @@ public enum Buff
 	ATTACK_UP("buff.zss.attack_up", false, 8),
 	/** Multiplies Attack damage by a factor of (1.0F - (amplifier * 0.01F)) */
 	ATTACK_DOWN("buff.zss.attack_down", true, 8),
+	/** Defense bonus: All damage received multiplied by (1.0F - (amplifier * 0.01F)) */
+	DEFENSE_UP("buff.zss.defense_up", false, 10),
+	/** Defense penalty: All damage received multiplied by (1.0F + (amplifier * 0.01F)) */
+	DEFENSE_DOWN("buff.zss.defense_down", true, 10),
 	/** Increases chance to evade attacks by (amplifier * 0.01F) */
 	EVADE_UP("buff.zss.evade_up", false, 9),
 	/** Reduces chance to evade attacks by (amplifier * 0.01F) */

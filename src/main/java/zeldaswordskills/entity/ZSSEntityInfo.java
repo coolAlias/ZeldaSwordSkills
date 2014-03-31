@@ -70,15 +70,12 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	
 	/** Returns the amplifier of the Buff, or 0 if not active */
 	public int getBuffAmplifier(Buff buff) {
-		if (isBuffActive(buff)) {
-			return getActiveBuff(buff).getAmplifier();
-		}
-		return 0;
+		return (isBuffActive(buff) ? getActiveBuff(buff).getAmplifier() : 0);
 	}
 	
 	/** Returns true if a buff is both active and permanent */
 	public boolean isBuffPermanent(Buff buff) {
-		return isBuffActive(buff) && getActiveBuff(buff).getDuration() == Integer.MAX_VALUE;
+		return isBuffActive(buff) && getActiveBuff(buff).isPermanent();
 	}
 	
 	/** Returns active buffs map */

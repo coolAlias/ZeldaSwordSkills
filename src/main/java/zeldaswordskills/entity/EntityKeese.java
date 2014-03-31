@@ -50,10 +50,10 @@ public class EntityKeese extends EntityBat implements IMob
 {
 	/** The different varieties of Keese */
 	public static enum KeeseType {NORMAL,FIRE,ICE,THUNDER,CURSED};
-	
+
 	/** Chunk coordinates toward which this Keese is currently heading */
 	private ChunkCoordinates currentFlightTarget;
-	
+
 	/** Data watcher index for this Keese's type */
 	private static final int TYPE_INDEX = 17;
 	/** Data watcher index for shock time so entity can render appropriately */
@@ -72,19 +72,19 @@ public class EntityKeese extends EntityBat implements IMob
 		dataWatcher.addObject(TYPE_INDEX, (byte)(KeeseType.NORMAL.ordinal()));
 		dataWatcher.addObject(SHOCK_INDEX, 0);
 	}
-	
+
 	/** Returns this Keese's type */
 	public KeeseType getType() {
 		return KeeseType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX)];
 	}
-	
+
 	/** Sets this Keese's type */
 	public void setType(KeeseType type) {
 		dataWatcher.updateObject(TYPE_INDEX, (byte)(type.ordinal()));
 		applyTypeTraits();
 		updateMaxHealth();
 	}
-	
+
 	/**
 	 * Sets the Keese's type when spawned
 	 */
@@ -107,10 +107,10 @@ public class EntityKeese extends EntityBat implements IMob
 				}
 			}
 		}
-		
+
 		setType(type);
 	}
-	
+
 	/**
 	 * Applies traits based on Keese's type
 	 */
@@ -141,7 +141,7 @@ public class EntityKeese extends EntityBat implements IMob
 		default: experienceValue = 1;
 		}
 	}
-	
+
 	/**
 	 * Updates max health based on Keese's type
 	 */
@@ -155,32 +155,32 @@ public class EntityKeese extends EntityBat implements IMob
 			break;
 		default:
 		}
-		
+
 		setHealth(getMaxHealth());
 	}
-	
+
 	/** Whether this Keese type can shock */
 	protected boolean canShock() {
 		return (getType() == KeeseType.THUNDER);
 	}
-	
+
 	/** Returns the amount of time remaining for which this Keese is electrified */
 	public int getShockTime() {
 		return dataWatcher.getWatchableObjectInt(SHOCK_INDEX);
 	}
-	
+
 	/** Sets the amount of time this Keese will remain electrified */
 	public void setShockTime(int time) {
 		dataWatcher.updateObject(SHOCK_INDEX, time);
 	}
-	
+
 	/**
 	 * Returns amount of damage this type of Keese inflicts
 	 */
 	private float getDamage() {
 		return 2.0F;
 	}
-	
+
 	/**
 	 * Returns the DamageSource this type of Keese inflicts
 	 */
@@ -196,7 +196,7 @@ public class EntityKeese extends EntityBat implements IMob
 			}
 		}
 	}
-	
+
 	// par1 may be 1 or 0
 	@Override
 	protected void dropRareDrop(int par1) {
@@ -212,7 +212,7 @@ public class EntityKeese extends EntityBat implements IMob
 			}
 		}
 	}
-	
+
 	@Override
 	public void onCollideWithPlayer(EntityPlayer player) {
 		if (attackTime == 0 && canEntityBeSeen(player) && getDistanceSqToEntity(player) < 1.5D
@@ -234,26 +234,27 @@ public class EntityKeese extends EntityBat implements IMob
 			}
 		}
 	}
-	
+
 	/**
 	 * Applies a random negative effect to the player, or possibly no effect
 	 */
 	private void applyRandomCurse(EntityPlayer player) {
 		switch(rand.nextInt(16)) {
-		case 0: ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_DOWN, rand.nextInt(500) + 100, rand.nextInt(50) + 50); break;
-		case 1: ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, rand.nextInt(500) + 100, rand.nextInt(50) + 50); break;
-		case 2: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_COLD, rand.nextInt(500) + 100, rand.nextInt(50) + 50); break;
-		case 3: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_FIRE, rand.nextInt(500) + 100, rand.nextInt(50) + 50); break;
-		case 4: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_MAGIC, rand.nextInt(500) + 100, rand.nextInt(50) + 50); break;
-		case 5: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_SHOCK, rand.nextInt(500) + 100, rand.nextInt(50) + 50); break;
-		case 6: player.addPotionEffect(new PotionEffect(Potion.confusion.id, rand.nextInt(500) + 100, 1)); break;
-		case 7: player.addPotionEffect(new PotionEffect(Potion.blindness.id, rand.nextInt(500) + 100, 1)); break;
-		case 8: player.addPotionEffect(new PotionEffect(Potion.poison.id, rand.nextInt(100) + 50, rand.nextInt(9) / 8)); break;
-		case 9: player.addPotionEffect(new PotionEffect(Potion.harm.id, 1, rand.nextInt(9) / 8)); break;
+		case 0: ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_DOWN, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
+		case 1: ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_DOWN, rand.nextInt(500) + 100, rand.nextInt(26) + 25); break;
+		case 2: ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
+		case 3: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_COLD, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
+		case 4: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_FIRE, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
+		case 5: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_MAGIC, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
+		case 6: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_SHOCK, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
+		case 7: player.addPotionEffect(new PotionEffect(Potion.confusion.id, rand.nextInt(500) + 100, 1)); break;
+		case 8: player.addPotionEffect(new PotionEffect(Potion.blindness.id, rand.nextInt(500) + 100, 1)); break;
+		case 9: player.addPotionEffect(new PotionEffect(Potion.poison.id, rand.nextInt(100) + 50, rand.nextInt(9) / 8)); break;
+		case 10: player.addPotionEffect(new PotionEffect(Potion.harm.id, 1, rand.nextInt(9) / 8)); break;
 		default:
 		}
 	}
-	
+
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -350,10 +351,10 @@ public class EntityKeese extends EntityBat implements IMob
 					source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
 					worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 				}
-				
+
 				return false;
 			}
-			
+
 			return source != DamageSource.inWall && super.attackEntityFrom(source, amount);
 		}
 	}
@@ -371,7 +372,7 @@ public class EntityKeese extends EntityBat implements IMob
 		compound.setBoolean("SpawnedSwarm", swarmSpawned);
 		compound.setByte("KeeseType", dataWatcher.getWatchableObjectByte(TYPE_INDEX));
 	}
-	
+
 	@Override
 	public EntityLivingData onSpawnWithEgg(EntityLivingData data) {
 		data = super.onSpawnWithEgg(data);
@@ -383,11 +384,11 @@ public class EntityKeese extends EntityBat implements IMob
 	public boolean getCanSpawnHere() {
 		return (worldObj.difficultySetting > 0 && (posY < 64.0D || rand.nextInt(16) > 13) && isValidLightLevel() && !worldObj.isAnyLiquid(boundingBox));
 	}
-	
+
 	protected boolean isValidLightLevel() {
 		int i = MathHelper.floor_double(posX);
-        int j = MathHelper.floor_double(boundingBox.minY);
-        int k = MathHelper.floor_double(posZ);
-        return worldObj.getLightBrightness(i, j, k) <= rand.nextInt(8);
+		int j = MathHelper.floor_double(boundingBox.minY);
+		int k = MathHelper.floor_double(posZ);
+		return worldObj.getLightBrightness(i, j, k) <= rand.nextInt(8);
 	}
 }

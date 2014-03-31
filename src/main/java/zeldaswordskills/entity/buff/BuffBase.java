@@ -43,13 +43,13 @@ public class BuffBase
 		this.duration = duration;
 		this.amplifier = amplifier;
 	}
-	
+
 	public BuffBase(BuffBase b) {
 		this.buff = b.buff;
 		this.duration = b.duration;
 		this.amplifier = b.amplifier;
 	}
-	
+
 	/** The type of Buff that this effect is */
 	public Buff getBuff() { return buff; }
 	/** The duration remaining for this buff's effect */
@@ -62,29 +62,31 @@ public class BuffBase
 	public boolean isDebuff() { return buff.isDebuff; }
 	/** Shortcut to Buff method; true if this buff displays an arrow icon overlay */
 	public boolean displayArrow() { return buff.displayArrow; }
-	
 	/** Whether this buff is applied permanently, used for mobs with permanent resistances */
 	public boolean isPermanent() { return duration == Integer.MAX_VALUE; }
-	
+
 	@Override
 	public int hashCode() {
-		return buff.ordinal();
+		return 31 * (31 + buff.ordinal()) + amplifier;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof BuffBase) {
-			BuffBase buffBase = (BuffBase) obj;
-			return this.buff == buffBase.buff && this.duration == buffBase.duration && this.amplifier == buffBase.amplifier;
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		BuffBase base = (BuffBase) obj;
+		return this.buff == base.buff && this.duration == base.duration && this.amplifier == base.amplifier;
 	}
-	
+
 	@Override
 	public String toString() {
 		return buff.getName(); // TODO add more information
 	}
-	
+
 	/**
 	 * Combines the new buff's duration and amplifier with the old buff
 	 */
@@ -100,7 +102,7 @@ public class BuffBase
 			this.duration = newBuff.duration;
 		}
 	}
-	
+
 	/**
 	 * Adds any effects the buff may have to the entity when first applied 
 	 */
@@ -112,14 +114,14 @@ public class BuffBase
 			}
 		}
 	}
-	
+
 	/**
 	 * Removes any effects that may have been applied when the buff is removed
 	 */
 	public void onRemoved(EntityLivingBase entity) {
 		onRemoved(entity, true);
 	}
-	
+
 	/**
 	 * Removes any effects that may have been applied when the buff is removed,
 	 * updating the client player if needsUpdate is true
@@ -132,7 +134,7 @@ public class BuffBase
 			}
 		}
 	}
-	
+
 	/**
 	 * Called when a buff has changed, removing the old effects and applying the new
 	 */
@@ -142,7 +144,7 @@ public class BuffBase
 			onAdded(entity);
 		}
 	}
-	
+
 	/**
 	 * Updates this buff's duration and effects, if any
 	 * @return true if this buff needs to be removed (duration remaining is zero)
@@ -154,7 +156,7 @@ public class BuffBase
 		}
 		return duration == 0;
 	}
-	
+
 	/**
 	 * Reads and returns a new BuffBase from the tag compound
 	 */
@@ -164,7 +166,7 @@ public class BuffBase
 		int dur = compound.getInteger("duration");
 		return new BuffBase(b, dur, (int) amp);
 	}
-	
+
 	/**
 	 * Writes this buff effect into the new tag compound, returning it for ease of use
 	 */

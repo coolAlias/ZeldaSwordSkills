@@ -311,8 +311,8 @@ public class ZSSCombatEvents
 			if (event.source.isFireDamage() && event.source.getSourceOfDamage() == null && !event.isCanceled()) {
 				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
 			}
-		} else if (!event.isCanceled() && event.entity instanceof EntityLivingBase && event.source.getEntity() != null) {
-			EntityLivingBase entity = (EntityLivingBase) event.entity;
+		} else if (!event.isCanceled() && event.source.getEntity() != null) {
+			EntityLivingBase entity = event.entityLiving;
 			float evade = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
 			if (evade > 0.0F) {
 				float penalty = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_DOWN) * 0.01F;
@@ -454,7 +454,10 @@ public class ZSSCombatEvents
 	 * Modifies damage of LivingHurtEvent based on entity resistances
 	 */
 	private void applyDamageResistances(LivingHurtEvent event) {
-		if (event.source instanceof IDamageType) {
+		float defenseUp = (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.DEFENSE_UP) * 0.01F);
+		float defenseDown = (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.DEFENSE_DOWN) * 0.01F);
+		event.ammount *= (1.0F + defenseDown - defenseUp);
+		if (event.source instanceof IDamageType && event.ammount > 0.0F) {
 			Set<EnumDamageType> damageTypes = ((IDamageType) event.source).getEnumDamageTypes();
 			if (damageTypes != null) {
 				for (EnumDamageType type : damageTypes) {
