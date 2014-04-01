@@ -27,8 +27,8 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
+import zeldaswordskills.skills.sword.EndingBlow;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
@@ -98,9 +98,10 @@ public class TargetingTickHandler implements ITickHandler
 							skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
 							mc.gameSettings.keyBindUseItem.pressed = false;
 							ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed = false;
-							if (skills.hasSkill(SkillBase.dash)) {
-								((Dash) skills.getPlayerSkill(SkillBase.dash)).keyPressed(false);
-							}
+						}
+					} else if (isVanillaKeyPressed(mc.gameSettings.keyBindForward)) {
+						if (skills.hasSkill(SkillBase.endingBlow)) {
+							((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).keyPressed();
 						}
 					} else if (Config.allowVanillaControls()) {
 						isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);

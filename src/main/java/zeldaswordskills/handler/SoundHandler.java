@@ -71,6 +71,7 @@ public class SoundHandler {
 		// the following have 3
 		for (int i = 1; i < 4; ++i) {
 			event.manager.addSound(Sounds.ARMOR_BREAK + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.GRUNT + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.HAMMER + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.HIT_RUSTY + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.LEAPING_BLOW + String.valueOf(i) + ".ogg");

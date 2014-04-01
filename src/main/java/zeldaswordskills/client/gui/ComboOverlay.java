@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -47,7 +48,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ComboOverlay extends Gui
 {
 	private final Minecraft mc;
-	
+
+	private ScaledResolution resolution;
+
 	/** Texture location for the targeting overlay */
 	//private static final ResourceLocation targetTexture = new ResourceLocation(ModInfo.ID, "textures/gui/targeting_overlay.png");
 	
@@ -72,6 +75,7 @@ public class ComboOverlay extends Gui
 	public ComboOverlay() {
 		super();
 		this.mc = Minecraft.getMinecraft();
+		this.resolution = new ScaledResolution(this.mc.gameSettings, mc.displayWidth, mc.displayHeight);
 	}
 
 	@ForgeSubscribe(priority = EventPriority.NORMAL)
@@ -79,11 +83,13 @@ public class ComboOverlay extends Gui
 		if (event.isCancelable() || event.type != ElementType.HOTBAR) {
 			return;
 		}
-		
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(mc.thePlayer);
-		if (info != null) {
-			displayComboText();
-			ILockOnTarget skill = info.getTargetingSkill();
+		if (mc.gameSettings.guiScale != resolution.getScaleFactor()) {
+			resolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+		}
+		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+		if (skills != null) {
+			displayComboText(skills);
+			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill != null && skill.isLockedOn()) {
 				//displayTargetingOverlay(event, skill.getCurrentTarget());
 			}
@@ -93,8 +99,8 @@ public class ComboOverlay extends Gui
 	/**
 	 * Displays current combo data if applicable
 	 */
-	private void displayComboText() {
-		ICombo iCombo = ZSSPlayerInfo.get(mc.thePlayer).getComboSkill();
+	private void displayComboText(ZSSPlayerInfo skills) {
+		ICombo iCombo = skills.getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (combo != iCombo.getCombo()) {
 				combo = iCombo.getCombo();
@@ -116,12 +122,19 @@ public class ComboOverlay extends Gui
 			// TODO make display look nice
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
 				String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
-				mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 255 : -256);
-				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, -1);
-				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, -1);
+				mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
+				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
+				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
 				List<Float> damageList = combo.getDamageList();
 				for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-					mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, -1);
+					mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+				}
+				if (skills.canUseSkill(SkillBase.endingBlow)) {
+					ICombo skill = skills.getComboSkill();
+					ILockOnTarget target = skills.getTargetingSkill();
+					if (skill != null && skill.isComboInProgress() && target != null && target.getCurrentTarget() == skill.getCombo().getLastEntityHit()) {
+						mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.ending"), (resolution.getScaledWidth() / 2) - 15, 30, 0xFF0000, true);
+					}
 				}
 			}
 		}

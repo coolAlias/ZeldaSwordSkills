@@ -19,6 +19,7 @@ package zeldaswordskills.skills.sword;
 
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -27,6 +28,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.MortalDrawPacket;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -53,9 +55,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class MortalDraw extends SkillActive
 {
-	/** Used to track when RMB is held down, since this cannot be checked reliably during LMB MouseEvent */
-	@SideOnly(Side.CLIENT)
-	private boolean isRMBDown;
 	/** Delay before skill can be used again */
 	private static final int DELAY = 30;
 	/** The time remaining during which the skill will succeed */
@@ -104,6 +103,13 @@ public class MortalDraw extends SkillActive
 	@Override
 	public boolean isActive() {
 		return attackTimer > DELAY;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.pressed
+				|| ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed);
 	}
 
 	@Override
@@ -156,9 +162,7 @@ public class MortalDraw extends SkillActive
 			player.setCurrentItemOrArmor(0, player.inventory.getStackInSlot(swordSlot));
 			player.inventory.setInventorySlotContents(swordSlot, null);
 			swordSlot = -1;
-			if (player.worldObj.isRemote) {
-				isRMBDown = false; // prevents some accidental activation on next target
-			} else { // only care about this on server:
+			if (!player.worldObj.isRemote) { // only care about this on server:
 				ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
 				return (skill != null && skill.getCurrentTarget() == attacker);
 			}
@@ -173,16 +177,5 @@ public class MortalDraw extends SkillActive
 		attackTimer = DELAY;
 		event.ammount *= 2.0F;
 		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.MORTAL_DRAW, 0.4F, 0.5F);
-	}
-
-	/** Call whenever RMB changes */
-	@SideOnly(Side.CLIENT)
-	public void keyPressed(boolean pressed) {
-		isRMBDown = pressed;
-	}
-
-	@SideOnly(Side.CLIENT)
-	public boolean isRMBDown() {
-		return isRMBDown;
 	}
 }

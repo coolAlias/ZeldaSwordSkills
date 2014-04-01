@@ -19,15 +19,12 @@ package zeldaswordskills.skills.sword;
 
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.handler.ZSSCombatEvents;
-import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -85,6 +82,12 @@ public class RisingCut extends SkillActive
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return ticksTilFail > 0 && player.motionY > 0.0D;
+	}
+
+	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
 				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
@@ -101,12 +104,6 @@ public class RisingCut extends SkillActive
 			activeTimer = 5 + level;
 			player.motionY += 0.3D + (0.115D * level);
 			ZSSPlayerInfo.get(player).reduceFallAmount = level;
-			if (world.isRemote) {
-				ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
-				if (skill != null && skill.isLockedOn()) {
-					ZSSCombatEvents.performComboAttack(Minecraft.getMinecraft(), skill);
-				}
-			}
 		}
 		return isActive();
 	}
@@ -139,14 +136,6 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void keyPressed() {
 		ticksTilFail = 3;
-	}
-
-	/**
-	 * Returns true if rising cut was pre-activated and the player is rising upwards
-	 */
-	@SideOnly(Side.CLIENT)
-	public boolean canExecute(EntityPlayer player) {
-		return ticksTilFail > 0 && player.motionY > 0.0D;
 	}
 
 	/**

@@ -140,6 +140,15 @@ public abstract class SkillActive extends SkillBase
 		return (level > 0 && player.getFoodStats().getFoodLevel() > 0);
 	}
 
+	/**
+	 * Called only on the client side as a pre-activation check for some skills;
+	 * typical use is to check if all necessary keys have been pressed
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return true;
+	}
+
 	/** Disables manual activation of this skill */
 	protected SkillActive disableUserActivation() {
 		allowUserActivation = false;

@@ -54,17 +54,13 @@ public class Dash extends SkillActive
 {
 	/** True when Slam is used and while the player is in motion towards the target */
 	private boolean isActive = false;
-	
+
 	/** Total distance currently traveled */
 	private double distance;
-	
+
 	/** Target acquired from ILockOnTarget skill */
 	private Entity target;
-	
-	/** Used to track when RMB is held down, since this cannot be checked reliably during LMB MouseEvent */
-	@SideOnly(Side.CLIENT)
-	private boolean isRMBDown;
-	
+
 	public Dash(String name) {
 		super(name);
 		setDisablesLMB();
@@ -73,12 +69,12 @@ public class Dash extends SkillActive
 	private Dash(Dash skill) {
 		super(skill);
 	}
-	
+
 	@Override
 	public Dash newInstance() {
 		return new Dash(this);
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
@@ -93,34 +89,40 @@ public class Dash extends SkillActive
 	public boolean isActive() {
 		return isActive;
 	}
-	
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return player.isUsingItem() && player.onGround;
+	}
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
 				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
-	
+
 	/** Damage is base damage plus 1.0F per level */
 	private float getDamage() {
 		return (4.0F + level);
 	}
-	
+
 	/** Range increases by 1 block per level */
 	private double getRange() {
 		return (3.0D + level);
 	}
-	
+
 	/** Deactivates skill and resets local variables */
 	private void deactivate() {
 		isActive = false;
 		distance = 0.0D;
 	}
-	
+
 	@Override
 	protected float getExhaustion() {
 		return 1.0F - (0.1F * level);
 	}
-	
+
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		isActive = super.activate(world, player);
@@ -134,21 +136,16 @@ public class Dash extends SkillActive
 		}
 		return isActive();
 	}
-	
+
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
-		if (player.worldObj.isRemote && (skill == null || !skill.isLockedOn())) {
-			isRMBDown = false;
-		}
-		
 		if (isActive()) {
 			if (target instanceof EntityLivingBase) {
 				double d0 = 0.15D * (target.posX - player.posX);
 				double d1 = 0.15D * (target.posY + (double)(target.height / 3.0F) - player.posY);
 				double d2 = 0.15D * (target.posZ - player.posZ);
 				Vec3 vec3 = player.worldObj.getWorldVec3Pool().getVecFromPool(d0, d1, d2);
-				
+
 				float f = 1.0F;
 				if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null) {
 					if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsPegasus) {
@@ -157,10 +154,10 @@ public class Dash extends SkillActive
 						f = 0.2F;
 					}
 				}
-				
+
 				player.addVelocity(vec3.xCoord * f, 0.0D, vec3.zCoord * f);
 				distance += vec3.lengthVector();
-				
+
 				if (f > 0.5F && target.getDistanceSqToEntity(player) <= 9.0D) {
 					if (distance > (2.0D - (0.2D * level))) {
 						target.attackEntityFrom(DamageUtils.causeNonSwordDamage(player), getDamage() * f);
@@ -171,7 +168,7 @@ public class Dash extends SkillActive
 					WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SLAM, 0.4F, 0.5F);
 					deactivate();
 				}
-				
+
 				if (distance > getRange()) {
 					deactivate();
 				}
@@ -179,15 +176,5 @@ public class Dash extends SkillActive
 				deactivate();
 			}
 		}
-	}
-	
-	@SideOnly(Side.CLIENT)
-	public void keyPressed(boolean pressed) {
-		isRMBDown = pressed;
-	}
-	
-	@SideOnly(Side.CLIENT)
-	public boolean isRMBDown() {
-		return isRMBDown;
 	}
 }

@@ -317,7 +317,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if (flag || event.source.damageType.equals(DamageUtils.INDIRECT_SWORD)) {
 			combo.addDamageOnly(player, event.ammount, flag);
 		} else {
-			combo.add(player, event.ammount);
+			combo.add(player, event.entityLiving, event.ammount);
 		}
 		if (event.source.damageType.equals("player") && PlayerUtils.isHoldingSword(player)) {
 			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_CUT, 0.4F, 0.5F);
@@ -326,6 +326,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event) {
+		// TODO armor and potion resistance not accounted for at this point
 		if (isComboInProgress() && event.ammount > (0.5F * level)) {
 			combo.endCombo(player);
 		}

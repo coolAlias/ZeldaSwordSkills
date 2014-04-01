@@ -32,6 +32,7 @@ import zeldaswordskills.network.SyncSkillPacket;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
+import zeldaswordskills.skills.sword.EndingBlow;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
@@ -80,9 +81,10 @@ public abstract class SkillBase
 	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDefaultDescriptions(2);
 	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDefaultDescriptions(2);
 	public static final SkillBase risingCut = new RisingCut("risingcut").addDefaultDescriptions(2);
+	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDefaultDescriptions(2);
 
 	/** Unlocalized name for language registry */
-	protected final String unlocalizedName;
+	private final String unlocalizedName;
 
 	/** IDs are determined internally; used as key to retrieve skill instance from skills map */
 	private final byte id;
@@ -91,7 +93,7 @@ public abstract class SkillBase
 	protected byte level = 0;
 
 	/** Contains descriptions for tooltip display */
-	protected final List<String> tooltip = new ArrayList<String>();
+	private final List<String> tooltip = new ArrayList<String>();
 
 	/**
 	 * Constructs the first instance of a skill and stores it in the skill list
@@ -191,12 +193,12 @@ public abstract class SkillBase
 
 	/** Returns the translated skill name */
 	public final String getDisplayName() {
-		return StatCollector.translateToLocal(getUnlocalizedName());
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".name");
 	}
 
-	/** Returns the unlocalized name prefixed by 'skill.' and suffixed by '.name' */
+	/** Returns the unlocalized name prefixed by 'skill.zss' */
 	public final String getUnlocalizedName() {
-		return "skill.zss." + unlocalizedName + ".name";
+		return "skill.zss." + unlocalizedName;
 	}
 
 	/** Returns texture path for the skill's icon */
@@ -235,7 +237,7 @@ public abstract class SkillBase
 	 * @param n if less than zero, ".n" will not be appended
 	 */
 	protected final String getUnlocalizedDescription(int n) {
-		return "skill.zss." + unlocalizedName + ".desc" + (n < 0 ? "" : ("." + n));
+		return getUnlocalizedName() + ".desc" + (n < 0 ? "" : ("." + n));
 	}
 
 	/**
@@ -289,6 +291,11 @@ public abstract class SkillBase
 	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
 	public String getDamageDisplay(float damage, boolean displayPlus) {
 		return StatCollector.translateToLocalFormatted("skill.zss.damage.desc", (displayPlus ? "+" : ""), String.format("%.1f", damage));
+	}
+
+	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
+	public String getDamageDisplay(int damage, boolean displayPlus) {
+		return StatCollector.translateToLocalFormatted("skill.zss.damage.desc", (displayPlus ? "+" : ""), damage);
 	}
 
 	/** Returns a translated description of the skill's duration, in ticks or seconds, using the value provided */

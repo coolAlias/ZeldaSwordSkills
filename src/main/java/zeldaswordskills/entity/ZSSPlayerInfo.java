@@ -336,6 +336,15 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		return currentActiveSkillId == -1;
 	}
 
+	/**
+	 * Returns a SkillActive version of the player's actual skill instance,
+	 * or null if the player doesn't have the skill or it is not the correct type
+	 */
+	public SkillActive getActiveSkill(SkillBase skill) {
+		SkillBase active = getPlayerSkill(skill.getId());
+		return (active instanceof SkillActive ? (SkillActive) active : null);
+	}
+
 	/** Returns the player's actual skill instance or null if the player doesn't have the skill */
 	public SkillBase getPlayerSkill(SkillBase skill) {
 		return getPlayerSkill(skill.getId());

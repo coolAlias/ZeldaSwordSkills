@@ -71,6 +71,7 @@ import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
+import zeldaswordskills.skills.sword.EndingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.RisingCut;
@@ -164,33 +165,33 @@ public class ZSSCombatEvents
 		if (skill != null && skill.isLockedOn()) {
 			if (event.button == 0 && event.buttonstate) {
 				if (Config.allowVanillaControls() && PlayerUtils.isHoldingSword(player)) {
-					// Whether or not ArmorBreak should receive key pressed information for charging up
-					boolean canCharge = true;
-
 					if (!skills.canInteract()) {
 						if (skills.isSkillActive(SkillBase.spinAttack)) {
 							((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
 						}
-						canCharge = false;
 						event.setCanceled(true);
-					} else if (skills.hasSkill(SkillBase.dash) && player.onGround && ((Dash) skills.getPlayerSkill(SkillBase.dash)).isRMBDown()) {
+						return;
+					} else if (skills.hasSkill(SkillBase.dash) && ((Dash) skills.getPlayerSkill(SkillBase.dash)).canExecute(player)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
 						event.setCanceled(player.getItemInUse() == null);
 					} else if (skills.hasSkill(SkillBase.risingCut) && ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).canExecute(player)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
-						canCharge = false;
+						performComboAttack(mc, skill);
 					} else if (player.isSneaking() && skills.canUseSkill(SkillBase.swordBeam)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
 						// set to canceled to prevent secondary attack from occurring that doesn't occur with dash (thanks to blocking)
 						event.setCanceled(true);
+					} else if (skills.hasSkill(SkillBase.endingBlow) && ((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).canExecute(player)) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
+						performComboAttack(mc, skill);
 					} else {
 						performComboAttack(mc, skill);
 					}
 					// handle separately so can attack and begin charging without pressing key twice
-					if (skills.hasSkill(SkillBase.armorBreak) && canCharge) {
+					if (skills.hasSkill(SkillBase.armorBreak)) {
 						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player);
 					}
-				} else if (skills.hasSkill(SkillBase.mortalDraw) && ((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).isRMBDown() && player.getHeldItem() == null) {
+				} else if (skills.hasSkill(SkillBase.mortalDraw) && ((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).canExecute(player)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
 					event.setCanceled(true);
 				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
@@ -201,10 +202,6 @@ public class ZSSCombatEvents
 			} else if (event.button == 1 && Config.allowVanillaControls()) {
 				if (!skills.canInteract() && event.buttonstate) {
 					event.setCanceled(true);
-				} else if (skills.hasSkill(SkillBase.dash) && PlayerUtils.isHoldingSword(player)) {
-					((Dash) skills.getPlayerSkill(SkillBase.dash)).keyPressed(event.buttonstate);
-				} else if (skills.hasSkill(SkillBase.mortalDraw) && player.getHeldItem() == null) {
-					((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).keyPressed(event.buttonstate);
 				}
 			}
 		} else { // not locked on to a target, normal item swing
@@ -235,7 +232,9 @@ public class ZSSCombatEvents
 	 * Sets the attack timer for the player if using an ISwingSpeed item
 	 * All other items default to vanilla behavior, which is spam-happy
 	 * Note that the attackTime is deliberately NOT synced between client
-	 * and server; otherwise the smash mechanics will break
+	 * and server; otherwise the smash mechanics will break: left-click is
+	 * processed first on the client, and the server gets notified before
+	 * the smash can process
 	 */
 	public static void setPlayerAttackTime(EntityPlayer player) {
 		if (!player.capabilities.isCreativeMode) {
@@ -413,11 +412,13 @@ public class ZSSCombatEvents
 		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
-			if (skills.getComboSkill() != null) {
-				skills.getComboSkill().onHurtTarget(player, event);
-			}
 			if (skills.isSkillActive(SkillBase.risingCut)) {
 				((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onImpact(event.entity);
+			} else if (skills.isSkillActive(SkillBase.endingBlow)) {
+				((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).onImpact(player, event);
+			}
+			if (skills.getComboSkill() != null) {
+				skills.getComboSkill().onHurtTarget(player, event);
 			}
 		}
 		

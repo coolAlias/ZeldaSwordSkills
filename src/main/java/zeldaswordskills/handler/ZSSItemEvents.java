@@ -113,7 +113,6 @@ public class ZSSItemEvents
 					orb = (id == SkillBase.bonusHeart.getId() ? new ItemStack(ZSSItems.heartPiece) : new ItemStack(ZSSItems.skillOrb, 1, id));
 				}
 			}
-
 			return orb;
 		}
 	}
@@ -269,7 +268,7 @@ public class ZSSItemEvents
 				}
 				return true;
 			} else {
-				// TODO play exertion or grunt sound
+				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.GRUNT, 0.3F, 0.8F);
 			}
 		}
 		return false;

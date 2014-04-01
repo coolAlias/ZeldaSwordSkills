@@ -25,6 +25,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
+import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillActive;
@@ -37,7 +38,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * SWORD BEAM
  * Description: Shoot a beam of energy from the sword tip
- * Activation: attack while sneaking and at near full health
+ * Activation: Attack while sneaking and at near full health
  * Effect: Shoots a ranged beam, damaging a single target
  * Damage: Base sword damage (without other bonuses), +1 extra damage per skill level
  * Range: Approximately 12 blocks, plus one block per level
@@ -89,7 +90,8 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && ZSSPlayerInfo.get(player).isSkillActive(swordBasic) && PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && checkHealth(player) && PlayerUtils.isHoldingSword(player)
+				&& player.attackTime == 0 && ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
 	}
 
 	@Override
@@ -113,6 +115,7 @@ public class SwordBeam extends SkillActive
 	@Override
 	public boolean trigger(World world, EntityPlayer player) {
 		if (super.trigger(world, player)) {
+			player.attackTime = (player.capabilities.isCreativeMode ? 0 : 20 - level);
 			if (!world.isRemote) {
 				missTimer = 12 + level;
 				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.WHOOSH, 0.4F, 0.5F);
@@ -141,7 +144,8 @@ public class SwordBeam extends SkillActive
 
 	/** Returns true if players current health is within the allowed limit */
 	private boolean checkHealth(EntityPlayer player) {
-		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) < (0.31F * level);
+		float f = (Config.getBeamRequiresFullHealth() ? 0.0F : (0.3F * level));
+		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= f;
 	}
 
 	/** Returns player's base damage (with sword) plus 1.0F per level */

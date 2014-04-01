@@ -20,13 +20,17 @@ package zeldaswordskills.skills;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.network.UpdateComboPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -47,31 +51,40 @@ public class Combo
 {
 	/** Used only to get correct Skill class from player during update */
 	private final byte skillId;
-	
+
 	/** Max combo size attainable by this instance of Combo */
 	private final int maxComboSize;
-	
+
 	/** Upon landing a blow, the combo timer is set to this damage */
 	private final int timeLimit;
-	
+
 	/** Current combo timer; combo ends when timer reaches zero. */
 	private int comboTimer = 0;
-	
-	/** List stores each hit's damage; combo size is inherent in the list */
-	private final List<Float> damageList = new ArrayList<Float>();
-	
-	/** Running total of damage inflicted during a combo */
-	private float comboDamage = 0.0F;
-	
+
 	/** Set to true when endCombo method is called */
 	private boolean isFinished = false;
-	
+
+	/** List stores each hit's damage; combo size is inherent in the list */
+	private final List<Float> damageList = new ArrayList<Float>();
+
+	/** Running total of damage inflicted during a combo */
+	private float comboDamage = 0.0F;
+
 	/** Internal flag for correcting split damage such as IArmorBreak */
 	private boolean addToLast = false;
-	
+
 	/** Internal value for last damage */
 	private float lastDamage = 0.0F;
-	
+
+	/** Last entity hit; used to check if consecutive hit counter should increase or reset */
+	private Entity lastEntityHit = null;
+
+	/** EntityID of last entity hit, used client side to get the entity */
+	private int entityId;
+
+	/** Total number of consecutive hits on the same target entity */
+	private int consecutiveHits = 0;
+
 	/**
 	 * Constructs a new Combo with specified max combo size and time limit and sends an update
 	 * packet to the player with the new Combo instance.
@@ -85,7 +98,7 @@ public class Combo
 		this.timeLimit = timeLimit;
 		PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
 	}
-	
+
 	/**
 	 * Constructs a new Combo with specified max combo size and time limit
 	 * @param maxComboSize size at which the combo self-terminates
@@ -97,30 +110,36 @@ public class Combo
 		this.maxComboSize = maxComboSize;
 		this.timeLimit = timeLimit;
 	}
-	
+
 	/** Returns the skill id associated with this Combo */
 	public byte getSkill() { return skillId; }
-	
+
 	/** Returns current combo size */
 	public int getSize() { return damageList.size(); }
-	
+
 	/** Returns current combo's maximum size */
 	public int getMaxSize() { return maxComboSize; }
-	
+
 	/** Returns current damage total for this combo */
 	public float getDamage() { return comboDamage; }
-	
+
 	/** Returns a copy of the current damage list */
 	public List<Float> getDamageList() { return new ArrayList(damageList); }
-	
+
+	/** Returns the last entity that was hit in the combo */
+	public Entity getLastEntityHit() { return lastEntityHit; }
+
+	/** Returns the number of consecutive hits on the same target entity */
+	public int getConsecutiveHits() { return consecutiveHits; }
+
 	/** Returns true if this combo is finished, i.e. no longer active */
 	public boolean isFinished() { return isFinished; }
-	
+
 	/** Returns translated current description of combo; e.g. "Great" */
 	public String getLabel() {
 		return StatCollector.translateToLocal("combo.label." + getSize());
 	}
-	
+
 	/**
 	 * Updates combo timer and triggers combo ending if timer reaches zero
 	 */
@@ -132,13 +151,20 @@ public class Combo
 			}
 		}
 	}
-	
+
 	/**
 	 * Increases the combo size by one and adds the damage to the running total, as well as
 	 * ending the combo if the max size is reached. This is only called server side.
+	 * @param target used to track consecutive hits on a single target
 	 */
-	public void add(EntityPlayer player, float damage) {
+	public void add(EntityPlayer player, Entity target, float damage) {
 		if (getSize() < maxComboSize && (comboTimer > 0 || getSize() == 0)) {
+			if (target != null && target == lastEntityHit) {
+				++consecutiveHits;
+			} else {
+				lastEntityHit = target;
+				consecutiveHits = (target != null ? 1 : 0);
+			}
 			if (addToLast) {
 				damageList.add(damage + lastDamage);
 				addToLast = false;
@@ -162,7 +188,7 @@ public class Combo
 			endCombo(player);
 		}
 	}
-	
+
 	/**
 	 * Adds damage damage to combo's total, without incrementing the combo size.
 	 */
@@ -179,19 +205,29 @@ public class Combo
 			PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
 		}
 	}
-	
+
 	/**
 	 * Ends a combo and grants Xp
 	 */
 	public void endCombo(EntityPlayer player) {
 		if (!isFinished) {
 			isFinished = true;
+			lastEntityHit = null;
+			consecutiveHits = 0;
 			if (!player.worldObj.isRemote) {
 				PacketDispatcher.sendPacketToPlayer(new UpdateComboPacket(this).makePacket(), (Player) player);
 			}
 		}
 	}
-	
+
+	/**
+	 * Attempts to set the last entity hit after loading from NBT; use from update packet
+	 */
+	@SideOnly(Side.CLIENT)
+	public void getEntityFromWorld(World world) {
+		lastEntityHit = world.getEntityByID(entityId);
+	}
+
 	/**
 	 * Writes this combo to NBT and returns the tag compound
 	 */
@@ -205,10 +241,12 @@ public class Combo
 			compound.setFloat("Dmg" + i, damageList.get(i));
 		}
 		compound.setFloat("TotalDamage", comboDamage);
+		compound.setInteger("EntityId", (lastEntityHit != null ? lastEntityHit.entityId : 0));
+		compound.setInteger("ConsecutiveHits", consecutiveHits);
 		compound.setBoolean("Finished", isFinished);
 		return compound;
 	}
-	
+
 	/**
 	 * Creates a new combo from the nbt tag data
 	 */
@@ -219,6 +257,8 @@ public class Combo
 			combo.damageList.add(compound.getFloat("Dmg" + i));
 		}
 		combo.comboDamage = compound.getFloat("TotalDamage");
+		combo.entityId = compound.getInteger("EntityId");
+		combo.consecutiveHits = compound.getInteger("ConsecutiveHits");
 		combo.isFinished = compound.getBoolean("Finished");
 		return combo;
 	}

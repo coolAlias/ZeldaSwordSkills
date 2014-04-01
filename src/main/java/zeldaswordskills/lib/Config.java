@@ -134,6 +134,8 @@ public class Config
 	private static boolean autoTarget;
 	/** Number of combo hits to display */
 	private static int hitsToDisplay;
+	/** [Sword Beam] Whether to require a completely full health bar to use */
+	private static boolean beamRequiresFullHealth;
 	/*================== DUNGEON GEN =====================*/
 	/** Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected */
 	private static boolean avoidModBlocks;
@@ -276,6 +278,7 @@ public class Config
 		doubleTap = config.get("Skills", "Require double tap activation", true).getBoolean(true);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
+		beamRequiresFullHealth = config.get("Skills", "[Sword Beam] Whether to require a completely full health bar to use", false).getBoolean(false);
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
 		enableWindows = config.get("Dungeon Generation", "Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
@@ -384,6 +387,7 @@ public class Config
 	public static boolean autoTargetEnabled() { return autoTarget; }
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
+	public static boolean getBeamRequiresFullHealth() { return beamRequiresFullHealth; }
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }
@@ -420,7 +424,10 @@ public class Config
 	public static float getCreeperDropChance() { return MathHelper.clamp_float(creeperDrop * 0.01F, 0F, 1.0F); }
 	public static float getChanceForRandomDrop() { return MathHelper.clamp_float(randomDropChance * 0.01F, 0F, 1.0F); }
 	public static float getRandomMobDropChance() { return MathHelper.clamp_float(genericMobDropChance * 0.0F, 0F, 1.0F); }
-	public static float getDropChance(int orbID) { return MathHelper.clamp_float(orbDropChance.get((byte) orbID) * 0.001F, 0.0F, 0.01F); }
+	public static float getDropChance(int orbID) {
+		int i = (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0);
+		return MathHelper.clamp_float(i * 0.001F, 0.0F, 0.01F);
+	}
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }

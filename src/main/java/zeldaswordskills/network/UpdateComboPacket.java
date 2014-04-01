@@ -66,6 +66,7 @@ public class UpdateComboPacket extends CustomPacket
 			try {
 				ICombo skill = (ICombo) ZSSPlayerInfo.get(player).getPlayerSkill(combo.getSkill());
 				if (skill != null) {
+					combo.getEntityFromWorld(player.worldObj);
 					skill.setCombo(combo);
 				}
 			} catch (ClassCastException e) {

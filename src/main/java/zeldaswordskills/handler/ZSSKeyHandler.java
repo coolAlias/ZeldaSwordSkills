@@ -21,12 +21,17 @@ import java.util.EnumSet;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.item.Item;
 import net.minecraft.util.StatCollector;
 
 import org.lwjgl.input.Keyboard;
 
+import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.client.gui.GuiBuffBar;
+import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
@@ -35,7 +40,6 @@ import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBreak;
 import zeldaswordskills.util.PlayerUtils;
@@ -119,6 +123,9 @@ public class ZSSKeyHandler extends KeyHandler
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract();
+		Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
+		canInteract |= (ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN) || heldItem instanceof ItemHeldBlock ||
+				(mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
 
 		if (skill == null || !skill.isLockedOn()) {
 			return;
@@ -135,12 +142,16 @@ public class ZSSKeyHandler extends KeyHandler
 				return;
 			}
 			if (PlayerUtils.isHoldingSword(mc.thePlayer)) {
-				if (skills.hasSkill(SkillBase.dash) && keys[KEY_BLOCK].pressed && mc.thePlayer.onGround) {
+				if (skills.hasSkill(SkillBase.dash) && skills.getActiveSkill(SkillBase.dash).canExecute(mc.thePlayer)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-				} else if (skills.hasSkill(SkillBase.risingCut) && ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).canExecute(mc.thePlayer)) {
+				} else if (skills.hasSkill(SkillBase.risingCut) && skills.getActiveSkill(SkillBase.risingCut).canExecute(mc.thePlayer)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
+					ZSSCombatEvents.performComboAttack(mc, skill);
 				} else if (skills.canUseSkill(SkillBase.swordBeam) && mc.thePlayer.isSneaking()) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
+				} else if (skills.hasSkill(SkillBase.endingBlow) && skills.getActiveSkill(SkillBase.endingBlow).canExecute(mc.thePlayer)) {
+					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
+					ZSSCombatEvents.performComboAttack(mc, skill);
 				} else {
 					ZSSCombatEvents.performComboAttack(mc, skill);
 				}
@@ -148,7 +159,7 @@ public class ZSSKeyHandler extends KeyHandler
 				if (skills.hasSkill(SkillBase.armorBreak)) {
 					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer);
 				}
-			} else if (skills.hasSkill(SkillBase.mortalDraw) && keys[KEY_BLOCK].pressed && mc.thePlayer.getHeldItem() == null) {
+			} else if (skills.hasSkill(SkillBase.mortalDraw) && skills.getActiveSkill(SkillBase.mortalDraw).canExecute(mc.thePlayer)) {
 				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
 			} else {
 				ZSSCombatEvents.performComboAttack(mc, skill);
