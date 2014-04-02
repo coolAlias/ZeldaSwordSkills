@@ -69,7 +69,7 @@ public class BlockChestLocked extends BlockContainer
 
 	@Override
 	public boolean renderAsNormalBlock() { return false; }
-	
+
 	@Override
 	public int getMobilityFlag() { return 2; }
 
@@ -91,9 +91,9 @@ public class BlockChestLocked extends BlockContainer
 		}
 		super.breakBlock(world, x, y, z, id, meta);
 	}
-	
+
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int par6, float par7, float par8, float par9) {
+	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (world.isRemote) {
 			return true;
 		}
@@ -110,8 +110,21 @@ public class BlockChestLocked extends BlockContainer
 			keepInventory = true;
 			world.setBlock(x, y, z, Block.chest.blockID);
 			keepInventory = false;
-			world.setBlockMetadataWithNotify(x, y, z, meta, 3);
-			world.playSoundAtEntity(player, Sounds.LOCK_CHEST, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+
+			boolean isChest = world.getBlockId(x + 1, y, z) == Block.chest.blockID;
+			if (!isChest) {
+				isChest = world.getBlockId(x - 1, y, z) == Block.chest.blockID;
+			}
+			if (!isChest) {
+				isChest = world.getBlockId(x, y, z + 1) == Block.chest.blockID;
+			}
+			if (!isChest) {
+				isChest = world.getBlockId(x, y, z - 1) == Block.chest.blockID;
+			}
+			if (!isChest) {
+				world.setBlockMetadataWithNotify(x, y, z, meta, 3);
+			}
+			WorldUtils.playSoundAtEntity(world, player, Sounds.LOCK_CHEST, 0.4F, 0.5F);
 
 			// copy the old inventory to the new chest
 			TileEntity chest = world.getBlockTileEntity(x, y, z);
@@ -123,11 +136,11 @@ public class BlockChestLocked extends BlockContainer
 			}
 			return true;
 		} else {
-			world.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			WorldUtils.playSoundAtEntity(world, player, Sounds.LOCK_RATTLE, 0.4F, 0.5F);
 		}
 		return false;
 	}
-	
+
 	private boolean canUnlock(EntityPlayer player) {
 		return (player.getHeldItem() != null && (player.getHeldItem().getItem() == ZSSItems.keySkeleton ||
 				(player.getHeldItem().getItem() == ZSSItems.keySmall && player.inventory.consumeInventoryItem(ZSSItems.keySmall.itemID))));
@@ -154,7 +167,7 @@ public class BlockChestLocked extends BlockContainer
 		if (Block.opaqueCubeLookup[k1] && !Block.opaqueCubeLookup[j1]) {
 			meta = 4;
 		}
-		
+
 		world.setBlockMetadataWithNotify(x, y, z, meta, 3);
 	}
 
