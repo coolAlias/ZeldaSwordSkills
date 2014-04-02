@@ -156,7 +156,10 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-		if (world.getBlockMetadata(x, y, z) >= MAX_STATE) {
+		int meta = world.getBlockMetadata(x, y, z);
+		if (meta == 0) {
+			return AxisAlignedBB.getAABBPool().getAABB(x + minX, y + minY, z + minZ, x + maxX, y + maxY + 0.5D, z + maxZ);
+		} else if (meta >= MAX_STATE) {
 			return null;
 		} else {
 			return super.getCollisionBoundingBoxFromPool(world, x, y, z);
