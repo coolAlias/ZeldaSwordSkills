@@ -69,7 +69,6 @@ import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
-import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.EndingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
@@ -164,24 +163,25 @@ public class ZSSCombatEvents
 		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
 			if (event.button == 0 && event.buttonstate) {
+				if (!skills.canInteract()) {
+					if (skills.isSkillActive(SkillBase.spinAttack)) {
+						((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
+					}
+					event.setCanceled(true);
+					return;
+				}
 				if (Config.allowVanillaControls() && PlayerUtils.isHoldingSword(player)) {
-					if (!skills.canInteract()) {
-						if (skills.isSkillActive(SkillBase.spinAttack)) {
-							((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
-						}
-						event.setCanceled(true);
-						return;
-					} else if (skills.hasSkill(SkillBase.dash) && ((Dash) skills.getPlayerSkill(SkillBase.dash)).canExecute(player)) {
+					if (skills.hasSkill(SkillBase.dash) && skills.getActiveSkill(SkillBase.dash).canExecute(player)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
 						event.setCanceled(player.getItemInUse() == null);
-					} else if (skills.hasSkill(SkillBase.risingCut) && ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).canExecute(player)) {
+					} else if (skills.hasSkill(SkillBase.risingCut) && skills.getActiveSkill(SkillBase.risingCut).canExecute(player)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
 						performComboAttack(mc, skill);
 					} else if (player.isSneaking() && skills.canUseSkill(SkillBase.swordBeam)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
 						// set to canceled to prevent secondary attack from occurring that doesn't occur with dash (thanks to blocking)
 						event.setCanceled(true);
-					} else if (skills.hasSkill(SkillBase.endingBlow) && ((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).canExecute(player)) {
+					} else if (skills.hasSkill(SkillBase.endingBlow) && skills.getActiveSkill(SkillBase.endingBlow).canExecute(player)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
 						performComboAttack(mc, skill);
 					} else {
@@ -191,7 +191,7 @@ public class ZSSCombatEvents
 					if (skills.hasSkill(SkillBase.armorBreak)) {
 						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player);
 					}
-				} else if (skills.hasSkill(SkillBase.mortalDraw) && ((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).canExecute(player)) {
+				} else if (skills.hasSkill(SkillBase.mortalDraw) && skills.getActiveSkill(SkillBase.mortalDraw).canExecute(player)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
 					event.setCanceled(true);
 				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo

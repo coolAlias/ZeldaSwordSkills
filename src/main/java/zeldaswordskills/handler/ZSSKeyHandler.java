@@ -31,7 +31,6 @@ import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
@@ -122,10 +121,7 @@ public class ZSSKeyHandler extends KeyHandler
 	{
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
 		ILockOnTarget skill = skills.getTargetingSkill();
-		boolean canInteract = skills.canInteract();
-		Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
-		canInteract |= (ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN) || heldItem instanceof ItemHeldBlock ||
-				(mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
+		boolean canInteract = skills.canInteract() && !ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN);
 
 		if (skill == null || !skill.isLockedOn()) {
 			return;
@@ -133,7 +129,8 @@ public class ZSSKeyHandler extends KeyHandler
 		if (kb == keys[KEY_NEXT_TARGET]) {
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK]) {
-			if (canInteract) {
+			Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
+			if (canInteract && !(mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed))) {
 				keys[KEY_ATTACK].pressed = true;
 			} else {
 				if (skills.isSkillActive(SkillBase.spinAttack)) {

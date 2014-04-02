@@ -33,6 +33,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 
 public class EntityLeapingBlow extends EntityThrowable
 {
@@ -91,13 +92,19 @@ public class EntityLeapingBlow extends EntityThrowable
 	}
 
 	/** Max distance (squared) from thrower that damage can still be applied */
-	private double getRangeSquared() { return (3.0D + level) * (3.0D + level); }
+	private double getRangeSquared() {
+		return (3.0D + level) * (3.0D + level);
+	}
 
 	/** Duration of weakness effect */
-	private int getPotionDuration() { return ((isMaster ? 110 : 50) + (level * 10)); }
+	private int getPotionDuration() {
+		return ((isMaster ? 110 : 50) + (level * 10));
+	}
 
 	/** Returns area within which to search for targets each tick */
-	private AxisAlignedBB getAoE() { return boundingBox.expand((0.25F * level), 0.0F, (0.25F * level)); }
+	private AxisAlignedBB getAoE() {
+		return boundingBox.expand((0.25F * level), 0.0F, (0.25F * level));
+	}
 
 	@Override
 	public void onUpdate() {
@@ -145,7 +152,7 @@ public class EntityLeapingBlow extends EntityThrowable
 				if (entity instanceof EntityLivingBase && !struckEntities.contains(entity.entityId) && entity != getThrower()) {
 					struckEntities.add(entity.entityId);
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
-						entity.worldObj.playSoundAtEntity(entity, "damage.hit", (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (entity.worldObj.rand.nextFloat() * 0.4F + 0.5F));
+						WorldUtils.playSoundAtEntity(worldObj, entity, "damage.hit", 0.4F, 0.5F);
 						if (entity instanceof EntityLivingBase) {
 							((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.weakness.id, 60));
 						}
@@ -162,10 +169,14 @@ public class EntityLeapingBlow extends EntityThrowable
 
 	/** Entity's velocity factor */
 	@Override
-	protected float func_70182_d() { return 0.5F; }
+	protected float func_70182_d() {
+		return 0.5F;
+	}
 
 	@Override
-	public float getGravityVelocity() { return 0.0F; }
+	public float getGravityVelocity() {
+		return 0.0F;
+	}
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {

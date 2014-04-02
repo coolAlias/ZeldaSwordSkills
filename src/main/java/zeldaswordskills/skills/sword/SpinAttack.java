@@ -208,7 +208,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void keyPressed(KeyBinding key, EntityPlayer player) {
 		if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || key == Minecraft.getMinecraft().gameSettings.keyBindAttack) {
-			if (isActive && arc < (360F * (superLevel + 1)) && arc == (360F * refreshed)) {
+			if (PlayerUtils.isHoldingSword(player) && isActive && arc < (360F * (superLevel + 1)) && arc == (360F * refreshed)) {
 				arc += 360F;
 			}
 		} else {

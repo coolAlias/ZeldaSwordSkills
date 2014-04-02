@@ -20,6 +20,7 @@ package zeldaswordskills.skills.sword;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -290,11 +291,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onAttack(EntityPlayer player) {
-		Entity mouseOver = TargetUtils.getMouseOverEntity(); // needed to prevent combo from restarting every time new entity hit
-		boolean attackHit = (isLockedOn() && ((TargetUtils.isMouseOverEntity(getCurrentTarget())
-				&& TargetUtils.canReachTarget(player, getCurrentTarget()))
-				|| (mouseOver != null && TargetUtils.canReachTarget(player, mouseOver))));
-
+		Entity mouseOver = TargetUtils.getMouseOverEntity();
+		boolean attackHit = (isLockedOn() && mouseOver != null && TargetUtils.canReachTarget(player, mouseOver));
 		if (!attackHit) {
 			if (PlayerUtils.isHoldingSword(player)) {
 				PlayerUtils.playRandomizedSound(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
@@ -303,7 +301,6 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
 			}
 		}
-
 		return attackHit;
 	}
 
@@ -326,8 +323,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event) {
-		// TODO armor and potion resistance not accounted for at this point
-		if (isComboInProgress() && event.ammount > (0.5F * level)) {
+		if (isComboInProgress() && DirtyEntityAccessor.getModifiedDamage(player, event.source, event.ammount) > (0.5F * level)) {
 			combo.endCombo(player);
 		}
 	}

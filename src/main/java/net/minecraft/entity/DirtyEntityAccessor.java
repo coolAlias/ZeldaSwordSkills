@@ -20,7 +20,18 @@ package net.minecraft.entity;
 import net.minecraft.util.DamageSource;
 
 public class DirtyEntityAccessor {
+
+	/** Damages the target for the amount of damage using the vanilla method; posts LivingHurtEvent */
 	public static void damageEntity(EntityLivingBase target, DamageSource source, float amount) {
 		target.damageEntity(source, amount);
+	}
+
+	/**
+	 * Returns the amount of damage the entity will receive after armor and potions are taken into account
+	 */
+	public static float getModifiedDamage(EntityLivingBase entity, DamageSource source, float amount) {
+		amount = entity.applyArmorCalculations(source, amount);
+		amount = entity.applyPotionDamageCalculations(source, amount);
+		return Math.max(amount - entity.getAbsorptionAmount(), 0.0F);
 	}
 }

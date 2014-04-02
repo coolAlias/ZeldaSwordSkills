@@ -54,9 +54,13 @@ public class TargetUtils
 	// TODO methods for acquiring multiple targets (beam, sphere, etc) with optional number of targets to acquire
 	
 	/** Returns the player's current reach distance, taking held item into account if applicable */
-	// this is the value used in Packet7UseEntity for determining if attacks hit; 9.0D is used if the entity cannot be seen
-	// TODO adjust for currently equipped weapon's reach and possibly AoE attacks
-	public static double getReachDistanceSq(EntityPlayer player) { return 36.0D; }
+	// Packet7UseEntity uses 36.0D for determining if an attack should hit, or 9.0D if the entity cannot be seen
+	// EntityRenderer uses 36.0D for creative mode, otherwise 9.0D, in calculating whether mouseover entity should be null
+	// but using this exactly results in some attacks that in reality hit, being counted as a miss
+	// Unlike Creative Mode, the mouseover is always null when an attack should miss when in Survival
+	public static double getReachDistanceSq(EntityPlayer player) {
+		return 38.5D; // seems to be just about right for Creative Mode hit detection
+	}
 	
 	/**
 	 * Returns true if current target is within the player's reach distance; does NOT check mouse over

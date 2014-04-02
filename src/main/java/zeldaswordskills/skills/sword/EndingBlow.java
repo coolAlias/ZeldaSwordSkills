@@ -42,12 +42,12 @@ import cpw.mods.fml.relauncher.SideOnly;
  * ENDING BLOW
  * Description: Finish off an enemy made vulnerable by your flurry of blows
  * Activation: Forward, forward, and attack during combo
- * Effect:	Inflicts significantly more damage than a normal attack, but leaves you vulnerable
- * 			if you miss or the enemy survives your attack
+ * Effect:	Build up combo momentum and then finish off your enemy with a decisive strike,
+ * 			gaining bonus xp if successful or becoming flat-footed if not
  * Damage: +(level * 20) percent
  * Duration of vulnerability: 110 - (level * 10) ticks
  * Exhaustion: 2.0F - (level * 0.1F)
- * XP Bonus: level + (value between 1 and damage dealt)
+ * XP Bonus: level + (value between 1 and the opponent's last remaining health)
  * Special:
  * - May only be used after two or more consecutive strikes on the same target
  * - Slaying an opponent with this move grants additional experience
@@ -201,7 +201,7 @@ public class EndingBlow extends SkillActive
 			event.ammount *= 1.0F + (level * 0.2F);
 			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.MORTAL_DRAW, 0.4F, 0.5F);
 			entityHit = event.entityLiving;
-			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(event.ammount)));
+			xp = level + 1 + player.worldObj.rand.nextInt(Math.max(2, MathHelper.ceiling_float_int(event.entityLiving.getHealth())));
 		}
 	}
 

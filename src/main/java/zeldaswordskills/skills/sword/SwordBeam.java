@@ -39,7 +39,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * SWORD BEAM
  * Description: Shoot a beam of energy from the sword tip
  * Activation: Attack while sneaking and at near full health
- * Effect: Shoots a ranged beam, damaging a single target
+ * Effect: Shoots a ranged beam capable of damaging one or possibly more targets
  * Damage: Base sword damage (without other bonuses), +1 extra damage per skill level
  * Range: Approximately 12 blocks, plus one block per level
  * Exhaustion: 3.0F - (0.2F * level)
