@@ -101,6 +101,7 @@ public class ZSSMain
 	
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
+		Config.postInit();
 		if (isBG2Enabled) {
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}

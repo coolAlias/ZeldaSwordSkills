@@ -27,6 +27,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityGhast;
@@ -38,6 +39,7 @@ import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityOcelot;
@@ -140,7 +142,7 @@ public class ZSSItemEvents
 			if (mob instanceof EntityCreeper && mob.worldObj.rand.nextFloat() < Config.getCreeperDropChance()) {
 				event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.bomb)));
 			}
-			if (mob.worldObj.rand.nextInt(50) == 0) {
+			if (mob instanceof IMob && mob.worldObj.rand.nextInt(Config.getPowerDropRate()) == 0) {
 				event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.powerPiece)));
 			}
 		}
@@ -319,7 +321,8 @@ public class ZSSItemEvents
 		addDrop(EntityHorse.class, SkillBase.dash.getId());
 		addDrop(EntityPigZombie.class, SkillBase.parry.getId());
 		addDrop(EntityOcelot.class, SkillBase.parry.getId());
-		addDrop(EntitySpider.class, SkillBase.leapingBlow.getId());
+		addDrop(EntitySpider.class, SkillBase.endingBlow.getId());
+		addDrop(EntityCaveSpider.class, SkillBase.leapingBlow.getId());
 		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow.getId());
 		addDrop(EntityBlaze.class, SkillBase.spinAttack.getId());
 		addDrop(EntityBat.class, SkillBase.spinAttack.getId());

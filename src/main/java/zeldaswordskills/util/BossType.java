@@ -18,7 +18,7 @@
 package zeldaswordskills.util;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
@@ -31,6 +31,7 @@ import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import zeldaswordskills.api.item.HookshotType;
@@ -46,63 +47,101 @@ import zeldaswordskills.item.ZSSItems;
  */
 public enum BossType
 {
-	HELL(7),DESERT(1),FOREST(4),TAIGA(5),OCEAN(1),SWAMP(4),MOUNTAIN(3),END(7);
-	
+	HELL("temple_fire", EntityBlaze.class, 7, "hell"),
+	DESERT("temple_desert", EntityBlaze.class, 1, "desert", "deserthills"),
+	FOREST("temple_forest", EntityCaveSpider.class, 4, "forest", "foresthills"),
+	TAIGA("temple_ice", EntitySkeleton.class, 5, "taiga", "taigahills", "iceplains"),
+	OCEAN("temple_water", EntityOctorok.class, 1, "ocean", "frozenocean"),
+	SWAMP("temple_wind", EntityWitch.class, 4, "swampland"),
+	MOUNTAIN("temple_earth", EntityZombie.class, 3, "extremehills", "extremehillsedge");
+
+	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
+	private final String unlocalizedName;
+
+	/** Default biomes in which this dungeon can generate */
+	private final String[] defaultBiomes;
+
+	/** The mob class to spawn when a player enters the boss dungeon */
+	private final Class<? extends IMob> bossMob;
+
+	/** Currently stores metadata value used by SecretStone for returning appropriate Block */
 	public final int metadata;
-	
-	private BossType(int meta) {
-		metadata = meta;
+
+	/** Unlocalized name to BossType mapping */
+	private static final Map<String, BossType> stringToTypeMap = new HashMap<String, BossType>();
+	/** Mapping of biome names to boss types */
+	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
+
+	private BossType(String name, Class<? extends IMob> bossMob, int block, String... defaultBiomes) {
+		this.unlocalizedName = name;
+		this.defaultBiomes = defaultBiomes;
+		this.bossMob = bossMob;
+		this.metadata = block;
 	}
-	
-	/** BossType to Mob spawned mapping */
-	private static final Map<BossType, Class<? extends IMob>> mobSpawned = new EnumMap(BossType.class);
-	
+
+	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
+	public String getUnlocalizedName() {
+		return unlocalizedName;
+	}
+
+	/** Returns the translated name */
+	public String getDisplayName() {
+		return StatCollector.translateToLocal("dungeon.zss." + unlocalizedName + ".name");
+	}
+
+	/** Default biomes in which this dungeon can generate */
+	public String[] getDefaultBiomes() {
+		return defaultBiomes;
+	}
+
 	@Override
 	public String toString() {
-		switch(this) {
-		case HELL: return "Nether";
-		case DESERT: return "Desert";
-		case FOREST: return "Forest";
-		case OCEAN: return "Ocean";
-		case TAIGA: return "Taiga";
-		case SWAMP: return "Swamp";
-		case MOUNTAIN: return "Mountain";
-		case END: return "The End";
-		default: return "Unknown Boss Type";
-		}
+		return String.format("Name: %s BossMob: %s Block: %s", getUnlocalizedName(),
+				(bossMob != null ? bossMob.toString() : "NULL"), metadata);
 	}
 	
+	/**
+	 * Adds each biome name to the mapping for this BossType
+	 */
+	public static void addBiomes(BossType type, String[] biomeNames) {
+		for (String biome : biomeNames) {
+			if (biome.length() < 1) {
+				continue;
+			}
+			biome = biome.toLowerCase().replace(" ", "");
+			if (bossBiomeList.containsKey(biome)) {
+				LogHelper.log(Level.WARNING, String.format("Error while adding %s for %s: biome already mapped to %s",
+						biome, type.getDisplayName(), bossBiomeList.get(biome).getDisplayName()));
+			} else {
+				bossBiomeList.put(biome, type);
+			}
+		}
+	}
+
+	/**
+	 * Get a BossType by name; will return null if it the name doesn't match any BossType's unlocalizedName
+	 */
+	public static BossType getBossType(String name) {
+		if (stringToTypeMap.isEmpty()) {
+			for (BossType type : BossType.values()) {
+				stringToTypeMap.put(type.unlocalizedName, type);
+			}
+		}
+		return stringToTypeMap.get(name.toLowerCase());
+	}
+	
+	/**
+	 * Returns the BossType for the biome at x/z, or null if no BossType exists for that biome
+	 */
 	public static BossType getBossType(World world, int x, int z) {
 		BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
 		if (biome == null) {
 			LogHelper.log(Level.WARNING, "Null biome at " + x + "/" + z + " while getting Boss Type");
 			return null;
 		}
-		String name = biome.biomeName.toLowerCase();
-		if (world.provider.isHellWorld) {
-			return HELL;
-		} else if (name.contains("desert")) {
-			return DESERT;
-		} else if (name.contains("extreme")) {
-			return MOUNTAIN;
-		} else if (name.contains("forest")) {
-			return FOREST;
-		} else if (name.contains("ocean")) {
-			return OCEAN;
-		} else if (name.contains("swamp")) {
-			return SWAMP;
-		} else if (name.contains("taiga")) {
-			return TAIGA;
-		} else {
-			return null;
-		}
-		/*
-		else if (name.contains("sky")) {
-			return END;
-		}
-		 */
+		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
 	}
-	
+
 	/**
 	 * Returns the specific ItemStack that is always found in this Boss Type's chests, if any
 	 */
@@ -114,7 +153,7 @@ public enum BossType
 		default: return null;
 		}
 	}
-	
+
 	/**
 	 * Returns a random special item fitting for the boss type, or null if none are available
 	 */
@@ -135,7 +174,7 @@ public enum BossType
 		}
 		return null;
 	}
-	
+
 	// Possible special items that may generate in this boss type's chests
 	private static final ItemStack[] desertItems = {
 		new ItemStack(ZSSItems.boomerang),
@@ -180,43 +219,33 @@ public enum BossType
 		new ItemStack(ZSSItems.gauntletsSilver),
 		new ItemStack(ZSSItems.maskGiants)
 	};
-	
+
 	/**
 	 * Returns a new instance of the appropriate mob for this type, or null
+	 * Note that no position or other information has been set, the default constructor(World) is used
 	 */
 	@SuppressWarnings("finally")
 	public static final Entity getNewMob(BossType type, World world) {
-		if (mobSpawned.containsKey(type)) {
-			Entity entity = null;
-			try {
-				try {
-					entity = (Entity) mobSpawned.get(type).getConstructor(World.class).newInstance(world);
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-					return null;
-				}
-			} finally {
-				return entity;
-			}
-		} else {
+		if (type.bossMob == null) {
+			LogHelper.log(Level.WARNING, "Error retrieving boss mob for " + type.toString());
 			return null;
 		}
-	}
-	
-	static {
-		mobSpawned.put(BossType.HELL, EntityBlaze.class);
-		mobSpawned.put(BossType.DESERT, EntityBlaze.class);
-		mobSpawned.put(BossType.MOUNTAIN, EntityZombie.class);
-		mobSpawned.put(BossType.OCEAN, EntityOctorok.class);
-		mobSpawned.put(BossType.FOREST, EntityCaveSpider.class);
-		mobSpawned.put(BossType.SWAMP, EntityWitch.class);
-		mobSpawned.put(BossType.TAIGA, EntitySkeleton.class);
-		//mobSpawned.put(BossType.END, EntityGhast.class); // ghast needs large open area - gets stuck
+		Entity entity = null;
+		try {
+			try {
+				entity = (Entity) type.bossMob.getConstructor(World.class).newInstance(world);
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+				return null;
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+				return null;
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} finally {
+			return entity;
+		}
 	}
 }

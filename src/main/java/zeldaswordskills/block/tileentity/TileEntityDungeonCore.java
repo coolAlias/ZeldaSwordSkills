@@ -769,7 +769,7 @@ public class TileEntityDungeonCore extends TileEntity
 		tag.setBoolean("verified", alreadyVerified);
 		tag.setBoolean("isBossRoom", isBossRoom);
 		if (isBossRoom) {
-			tag.setInteger("dungeonType", dungeonType.ordinal());
+			tag.setString("dungeonName", dungeonType.getUnlocalizedName());
 			tag.setBoolean("isOpened", isOpened);
 			tag.setInteger("eventTimer", eventTimer);
 			tag.setInteger("eventType", event != null ? event.ordinal() : -1);
@@ -799,10 +799,15 @@ public class TileEntityDungeonCore extends TileEntity
 			this.box = new StructureBoundingBox(tag.getIntArray("boxBounds"));
 		}
 		alreadyVerified = tag.hasKey("verified") ? tag.getBoolean("verified") : false;
-		// TODO remove after everyone updates
+		// TODO change to just getBoolean("isBossRoom") after everyone updates
 		isBossRoom = tag.hasKey("isBossRoom") ? tag.getBoolean("isBossRoom") : tag.getBoolean("isLocked");
 		if (isBossRoom) {
-			dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
+			if (tag.hasKey("dungeonName")) {
+				dungeonType = BossType.getBossType(tag.getString("dungeonName"));
+			} else {
+				// TODO remove after all previous worlds update to String storage:
+				dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
+			}
 			isOpened = tag.getBoolean("isOpened");
 			eventTimer = tag.getInteger("eventTimer");
 			event = (tag.getInteger("eventType") == -1 ? null : TimedEvent.values()[tag.getInteger("eventType") % TimedEvent.values().length]);

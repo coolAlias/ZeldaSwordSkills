@@ -27,10 +27,12 @@ import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.BossType;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
 public class Config
 {
+	public static Configuration config;
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	/** [BattleGear2] Allow Master Swords to be held in the off-hand */
 	private static boolean enableOffhandMaster;
@@ -203,6 +205,8 @@ public class Config
 	private static int genericMobDropChance;
 	/** Individual drop chances for skill orbs and heart pieces */
 	private static Map<Byte, Integer> orbDropChance;
+	/** [Piece of Power] Approximate number of enemies you need to kill before a piece of power drops */
+	private static int powerDropRate;
 	/*================== TRADES =====================*/
 	/** [Bomb Bag] Enable random villager trades for bomb bags */
 	private static boolean enableTradeBombBag;
@@ -218,7 +222,7 @@ public class Config
 	private static int friendTradesRequired;
 
 	public static void init(FMLPreInitializationEvent event) {
-		Configuration config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
+		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
 		config.load();
 		ZSSEntities.init(config);
 		ZSSBlocks.init(config);
@@ -321,6 +325,7 @@ public class Config
 				orbDropChance.put(skill.getId(), config.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt());
 			}
 		}
+		powerDropRate = config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt();
 		/*================== TRADES =====================*/
 		friendTradesRequired = config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt();
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
@@ -328,9 +333,17 @@ public class Config
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-25]", 15).getInt();
-		
-		config.save();
 	}
+	
+	public static void postInit() {
+		for (BossType type : BossType.values()) {
+			BossType.addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.getDefaultBiomes()).getStringList());
+		}
+		if (config.hasChanged()) {
+			config.save();
+		}
+	}
+
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	public static boolean allowOffhandMaster() { return enableOffhandMaster; }
 	/*================== GENERAL =====================*/
@@ -428,6 +441,7 @@ public class Config
 		int i = (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0);
 		return MathHelper.clamp_float(i * 0.001F, 0.0F, 0.01F);
 	}
+	public static int getPowerDropRate() { return Math.max(powerDropRate, 20); }
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }

@@ -105,7 +105,8 @@ public class ItemKeyBig extends Item
 	
 	@Override
 	public String getItemDisplayName(ItemStack stack) {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name");
+		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name",
+				BossType.values()[stack.getItemDamage() % BossType.values().length].getDisplayName());
 	}
 	
 	@Override
@@ -116,23 +117,23 @@ public class ItemKeyBig extends Item
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(int itemID, CreativeTabs tab, List list) {
-		for (int i = 0; i < 8; ++i) {
-			list.add(new ItemStack(itemID, 1, i));
+		for (BossType boss : BossType.values()) {
+			list.add(new ItemStack(itemID, 1, boss.ordinal()));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
-		return iconArray[par1 % 8];
+	public Icon getIconFromDamage(int damage) {
+		return iconArray[damage % BossType.values().length];
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[8];
+		iconArray = new Icon[BossType.values().length];
 		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + i);
+			iconArray[i] = register.registerIcon(ModInfo.ID + ":key_" + BossType.values()[i].getUnlocalizedName());
 		}
 	}
 	
