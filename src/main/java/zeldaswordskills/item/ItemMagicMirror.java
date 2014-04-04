@@ -162,6 +162,7 @@ public class ItemMagicMirror extends Item
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.1"));
 	}
 	
 	/**

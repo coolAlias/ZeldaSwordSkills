@@ -58,7 +58,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabSkills);
 	}
-	
+
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!player.worldObj.isRemote) {
@@ -99,10 +99,10 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 				}
 			}
 		}
-		
+
 		return stack;
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
@@ -121,13 +121,13 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 		}
 		return true;
 	}
-	
+
 	@Override
 	public String getItemDisplayName(ItemStack stack) {
 		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
 		return StatCollector.translateToLocal(super.getUnlocalizedName() + ".name") + " " + (skill != null ? skill.getDisplayName() : "");
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIconFromDamage(int damage) {
@@ -155,11 +155,10 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
-			SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
-			int level = ZSSPlayerInfo.get(player).getSkillLevel(skill);
-			if (level > 0) {
+			SkillBase skill = ZSSPlayerInfo.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
+			if (skill != null && skill.getLevel() > 0) {
 				if (skill.getId() != SkillBase.bonusHeart.getId()) {
-					list.add(StatCollector.translateToLocalFormatted("tooltip.zss.skillorb.desc.level", level, skill.getMaxLevel()));
+					list.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
 				}
 				list.addAll(ZSSPlayerInfo.get(player).getPlayerSkill(skill).getDescription(player));
 			} else {
@@ -195,7 +194,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean hasFairyUpgrade(ItemStack stack) {
 		return stack.getItemDamage() == SkillBase.spinAttack.getId();

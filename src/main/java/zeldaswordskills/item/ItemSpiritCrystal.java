@@ -108,7 +108,6 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 				cost = handleNayru(stack, world, player);
 			} else {
 				player.setItemInUse(stack, getMaxItemUseDuration(stack));
-				// TODO different and shorter sound for DIN
 				String sound = (spiritType == BlockSacredFlame.DIN ? Sounds.SUCCESS : Sounds.FLAME_ABSORB);
 				player.playSound(sound, 1.0F, 1.0F);
 			}
@@ -367,5 +366,6 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.1"));
 	}
 }

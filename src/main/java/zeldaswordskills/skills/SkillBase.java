@@ -309,6 +309,15 @@ public abstract class SkillBase
 		return StatCollector.translateToLocalFormatted("skill.zss.exhaustion.desc", String.format("%.2f", exhaustion));
 	}
 
+	/**
+	 * Returns the skill's current level / max level
+	 * @param simpleMax whether to replace the numerical display with MAX LEVEL when appropriate
+	 */
+	public String getLevelDisplay(boolean simpleMax) {
+		return ((simpleMax && level == getMaxLevel()) ? StatCollector.translateToLocal("skill.zss.level.max") :
+			StatCollector.translateToLocalFormatted("skill.zss.level.desc", level, getMaxLevel()));
+	}
+
 	/** Returns a translated description of the skill's range, using the value provided */
 	public String getRangeDisplay(double range) {
 		return StatCollector.translateToLocalFormatted("skill.zss.range.desc", String.format("%.1f", range));
