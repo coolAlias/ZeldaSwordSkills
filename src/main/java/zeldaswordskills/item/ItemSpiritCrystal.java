@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
@@ -40,8 +39,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
+import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
-import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
@@ -65,14 +64,14 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 		constantly drains hunger and prevents the use of other magic skills
  *
  */
-public class ItemSpiritCrystal extends Item implements ISpawnParticles
+public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParticles
 {
 	/** The spirit's id, from BlockSacredFlame */
 	private final int spiritType;
-	
+
 	/** Cost (in damage) for each use of this item*/
 	private final int costToUse;
-	
+
 	/** Amount of time required before the crystal's effects activate */
 	private final int timeToUse;
 
@@ -85,18 +84,22 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
-	
+
 	@Override
-	public int getMaxItemUseDuration(ItemStack stack) { return 72000; }
-	
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return 72000;
+	}
+
 	@Override
-	public EnumAction getItemUseAction(ItemStack stack) { return EnumAction.block; }
-	
+	public EnumAction getItemUseAction(ItemStack stack) {
+		return EnumAction.block;
+	}
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		return true;
 	}
-	
+
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		int cost = 0;
@@ -120,7 +123,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		}
 		return stack;
 	}
-	
+
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
 		if (getMaxItemUseDuration(stack) - ticksRemaining > timeToUse) {
@@ -131,13 +134,39 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 			case BlockSacredFlame.NAYRU: break;
 			default: LogHelper.log(Level.WARNING, "Invalid spirit type " + spiritType + " while using spirit crystal");
 			}
-			
+
 			if (damageStack(stack, player, cost)) {
 				player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalSpirit));
 			}
 		}
 	}
-	
+
+	@Override
+	public boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
+		return false;
+	}
+
+	@Override
+	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
+		if (world.isRemote) {
+			return false;
+		} else if (stack.getItemDamage() == 0) {
+			player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.full"));
+		} else if (isActive) {
+			if (spiritType == type) {
+				int originalDamage = stack.getItemDamage();
+				stack.setItemDamage(0);
+				world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
+				return (world.rand.nextInt(stack.getMaxDamage()) < originalDamage);
+			} else {
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.mismatch"));
+			}
+		} else {
+			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+		}
+		return false;
+	}
+
 	/**
 	 * Damages the stack for amount, returning true if the stack size is zero
 	 */
@@ -148,14 +177,14 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns true if there is enough charge remaining to use the item
 	 */
 	private boolean canUse(ItemStack stack) {
 		return (stack.getMaxDamage() - stack.getItemDamage() >= costToUse);
 	}
-	
+
 	/**
 	 * Processes right-click for Din's Fire; returns amount of damage to apply to stack
 	 */
@@ -169,7 +198,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		world.playSoundAtEntity(player, "random.explode", 4.0F, (1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
 		return costToUse;
 	}
-	
+
 	/**
 	 * Affects all blocks in the radius with the effects of Din's Fire
 	 */
@@ -178,7 +207,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		Iterator iterator;
 		ChunkPosition chunkposition;
 		int i, j, k, l;
-		
+
 		iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
 			chunkposition = (ChunkPosition)iterator.next();
@@ -186,24 +215,19 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 			j = chunkposition.y;
 			k = chunkposition.z;
 			l = world.getBlockId(i, j, k);
-			
-			if (l > 0) {
-				int meta = world.getBlockMetadata(i, j, k);
-				boolean flag = Config.isDinMeltEnabled() ? (meta & 5) == 5 : meta == 5;
-				Block block = Block.blocksList[l];
-				if (block.blockMaterial == Material.ice || block.blockMaterial == Material.snow || (flag && block == ZSSBlocks.secretStone)) {
-					world.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
-					world.setBlockToAir(i, j, k);
-				}
-			} else if (l == 0 && Config.isDinIgniteEnabled()) {
+
+			if (l == 0 && Config.isDinIgniteEnabled()) {
 				int i1 = world.getBlockId(i, j - 1, k);
 				if (Block.opaqueCubeLookup[i1] && world.rand.nextInt(8) == 0) {
 					world.setBlock(i, j, k, Block.fire.blockID);
 				}
+			} else if (WorldUtils.canMeltBlock(world, l, i, j, k)) {
+				world.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+				world.setBlockToAir(i, j, k);
 			}
 		}
 	}
-	
+
 	/**
 	 * Affects all entities within the radius with the effects of Din's Fire
 	 */
@@ -280,7 +304,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 			}
 		}
 	}
-	
+
 	/**
 	 * Processes right-click for Farore's Wind; returns amount of damage to apply to stack
 	 */
@@ -306,10 +330,10 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 				}
 			}
 		}
-		
+
 		return 0;
 	}
-	
+
 	/**
 	 * Processes right-click for Nayru's Love; returns amount of damage to apply to stack
 	 */
@@ -321,7 +345,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Saves the player's current position and dimension into Farore's Wind
 	 */
@@ -333,7 +357,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		stack.getTagCompound().setDouble("zssFWposZ", player.posZ);
 		world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 	}
-	
+
 	/**
 	 * Returns the dimension of the stored coordinates
 	 */
@@ -341,7 +365,7 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		return (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssFWdimension") ?
 				stack.getTagCompound().getInteger("zssFWdimension") : Integer.MAX_VALUE);
 	}
-	
+
 	/**
 	 * Returns the saved coordinates from Farore's Wind, or null if no position was marked
 	 */
@@ -355,13 +379,13 @@ public class ItemSpiritCrystal extends Item implements ISpawnParticles
 		}
 		return coordinates;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {

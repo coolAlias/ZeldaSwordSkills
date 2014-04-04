@@ -25,7 +25,8 @@ import net.minecraft.tileentity.TileEntity;
 
 /**
  * 
- * Base class for any tile entity that needs an inventory
+ * Base class for any tile entity that needs an inventory;
+ * disallows update ticks by default, so re-override canUpdate if needed
  *
  */
 public abstract class TileEntityInventory extends TileEntity implements IInventory
@@ -34,10 +35,19 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	protected ItemStack[] inventory;
 
 	@Override
-	public int getSizeInventory() { return inventory.length; }
+	public boolean canUpdate() {
+		return false;
+	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot) { return inventory[slot]; }
+	public int getSizeInventory() {
+		return inventory.length;
+	}
+
+	@Override
+	public ItemStack getStackInSlot(int slot) {
+		return inventory[slot];
+	}
 
 	@Override
 	public ItemStack decrStackSize(int slot, int amount) {
@@ -50,7 +60,6 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 				setInventorySlotContents(slot, null);
 			}
 		}
-
 		return stack;
 	}
 

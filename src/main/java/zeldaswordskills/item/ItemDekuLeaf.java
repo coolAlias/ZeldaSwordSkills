@@ -24,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -43,7 +44,18 @@ public class ItemDekuLeaf extends Item
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
-	
+
+	/** Returns the current cooldown on this stack */
+	private int getCooldown(ItemStack stack) {
+		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("cooldown") : 0);
+	}
+
+	/** Sets the cooldown on this stack */
+	private void setCooldown(ItemStack stack, int cooldown) {
+		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
+		stack.getTagCompound().setInteger("cooldown", cooldown);
+	}
+
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
 		EntityPlayer player = (entity instanceof EntityPlayer ? (EntityPlayer) entity : null);
@@ -52,28 +64,33 @@ public class ItemDekuLeaf extends Item
 				entity.motionY = (entity.motionY < -0.05D ? -0.05D : entity.motionY);
 				entity.fallDistance = 1.0F;
 				if (player != null && !player.capabilities.isCreativeMode) {
-					player.addExhaustion(0.15F);
+					player.addExhaustion(0.1F);
 				}
 			}
 		}
+		if (!world.isRemote && getCooldown(stack) > 0) {
+			setCooldown(stack, getCooldown(stack) - 1);
+		}
 	}
-	
+
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		player.swingItem();
 		if (player.getFoodStats().getFoodLevel() > 0) {
 			if (player.onGround) {
-				player.addExhaustion(10.0F);
-				if (!world.isRemote) {
+				if (!world.isRemote && getCooldown(stack) == 0) {
+					player.addExhaustion(3.0F);
 					world.playSoundAtEntity(player, Sounds.WHOOSH, 1.0F, 1.0F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));
+					if (!player.capabilities.isCreativeMode) {
+						setCooldown(stack, 15);
+					}
 				}
 			} else {
-				player.addExhaustion(0.3F);
+				player.addExhaustion(0.1F);
 				player.motionY += 0.175D;
 			}
 		}
-		
 		return stack;
 	}
 

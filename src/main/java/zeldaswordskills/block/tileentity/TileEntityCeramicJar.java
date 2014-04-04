@@ -34,16 +34,22 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 	public TileEntityCeramicJar() {
 		inventory = new ItemStack[1];
 	}
-	
+
 	private boolean shouldUpdate() {
-		return (worldObj.rand.nextInt(120) == 0 && worldObj.getClosestPlayer((double) xCoord + 0.5D, (double) yCoord + 0.5D, (double) zCoord + 0.5D, 16.0D) != null);
+		return (worldObj.getWorldTime() % 64 == 0 && worldObj.rand.nextInt(8) == 0 &&
+				worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 16.0D) != null);
 	}
-	
+
+	@Override
+	public boolean canUpdate() {
+		return true;
+	}
+
 	@Override
 	public void updateEntity() {
-		if (getStackInSlot(0) == null && shouldUpdate()) {
+		if (!worldObj.isRemote && getStackInSlot(0) == null && shouldUpdate()) {
 			List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().
-				getAABB(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1).expand(1.0D, 1.0D, 1.0D));
+					getAABB(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1).expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : list) {
 				ItemStack stack;
 				if (item.getEntityItem().stackSize > 64) {
@@ -52,7 +58,6 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 					stack = item.getEntityItem().copy();
 					item.setDead();
 				}
-				
 				setInventorySlotContents(0, stack);
 				break;
 			}
@@ -60,18 +65,27 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 	}
 
 	@Override
-	public String getInvName() { return ""; }
+	public String getInvName() {
+		return "";
+	}
 
 	@Override
-	public boolean isInvNameLocalized() { return true; }
+	public boolean isInvNameLocalized() {
+		return true;
+	}
 
 	@Override
-	public int getInventoryStackLimit() { return 64; }
+	public int getInventoryStackLimit() {
+		return 64;
+	}
 
 	@Override
-	public boolean isUseableByPlayer(EntityPlayer player) { return false; }
+	public boolean isUseableByPlayer(EntityPlayer player) {
+		return false;
+	}
 
 	@Override
-	public boolean isItemValidForSlot(int slot, ItemStack stack) { return true; }
-
+	public boolean isItemValidForSlot(int slot, ItemStack stack) {
+		return true;
+	}
 }

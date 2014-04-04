@@ -99,7 +99,9 @@ public class ZSSKeyHandler extends KeyHandler
 			if (mc.inGameHasFocus && ZSSPlayerInfo.get(mc.thePlayer) != null) {
 				if (kb == keys[KEY_SKILL_ACTIVATE]) {
 					SkillBase skill = ZSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillBase.swordBasic);
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(skill).makePacket());
+					if (skill != null && skill.getLevel() > 0) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(skill).makePacket());
+					}
 				} else if (kb == keys[KEY_BOMB]) {
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
 				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {

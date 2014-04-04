@@ -36,7 +36,6 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
-import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.util.WorldUtils;
@@ -64,10 +63,10 @@ public class EntityArrowElemental extends EntityArrowCustom
 {
 	/** Valid element types for elemental arrows */
 	public static enum ElementType {FIRE,ICE,LIGHT};
-	
+
 	/** Particle to spawn, based on element */
 	private static final String[] particles = {"flame","magicCrit","explode"};
-	
+
 	/** Watchable object index for arrow's element type */
 	private static final int ARROWTYPE_DATAWATCHER_INDEX = 25;
 
@@ -86,21 +85,21 @@ public class EntityArrowElemental extends EntityArrowCustom
 	public EntityArrowElemental(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
 	}
-	
+
 	@Override
 	public void entityInit() {
 		super.entityInit();
 		setDamage(4.0F); // compensate for lower velocity
 		dataWatcher.addObject(ARROWTYPE_DATAWATCHER_INDEX, ElementType.FIRE.ordinal());
 	}
-	
+
 	/**
 	 * Returns the element type of this arrow
 	 */
 	public ElementType getType() {
 		return ElementType.values()[dataWatcher.getWatchableObjectInt(ARROWTYPE_DATAWATCHER_INDEX)];
 	}
-	
+
 	/**
 	 * Sets this arrow's element
 	 */
@@ -109,10 +108,10 @@ public class EntityArrowElemental extends EntityArrowCustom
 		if (type == ElementType.FIRE) { setFire(100); }
 		return this;
 	}
-	
+
 	@Override
 	protected float getVelocityFactor() { return 1.3F; }
-	
+
 	@Override
 	protected DamageSource getDamageSource() {
 		switch(getType()) {
@@ -122,27 +121,27 @@ public class EntityArrowElemental extends EntityArrowCustom
 		}
 		return super.getDamageSource();
 	}
-	
+
 	@Override
 	protected boolean canTargetEntity(Entity entity) {
 		return getType() == ElementType.LIGHT || super.canTargetEntity(entity);
 	}
-	
+
 	@Override
 	protected String getParticleName() {
 		return particles[getType().ordinal()];
 	}
-	
+
 	@Override
 	protected boolean shouldSpawnParticles() { return true; }
-	
+
 	@Override
 	protected void updateInAir() {
 		super.updateInAir();
 		boolean flag = (getType() == ElementType.FIRE && worldObj.handleMaterialAcceleration(boundingBox, Material.water, this));
 		if (!worldObj.isRemote && getType() == ElementType.ICE &&
 				(worldObj.handleMaterialAcceleration(boundingBox, Material.water, this) ||
-				 worldObj.handleMaterialAcceleration(boundingBox, Material.lava, this))) {
+						worldObj.handleMaterialAcceleration(boundingBox, Material.lava, this))) {
 			flag = affectBlocks();
 		}
 		if (flag) {
@@ -154,7 +153,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 			}
 		}
 	}
-	
+
 	@Override
 	protected void onImpactBlock(MovingObjectPosition mop) {
 		boolean flag = (getType() == ElementType.LIGHT && !Config.enableLightArrowNoClip());
@@ -177,7 +176,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 			}
 		}
 	}
-	
+
 	@Override
 	protected void onImpactEntity(MovingObjectPosition mop) {
 		if (getType() == ElementType.LIGHT && canOneHitKill(mop.entityHit)) {
@@ -192,7 +191,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 			super.onImpactEntity(mop);
 		}
 	}
-	
+
 	@Override
 	protected void handlePostDamageEffects(EntityLivingBase entity) {
 		super.handlePostDamageEffects(entity);
@@ -206,7 +205,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.glass", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 		}
 	}
-	
+
 	/**
 	 * Returns true if the light arrow can kill this entity in one hit (endermen and wither skeletons)
 	 */
@@ -214,7 +213,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 		boolean flag = (entity instanceof EntitySkeleton && ((EntitySkeleton) entity).getSkeletonType() == 1);
 		return (!(entity instanceof IBossDisplayData)) && (flag || entity instanceof EntityEnderman);
 	}
-	
+
 	/**
 	 * Affects all blocks within AoE; returns true if arrow should be consumed
 	 */
@@ -222,29 +221,26 @@ public class EntityArrowElemental extends EntityArrowCustom
 		boolean flag = false;
 		Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, -1));
 		int i, j, k, l;
-		
+
 		for (ChunkPosition position : affectedBlocks) {
 			i = position.x;
 			j = position.y;
 			k = position.z;
 			l = worldObj.getBlockId(i, j, k);
-			
+
 			switch(getType()) {
 			case FIRE:
-				if (l > 0) {
-					Block block = Block.blocksList[l];
-					if (canMeltBlock(l, block.blockMaterial, i, j, k)) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-						worldObj.setBlockToAir(i, j, k);
-						flag = true;
-					}
-				} else if (l == 0 && Config.enableFireArrowIgnite()) {
+				if (l == 0 && Config.enableFireArrowIgnite()) {
 					int i1 = worldObj.getBlockId(i, j - 1, k);
 					if (Block.opaqueCubeLookup[i1] && rand.nextInt(8) == 0) {
 						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "fire.ignite", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 						worldObj.setBlock(i, j, k, Block.fire.blockID);
 						flag = true;
 					}
+				} else if (WorldUtils.canMeltBlock(worldObj, l, i, j, k)) {
+					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlockToAir(i, j, k);
+					flag = true;
 				}
 				break;
 			case ICE:
@@ -270,41 +266,32 @@ public class EntityArrowElemental extends EntityArrowCustom
 				break;
 			}
 		}
-		
+
 		return flag;
 	}
-	
-	/**
-	 * Returns true if this block or material can be melted by the fire arrow
-	 */
-	private boolean canMeltBlock(int blockId, Material m, int x, int y, int z) {
-		int meta = worldObj.getBlockMetadata(x, y, z);
-		boolean flag = Config.enableFireArrowMelt() ? (meta & 5) == 5 : meta == 5;
-		return (m == Material.ice || m == Material.snow || (blockId == ZSSBlocks.secretStone.blockID && flag));
-	}
-	
+
 	/**
 	 * Sets this arrow to dead after spawning some particles
 	 */
 	private void extinguishLightArrow() {
 		for (int i = 0; i < 10; ++i) {
-            double d0 = rand.nextGaussian() * 0.02D;
-            double d1 = rand.nextGaussian() * 0.02D;
-            double d2 = rand.nextGaussian() * 0.02D;
-            worldObj.spawnParticle("explode", posX + (double)(rand.nextFloat() * width * 2.0F) - (double) width,
-            		posY + (double)(rand.nextFloat() * height), posZ + (double)(rand.nextFloat() * width * 2.0F) - (double) width, d0, d1, d2);
-        }
+			double d0 = rand.nextGaussian() * 0.02D;
+			double d1 = rand.nextGaussian() * 0.02D;
+			double d2 = rand.nextGaussian() * 0.02D;
+			worldObj.spawnParticle("explode", posX + (double)(rand.nextFloat() * width * 2.0F) - (double) width,
+					posY + (double)(rand.nextFloat() * height), posZ + (double)(rand.nextFloat() * width * 2.0F) - (double) width, d0, d1, d2);
+		}
 		if (!worldObj.isRemote) {
 			setDead();
 		}
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setInteger("arrowType", getType().ordinal());
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

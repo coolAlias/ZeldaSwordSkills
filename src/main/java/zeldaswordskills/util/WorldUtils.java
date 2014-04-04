@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
@@ -42,8 +43,10 @@ import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
+import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityFairy;
+import zeldaswordskills.lib.Config;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -77,7 +80,17 @@ public class WorldUtils
 		default: world.notifyBlocksOfNeighborChange(x, y - 1, z, blockId);
 		}
 	}
-	
+
+	/**
+	 * Whether the block at x/y/z can be melted by any of the various fire effects
+	 */
+	public static boolean canMeltBlock(World world, int blockId, int x, int y, int z) {
+		Material m = world.getBlockMaterial(x, y, z);
+		int meta = world.getBlockMetadata(x, y, z);
+		boolean flag = Config.enableFireArrowMelt() ? (meta & ~8) == 5 : meta == 5;
+		return (m == Material.ice || m == Material.snow || (blockId == ZSSBlocks.secretStone.blockID && flag));
+	}
+
 	/**
 	 * Call when a container block is broken to drop the entire inv into the world
 	 */

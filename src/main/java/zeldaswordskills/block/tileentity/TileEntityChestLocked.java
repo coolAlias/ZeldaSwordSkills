@@ -30,23 +30,29 @@ public class TileEntityChestLocked extends TileEntityInventory
 	public TileEntityChestLocked() {
 		inventory = new ItemStack[27];
 	}
-	
-	@Override
-	public boolean canUpdate() { return false; }
 
 	@Override
-	public String getInvName() { return ""; }
+	public String getInvName() {
+		return "";
+	}
 
 	@Override
-	public boolean isInvNameLocalized() { return true; }
+	public boolean isInvNameLocalized() {
+		return true;
+	}
 
 	@Override
-	public int getInventoryStackLimit() { return 64; }
+	public int getInventoryStackLimit() {
+		return 64;
+	}
 
 	@Override
-	public boolean isUseableByPlayer(EntityPlayer player) { return player.capabilities.isCreativeMode; }
+	public boolean isUseableByPlayer(EntityPlayer player) {
+		return player.capabilities.isCreativeMode;
+	}
 
 	@Override
-	public boolean isItemValidForSlot(int slot, ItemStack stack) { return true; }
-	
+	public boolean isItemValidForSlot(int slot, ItemStack stack) {
+		return true;
+	}
 }

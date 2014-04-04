@@ -28,9 +28,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.packet.Packet28EntityVelocity;
+import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
@@ -40,6 +43,8 @@ import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -54,6 +59,8 @@ public class EntityCyclone extends EntityMobThrowable
 	
 	/** ItemStack version of captured drops is more efficient for NBT storage */
 	private List<ItemStack> capturedItems = new ArrayList<ItemStack>();
+	/** Whether this cyclone can destroy blocks */
+	private boolean canGrief = true;
 	
 	public EntityCyclone(World world) {
 		super(world);
@@ -77,20 +84,34 @@ public class EntityCyclone extends EntityMobThrowable
 		setSize(1.0F, 2.0F);
 	}
 	
+	/** Disables the cyclone's ability to destroy blocks */
+	public EntityCyclone disableGriefing() {
+		canGrief = false;
+		return this;
+	}
+	
 	@Override
 	public void applyEntityCollision(Entity entity) {}
 	
 	@Override
-	public boolean handleWaterMovement() { return false; }
+	public boolean handleWaterMovement() {
+		return false;
+	}
 	
 	@Override
-	public boolean handleLavaMovement() { return false; }
+	public boolean handleLavaMovement() {
+		return false;
+	}
 	
 	@Override
-	protected float getGravityVelocity() { return 0.0F; }
+	protected float getGravityVelocity() {
+		return 0.0F;
+	}
 	
 	@Override
-	protected float func_70182_d() { return 0.75F; }
+	protected float func_70182_d() {
+		return 0.75F;
+	}
 	
 	@Override
 	public void onUpdate() {
@@ -98,7 +119,9 @@ public class EntityCyclone extends EntityMobThrowable
 		motionY += 0.01D;
 		if (!worldObj.isRemote) {
 			captureDrops();
-			destroyLeaves();
+			if (canGrief) {
+				destroyLeaves();
+			}
 			if (ticksExisted > 40) {
 				setDead();
 				releaseDrops();
@@ -115,7 +138,7 @@ public class EntityCyclone extends EntityMobThrowable
 		if (mop.typeOfHit == EnumMovingObjectType.TILE) {
 			Material m = worldObj.getBlockMaterial(mop.blockX, mop.blockY, mop.blockZ);
 			if (m == Material.leaves) {
-				if (Config.canDekuDenude()) {
+				if (!worldObj.isRemote && canGrief && Config.canDekuDenude()) {
 					worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, true);
 				}
 			} else if (m.blocksMovement()) {
@@ -129,11 +152,20 @@ public class EntityCyclone extends EntityMobThrowable
 				}
 			}
 		} else if (mop.entityHit != null) {
+			if (getDamage() > 0.0F) {
+				mop.entityHit.attackEntityFrom(new EntityDamageSourceIndirect("tornado", this, getThrower()).setProjectile().setMagicDamage(), getDamage());
+				if (!worldObj.isRemote) {
+					setDamage(0.0F);
+				}
+			}
 			if (!(mop.entityHit instanceof EntityLivingBase) || rand.nextFloat() > ((EntityLivingBase) mop.entityHit).getAttributeMap().getAttributeInstance(SharedMonsterAttributes.knockbackResistance).getAttributeValue()) {
 				mop.entityHit.motionX = this.motionX * 1.8D;
 				mop.entityHit.motionY = this.motionY + 0.5D;
 				mop.entityHit.motionZ = this.motionZ * 1.8D;
 				mop.entityHit.rotationYaw += 30.0F * this.ticksExisted;
+				if (mop.entityHit instanceof EntityPlayer && !worldObj.isRemote) {
+					PacketDispatcher.sendPacketToPlayer(new Packet28EntityVelocity(mop.entityHit), (Player) mop.entityHit);
+				}
 			}
 		}
 	}

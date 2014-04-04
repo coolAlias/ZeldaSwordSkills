@@ -28,17 +28,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
 import zeldaswordskills.client.render.block.RenderSacredFlame;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.item.ItemSpiritCrystal;
-import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
@@ -48,12 +46,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Colored flames representing Din (0x1), Farore (0x2), and Nayru (0x4)
+ * Colored flames representing Din (0x1), Farore (0x2), and Nayru (0x4).
  * 
- * Bit 0x8 determines whether the flame has been extinguished or is still active
- * 
- * When struck with the Golden Master Sword, they will imbue it with their powers,
- * unleashing the True Master Sword when all three (0x7) have been collected.
+ * Bit 0x8 determines whether the flame has been extinguished or is still active.
  *
  */
 public class BlockSacredFlame extends BlockContainer
@@ -80,19 +75,29 @@ public class BlockSacredFlame extends BlockContainer
 	}
 
 	@Override
-	public int damageDropped(int meta) { return meta; }
+	public int damageDropped(int meta) {
+		return meta;
+	}
 	
 	@Override
-	public boolean isCollidable() { return true; }
+	public boolean isCollidable() {
+		return true;
+	}
 
 	@Override
-	public boolean isOpaqueCube() { return false; }
+	public boolean isOpaqueCube() {
+		return false;
+	}
 
 	@Override
-	public boolean renderAsNormalBlock() { return false; }
+	public boolean renderAsNormalBlock() {
+		return false;
+	}
 
 	@Override
-	public int getRenderType() { return RenderSacredFlame.renderId; }
+	public int getRenderType() {
+		return RenderSacredFlame.renderId;
+	}
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
@@ -105,13 +110,33 @@ public class BlockSacredFlame extends BlockContainer
 	}
 
 	@Override
+	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
+		int meta = world.getBlockMetadata(x, y, z);
+		ItemStack stack = player.getHeldItem();
+		if (stack != null && stack.getItem() instanceof ISacredFlame) {
+			if (((ISacredFlame) stack.getItem()).onActivatedSacredFlame(stack, world, player, (meta & ~8), (meta & 0x8) == 0)) {
+				extinguishFlame(world, x, y, z);
+				return true;
+			}
+		} else if (!world.isRemote) {
+			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+		}
+		return false;
+	}
+
+	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		int meta = world.getBlockMetadata(x, y, z);
-		if (!world.isRemote && (meta & 0x8) == 0 && player.getHeldItem() != null) {
-			ItemStack stack = player.getHeldItem();
-			if (stack.getItem() instanceof ItemSword && ItemZeldaSword.onClickedSacredFlame(world, x, y, z, player)) {
-				extinguishFlame(world, x, y, z);
-			} else if (stack.getItem() == Item.arrow) {
+		ItemStack stack = player.getHeldItem();
+		if (stack != null) {
+			boolean isActive = (meta & 0x8) == 0;
+			if (stack.getItem() instanceof ISacredFlame) {
+				if (((ISacredFlame) stack.getItem()).onClickedSacredFlame(stack, world, player, (meta & ~8), isActive)) {
+					extinguishFlame(world, x, y, z);
+				}
+			} else if (world.isRemote) {
+				;
+			} else if (stack.getItem() == Item.arrow && isActive) {
 				int n = stack.stackSize;
 				player.setCurrentItemOrArmor(0, new ItemStack(meta == DIN ? ZSSItems.arrowFire :
 					meta == NAYRU ? ZSSItems.arrowIce : ZSSItems.arrowLight, n));
@@ -119,7 +144,7 @@ public class BlockSacredFlame extends BlockContainer
 				if (Config.getArrowsConsumeFlame() && world.rand.nextInt(80) < n) {
 					extinguishFlame(world, x, y, z);
 				}
-			} else if (stack.getItem() == ZSSItems.crystalSpirit) {
+			} else if (stack.getItem() == ZSSItems.crystalSpirit && isActive) {
 				switch(meta) {
 				case DIN: player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalDin)); break;
 				case FARORE: player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalFarore)); break;
@@ -127,45 +152,27 @@ public class BlockSacredFlame extends BlockContainer
 				}
 				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
 				extinguishFlame(world, x, y, z);
-			} else if (stack.getItem() instanceof ItemSpiritCrystal) {
-				if (stack.getItemDamage() > 0) {
-					int damage = stack.getItemDamage();
-					switch(meta) {
-					case DIN: if (stack.getItem() == ZSSItems.crystalDin) { stack.setItemDamage(0); } break;
-					case FARORE: if (stack.getItem() == ZSSItems.crystalFarore) { stack.setItemDamage(0); } break;
-					case NAYRU: if (stack.getItem() == ZSSItems.crystalNayru) { stack.setItemDamage(0); } break;
-					}
-
-					if (stack.getItemDamage() == 0) {
-						world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
-						if (world.rand.nextInt(stack.getMaxDamage()) < damage) {
-							extinguishFlame(world, x, y, z);
-						}
-					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.mismatch"));
-					}
-				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.full"));
-				}
+			} else if (isActive) {
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sword.sacred_flame.random"));
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
 			}
-		} else if (!world.isRemote) {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sword.sacred_flame.inactive"));
 		}
 	}
 	
 	/**
 	 * Extinguishes the flames at this location, setting the block to air if flames are not renewable
 	 */
-	protected void extinguishFlame(World world, int x, int y, int z) {
-		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if (Config.getSacredFlameRefreshRate() > 0 && te instanceof TileEntitySacredFlame) {
-			int meta = world.getBlockMetadata(x, y, z);
-			world.setBlockMetadataWithNotify(x, y, z, meta | 0x8, 3);
-			((TileEntitySacredFlame) te).extinguish();
-		} else {
-			world.setBlockToAir(x, y, z);
+	private void extinguishFlame(World world, int x, int y, int z) {
+		if (!world.isRemote) {
+			TileEntity te = world.getBlockTileEntity(x, y, z);
+			if (Config.getSacredFlameRefreshRate() > 0 && te instanceof TileEntitySacredFlame) {
+				int meta = world.getBlockMetadata(x, y, z);
+				world.setBlockMetadataWithNotify(x, y, z, meta | 0x8, 3);
+				((TileEntitySacredFlame) te).extinguish();
+			} else {
+				world.setBlockToAir(x, y, z);
+			}
 		}
 	}
 

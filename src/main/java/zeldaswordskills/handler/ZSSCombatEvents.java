@@ -26,7 +26,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
-import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -433,8 +433,8 @@ public class ZSSCombatEvents
 				ZSSPlayerInfo.saveProxyData((EntityPlayer) event.entity);
 			}
 		}
-		if (event.source.getEntity() instanceof EntityPlayer && event.entity instanceof EntityMob) {
-			ItemZeldaSword.onKilledMob((EntityPlayer) event.source.getEntity(), (EntityMob) event.entity);
+		if (event.source.getEntity() instanceof EntityPlayer && event.entity instanceof IMob) {
+			ItemZeldaSword.onKilledMob((EntityPlayer) event.source.getEntity(), (IMob) event.entity);
 		}
 	}
 
