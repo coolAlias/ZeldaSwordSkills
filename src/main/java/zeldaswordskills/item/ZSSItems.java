@@ -49,6 +49,7 @@ import zeldaswordskills.client.render.item.RenderItemCustomBow;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.projectile.EntityMagicSpell.MagicType;
 import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
@@ -139,6 +140,9 @@ public class ZSSItems
 	potionYellow,
 	powerPiece,
 	rocsFeather,
+	rodFire,
+	rodIce,
+	rodTornado,
 	slingshot,
 	scattershot,
 	supershot,
@@ -315,7 +319,7 @@ public class ZSSItems
 			player.inventory.addItemStackToInventory(new ItemStack(swordKokiri));
 		}
 		if (enableOrb) {
-			player.inventory.addItemStackToInventory(new ItemStack(skillOrb,1,SkillBase.swordBasic.id));
+			player.inventory.addItemStackToInventory(new ItemStack(skillOrb,1,SkillBase.swordBasic.getId()));
 		}
 		if (enableFullSet) {
 			ItemStack[] set = { new ItemStack(tunicHeroBoots),new ItemStack(tunicHeroLegs),
@@ -459,8 +463,13 @@ public class ZSSItems
 		shieldDeku = new ItemZeldaShield(modItemIndex++, 30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
 		shieldHylian = new ItemZeldaShield(modItemIndex++, 18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
 		shieldMirror = new ItemZeldaShield(modItemIndex++, 24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
-		
+
 		maskMajora = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.wither.id, 100, 1)).setUnlocalizedName("zss.mask_majora");
+
+		// 0.6.5 new items
+		rodFire = new ItemMagicRod(modItemIndex++, MagicType.FIRE, 8.0F, 8.0F).setUnlocalizedName("zss.rod_fire");
+		rodIce = new ItemMagicRod(modItemIndex++, MagicType.ICE, 6.0F, 8.0F).setUnlocalizedName("zss.rod_ice");
+		rodTornado = new ItemMagicRod(modItemIndex++, MagicType.WIND, 4.0F, 4.0F).setUnlocalizedName("zss.rod_tornado");
 	}
 
 	private static void registerItems() {
@@ -536,6 +545,9 @@ public class ZSSItems
 		GameRegistry.registerItem(crystalNayru, crystalNayru.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(gauntletsSilver, gauntletsSilver.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(gauntletsGolden, gauntletsGolden.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(rodFire, rodFire.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(rodIce, rodIce.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(rodTornado, rodTornado.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(magicMirror, magicMirror.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(fairyBottle, fairyBottle.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(potionRed, potionRed.getUnlocalizedName().substring(5));
@@ -589,7 +601,7 @@ public class ZSSItems
 		GameRegistry.addRecipe(new ItemStack(arrowBombFire), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), 'a', Item.arrow);
 		GameRegistry.addRecipe(new ItemStack(arrowBombWater), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), 'a', Item.arrow);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Item.brick);
-		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.id), "HH","HH", 'H', heartPiece);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronHelm), tunicHeroHelm, new ItemStack(Item.dyePowder,1,1));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Item.dyePowder,1,1));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraHelm), tunicHeroHelm, new ItemStack(Item.dyePowder,1,4));
@@ -597,38 +609,33 @@ public class ZSSItems
 	}
 
 	private static void registerDungeonLoot() {
-		// BOMBS
 		if (enableBombLoot) {
-			WeightedRandomChestContent lootBomb = new WeightedRandomChestContent(new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight());
-			ChestGenHooks.getInfo(ChestGenHooks.MINESHAFT_CORRIDOR).addItem(lootBomb);
-			ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_DESERT_CHEST).addItem(lootBomb);
-			ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_JUNGLE_CHEST).addItem(lootBomb);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CORRIDOR).addItem(lootBomb);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_LIBRARY).addItem(lootBomb);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CROSSING).addItem(lootBomb);
-			ChestGenHooks.getInfo(ChestGenHooks.VILLAGE_BLACKSMITH).addItem(lootBomb);
-			ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(lootBomb);
+			addLootToAll(new WeightedRandomChestContent(new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight()), true, true);
 		}
-		// BOMB BAG
 		if (enableBombBagLoot) {
-			WeightedRandomChestContent lootBag = new WeightedRandomChestContent(new ItemStack(bombBag), 1, 1, Config.getBombBagWeight());
-			ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_DESERT_CHEST).addItem(lootBag);
-			ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_JUNGLE_CHEST).addItem(lootBag);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CORRIDOR).addItem(lootBag);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_LIBRARY).addItem(lootBag);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CROSSING).addItem(lootBag);
-			ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(lootBag);
+			addLootToAll(new WeightedRandomChestContent(new ItemStack(bombBag), 1, 1, Config.getBombBagWeight()), true, false);
 		}
-		// HEART PIECE
 		if (enableHeartLoot) {
-			WeightedRandomChestContent heart = new WeightedRandomChestContent(new ItemStack(skillOrb, 1, SkillBase.bonusHeart.id), 1, 1, Config.getHeartWeight());
-			ChestGenHooks.getInfo(ChestGenHooks.MINESHAFT_CORRIDOR).addItem(heart);
-			ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_DESERT_CHEST).addItem(heart);
-			ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_JUNGLE_CHEST).addItem(heart);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CORRIDOR).addItem(heart);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_LIBRARY).addItem(heart);
-			ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CROSSING).addItem(heart);
-			ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(heart);
+			addLootToAll(new WeightedRandomChestContent(new ItemStack(skillOrb, 1, SkillBase.bonusHeart.getId()), 1, 1, Config.getHeartWeight()), false, false);
+		}
+	}
+
+	/**
+	 * Adds weighted chest contents to all ChestGenHooks, with possible exception of blacksmith and Bonus Chest
+	 */
+	private static void addLootToAll(WeightedRandomChestContent loot, boolean smith, boolean bonus) {
+		ChestGenHooks.getInfo(ChestGenHooks.MINESHAFT_CORRIDOR).addItem(loot);
+		ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_DESERT_CHEST).addItem(loot);
+		ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_JUNGLE_CHEST).addItem(loot);
+		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CORRIDOR).addItem(loot);
+		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_LIBRARY).addItem(loot);
+		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_CROSSING).addItem(loot);
+		ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(loot);
+		if (smith) {
+			ChestGenHooks.getInfo(ChestGenHooks.VILLAGE_BLACKSMITH).addItem(loot);
+		}
+		if (bonus) {
+			ChestGenHooks.getInfo(ChestGenHooks.BONUS_CHEST).addItem(loot);
 		}
 	}
 }

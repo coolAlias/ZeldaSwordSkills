@@ -35,6 +35,7 @@ import zeldaswordskills.client.render.entity.RenderEntityFairy;
 import zeldaswordskills.client.render.entity.RenderEntityHookShot;
 import zeldaswordskills.client.render.entity.RenderEntityJar;
 import zeldaswordskills.client.render.entity.RenderEntityKeese;
+import zeldaswordskills.client.render.entity.RenderEntityMagicSpell;
 import zeldaswordskills.client.render.entity.RenderEntityMaskTrader;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
 import zeldaswordskills.client.render.entity.RenderOctorok;
@@ -47,6 +48,7 @@ import zeldaswordskills.entity.projectile.EntityCeramicJar;
 import zeldaswordskills.entity.projectile.EntityCyclone;
 import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
+import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
@@ -82,7 +84,7 @@ public class ZSSEntities
 		addSpawns();
 	}
 	
-	protected static void registerEntities() {
+	private static void registerEntities() {
 		int modEntityIndex = 0;
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
@@ -96,6 +98,7 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityArrowBomb.class, "arrowbomb", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrowcustom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowElemental.class, "arrowelemental", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityMagicSpell.class, "magicspell", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		
 		// MOBS
 		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
@@ -118,6 +121,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese());
 		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot());
 		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
+		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell());
 		RenderingRegistry.registerEntityRenderingHandler(EntityMaskTrader.class, new RenderEntityMaskTrader());
 		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderOctorok(new ModelSquid(), 0.7F));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
@@ -126,7 +130,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing());
 	}
 	
-	protected static void registerEggs() {
+	private static void registerEggs() {
 		int id = Config.getSpawnEggStartId();
 		registerEntityEgg(EntityFairy.class, (id == 0 ? getNextEggId() : id++), 0xADFF2F, 0xFFFF00);
 		registerEntityEgg(EntityChu.class, (id == 0 ? getNextEggId() : id++), 0xEE2C2C, 0x00CED1);
@@ -134,7 +138,7 @@ public class ZSSEntities
 		registerEntityEgg(EntityOctorok.class, (id == 0 ? getNextEggId() : id++), 0x68228B, 0xBA55D3);
 	}
 	
-	protected static void registerEntityEgg(Class<? extends Entity> entity, int id, int primaryColor, int secondaryColor){
+	private static void registerEntityEgg(Class<? extends Entity> entity, int id, int primaryColor, int secondaryColor){
 		EntityList.IDtoClassMapping.put(id, entity);
 		EntityList.entityEggs.put(id, new EntityEggInfo(id, primaryColor, secondaryColor));
 	}
@@ -142,7 +146,7 @@ public class ZSSEntities
 	/**
 	 * Returns the next available egg id
 	 */
-	protected static int getNextEggId() {
+	private static int getNextEggId() {
 		int i = 0;
 		while (EntityList.entityEggs.containsKey(i)) {
 			++i;
@@ -150,7 +154,7 @@ public class ZSSEntities
 		return i;
 	}
 	
-	protected static void addSpawns() {
+	private static void addSpawns() {
 		if (spawnFairy > 0) {
 			EntityRegistry.addSpawn(EntityFairy.class, spawnFairy, 1, 3, EnumCreatureType.ambient, BiomeGenBase.swampland);
 		}
