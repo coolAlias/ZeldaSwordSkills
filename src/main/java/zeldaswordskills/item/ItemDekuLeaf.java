@@ -32,6 +32,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityCyclone;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -79,8 +80,8 @@ public class ItemDekuLeaf extends Item
 		if (player.getFoodStats().getFoodLevel() > 0) {
 			if (player.onGround) {
 				if (!world.isRemote && getCooldown(stack) == 0) {
-					player.addExhaustion(3.0F);
-					world.playSoundAtEntity(player, Sounds.WHOOSH, 1.0F, 1.0F);
+					player.addExhaustion(2.0F);
+					WorldUtils.playSoundAtEntity(world, player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));
 					if (!player.capabilities.isCreativeMode) {
 						setCooldown(stack, 15);

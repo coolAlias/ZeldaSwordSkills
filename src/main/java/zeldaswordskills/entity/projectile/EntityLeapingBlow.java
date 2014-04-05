@@ -31,6 +31,9 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -38,7 +41,7 @@ import zeldaswordskills.util.WorldUtils;
 public class EntityLeapingBlow extends EntityThrowable
 {
 	/** Keeps track of entities already affected so they don't get attacked twice */
-	private List<Integer> struckEntities = new ArrayList<Integer>(); 
+	private List<Integer> affectedEntities = new ArrayList<Integer>(); 
 
 	/** Base damage should be set from player's Leaping Blow skill */
 	private float damage = 2.0F;
@@ -115,8 +118,8 @@ public class EntityLeapingBlow extends EntityThrowable
 		if (!worldObj.isRemote) {
 			List<EntityLivingBase> targets = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, getAoE());
 			for (EntityLivingBase target : targets) {
-				if (!struckEntities.contains(target.entityId) && target != getThrower() && !TargetUtils.isTargetInFrontOf(this, target, 30F)) {
-					struckEntities.add(target.entityId);
+				if (!affectedEntities.contains(target.entityId) && target != getThrower() && !TargetUtils.isTargetInFrontOf(this, target, 30F)) {
+					affectedEntities.add(target.entityId);
 					float d = damage;
 					if (getThrower() != null) {
 						double d0 = (1.0D - getThrower().getDistanceSqToEntity(target) / getRangeSquared());
@@ -149,8 +152,8 @@ public class EntityLeapingBlow extends EntityThrowable
 		if (!worldObj.isRemote) {
 			if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
-				if (entity instanceof EntityLivingBase && !struckEntities.contains(entity.entityId) && entity != getThrower()) {
-					struckEntities.add(entity.entityId);
+				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.entityId) && entity != getThrower()) {
+					affectedEntities.add(entity.entityId);
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
 						WorldUtils.playSoundAtEntity(worldObj, entity, "damage.hit", 0.4F, 0.5F);
 						if (entity instanceof EntityLivingBase) {
@@ -185,6 +188,7 @@ public class EntityLeapingBlow extends EntityThrowable
 		compound.setFloat("damage", damage);
 		compound.setInteger("level", level);
 		compound.setInteger("lifespan", lifespan);
+		compound.setIntArray("affectedEntities", ArrayUtils.toPrimitive(affectedEntities.toArray(new Integer[affectedEntities.size()])));
 	}
 
 	@Override
@@ -194,5 +198,9 @@ public class EntityLeapingBlow extends EntityThrowable
 		damage = compound.getFloat("damage");
 		level = compound.getInteger("level");
 		lifespan = compound.getInteger("lifespan");
+		int[] entities = compound.getIntArray("affectedEntities");
+		for (int i = 0; i < entities.length; ++i) {
+			affectedEntities.add(entities[i]);
+		}
 	}
 }

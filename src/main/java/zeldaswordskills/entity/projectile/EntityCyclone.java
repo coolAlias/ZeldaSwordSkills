@@ -38,6 +38,9 @@ import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import zeldaswordskills.client.particle.FXCycloneRing;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
@@ -56,7 +59,11 @@ public class EntityCyclone extends EntityMobThrowable
 	private float yawVelocity = 0.1f;
 	private float pitch = 0;
 	private static float pitchVelocity = 0;
-	
+
+	/** Watchable object index for cyclone's area of effect */
+	private static final int AREA_INDEX = 23;
+	/** Keeps track of entities already affected so they don't get attacked twice */
+	private List<Integer> affectedEntities = new ArrayList<Integer>(); 
 	/** ItemStack version of captured drops is more efficient for NBT storage */
 	private List<ItemStack> capturedItems = new ArrayList<ItemStack>();
 	/** Whether this cyclone can destroy blocks */
@@ -83,7 +90,24 @@ public class EntityCyclone extends EntityMobThrowable
 		super(world, shooter, target, velocity, wobble);
 		setSize(1.0F, 2.0F);
 	}
-	
+
+	@Override
+	protected void entityInit() {
+		super.entityInit();
+		dataWatcher.addObject(AREA_INDEX, 2.0F);
+	}
+
+	/** Returns the cyclone's area of effect */
+	public float getArea() {
+		return dataWatcher.getWatchableObjectFloat(AREA_INDEX);
+	}
+
+	/** Sets the cyclone's area of effect radius; damages entities within (radius - 1, min. 0.5) */
+	public EntityCyclone setArea(float radius) {
+		dataWatcher.updateObject(AREA_INDEX, radius);
+		return this;
+	}
+
 	/** Disables the cyclone's ability to destroy blocks */
 	public EntityCyclone disableGriefing() {
 		canGrief = false;
@@ -119,6 +143,7 @@ public class EntityCyclone extends EntityMobThrowable
 		motionY += 0.01D;
 		if (!worldObj.isRemote) {
 			captureDrops();
+			attackNearbyEntities();
 			if (canGrief) {
 				destroyLeaves();
 			}
@@ -152,11 +177,9 @@ public class EntityCyclone extends EntityMobThrowable
 				}
 			}
 		} else if (mop.entityHit != null) {
-			if (getDamage() > 0.0F) {
+			if (getDamage() > 0.0F && !affectedEntities.contains(mop.entityHit.entityId)) {
 				mop.entityHit.attackEntityFrom(new EntityDamageSourceIndirect("tornado", this, getThrower()).setProjectile().setMagicDamage(), getDamage());
-				if (!worldObj.isRemote) {
-					setDamage(0.0F);
-				}
+				affectedEntities.add(mop.entityHit.entityId);
 			}
 			if (!(mop.entityHit instanceof EntityLivingBase) || rand.nextFloat() > ((EntityLivingBase) mop.entityHit).getAttributeMap().getAttributeInstance(SharedMonsterAttributes.knockbackResistance).getAttributeValue()) {
 				mop.entityHit.motionX = this.motionX * 1.8D;
@@ -169,13 +192,31 @@ public class EntityCyclone extends EntityMobThrowable
 			}
 		}
 	}
+
+	/**
+	 * If cyclone inflicts damage, searches for entities within the area of effect and attacks them
+	 */
+	private void attackNearbyEntities() {
+		if (getDamage() > 0.0F) {
+			double d = Math.max(0.5D, getArea() - 1.0D);
+			List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, boundingBox.expand(d, d, d));
+			for (EntityLivingBase entity : entities) {
+				if (affectedEntities.contains(entity.entityId)) {
+					continue;
+				}
+				entity.attackEntityFrom(new EntityDamageSourceIndirect("tornado", this, getThrower()).setProjectile().setMagicDamage(), getDamage());
+				affectedEntities.add(entity.entityId);
+			}
+		}
+	}
 	
 	/**
 	 * Scans for and captures nearby EntityItems
 	 */
 	private void captureDrops() {
 		if (!isDead) {
-			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(1.0D, 1.0D, 1.0D));
+			double d = Math.max(0.5D, getArea() - 1.0D);
+			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(d, d, d));
 			for (EntityItem item : items) {
 				capturedItems.add(item.getEntityItem());
 				item.setDead();
@@ -196,7 +237,7 @@ public class EntityCyclone extends EntityMobThrowable
 	 * Checks for and destroys leaves each update tick
 	 */
 	private void destroyLeaves() {
-		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(worldObj, rand, 2.0F, posX, posY, posZ, -1));
+		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(worldObj, rand, getArea(), posX, posY, posZ, -1));
 		Iterator iterator;
 		ChunkPosition chunkposition;
 		int i, j, k;
@@ -252,6 +293,8 @@ public class EntityCyclone extends EntityMobThrowable
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
+		compound.setFloat("areaOfEffect", getArea());
+		compound.setIntArray("affectedEntities", ArrayUtils.toPrimitive(affectedEntities.toArray(new Integer[affectedEntities.size()])));
 		NBTTagList items = new NBTTagList();
 		for (ItemStack stack : capturedItems) {
 			NBTTagCompound dropNBT = new NBTTagCompound();
@@ -264,6 +307,11 @@ public class EntityCyclone extends EntityMobThrowable
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
+		setArea(compound.getFloat("areaOfEffect"));
+		int[] entities = compound.getIntArray("affectedEntities");
+		for (int i = 0; i < entities.length; ++i) {
+			affectedEntities.add(entities[i]);
+		}
 		NBTTagList items = compound.getTagList("items");
 		for (int i = 0; i < items.tagCount(); ++i) {
 			capturedItems.add(ItemStack.loadItemStackFromNBT((NBTTagCompound) items.tagAt(i)));
