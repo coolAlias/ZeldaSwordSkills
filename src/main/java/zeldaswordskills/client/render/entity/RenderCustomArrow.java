@@ -47,7 +47,7 @@ public class RenderCustomArrow extends Render
 	public void renderArrow(EntityArrowCustom arrow, double dx, double dy, double dz, float yaw, float partialTick) {
 		bindEntityTexture(arrow);
 		GL11.glPushMatrix();
-		GL11.glTranslatef((float) dx, (float) dy, (float) dz);
+		GL11.glTranslated(dx, dy, dz);
 		GL11.glRotatef(arrow.prevRotationYaw + (arrow.rotationYaw - arrow.prevRotationYaw) * partialTick - 90.0F, 0.0F, 1.0F, 0.0F);
 		GL11.glRotatef(arrow.prevRotationPitch + (arrow.rotationPitch - arrow.prevRotationPitch) * partialTick, 0.0F, 0.0F, 1.0F);
 		Tessellator tessellator = Tessellator.instance;

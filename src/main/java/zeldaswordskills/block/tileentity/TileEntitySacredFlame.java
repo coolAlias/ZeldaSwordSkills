@@ -48,11 +48,13 @@ public class TileEntitySacredFlame extends TileEntity
 	
 	@Override
 	public void writeToNBT(NBTTagCompound compound) {
+		super.writeToNBT(compound);
 		compound.setInteger("nextResetDate", nextResetDate);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
+		super.readFromNBT(compound);
 		nextResetDate = (compound.hasKey("nextResetDate") ? compound.getInteger("nextResetDate") : 0);
 	}
 }

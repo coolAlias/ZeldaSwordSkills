@@ -83,9 +83,8 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	public int getMetaFromStack(ItemStack stack) {
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("metadata")) {
 			return stack.getTagCompound().getInteger("metadata");
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 	
 	/**

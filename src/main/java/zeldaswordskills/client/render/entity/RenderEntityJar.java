@@ -36,7 +36,7 @@ public class RenderEntityJar extends Render
 
 	public void renderJar(EntityCeramicJar entity, double dx, double dy, double dz, float yaw, float partialTick) {
 		GL11.glPushMatrix();
-		GL11.glTranslatef((float) dx, (float) dy, (float) dz);
+		GL11.glTranslated(dx, dy, dz);
 		GL11.glRotatef(yaw, 0, 1, 0);
 		float roll = ((float) entity.ticksExisted + partialTick) * 5;
 		while (roll > 360) roll -= 360;

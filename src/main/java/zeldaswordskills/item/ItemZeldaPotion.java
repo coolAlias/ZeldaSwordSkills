@@ -108,7 +108,9 @@ public class ItemZeldaPotion extends ItemFood
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-    public boolean hasEffect(ItemStack stack) { return true; }
+    public boolean hasEffect(ItemStack stack) {
+		return true;
+	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)

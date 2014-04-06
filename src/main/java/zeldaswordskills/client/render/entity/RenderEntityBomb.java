@@ -55,6 +55,7 @@ public class RenderEntityBomb extends Render
 		}
 	}
 
+	@Override
 	public void doRender(Entity bomb, double x, double y, double z, float yaw, float partialTick) {
 		renderEntityModel(bomb, x, y, z, yaw, partialTick);
 	}
@@ -62,8 +63,8 @@ public class RenderEntityBomb extends Render
 	public void renderEntityModel(Entity bomb, double x, double y, double z, float yaw, float partialTick) {
 		GL11.glPushMatrix();
 		float scale = bomb.ticksExisted % 13 > 10 ? 1.65F : 1.25F;
-		this.bindTexture(getEntityTexture(bomb));
-		GL11.glTranslatef((float) x, (float) y, (float) z);
+		bindTexture(getEntityTexture(bomb));
+		GL11.glTranslated(x, y, z);
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		GL11.glRotatef(150, 1F, 1F, 300F);
 		GL11.glScalef(scale, scale, scale);
