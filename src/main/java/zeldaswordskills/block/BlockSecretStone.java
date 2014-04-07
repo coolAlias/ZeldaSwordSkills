@@ -17,47 +17,45 @@
 
 package zeldaswordskills.block;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
+import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
+import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.lib.Config;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * An otherwise simple block that has can only be destroyed by explosions
+ * A simple block that renders as nearly any texture and can only be destroyed by explosions
  * 
- * Metadata bits 0x0 to 0x7 designate block texture
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
+public class BlockSecretStone extends BlockContainer implements IDungeonBlock, ISmashable
 {
-	/** List of all currently available secret blocks */
-	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","quartz_block_chiseled","end_stone"};
-	
 	/** Slab metadata values associated with each stone type */
 	private static final int[] slabs = {0,1,6,5,3,7,7,7};
-	
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
 
 	public BlockSecretStone(int id, Material material) {
 		super(id, material);
@@ -66,7 +64,17 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 		setStepSound(soundStoneFootstep);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
-	
+
+	@Override
+	public TileEntity createNewTileEntity(World world) {
+		return new TileEntityDungeonBlock();
+	}
+
+	@Override
+	public int getRenderType() {
+		return RenderTileDungeonBlock.renderId;
+	}
+
 	@Override
 	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
 		return (meta < 0x8 ? BlockWeight.VERY_HEAVY : BlockWeight.IMPOSSIBLE);
@@ -76,28 +84,47 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
 		return Result.DEFAULT;
 	}
-	
+
 	@Override
 	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
 		return world.getBlockMetadata(x, y, z) < 0x8;
 	}
-	
+
 	@Override
 	public boolean canCreatureSpawn(EnumCreatureType type, World world, int x, int y, int z) {
 		return false;
 	}
-	
+
 	@Override
-	public int getMobilityFlag() { return 2; }
-	
-	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) { return false; }
-	
-	@Override
-	public int idDropped(int meta, Random rand, int fortune) {
-		return getIdFromMeta(meta);
+	public int getMobilityFlag() {
+		return 2;
 	}
-	
+
+	@Override
+	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+		return false;
+	}
+
+	@Override
+	public ArrayList<ItemStack> getBlockDropped(World world, int x, int y, int z, int meta, int fortune) {
+		ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
+		Block block = null;
+		int blockMeta = 0;
+		TileEntity te = world.getBlockTileEntity(x, y, z);
+		if (te instanceof TileEntityDungeonBlock) {
+			block = ((TileEntityDungeonBlock) te).getRenderBlock();
+			blockMeta = ((TileEntityDungeonBlock) te).getRenderMetadata();
+			if (block == ZSSBlocks.secretStone || block == ZSSBlocks.dungeonCore) {
+				block = Block.blocksList[BlockSecretStone.getIdFromMeta(meta)];
+				blockMeta = 0;
+			}
+		}
+		if (block != null) {
+			drops.add(new ItemStack(block, 1, blockMeta));
+		}
+		return drops;
+	}
+
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
@@ -107,36 +134,40 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 			world.playSoundAtEntity(player, "random.break", 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}
 	}
-	
+
 	@Override
-	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
-	}
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-    public void getSubBlocks(int id, CreativeTabs tab, List list) {
-		for (int i = 0; i < names.length; ++i) {
-			list.add(new ItemStack(id, 1, i));
-			list.add(new ItemStack(id, 1, i | 0x8));
+	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
+		TileEntity te = world.getBlockTileEntity(x, y, z);
+		if (te instanceof TileEntityDungeonBlock && stack != null && stack.getItem() instanceof ItemDungeonBlock) {
+			Block block = ((ItemDungeonBlock) stack.getItem()).getBlockFromStack(stack);
+			if (block == ZSSBlocks.secretStone) {
+				block = (stack.getItemDamage() == 0 ? Block.stone : Block.obsidian);
+			} else if (block == ZSSBlocks.dungeonCore) {
+				block = (stack.getItemDamage() == 0 ? Block.cobblestoneMossy : Block.stoneBrick);
+			}
+			int meta = ((ItemDungeonBlock) stack.getItem()).getMetaFromStack(stack);
+			((TileEntityDungeonBlock) te).setRenderBlock(block, meta);
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int meta) {
-		return iconArray[(meta & ~0x8) % names.length];
+	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
+		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
-	
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void getSubBlocks(int id, CreativeTabs tab, List list) {
+		list.add(new ItemStack(id, 1, 0x0));
+		list.add(new ItemStack(id, 1, 0x8));
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[names.length];
-		for (int i = 0; i < names.length; ++i) {
-			iconArray[i] = register.registerIcon(names[i]);
-		}
+		blockIcon = register.registerIcon("stone");
 	}
-	
+
 	/**
 	 * Returns the block ID associated with the given metadata value; bit8 is ignored
 	 */
@@ -153,7 +184,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 		default: return 0;
 		}
 	}
-	
+
 	/**
 	 * Returns the stair block ID associated with the given metadata value; bit8 is ignored
 	 */
@@ -170,7 +201,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 		default: return Block.stairsCobblestone.blockID;
 		}
 	}
-	
+
 	/**
 	 * Returns the slab block metadata associated with the given metadata value; bit8 is ignored
 	 */

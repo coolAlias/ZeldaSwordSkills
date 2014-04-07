@@ -78,7 +78,7 @@ import zeldaswordskills.world.gen.structure.RoomBoss;
  * occasionally reset, limiting the number of fairies that can spawn on any given day.
  *
  */
-public class TileEntityDungeonCore extends TileEntity
+public class TileEntityDungeonCore extends TileEntityDungeonBlock
 {
 	/** Various timed event types; Generic type is merely a counter until all enemies defeated */
 	private static enum TimedEvent {GENERIC,DESERT_BATTLE,OCEAN_BATTLE,FOREST_BATTLE,MOUNTAIN_BATTLE,NETHER_BATTLE};
@@ -135,12 +135,21 @@ public class TileEntityDungeonCore extends TileEntity
 	private boolean alreadyVerified = false;
 	
 	public TileEntityDungeonCore() {}
+
+	@Override
+	public boolean canUpdate() {
+		return true;
+	}
 	
 	/** Call after setting the block to set the dungeon's structure bounding box */
-	public void setDungeonBoundingBox(StructureBoundingBox box) { this.box = box; }
+	public void setDungeonBoundingBox(StructureBoundingBox box) {
+		this.box = box;
+	}
 	
 	/** Returns the bounding box for this dungeon; may be null */
-	public StructureBoundingBox getDungeonBoundingBox() { return box; }
+	public StructureBoundingBox getDungeonBoundingBox() {
+		return box;
+	}
 	
 	/** Sets the boss type for this boss room */
 	public void setBossType(BossType type) {
@@ -158,7 +167,9 @@ public class TileEntityDungeonCore extends TileEntity
 	}
 	
 	/** Returns whether this tile is a spawner */
-	public boolean isSpawner() { return isSpawner; }
+	public boolean isSpawner() {
+		return isSpawner;
+	}
 	
 	/**
 	 * Sets this tile entity to act as a fairy spawner
@@ -205,8 +216,9 @@ public class TileEntityDungeonCore extends TileEntity
 	
 	@Override
 	public void updateEntity() {
-		if (worldObj.isRemote) { return; }
-		
+		if (worldObj.isRemote) {
+			return;
+		}
 		if (eventTimer == 0 && isOpened && worldObj.getClosestPlayer((double) xCoord + 0.5D, (double) yCoord + 0.5D, (double) zCoord + 0.5D, (double)(box.getXSize() - 2) / 2.0D) != null) {
 			if (triggerEvent()) {
 				//LogHelper.log(Level.INFO, "Removing core block after event triggered");
@@ -280,21 +292,22 @@ public class TileEntityDungeonCore extends TileEntity
 			--itemUpdate;
 		} else if (itemUpdate == 0) {
 			EntityPlayer player = worldObj.getPlayerEntityByName(playerName);
-			List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().
-					getAABB(xCoord, box.getCenterY(), zCoord, (xCoord + 1), (box.getCenterY() + 1), (zCoord + 1)).
-					expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2));
-			for (EntityItem item : list) {
-				ItemStack stack = item.getEntityItem();
-				if (stack.getItem() == Item.emerald) {
-					player.triggerAchievement(ZSSAchievements.fairyEmerald);
-					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, "random.orb", 1.0F, 1.0F);
-					rupees += stack.stackSize;
-					item.setDead();
-				} else if (stack.getItem() instanceof IFairyUpgrade && ((IFairyUpgrade) stack.getItem()).hasFairyUpgrade(stack)) {
-					((IFairyUpgrade) stack.getItem()).handleFairyUpgrade(item, player, this);
+			if (player != null) {
+				List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().
+						getAABB(xCoord, box.getCenterY(), zCoord, (xCoord + 1), (box.getCenterY() + 1), (zCoord + 1)).
+						expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2));
+				for (EntityItem item : list) {
+					ItemStack stack = item.getEntityItem();
+					if (stack.getItem() == Item.emerald) {
+						player.triggerAchievement(ZSSAchievements.fairyEmerald);
+						worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, "random.orb", 1.0F, 1.0F);
+						rupees += stack.stackSize;
+						item.setDead();
+					} else if (stack.getItem() instanceof IFairyUpgrade && ((IFairyUpgrade) stack.getItem()).hasFairyUpgrade(stack)) {
+						((IFairyUpgrade) stack.getItem()).handleFairyUpgrade(item, player, this);
+					}
 				}
 			}
-			
 			itemUpdate = -1;
 			playerName = "";
 		}
@@ -319,7 +332,7 @@ public class TileEntityDungeonCore extends TileEntity
 			if (dungeonType != null) {
 				info.addStat(Stats.STAT_BOSS_ROOMS, 1 << dungeonType.ordinal());
 				player.triggerAchievement(ZSSAchievements.bossBattle);
-				// == 127 (or 255 if the End boss room ever gets made)
+				// TODO == 127 (or 255 if the End boss room ever gets made)
 				if (info.getStat(Stats.STAT_BOSS_ROOMS) == 127) {
 					player.triggerAchievement(ZSSAchievements.bossComplete);
 				}
@@ -533,7 +546,8 @@ public class TileEntityDungeonCore extends TileEntity
 			for (int i = minX; i < maxX; ++i) {
 				for (int k = minZ; k < maxZ; ++k) {
 					if (activate) {
-						if (worldObj.getBlockId(i, j, k) == Block.dispenser.blockID) { 
+						// TODO test that dispensers are activating at random:
+						if (worldObj.getBlockId(i, j, k) == Block.dispenser.blockID && worldObj.rand.nextInt(10 - (2 * difficulty)) == 0) { 
 							Block.blocksList[Block.dispenser.blockID].updateTick(worldObj, i, j, k, worldObj.rand);
 						}
 					} else {

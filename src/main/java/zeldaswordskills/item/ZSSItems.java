@@ -46,6 +46,7 @@ import zeldaswordskills.client.render.item.RenderHeldItemBlock;
 import zeldaswordskills.client.render.item.RenderItemBomb;
 import zeldaswordskills.client.render.item.RenderItemBombBag;
 import zeldaswordskills.client.render.item.RenderItemCustomBow;
+import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.buff.Buff;
@@ -100,6 +101,11 @@ public class ZSSItems
 
 	/** Material used for masks */
 	public static final EnumArmorMaterial WOOD = EnumHelper.addArmorMaterial("Wood", 5, new int[] {1,3,2,1}, 5);
+
+	/** Block items */
+	public static Item
+	dungeonCoreItem,
+	secretStoneItem;
 
 	/** Miscellaneous mod items */
 	public static Item
@@ -277,12 +283,16 @@ public class ZSSItems
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerSkull.itemID, new RenderBigItem(1.0F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordBiggoron.itemID, new RenderBigItem(0.75F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordGiant.itemID, new RenderBigItem(0.75F));
-		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heroBow.itemID, new RenderItemCustomBow());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldDeku.itemID, new RenderItemShield());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldHylian.itemID, new RenderItemShield());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldMirror.itemID, new RenderItemShield());
 		//MinecraftForgeClient.registerItemRenderer(ZSSItems.hookshot.itemID, new RenderItemHookShot());
+	
+		// BLOCK ITEMS
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.dungeonCoreItem.itemID, new RenderItemDungeonBlock());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.secretStoneItem.itemID, new RenderItemDungeonBlock());
 	}
 
 	private static void addGrassDrops() {
@@ -379,6 +389,8 @@ public class ZSSItems
 
 		// BLOCK TAB ITEMS
 		doorLocked = new ItemDoorLocked(modItemIndex++).setUnlocalizedName("zss.doorlocked");
+		dungeonCoreItem = new ItemDungeonBlock(ZSSBlocks.dungeonCore.blockID - 256, ZSSBlocks.dungeonCore).setUnlocalizedName("item_dungeon_core");
+		secretStoneItem = new ItemDungeonBlock(ZSSBlocks.secretStone.blockID - 256, ZSSBlocks.secretStone).setUnlocalizedName("item_secret_stone");
 
 		// MISCELLANEOUS TAB ITEMS
 		hookshot = new ItemHookShot(modItemIndex++).setUnlocalizedName("zss.hookshot");
@@ -529,6 +541,8 @@ public class ZSSItems
 
 		// BLOCK TAB ITEMS
 		GameRegistry.registerItem(doorLocked, doorLocked.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(dungeonCoreItem, dungeonCoreItem.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(secretStoneItem, secretStoneItem.getUnlocalizedName().substring(5));
 
 		// KEYS TAB ITEMS
 		GameRegistry.registerItem(keyBig, keyBig.getUnlocalizedName().substring(5));

@@ -67,26 +67,16 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 		return stack;
 	}
 
-	/**
-	 * Returns the stored Block or null if none available
-	 */
+	/** Returns the stored Block or null if none available */
 	public Block getBlockFromStack(ItemStack stack) {
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("blockID")) {
-			return Block.blocksList[stack.getTagCompound().getInteger("blockID")];
-		}
-		return null;
+		return (stack.hasTagCompound() ? Block.blocksList[stack.getTagCompound().getInteger("blockID")] : null);
 	}
 
-	/**
-	 * Returns the metadata value associated with the stored block
-	 */
+	/** Returns the metadata value associated with the stored block */
 	public int getMetaFromStack(ItemStack stack) {
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("metadata")) {
-			return stack.getTagCompound().getInteger("metadata");
-		}
-		return 0;
+		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("metadata") : 0);
 	}
-	
+
 	/**
 	 * Drops the held block as close to the entity's position as possible, without
 	 * dropping it on the entity
@@ -116,7 +106,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Tries to drop the block at the closest block to x/y/z along the vector dx/dz in a semi-circular pattern
 	 * @param n the number of block lengths to check
@@ -138,7 +128,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * Returns true if the block was placed at x/y/z; checks for entity collision and other blocks
 	 */
@@ -244,7 +234,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		Block block = getBlockFromStack(stack);
-		return (block != null ? block.getUnlocalizedName() : Block.blocksList[Block.stone.blockID].getUnlocalizedName());
+		return (block != null ? block.getUnlocalizedName() : Block.stone.getUnlocalizedName());
 	}
 
 	@Override
@@ -257,7 +247,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	@SideOnly(Side.CLIENT)
 	public Icon getIcon(ItemStack stack, int pass) {
 		Block block = getBlockFromStack(stack);
-		return (block != null ? block.getIcon(1, getMetaFromStack(stack)) : Block.blocksList[Block.stone.blockID].getIcon(1, 0));
+		return (block != null ? block.getIcon(1, getMetaFromStack(stack)) : Block.stone.getIcon(1, 0));
 	}
 
 	@Override
