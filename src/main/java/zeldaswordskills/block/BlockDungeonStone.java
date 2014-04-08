@@ -17,54 +17,59 @@
 
 package zeldaswordskills.block;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
+import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
+import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.lib.Config;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * A block that can either only be destroyed by explosions, or can not be destroyed at all
+ * A simple block that renders as nearly any texture and can only be destroyed by explosions
  * 
- * Metadata bits 0x0 to 0x7 designate block texture
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
+public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, ISmashable
 {
-	/** List of all currently available secret blocks */
-	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","quartz_block_chiseled","end_stone"};
-
-	/** Slab metadata values associated with each stone type */
-	private static final int[] slabs = {0,1,6,5,3,7,7,7};
-
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
-
-	public BlockSecretStone(int id, Material material) {
+	public BlockDungeonStone(int id, Material material) {
 		super(id, material);
 		setBlockUnbreakable();
 		setResistance(6.0F);
 		setStepSound(soundStoneFootstep);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
+	}
+
+	@Override
+	public TileEntity createNewTileEntity(World world) {
+		return new TileEntityDungeonBlock();
+	}
+
+	@Override
+	public int getRenderType() {
+		return RenderTileDungeonBlock.renderId;
 	}
 
 	@Override
@@ -98,8 +103,19 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	}
 
 	@Override
-	public int idDropped(int meta, Random rand, int fortune) {
-		return getIdFromMeta(meta);
+	public ArrayList<ItemStack> getBlockDropped(World world, int x, int y, int z, int meta, int fortune) {
+		ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
+		Block block = null;
+		int blockMeta = 0;
+		TileEntity te = world.getBlockTileEntity(x, y, z);
+		if (te instanceof TileEntityDungeonBlock) {
+			block = ((TileEntityDungeonBlock) te).getRenderBlock();
+			blockMeta = ((TileEntityDungeonBlock) te).getRenderMetadata();
+		}
+		if (block != null) {
+			drops.add(new ItemStack(block, 1, blockMeta));
+		}
+		return drops;
 	}
 
 	@Override
@@ -113,6 +129,21 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	}
 
 	@Override
+	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
+		TileEntity te = world.getBlockTileEntity(x, y, z);
+		if (te instanceof TileEntityDungeonBlock && stack != null && stack.getItem() instanceof ItemDungeonBlock) {
+			Block block = ((ItemDungeonBlock) stack.getItem()).getBlockFromStack(stack);
+			if (block == ZSSBlocks.dungeonStone) {
+				block = (stack.getItemDamage() == 0 ? Block.stone : Block.obsidian);
+			} else if (block == ZSSBlocks.dungeonCore) {
+				block = (stack.getItemDamage() == 0 ? Block.cobblestoneMossy : Block.stoneBrick);
+			}
+			int meta = ((ItemDungeonBlock) stack.getItem()).getMetaFromStack(stack);
+			((TileEntityDungeonBlock) te).setRenderBlock(block, meta);
+		}
+	}
+
+	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
 		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
@@ -120,65 +151,13 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(int id, CreativeTabs tab, List list) {
-		for (int i = 0; i < names.length; ++i) {
-			list.add(new ItemStack(id, 1, i));
-			list.add(new ItemStack(id, 1, i | 0x8));
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int meta) {
-		return iconArray[(meta & ~0x8) % names.length];
+		list.add(new ItemStack(id, 1, 0x0));
+		list.add(new ItemStack(id, 1, 0x8));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[names.length];
-		for (int i = 0; i < names.length; ++i) {
-			iconArray[i] = register.registerIcon(names[i]);
-		}
-	}
-
-	/**
-	 * Returns the block ID associated with the given metadata value; bit8 is ignored
-	 */
-	public static int getIdFromMeta(int meta) {
-		switch(meta & ~0x8) {
-		case 0: return Block.stone.blockID;
-		case 1: return Block.sandStone.blockID;
-		case 2: return Block.netherBrick.blockID;
-		case 3: return Block.stoneBrick.blockID;
-		case 4: return Block.cobblestoneMossy.blockID;
-		case 5: return Block.ice.blockID;
-		case 6: return Block.blockNetherQuartz.blockID;
-		case 7: return Block.whiteStone.blockID;
-		default: return 0;
-		}
-	}
-
-	/**
-	 * Returns the stair block ID associated with the given metadata value; bit8 is ignored
-	 */
-	public static int getStairIdFromMeta(int meta) {
-		switch(meta & ~0x8) {
-		case 0: return Block.stairsStoneBrick.blockID;
-		case 4: return Block.stairsCobblestone.blockID;
-		case 1: return Block.stairsSandStone.blockID;
-		case 2: return Block.stairsNetherBrick.blockID;
-		case 3: return Block.stairsStoneBrick.blockID;
-		case 5:
-		case 6:
-		case 7: return Block.stairsNetherQuartz.blockID;
-		default: return Block.stairsCobblestone.blockID;
-		}
-	}
-
-	/**
-	 * Returns the slab block metadata associated with the given metadata value; bit8 is ignored
-	 */
-	public static int getSlabTypeFromMeta(int meta) {
-		return slabs[meta % 8];
+		blockIcon = register.registerIcon("stone");
 	}
 }

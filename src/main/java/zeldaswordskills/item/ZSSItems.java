@@ -105,7 +105,7 @@ public class ZSSItems
 	/** Block items */
 	public static Item
 	dungeonCoreItem,
-	secretStoneItem;
+	dungeonStoneItem;
 
 	/** Miscellaneous mod items */
 	public static Item
@@ -292,7 +292,7 @@ public class ZSSItems
 		// BLOCK ITEMS
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.dungeonCoreItem.itemID, new RenderItemDungeonBlock());
-		MinecraftForgeClient.registerItemRenderer(ZSSItems.secretStoneItem.itemID, new RenderItemDungeonBlock());
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.dungeonStoneItem.itemID, new RenderItemDungeonBlock());
 	}
 
 	private static void addGrassDrops() {
@@ -390,7 +390,7 @@ public class ZSSItems
 		// BLOCK TAB ITEMS
 		doorLocked = new ItemDoorLocked(modItemIndex++).setUnlocalizedName("zss.doorlocked");
 		dungeonCoreItem = new ItemDungeonBlock(ZSSBlocks.dungeonCore.blockID - 256, ZSSBlocks.dungeonCore).setUnlocalizedName("item_dungeon_core");
-		secretStoneItem = new ItemDungeonBlock(ZSSBlocks.secretStone.blockID - 256, ZSSBlocks.secretStone).setUnlocalizedName("item_secret_stone");
+		dungeonStoneItem = new ItemDungeonBlock(ZSSBlocks.dungeonStone.blockID - 256, ZSSBlocks.dungeonStone).setUnlocalizedName("item_dungeon_stone");
 
 		// MISCELLANEOUS TAB ITEMS
 		hookshot = new ItemHookShot(modItemIndex++).setUnlocalizedName("zss.hookshot");
@@ -542,7 +542,7 @@ public class ZSSItems
 		// BLOCK TAB ITEMS
 		GameRegistry.registerItem(doorLocked, doorLocked.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(dungeonCoreItem, dungeonCoreItem.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(secretStoneItem, secretStoneItem.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(dungeonStoneItem, dungeonStoneItem.getUnlocalizedName().substring(5));
 
 		// KEYS TAB ITEMS
 		GameRegistry.registerItem(keyBig, keyBig.getUnlocalizedName().substring(5));

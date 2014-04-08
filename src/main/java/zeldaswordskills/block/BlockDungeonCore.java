@@ -31,10 +31,10 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
  * integrity of the structure and 'disables' indestructible blocks in addition to
  * playing the medley when breached.
  * 
- * Uses the same bit flag as {@link #BlockSecretStone}
+ * Uses the same bit flag as {@link #BlockDungeonStone}
  *
  */
-public class BlockDungeonCore extends BlockSecretStone
+public class BlockDungeonCore extends BlockDungeonStone
 {
 	public BlockDungeonCore(int id, Material material) {
 		super(id, material);

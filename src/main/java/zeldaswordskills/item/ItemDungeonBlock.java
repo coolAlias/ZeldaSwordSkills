@@ -17,16 +17,20 @@
 
 package zeldaswordskills.item;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlockWithMetadata;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -80,13 +84,13 @@ public class ItemDungeonBlock extends ItemBlockWithMetadata {
 				int blockID = world.getBlockId(x, y, z);
 				int meta = world.getBlockMetadata(x, y, z);
 				Block block = (blockID > 0 ? Block.blocksList[blockID] : null);
-				TileEntity te = world.getBlockTileEntity(x, y, z);
-				if (te instanceof TileEntityDungeonBlock) {
-					block = ((TileEntityDungeonBlock) te).getRenderBlock();
-					if (block == null) {
-						block = Block.blocksList[BlockSecretStone.getIdFromMeta(meta)];
-						meta = 0;
-					} else {
+				if (block == ZSSBlocks.secretStone) {
+					block = Block.blocksList[BlockSecretStone.getIdFromMeta(meta)];
+					meta = 0;
+				} else {
+					TileEntity te = world.getBlockTileEntity(x, y, z);
+					if (te instanceof TileEntityDungeonBlock) {
+						block = ((TileEntityDungeonBlock) te).getRenderBlock();
 						meta = ((TileEntityDungeonBlock) te).getRenderMetadata();
 					}
 				}
@@ -102,5 +106,17 @@ public class ItemDungeonBlock extends ItemBlockWithMetadata {
 		} else {
 			return super.onItemUse(stack, player, world, x, y, z, side, hitX, hitY, hitZ);
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
+		if (stack.getItemDamage() > 7) {
+			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.unbreakable.desc"));
+		} else {
+			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block." +
+					(getBlockID() == ZSSBlocks.dungeonCore.blockID ? "core" : "dungeon") + ".desc.0"));
+		}
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.dungeon.desc.1"));
 	}
 }

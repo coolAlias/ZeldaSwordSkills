@@ -24,8 +24,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
-import zeldaswordskills.block.BlockSecretStone;
-import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -45,13 +43,7 @@ public class RenderTileDungeonBlock implements ISimpleBlockRenderingHandler
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonBlock) {
 			block = ((TileEntityDungeonBlock) te).getRenderBlock();
-			if (block == null || block == ZSSBlocks.secretStone || block == ZSSBlocks.dungeonCore) {
-				int blockId = BlockSecretStone.getIdFromMeta(meta);
-				block = (blockId > 0 ? Block.blocksList[blockId] : null);
-				meta = 0;
-			} else {
-				meta = ((TileEntityDungeonBlock) te).getRenderMetadata();
-			}
+			meta = ((TileEntityDungeonBlock) te).getRenderMetadata();
 		}
 		if (block == null || (!block.isOpaqueCube() && block != Block.ice)) {
 			return false;
@@ -60,8 +52,7 @@ public class RenderTileDungeonBlock implements ISimpleBlockRenderingHandler
 		if (meta == 0 || block == Block.ice) {
 			return renderer.renderBlockByRenderType(block, x, y, z);
 		}
-		// the following is for backwards compatibility with meta-based secret stone blocks
-		// it can be removed if the structure generation code ever transitions to tile entity
+		// the following is for blocks with meta-based icons, such as pumpkins
 		boolean rendered = false;
 		Icon icon = block.getIcon(0, meta);
 		if (icon != null) {

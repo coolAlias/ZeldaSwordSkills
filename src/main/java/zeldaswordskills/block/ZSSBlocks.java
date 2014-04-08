@@ -22,9 +22,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemBlockWithMetadata;
 import net.minecraftforge.common.Configuration;
 import zeldaswordskills.api.block.BlockWeight;
-import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
+import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
@@ -36,8 +36,9 @@ import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderTileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
 import zeldaswordskills.item.ItemCeramicJar;
-import zeldaswordskills.item.ItemSacredFlame;
 import zeldaswordskills.item.ItemDungeonBlock;
+import zeldaswordskills.item.ItemSacredFlame;
+import zeldaswordskills.item.ItemSecretStone;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -56,6 +57,7 @@ public class ZSSBlocks
 	chestLocked,
 	doorLocked,
 	dungeonCore,
+	dungeonStone,
 	pedestal,
 	pegWooden,
 	pegRusty,
@@ -84,6 +86,7 @@ public class ZSSBlocks
 		barrierHeavy = new BlockHeavy(modBlockIndex++, Material.rock, BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.barrier_heavy");
 		pegWooden = new BlockPeg(modBlockIndex++, BlockPeg.pegWoodMaterial, BlockWeight.VERY_LIGHT).setUnlocalizedName("zss.peg_wooden");
 		pegRusty = new BlockPeg(modBlockIndex++, BlockPeg.pegRustyMaterial, BlockWeight.MEDIUM).setUnlocalizedName("zss.peg_rusty");
+		dungeonStone = new BlockDungeonStone(modBlockIndex++, Material.rock).setUnlocalizedName("zss.dungeonstone");
 
 		register();
 	}
@@ -111,8 +114,9 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(chestLocked, chestLocked.getUnlocalizedName());
 		GameRegistry.registerBlock(doorLocked, doorLocked.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonCore, ItemDungeonBlock.class, dungeonCore.getUnlocalizedName());
+		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName());
 		GameRegistry.registerBlock(pedestal, ItemBlockWithMetadata.class, pedestal.getUnlocalizedName());
-		GameRegistry.registerBlock(secretStone, ItemDungeonBlock.class, secretStone.getUnlocalizedName());
+		GameRegistry.registerBlock(secretStone, ItemSecretStone.class, secretStone.getUnlocalizedName());
 		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");

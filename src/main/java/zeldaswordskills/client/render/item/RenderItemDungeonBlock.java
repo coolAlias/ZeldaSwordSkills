@@ -51,7 +51,7 @@ public class RenderItemDungeonBlock implements IItemRenderer
 		Item item = stack.getItem();
 		if (item instanceof ItemDungeonBlock) {
 			Block block = ((ItemDungeonBlock) item).getBlockFromStack(stack);
-			if (block == ZSSBlocks.secretStone) {
+			if (block == ZSSBlocks.dungeonStone) {
 				block = (stack.getItemDamage() == 0 ? Block.stone : Block.obsidian);
 			} else if (block == ZSSBlocks.dungeonCore) {
 				block = (stack.getItemDamage() == 0 ? Block.cobblestoneMossy : Block.stoneBrick);
