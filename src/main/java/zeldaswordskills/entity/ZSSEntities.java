@@ -19,9 +19,6 @@ package zeldaswordskills.entity;
 
 import net.minecraft.client.model.ModelSquid;
 import net.minecraft.client.renderer.entity.RenderSnowball;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityEggInfo;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.Configuration;
@@ -53,7 +50,6 @@ import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -61,9 +57,11 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSEntities
 {
+	/** Mod-only entity IDs */
+	private static int modEntityIndex = 0;
 	/** Spawn rates */
 	private static int spawnChu, spawnFairy, spawnKeese, spawnOctorok;
-	
+
 	/**
 	 * Initializes entity spawn rates 
 	 */
@@ -74,18 +72,16 @@ public class ZSSEntities
 		spawnKeese = config.get("Spawn Rates", "Keese spawn rate (0 to disable)[0+]", 1).getInt();
 		spawnOctorok = config.get("Spawn Rates", "Octorok spawn rate (0 to disable)[0+]", 8).getInt();
 	}
-	
+
 	/**
 	 * Registers all entities, entity eggs, and adds spawns
 	 */
 	public static void load() {
 		registerEntities();
-		registerEggs();
 		addSpawns();
 	}
-	
+
 	private static void registerEntities() {
-		int modEntityIndex = 0;
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBomb.class, "bomb", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
@@ -99,17 +95,23 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrowcustom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowElemental.class, "arrowelemental", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityMagicSpell.class, "magicspell", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
-		
+
 		// MOBS
-		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
-		EntityRegistry.registerModEntity(EntityFairy.class, "fairy", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
-		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
-		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
-		
+		registerEntity(EntityFairy.class, "fairy", 0xADFF2F, 0xFFFF00);
+		registerEntity(EntityChu.class, "chu", 0xEE2C2C, 0x00CED1);
+		registerEntity(EntityKeese.class, "keese", 0x555555, 0x000000);
+		registerEntity(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3);
+
 		// NPCS
 		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
 	}
-	
+
+	public static void registerEntity(Class entityClass, String name, int primaryColor, int secondaryColor) {
+		int id = EntityRegistry.findGlobalUniqueEntityId();
+		EntityRegistry.registerGlobalEntityID(entityClass, name, id, primaryColor, secondaryColor);
+		EntityRegistry.registerModEntity(entityClass, name, ++modEntityIndex, ZSSMain.instance, 80, 3, false);
+	}
+
 	@SideOnly(Side.CLIENT) 
 	public static void registerRenderers() {
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow());
@@ -129,31 +131,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(ZSSItems.throwingRock));
 		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing());
 	}
-	
-	private static void registerEggs() {
-		int id = Config.getSpawnEggStartId();
-		registerEntityEgg(EntityFairy.class, (id == 0 ? getNextEggId() : id++), 0xADFF2F, 0xFFFF00);
-		registerEntityEgg(EntityChu.class, (id == 0 ? getNextEggId() : id++), 0xEE2C2C, 0x00CED1);
-		registerEntityEgg(EntityKeese.class, (id == 0 ? getNextEggId() : id++), 0x555555, 0x000000);
-		registerEntityEgg(EntityOctorok.class, (id == 0 ? getNextEggId() : id++), 0x68228B, 0xBA55D3);
-	}
-	
-	private static void registerEntityEgg(Class<? extends Entity> entity, int id, int primaryColor, int secondaryColor){
-		EntityList.IDtoClassMapping.put(id, entity);
-		EntityList.entityEggs.put(id, new EntityEggInfo(id, primaryColor, secondaryColor));
-	}
-	
-	/**
-	 * Returns the next available egg id
-	 */
-	private static int getNextEggId() {
-		int i = 0;
-		while (EntityList.entityEggs.containsKey(i)) {
-			++i;
-		}
-		return i;
-	}
-	
+
 	private static void addSpawns() {
 		if (spawnFairy > 0) {
 			EntityRegistry.addSpawn(EntityFairy.class, spawnFairy, 1, 3, EnumCreatureType.ambient, BiomeGenBase.swampland);

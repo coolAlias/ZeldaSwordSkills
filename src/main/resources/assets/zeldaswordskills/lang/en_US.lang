@@ -378,10 +378,10 @@ entity.zeldaswordskills.arrowcustom.name=Arrow
 entity.zeldaswordskills.arrowelemental.name=Magic Arrow
 entity.zeldaswordskills.magicspell.name=Spell
 
-entity.zeldaswordskills.chu.name=Chu
-entity.zeldaswordskills.fairy.name=Fairy
-entity.zeldaswordskills.keese.name=Keese
-entity.zeldaswordskills.octorok.name=Octorok
+entity.chu.name=Chu
+entity.fairy.name=Fairy
+entity.keese.name=Keese
+entity.octorok.name=Octorok
 
 entity.zeldaswordskills.npc.mask_trader.name=Mask Salesman
 
