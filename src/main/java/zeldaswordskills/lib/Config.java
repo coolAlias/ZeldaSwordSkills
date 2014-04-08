@@ -89,8 +89,6 @@ public class Config
 	/*================== ITEMS =====================*/
 	/** [Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame */
 	private static boolean arrowsConsumeFlame;
-	/** [Blocks] Show Dungeon Core (fairy spawner) blocks in the Creative Tabs */
-	private static boolean enableDungeonCoreTab;
 	/** [Bombs] Minimum fuse time; set to 0 to disable held bomb ticks */
 	private static int bombFuseTime;
 	/** [Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone */
@@ -125,8 +123,6 @@ public class Config
 	private static int slingshotUpgradeOne;
 	/** [Slingshot] Cost (in emeralds) for second upgrade */
 	private static int slingshotUpgradeTwo;
-	/** [Spawn Egg] Starting spawn egg ID */
-	private static int spawnEggId;
 	/*================== SKILLS =====================*/
 	/** Whether to use default movement controls to activate skills such as Dodge */
 	private static boolean allowVanillaControls;
@@ -260,7 +256,6 @@ public class Config
 		isBuffBarLeft = config.get("General", "[Buff HUD] Whether the buff bar should be displayed on the left side of the screen", false).getBoolean(false);
 		/*================== ITEMS =====================*/
 		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
-		enableDungeonCoreTab = config.get("Item", "[Blocks] Show Dungeon Core (fairy spawner) blocks in the Creative Tabs", true).getBoolean(true);
 		bombFuseTime = config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt();
 		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone", false).getBoolean(false);
 		enableDekuDenude = config.get("Item", "[Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves", true).getBoolean(true);
@@ -278,7 +273,6 @@ public class Config
 		temperedRequiredKills = config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt();
 		slingshotUpgradeOne = config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt();
 		slingshotUpgradeTwo = config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt();
-		spawnEggId = config.get("Item", "[Spawn Egg] Starting spawn egg ID [0-32,000]", 0).getInt();
 		/*================== SKILLS =====================*/
 		allowVanillaControls = config.get("Skills", "Allow vanilla controls to activate skills", true).getBoolean(true);
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
@@ -378,7 +372,6 @@ public class Config
 	public static boolean isBuffBarLeft() { return isBuffBarLeft; }
 	/*================== ITEMS =====================*/
 	public static boolean getArrowsConsumeFlame() { return arrowsConsumeFlame; }
-	public static boolean isDungeonCoreTabEnabled() { return enableDungeonCoreTab; }
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
 	public static int getBombFuseTime() { return MathHelper.clamp_int(bombFuseTime, 0, 128); }
 	public static boolean canDekuDenude() { return enableDekuDenude; }
@@ -396,7 +389,6 @@ public class Config
 	public static int getRequiredKills() { return MathHelper.clamp_int(temperedRequiredKills, 100, 1000) - 1; }
 	public static int getSlingshotCostOne() { return MathHelper.clamp_int(slingshotUpgradeOne, 64, 320); }
 	public static int getSlingshotCostTwo() { return MathHelper.clamp_int(slingshotUpgradeTwo, 128, 640); }
-	public static int getSpawnEggStartId() { return MathHelper.clamp_int(spawnEggId, 0, Integer.MAX_VALUE); }
 	/*================== SKILLS =====================*/
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return doubleTap; }

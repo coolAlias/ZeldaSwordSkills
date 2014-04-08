@@ -180,7 +180,8 @@ public enum BossType
 		new ItemStack(ZSSItems.boomerang),
 		new ItemStack(ZSSItems.bootsHover),
 		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.EXTENSION.ordinal()),
-		new ItemStack(ZSSItems.maskGibdo)
+		new ItemStack(ZSSItems.maskGibdo),
+		new ItemStack(ZSSItems.rodFire)
 	};
 	private static final ItemStack[] forestItems = {
 		new ItemStack(ZSSItems.dekuLeaf),
@@ -211,13 +212,15 @@ public enum BossType
 		new ItemStack(ZSSItems.bootsRubber),
 		new ItemStack(ZSSItems.hammer),
 		new ItemStack(ZSSItems.heroBow),
-		new ItemStack(ZSSItems.maskHawkeye)
+		new ItemStack(ZSSItems.maskHawkeye),
+		new ItemStack(ZSSItems.rodTornado)
 	};
 	private static final ItemStack[] taigaItems = {
 		new ItemStack(ZSSItems.boomerang),
 		new ItemStack(ZSSItems.bootsHover),
 		new ItemStack(ZSSItems.gauntletsSilver),
-		new ItemStack(ZSSItems.maskGiants)
+		new ItemStack(ZSSItems.maskGiants),
+		new ItemStack(ZSSItems.rodIce)
 	};
 
 	/**
