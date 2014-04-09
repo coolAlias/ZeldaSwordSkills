@@ -18,11 +18,13 @@
 package zeldaswordskills.entity;
 
 import net.minecraft.client.model.ModelSquid;
+import net.minecraft.client.model.ModelVillager;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.Configuration;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.client.model.ModelGoron;
 import zeldaswordskills.client.render.RenderNothing;
 import zeldaswordskills.client.render.entity.RenderCustomArrow;
 import zeldaswordskills.client.render.entity.RenderEntityBomb;
@@ -33,8 +35,8 @@ import zeldaswordskills.client.render.entity.RenderEntityHookShot;
 import zeldaswordskills.client.render.entity.RenderEntityJar;
 import zeldaswordskills.client.render.entity.RenderEntityKeese;
 import zeldaswordskills.client.render.entity.RenderEntityMagicSpell;
-import zeldaswordskills.client.render.entity.RenderEntityMaskTrader;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
+import zeldaswordskills.client.render.entity.RenderGenericLiving;
 import zeldaswordskills.client.render.entity.RenderOctorok;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
@@ -50,6 +52,7 @@ import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -101,6 +104,7 @@ public class ZSSEntities
 		registerEntity(EntityChu.class, "chu", 0xEE2C2C, 0x00CED1);
 		registerEntity(EntityKeese.class, "keese", 0x555555, 0x000000);
 		registerEntity(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3);
+		registerEntity(EntityGoron.class, "goron", 0xB8860B, 0x8B5A00);
 
 		// NPCS
 		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
@@ -120,11 +124,14 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar());
 		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu());
 		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy());
+		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(
+				new ModelGoron(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/goron.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese());
 		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot());
 		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
 		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell());
-		RenderingRegistry.registerEntityRenderingHandler(EntityMaskTrader.class, new RenderEntityMaskTrader());
+		RenderingRegistry.registerEntityRenderingHandler(EntityMaskTrader.class, new RenderGenericLiving(
+				new ModelVillager(0.0F), 0.5F, 1.0F, "textures/entity/villager/villager.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderOctorok(new ModelSquid(), 0.7F));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());

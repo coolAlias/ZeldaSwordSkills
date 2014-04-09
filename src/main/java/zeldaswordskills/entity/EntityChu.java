@@ -207,6 +207,11 @@ public class EntityChu extends EntityLiving implements IMob
 	}
 
 	@Override
+	public boolean canBreatheUnderwater() {
+		return true;
+	}
+
+	@Override
 	protected void fall(float f) {}
 
 	@Override
@@ -316,10 +321,7 @@ public class EntityChu extends EntityLiving implements IMob
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
 		// workaround to prevent recursive splitting and merging in some situations
-		if (source == DamageSource.drown) {
-			setAir(300);
-			return false;
-		} else if (source == DamageSource.inWall) {
+		if (source == DamageSource.inWall) {
 			return false;
 		} else if (getShockTime() > 0) {
 			if (source instanceof EntityDamageSourceIndirect) {
