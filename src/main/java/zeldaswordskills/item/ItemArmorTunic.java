@@ -25,6 +25,7 @@ import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.Item;
@@ -35,12 +36,15 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
+import net.minecraft.village.MerchantRecipe;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.util.MerchantRecipeHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -62,7 +66,7 @@ public class ItemArmorTunic extends ItemArmor
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
-	
+
 	/**
 	 * Armor types as used on player: 0 boots, 1 legs, 2 chest, 3 helm
 	 * Armor types as used in armor class: 0 helm, 1 chest, 2 legs, 3 boots
@@ -71,7 +75,7 @@ public class ItemArmorTunic extends ItemArmor
 		super(id, EnumArmorMaterial.CHAIN, renderIndex, type);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
-	
+
 	/**
 	 * Sets this piece of armor to grant the specified potion effect every 50 ticks
 	 */
@@ -79,19 +83,28 @@ public class ItemArmorTunic extends ItemArmor
 		tickingEffect = effect;
 		return this;
 	}
-	
+
 	/**
 	 * Returns this armor's ticking potion effect or null if it doesn't have one
 	 */
 	public PotionEffect getEffect() {
 		return tickingEffect;
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (!player.worldObj.isRemote && this == ZSSItems.tunicGoronChest && entity instanceof EntityGoron) {
+			if (stack.getItemDamage() > 0) {
+				MerchantRecipe trade = new MerchantRecipe(new ItemStack(ZSSItems.tunicGoronChest), new ItemStack(Item.emerald, 8), new ItemStack(ZSSItems.tunicGoronChest));
+				MerchantRecipeHelper.addToListWithCheck(((EntityVillager) entity).getRecipes(player), trade);
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.goron.tunic.repair"));
+			} else {
+				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.goron.tunic.undamaged"));
+			}
+		}
 		return true;
 	}
-	
+
 	@Override
 	public void onArmorTickUpdate(World world, EntityPlayer player, ItemStack stack) {
 		PotionEffect effect = getEffect();
@@ -101,7 +114,7 @@ public class ItemArmorTunic extends ItemArmor
 			damageStack(stack, player, 1);
 		}
 	}
-	
+
 	/**
 	 * Call from LivingAttackEvent when entity attacked by fire damage
 	 * Checks if wearing Goron Tunic and negates damage if appropriate
@@ -126,12 +139,12 @@ public class ItemArmorTunic extends ItemArmor
 				}
 				entity.extinguish();
 			}
-			
+
 			return true;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Damages stack for amount, destroying if applicable
 	 */
@@ -142,7 +155,7 @@ public class ItemArmorTunic extends ItemArmor
 			entity.setCurrentItemOrArmor(EntityLiving.getArmorPosition(stack), null);
 		}
 	}
-	
+
 	/**
 	 * Returns true if the armor should be damaged this tick for applying potion effect
 	 */
@@ -154,7 +167,7 @@ public class ItemArmorTunic extends ItemArmor
 			return false;
 		}
 	}
-	
+
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer) {
 		String name = getUnlocalizedName().substring(9, getUnlocalizedName().lastIndexOf("_"));
@@ -164,12 +177,12 @@ public class ItemArmorTunic extends ItemArmor
 			return ModInfo.ID + ":textures/armor/" + name + "_layer_1.png";
 		}
 	}
-	
+
 	@Override
 	public int getItemEnchantability() {
 		return EnumArmorMaterial.CLOTH.getEnchantability();
 	}
-	
+
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
 		if (this == ZSSItems.tunicGoronChest) {
@@ -180,13 +193,13 @@ public class ItemArmorTunic extends ItemArmor
 		}
 		return stack.getItem() == Item.itemsList[Block.cloth.blockID];
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {

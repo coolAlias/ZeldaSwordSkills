@@ -265,9 +265,9 @@ public class TargetUtils
 	 * Returns true if the entity has an unimpeded view of the sky
 	 */
 	public static boolean canEntitySeeSky(World world, Entity entity) {
-		int x = (int) entity.posX;
-		int z = (int) entity.posZ;
-		for (int y = (int) entity.posY + 1; y < world.getActualHeight(); ++y) {
+		int x = MathHelper.floor_double(entity.posX);
+		int z = MathHelper.floor_double(entity.posZ);
+		for (int y = MathHelper.floor_double(entity.posY) + 1; y < world.getActualHeight(); ++y) {
 			if (!world.isAirBlock(x, y, z)) {
 				return false;
 			}

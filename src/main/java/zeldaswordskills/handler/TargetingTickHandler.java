@@ -20,10 +20,15 @@ package zeldaswordskills.handler;
 import java.util.EnumSet;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.client.render.EntityRendererAlt;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
@@ -47,6 +52,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class TargetingTickHandler implements ITickHandler
 {
 	private final Minecraft mc;
+
+	/** Allows swapping entity renderer for camera viewpoint when transformed */
+	private EntityRenderer renderer, prevRenderer;
 
 	/** The player whose view will update */
 	private EntityPlayer player = null;
@@ -73,6 +81,8 @@ public class TargetingTickHandler implements ITickHandler
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
 		player = mc.thePlayer;
 		if (player != null && ZSSPlayerInfo.get(player) != null) {
+			updateRenderer();
+
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
 			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill != null) {
@@ -156,5 +166,23 @@ public class TargetingTickHandler implements ITickHandler
 		rYaw += 90F;
 		float rPitch = (float) pitch - (float)(10.0F / Math.sqrt(distance)) + (float)(distance * Math.PI / 90);
 		player.setAngles(rYaw, -(rPitch - player.rotationPitch));
+	}
+
+	/**
+	 * Updates the camera entity renderer for Giant's Mask or other transformations
+	 */
+	private void updateRenderer() {
+		ItemStack mask = mc.thePlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
+		if (mask != null && mask.getItem() == ZSSItems.maskGiants) {
+			if (renderer == null) {
+				renderer = new EntityRendererAlt(mc);
+			}
+			if (mc.entityRenderer != renderer) {
+				prevRenderer = mc.entityRenderer;
+				mc.entityRenderer = renderer;
+			}
+		} else if (prevRenderer != null && mc.entityRenderer != prevRenderer) {
+			mc.entityRenderer = prevRenderer;
+		}
 	}
 }

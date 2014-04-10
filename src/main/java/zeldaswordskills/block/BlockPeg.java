@@ -141,13 +141,19 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public int tickRate(World world) { return 60; }
+	public int tickRate(World world) {
+		return 60;
+	}
 
 	@Override
-	public boolean renderAsNormalBlock() { return false; }
+	public boolean renderAsNormalBlock() {
+		return false;
+	}
 
 	@Override
-	public boolean isOpaqueCube() { return false; }
+	public boolean isOpaqueCube() {
+		return false;
+	}
 
 	@Override
 	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {

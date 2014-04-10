@@ -116,10 +116,10 @@ public class ItemHookShot extends Item
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
+		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 3 && trades != null) {
+			if (villager.getProfession() == 3) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));

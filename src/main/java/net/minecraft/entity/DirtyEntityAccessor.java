@@ -17,7 +17,12 @@
 
 package net.minecraft.entity;
 
+import java.util.logging.Level;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import zeldaswordskills.util.LogHelper;
 
 public class DirtyEntityAccessor {
 
@@ -33,5 +38,35 @@ public class DirtyEntityAccessor {
 		amount = entity.applyArmorCalculations(source, amount);
 		amount = entity.applyPotionDamageCalculations(source, amount);
 		return Math.max(amount - entity.getAbsorptionAmount(), 0.0F);
+	}
+
+	/**
+	 * Sets an entity's size; stores original size in entity's extended data
+	 * @param width stored as "origWidth"
+	 * @param height stored as "origHeight"
+	 */
+	public static void setSize(Entity entity, float width, float height) {
+		NBTTagCompound compound = entity.getEntityData();
+		compound.setFloat("origWidth", entity.width);
+		compound.setFloat("origHeight", entity.height);
+		entity.setSize(width, height);
+		if (entity instanceof EntityPlayer) {
+			((EntityPlayer) entity).eyeHeight = 0.85F * height;
+		}
+	}
+
+	/**
+	 * Restores entity to original size; must have first called {@link #setSize(Entity, float, float) setSize}
+	 */
+	public static void restoreOriginalSize(Entity entity) {
+		NBTTagCompound compound = entity.getEntityData();
+		if (compound.hasKey("origWidth") && compound.hasKey("origHeight")) {
+			entity.setSize(compound.getFloat("origWidth"), compound.getFloat("origHeight"));
+			if (entity instanceof EntityPlayer) {
+				((EntityPlayer) entity).eyeHeight = ((EntityPlayer) entity).getDefaultEyeHeight();
+			}
+		} else {
+			LogHelper.log(Level.WARNING, "Attempted to restore original size without any available data");
+		}
 	}
 }

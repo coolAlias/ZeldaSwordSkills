@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
@@ -68,7 +69,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	private int buyPrice;
 	/** Number of rupees a villager will pay for this mask */
 	private int sellPrice;
-	
+
 	/** Movement bonus for wearing the Bunny Hood */
 	public static final UUID bunnyHoodMoveBonusUUID = UUID.fromString("8412C9F7-9645-4C24-8FD1-6EFB8282E822");
 	public static final AttributeModifier bunnyHoodMoveBonus = (new AttributeModifier(bunnyHoodMoveBonusUUID, "Bunny Hood Speed Bonus", 0.3D, 2)).setSaved(false);
@@ -82,7 +83,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		setMaxDamage(0);
 		setCreativeTab(ZSSCreativeTabs.tabMasks);
 	}
-	
+
 	/**
 	 * Sets the buy and sell price for this mask; only for masks in the trading sequence
 	 * @param buy price the player will pay for the mask
@@ -93,17 +94,17 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		sellPrice = sell;
 		return this;
 	}
-	
+
 	/** The number of rupees to pay back to the Happy Mask Salesman */
 	public int getBuyPrice() {
 		return buyPrice > 0 ? buyPrice : 16;
 	}
-	
+
 	/** The number of rupees a villager will pay for this mask */
 	public int getSellPrice() {
 		return sellPrice > 0 ? sellPrice : 16;
 	}
-	
+
 	/**
 	 * Sets this mask to grant the specified potion effect every 50 ticks
 	 */
@@ -111,7 +112,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		tickingEffect = effect;
 		return this;
 	}
-	
+
 	/**
 	 * Used by the Blast Mask to cause an explosion; sets a short cooldown on the stack
 	 */
@@ -125,29 +126,29 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 			}
 		}
 	}
-	
+
 	/** Returns true if this Mask is cooling down */
 	private boolean isCooling(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getInteger("cooldown") > 0);
 	}
-	
+
 	/** Decrements the stack's cooldown by one; must check NBT tags are valid beforehand */
 	private void decrementCooldown(ItemStack stack) {
 		stack.getTagCompound().setInteger("cooldown", stack.getTagCompound().getInteger("cooldown") - 1);
 	}
-	
+
 	/** Sets the stack's cooldown to the time provided, in ticks */
 	private void setCooldown(ItemStack stack, int time) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
 		stack.getTagCompound().setInteger("cooldown", time);
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public float getMagnificationFactor() {
 		return (this == ZSSItems.maskHawkeye ? 3.0F : 0.0F);
 	}
-	
+
 	@Override
 	public void onArmorTickUpdate(World world, EntityPlayer player, ItemStack stack) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
@@ -171,14 +172,14 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 			}
 		}
 	}
-	
+
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
 		if (isCooling(stack)) {
 			decrementCooldown(stack);
 		}
 	}
-	
+
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer) {
 		if (slot == 2) {
@@ -187,10 +188,10 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 			return ModInfo.ID + ":textures/armor/" + getUnlocalizedName().substring(9) + "_layer_1.png";
 		}
 	}
-	
+
 	@Override
 	public int getItemEnchantability() { return 0; }
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
@@ -207,7 +208,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Called when the player right-clicks on an entity while wearing a mask
 	 * @return returning true will cancel the interact event (preventing trade
@@ -217,9 +218,9 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		if (!player.worldObj.isRemote) {
 			if (entity instanceof EntityVillager) {
 				EntityVillager villager = (EntityVillager) entity;
-				if (this == ZSSVillagerInfo.get(villager).getMaskDesired()) {
+				if (entity.getClass().isAssignableFrom(EntityVillager.class) && this == ZSSVillagerInfo.get(villager).getMaskDesired()) {
 					new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.mask.desired.0"),
-									StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
+							StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
 				} else {
 					player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
 				}
@@ -237,13 +238,13 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	public void registerIcons(IconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 	}
-	
+
 	/**
 	 * Applies or removes attribute modifiers for masks when equipped or unequipped
 	 */
@@ -261,6 +262,12 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		if (buffInfo.isBuffPermanent(Buff.ATTACK_UP)) {
 			buffInfo.removeBuff(Buff.ATTACK_UP);
 		}
+		if (player.getEntityData().hasKey("origWidth") && (stack == null || stack.getItem() != ZSSItems.maskGiants)) {
+			DirtyEntityAccessor.restoreOriginalSize(player);
+			if (player.worldObj.isRemote) {
+				player.stepHeight -= 1.0F;
+			}
+		}
 		if (stack != null && info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
 			if (((ItemMask) stack.getItem()).tickingEffect != null) {
 				player.addPotionEffect(new PotionEffect(((ItemMask) stack.getItem()).tickingEffect));
@@ -269,6 +276,11 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 				movement.applyModifier(bunnyHoodMoveBonus);
 				info.setFlag(ZSSPlayerInfo.MOBILITY, true);
 				buffInfo.applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
+			} else if (stack.getItem() == ZSSItems.maskGiants) {
+				DirtyEntityAccessor.setSize(player, player.width * 3.0F, player.height * 3.0F);
+				if (player.worldObj.isRemote) {
+					player.stepHeight += 1.0F;
+				}
 			} else if (stack.getItem() == ZSSItems.maskMajora) {
 				buffInfo.applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
 			}

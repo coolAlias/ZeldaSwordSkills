@@ -39,6 +39,7 @@ import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -93,7 +94,9 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 	}
 	
 	/** Shortcut method; returns this bomb's enum Type from stack damage value */
-	public static BombType getType(ItemStack stack) { return getType(stack.getItemDamage()); }
+	public static BombType getType(ItemStack stack) {
+		return getType(stack.getItemDamage());
+	}
 	
 	/**
 	 * Returns this bomb's enum Type from stack damage value
@@ -122,14 +125,14 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 	
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityVillager) {
+		if (entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			if (!player.worldObj.isRemote) {
 				EntityVillager villager = (EntityVillager) entity;
 				MerchantRecipeList trades = villager.getRecipes(player);
 				BombType bombType = getType(stack);
-				ItemStack chest = player.getCurrentArmor(2);
-				if (villager.getProfession() == 2 && trades != null) {
-					if (chest != null && chest.itemID == ZSSItems.tunicZoraChest.itemID && bombType != BombType.BOMB_FIRE) {
+				ItemStack chest = player.getCurrentArmor(ArmorIndex.WORN_CHEST);
+				if (villager.getProfession() == 2) {
+					if (chest != null && chest.getItem() == ZSSItems.tunicZoraChest && bombType != BombType.BOMB_FIRE) {
 						MerchantRecipe waterBombTrade = new MerchantRecipe(new ItemStack(ZSSItems.bomb,1,BombType.BOMB_STANDARD.ordinal()), new ItemStack(Item.emerald, 5), new ItemStack(ZSSItems.bomb,1,BombType.BOMB_WATER.ordinal()));
 						MerchantRecipeHelper.addToListWithCheck(trades, waterBombTrade);
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.zora"));
@@ -140,7 +143,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 					} else {
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.failure"));
 					}
-				} else if (villager.getProfession() == 3 && trades != null && chest != null && chest.itemID == ZSSItems.tunicGoronChest.itemID && bombType != BombType.BOMB_WATER) {
+				} else if (villager.getProfession() == 3 && chest != null && chest.getItem() == ZSSItems.tunicGoronChest && bombType != BombType.BOMB_WATER) {
 					MerchantRecipe fireBombTrade = new MerchantRecipe(new ItemStack(ZSSItems.bomb,1,BombType.BOMB_STANDARD.ordinal()), new ItemStack(Item.emerald, 10), new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FIRE.ordinal()));
 					MerchantRecipeHelper.addToListWithCheck(trades, fireBombTrade);
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.goron"));
@@ -150,7 +153,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 			}
 			return true;
 		} else {
-			return super.onLeftClickEntity(stack, player, entity);
+			return (entity instanceof EntityVillager || super.onLeftClickEntity(stack, player, entity));
 		}
 	}
 	

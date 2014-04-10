@@ -64,13 +64,13 @@ public class ItemChuJelly extends Item
 	
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
+		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager entityVillager = (EntityVillager) entity;
 			ZSSVillagerInfo villager = ZSSVillagerInfo.get(entityVillager);
 			MerchantRecipeList trades = entityVillager.getRecipes(player);
 			ChuType type = getType(stack);
 			entityVillager.playLivingSound();
-			if (villager != null && trades != null && villager.isChuTrader() && jellyMap.containsKey(type)) {
+			if (villager != null && villager.isChuTrader() && jellyMap.containsKey(type)) {
 				if (villager.getJelliesReceived(type) == 0) {
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.jelly.first"));
 					villager.addJelly(type, 1);

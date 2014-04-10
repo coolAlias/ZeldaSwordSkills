@@ -119,12 +119,15 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public boolean isInterested(Treasures treasure, ItemStack stack) {
 		if (treasureCustom.containsKey(treasure)) {
 			boolean flag = treasureCustom.get(treasure).equals(villager.getCustomNameTag());
+			if (flag && treasureCustom.get(treasure).equals("Biggoron")) {
+				flag = villager instanceof EntityGoron;
+			}
 			if (treasure == Treasures.CLAIM_CHECK) {
 				flag = stack.hasTagCompound() && stack.getTagCompound().hasKey("dateReceived") &&
 						stack.getTagCompound().getInteger("dateReceived") > Calendar.DATE + 2;
 			}
-			return flag && specialTrade != -2 && treasureVillager.get(treasure) == villager.getProfession() && 
-					(treasure != Treasures.TENTACLE || villager.isChild());
+			return flag && specialTrade != -2 && (treasure != Treasures.TENTACLE || villager.isChild() &&
+					(treasureVillager.get(treasure) == null || treasureVillager.get(treasure) == villager.getProfession()));
 		}
 		return (specialTrade > 0 && treasureVillager.get(treasure) == villager.getProfession());
 	}
@@ -283,12 +286,12 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	/**
 	 * Adds every component involved in a treasure trade
 	 * @param treasure the treasure to be traded
-	 * @param villager the profession of the villager allowed to have this trade
+	 * @param villager the profession of the villager allowed to have this trade, or null for no requirement
 	 * @param required the itemstack required for the trade in addition to the Treasure
 	 * @param output the itemstack to be traded for
 	 */
 	public static final void addTreasureTrade(Treasures treasure, EnumVillager villager, ItemStack required, ItemStack output) {
-		treasureVillager.put(treasure, villager.ordinal());
+		treasureVillager.put(treasure, (villager != null ? villager.ordinal() : null));
 		treasureTrades.put(treasure, new MerchantRecipe(new ItemStack(ZSSItems.treasure,1,treasure.ordinal()), required, output));
 	}
 
@@ -296,7 +299,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 * Adds every component involved in a treasure trade for a custom-named villager
 	 * @param treasure the treasure to be traded
 	 * @param name the name of the villager allowed to have this trade
-	 * @param villager the profession of the villager allowed to have this trade 
+	 * @param villager the profession of the villager allowed to have this trade, or null for no requirement
 	 * @param required the itemstack required for the trade in addition to the Treasure
 	 * @param output the itemstack to be traded for
 	 */
@@ -322,10 +325,10 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		addTreasureTrade(Treasures.ODD_MUSHROOM,"Old Hag",EnumVillager.LIBRARIAN,null,new ItemStack(ZSSItems.treasure,1,Treasures.ODD_POTION.ordinal()));
 		addTreasureTrade(Treasures.ODD_POTION,"Grog",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.POACHER_SAW.ordinal()));
 		addTreasureTrade(Treasures.POACHER_SAW,"Mutoh",EnumVillager.BLACKSMITH,null,new ItemStack(ZSSItems.treasure,1,Treasures.GORON_SWORD.ordinal()));
-		addTreasureTrade(Treasures.GORON_SWORD,"Biggoron",EnumVillager.BLACKSMITH,null,new ItemStack(ZSSItems.treasure,1,Treasures.PRESCRIPTION.ordinal()));
+		addTreasureTrade(Treasures.GORON_SWORD,"Biggoron",null,null,new ItemStack(ZSSItems.treasure,1,Treasures.PRESCRIPTION.ordinal()));
 		addTreasureTrade(Treasures.PRESCRIPTION,"King Zora",EnumVillager.PRIEST,null,new ItemStack(ZSSItems.treasure,1,Treasures.EYEBALL_FROG.ordinal()));
 		addTreasureTrade(Treasures.EYEBALL_FROG,"Lake Scientist",EnumVillager.LIBRARIAN,null,new ItemStack(ZSSItems.treasure,1,Treasures.EYE_DROPS.ordinal()));
-		addTreasureTrade(Treasures.EYE_DROPS,"Biggoron",EnumVillager.BLACKSMITH,null,new ItemStack(ZSSItems.treasure,1,Treasures.CLAIM_CHECK.ordinal()));
-		addTreasureTrade(Treasures.CLAIM_CHECK,"Biggoron",EnumVillager.BLACKSMITH,null,new ItemStack(ZSSItems.swordBiggoron));
+		addTreasureTrade(Treasures.EYE_DROPS,"Biggoron",null,null,new ItemStack(ZSSItems.treasure,1,Treasures.CLAIM_CHECK.ordinal()));
+		addTreasureTrade(Treasures.CLAIM_CHECK,"Biggoron",null,null,new ItemStack(ZSSItems.swordBiggoron));
 	}
 }

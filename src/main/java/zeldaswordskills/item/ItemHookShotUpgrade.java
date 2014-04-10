@@ -78,7 +78,7 @@ public class ItemHookShotUpgrade extends Item
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityVillager) {
+		if (entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			if (stack.getItem() instanceof ItemHookShotUpgrade) {
 				addSpecialTrade(stack, player, (EntityVillager) entity);
 			}

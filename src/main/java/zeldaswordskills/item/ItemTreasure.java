@@ -34,6 +34,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
@@ -108,7 +109,7 @@ public class ItemTreasure extends Item
 				MerchantRecipe trade = ZSSVillagerInfo.getTreasureTrade(treasure);
 				villager.playLivingSound();
 				if (treasure == Treasures.ZELDAS_LETTER) {
-					if (villager.hasCustomNameTag() && villager.getCustomNameTag().contains("Mask Salesman")) {
+					if (!(entity instanceof EntityGoron) && villager.getCustomNameTag().contains("Mask Salesman")) {
 						EntityMaskTrader trader = new EntityMaskTrader(villager.worldObj);
 						trader.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 						trader.setCustomNameTag(villager.getCustomNameTag());

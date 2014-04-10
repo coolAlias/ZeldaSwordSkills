@@ -38,6 +38,7 @@ import net.minecraft.village.MerchantRecipeList;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.skills.SkillBase;
@@ -70,13 +71,14 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
+			boolean isGoron = (entity instanceof EntityGoron);
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 3 && trades != null) {
+			if (villager.getProfession() == 3 || isGoron) {
 				if (stack.getItemDamage() != ZSSItems.swordGiant.itemID) {
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken"));
 					MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 5), new ItemStack(stack.getItemDamage(), 1, 0)));
-				} else if (villager.hasCustomNameTag() && villager.getCustomNameTag().equals("Medigoron")) {
+				} else if (isGoron && villager.getCustomNameTag().equals("Medigoron")) {
 					if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart) > 9) {
 						player.triggerAchievement(ZSSAchievements.swordBroken);
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.1"));

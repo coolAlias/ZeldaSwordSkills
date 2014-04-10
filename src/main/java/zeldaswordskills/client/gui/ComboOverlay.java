@@ -26,7 +26,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.event.EventPriority;
 import net.minecraftforge.event.ForgeSubscribe;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
@@ -48,8 +47,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ComboOverlay extends Gui
 {
 	private final Minecraft mc;
-
-	private ScaledResolution resolution;
 
 	/** Texture location for the targeting overlay */
 	//private static final ResourceLocation targetTexture = new ResourceLocation(ModInfo.ID, "textures/gui/targeting_overlay.png");
@@ -75,20 +72,16 @@ public class ComboOverlay extends Gui
 	public ComboOverlay() {
 		super();
 		this.mc = Minecraft.getMinecraft();
-		this.resolution = new ScaledResolution(this.mc.gameSettings, mc.displayWidth, mc.displayHeight);
 	}
 
-	@ForgeSubscribe(priority = EventPriority.NORMAL)
-	public void onRenderExperienceBar(RenderGameOverlayEvent event) {
-		if (event.isCancelable() || event.type != ElementType.HOTBAR) {
+	@ForgeSubscribe
+	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
+		if (event.type != ElementType.HOTBAR) {
 			return;
-		}
-		if (mc.gameSettings.guiScale != resolution.getScaleFactor()) {
-			resolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
 		}
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
 		if (skills != null) {
-			displayComboText(skills);
+			displayComboText(skills, event.resolution);
 			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill != null && skill.isLockedOn()) {
 				//displayTargetingOverlay(event, skill.getCurrentTarget());
@@ -99,7 +92,7 @@ public class ComboOverlay extends Gui
 	/**
 	 * Displays current combo data if applicable
 	 */
-	private void displayComboText(ZSSPlayerInfo skills) {
+	private void displayComboText(ZSSPlayerInfo skills, ScaledResolution resolution) {
 		ICombo iCombo = skills.getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (combo != iCombo.getCombo()) {
