@@ -91,7 +91,7 @@ public class ItemMiscZSS extends Item
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
+		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			if (stack.getItem() == ZSSItems.masterOre) {
 				handleMasterOre(stack, player, (EntityVillager) entity);
 			} else {

@@ -63,7 +63,7 @@ public class ItemPendant extends Item
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
+		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) entity;
 			if (villager.getProfession() == 2) {
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.pendant.priest.0"));

@@ -105,7 +105,7 @@ public class ItemMagicMirror extends Item
 	
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
+		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (villager.getProfession() == 1 && trades != null) {
