@@ -118,16 +118,19 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 	}
 
 	@Override
-	public boolean isItemTool(ItemStack stack) { return true; }
+	public int getItemEnchantability() {
+		return 0;
+	}
 
 	@Override
-	public int getItemEnchantability() { return 0; }
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return 72000;
+	}
 
 	@Override
-	public int getMaxItemUseDuration(ItemStack stack) { return 72000; }
-
-	@Override
-	public EnumAction getItemUseAction(ItemStack stack) { return EnumAction.bow; }
+	public EnumAction getItemUseAction(ItemStack stack) {
+		return EnumAction.bow;
+	}
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
