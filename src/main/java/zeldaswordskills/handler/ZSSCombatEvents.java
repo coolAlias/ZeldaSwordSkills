@@ -113,7 +113,7 @@ public class ZSSCombatEvents
 					float factor = (flag ? ((IZoom) stack.getItem()).getZoomFactor() : 0.15F);
 					float charge = (float) event.entity.getItemInUseDuration() / maxTime;
 					AttributeInstance attributeinstance = event.entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-					float fov = (event.entity.capabilities.allowFlying ? 1.1F : 1.0F);
+					float fov = (event.entity.capabilities.isFlying ? 1.1F : 1.0F);
 					fov *= (attributeinstance.getAttributeValue() / (double) event.entity.capabilities.getWalkSpeed() + 1.0D) / 2.0D;
 					if (event.entity.capabilities.getWalkSpeed() == 0.0F || Float.isNaN(fov) || Float.isInfinite(fov)) {
 						fov = 1.0F;
@@ -123,7 +123,7 @@ public class ZSSCombatEvents
 					} else {
 						charge *= charge;
 					}
-					event.newfov = fov * (1.0F - charge * magnify * factor);
+					event.newfov = fov * (1.0F - charge * factor * magnify);
 				}
 			}
 		}
