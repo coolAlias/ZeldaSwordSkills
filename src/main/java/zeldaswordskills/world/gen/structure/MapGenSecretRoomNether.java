@@ -41,7 +41,6 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 				int x = posX + rand.nextInt(16);
 				int y = rand.nextInt((i % 4 == 1 ? 64 : 128)) - rand.nextInt(16);
 				int z = posZ + rand.nextInt(16);
-				
 				RoomSecret room = new RoomSecret(chunkX, chunkZ, rand.nextInt(6) + 3, Block.netherrack.blockID);
 				if (room.generate(this, world, rand, x, y, z)) {
 					roomList.appendTag(room.writeToNBT());
@@ -61,6 +60,7 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 	}
 	
 	@Override
-	public String getTagName() { return "zssSecretNether"; }
-	
+	public String getTagName() {
+		return "zssSecretNether";
+	}
 }

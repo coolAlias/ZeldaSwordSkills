@@ -47,7 +47,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 		loadOrCreateData(worldObj);
 		int posX = (chunkX << 4) + rand.nextInt(16);
 		int posZ = (chunkZ << 4) + rand.nextInt(16);
-		
+
 		BossType type = BossType.getBossType(world, posX, posZ);
 		if (type != null) {
 			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, rand.nextInt(5) + 9, Block.stone.blockID);
@@ -65,7 +65,9 @@ public class MapGenBossRoom extends ZSSMapGenBase
 	}
 
 	@Override
-	public String getTagName() { return "zssBossRooms"; }
+	public String getTagName() {
+		return "zssBossRooms";
+	}
 
 	/**
 	 * Always returns null for boss rooms; generate on a chunk-by-chunk basis only
@@ -74,7 +76,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 	protected StructureBoundingBox getStructureBBAt(int x, int y, int z) {
 		return null;
 	}
-	
+
 	/**
 	 * Whether the lake generating at chunkX and chunkZ should be denied or not
 	 * (prevents lakes from destroying boss rooms within one chunk)
@@ -86,7 +88,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 				isRoomInChunk(chunkX, chunkZ - 1) || isRoomInChunk(chunkX + 1, chunkZ) ||
 				isRoomInChunk(chunkX - 1, chunkZ));
 	}
-	
+
 	/**
 	 * Returns true if a boss room exists in the chunk provided
 	 */
@@ -114,7 +116,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -130,7 +132,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			LogHelper.log(Level.WARNING, "Failed to translate Boss Room NBT compound into structure map");
 		}
 	}
-	
+
 	/**
 	 * Returns the ordinal value of the BossType of the Boss Dungeon in chunkXZ, or -1 if
 	 * no structure exists there
@@ -142,7 +144,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			return -1;
 		}
 	}
-	
+
 	/**
 	 * Updates the structure map and adds the appropriate nbt compound to the room data
 	 */

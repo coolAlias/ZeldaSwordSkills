@@ -49,13 +49,14 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		int posX = chunkX << 4;
 		int posZ = chunkZ << 4;
 		int posY = StructureGenUtils.getAverageSurfaceHeight(world, posX, posZ);
-		
+		if (posY < 1) {
+			return;
+		}
 		for (int i = 0; i < Config.getAttemptsPerChunk(); ++i) {
 			if (rand.nextFloat() < Config.getSecretRoomChance()) {
 				int x = posX + rand.nextInt(16);
 				int y = rand.nextInt(posY) + (i % 2 == 0 ? rand.nextInt(16) : rand.nextInt(8));
 				int z = posZ + rand.nextInt(16);
-				
 				RoomSecret room = new RoomSecret(chunkX, chunkZ, Math.min(rand.nextInt(6) + 3, 6), Block.stone.blockID);
 				if (room.generate(this, world, rand, x, y, z)) {
 					roomList.appendTag(room.writeToNBT());
@@ -73,7 +74,9 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 	}
 	
 	@Override
-	public String getTagName() { return "zssSecretRooms"; }
+	public String getTagName() {
+		return "zssSecretRooms";
+	}
 
 	@Override
 	protected StructureBoundingBox getStructureBBAt(int x, int y, int z) {

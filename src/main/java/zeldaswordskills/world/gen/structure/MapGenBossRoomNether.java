@@ -33,7 +33,7 @@ public class MapGenBossRoomNether extends MapGenBossRoom
 		loadOrCreateData(worldObj);
 		int posX = (chunkX << 4) + rand.nextInt(16);
 		int posZ = (chunkZ << 4) + rand.nextInt(16);
-		
+
 		BossType type = BossType.getBossType(world, posX, posZ);
 		if (type != null) {
 			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, rand.nextInt(6) + 8, Block.netherrack.blockID);
@@ -50,6 +50,7 @@ public class MapGenBossRoomNether extends MapGenBossRoom
 	}
 
 	@Override
-	public String getTagName() { return "zssBossNether"; }
-
+	public String getTagName() {
+		return "zssBossNether";
+	}
 }
