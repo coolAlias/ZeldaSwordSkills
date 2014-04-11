@@ -17,29 +17,46 @@
 
 package zeldaswordskills.entity;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentThorns;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIFollowGolem;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILookAtTradePlayer;
 import net.minecraft.entity.ai.EntityAIMoveThroughVillage;
+import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
 import net.minecraft.entity.ai.EntityAIMoveTowardsTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAIPlay;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAITradePlayer;
+import net.minecraft.entity.ai.EntityAIVillagerMate;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.village.Village;
 import net.minecraft.world.World;
+import zeldaswordskills.entity.ai.GenericAIDefendVillage;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-public class EntityGoron extends EntityVillager
+public class EntityGoron extends EntityVillager implements IVillageDefender
 {
+	/** The Goron's village, since EntityVillager.villageObj cannot be accessed */
+	protected Village village;
 	/** Flag for handling attack timer during client-side health update */
-	private static Byte ATTACK_FLAG = (byte) 4;
+	private static Byte ATTACK_FLAG = 0x4;
 
 	public EntityGoron(World world) {
 		this(world, 0);
@@ -47,13 +64,26 @@ public class EntityGoron extends EntityVillager
 
 	public EntityGoron(World world, int profession) {
 		super(world, profession);
-		setSize(1.2F, 2.8F);
-		setCanPickUpLoot(true);
+		setSize(1.5F, 2.8F);
+		tasks.taskEntries.clear();
+		tasks.addTask(0, new EntityAISwimming(this));
+		tasks.addTask(1, new EntityAITradePlayer(this));
+		tasks.addTask(1, new EntityAILookAtTradePlayer(this));
 		tasks.addTask(2, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
 		tasks.addTask(2, new EntityAIAttackOnCollide(this, IMob.class, 1.0D, false));
-		tasks.addTask(3, new EntityAIMoveThroughVillage(this, 0.6D, true));
 		tasks.addTask(3, new EntityAIMoveTowardsTarget(this, getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue(), 16.0F));
-		targetTasks.addTask(1, new EntityAIHurtByTarget(this, true));
+		tasks.addTask(4, new EntityAIMoveThroughVillage(this, 0.6D, true));
+		tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 1.0D));
+		tasks.addTask(6, new EntityAIVillagerMate(this));
+		tasks.addTask(7, new EntityAIFollowGolem(this));
+		tasks.addTask(8, new EntityAIPlay(this, 0.32D));
+		tasks.addTask(9, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 1.0F));
+		tasks.addTask(9, new EntityAIWatchClosest2(this, EntityVillager.class, 5.0F, 0.02F));
+		tasks.addTask(9, new EntityAIWander(this, 0.6D));
+		tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
+		targetTasks.addTask(1, new GenericAIDefendVillage(this));
+		targetTasks.addTask(2, new EntityAIHurtByTarget(this, true));
+		targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));
 	}
 
 	@Override
@@ -75,6 +105,19 @@ public class EntityGoron extends EntityVillager
 				setRevengeTarget(null);
 				setAttackTarget(null);
 				attackingPlayer = null;
+			}
+		}
+	}
+	
+	@Override
+	public void updateAITick() {
+		super.updateAITick();
+		if (!hasHome()) {
+			village = null;
+		} else if (village == null) {
+			ChunkCoordinates cc = getHomePosition();
+			if (cc != null) {
+				village = worldObj.villageCollectionObj.findNearestVillage(cc.posX, cc.posY, cc.posZ, 32);
 			}
 		}
 	}
@@ -100,7 +143,7 @@ public class EntityGoron extends EntityVillager
 
 	@Override
 	@SideOnly(Side.CLIENT)
-    public void handleHealthUpdate(byte flag) {
+	public void handleHealthUpdate(byte flag) {
 		if (flag == ATTACK_FLAG) {
 			// matches golem's value for rendering; not the same as value on server
 			attackTime = 10;
@@ -108,14 +151,14 @@ public class EntityGoron extends EntityVillager
 			super.handleHealthUpdate(flag);
 		}
 	}
-	
+
 	@Override
 	public boolean attackEntityAsMob(Entity entity) {
 		float amount = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int knockback = 0;
 		attackTime = 20; // set to 20 in EntityMob#attackEntity, but seems to be unnecessary due to AI
 		worldObj.setEntityState(this, ATTACK_FLAG);
-		
+
 		if (entity instanceof EntityLivingBase) {
 			amount += EnchantmentHelper.getEnchantmentModifierLiving(this, (EntityLivingBase) entity);
 			knockback += EnchantmentHelper.getKnockbackModifier(this, (EntityLivingBase) entity);
@@ -165,6 +208,11 @@ public class EntityGoron extends EntityVillager
 
 	// TODO update sounds to Goron-specific sounds
 	@Override
+	protected float getSoundPitch() {
+		return super.getSoundPitch() * 0.8F;
+	}
+
+	@Override
 	protected String getLivingSound() {
 		return isTrading() ? "mob.villager.haggle" : "mob.villager.idle";
 	}
@@ -188,5 +236,10 @@ public class EntityGoron extends EntityVillager
 		EntityGoron goron = new EntityGoron(worldObj);
 		goron.onSpawnWithEgg(null);
 		return goron;
+	}
+
+	@Override
+	public Village getVillageToDefend() {
+		return village;
 	}
 }
