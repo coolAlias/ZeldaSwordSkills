@@ -483,7 +483,7 @@ public class EntityChu extends EntityLiving implements IMob
 		if (getShockTime() % 8 > 6 && rand.nextInt(4) == 0) {
 			worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 		}
-		if (onGround) {
+		if (onGround && getEntityData().getInteger("timesMerged") < 4) {
 			attemptMerge();
 		}
 	}
@@ -500,6 +500,7 @@ public class EntityChu extends EntityLiving implements IMob
 				chu.setSize(i / 2);
 				chu.setType(getType());
 				chu.setLocationAndAngles(posX + (double) f, posY + 0.5D, posZ + (double) f1, rand.nextFloat() * 360.0F, 0.0F);
+				chu.getEntityData().setInteger("timesMerged", this.getEntityData().getInteger("timesMerged"));
 				worldObj.spawnEntityInWorld(chu);
 			}
 		}
@@ -528,6 +529,7 @@ public class EntityChu extends EntityLiving implements IMob
 					newChu.setSize(i * 2);
 					newChu.setType(this.getType().ordinal() < chu.getType().ordinal() ? chu.getType() : this.getType());
 					newChu.setLocationAndAngles((this.posX + chu.posX) / 2, posY + 0.5D, (this.posZ + chu.posZ) / 2 , rand.nextFloat() * 360.0F, 0.0F);
+					newChu.getEntityData().setInteger("timesMerged", rand.nextInt(3) + this.getEntityData().getInteger("timesMerged"));
 					worldObj.spawnEntityInWorld(newChu);
 					chu.isDead = true;
 					this.isDead = true;
