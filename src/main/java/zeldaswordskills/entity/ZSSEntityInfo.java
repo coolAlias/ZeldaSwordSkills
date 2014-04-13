@@ -137,7 +137,9 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	}
 	
 	/** Stuns this entity for the time given (not additive with previous stuns) */
-	public void stun(int time) { stun(time, false); }
+	public void stun(int time) {
+		stun(time, false);
+	}
 	
 	/**
 	 * Stuns this entity for the time given with optional override for players

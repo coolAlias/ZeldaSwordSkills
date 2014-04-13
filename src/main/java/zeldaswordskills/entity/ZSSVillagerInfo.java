@@ -126,8 +126,8 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 				flag = stack.hasTagCompound() && stack.getTagCompound().hasKey("dateReceived") &&
 						stack.getTagCompound().getInteger("dateReceived") > Calendar.DATE + 2;
 			}
-			return flag && specialTrade != -2 && (treasure != Treasures.TENTACLE || villager.isChild() &&
-					(treasureVillager.get(treasure) == null || treasureVillager.get(treasure) == villager.getProfession()));
+			return flag && specialTrade != -2 && (treasure != Treasures.TENTACLE || villager.isChild()) &&
+					(treasureVillager.get(treasure) == null || treasureVillager.get(treasure) == villager.getProfession());
 		}
 		return (specialTrade > 0 && treasureVillager.get(treasure) == villager.getProfession());
 	}

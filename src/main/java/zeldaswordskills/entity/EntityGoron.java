@@ -57,6 +57,8 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	protected Village village;
 	/** Flag for handling attack timer during client-side health update */
 	private static Byte ATTACK_FLAG = 0x4;
+	/** Timer for health regeneration, similar to players when satiated */
+	private int regenTimer;
 
 	public EntityGoron(World world) {
 		this(world, 0);
@@ -107,6 +109,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 				attackingPlayer = null;
 			}
 		}
+		if (!worldObj.isRemote) {
+			updateHealth();
+		}
 	}
 	
 	@Override
@@ -118,6 +123,18 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 			ChunkCoordinates cc = getHomePosition();
 			if (cc != null) {
 				village = worldObj.villageCollectionObj.findNearestVillage(cc.posX, cc.posY, cc.posZ, 32);
+			}
+		}
+	}
+
+	/**
+	 * Checks if Goron should regenerate some health
+	 */
+	protected void updateHealth() {
+		if (getHealth() < getMaxHealth()) {
+			if (++regenTimer > 399) {
+				heal(1.0F);
+				regenTimer = 0;
 			}
 		}
 	}

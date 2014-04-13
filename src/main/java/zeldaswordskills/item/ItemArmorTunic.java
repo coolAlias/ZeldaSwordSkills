@@ -171,11 +171,7 @@ public class ItemArmorTunic extends ItemArmor
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer) {
 		String name = getUnlocalizedName().substring(9, getUnlocalizedName().lastIndexOf("_"));
-		if (slot == 2) {
-			return ModInfo.ID + ":textures/armor/" + name + "_layer_2.png";
-		} else {
-			return ModInfo.ID + ":textures/armor/" + name + "_layer_1.png";
-		}
+		return String.format("%s:textures/armor/%s_layer_%d.png", ModInfo.ID, name, (slot == 2 ? 2 : 1));
 	}
 
 	@Override
