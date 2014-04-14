@@ -260,7 +260,6 @@ public class EntityOctorok extends EntityWaterMob implements IMob
 				if (entity != this) {
 					entityToAttack = entity;
 				}
-
 				return true;
 			} else {
 				return true;
@@ -316,7 +315,8 @@ public class EntityOctorok extends EntityWaterMob implements IMob
 					projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - worldObj.difficultySetting * 4)).
 							setType(BombType.BOMB_WATER).setTime(12 - (worldObj.difficultySetting * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * worldObj.difficultySetting);
 				} else {
-					projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - worldObj.difficultySetting * 4)).setDamage(f * worldObj.difficultySetting);
+					projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - worldObj.difficultySetting * 4)).
+							setIgnoreWater().setDamage(f * worldObj.difficultySetting);
 				}
 				// TODO worldObj.playSoundAtEntity(this, ModInfo.SOUND_WEB_SPLAT, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 				if (!worldObj.isRemote) {

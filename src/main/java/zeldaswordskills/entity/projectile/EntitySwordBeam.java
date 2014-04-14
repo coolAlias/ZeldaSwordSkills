@@ -101,10 +101,14 @@ public class EntitySwordBeam extends EntityThrowable
 
 	/** Entity's velocity factor */
 	@Override
-	protected float func_70182_d() { return 1.0F + (level * 0.15F); }
+	protected float func_70182_d() {
+		return 1.0F + (level * 0.15F);
+	}
 
 	@Override
-	public float getGravityVelocity() { return 0.0F; }
+	public float getGravityVelocity() {
+		return 0.0F;
+	}
 	
 	@Override
 	public float getBrightness(float partialTick) {

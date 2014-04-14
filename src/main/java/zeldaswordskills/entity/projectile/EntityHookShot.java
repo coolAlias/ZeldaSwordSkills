@@ -25,6 +25,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
@@ -128,6 +129,11 @@ public class EntityHookShot extends EntityThrowable
 		return (name.equals("") ? null : worldObj.getPlayerEntityByName(name));
 	}
 
+	/** Returns a hookshot damage source */
+	protected DamageSource getDamageSource() {
+		return new DamageSourceStunIndirect("hookshot", this, getThrower(), 50, 1).setCanStunPlayers().setProjectile();
+	}
+
 	/**
 	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
 	 */
@@ -216,7 +222,7 @@ public class EntityHookShot extends EntityThrowable
 				}
 			}
 		} else if (mop.entityHit != null && getTarget() == null) {
-			mop.entityHit.attackEntityFrom(new DamageSourceStunIndirect("hookshot", this, getThrower(), 50, 1).setCanStunPlayers().setProjectile(), 1.0F);
+			mop.entityHit.attackEntityFrom(getDamageSource(), 1.0F);
 			worldObj.playSoundAtEntity(mop.entityHit, "random.wood_click", 1.0F, 1.0F);
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
 			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null &&

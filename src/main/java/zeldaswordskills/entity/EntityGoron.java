@@ -56,7 +56,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	/** The Goron's village, since EntityVillager.villageObj cannot be accessed */
 	protected Village village;
 	/** Flag for handling attack timer during client-side health update */
-	private static Byte ATTACK_FLAG = 0x4;
+	private static final Byte ATTACK_FLAG = (byte) 4;
 	/** Timer for health regeneration, similar to players when satiated */
 	private int regenTimer;
 

@@ -18,12 +18,15 @@
 package zeldaswordskills.entity.projectile;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
 public class EntityThrowingRock extends EntityMobThrowable
 {
+	private static final int IGNORE_WATER = 22;
+
 	public EntityThrowingRock(World world) {
 		super(world);
 	}
@@ -35,14 +38,31 @@ public class EntityThrowingRock extends EntityMobThrowable
 	public EntityThrowingRock(World world, double x, double y, double z) {
 		super(world, x, y, z);
 	}
-	
+
 	public EntityThrowingRock(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
 	}
-	
+
+	/** Sets this throwing rock to ignore water during motion updates */
+	public EntityThrowingRock setIgnoreWater() {
+		dataWatcher.updateObject(IGNORE_WATER, (byte) 1);
+		return this;
+	}
+
+	/** Whether this throwing rock ignores water for motion updates */
+	public boolean getIgnoresWater() {
+		return dataWatcher.getWatchableObjectByte(IGNORE_WATER) != 0;
+	}
+
 	@Override
 	public void entityInit() {
+		dataWatcher.addObject(IGNORE_WATER, (byte) 0);
 		setDamage(2.0F);
+	}
+
+	@Override
+	public boolean handleWaterMovement() {
+		return !getIgnoresWater();
 	}
 
 	@Override
@@ -50,13 +70,27 @@ public class EntityThrowingRock extends EntityMobThrowable
 		for (int l = 0; l < 4; ++l) {
 			worldObj.spawnParticle("crit", posX, posY, posZ, 0.0D, 0.0D, 0.0D);
 		}
-		
+
 		if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), getDamage());
 		}
-		
+
 		if (!worldObj.isRemote) {
 			setDead();
+		}
+	}
+
+	@Override
+	public void writeEntityToNBT(NBTTagCompound compound) {
+		super.writeEntityToNBT(compound);
+		compound.setByte("ignoreWater", getIgnoresWater() ? (byte) 1 : (byte) 0);
+	}
+
+	@Override
+	public void readEntityFromNBT(NBTTagCompound compound) {
+		super.readEntityFromNBT(compound);
+		if (compound.getByte("ignoreWater") != 0) {
+			setIgnoreWater();
 		}
 	}
 }

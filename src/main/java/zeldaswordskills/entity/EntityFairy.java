@@ -51,7 +51,7 @@ public class EntityFairy extends EntityAmbientCreature
 	 * upon getting close a new target will be selected
 	 */
 	protected ChunkCoordinates currentFlightTarget;
-	
+
 	/** Home coordinates where this fairy spawned; will not wander too far from here */
 	protected int[] home = null;
 
@@ -60,7 +60,7 @@ public class EntityFairy extends EntityAmbientCreature
 		setSize(0.5F, 0.5F);
 		isImmuneToFire = true;
 	}
-	
+
 	/**
 	 * Sets the fairy's home coordinates after calling setPositionAndUpdate
 	 */
@@ -70,25 +70,39 @@ public class EntityFairy extends EntityAmbientCreature
 	}
 
 	@Override
-	public boolean isEntityInvulnerable() { return true; }
+	public boolean isEntityInvulnerable() {
+		return true;
+	}
 
 	@Override
-	public boolean attackEntityFrom(DamageSource source, float amount) { return false; }
+	public boolean attackEntityFrom(DamageSource source, float amount) {
+		return false;
+	}
 
 	@Override
-	protected boolean isAIEnabled() { return true; }
-	
-	@Override
-	public boolean canDespawn() { return home == null; }
+	protected boolean isAIEnabled() {
+		return true;
+	}
 
 	@Override
-	public boolean canBePushed() { return false; }
+	public boolean canDespawn() {
+		return home == null;
+	}
 
 	@Override
-	protected boolean canTriggerWalking() { return false; }
+	public boolean canBePushed() {
+		return false;
+	}
 
 	@Override
-	public boolean doesEntityNotTriggerPressurePlate() { return true; }
+	protected boolean canTriggerWalking() {
+		return false;
+	}
+
+	@Override
+	public boolean doesEntityNotTriggerPressurePlate() {
+		return true;
+	}
 
 	@Override
 	protected void fall(float par1) {}
@@ -131,7 +145,6 @@ public class EntityFairy extends EntityAmbientCreature
 					player.worldObj.spawnEntityInWorld(new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, stack));
 				}
 			}
-			
 			worldObj.playSoundAtEntity(player, Sounds.CORK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			setDead();
 			return true;
@@ -162,14 +175,13 @@ public class EntityFairy extends EntityAmbientCreature
 	}
 
 	@Override
-	protected void updateAITasks()
-	{
+	protected void updateAITasks() {
 		super.updateAITasks();
 
 		if (currentFlightTarget != null && (!worldObj.isAirBlock(currentFlightTarget.posX, currentFlightTarget.posY, currentFlightTarget.posZ) || currentFlightTarget.posY < 1)) {
 			currentFlightTarget = null;
 		}
-		
+
 		if (home != null && (posY < home[1] || getDistanceSq(home[0], home[1], home[2]) > 16D)) {
 			currentFlightTarget = new ChunkCoordinates(home[0], home[1], home[2]);
 		} else if (currentFlightTarget == null || rand.nextInt(30) == 0 || currentFlightTarget.getDistanceSquared((int) posX, (int) posY, (int) posZ) < 4.0F) {
@@ -196,7 +208,7 @@ public class EntityFairy extends EntityAmbientCreature
 		if (j > 240) { j = 240; }
 		return j | k << 16;
 	}
-	
+
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setBoolean("hasHome", home != null);
@@ -204,7 +216,7 @@ public class EntityFairy extends EntityAmbientCreature
 			compound.setIntArray("FairyHome", home);
 		}
 	}
-	
+
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		if (compound.getBoolean("hasHome")) {

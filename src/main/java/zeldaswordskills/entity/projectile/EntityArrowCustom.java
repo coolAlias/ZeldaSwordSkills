@@ -53,13 +53,13 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 {
 	/** Watchable object index for thrower entity's id */
 	protected static final int SHOOTER_DATAWATCHER_INDEX = 22;
-	
+
 	/** Watchable object index for whether this arrow is a homing arrow */
 	private static final int HOMING_DATAWATCHER_INDEX = 23;
-	
+
 	/** Watchable object index for target entity's id */
 	private static final int TARGET_DATAWATCHER_INDEX = 24;
-	
+
 	/** Private fields from EntityArrow are now protected instead */
 	protected int xTile = -1, yTile = -1, zTile = -1, inTile, inData;
 	protected int ticksInGround = 0, ticksInAir = 0;
@@ -68,7 +68,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	/** damage and knockback have getters and setters, so can be private */
 	private double damage = 2.0D;
 	private int knockbackStrength;
-	
+
 	/** The item id to return when picked up */
 	private int arrowItemId = Item.arrow.itemID;
 
@@ -109,7 +109,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		super(world, shooter, target, velocity, wobble);
 		setTarget(target);
 	}
-	
+
 	@Override
 	protected void entityInit() {
 		super.entityInit();
@@ -117,7 +117,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		dataWatcher.addObject(TARGET_DATAWATCHER_INDEX, -1);
 		dataWatcher.addObject(HOMING_DATAWATCHER_INDEX, Byte.valueOf((byte) 0));
 	}
-	
+
 	/**
 	 * Returns the shooter of this arrow or null if none was available
 	 */
@@ -125,7 +125,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		String name = dataWatcher.getWatchableObjectString(SHOOTER_DATAWATCHER_INDEX);
 		return (name.equals("") ? shootingEntity : worldObj.getPlayerEntityByName(name));
 	}
-	
+
 	/**
 	 * Used to update the datawatcher shooting entity object
 	 */
@@ -140,7 +140,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	protected boolean isHomingArrow() {
 		return (dataWatcher.getWatchableObjectByte(HOMING_DATAWATCHER_INDEX) & 1) != 0;
 	}
-	
+
 	/**
 	 * Sets whether this arrow is a homing arrow or not
 	 */
@@ -155,14 +155,14 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		int id = dataWatcher.getWatchableObjectInt(TARGET_DATAWATCHER_INDEX);
 		return (id > 0 ? (EntityLivingBase) worldObj.getEntityByID(id) : null);
 	}
-	
+
 	/**
 	 * Sets this arrow's current target (for homing arrows only)
 	 */
 	public void setTarget(EntityLivingBase target) {
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, target != null ? target.entityId : -1);
 	}
-	
+
 	/**
 	 * Sets the arrow item that will be added to the player's inventory when picked up
 	 */
@@ -177,9 +177,14 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		super.onEntityUpdate();
 		updateAngles();
 		checkInGround();
-		if (arrowShake > 0) { --arrowShake; }
-		if (inGround) { updateInGround(); }
-		else { updateInAir(); }
+		if (arrowShake > 0) {
+			--arrowShake;
+		}
+		if (inGround) {
+			updateInGround();
+		} else {
+			updateInAir();
+		}
 	}
 
 	/**
@@ -214,26 +219,34 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	}
 
 	/** Sets the amount of damage the arrow will inflict when it hits a mob */
-	public void setDamage(double value) { damage = value; }
+	public void setDamage(double value) {
+		damage = value;
+	}
 
 	/** Returns the amount of damage the arrow will inflict when it hits a mob */
-	public double getDamage() { return damage; }
-	
+	public double getDamage() {
+		return damage;
+	}
+
 	/** Returns the damage source this arrow will use */ 
 	protected DamageSource getDamageSource() {
 		return new EntityDamageSourceIndirect("arrow", this, getShooter()).setProjectile();
 	}
-	
+
 	/** Returns whether this arrow can target the entity; used for Endermen */
 	protected boolean canTargetEntity(Entity entity) {
 		return (!(entity instanceof EntityEnderman));
 	}
 
 	/** Sets the amount of knockback the arrow applies when it hits a mob. */
-	public void setKnockbackStrength(int value) { knockbackStrength = value; }
+	public void setKnockbackStrength(int value) {
+		knockbackStrength = value;
+	}
 
 	/** Returns the amount of knockback the arrow applies when it hits a mob */
-	public int getKnockbackStrength() { return knockbackStrength; }
+	public int getKnockbackStrength() {
+		return knockbackStrength;
+	}
 
 	/**
 	 * Updates yaw and pitch based on current motion
@@ -345,21 +358,29 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	protected void updateInAir() {
 		++ticksInAir;
 		MovingObjectPosition mop = checkForImpact();
-		if (mop != null) { onImpact(mop); }
+		if (mop != null) {
+			onImpact(mop);
+		}
 		spawnTrailingParticles();
 		updatePosition();
 		doBlockCollisions();
 	}
-	
+
 	/** Returns the arrow's velocity factor */
-	protected float getVelocityFactor() { return 1.5F; }
-	
+	protected float getVelocityFactor() {
+		return 1.5F;
+	}
+
 	/** Default gravity adjustment for arrows seems to be 0.05F */
-	protected float getGravityVelocity() { return 0.05F; }
-	
+	protected float getGravityVelocity() {
+		return 0.05F;
+	}
+
 	/** The name of the particle to spawn for trailing particle effects */
-	protected String getParticleName() { return "crit"; }
-	
+	protected String getParticleName() {
+		return "crit";
+	}
+
 	/**
 	 * Returns whether trailing particles should spawn (vanilla returns isCritical())
 	 */
@@ -373,8 +394,11 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	protected void spawnTrailingParticles() {
 		if (shouldSpawnParticles()) {
 			for (int i = 0; i < 4; ++i) {
-				worldObj.spawnParticle(getParticleName(), posX + motionX * (double) i / 4.0D, posY + motionY * (double) i / 4.0D,
-						posZ + motionZ * (double) i / 4.0D, -motionX, -motionY + 0.2D, -motionZ);
+				worldObj.spawnParticle(getParticleName(),
+						posX + motionX * (double) i / 4.0D,
+						posY + motionY * (double) i / 4.0D,
+						posZ + motionZ * (double) i / 4.0D,
+						-motionX, -motionY + 0.2D, -motionZ);
 			}
 		}
 	}
@@ -404,7 +428,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 			if (entity1.canBeCollidedWith() && (entity1 != shootingEntity || ticksInAir >= 5)) {
 				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
 				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
-				
+
 				if (mop1 != null) {
 					double d1 = vec3.distanceTo(mop1.hitVec);
 					if (d1 < d0 || d0 == 0.0D) {
@@ -415,7 +439,9 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 			}
 		}
 
-		if (entity != null) { mop = new MovingObjectPosition(entity); }
+		if (entity != null) {
+			mop = new MovingObjectPosition(entity);
+		}
 
 		if (mop != null && mop.entityHit instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) mop.entityHit;
@@ -433,8 +459,11 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	 * Called when custom arrow impacts an entity or block
 	 */
 	protected void onImpact(MovingObjectPosition mop) {
-		if (mop.entityHit != null) { onImpactEntity(mop); }
-		else { onImpactBlock(mop); }
+		if (mop.entityHit != null) {
+			onImpactEntity(mop);
+		} else {
+			onImpactBlock(mop);
+		}
 	}
 
 	/**
@@ -504,7 +533,9 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	protected int calculateDamage(Entity entityHit) {
 		float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
 		int dmg = MathHelper.ceiling_double_int((double) velocity * damage);
-		if (getIsCritical()) { dmg += rand.nextInt(dmg / 2 + 2); }
+		if (getIsCritical()) {
+			dmg += rand.nextInt(dmg / 2 + 2);
+		}
 		return dmg;
 	}
 
@@ -565,9 +596,14 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		inData = compound.getByte("inData") & 255;
 		arrowShake = compound.getByte("shake") & 255;
 		inGround = compound.getByte("inGround") == 1;
-		if (compound.hasKey("damage")) { damage = compound.getDouble("damage"); }
-		if (compound.hasKey("pickup")) { canBePickedUp = compound.getByte("pickup"); }
-		else if (compound.hasKey("player")) { canBePickedUp = compound.getBoolean("player") ? 1 : 0; }
+		if (compound.hasKey("damage")) {
+			damage = compound.getDouble("damage");
+		}
+		if (compound.hasKey("pickup")) {
+			canBePickedUp = compound.getByte("pickup");
+		} else if (compound.hasKey("player")) {
+			canBePickedUp = compound.getBoolean("player") ? 1 : 0;
+		}
 		arrowItemId = (compound.hasKey("arrowId") ? compound.getInteger("arrowId") : Item.arrow.itemID);
 		dataWatcher.updateObject(SHOOTER_DATAWATCHER_INDEX, compound.hasKey("shooter") ? compound.getString("shooter") : "");
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, compound.hasKey("target") ? compound.getInteger("target") : -1);

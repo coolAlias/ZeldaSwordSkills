@@ -33,6 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.packet.Packet28EntityVelocity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
@@ -113,6 +114,11 @@ public class EntityCyclone extends EntityMobThrowable
 		canGrief = false;
 		return this;
 	}
+
+	/** Returns a tornado damage source */
+	protected DamageSource getDamageSource() {
+		return new EntityDamageSourceIndirect("tornado", this, getThrower()).setProjectile().setMagicDamage();
+	}
 	
 	@Override
 	public void applyEntityCollision(Entity entity) {}
@@ -178,7 +184,7 @@ public class EntityCyclone extends EntityMobThrowable
 			}
 		} else if (mop.entityHit != null) {
 			if (getDamage() > 0.0F && !affectedEntities.contains(mop.entityHit.entityId)) {
-				mop.entityHit.attackEntityFrom(new EntityDamageSourceIndirect("tornado", this, getThrower()).setProjectile().setMagicDamage(), getDamage());
+				mop.entityHit.attackEntityFrom(getDamageSource(), getDamage());
 				affectedEntities.add(mop.entityHit.entityId);
 			}
 			if (!(mop.entityHit instanceof EntityLivingBase) || rand.nextFloat() > ((EntityLivingBase) mop.entityHit).getAttributeMap().getAttributeInstance(SharedMonsterAttributes.knockbackResistance).getAttributeValue()) {

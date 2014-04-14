@@ -185,15 +185,13 @@ public class EntityKeese extends EntityBat implements IMob
 	 * Returns the DamageSource this type of Keese inflicts
 	 */
 	private DamageSource getDamageSource() {
+		if (getShockTime() > 0) {
+			return new DamageSourceShock("shock", this, worldObj.difficultySetting * 50, 1.0F);
+		}
 		switch(getType()) {
 		case FIRE: return new DamageSourceDirect("mob", this).setFireDamage();
 		case ICE: return new DamageSourceIce("mob", this, 100, 0);
-		default:
-			if (getShockTime() > 0) {
-				return new DamageSourceShock("mob", this, worldObj.difficultySetting * 50, 1.0F);
-			} else {
-				return new EntityDamageSource("mob", this);
-			}
+		default: return new EntityDamageSource("mob", this);
 		}
 	}
 

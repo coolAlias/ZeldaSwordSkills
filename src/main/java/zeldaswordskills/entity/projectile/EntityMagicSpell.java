@@ -28,6 +28,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumMovingObjectType;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
@@ -114,9 +115,9 @@ public class EntityMagicSpell extends EntityMobThrowable
 	 */
 	protected DamageSource getDamageSource() {
 		switch(getType()) {
-		case ICE: return new DamageSourceIceIndirect("iceblast", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
-		case WIND: return new EntityDamageSourceIndirect("windblast", this, getThrower()).setProjectile().setMagicDamage();
-		default: return new DamageSourceIndirect("fireblast", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
+		case ICE: return new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
+		case WIND: return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
+		default: return new DamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
 		}
 	}
 
@@ -146,8 +147,10 @@ public class EntityMagicSpell extends EntityMobThrowable
 			boolean flag = getType() != MagicType.FIRE;
 			for (int i = 0; i < 4; ++i) {
 				worldObj.spawnParticle(particle,
-						posX + motionX * (double) i / 4.0D, posY + motionY * (double) i / 4.0D,
-						posZ + motionZ * (double) i / 4.0D, -motionX * 0.25D, -motionY + (flag ? 0.1D : 0.0D), -motionZ * 0.25D);
+						posX + motionX * (double) i / 4.0D,
+						posY + motionY * (double) i / 4.0D,
+						posZ + motionZ * (double) i / 4.0D,
+						-motionX * 0.25D, -motionY + (flag ? 0.1D : 0.0D), -motionZ * 0.25D);
 			}
 		}
 	}
@@ -202,9 +205,9 @@ public class EntityMagicSpell extends EntityMobThrowable
 		switch(getType()) {
 		case ICE:
 			ZSSEntityInfo.get(entity).stun((int) Math.ceil(getDamage()) * 10, true);
-			int i = (int) Math.floor(entity.posX);
-			int j = (int) Math.floor(entity.posY);
-			int k = (int) Math.floor(entity.posZ);
+			int i = MathHelper.floor_double(entity.posX);
+			int j = MathHelper.floor_double(entity.posY);
+			int k = MathHelper.floor_double(entity.posZ);
 			worldObj.setBlock(i, j, k, Block.ice.blockID);
 			worldObj.setBlock(i, j + 1, k, Block.ice.blockID);
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.glass", 1.0F, rand.nextFloat() * 0.4F + 0.8F);

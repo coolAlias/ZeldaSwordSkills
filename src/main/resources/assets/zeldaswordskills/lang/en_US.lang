@@ -357,6 +357,18 @@ creativetab.zss.misc=Zelda Treasures
 creativetab.zss.skill=Zelda Skills
 creativetab.zss.tools=Zelda Items
 
+death.arrow.fire=fire Arrow
+death.arrow.ice=ice Arrow
+death.arrow.light=light Arrow
+death.blast.fire=fire blast
+death.blast.ice=ice blast
+death.blast.wind=wind blast
+death.boomerang=boomerang
+death.hookshot=hookshot
+death.shock=shock
+death.slingshot=slingshot
+death.tornado=tornado
+
 dungeon.zss.temple_desert.name=Desert Temple
 dungeon.zss.temple_earth.name=Earth Temple
 dungeon.zss.temple_fire.name=Fire Temple

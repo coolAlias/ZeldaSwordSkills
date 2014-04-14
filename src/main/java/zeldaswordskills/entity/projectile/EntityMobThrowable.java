@@ -70,7 +70,9 @@ public abstract class EntityMobThrowable extends EntityThrowable
 	}
 	
 	/** Returns the amount of damage this entity will cause upon impact */
-	public float getDamage() { return damage; }
+	public float getDamage() {
+		return damage;
+	}
 	
 	/**
 	 * Sets the damage this entity will cause upon impact

@@ -32,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -128,13 +129,20 @@ public class EntityBoomerang extends EntityMobThrowable
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, target != null ? target.entityId : -1);
 	}
 
+	/** Returns a boomerang damage source */
+	protected DamageSource getDamageSource() {
+		return new DamageSourceStunIndirect("boomerang", this, getThrower(), 200, 5).setCanStunPlayers().setProjectile();
+	}
+
 	@Override
 	protected float getGravityVelocity() {
 		return 0.0F;
 	}
 
 	/** Returns the boomerang's velocity */
-	protected float getVelocity() { return func_70182_d(); }
+	protected float getVelocity() {
+		return func_70182_d();
+	}
 
 	/** Returns the boomerang's velocity */
 	@Override
@@ -170,34 +178,9 @@ public class EntityBoomerang extends EntityMobThrowable
 		}
 		EntityLivingBase target = getTarget(); 
 		if (target != null) {
-			// TODO make the boomerang curve
 			double d0 = target.posX - this.posX;
 			double d1 = target.boundingBox.minY + (double)(target.height) - this.posY;
 			double d2 = target.posZ - this.posZ;
-			/*
-			if (distance > -20) {
-			float yaw = (float)(Math.atan2(d0, d2) * 180.0D / Math.PI);
-		    float pitch = (float)(Math.atan2(d1, Math.sqrt(d0 * d0 + d2 * d2)) * 180.0D / Math.PI);
-		    float f = 0.4F;
-		    rotationYaw += (yaw - rotationYaw) / 90.0F;
-		    rotationPitch += (pitch - rotationPitch) / 90.0F;
-		    motionX = (double)(-MathHelper.sin(rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float) Math.PI) * f);
-		    motionZ = (double)(MathHelper.cos(rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float) Math.PI) * f);
-		    motionY = (double)(-MathHelper.sin(rotationPitch / 180.0F * (float) Math.PI) * f);
-			setThrowableHeading(motionX, motionY, motionZ, getVelocity(), 0.0F);
-			} else {
-			double d = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-			double d3 = Math.pow(d, 3);
-			double k = 0.1D;
-			motionX += k / d3 * d0;
-			motionY += k / d3 * d1;
-			motionZ += k / d3 * d2;
-			double velocity = Math.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
-			motionX *= getVelocity() / velocity;
-			motionY *= getVelocity() / velocity;
-			motionZ *= getVelocity() / velocity;
-			}
-			*/
 			setThrowableHeading(d0, d1, d2, getVelocity(), 0.0F);
 		}
 	}
@@ -225,7 +208,7 @@ public class EntityBoomerang extends EntityMobThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
-			if (mop.entityHit != getThrower() && mop.entityHit.attackEntityFrom(new DamageSourceStunIndirect("boomerang", this, getThrower(), 200, 5).setCanStunPlayers().setProjectile(), getDamage())) {
+			if (mop.entityHit != getThrower() && mop.entityHit.attackEntityFrom(getDamageSource(), getDamage())) {
 				playSound("damage.hit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (mop.entityHit instanceof EntityLivingBase && getThrower() != null) {
 					EnchantmentThorns.func_92096_a(getThrower(), (EntityLivingBase) mop.entityHit, rand);

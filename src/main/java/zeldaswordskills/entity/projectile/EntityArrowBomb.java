@@ -98,19 +98,29 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	}
 	
 	@Override
-	public float getMotionFactor() { return 1.0F; }
+	public float getMotionFactor() {
+		return 1.0F;
+	}
 	
 	@Override
-	protected float getVelocityFactor() { return 1.0F; }
+	protected float getVelocityFactor() {
+		return 1.0F;
+	}
 	
 	@Override
-	protected float getGravityVelocity() { return 0.065F; }
+	protected float getGravityVelocity() {
+		return 0.065F;
+	}
 	
 	@Override
-	protected String getParticleName() { return "smoke"; }
+	protected String getParticleName() {
+		return "smoke";
+	}
 	
 	@Override
-	protected boolean shouldSpawnParticles() { return true; }
+	protected boolean shouldSpawnParticles() {
+		return true;
+	}
 	
 	@Override
 	public void onUpdate() {

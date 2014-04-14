@@ -50,7 +50,7 @@ public class EntitySeedShot extends EntityThrowable
 	public EntitySeedShot(World world) {
 		super(world);
 	}
-	
+
 	public EntitySeedShot(World world, EntityLivingBase entity, float velocity) {
 		this(world, entity, velocity, 1, 0F);
 	}
@@ -108,14 +108,20 @@ public class EntitySeedShot extends EntityThrowable
 	}
 
 	/** Get the seed's type */
-	public SeedType getType() { return SeedType.values()[dataWatcher.getWatchableObjectInt(SEEDTYPE_INDEX)]; }
+	public SeedType getType() {
+		return SeedType.values()[dataWatcher.getWatchableObjectInt(SEEDTYPE_INDEX)];
+	}
 
 	/** Sets the amount of damage the arrow will inflict when it hits a mob */
-	public void setDamage(float value) { damage = value; }
+	public void setDamage(float value) {
+		damage = value;
+	}
 
 	/** Returns the amount of damage the arrow will inflict when it hits a mob */
-	public float getDamage() { return damage; }
-	
+	public float getDamage() {
+		return damage;
+	}
+
 	/**
 	 * Returns the damage source caused by this seed type
 	 */
@@ -128,25 +134,36 @@ public class EntitySeedShot extends EntityThrowable
 	}
 
 	/** Sets the amount of knockback the arrow applies when it hits a mob. */
-	public void setKnockback(int value) { knockback = value; }
+	public void setKnockback(int value) {
+		knockback = value;
+	}
 
 	/** Returns the amount of knockback the arrow applies when it hits a mob */
-	public int getKnockback() { return knockback; }
+	public int getKnockback() {
+		return knockback;
+	}
 
 	@Override
-	protected boolean canTriggerWalking() { return false; }
+	protected boolean canTriggerWalking() {
+		return false;
+	}
 
 	@Override
-	protected float getGravityVelocity() { return 0.05F; }
+	protected float getGravityVelocity() {
+		return 0.05F;
+	}
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		String particle = (getType() == SeedType.DEKU ? "largeexplode" : "crit");
 		for (int i = 0; i < 4; ++i) {
-			worldObj.spawnParticle(particle, posX - motionX * (double) i / 4.0D, posY - motionY * (double) i / 4.0D,
-					posZ - motionZ * (double) i / 4.0D, motionX, motionY + 0.2D, motionZ);
+			worldObj.spawnParticle(particle,
+					posX - motionX * (double) i / 4.0D,
+					posY - motionY * (double) i / 4.0D,
+					posZ - motionZ * (double) i / 4.0D,
+					motionX, motionY + 0.2D, motionZ);
 		}
-		
+
 		if (mop.entityHit != null) {
 			if (isBurning() && !(mop.entityHit instanceof EntityEnderman)) {
 				mop.entityHit.setFire(5);
@@ -161,7 +178,7 @@ public class EntitySeedShot extends EntityThrowable
 						mop.entityHit.addVelocity(motionX * d, 0.1D, motionZ * d);
 					}
 				}
-				
+
 				if (mop.entityHit instanceof EntityLivingBase) {
 					EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
 					switch(getType()) {
@@ -169,7 +186,7 @@ public class EntitySeedShot extends EntityThrowable
 					case PUMPKIN: entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id,100,0)); break;
 					default:
 					}
-					
+
 					if (getThrower() != null) {
 						EnchantmentThorns.func_92096_a(getThrower(), entity, rand);
 					}
@@ -205,7 +222,7 @@ public class EntitySeedShot extends EntityThrowable
 		}
 		return dmg;
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
@@ -214,7 +231,7 @@ public class EntitySeedShot extends EntityThrowable
 		compound.setFloat("damage", damage);
 		compound.setInteger("knockback", knockback);
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

@@ -29,7 +29,7 @@ import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
@@ -115,9 +115,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected DamageSource getDamageSource() {
 		switch(getType()) {
-		case FIRE: return new DamageSourceIndirect("fire arrow", this, getShooter()).setFireDamage().setProjectile().setMagicDamage();
-		case ICE: return new DamageSourceIceIndirect("ice arrow", this, getShooter(), 50, 1).setProjectile().setMagicDamage();
-		case LIGHT: return new DamageSourceHolyIndirect("light arrow", this, getShooter()).setProjectile().setMagicDamage();
+		case FIRE: return new DamageSourceIndirect("arrow.fire", this, getShooter()).setFireDamage().setProjectile().setMagicDamage();
+		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, getShooter(), 50, 1).setProjectile().setMagicDamage();
+		case LIGHT: return new DamageSourceHolyIndirect("arrow.light", this, getShooter()).setProjectile().setMagicDamage();
 		}
 		return super.getDamageSource();
 	}
@@ -133,7 +133,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	@Override
-	protected boolean shouldSpawnParticles() { return true; }
+	protected boolean shouldSpawnParticles() {
+		return true;
+	}
 
 	@Override
 	protected void updateInAir() {
@@ -181,7 +183,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 	protected void onImpactEntity(MovingObjectPosition mop) {
 		if (getType() == ElementType.LIGHT && canOneHitKill(mop.entityHit)) {
 			EntityLivingBase ender = (EntityLivingBase) mop.entityHit;
-			ender.attackEntityFrom(new EntityDamageSource("light arrow", getShooter()).setProjectile().setMagicDamage(), ender.getMaxHealth());
+			ender.attackEntityFrom(getDamageSource(), ender.getMaxHealth());
 			playSound("random.bowhit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			// TODO render bright flash, different sound effect?
 			if (!worldObj.isRemote) {
@@ -197,9 +199,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 		super.handlePostDamageEffects(entity);
 		if (!entity.isDead && getType() == ElementType.ICE) {
 			ZSSEntityInfo.get(entity).stun(calculateDamage(entity) * 10, true);
-			int i = (int) Math.floor(entity.posX);
-			int j = (int) Math.floor(entity.posY);
-			int k = (int) Math.floor(entity.posZ);
+			int i = MathHelper.floor_double(entity.posX);
+			int j = MathHelper.floor_double(entity.posY);
+			int k = MathHelper.floor_double(entity.posZ);
 			worldObj.setBlock(i, j, k, Block.ice.blockID);
 			worldObj.setBlock(i, j + 1, k, Block.ice.blockID);
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.glass", 1.0F, rand.nextFloat() * 0.4F + 0.8F);

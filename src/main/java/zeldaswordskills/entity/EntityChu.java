@@ -334,7 +334,7 @@ public class EntityChu extends EntityLiving implements IMob
 					setShockTime(0);
 				}
 			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityLivingBase) {
-				source.getEntity().attackEntityFrom(new DamageSourceShock("shock", this, getMaxStunTime(), getDamage()), getDamage());
+				source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
 				worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
 
@@ -354,7 +354,7 @@ public class EntityChu extends EntityLiving implements IMob
 	 */
 	private DamageSource getDamageSource() {
 		if (getShockTime() > 0) {
-			return new DamageSourceShock("mob", this, getMaxStunTime(), getDamage());
+			return new DamageSourceShock("shock", this, getMaxStunTime(), getDamage());
 		}
 		switch(getType()) {
 		case BLUE: return new DamageSourceIce("mob", this, 50, (getSize() > 2 ? 1 : 0));

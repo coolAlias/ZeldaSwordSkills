@@ -99,7 +99,9 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	}
 	
 	@Override
-	public float getMotionFactor() { return motionFactor; }
+	public float getMotionFactor() {
+		return motionFactor;
+	}
 	
 	/**
 	 * Sets amount by which entity's motion will be multiplied
@@ -126,25 +128,39 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	}
 
 	@Override
-	public BombType getType() { return BombType.values()[dataWatcher.getWatchableObjectInt(BOMBTYPE_DATAWATCHER_INDEX)]; }
+	public BombType getType() {
+		return BombType.values()[dataWatcher.getWatchableObjectInt(BOMBTYPE_DATAWATCHER_INDEX)];
+	}
 
 	@Override
-	protected float getGravityVelocity() { return 0.075F; }
+	protected float getGravityVelocity() {
+		return 0.075F;
+	}
 
 	@Override
-	protected float func_70182_d() { return 0.5F; }
+	protected float func_70182_d() {
+		return 0.5F;
+	}
 
 	@Override
-	protected boolean canTriggerWalking() { return false; }
+	protected boolean canTriggerWalking() {
+		return false;
+	}
 
 	@Override
-	public boolean canBeCollidedWith() { return !isDead; }
+	public boolean canBeCollidedWith() {
+		return !isDead;
+	}
 
 	@Override
-	public AxisAlignedBB getBoundingBox() { return boundingBox; }
+	public AxisAlignedBB getBoundingBox() {
+		return boundingBox;
+	}
 
 	@Override
-	public AxisAlignedBB getCollisionBox(Entity entity) { return entity.boundingBox; }
+	public AxisAlignedBB getCollisionBox(Entity entity) {
+		return entity.boundingBox;
+	}
 
 	@Override
 	public void onUpdate() {

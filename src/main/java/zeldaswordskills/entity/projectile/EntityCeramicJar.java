@@ -57,10 +57,14 @@ public class EntityCeramicJar extends EntityThrowable
 	}
 
 	@Override
-	protected float func_70182_d() { return 1.0F; }
+	protected float func_70182_d() {
+		return 1.0F;
+	}
 
 	@Override
-	protected float getGravityVelocity() { return 0.1F; }
+	protected float getGravityVelocity() {
+		return 0.1F;
+	}
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
