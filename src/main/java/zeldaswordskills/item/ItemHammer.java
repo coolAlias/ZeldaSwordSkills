@@ -163,7 +163,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);
 				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.LEAPING_BLOW, 0.4F, 0.5F);
-				DamageSource specialAttack = new DamageSourceStun("hammer", player, (int)(60 * charge), 5).setCanStunPlayers().setDamageBypassesArmor();
+				DamageSource specialAttack = new DamageSourceStun("player", player, (int)(60 * charge), 5).setCanStunPlayers().setDamageBypassesArmor();
 				float damage = (weaponDamage * charge) / 2.0F;
 				if (damage > 0.5F) {
 					List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(4.0D, 0.0D, 4.0D));

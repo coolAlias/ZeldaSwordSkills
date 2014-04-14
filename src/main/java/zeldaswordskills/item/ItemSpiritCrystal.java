@@ -260,7 +260,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 					amount *= 0.25F;
 				}
 
-				if (entity.attackEntityFrom(new DamageSourceIndirect("Din's Fire", player, player).setFireDamage().setMagicDamage(), amount) && !entity.isImmuneToFire()) {
+				if (entity.attackEntityFrom(new DamageSourceIndirect("magic.din", player, player).setFireDamage().setMagicDamage(), amount) && !entity.isImmuneToFire()) {
 					if (world.rand.nextFloat() < d10) {
 						entity.setFire(10);
 					}

@@ -41,14 +41,14 @@ public class DamageUtils
 	NON_SWORD = "nonSword",
 	/** Indirect damage caused by sword skills such as Leaping Blow */
 	INDIRECT_SWORD = "indirectSword";
-	
+
 	/**
 	 * Returns an armor-bypassing physical DamageSource
 	 */
 	public static DamageSource causeArmorBreakDamage(Entity entity) {
 		return new DamageSourceArmorBreak(ARMOR_BREAK, entity);
 	}
-	
+
 	/**
 	 * Returns IArmorBreak damage, distinguished from regular armor break damage
 	 * because the damage is added on to the last hit for combos
@@ -64,7 +64,7 @@ public class DamageUtils
 			setDamageBypassesArmor();
 		}
 	}
-	
+
 	/**
 	 * Returns a direct non-sword-based DamageSource for skills such as "Slam"
 	 * @param entity - entity directly responsible for causing the damage
@@ -72,7 +72,7 @@ public class DamageUtils
 	public static DamageSource causeNonSwordDamage(Entity entity) {
 		return new EntityDamageSource(NON_SWORD, entity);
 	}
-	
+
 	/**
 	 * Returns an indirect sword-based DamageSource
 	 * @param direct - entity directly responsible for causing the damage
@@ -81,7 +81,7 @@ public class DamageUtils
 	public static DamageSource causeIndirectSwordDamage(Entity direct, Entity indirect) {
 		return new EntityDamageSourceIndirect(INDIRECT_SWORD, direct, indirect);
 	}
-	
+
 	/**
 	 * Class providing access to protected vanilla methods
 	 */
@@ -107,7 +107,7 @@ public class DamageUtils
 			return this;
 		}
 	}
-	
+
 	/**
 	 * Class providing access to protected vanilla methods
 	 */
@@ -133,18 +133,18 @@ public class DamageUtils
 			return this;
 		}
 	}
-	
+
 	public static class DamageSourceShock extends DamageSourceDirect implements IDamageType, IDamageSourceStun
 	{
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
-		
+
 		/** Amount of hunger to drain */
 		private final float hunger;
-		
+
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
-		
+
 		/**
 		 * Creates a direct SHOCK damage source, causing stun and damaging hunger
 		 */
@@ -157,40 +157,40 @@ public class DamageUtils
 			enumDamageTypes.add(EnumDamageType.SHOCK);
 			enumDamageTypes.add(EnumDamageType.STUN);
 		}
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;
 		}
-		
+
 		@Override
 		public int getDuration() { return duration; }
-		
+
 		@Override
 		public int getAmplifier() { return 5; }
-		
+
 		@Override
 		public boolean canStunPlayers() { return true; }
-		
+
 		@Override
 		public boolean alwaysStuns() { return true; }
-		
+
 		@Override
 		public float getHungerDamage() { return hunger; }
 
 	}
-	
+
 	public static class DamageSourceShockIndirect extends DamageSourceIndirect implements IDamageType, IDamageSourceStun
 	{
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
-		
+
 		/** Amount of hunger to drain */
 		private final float hunger;
-		
+
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
-		
+
 		/**
 		 * Creates indirect source of SHOCK damage, causing stun and damaging hunger
 		 */
@@ -203,43 +203,43 @@ public class DamageUtils
 			enumDamageTypes.add(EnumDamageType.SHOCK);
 			enumDamageTypes.add(EnumDamageType.STUN);
 		}
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;
 		}
-		
+
 		@Override
 		public int getDuration() { return duration; }
-		
+
 		@Override
 		public int getAmplifier() { return 5; }
-		
+
 		@Override
 		public boolean canStunPlayers() { return true; }
-		
+
 		@Override
 		public boolean alwaysStuns() { return true; }
-		
+
 		@Override
 		public float getHungerDamage() { return hunger; }
 
 	}
-	
+
 	public static class DamageSourceStun extends DamageSourceDirect implements IDamageType,IDamageSourceStun
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
-		
+
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
-		
+
 		/** Factor by which stun time will be modified, multiplied by total damage inflicted */
 		private final int amplifier;
-		
+
 		/** If true, this damage source is capable of stunning players unless disabled in the config */
 		private boolean canStunPlayers = false;
-		
+
 		/**
 		 * Creates a direct stun damage source
 		 * @param duration base stun duration, modified by amplifier and -rand.nextInt(duration / 2)
@@ -252,46 +252,46 @@ public class DamageUtils
 			enumDamageTypes = new HashSet<EnumDamageType>();
 			enumDamageTypes.add(EnumDamageType.STUN);
 		}
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;
 		}
-		
+
 		@Override
 		public int getDuration() { return duration; }
-		
+
 		@Override
 		public int getAmplifier() { return amplifier; }
-		
+
 		/** Allows this damage source to stun players if allowed in the config */
 		public DamageSourceStun setCanStunPlayers() {
 			canStunPlayers = true;
 			return this;
 		}
-		
+
 		@Override
 		public boolean canStunPlayers() { return canStunPlayers; }
-		
+
 		@Override
 		public boolean alwaysStuns() { return false; }
 
 	}
-	
+
 	public static class DamageSourceStunIndirect extends DamageSourceIndirect implements IDamageType,IDamageSourceStun
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
-		
+
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
-		
+
 		/** Factor by which stun time will be modified, multiplied by total damage inflicted */
 		private final int amplifier;
-		
+
 		/** If true, this damage source is capable of stunning players unless disabled in the config */
 		private boolean canStunPlayers = false;
-		
+
 		/**
 		 * Creates an indirect stun damage source
 		 * @param duration base stun duration, modified by amplifier and -rand.nextInt(duration / 2)
@@ -304,75 +304,75 @@ public class DamageUtils
 			enumDamageTypes = new HashSet<EnumDamageType>();
 			enumDamageTypes.add(EnumDamageType.STUN);
 		}
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;
 		}
-		
+
 		@Override
 		public int getDuration() { return duration; }
-		
+
 		@Override
 		public int getAmplifier() { return amplifier; }
-		
+
 		/** Allows this damage source to stun players if allowed in the config */
 		public DamageSourceStunIndirect setCanStunPlayers() {
 			canStunPlayers = true;
 			return this;
 		}
-		
+
 		@Override
 		public boolean canStunPlayers() { return canStunPlayers; }
-		
+
 		@Override
 		public boolean alwaysStuns() { return false; }
 
 	}
-	
+
 	public static class DamageSourceHoly extends DamageSourceDirect implements IDamageType
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
-		
+
 		/** Creates a HOLY type EntityDamageSource */
 		public DamageSourceHoly(String name, Entity entity) {
 			super(name, entity);
 			enumDamageTypes = new HashSet<EnumDamageType>();
 			enumDamageTypes.add(EnumDamageType.HOLY);
 		}
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;
 		}
 	}
-	
+
 	public static class DamageSourceHolyIndirect extends DamageSourceIndirect implements IDamageType
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
-		
+
 		/** Creates a HOLY type indirect entity DamageSource */
 		public DamageSourceHolyIndirect(String name, Entity direct, Entity indirect) {
 			super(name, direct, indirect);
 			enumDamageTypes = new HashSet<EnumDamageType>();
 			enumDamageTypes.add(EnumDamageType.HOLY);
 		}
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;
 		}
 	}
-	
+
 	public static class DamageSourceIce extends DamageSourceDirect implements IDamageType, IPostDamageEffect
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
 		/** Slow effect duration and amplifier */
 		private final int duration, amplifier;
-		
+
 		/** Creates a ice-based EntityDamageSource */
 		public DamageSourceIce(String name, Entity entity, int duration, int amplifier) {
 			super(name, entity);
@@ -381,26 +381,26 @@ public class DamageUtils
 			enumDamageTypes = new HashSet<EnumDamageType>();
 			enumDamageTypes.add(EnumDamageType.COLD);
 		}
-		
+
 		@Override
 		public int getDuration() { return duration; }
-		
+
 		@Override
 		public int getAmplifier() { return amplifier; }
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;
 		}
 	}
-	
+
 	public static class DamageSourceIceIndirect extends DamageSourceIndirect implements IDamageType, IPostDamageEffect
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
 		/** Slow effect duration and amplifier */
 		private final int duration, amplifier;
-		
+
 		/** Creates a ice-based indirect entity DamageSource */
 		public DamageSourceIceIndirect(String name, Entity direct, Entity indirect, int duration, int amplifier) {
 			super(name, direct, indirect);
@@ -409,13 +409,13 @@ public class DamageUtils
 			enumDamageTypes = new HashSet<EnumDamageType>();
 			enumDamageTypes.add(EnumDamageType.COLD);
 		}
-		
+
 		@Override
 		public int getDuration() { return duration; }
-		
+
 		@Override
 		public int getAmplifier() { return amplifier; }
-		
+
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return enumDamageTypes;

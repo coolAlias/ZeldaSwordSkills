@@ -117,7 +117,7 @@ public class EntityCyclone extends EntityMobThrowable
 
 	/** Returns a tornado damage source */
 	protected DamageSource getDamageSource() {
-		return new EntityDamageSourceIndirect("tornado", this, getThrower()).setProjectile().setMagicDamage();
+		return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
 	}
 	
 	@Override

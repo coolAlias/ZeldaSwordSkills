@@ -320,8 +320,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	/** Only used for Fire and Ice Rods */
 	private DamageSource getDamageSource(EntityPlayer player) {
 		switch(magicType) {
-		case ICE: return new DamageSourceIce("player", player, 60, 1);
-		default: return new DamageSourceDirect("player", player).setFireDamage();
+		case ICE: return new DamageSourceIce("blast.ice", player, 60, 1);
+		default: return new DamageSourceDirect("blast.fire", player).setFireDamage();
 		}
 	}
 
