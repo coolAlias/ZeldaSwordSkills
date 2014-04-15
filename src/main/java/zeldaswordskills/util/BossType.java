@@ -35,10 +35,17 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.world.crisis.BossBattle;
+import zeldaswordskills.world.crisis.DesertBattle;
+import zeldaswordskills.world.crisis.EarthBattle;
+import zeldaswordskills.world.crisis.FireBattle;
+import zeldaswordskills.world.crisis.ForestBattle;
+import zeldaswordskills.world.crisis.OceanBattle;
 
 /**
  * 
@@ -47,19 +54,22 @@ import zeldaswordskills.item.ZSSItems;
  */
 public enum BossType
 {
-	HELL("temple_fire", EntityBlaze.class, 7, "hell"),
-	DESERT("temple_desert", EntityBlaze.class, 1, "desert", "deserthills"),
-	FOREST("temple_forest", EntityCaveSpider.class, 4, "forest", "foresthills"),
-	TAIGA("temple_ice", EntitySkeleton.class, 5, "taiga", "taigahills", "iceplains"),
-	OCEAN("temple_water", EntityOctorok.class, 1, "ocean", "frozenocean"),
-	SWAMP("temple_wind", EntityWitch.class, 4, "swampland"),
-	MOUNTAIN("temple_earth", EntityZombie.class, 3, "extremehills", "extremehillsedge");
+	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, "hell"),
+	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, "desert", "deserthills"),
+	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, "forest", "foresthills"),
+	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, "taiga", "taigahills", "iceplains"),
+	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, "ocean", "frozenocean"),
+	SWAMP("temple_wind", BossBattle.class, EntityWitch.class, 4, "swampland"),
+	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, "extremehills", "extremehillsedge");
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
 	private final String unlocalizedName;
 
 	/** Default biomes in which this dungeon can generate */
 	private final String[] defaultBiomes;
+
+	/** The class that will be used during the dungeon's Boss Battle */
+	private final Class<? extends BossBattle> bossBattle;
 
 	/** The mob class to spawn when a player enters the boss dungeon */
 	private final Class<? extends IMob> bossMob;
@@ -69,12 +79,14 @@ public enum BossType
 
 	/** Unlocalized name to BossType mapping */
 	private static final Map<String, BossType> stringToTypeMap = new HashMap<String, BossType>();
+
 	/** Mapping of biome names to boss types */
 	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
 
-	private BossType(String name, Class<? extends IMob> bossMob, int block, String... defaultBiomes) {
+	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int block, String... defaultBiomes) {
 		this.unlocalizedName = name;
 		this.defaultBiomes = defaultBiomes;
+		this.bossBattle = bossBattle;
 		this.bossMob = bossMob;
 		this.metadata = block;
 	}
@@ -224,19 +236,47 @@ public enum BossType
 	};
 
 	/**
+	 * Returns a new instance of the appropriate BossBattle crisis event
+	 */
+	@SuppressWarnings("finally")
+	public final BossBattle getBossBattle(TileEntityDungeonCore core) {
+		if (bossBattle == null) {
+			LogHelper.log(Level.WARNING, "Error retrieving boss battle event for " + toString());
+			return null;
+		}
+		BossBattle battle = null;
+		try {
+			try {
+				battle = (BossBattle) bossBattle.getConstructor(TileEntityDungeonCore.class).newInstance(core);
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+				return null;
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+				return null;
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} finally {
+			return battle;
+		}
+	}
+
+	/**
 	 * Returns a new instance of the appropriate mob for this type, or null
 	 * Note that no position or other information has been set, the default constructor(World) is used
 	 */
 	@SuppressWarnings("finally")
-	public static final Entity getNewMob(BossType type, World world) {
-		if (type.bossMob == null) {
-			LogHelper.log(Level.WARNING, "Error retrieving boss mob for " + type.toString());
+	public final Entity getNewMob(World world) {
+		if (bossMob == null) {
+			LogHelper.log(Level.WARNING, "Error retrieving boss mob for " + toString());
 			return null;
 		}
 		Entity entity = null;
 		try {
 			try {
-				entity = (Entity) type.bossMob.getConstructor(World.class).newInstance(world);
+				entity = (Entity) bossMob.getConstructor(World.class).newInstance(world);
 			} catch (InstantiationException e) {
 				e.printStackTrace();
 				return null;
