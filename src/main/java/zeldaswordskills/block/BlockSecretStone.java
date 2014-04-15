@@ -98,6 +98,11 @@ public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
 	}
 
 	@Override
+	public int damageDropped(int meta) {
+		return meta;
+	}
+
+	@Override
 	public int idDropped(int meta, Random rand, int fortune) {
 		return getIdFromMeta(meta);
 	}

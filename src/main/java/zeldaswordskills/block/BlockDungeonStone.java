@@ -103,6 +103,11 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 	}
 
 	@Override
+	public int damageDropped(int meta) {
+		return meta;
+	}
+
+	@Override
 	public ArrayList<ItemStack> getBlockDropped(World world, int x, int y, int z, int meta, int fortune) {
 		ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
 		Block block = null;
@@ -125,6 +130,17 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.block.secret"));
 			}
 			world.playSoundAtEntity(player, "random.break", 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+		}
+	}
+
+	@Override
+	public void onBlockAdded(World world, int x, int y, int z) {
+		TileEntity te = world.getBlockTileEntity(x, y, z);
+		if (te instanceof TileEntityDungeonBlock) {
+			TileEntityDungeonBlock stone = (TileEntityDungeonBlock) te;
+			if (stone.getRenderBlock() == null) {
+				stone.setRenderBlock(ZSSBlocks.secretStone, world.getBlockMetadata(x, y, z));
+			}
 		}
 	}
 
