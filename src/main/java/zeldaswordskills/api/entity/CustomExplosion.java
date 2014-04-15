@@ -88,9 +88,11 @@ public class CustomExplosion extends Explosion
 		explosion.targetBlock = (Config.onlyBombSecretStone() ? ZSSBlocks.secretStone.blockID : -1);
 		explosion.ignoreLiquids = (type != BombType.BOMB_STANDARD);
 		explosion.ignoreLiquidType = (type == BombType.BOMB_FIRE ? 2 : (type == BombType.BOMB_WATER ? 1 : 0));
-		if (world.provider.dimensionId == -1 && type != BombType.BOMB_FIRE) {
-			explosion.restrictExplosionBy(0.5F);
+		float f = bomb.getDestructionFactor();
+		if (world.provider.isHellWorld && type != BombType.BOMB_FIRE) {
+			f *= 0.5F;
 		}
+		explosion.restrictExplosionBy(f);
 		explosion.doExplosionA();
 		explosion.doExplosionB(true);
 	}
@@ -198,7 +200,7 @@ public class CustomExplosion extends Explosion
 	 */
 	@Override
 	public void doExplosionA() {
-		if (isSmoking) {
+		if (isSmoking && restrictExplosion > 0) {
 			populateAffectedBlocksList();
 		}
 		if (inflictsDamage) {
@@ -290,6 +292,7 @@ public class CustomExplosion extends Explosion
 	 */
 	protected void populateAffectedBlocksList() {
 		HashSet hashset = new HashSet();
+		float radius = Math.min(explosionSize * restrictExplosion, 16.0F);
 		for (int i = 0; i < MAX_RADIUS; ++i) {
 			for (int j = 0; j < MAX_RADIUS; ++j) {
 				for (int k = 0; k < MAX_RADIUS; ++k) {
@@ -302,7 +305,7 @@ public class CustomExplosion extends Explosion
 						d3 /= d6;
 						d4 /= d6;
 						d5 /= d6;
-						float f1 = explosionSize * ((0.7F * restrictExplosion) + worldObj.rand.nextFloat() * 0.6F);
+						float f1 = radius * (0.7F + worldObj.rand.nextFloat() * 0.6F);
 						double d0 = explosionX;
 						double d1 = explosionY;
 						double d2 = explosionZ;

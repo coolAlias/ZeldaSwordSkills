@@ -34,10 +34,10 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 {
 	/** Watchable object index for bomb's type */
 	private static final int BOMBTYPE_DATAWATCHER_INDEX = 25;
-	
+
 	/** Uses ItemBomb's radius if this value is zero */
 	private float radius = 0.0F;
-	
+
 	/** Whether this bomb is capable of destroying blocks */
 	private boolean canGrief = true;
 
@@ -56,18 +56,18 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	public EntityArrowBomb(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
 	}
-	
+
 	@Override
 	public void entityInit() {
 		super.entityInit();
 		dataWatcher.addObject(BOMBTYPE_DATAWATCHER_INDEX, BombType.BOMB_STANDARD.ordinal());
 	}
-	
+
 	@Override
 	protected DamageSource getDamageSource() {
 		return new EntityDamageSourceIndirect("bomb arrow", this, getShooter()).setProjectile().setExplosion();
 	}
-	
+
 	/**
 	 * Sets this bomb's radius
 	 */
@@ -75,7 +75,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 		this.radius = radius;
 		return this;
 	}
-	
+
 	/**
 	 * Sets this bomb to not destroy blocks, but still cause damage 
 	 */
@@ -96,32 +96,37 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	public BombType getType() {
 		return BombType.values()[dataWatcher.getWatchableObjectInt(BOMBTYPE_DATAWATCHER_INDEX)];
 	}
-	
+
 	@Override
 	public float getMotionFactor() {
 		return 1.0F;
 	}
-	
+
+	@Override
+	public float getDestructionFactor() {
+		return 1.0F;
+	}
+
 	@Override
 	protected float getVelocityFactor() {
 		return 1.0F;
 	}
-	
+
 	@Override
 	protected float getGravityVelocity() {
 		return 0.065F;
 	}
-	
+
 	@Override
 	protected String getParticleName() {
 		return "smoke";
 	}
-	
+
 	@Override
 	protected boolean shouldSpawnParticles() {
 		return true;
 	}
-	
+
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -130,7 +135,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 			setDead();
 		}
 	}
-	
+
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		Material material = worldObj.getBlockMaterial(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
@@ -143,7 +148,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 			super.onImpact(mop);
 		}
 	}
-	
+
 	/**
 	 * Returns true if the bomb is a dud: in the water or a water bomb in the nether
 	 * @param inFire whether this bomb is in fire, lava, or currently burning
@@ -154,7 +159,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 		default: return (worldObj.getBlockMaterial((int) posX, (int) posY, (int) posZ) == Material.water);
 		}
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
@@ -162,7 +167,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 		compound.setFloat("bombRadius", radius);
 		compound.setBoolean("canGrief", canGrief);
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

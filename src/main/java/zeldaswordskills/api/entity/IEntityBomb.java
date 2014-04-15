@@ -32,5 +32,12 @@ public interface IEntityBomb {
 	
 	/** Factor by which affected entity's motion will be multiplied */
 	public float getMotionFactor();
-	
+
+	/**
+	 * Factor by which to modify the radius of block destruction:
+	 * below 1.0F restricts the radius; above 1.0F expands the radius
+	 * Maximum radius * destruction factor is capped at 16.0F, which is mighty big.
+	 */
+	public float getDestructionFactor();
+
 }

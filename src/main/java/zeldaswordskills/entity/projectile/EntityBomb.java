@@ -48,6 +48,9 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	/** Factor by which affected entity's motion will be multiplied */
 	protected float motionFactor = 1.0F;
 
+	/** Factor by which radius of block destruction is multiplied */
+	protected float destructionFactor = 1.0F;
+
 	/** Watchable object index for bomb's type */
 	private static final int BOMBTYPE_DATAWATCHER_INDEX = 22;
 
@@ -108,6 +111,19 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	 */
 	public EntityBomb setMotionFactor(float amount) {
 		motionFactor = amount;
+		return this;
+	}
+
+	@Override
+	public float getDestructionFactor() {
+		return destructionFactor;
+	}
+
+	/**
+	 * Sets the amount by which block destruction radius will be multiplied
+	 */
+	public EntityBomb setDestructionFactor(float factor) {
+		this.destructionFactor = factor;
 		return this;
 	}
 
@@ -257,6 +273,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		compound.setInteger("fuseTime", fuseTime);
 		compound.setFloat("bombRadius", radius);
 		compound.setFloat("motionFactor", motionFactor);
+		compound.setFloat("destructionFactor", destructionFactor);
 		compound.setBoolean("canGrief", canGrief);
 	}
 	
@@ -267,6 +284,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		fuseTime = compound.getInteger("fuseTime");
 		radius = compound.getFloat("bombRadius");
 		motionFactor = compound.getFloat("motionFactor");
+		destructionFactor = compound.getFloat("destructionFactor");
 		canGrief = compound.getBoolean("canGrief");
 	}
 }
