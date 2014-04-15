@@ -132,6 +132,8 @@ public class Config
 	private static int maxBonusHearts;
 	/** Whether auto-targeting is enabled or not */
 	private static boolean autoTarget;
+	/** Whether players can be targeted */
+	private static boolean enablePlayerTarget;
 	/** Number of combo hits to display */
 	private static int hitsToDisplay;
 	/** [Sword Beam] Whether to require a completely full health bar to use */
@@ -276,6 +278,7 @@ public class Config
 		/*================== SKILLS =====================*/
 		allowVanillaControls = config.get("Skills", "Allow vanilla controls to activate skills", true).getBoolean(true);
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
+		enablePlayerTarget = config.get("Skills", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
 		doubleTap = config.get("Skills", "Require double tap activation", true).getBoolean(true);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
@@ -395,6 +398,8 @@ public class Config
 	public static byte getMaxBonusHearts() { return (byte) MathHelper.clamp_int(maxBonusHearts, 0, 50); }
 	public static boolean autoTargetEnabled() { return autoTarget; }
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
+	public static boolean canTargetPlayers() { return enablePlayerTarget; }
+	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
 	public static boolean getBeamRequiresFullHealth() { return beamRequiresFullHealth; }
 	/*================== DUNGEON GEN =====================*/

@@ -260,7 +260,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isTargetValid(EntityPlayer player, EntityLivingBase target) {
-		return (target != null && !target.isDead && target.getHealth() > 0F && player.getDistanceToEntity(target) < (float) getMaxTargetDistance());
+		return (target != null && !target.isDead && target.getHealth() > 0F &&
+				player.getDistanceToEntity(target) < (float) getMaxTargetDistance() &&
+				(Config.canTargetPlayers() || !(target instanceof EntityPlayer)));
 	}
 
 	@Override
@@ -310,11 +312,14 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if ((combo == null || combo.isFinished()) && !player.worldObj.isRemote) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit(player));
 		}
-		boolean flag = event.source.damageType.equals(DamageUtils.IARMOR_BREAK);
-		if (flag || event.source.damageType.equals(DamageUtils.INDIRECT_SWORD)) {
-			combo.addDamageOnly(player, event.ammount, flag);
-		} else {
-			combo.add(player, event.entityLiving, event.ammount);
+		float damage = DirtyEntityAccessor.getModifiedDamage(event.entityLiving, event.source, event.ammount);
+		if (damage > 0) {
+			boolean flag = event.source.damageType.equals(DamageUtils.IARMOR_BREAK);
+			if (flag || event.source.damageType.equals(DamageUtils.INDIRECT_SWORD)) {
+				combo.addDamageOnly(player, damage, flag);
+			} else {
+				combo.add(player, event.entityLiving, damage);
+			}
 		}
 		if (event.source.damageType.equals("player") && PlayerUtils.isHoldingSword(player)) {
 			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_CUT, 0.4F, 0.5F);

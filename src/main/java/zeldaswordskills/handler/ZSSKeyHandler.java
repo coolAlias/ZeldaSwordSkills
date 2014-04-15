@@ -88,10 +88,14 @@ public class ZSSKeyHandler extends KeyHandler
 	}
 
 	@Override
-	public String getLabel() { return StatCollector.translateToLocal("key.zss.label"); }
+	public String getLabel() {
+		return StatCollector.translateToLocal("key.zss.label");
+	}
 
 	@Override
-	public EnumSet<TickType> ticks() { return EnumSet.of(TickType.CLIENT); }
+	public EnumSet<TickType> ticks() {
+		return EnumSet.of(TickType.CLIENT);
+	}
 
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
@@ -105,8 +109,13 @@ public class ZSSKeyHandler extends KeyHandler
 				} else if (kb == keys[KEY_BOMB]) {
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
 				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
-					mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
-							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					if (mc.thePlayer.isSneaking()) {
+						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggletp",
+								(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					} else {
+						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
+								(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					}
 				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
 					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
 				} else {

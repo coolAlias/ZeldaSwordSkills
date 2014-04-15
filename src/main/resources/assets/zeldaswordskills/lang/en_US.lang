@@ -114,6 +114,7 @@ chat.zss.fairy.memento=Please, take this as a memento.
 chat.zss.fairy.laugh.unworthy=Tee hee hee! I don't think so!
 chat.zss.fairy.laugh.sword=Hahahaha, what a silly sword you have!
 chat.zss.key.toggleat=Auto targeting is now %s
+chat.zss.key.toggletp=Player targeting is now %s
 chat.zss.key.enable=enabled
 chat.zss.key.disable=disabled
 chat.zss.pendant.priest.0=That's one of the Pendants of Virtue!
