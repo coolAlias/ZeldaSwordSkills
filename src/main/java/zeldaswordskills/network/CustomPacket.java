@@ -43,29 +43,27 @@ public abstract class CustomPacket {
 
 	static {
 		ImmutableBiMap.Builder<Integer, Class<? extends CustomPacket>> builder = ImmutableBiMap.builder();
-		
-		builder.put(Integer.valueOf(0), SyncPlayerInfoPacket.class);
-		builder.put(Integer.valueOf(1), SyncSkillPacket.class);
-		builder.put(Integer.valueOf(2), ActivateSkillPacket.class);
-		builder.put(Integer.valueOf(3), AddExhaustionPacket.class);
-		builder.put(Integer.valueOf(4), TargetIdPacket.class);
-		builder.put(Integer.valueOf(5), UpdateComboPacket.class);
-		builder.put(Integer.valueOf(6), EndComboPacket.class);
-		builder.put(Integer.valueOf(7), SpawnLeapingBlowPacket.class);
-		builder.put(Integer.valueOf(8), GetBombPacket.class);
-		builder.put(Integer.valueOf(9), BombTickPacket.class);
-		builder.put(Integer.valueOf(10), InLiquidPacket.class);
-		builder.put(Integer.valueOf(11), SwordPedestalPacket.class);
-		builder.put(Integer.valueOf(12), PacketISpawnParticles.class);
-		builder.put(Integer.valueOf(13), SpawnNayruParticlesPacket.class);
-		builder.put(Integer.valueOf(14), UpdateBuffPacket.class);
-		builder.put(Integer.valueOf(15), SyncEntityInfoPacket.class);
-		builder.put(Integer.valueOf(16), PlaySoundPacket.class);
-		builder.put(Integer.valueOf(17), UnpressKeyPacket.class);
-		builder.put(Integer.valueOf(18), BorrowMaskPacket.class);
-		builder.put(Integer.valueOf(19), MortalDrawPacket.class);
-		builder.put(Integer.valueOf(20), AttackBlockedPacket.class);
-		
+		int i = 0;
+		builder.put(Integer.valueOf(i++), ActivateSkillPacket.class);
+		builder.put(Integer.valueOf(i++), AddExhaustionPacket.class);
+		builder.put(Integer.valueOf(i++), AttackBlockedPacket.class);
+		builder.put(Integer.valueOf(i++), BombTickPacket.class);
+		builder.put(Integer.valueOf(i++), BorrowMaskPacket.class);
+		builder.put(Integer.valueOf(i++), EndComboPacket.class);
+		builder.put(Integer.valueOf(i++), GetBombPacket.class);
+		builder.put(Integer.valueOf(i++), InLiquidPacket.class);
+		builder.put(Integer.valueOf(i++), MortalDrawPacket.class);
+		builder.put(Integer.valueOf(i++), PacketISpawnParticles.class);
+		builder.put(Integer.valueOf(i++), PlaySoundPacket.class);
+		builder.put(Integer.valueOf(i++), SpawnLeapingBlowPacket.class);
+		builder.put(Integer.valueOf(i++), SpawnNayruParticlesPacket.class);
+		builder.put(Integer.valueOf(i++), SyncEntityInfoPacket.class);
+		builder.put(Integer.valueOf(i++), SyncPlayerInfoPacket.class);
+		builder.put(Integer.valueOf(i++), SyncSkillPacket.class);
+		builder.put(Integer.valueOf(i++), TargetIdPacket.class);
+		builder.put(Integer.valueOf(i++), UnpressKeyPacket.class);
+		builder.put(Integer.valueOf(i++), UpdateBuffPacket.class);
+		builder.put(Integer.valueOf(i++), UpdateComboPacket.class);
 		idMap = builder.build();
 	}
 

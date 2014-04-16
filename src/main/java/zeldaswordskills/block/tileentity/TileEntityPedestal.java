@@ -28,10 +28,8 @@ import net.minecraft.network.packet.Packet132TileEntityData;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.SwordPedestalPacket;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -61,29 +59,35 @@ public class TileEntityPedestal extends TileEntityInventory
 	public void changeOrientation() {
 		if (hasSword()) {
 			orientation = (byte)(orientation == 0 ? 1 : 0);
-			sendPacketToAllAround();
+			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 		}
 	}
 
 	/** Returns on which axis the sword is aligned */
-	public byte getOrientation() { return orientation; }
+	public byte getOrientation() {
+		return orientation;
+	}
 
 	/** Returns the sword itemstack currently in the pedestal or null */
-	public ItemStack getSword() { return sword; }
+	public ItemStack getSword() {
+		return sword;
+	}
 
 	/** Returns whether there is a sword currently in this pedestal */
-	public boolean hasSword() { return sword != null; }
+	public boolean hasSword() {
+		return sword != null;
+	}
 
 	/**
 	 * Retrieves the sword from the pedestal, if any, spawning the appropriate EntityItem
 	 */
 	public void retrieveSword() {
 		if (sword != null) {
-			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_SWORDSTRIKE, 1.0F, 1.0F);
+			WorldUtils.playSoundAt(worldObj, xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 			WorldUtils.spawnItemWithRandom(worldObj, sword, xCoord, yCoord + 1, zCoord);
 			sword = null;
 			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlockId(xCoord, yCoord, zCoord));
-			sendPacketToAllAround();
+			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 		}
 	}
 
@@ -96,7 +100,7 @@ public class TileEntityPedestal extends TileEntityInventory
 					stack.getTagCompound().hasKey("SacredFlames") &&
 					stack.getTagCompound().getInteger("SacredFlames") == 0x7)
 			{
-				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_MASTER_SWORD, 1.0F, 1.0F);
+				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.MASTER_SWORD, 1.0F, 1.0F);
 				ItemStack master = new ItemStack(ZSSItems.swordMasterTrue);
 				master.addEnchantment(Enchantment.sharpness, 5);
 				master.addEnchantment(Enchantment.knockback, 2);
@@ -107,12 +111,12 @@ public class TileEntityPedestal extends TileEntityInventory
 					player.triggerAchievement(ZSSAchievements.swordTrue);
 				}
 			} else {
-				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_SWORDSTRIKE, 1.0F, 1.0F);
+				WorldUtils.playSoundAt(worldObj, xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 				sword = stack.copy();
 			}
 			orientation = 0;
 			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlockId(xCoord, yCoord, zCoord));
-			sendPacketToAllAround();
+			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 			return true;
 		} else {
 			return false;
@@ -140,9 +144,6 @@ public class TileEntityPedestal extends TileEntityInventory
 	}
 
 	@Override
-	public boolean canUpdate() { return false; }
-
-	@Override
 	public void onInventoryChanged() {
 		super.onInventoryChanged();
 		int meta = 0;
@@ -155,7 +156,7 @@ public class TileEntityPedestal extends TileEntityInventory
 		if (meta == 0x7) {
 			meta = 0x8;
 			if (playSound) {
-				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, ModInfo.SOUND_MASTER_SWORD, 1.0F, 1.0F);
+				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.MASTER_SWORD, 1.0F, 1.0F);
 				retrieveSword();
 				EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 8.0D);
 				if (player != null) {
@@ -172,13 +173,19 @@ public class TileEntityPedestal extends TileEntityInventory
 	}
 
 	@Override
-	public String getInvName() { return ""; }
+	public String getInvName() {
+		return "";
+	}
 
 	@Override
-	public boolean isInvNameLocalized() { return true; }
+	public boolean isInvNameLocalized() {
+		return true;
+	}
 
 	@Override
-	public int getInventoryStackLimit() { return 1; }
+	public int getInventoryStackLimit() {
+		return 1;
+	}
 
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer player) {
@@ -200,12 +207,6 @@ public class TileEntityPedestal extends TileEntityInventory
 	@Override
 	public void onDataPacket(INetworkManager net, Packet132TileEntityData packet) {
 		readFromNBT(packet.data);
-	}
-	
-	/** Sends description packet to all around */
-	private void sendPacketToAllAround() {
-		PacketDispatcher.sendPacketToAllAround(xCoord, yCoord, zCoord, 64.0D, worldObj.provider.dimensionId,
-				new SwordPedestalPacket(xCoord, yCoord, zCoord, sword, orientation).makePacket());
 	}
 
 	@Override

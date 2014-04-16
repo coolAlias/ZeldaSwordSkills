@@ -79,13 +79,19 @@ public class BlockPedestal extends BlockContainer
 	}
 	
 	@Override
-	public boolean renderAsNormalBlock() { return false; }
+	public boolean renderAsNormalBlock() {
+		return false;
+	}
 
 	@Override
-	public boolean isOpaqueCube() { return false; }
+	public boolean isOpaqueCube() {
+		return false;
+	}
 	
 	@Override
-	public int getMobilityFlag() { return 2; }
+	public int getMobilityFlag() {
+		return 2;
+	}
 	
 	@Override
 	public boolean canHarvestBlock(EntityPlayer player, int meta) {
@@ -160,7 +166,9 @@ public class BlockPedestal extends BlockContainer
 	}
 	
 	@Override
-	public boolean canProvidePower() { return true; }
+	public boolean canProvidePower() {
+		return true;
+	}
 	
 	@Override
 	public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side) {
