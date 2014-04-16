@@ -89,9 +89,15 @@ public class SwordBeam extends SkillActive
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return player.isSneaking() && canUse(player);
+	}
+
+	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && PlayerUtils.isHoldingSword(player)
-				&& player.attackTime == 0 && ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && checkHealth(player) && player.attackTime == 0
+				&& PlayerUtils.isHoldingSword(player);
 	}
 
 	@Override

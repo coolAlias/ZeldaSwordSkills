@@ -107,7 +107,7 @@ public class EndingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		if (super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)) {
+		if (super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player)) {
 			ICombo skill = ZSSPlayerInfo.get(player).getComboSkill();
 			if (skill != null && skill.isComboInProgress()) {
 				if (lastNumHits > 0) {

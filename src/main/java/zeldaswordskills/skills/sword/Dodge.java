@@ -32,8 +32,10 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -154,7 +156,11 @@ public class Dodge extends SkillActive
 	 * Returns true if the attack was dodged and the attack event should be canceled
 	 */
 	public boolean dodgeAttack(EntityPlayer player) {
-		return (player.worldObj.rand.nextFloat() < getDodgeChance(player));
+		if (player.worldObj.rand.nextFloat() < getDodgeChance(player)) {
+			PlayerUtils.playRandomizedSound(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
+			return true;
+		}
+		return false;
 	}
 
 	/**

@@ -31,7 +31,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 @SideOnly(Side.CLIENT)
 public class SoundHandler {
-	
+
 	@ForgeSubscribe
 	public void onLoadSound(SoundLoadEvent event) {
 		// the following sounds have only 1 file each
@@ -67,13 +67,14 @@ public class SoundHandler {
 			event.manager.addSound(Sounds.ROCK_FALL + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.WHIRLWIND + String.valueOf(i) + ".ogg");
 		}
-		
+
 		// the following have 3
 		for (int i = 1; i < 4; ++i) {
 			event.manager.addSound(Sounds.ARMOR_BREAK + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.GRUNT + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.HAMMER + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.HIT_RUSTY + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.HURT_FLESH + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.LEAPING_BLOW + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.SLAM + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.SPIN_ATTACK + String.valueOf(i) + ".ogg");

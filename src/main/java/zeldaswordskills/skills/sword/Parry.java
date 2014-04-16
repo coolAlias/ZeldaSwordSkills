@@ -101,8 +101,7 @@ public class Parry extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
-				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
 	}
 
 	@Override
@@ -164,7 +163,7 @@ public class Parry extends SkillActive
 	 * @return true if the attack was parried and the attack event should be canceled
 	 */
 	public boolean parryAttack(EntityPlayer player, EntityLivingBase attacker) {
-		if (parryTimer > getParryDelay() && attacker.getHeldItem() != null) {
+		if (parryTimer > getParryDelay() && attacker.getHeldItem() != null && PlayerUtils.isHoldingSkillItem(player)) {
 			parryTimer = getParryDelay(); // fix probable bug where player can disarm multiple opponents at once
 			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 			playMissSound = false;

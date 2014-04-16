@@ -22,10 +22,12 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Sounds;
@@ -93,13 +95,13 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.isUsingItem() && player.onGround;
+		return player.onGround && player.isUsingItem() && canUse(player);
 	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
-				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		Item item = (player.getHeldItem() != null ? player.getHeldItem().getItem() : null);
+		return super.canUse(player) && !isActive() && (PlayerUtils.isSkillItem(item) || item instanceof IDashItem);
 	}
 
 	/** Damage is base damage plus 1.0F per level */
@@ -141,10 +143,10 @@ public class Dash extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		if (isActive()) {
 			if (target instanceof EntityLivingBase) {
-				double d0 = 0.15D * (target.posX - player.posX);
-				double d1 = 0.15D * (target.posY + (double)(target.height / 3.0F) - player.posY);
-				double d2 = 0.15D * (target.posZ - player.posZ);
-				Vec3 vec3 = player.worldObj.getWorldVec3Pool().getVecFromPool(d0, d1, d2);
+				double d0 = (target.posX - player.posX);
+				double d1 = (target.posY + (double)(target.height / 3.0F) - player.posY);
+				double d2 = (target.posZ - player.posZ);
+				Vec3 vec3 = player.worldObj.getWorldVec3Pool().getVecFromPool(d0, d1, d2).normalize();
 
 				float f = 1.0F;
 				if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null) {

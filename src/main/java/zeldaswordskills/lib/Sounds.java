@@ -66,7 +66,7 @@ public class Sounds {
 	// SWORD SKILL SOUNDS
 	public static final String ARMOR_BREAK = ModInfo.ID + ":armorbreak";
 	public static final String LEAPING_BLOW = ModInfo.ID + ":leapingblow";
-	// 1.7.2 sound: public static final String HURT_FLESH = ModInfo.ID + ":hurtflesh";
+	public static final String HURT_FLESH = ModInfo.ID + ":hurtflesh";
 	public static final String MORTAL_DRAW = ModInfo.ID + ":mortaldraw";
 	public static final String SLAM = ModInfo.ID + ":slam";
 	public static final String SPIN_ATTACK = ModInfo.ID + ":spinattack";

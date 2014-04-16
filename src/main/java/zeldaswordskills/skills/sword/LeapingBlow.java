@@ -26,6 +26,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
+import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.network.SpawnLeapingBlowPacket;
@@ -107,8 +108,8 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && !player.onGround && PlayerUtils.isHoldingSword(player)
-				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && !player.onGround &&
+				PlayerUtils.isHoldingSword(player);
 	}
 
 	@Override
@@ -130,13 +131,11 @@ public class LeapingBlow extends SkillActive
 	public void onImpact(EntityPlayer player, float distance) {
 		SwordBasic swordSkill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isHoldingSword(player)) {
-			player.swingItem();
 			isActive = false;
 			if (distance < 1.0F) {
-				if (swordSkill.onAttack(player)) {
-					Minecraft.getMinecraft().playerController.attackEntity(player, swordSkill.getCurrentTarget());
-				}
+				ZSSCombatEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
 			} else {
+				player.swingItem();
 				PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(getExhaustion()).makePacket());
 				PacketDispatcher.sendPacketToServer(new SpawnLeapingBlowPacket(isMaster).makePacket());
 			}

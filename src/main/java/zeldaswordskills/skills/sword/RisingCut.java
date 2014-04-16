@@ -84,13 +84,12 @@ public class RisingCut extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return ticksTilFail > 0 && player.motionY > 0.0D;
+		return ticksTilFail > 0 && player.motionY > 0.0D && canUse(player);
 	}
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
-				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player);
 	}
 
 	@Override

@@ -23,7 +23,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -33,6 +32,7 @@ import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.MortalDrawPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -114,8 +114,7 @@ public class MortalDraw extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && attackTimer == 0 && swordSlot > -1 && player.getHeldItem() == null
-				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && attackTimer == 0 && swordSlot > -1 && player.getHeldItem() == null;
 	}
 
 	@Override
@@ -129,7 +128,7 @@ public class MortalDraw extends SkillActive
 			swordSlot = -1;
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && stack.getItem() instanceof ItemSword) {
+				if (stack != null && PlayerUtils.isSwordItem(stack.getItem())) {
 					swordSlot = i;
 					break;
 				}
@@ -158,16 +157,17 @@ public class MortalDraw extends SkillActive
 	 * Returns true if the player was able to draw a sword
 	 */
 	public boolean drawSword(EntityPlayer player, Entity attacker) {
+		boolean flag = false;
 		if (swordSlot > -1 && swordSlot != player.inventory.currentItem) {
 			player.setCurrentItemOrArmor(0, player.inventory.getStackInSlot(swordSlot));
-			player.inventory.setInventorySlotContents(swordSlot, null);
-			swordSlot = -1;
 			if (!player.worldObj.isRemote) { // only care about this on server:
+				player.inventory.setInventorySlotContents(swordSlot, null);
 				ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
-				return (skill != null && skill.getCurrentTarget() == attacker);
+				flag = (skill != null && skill.getCurrentTarget() == attacker);
 			}
 		}
-		return false;
+		swordSlot = -1;
+		return flag;
 	}
 
 	/**

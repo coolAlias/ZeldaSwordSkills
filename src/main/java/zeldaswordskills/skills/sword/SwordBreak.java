@@ -25,7 +25,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
@@ -94,8 +93,7 @@ public class SwordBreak extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
-				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
 	}
 
 	@Override
@@ -167,7 +165,7 @@ public class SwordBreak extends SkillActive
 	 */
 	public boolean breakAttack(EntityPlayer player, EntityLivingBase attacker) {
 		ItemStack stackToDamage = attacker.getHeldItem();
-		if (breakTimer > getUseDelay() && stackToDamage != null) {
+		if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isHoldingSkillItem(player)) {
 			breakTimer = getUseDelay(); // only block one attack
 			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 			playMissSound = false;

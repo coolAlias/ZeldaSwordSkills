@@ -296,9 +296,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		Entity mouseOver = TargetUtils.getMouseOverEntity();
 		boolean attackHit = (isLockedOn() && mouseOver != null && TargetUtils.canReachTarget(player, mouseOver));
 		if (!attackHit) {
-			if (PlayerUtils.isHoldingSword(player)) {
-				PlayerUtils.playRandomizedSound(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
-			}
+			PlayerUtils.playRandomizedSound(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 			if (isComboInProgress()) {
 				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
 			}
@@ -321,8 +319,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				combo.add(player, event.entityLiving, damage);
 			}
 		}
-		if (event.source.damageType.equals("player") && PlayerUtils.isHoldingSword(player)) {
-			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_CUT, 0.4F, 0.5F);
+		if (event.source.damageType.equals("player")) {
+			String sound = (PlayerUtils.isHoldingSword(player) ? Sounds.SWORD_CUT : Sounds.HURT_FLESH);
+			WorldUtils.playSoundAtEntity(player.worldObj, player, sound, 0.4F, 0.5F);
 		}
 	}
 

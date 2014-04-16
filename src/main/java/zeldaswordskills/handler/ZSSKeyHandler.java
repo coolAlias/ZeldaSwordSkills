@@ -41,7 +41,6 @@ import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBreak;
-import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.TickType;
@@ -149,15 +148,15 @@ public class ZSSKeyHandler extends KeyHandler
 				}
 				return;
 			}
-			if (PlayerUtils.isHoldingSword(mc.thePlayer)) {
-				if (skills.hasSkill(SkillBase.dash) && skills.getActiveSkill(SkillBase.dash).canExecute(mc.thePlayer)) {
+			if (heldItem != null) {
+				if (skills.shouldSkillActivate(SkillBase.dash)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-				} else if (skills.hasSkill(SkillBase.risingCut) && skills.getActiveSkill(SkillBase.risingCut).canExecute(mc.thePlayer)) {
+				} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
 					ZSSCombatEvents.performComboAttack(mc, skill);
-				} else if (skills.canUseSkill(SkillBase.swordBeam) && mc.thePlayer.isSneaking()) {
+				} else if (skills.shouldSkillActivate(SkillBase.swordBeam)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
-				} else if (skills.hasSkill(SkillBase.endingBlow) && skills.getActiveSkill(SkillBase.endingBlow).canExecute(mc.thePlayer)) {
+				} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
 					ZSSCombatEvents.performComboAttack(mc, skill);
 				} else {
@@ -167,7 +166,7 @@ public class ZSSKeyHandler extends KeyHandler
 				if (skills.hasSkill(SkillBase.armorBreak)) {
 					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer);
 				}
-			} else if (skills.hasSkill(SkillBase.mortalDraw) && skills.getActiveSkill(SkillBase.mortalDraw).canExecute(mc.thePlayer)) {
+			} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
 				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
 			} else {
 				ZSSCombatEvents.performComboAttack(mc, skill);

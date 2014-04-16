@@ -48,6 +48,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
+import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -69,7 +70,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowDisplay", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
-public class ItemZeldaShield extends Item implements IFairyUpgrade, ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+public class ItemZeldaShield extends Item implements IDashItem, IFairyUpgrade,
+ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;

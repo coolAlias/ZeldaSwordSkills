@@ -21,6 +21,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import zeldaswordskills.api.item.ISkillItem;
+import zeldaswordskills.api.item.ISword;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.network.PlaySoundPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
@@ -33,21 +35,36 @@ import cpw.mods.fml.common.network.Player;
  */
 public class PlayerUtils
 {
-	/** Returns true if the player is currently holding a sword-type weapon */
+	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} */
 	public static boolean isHoldingSword(EntityPlayer player) {
-		return (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword);
+		return (player.getHeldItem() != null && isSwordItem(player.getHeldItem().getItem()));
 	}
-	
+
+	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} or {@link ISkillItem} */
+	public static boolean isHoldingSkillItem(EntityPlayer player) {
+		return (player.getHeldItem() != null && isSkillItem(player.getHeldItem().getItem()));
+	}
+
+	/** Returns true if the item is either an {@link ItemSword} or {@link ISword} */
+	public static boolean isSwordItem(Item item) {
+		return (item instanceof ItemSword || item instanceof ISword);
+	}
+
+	/** Returns true if the item is either a {@link #isSwordItem(Item) sword} or {@link ISkillItem} */
+	public static boolean isSkillItem(Item item) {
+		return (isSwordItem(item) || item instanceof ISkillItem);
+	}
+
 	/** Returns true if the player is currently holding a Zelda-specific sword */
 	public static boolean isHoldingZeldaSword(EntityPlayer player) {
 		return (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemZeldaSword);
 	}
-	
+
 	/** Returns true if the player is currently holding a Master sword */
 	public static boolean isHoldingMasterSword(EntityPlayer player) {
 		return (isHoldingZeldaSword(player) && ((ItemZeldaSword) player.getHeldItem().getItem()).isMasterSword());
 	}
-	
+
 	/**
 	 * Returns true if the player has any type of master sword somewhere in the inventory
 	 */
@@ -59,7 +76,7 @@ public class PlayerUtils
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns true if the player has the Item somewhere in the inventory,
 	 * ignoring the stack's damage value
@@ -67,7 +84,7 @@ public class PlayerUtils
 	public static boolean hasItem(EntityPlayer player, Item item) {
 		return hasItem(player, item, -1);
 	}
-	
+
 	/**
 	 * Returns true if the player has the Item somewhere in the inventory, with
 	 * optional metadata for subtyped items
@@ -81,12 +98,12 @@ public class PlayerUtils
 		}
 		return false;
 	}
-	
+
 	/** Returns the difference between player's max and current health */
 	public static float getHealthMissing(EntityPlayer player) {
 		return (player.getMaxHealth() - player.getHealth());
 	}
-	
+
 	/**
 	 * Adds the stack to the player's inventory or, failing that, drops it as an EntityItem
 	 */
@@ -95,7 +112,7 @@ public class PlayerUtils
 			player.dropPlayerItem(stack);
 		}
 	}
-	
+
 	/**
 	 * Metadata-sensitive version of consumeInventoryItem
 	 */
@@ -112,7 +129,7 @@ public class PlayerUtils
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns true if the provided ItemStack was consumed
 	 * The method is stackSize sensitive, consuming the exact amount as the argument
@@ -135,10 +152,10 @@ public class PlayerUtils
 		if (required > 0) {
 			player.inventory.addItemStackToInventory(new ItemStack(stack.getItem(), stack.stackSize - required, stack.getItemDamage()));
 		}
-		
+
 		return required == 0;
 	}
-	
+
 	/**
 	 * Sends a packet to the client to play a sound on the client side only, or
 	 * sends a packet to the server to play a sound on the server for all to hear.

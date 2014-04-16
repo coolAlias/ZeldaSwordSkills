@@ -303,11 +303,25 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Returns true if the player can currently use the skill;
-	 * i.e. has the skill and the skill's canUse method returns true
+	 * Returns true if the given skill may be activated; i.e. the player has the skill
+	 * and {@link SkillActive#canExecute(EntityPlayer) skill.canExecute} returns true.
+	 * Note that this does not guarantee the skill will successfully activate, but only
+	 * that the initial conditions are correct (e.g. all necessary keys pressed)
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean shouldSkillActivate(SkillBase skill) {
+		SkillActive active = getActiveSkill(skill);
+		return active != null && active.canExecute(player);
+	}
+
+	/**
+	 * Returns true if the player can currently use the skill; i.e. the player has the skill
+	 * and {@link SkillActive#canUse(EntityPlayer) skill.canUse} returns true. This implies
+	 * that the skill will trigger successfully if activated.
 	 */
 	public boolean canUseSkill(SkillBase skill) {
-		return hasSkill(skill) && skill instanceof SkillActive && ((SkillActive) getPlayerSkill(skill)).canUse(player);
+		SkillActive active = getActiveSkill(skill);
+		return active != null && active.canUse(player);
 	}
 
 	/**

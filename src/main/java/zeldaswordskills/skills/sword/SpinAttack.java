@@ -140,8 +140,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player)
-				&& ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
 	}
 
 	@Override
@@ -208,7 +207,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void keyPressed(KeyBinding key, EntityPlayer player) {
 		if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || key == Minecraft.getMinecraft().gameSettings.keyBindAttack) {
-			if (PlayerUtils.isHoldingSword(player) && isActive && arc < (360F * (superLevel + 1)) && arc == (360F * refreshed)) {
+			if (PlayerUtils.isHoldingSkillItem(player) && isActive && arc < (360F * (superLevel + 1)) && arc == (360F * refreshed)) {
 				arc += 360F;
 			}
 		} else {
@@ -283,7 +282,7 @@ public class SpinAttack extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player) {
-		if (!isCharging() && PlayerUtils.isHoldingSword(player)) {
+		if (!isCharging() && PlayerUtils.isHoldingSkillItem(player)) {
 			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
 			for (EntityLivingBase target : list) {
 				if (targets != null && targets.contains(target)) {
