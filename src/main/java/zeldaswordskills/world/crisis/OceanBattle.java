@@ -32,6 +32,7 @@ public class OceanBattle extends BossBattle {
 	@Override
 	public void beginCrisis(World world) {
 		super.beginCrisis(world);
+		eventTimer = 6000 - (600 * difficulty);
 		scheduleUpdateTick(-(1200 - eventTimer)); // one minute of falling sand
 	}
 

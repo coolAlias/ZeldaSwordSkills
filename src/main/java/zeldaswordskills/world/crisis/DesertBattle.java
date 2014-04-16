@@ -72,7 +72,7 @@ public class DesertBattle extends BossBattle {
 			for (int i = minX; i < maxX; ++i) {
 				for (int k = minZ; k < maxZ; ++k) {
 					if (activate) {
-						if (world.getBlockId(i, j, k) == Block.dispenser.blockID && world.rand.nextInt(8 - (2 * difficulty)) == 0) { 
+						if (world.getBlockId(i, j, k) == Block.dispenser.blockID && world.rand.nextInt(9 - (2 * difficulty)) == 0) { 
 							Block.blocksList[Block.dispenser.blockID].updateTick(world, i, j, k, world.rand);
 						}
 					} else {
