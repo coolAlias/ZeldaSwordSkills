@@ -39,7 +39,7 @@ public class RenderEntityJar extends Render
 		GL11.glTranslated(dx, dy, dz);
 		GL11.glRotatef(yaw, 0, 1, 0);
 		float roll = ((float) entity.ticksExisted + partialTick) * 5;
-		while (roll > 360) roll -= 360;
+		while (roll > 360) { roll -= 360; }
 		GL11.glRotatef(roll, -0.25F, 0.1F, 0);
 		GL11.glScalef(1.0F, 1.0F, 1.0F);
 		bindEntityTexture(entity);

@@ -17,7 +17,6 @@
 
 package zeldaswordskills.client.render.entity;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
@@ -45,7 +44,7 @@ public class RenderEntityBoomerang extends Render
 			GL11.glRotatef(Math.abs(entity.rotationPitch + (entity.prevRotationPitch - entity.rotationPitch)) * partialTick - rotation, 0.0F, 0.0F, 1.0F);
 			GL11.glTranslatef(-0.5F, -0.5F, 0.0F);
 			Icon icon = boomerang.getItem().getIconFromDamage(0);
-			bindTexture(Minecraft.getMinecraft().getTextureManager().getResourceLocation(boomerang.getItem().getSpriteNumber()));
+			bindTexture(renderManager.renderEngine.getResourceLocation(boomerang.getItem().getSpriteNumber()));
 			Tessellator tessellator = Tessellator.instance;
 			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 			GL11.glPopMatrix();

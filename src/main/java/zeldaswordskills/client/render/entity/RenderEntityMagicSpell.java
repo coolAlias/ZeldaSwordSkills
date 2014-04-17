@@ -17,7 +17,6 @@
 
 package zeldaswordskills.client.render.entity;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
@@ -55,7 +54,7 @@ public class RenderEntityMagicSpell extends Render
 		float roll = ((float) entity.ticksExisted + partialTick) * 40;
 		while (roll > 360) roll -= 360;
 		GL11.glRotatef(roll, 0.8F, 0F, -0.6F);
-		Minecraft.getMinecraft().renderEngine.bindTexture(getEntityTexture(entity));
+		bindEntityTexture(entity);
 		Tessellator.instance.setBrightness(0xf000f0);
 		box1.render(entity);
 		GL11.glRotatef(45, 1, 0, 1);
