@@ -182,15 +182,13 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer) {
-		if (slot == 2) {
-			return ModInfo.ID + ":textures/armor/" + getUnlocalizedName().substring(9) + "_layer_2.png";
-		} else {
-			return ModInfo.ID + ":textures/armor/" + getUnlocalizedName().substring(9) + "_layer_1.png";
-		}
+		return String.format("%s:textures/armor/%s_layer_%d.png", ModInfo.ID, getUnlocalizedName().substring(9), (slot == 2 ? 2 : 1));
 	}
 
 	@Override
-	public int getItemEnchantability() { return 0; }
+	public int getItemEnchantability() {
+		return 0;
+	}
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {

@@ -15,10 +15,18 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.handler;
+package zeldaswordskills.client;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.event.ForgeSubscribe;
+
+import org.lwjgl.opengl.GL11;
+
+import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -27,10 +35,50 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * SoundManager is only available on the client side; when run on a server, it will crash
  * if sounds are registered indiscriminately.
+ * 
+ * Player render events must also be done here, even though they should only be called on
+ * the client, they will crash the game when running a dedicated server if placed in a
+ * regular event handler.
  *
  */
 @SideOnly(Side.CLIENT)
-public class SoundHandler {
+public class ZSSClientEvents
+{
+	private final Minecraft mc;
+	/** True when openGL matrix needs to be popped */
+	private boolean needsPop;
+
+	public ZSSClientEvents() {
+		this.mc = Minecraft.getMinecraft();
+	}
+
+	@ForgeSubscribe
+	public void onRenderPlayer(RenderPlayerEvent.Pre event) {
+		ItemStack mask = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
+		if (mask != null && mask.getItem() == ZSSItems.maskGiants) {
+			GL11.glPushMatrix();
+			needsPop = true;
+			// TODO generalize transformations based on player's current height rather
+			// than on the mask worn; may need to flag this in extended properties to
+			// prevent possible conflicts with other mods
+			if (event.entityPlayer == mc.thePlayer) {
+				if (mc.inGameHasFocus) {
+					GL11.glTranslatef(0.0F, -6.325F, 0.0F);
+					GL11.glScalef(3.0F, 3.0F, 3.0F);
+				}
+			} else {
+				GL11.glScalef(3.0F, 3.0F, 3.0F);
+			}
+		}
+	}
+
+	@ForgeSubscribe
+	public void onRenderPlayer(RenderPlayerEvent.Post event) {
+		if (needsPop) {
+			GL11.glPopMatrix();
+			needsPop = false;
+		}
+	}
 
 	@ForgeSubscribe
 	public void onLoadSound(SoundLoadEvent event) {

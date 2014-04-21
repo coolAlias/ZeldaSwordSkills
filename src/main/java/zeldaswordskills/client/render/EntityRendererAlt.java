@@ -31,7 +31,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class EntityRendererAlt extends EntityRenderer
 {
 	private final Minecraft mc;
-	private float offsetY = 3.0F;
+	private float ySize = 3.0F;
+	private float offsetY = ySize;
 
 	public EntityRendererAlt(Minecraft mc) {
 		super(mc);
@@ -40,25 +41,27 @@ public class EntityRendererAlt extends EntityRenderer
 
 	@Override
 	public void updateCameraAndRender(float partialTick) {
-		if (mc.thePlayer == null || mc.thePlayer.isPlayerSleeping()){
+		if (mc.thePlayer == null || mc.thePlayer.isPlayerSleeping()) {
 			super.updateCameraAndRender(partialTick);
 			return;
 		}
-		mc.thePlayer.yOffset -= offsetY;
+		mc.thePlayer.yOffset -= ySize;
 		super.updateCameraAndRender(partialTick);
 		mc.thePlayer.yOffset = 1.62F;
 	}
 
 	@Override
 	public void getMouseOver(float partialTick) {
-		if (mc.thePlayer == null || mc.thePlayer.isPlayerSleeping()){
+		if (mc.thePlayer == null || mc.thePlayer.isPlayerSleeping()) {
 			super.getMouseOver(partialTick);
 			return;
 		}
-		// adjust the y position to get a mouseover at eye-level
-		// not perfect, as the server posY does not match, meaning
-		// that some block clicks do not process correctly
-		// (distance check or something like that)
+		/* 
+		 * Need to adjust the y position to get a mouseover at eye-level
+		 * Clicking blocks that appear to be close (i.e. at eye level when
+		 * big) does not work sometimes, since the server still checks
+		 * distance apparently based on posY, rather than eye level
+		 */
 		mc.thePlayer.posY += offsetY;
 		mc.thePlayer.prevPosY += offsetY;
 		mc.thePlayer.lastTickPosY += offsetY;

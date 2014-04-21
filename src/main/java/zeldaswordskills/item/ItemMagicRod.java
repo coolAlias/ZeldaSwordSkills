@@ -140,6 +140,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (player.capabilities.isCreativeMode || (getCooldown(stack) == 0 && player.getFoodStats().getFoodLevel() > 0)) {
+			player.swingItem();
 			if (player.isSneaking()) {
 				boolean isUpgraded = isUpgraded(stack);
 				EntityMobThrowable magic;

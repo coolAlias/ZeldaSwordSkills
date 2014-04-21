@@ -95,7 +95,7 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && player.isUsingItem() && canUse(player);
+		return player.onGround && PlayerUtils.isUsingItem(player) && canUse(player);
 	}
 
 	@Override

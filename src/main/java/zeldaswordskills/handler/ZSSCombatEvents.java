@@ -19,6 +19,7 @@ package zeldaswordskills.handler;
 
 import java.util.Set;
 
+import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
@@ -40,6 +41,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
@@ -160,7 +162,7 @@ public class ZSSCombatEvents
 			return;
 		}
 		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
-		if (skill != null && skill.isLockedOn()) {
+		if (skill != null && skill.isLockedOn() && !skills.isNayruActive()) {
 			if (event.button == 0 && event.buttonstate) {
 				if (!skills.canInteract()) {
 					if (skills.isSkillActive(SkillBase.spinAttack)) {
@@ -173,6 +175,7 @@ public class ZSSCombatEvents
 				if (Config.allowVanillaControls() && player.getHeldItem() != null) {
 					if (skills.shouldSkillActivate(SkillBase.dash)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
+						event.setCanceled(ZSSMain.isBG2Enabled && ((IBattlePlayer) player).isBattlemode());
 					} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
 						performComboAttack(mc, skill);

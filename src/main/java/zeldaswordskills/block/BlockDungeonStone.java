@@ -133,13 +133,14 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 		}
 	}
 
+	// this may not even be necessary, since these blocks will only ever be placed by a player
 	@Override
 	public void onBlockAdded(World world, int x, int y, int z) {
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonBlock) {
 			TileEntityDungeonBlock stone = (TileEntityDungeonBlock) te;
 			if (stone.getRenderBlock() == null) {
-				stone.setRenderBlock(ZSSBlocks.secretStone, world.getBlockMetadata(x, y, z));
+				stone.setRenderBlock(blocksList[BlockSecretStone.getIdFromMeta(world.getBlockMetadata(x, y, z))], 0);
 			}
 		}
 	}
