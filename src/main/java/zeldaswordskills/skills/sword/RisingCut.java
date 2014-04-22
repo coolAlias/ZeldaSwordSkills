@@ -69,11 +69,9 @@ public class RisingCut extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
+	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(2 + level));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override

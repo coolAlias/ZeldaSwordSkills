@@ -276,7 +276,25 @@ public abstract class SkillBase
 
 	/** Returns a personalized tooltip display containing info about skill at current level */
 	@SideOnly(Side.CLIENT)
-	public abstract List<String> getDescription(EntityPlayer player);
+	public List<String> getDescription(EntityPlayer player) {
+		List<String> desc = getDescription();
+		addInformation(desc, player);
+		return desc;
+	}
+
+	/** Allows subclasses to add descriptions of pertinent traits (damage, range, etc.) */
+	@SideOnly(Side.CLIENT)
+	public void addInformation(List<String> desc, EntityPlayer player) {}
+
+	/** Returns the translated description of the skill's effect (long version) */
+	public String getEffectDisplay() {
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".full");
+	}
+
+	/** Returns the translated description of the skill's activation requirements (long version) */
+	public String getActivationDisplay() {
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".activate");
+	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */
 	public String getAreaDisplay(double area) {

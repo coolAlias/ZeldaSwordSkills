@@ -79,12 +79,10 @@ public class Dash extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
+	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(getRange()));
 		desc.add(getDamageDisplay(getDamage(), false));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override

@@ -53,7 +53,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 			Tapping attack will continue the spin (Super Spin Attack only)
  * Arc: 360 degrees, plus an extra 360 degrees for every level of Super Spin Attack
  * Charge time: 20 ticks, minus 2 per level
- * Range: 3.0D or 6.0D, plus 0.5D per level
+ * Range: 3.0D plus 0.5D per level each of Spin and Super Spin Attack
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
@@ -112,15 +112,16 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
+	public void addInformation(List<String> desc, EntityPlayer player) {
+		byte temp = level;
 		if (!isActive()) {
 			superLevel = ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack);
+			level = ZSSPlayerInfo.get(player).getSkillLevel(spinAttack);
 		}
-		List<String> desc = getDescription();
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
+		level = temp;
 	}
 
 	@Override

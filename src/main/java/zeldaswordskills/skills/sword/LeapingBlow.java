@@ -77,12 +77,10 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
+	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay((PlayerUtils.isHoldingMasterSword(player) ? level * 2 : level), true));
 		desc.add(getDurationDisplay(getPotionDuration(player), false));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override

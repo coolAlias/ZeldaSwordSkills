@@ -42,8 +42,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * ARMOR BREAK
  * Description: Unleash a powerful blow that ignores armor
- * Activation: hold the 'up' arrow for (20 - level) ticks
- * Effect: Unleashes an attack that inflicts normal sword damage but ignores armor
+ * Activation: Hold attack for (20 - level) ticks
+ * Effect: Unleashes an attack that inflicts normal weapon damage but ignores armor
  * Exhaustion: 2.0F - (0.1F * level)
  * Special: May only be used while locked on to a target
  * 			Charge time is reduced by 5 ticks when wielding a Master Sword
@@ -91,11 +91,9 @@ public class ArmorBreak extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
+	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getChargeDisplay(getChargeTime(player)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override

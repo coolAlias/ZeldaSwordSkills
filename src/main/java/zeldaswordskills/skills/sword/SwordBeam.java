@@ -76,11 +76,9 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
+	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(level, true));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override
