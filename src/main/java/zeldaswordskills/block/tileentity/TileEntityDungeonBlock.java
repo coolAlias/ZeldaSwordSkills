@@ -80,8 +80,9 @@ public class TileEntityDungeonBlock extends TileEntity
 		super.writeToNBT(compound);
 		// TODO this should update world saves correctly to new format:
 		if (renderBlock == null && this.getBlockType() == ZSSBlocks.dungeonCore) {
-			renderMetadata = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
-			renderBlock = Block.blocksList[BlockSecretStone.getIdFromMeta(renderMetadata)];
+			renderBlock = Block.blocksList[BlockSecretStone.getIdFromMeta(worldObj.getBlockMetadata(xCoord, yCoord, zCoord))];
+			renderMetadata = 0;
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);
 		}
 		compound.setInteger("renderBlock", renderBlock != null ? renderBlock.blockID : -1);
 		compound.setInteger("renderMetadata", renderMetadata);
