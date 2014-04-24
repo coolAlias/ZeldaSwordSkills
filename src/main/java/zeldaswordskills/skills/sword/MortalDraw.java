@@ -83,7 +83,8 @@ public class MortalDraw extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(3),
+		desc.add(getDamageDisplay(100, true) + "%");
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
 				(getAttackTime() - DELAY)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}

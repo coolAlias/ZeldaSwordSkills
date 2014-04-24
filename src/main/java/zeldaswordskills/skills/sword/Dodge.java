@@ -92,8 +92,9 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(2),
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
 				(int)(getDodgeChance(player) * 100)));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), getDodgeTime() * 2));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 

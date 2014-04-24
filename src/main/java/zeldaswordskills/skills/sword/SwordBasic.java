@@ -24,6 +24,7 @@ import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
@@ -46,7 +47,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * BASIC SWORD SKILL
+ * BASIC TECHNIQUE
  * Description: Foundation for all other Sword Skills
  * Activation: Standard (toggle), but must be looking near a target within range
  * Effects:	1. must be active in order to use any of the Sword Skills (see below)
@@ -123,6 +124,15 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(List<String> desc, EntityPlayer player) {
+		desc.add(getRangeDisplay(getRange()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxComboSize()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), getComboTimeLimit()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 3), String.format("%.1f", (0.5F * level))));
+	}
+
+	@Override
 	public boolean isActive() {
 		return isActive;
 	}
@@ -145,7 +155,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				if (!isComboInProgress()) {
 					combo = null;
 				}
-				currentTarget = TargetUtils.acquireLookTarget(player, getMaxTargetDistance(), getMaxTargetDistance(), true);
+				currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true);
 			} else {
 				currentTarget = null;
 				if (world.isRemote) {
@@ -205,7 +215,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public final void getNextTarget(EntityPlayer player) {
 		EntityLivingBase nextTarget = null;
 		double dTarget = 0;
-		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getMaxTargetDistance(), getMaxTargetDistance());
+		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getRange(), getRange());
 		for (EntityLivingBase entity : list) {
 			if (entity == player) { continue; }
 			if (entity != currentTarget && entity != prevTarget && isTargetValid(player, entity)) {
@@ -233,7 +243,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	/** Returns max distance at which targets may be acquired or remain targetable */
-	private final int getMaxTargetDistance() {
+	private final int getRange() {
 		return (6 + level);
 	}
 
@@ -261,7 +271,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	@SideOnly(Side.CLIENT)
 	private boolean isTargetValid(EntityPlayer player, EntityLivingBase target) {
 		return (target != null && !target.isDead && target.getHealth() > 0F &&
-				player.getDistanceToEntity(target) < (float) getMaxTargetDistance() &&
+				player.getDistanceToEntity(target) < (float) getRange() && !target.isInvisible() &&
 				(Config.canTargetPlayers() || !(target instanceof EntityPlayer)));
 	}
 
@@ -286,7 +296,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	/** Returns amount of time allowed between successful attacks before combo terminates */
-	private final int getComboTimeLimit(EntityPlayer player) {
+	private final int getComboTimeLimit() {
 		return (20 + (level * 2));
 	}
 
@@ -308,7 +318,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
 		if (event.source.isProjectile()) { return; }
 		if ((combo == null || combo.isFinished()) && !player.worldObj.isRemote) {
-			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit(player));
+			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit());
 		}
 		float damage = DirtyEntityAccessor.getModifiedDamage(event.entityLiving, event.source, event.ammount);
 		if (damage > 0) {

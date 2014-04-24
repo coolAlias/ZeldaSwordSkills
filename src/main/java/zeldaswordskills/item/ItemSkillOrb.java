@@ -160,7 +160,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 				if (skill.getId() != SkillBase.bonusHeart.getId()) {
 					list.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
 				}
-				list.addAll(ZSSPlayerInfo.get(player).getPlayerSkill(skill).getDescription(player));
+				list.addAll(skill.getTranslatedTooltip(player));
 			} else {
 				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.skillorb.desc.unknown"));
 			}

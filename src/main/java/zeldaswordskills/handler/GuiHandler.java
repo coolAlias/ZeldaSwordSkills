@@ -23,13 +23,15 @@ import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.client.gui.GuiMaskTrader;
 import zeldaswordskills.client.gui.GuiPedestal;
+import zeldaswordskills.client.gui.GuiSkills;
 import zeldaswordskills.inventory.ContainerMaskTrader;
 import zeldaswordskills.inventory.ContainerPedestal;
+import zeldaswordskills.inventory.ContainerSkills;
 import cpw.mods.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler
 {
-	public static final int GUI_PEDESTAL = 0, GUI_MASK_TRADER = 1;
+	public static final int GUI_PEDESTAL = 0, GUI_MASK_TRADER = 1, GUI_SKILLS = 2;
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
@@ -42,6 +44,8 @@ public class GuiHandler implements IGuiHandler
 			break;
 		case GUI_MASK_TRADER:
 			return new ContainerMaskTrader();
+		case GUI_SKILLS:
+			return new ContainerSkills(player);
 		default:
 		}
 		return null;
@@ -58,6 +62,8 @@ public class GuiHandler implements IGuiHandler
 			break;
 		case GUI_MASK_TRADER:
 			return new GuiMaskTrader();
+		case GUI_SKILLS:
+			return new GuiSkills(player);
 		default:
 		}
 		return null;

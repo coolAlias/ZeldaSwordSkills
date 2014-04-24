@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
@@ -64,24 +65,24 @@ public abstract class SkillBase
 	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
 
 	/* ACTIVE SKILLS */
-	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDefaultDescriptions(2);
-	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDefaultDescriptions(2);
-	public static final SkillBase dodge = new Dodge("dodge").addDefaultDescriptions(1);
-	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow").addDefaultDescriptions(2);
-	public static final SkillBase parry = new Parry("parry").addDefaultDescriptions(1);
-	public static final SkillBase dash = new Dash("dash").addDefaultDescriptions(1);
-	public static final SkillBase spinAttack = new SpinAttack("spinattack").addDefaultDescriptions(1);
-	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack").addDefaultDescriptions(1);
-	public static final SkillBase swordBeam = new SwordBeam("swordbeam").addDefaultDescriptions(3);
+	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDescriptions(1);
+	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDescriptions(1);
+	public static final SkillBase dodge = new Dodge("dodge").addDescriptions(1);
+	public static final SkillBase leapingBlow = new LeapingBlow("leapingblow").addDescriptions(1);
+	public static final SkillBase parry = new Parry("parry").addDescriptions(1);
+	public static final SkillBase dash = new Dash("dash").addDescriptions(1);
+	public static final SkillBase spinAttack = new SpinAttack("spinattack").addDescriptions(1);
+	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack").addDescriptions(1);
+	public static final SkillBase swordBeam = new SwordBeam("swordbeam").addDescriptions(1);
 
 	/* PASSIVE SKILLS */
-	public static final SkillBase bonusHeart = new BonusHeart("bonusheart").addDefaultDescriptions(1);
+	public static final SkillBase bonusHeart = new BonusHeart("bonusheart").addDescriptions(1);
 
 	/* NEW SKILLS */
-	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDefaultDescriptions(2);
-	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDefaultDescriptions(2);
-	public static final SkillBase risingCut = new RisingCut("risingcut").addDefaultDescriptions(2);
-	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDefaultDescriptions(2);
+	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDescriptions(1);
+	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDescriptions(1);
+	public static final SkillBase risingCut = new RisingCut("risingcut").addDescriptions(1);
+	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDescriptions(1);
 
 	/** Unlocalized name for language registry */
 	private final String unlocalizedName;
@@ -232,25 +233,18 @@ public abstract class SkillBase
 	}
 
 	/**
-	 * Returns the key used by the language file for getting the description n
-	 * Language file should contain key "skill.zss.{unlocalizedName}.desc.n"
+	 * Returns the key used by the language file for getting tooltip description n
+	 * Language file should contain key "skill.zss.{unlocalizedName}.desc.{label}.n"
+	 * @param label the category for the data, usually "tooltip" or "info"
 	 * @param n if less than zero, ".n" will not be appended
 	 */
-	protected final String getUnlocalizedDescription(int n) {
-		return getUnlocalizedName() + ".desc" + (n < 0 ? "" : ("." + n));
+	protected final String getInfoString(String label, int n) {
+		return getUnlocalizedName() + ".desc." + label + (n < 0 ? "" : ("." + n));
 	}
 
-	/**
-	 * Adds n description keys to the tooltip using the default key:
-	 * {@link SkillBase#getUnlocalizedDescription(int n) getUnlocalizedDescription}
-	 * @param n the number of descriptions to add should be at least 1
-	 */
-	protected final SkillBase addDefaultDescriptions(int n) {
-		for (int i = 1; i <= n; ++i) {
-			tooltip.add(getUnlocalizedDescription(i));
-		}
-		return this;
-	}
+	/** Allows subclasses to add descriptions of pertinent traits (damage, range, etc.) */
+	@SideOnly(Side.CLIENT)
+	public void addInformation(List<String> desc, EntityPlayer player) {}
 
 	/** Adds a single untranslated string to the skill's tooltip display */
 	protected final SkillBase addDescription(String string) {
@@ -264,17 +258,44 @@ public abstract class SkillBase
 		return this;
 	}
 
-	/** Returns the translated list containing Strings for tooltip display */
+	/**
+	 * Adds n descriptions to the tooltip using the default 'tooltip' label:
+	 * {@link SkillBase#getInfoString(String label, int n) getInfoString}
+	 * @param n the number of descriptions to add should be at least 1
+	 */
+	protected final SkillBase addDescriptions(int n) {
+		for (int i = 1; i <= n; ++i) {
+			tooltip.add(getInfoString("tooltip", i));
+		}
+		return this;
+	}
+
+	/**
+	 * Returns the translated tooltip, possibly with advanced display with player information
+	 */
+	@SideOnly(Side.CLIENT)
+	public final List<String> getTranslatedTooltip(EntityPlayer player) {
+		List<String> desc = new ArrayList(tooltip.size());
+		for (String s : tooltip) {
+			desc.add(StatCollector.translateToLocal(s));
+		}
+		if (Minecraft.getMinecraft().gameSettings.advancedItemTooltips) {
+			addInformation(desc, player);
+		}
+		return desc;
+	}
+
+	/** Returns the translated tooltip display */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getDescription() {
-		List<String> desc = new ArrayList(tooltip.size());
+		List<String> desc = new ArrayList();
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}
 		return desc;
 	}
 
-	/** Returns a personalized tooltip display containing info about skill at current level */
+	/** Returns advanced tooltip display containing info about skill at current level */
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
@@ -282,49 +303,45 @@ public abstract class SkillBase
 		return desc;
 	}
 
-	/** Allows subclasses to add descriptions of pertinent traits (damage, range, etc.) */
-	@SideOnly(Side.CLIENT)
-	public void addInformation(List<String> desc, EntityPlayer player) {}
-
-	/** Returns the translated description of the skill's effect (long version) */
-	public String getEffectDisplay() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".full");
-	}
-
 	/** Returns the translated description of the skill's activation requirements (long version) */
 	public String getActivationDisplay() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".activate");
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.activate");
 	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */
 	public String getAreaDisplay(double area) {
-		return StatCollector.translateToLocalFormatted("skill.zss.area.desc", String.format("%.1f", area));
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.area", String.format("%.1f", area));
 	}
 
 	/** Returns a translated description of the skill's charge time in ticks, using the value provided */
 	public String getChargeDisplay(int chargeTime) {
-		return StatCollector.translateToLocalFormatted("skill.zss.charge.desc", chargeTime);
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.charge", chargeTime);
 	}
 
 	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
 	public String getDamageDisplay(float damage, boolean displayPlus) {
-		return StatCollector.translateToLocalFormatted("skill.zss.damage.desc", (displayPlus ? "+" : ""), String.format("%.1f", damage));
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.damage", (displayPlus ? "+" : ""), String.format("%.1f", damage));
 	}
 
 	/** Returns a translated description of the skill's damage, using the value provided and with "+" if desired */
 	public String getDamageDisplay(int damage, boolean displayPlus) {
-		return StatCollector.translateToLocalFormatted("skill.zss.damage.desc", (displayPlus ? "+" : ""), damage);
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.damage", (displayPlus ? "+" : ""), damage);
 	}
 
 	/** Returns a translated description of the skill's duration, in ticks or seconds, using the value provided */
 	public String getDurationDisplay(int duration, boolean inTicks) {
-		return StatCollector.translateToLocalFormatted("skill.zss.duration.desc", (inTicks ? duration : duration / 20),
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.duration", (inTicks ? duration : duration / 20),
 				(inTicks ? StatCollector.translateToLocal("skill.zss.ticks") : StatCollector.translateToLocal("skill.zss.seconds")));
 	}
 
 	/** Returns a translated description of the skill's exhaustion, using the value provided */
 	public String getExhaustionDisplay(float exhaustion) {
-		return StatCollector.translateToLocalFormatted("skill.zss.exhaustion.desc", String.format("%.2f", exhaustion));
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.exhaustion", String.format("%.2f", exhaustion));
+	}
+
+	/** Returns the translated description of the skill's effect (long version) */
+	public String getEffectDisplay() {
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.full");
 	}
 
 	/**
@@ -333,12 +350,12 @@ public abstract class SkillBase
 	 */
 	public String getLevelDisplay(boolean simpleMax) {
 		return ((simpleMax && level == getMaxLevel()) ? StatCollector.translateToLocal("skill.zss.level.max") :
-			StatCollector.translateToLocalFormatted("skill.zss.level.desc", level, getMaxLevel()));
+			StatCollector.translateToLocalFormatted("skill.zss.desc.level", level, getMaxLevel()));
 	}
 
 	/** Returns a translated description of the skill's range, using the value provided */
 	public String getRangeDisplay(double range) {
-		return StatCollector.translateToLocalFormatted("skill.zss.range.desc", String.format("%.1f", range));
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.range", String.format("%.1f", range));
 	}
 
 	/** Returns true if player meets requirements to learn this skill at target level */

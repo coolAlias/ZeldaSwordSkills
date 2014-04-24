@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -40,14 +41,15 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Description: Shoot a beam of energy from the sword tip
  * Activation: Attack while sneaking and at near full health
  * Effect: Shoots a ranged beam capable of damaging one or possibly more targets
- * Damage: Base sword damage (without other bonuses), +1 extra damage per skill level
+ * Damage: 30 + (level * 10) percent of the base sword damage (without other bonuses)
  * Range: Approximately 12 blocks, plus one block per level
- * Exhaustion: 3.0F - (0.2F * level)
+ * Exhaustion: 2.0F - (0.1F * level)
  * Special:
  * 	- May only be used while locked on to a target
  *  - Amount of health required decreases with skill level, down to 1-1/2 hearts below max
  *  - Hitting a target with the beam counts as a direct strike for combos
  *  - Using the Master Sword will shoot a beam that can penetrate multiple targets
+ *  - Each additional target receives 20% less damage than the previous
  * 
  * Sword beam shot from Link's sword when at full health. Inflicts the sword's full
  * base damage, not including enchantment or other bonuses, to the first entity struck.
@@ -77,7 +79,10 @@ public class SwordBeam extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(getDamageDisplay(level, true));
+		desc.add(getDamageDisplay(getDamageFactor(player), false) + "%");
+		desc.add(getRangeDisplay(12 + level));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
+				String.format("%.1f", getHealthAllowance() / 2.0F)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -100,7 +105,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	protected float getExhaustion() {
-		return 3.0F - (0.2F * level);
+		return 2.0F - (0.1F * level);
 	}
 
 	@Override
@@ -146,14 +151,23 @@ public class SwordBeam extends SkillActive
 		missTimer = (endCombo && missTimer > 0 ? 1 : 0);
 	}
 
+	/** The amount of health that the player can be missing and still use this skill */
+	private float getHealthAllowance() {
+		return (Config.getBeamRequiresFullHealth() ? 0.0F : (0.6F * level));
+	}
+
 	/** Returns true if players current health is within the allowed limit */
 	private boolean checkHealth(EntityPlayer player) {
-		float f = (Config.getBeamRequiresFullHealth() ? 0.0F : (0.3F * level));
-		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= f;
+		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= getHealthAllowance();
+	}
+
+	/** The percent of base sword damage that should be inflicted, as an integer */
+	private int getDamageFactor(EntityPlayer player) {
+		return 30 + (level * 10);
 	}
 
 	/** Returns player's base damage (with sword) plus 1.0F per level */
 	private float getDamage(EntityPlayer player) {
-		return (float)(level + player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
+		return (float)((double)(getDamageFactor(player)) * 0.01D * player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
 	}
 }

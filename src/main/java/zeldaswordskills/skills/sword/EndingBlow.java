@@ -164,7 +164,7 @@ public class EndingBlow extends SkillActive
 		if (isActive()) {
 			activeTimer = 0;
 			if (!player.worldObj.isRemote) {
-				ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_DOWN, getDuration(), 50);
+				ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_DOWN, getDuration() * 2, 50);
 			}
 		}
 	}

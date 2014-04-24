@@ -31,10 +31,12 @@ import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
+import zeldaswordskills.network.OpenGuiPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
@@ -57,16 +59,16 @@ public class ZSSKeyHandler extends KeyHandler
 	/** Key index for easy handling and retrieval of keys and key descriptions */
 	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
 			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_BOMB = 7,
-			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9;
+			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9, KEY_SKILLS_GUI = 10;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
 	public static final String[] desc = { "activate","next","attack","left","right","down",
-		"block","bomb","toggleat","togglebuff"};
+		"block","bomb","toggleat","togglebuff","skills_gui"};
 
 	/** Default key values */
 	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
 		Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_DOWN, Keyboard.KEY_RCONTROL,
-		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V};
+		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V, Keyboard.KEY_P};
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 
@@ -118,9 +120,13 @@ public class ZSSKeyHandler extends KeyHandler
 					}
 				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
 					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+				} else if (kb == keys[KEY_SKILLS_GUI]) {
+					PacketDispatcher.sendPacketToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS).makePacket());
 				} else {
 					handleTargetingKeys(kb);
 				}
+			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer != null) {
+				mc.thePlayer.closeScreen();
 			}
 		}
 	}

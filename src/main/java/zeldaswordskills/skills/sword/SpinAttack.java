@@ -24,6 +24,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
@@ -98,7 +99,6 @@ public class SpinAttack extends SkillActive
 	public SpinAttack(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription(getUnlocalizedDescription(2).replace("super", ""));
 	}
 
 	private SpinAttack(SpinAttack skill) {
@@ -115,11 +115,12 @@ public class SpinAttack extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		byte temp = level;
 		if (!isActive()) {
-			superLevel = ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack);
+			superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
 			level = ZSSPlayerInfo.get(player).getSkillLevel(spinAttack);
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1).replace("super", ""), superLevel + 1));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 		level = temp;
 	}

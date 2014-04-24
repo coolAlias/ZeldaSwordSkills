@@ -115,7 +115,7 @@ public class PlayerUtils
 
 	/** Returns the difference between player's max and current health */
 	public static float getHealthMissing(EntityPlayer player) {
-		return (player.getMaxHealth() - player.getHealth());
+		return player.capabilities.isCreativeMode ? 0.0F : (player.getMaxHealth() - player.getHealth());
 	}
 
 	/**

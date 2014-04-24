@@ -80,7 +80,7 @@ public class SwordBreak extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
-		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(3),getMaxDamage()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxDamage()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
