@@ -167,8 +167,7 @@ public class ZSSEntityEvents
 				PacketDispatcher.sendPacketToPlayer(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)).makePacket(), (Player) player);
 				ZSSPlayerInfo.get(player).verifyStartingGear();
 			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
-				// workaround to prevent "already tracking this entity" errors on the spawned Gorons
-				// also, this event is called each time the entity joins, which is every time the world is
+				// this event is called each time the entity joins, which is every time the world is
 				// loaded, not just the first time the entity spawns, so need to restrict to first time only 
 				NBTTagCompound compound = event.entity.getEntityData();
 				if (!compound.hasKey("zssFirstJoinFlag")) {
@@ -178,14 +177,18 @@ public class ZSSEntityEvents
 						int x = MathHelper.floor_double(event.entity.posX);
 						int y = MathHelper.floor_double(event.entity.posY);
 						int z = MathHelper.floor_double(event.entity.posZ);
-						if (event.entity.worldObj.villageCollectionObj.getVillageList().isEmpty() || event.entity.worldObj.villageCollectionObj.findNearestVillage(x, y, z, 32) != null) {
-							EntityGoron goron = new EntityGoron(event.entity.worldObj, event.entity.worldObj.rand.nextInt(5));
-							double posX = event.entity.posX + event.entity.worldObj.rand.nextInt(8) - 4;
-							double posZ = event.entity.posZ + event.entity.worldObj.rand.nextInt(8) - 4;
-							goron.setLocationAndAngles(posX, event.entity.posY + 1, posZ, event.entity.rotationYaw, event.entity.rotationPitch);
-							//if (goron.getCanSpawnHere()) { TODO reported crash getting block during world gen
-							event.entity.worldObj.spawnEntityInWorld(goron);
-							//}
+						try {
+							if (event.entity.worldObj.villageCollectionObj.getVillageList().isEmpty() || event.entity.worldObj.villageCollectionObj.findNearestVillage(x, y, z, 32) != null) {
+								EntityGoron goron = new EntityGoron(event.entity.worldObj, event.entity.worldObj.rand.nextInt(5));
+								double posX = event.entity.posX + event.entity.worldObj.rand.nextInt(8) - 4;
+								double posZ = event.entity.posZ + event.entity.worldObj.rand.nextInt(8) - 4;
+								goron.setLocationAndAngles(posX, event.entity.posY + 1, posZ, event.entity.rotationYaw, event.entity.rotationPitch);
+								if (goron.getCanSpawnHere()) {
+									event.entity.worldObj.spawnEntityInWorld(goron);
+								}
+							}
+						} catch (NullPointerException e) {
+							; // catches null pointer from block not found during world load (super-flat only?)
 						}
 					}
 				}
