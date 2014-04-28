@@ -17,6 +17,8 @@
 
 package zeldaswordskills.api.entity;
 
+import zeldaswordskills.api.block.IExplodable;
+
 
 /**
  * 
@@ -39,5 +41,11 @@ public interface IEntityBomb {
 	 * Maximum radius * destruction factor is capped at 16.0F, which is mighty big.
 	 */
 	public float getDestructionFactor();
+
+	/**
+	 * Return false to restrict this bomb's destruction in Adventure Mode,
+	 * allowing it to affect only {@link IExplodable} blocks
+	 */
+	public boolean canGriefAdventureMode();
 
 }

@@ -34,6 +34,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.Config;
@@ -48,7 +49,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockSecretStone extends Block implements IDungeonBlock, ISmashable
+public class BlockSecretStone extends Block implements IDungeonBlock, IExplodable, ISmashable
 {
 	/** List of all currently available secret blocks */
 	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","quartz_block_chiseled","end_stone"};

@@ -39,8 +39,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
+import net.minecraft.world.EnumGameType;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Config;
@@ -82,10 +84,12 @@ public class CustomExplosion extends Explosion
 	public static void createExplosion(IEntityBomb bomb, World world, double x, double y, double z, float radius, float damage, boolean canGrief) {
 		CustomExplosion explosion = new CustomExplosion(world, (Entity) bomb, x, y, z, radius).setDamage(damage);
 		BombType type = bomb.getType();
+		boolean isAdventureMode = (world.getWorldInfo().getGameType() == EnumGameType.ADVENTURE);
+		boolean restrictBlocks = (isAdventureMode && !bomb.canGriefAdventureMode());
 		explosion.setMotionFactor(bomb.getMotionFactor());
 		explosion.scalesWithDistance = (damage == 0.0F);
-		explosion.isSmoking = canGrief;
-		explosion.targetBlock = (Config.onlyBombSecretStone() ? ZSSBlocks.secretStone.blockID : -1);
+		explosion.isSmoking = canGrief;//(canGrief && !restrictBlocks);
+		explosion.targetBlock = ((restrictBlocks || Config.onlyBombSecretStone()) ? ZSSBlocks.secretStone.blockID : -1);
 		explosion.ignoreLiquids = (type != BombType.BOMB_STANDARD);
 		explosion.ignoreLiquidType = (type == BombType.BOMB_FIRE ? 2 : (type == BombType.BOMB_WATER ? 1 : 0));
 		float f = bomb.getDestructionFactor();
@@ -316,9 +320,10 @@ public class CustomExplosion extends Explosion
 							int i1 = MathHelper.floor_double(d1);
 							int j1 = MathHelper.floor_double(d2);
 							int k1 = worldObj.getBlockId(l, i1, j1);
+							Block block = (k1 > 0 ? Block.blocksList[k1] : null);
+							Block target = (targetBlock > 0 ? Block.blocksList[targetBlock] : null);
 
 							if (k1 > 0) {
-								Block block = Block.blocksList[k1];
 								boolean flag = !block.blockMaterial.isLiquid() || !ignoreLiquids || !(ignoreLiquidType != 0 &&
 										((ignoreLiquidType == 1 && block.blockMaterial == Material.water) ||
 												(ignoreLiquidType == 2 && block.blockMaterial == Material.lava)));
@@ -328,7 +333,9 @@ public class CustomExplosion extends Explosion
 								}
 							}
 
-							if (f1 > 0.0F && (targetBlock < 0 || k1 == targetBlock) && (exploder == null || exploder.shouldExplodeBlock(this, worldObj, l, i1, j1, k1, f1))) {
+							if (f1 > 0.0F && (target == null || block == target || block instanceof IExplodable) &&
+									(exploder == null || exploder.shouldExplodeBlock(this, worldObj, l, i1, j1, k1, f1)))
+							{
 								hashset.add(new ChunkPosition(l, i1, j1));
 							}
 

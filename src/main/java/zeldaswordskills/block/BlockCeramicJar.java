@@ -36,6 +36,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderCeramicJar;
@@ -49,7 +50,7 @@ import zeldaswordskills.world.gen.DungeonLootLists;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockCeramicJar extends BlockContainer implements ISmashable
+public class BlockCeramicJar extends BlockContainer implements IExplodable, ISmashable
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;

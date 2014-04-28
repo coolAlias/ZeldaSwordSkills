@@ -29,6 +29,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
+import zeldaswordskills.lib.Config;
 
 public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 {
@@ -74,6 +75,11 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	public EntityArrowBomb setRadius(float radius) {
 		this.radius = radius;
 		return this;
+	}
+
+	@Override
+	public boolean canGriefAdventureMode() {
+		return Config.canGriefAdventure();
 	}
 
 	/**
