@@ -25,15 +25,18 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSTabCombat extends CreativeTabs
 {
-	public ZSSTabCombat(String label) { super(label); }
-
-	public ZSSTabCombat(int index, String label) { super(index, label); }
+	public ZSSTabCombat(String label) {
+		super(label);
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public int getTabIconItemIndex() { return ZSSItems.swordMasterTrue.itemID; }
+	public int getTabIconItemIndex() {
+		return ZSSItems.swordMasterTrue.itemID;
+	}
 
 	@Override
-	public String getTranslatedTabLabel() { return StatCollector.translateToLocal("creativetab.zss.combat"); }
-
+	public String getTranslatedTabLabel() {
+		return StatCollector.translateToLocal("creativetab.zss.combat");
+	}
 }

@@ -21,12 +21,12 @@ import net.minecraft.creativetab.CreativeTabs;
 
 public class ZSSCreativeTabs
 {
-	public static CreativeTabs tabBlocks = new ZSSTabBlocks(CreativeTabs.getNextID(), "zssTabBlocks");
-	public static CreativeTabs tabCombat = new ZSSTabCombat(CreativeTabs.getNextID(), "zssTabCombat");
-	public static CreativeTabs tabTools = new ZSSTabTools(CreativeTabs.getNextID(), "zssTabTools");
-	public static CreativeTabs tabSkills = new ZSSTabSkills(CreativeTabs.getNextID(), "zssTabSkills");
-	public static CreativeTabs tabMasks = new ZSSTabMasks(CreativeTabs.getNextID(), "zssTabMasks");
-	public static CreativeTabs tabMisc = new ZSSTabMisc(CreativeTabs.getNextID(), "zssTabMisc");
-	public static CreativeTabs tabKeys = new ZSSTabKeys(CreativeTabs.getNextID(), "zssTabKeys");
+	public static CreativeTabs tabBlocks = new ZSSTabBlocks("zssTabBlocks");
+	public static CreativeTabs tabCombat = new ZSSTabCombat("zssTabCombat");
+	public static CreativeTabs tabTools = new ZSSTabTools("zssTabTools");
+	public static CreativeTabs tabSkills = new ZSSTabSkills("zssTabSkills");
+	public static CreativeTabs tabMasks = new ZSSTabMasks("zssTabMasks");
+	public static CreativeTabs tabMisc = new ZSSTabMisc("zssTabMisc");
+	public static CreativeTabs tabKeys = new ZSSTabKeys("zssTabKeys");
 	
 }

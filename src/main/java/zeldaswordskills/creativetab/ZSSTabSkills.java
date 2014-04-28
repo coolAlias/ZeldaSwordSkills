@@ -25,15 +25,18 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSTabSkills extends CreativeTabs
 {
-	public ZSSTabSkills(String label) { super(label); }
-
-	public ZSSTabSkills(int index, String label) { super(index, label); }
+	public ZSSTabSkills(String label) {
+		super(label);
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public int getTabIconItemIndex() { return ZSSItems.skillOrb.itemID; }
+	public int getTabIconItemIndex() {
+		return ZSSItems.skillOrb.itemID;
+	}
 
 	@Override
-	public String getTranslatedTabLabel() { return StatCollector.translateToLocal("creativetab.zss.skill"); }
-
+	public String getTranslatedTabLabel() {
+		return StatCollector.translateToLocal("creativetab.zss.skill");
+	}
 }

@@ -23,17 +23,20 @@ import zeldaswordskills.item.ZSSItems;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ZSSTabKeys extends CreativeTabs {
-
-	public ZSSTabKeys(String label) { super(label); }
-
-	public ZSSTabKeys(int index, String label) { super(index, label); }
+public class ZSSTabKeys extends CreativeTabs
+{
+	public ZSSTabKeys(String label) {
+		super(label);
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public int getTabIconItemIndex() { return ZSSItems.keySmall.itemID; }
+	public int getTabIconItemIndex() {
+		return ZSSItems.keySmall.itemID;
+	}
 
 	@Override
-	public String getTranslatedTabLabel() { return StatCollector.translateToLocal("creativetab.zss.keys"); }
-
+	public String getTranslatedTabLabel() {
+		return StatCollector.translateToLocal("creativetab.zss.keys");
+	}
 }

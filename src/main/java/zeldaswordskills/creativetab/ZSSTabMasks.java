@@ -24,17 +24,20 @@ import zeldaswordskills.item.ZSSItems;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ZSSTabMasks extends CreativeTabs {
-
-	public ZSSTabMasks(String label) { super(label); }
-
-	public ZSSTabMasks(int index, String label) { super(index, label); }
+public class ZSSTabMasks extends CreativeTabs
+{
+	public ZSSTabMasks(String label) {
+		super(label);
+	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Item getTabIconItem() { return ZSSItems.maskHawkeye; }
+	public Item getTabIconItem() {
+		return ZSSItems.maskHawkeye;
+	}
 
 	@Override
-	public String getTranslatedTabLabel() { return StatCollector.translateToLocal("creativetab.zss.masks"); }
-
+	public String getTranslatedTabLabel() {
+		return StatCollector.translateToLocal("creativetab.zss.masks");
+	}
 }
