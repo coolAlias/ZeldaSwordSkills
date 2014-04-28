@@ -102,11 +102,11 @@ public class ZSSKeyHandler extends KeyHandler
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
 		if (tickEnd) {
-			if (mc.inGameHasFocus && ZSSPlayerInfo.get(mc.thePlayer) != null) {
+			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+			if (mc.inGameHasFocus && skills != null) {
 				if (kb == keys[KEY_SKILL_ACTIVATE]) {
-					SkillBase skill = ZSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillBase.swordBasic);
-					if (skill != null && skill.getLevel() > 0) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(skill).makePacket());
+					if (skills.hasSkill(SkillBase.swordBasic)) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBasic).makePacket());
 					}
 				} else if (kb == keys[KEY_BOMB]) {
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
@@ -123,7 +123,7 @@ public class ZSSKeyHandler extends KeyHandler
 				} else if (kb == keys[KEY_SKILLS_GUI]) {
 					PacketDispatcher.sendPacketToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS).makePacket());
 				} else {
-					handleTargetingKeys(kb);
+					handleTargetingKeys(kb, skills);
 				}
 			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer != null) {
 				mc.thePlayer.closeScreen();
@@ -134,9 +134,7 @@ public class ZSSKeyHandler extends KeyHandler
 	/**
 	 * All ILockOnTarget skill related keys are handled here
 	 */
-	private void handleTargetingKeys(KeyBinding kb)
-	{
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+	private void handleTargetingKeys(KeyBinding kb, ZSSPlayerInfo skills) {
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract() && !ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN);
 
@@ -171,7 +169,7 @@ public class ZSSKeyHandler extends KeyHandler
 				}
 				// handle separately so can attack and begin charging without pressing key twice
 				if (skills.hasSkill(SkillBase.armorBreak)) {
-					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer);
+					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, true);
 				}
 			} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
 				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
@@ -210,6 +208,10 @@ public class ZSSKeyHandler extends KeyHandler
 				keys[KEY_BLOCK].pressed = false;
 			} else if (kb == keys[KEY_ATTACK]) {
 				keys[KEY_ATTACK].pressed = false;
+				ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+				if (skills.hasSkill(SkillBase.armorBreak)) {
+					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, false);
+				}
 			} else if (kb == keys[KEY_LEFT]) {
 				keys[KEY_LEFT].pressed = false;
 			} else if (kb == keys[KEY_RIGHT]) {

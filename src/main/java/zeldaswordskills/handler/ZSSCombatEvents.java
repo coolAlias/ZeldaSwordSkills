@@ -19,7 +19,6 @@ package zeldaswordskills.handler;
 
 import java.util.Set;
 
-import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
@@ -33,7 +32,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.event.Event;
 import net.minecraftforge.event.EventPriority;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -41,7 +39,6 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
@@ -131,11 +128,10 @@ public class ZSSCombatEvents
 	}
 
 	/**
-	 * If the player is using an ILockOnTarget skill, this event will cancel mouse motion when locked
-	 * on a target; if the skill is also an ICombo, the onAttack method will be called on left click
+	 * Handles mouse clicks for skills, canceling where appropriate; note that left click will
+	 * ALWAYS be canceled, as the attack is passed to {@link #performComboAttack(Minecraft, ILockOnTarget) performComboAttack};
+	 * allowing left click results in the attack processing twice, doubling durability damage to weapons
 	 * no button clicked -1, left button 0, right click 1, middle click 2
-	 * @return setCanceled(true) will prevent both the click and pressed information from executing
-	 * @return setResult(Result.DENY) will stop the click, but allow the key to still register as pressed
 	 */
 	@ForgeSubscribe
 	@SideOnly(Side.CLIENT)
@@ -157,6 +153,10 @@ public class ZSSCombatEvents
 			} else if (event.button == 1) {
 				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN));
 			}
+		} else if (!event.buttonstate && event.button == 0) {
+			if (skills.hasSkill(SkillBase.armorBreak)) {
+				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, false);
+			}
 		}
 		if (event.isCanceled()) {
 			return;
@@ -175,14 +175,11 @@ public class ZSSCombatEvents
 				if (Config.allowVanillaControls() && player.getHeldItem() != null) {
 					if (skills.shouldSkillActivate(SkillBase.dash)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-						event.setCanceled(ZSSMain.isBG2Enabled && ((IBattlePlayer) player).isBattlemode());
 					} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
 						performComboAttack(mc, skill);
 					} else if (skills.shouldSkillActivate(SkillBase.swordBeam)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
-						// set to canceled to prevent secondary attack from occurring that doesn't occur with dash (thanks to blocking)
-						event.setCanceled(true);
 					} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
 						performComboAttack(mc, skill);
@@ -191,16 +188,15 @@ public class ZSSCombatEvents
 					}
 					// handle separately so can attack and begin charging without pressing key twice
 					if (skills.hasSkill(SkillBase.armorBreak)) {
-						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player);
+						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, true);
 					}
 				} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
 					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
-					event.setCanceled(true);
 				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
 					performComboAttack(mc, skill);
 				}
-				// Setting result to DENY prevents click processing but still sets button.pressed to true
-				event.setResult(Event.Result.DENY);
+				// always cancel left click to prevent weapons taking double durability damage
+				event.setCanceled(true);
 			} else if (event.button == 1 && Config.allowVanillaControls()) {
 				if (!skills.canInteract() && event.buttonstate) {
 					event.setCanceled(true);
@@ -265,7 +261,7 @@ public class ZSSCombatEvents
 			setPlayerAttackTime(event.entityPlayer);
 		}
 	}
-	
+
 	@ForgeSubscribe
 	public void onSetAttackTarget(LivingSetAttackTargetEvent event) {
 		if (event.target instanceof EntityPlayer && event.entity instanceof EntityLiving) {
@@ -423,11 +419,14 @@ public class ZSSCombatEvents
 				skills.getComboSkill().onHurtTarget(player, event);
 			}
 		}
-		
+
 		handleSecondaryEffects(event);
 	}
 
-	@ForgeSubscribe
+	/**
+	 * Set to highest priority to prevent loss of "extra lives" from HQM mod
+	 */
+	@ForgeSubscribe(priority=EventPriority.HIGHEST)
 	public void onLivingDeathEvent(LivingDeathEvent event) {
 		if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
 			event.setCanceled(ItemFairyBottle.onDeath((EntityPlayer) event.entity));

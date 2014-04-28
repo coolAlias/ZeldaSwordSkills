@@ -25,9 +25,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
-import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -64,6 +62,13 @@ public class ArmorBreak extends SkillActive
 	/** Current charge time */
 	private int charge = 0;
 
+	/**
+	 * Fixes weapons taking double durability damage from non-canceled mouse event
+	 * by letting event be canceled and still allow skill to charge;
+	 * must be set and un-set manually on LMB click or release
+	 */
+	private boolean buttonState = false;
+
 	public ArmorBreak(String name) {
 		super(name);
 		setDisablesLMB();
@@ -76,8 +81,9 @@ public class ArmorBreak extends SkillActive
 	}
 
 	/** Returns true if the skill is still charging up */
-	public boolean isCharging() {
-		return charge > 0;
+	public boolean isCharging(EntityPlayer player) {
+		ILockOnTarget target = ZSSPlayerInfo.get(player).getTargetingSkill();
+		return charge > 0 && target != null && target.isLockedOn();
 	}
 
 	private ArmorBreak(ArmorBreak skill) {
@@ -111,17 +117,11 @@ public class ArmorBreak extends SkillActive
 		return 2.0F - (0.1F * level);
 	}
 
-	/** Called when key first pressed; initiates charging */
+	/** Called when key pressed or released; initiates or cancels charging */
 	@SideOnly(Side.CLIENT)
-	public void keyPressed(EntityPlayer player) {
-		charge = getChargeTime(player);
-	}
-
-	/** Returns true if skill should continue charging up (key is still held down) */
-	@SideOnly(Side.CLIENT)
-	private boolean isKeyPressed() {
-		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].pressed || (Config.allowVanillaControls() &&
-				Minecraft.getMinecraft().gameSettings.keyBindAttack.pressed && !Minecraft.getMinecraft().gameSettings.keyBindAttack.isPressed());
+	public void keyPressed(EntityPlayer player, boolean state) {
+		buttonState = state;
+		charge = (buttonState ? getChargeTime(player) : 0);
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class ArmorBreak extends SkillActive
 		if (super.trigger(world, player)) {
 			activeTimer = 1;
 			ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
-			if (skill != null && skill.isLockedOn()) {// && TargetUtils.canReachTarget(player, skill.getCurrentTarget())) {
+			if (skill != null && skill.isLockedOn()) {
 				player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 			}
 		}
@@ -138,8 +138,8 @@ public class ArmorBreak extends SkillActive
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (isCharging()) {
-			if (isKeyPressed() && PlayerUtils.isHoldingSkillItem(player)) {
+		if (isCharging(player)) {
+			if (buttonState && PlayerUtils.isHoldingSkillItem(player)) {
 				if (!player.isSwingInProgress) {
 					if (charge < (getChargeTime(player) - 1)) {
 						Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
@@ -148,6 +148,7 @@ public class ArmorBreak extends SkillActive
 				}
 				if (charge == 0) {
 					// can't use the standard disable LMB method, since Armor Break will not return true for isActive
+					buttonState = false;
 					player.attackTime = 4;
 					player.swingItem();
 					SwordBasic skill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
@@ -156,6 +157,7 @@ public class ArmorBreak extends SkillActive
 					}
 				}
 			} else {
+				buttonState = false;
 				charge = 0;
 			}
 		}

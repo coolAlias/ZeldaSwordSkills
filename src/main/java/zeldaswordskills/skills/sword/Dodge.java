@@ -93,8 +93,9 @@ public class Dodge extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
-				(int)(getDodgeChance(player) * 100)));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), getDodgeTime() * 2));
+				(int)(getBaseDodgeChance(player) * 100)));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
+				(getDodgeTime() + level - 5) * 2)); // don't use real time bonus, since timer is zero
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -143,12 +144,21 @@ public class Dodge extends SkillActive
 		}
 	}
 
-	/** Returns player's chance to successfully evade an attack */
-	private float getDodgeChance(EntityPlayer player) {
+	/** Returns player's base chance to successfully evade an attack, including bonuses from buffs */
+	private float getBaseDodgeChance(EntityPlayer player) {
 		float evadeUp = ZSSEntityInfo.get(player).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
 		float evadeDown = ZSSEntityInfo.get(player).getBuffAmplifier(Buff.EVADE_DOWN) * 0.01F;
-		float timeBonus = (dodgeTimer * 0.02F);
-		return ((level * 0.1F) + timeBonus + evadeUp - evadeDown);
+		return ((level * 0.1F) + evadeUp - evadeDown);
+	}
+
+	/** Returns timing evasion bonus */
+	private float getTimeBonus() {
+		return ((dodgeTimer + level - 5) * 0.02F);
+	}
+
+	/** Returns full chance to dodge an attack, including all bonuses */
+	private float getDodgeChance(EntityPlayer player) {
+		return getBaseDodgeChance(player) + getTimeBonus();
 	}
 
 	/**

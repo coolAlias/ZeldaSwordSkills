@@ -48,7 +48,7 @@ public class ContainerSkills extends Container
 			}
 		}
 
-		addSlotToContainer(new Slot(inventory, 0, 66, 141));
+		addSlotToContainer(new Slot(inventory, 0, 65, 141));
 
 		for (int i = 1; i < inventory.getSizeInventory(); ++i) {
 			if (i == SkillBase.bonusHeart.getId()) {
@@ -61,7 +61,7 @@ public class ContainerSkills extends Container
 				x = (i1 > 8 ? 108 : 22);
 				y = 99 - (i1 > 8 ? (i1 - 9) : (i1 - 5)) * 21;
 			} else {
-				x = 34 + (i1 - 1) * 21;
+				x = 32 + (i1 - 1) * 22;
 				y = 120;
 			}
 
