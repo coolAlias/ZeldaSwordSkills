@@ -44,6 +44,7 @@ import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBreak;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.TickType;
@@ -101,7 +102,7 @@ public class ZSSKeyHandler extends KeyHandler
 
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
-		if (tickEnd) {
+		if (tickEnd && mc.thePlayer != null) {
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
 			if (mc.inGameHasFocus && skills != null) {
 				if (kb == keys[KEY_SKILL_ACTIVATE]) {
@@ -191,7 +192,7 @@ public class ZSSKeyHandler extends KeyHandler
 				}
 			}
 		} else if (kb == keys[KEY_DOWN] && canInteract) {
-			if (mc.thePlayer.isUsingItem() && skills.hasSkill(SkillBase.swordBreak)) {
+			if (PlayerUtils.isUsingItem(mc.thePlayer) && skills.hasSkill(SkillBase.swordBreak)) {
 				((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(mc.thePlayer);
 			} else if (skills.hasSkill(SkillBase.parry)) {
 				((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(mc.thePlayer);

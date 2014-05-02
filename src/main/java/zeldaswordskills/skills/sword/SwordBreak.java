@@ -81,6 +81,7 @@ public class SwordBreak extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxDamage()));
+		desc.add(getTimeLimitDisplay(getActiveTime() - getUseDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -102,7 +103,7 @@ public class SwordBreak extends SkillActive
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		if (super.activate(world, player)) {
-			breakTimer = (6 + level); // 2 tick window to block at level 1
+			breakTimer = getActiveTime();
 			playMissSound = true;
 			if (world.isRemote) {
 				Minecraft.getMinecraft().gameSettings.keyBindUseItem.pressed = false;
@@ -131,9 +132,14 @@ public class SwordBreak extends SkillActive
 		}
 	}
 
+	/** Number of ticks that skill will be considered active */
+	private int getActiveTime() {
+		return 6 + level;
+	}
+
 	/** Number of ticks before player may attempt to use this skill again */
 	private int getUseDelay() {
-		return (5 - (level / 2));
+		return (5 - (level / 2)); // 2 tick usage window at level 1
 	}
 
 	/** Maximum amount of damage that may be caused to the opponent's weapon */

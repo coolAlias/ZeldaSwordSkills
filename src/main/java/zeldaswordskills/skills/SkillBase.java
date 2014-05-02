@@ -340,7 +340,7 @@ public abstract class SkillBase
 	}
 
 	/** Returns the translated description of the skill's effect (long version) */
-	public String getEffectDisplay() {
+	public String getFullDescription() {
 		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.full");
 	}
 
@@ -356,6 +356,11 @@ public abstract class SkillBase
 	/** Returns a translated description of the skill's range, using the value provided */
 	public String getRangeDisplay(double range) {
 		return StatCollector.translateToLocalFormatted("skill.zss.desc.range", String.format("%.1f", range));
+	}
+
+	/** Returns a translated description of the skill's time limit, using the value provided */
+	public String getTimeLimitDisplay(int time) {
+		return StatCollector.translateToLocalFormatted("skill.zss.desc.time", time);
 	}
 
 	/** Returns true if player meets requirements to learn this skill at target level */

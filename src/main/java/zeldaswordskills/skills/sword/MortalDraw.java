@@ -23,7 +23,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.client.ZSSKeyHandler;
@@ -84,8 +83,7 @@ public class MortalDraw extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(100, true) + "%");
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
-				(getAttackTime() - DELAY)));
+		desc.add(getTimeLimitDisplay(getAttackTime() - DELAY));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 

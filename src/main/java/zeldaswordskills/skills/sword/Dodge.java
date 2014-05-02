@@ -96,6 +96,7 @@ public class Dodge extends SkillActive
 				(int)(getBaseDodgeChance(player) * 100)));
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
 				(getDodgeTime() + level - 5) * 2)); // don't use real time bonus, since timer is zero
+		desc.add(getTimeLimitDisplay(getDodgeTime()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 

@@ -128,8 +128,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getRangeDisplay(getRange()));
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxComboSize()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), getComboTimeLimit()));
-		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 3), String.format("%.1f", (0.5F * level))));
+		desc.add(getTimeLimitDisplay(getComboTimeLimit()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), String.format("%.1f", (0.5F * level))));
 	}
 
 	@Override

@@ -41,6 +41,8 @@ public class GuiSkills extends GuiContainer
 	private static final int MAX_LINES = 11;
 	/** Currently selected skill for displaying a description */
 	private SkillBase currentSkill = null;
+	/** The description to display */
+	private final List<String> desc = new ArrayList<String>(50);
 	/** Current y position at which to draw text; coordinates set as though gui was entire screen */
 	private int textY;
 	/** Current position of the scroll bar, as a float (0 is top, 1 is bottom) */
@@ -62,6 +64,11 @@ public class GuiSkills extends GuiContainer
 		super(new ContainerSkills(player));
 		this.xSize = 281;
 		this.ySize = 180;
+	}
+
+	@Override
+	public boolean doesGuiPauseGame() {
+		return true;
 	}
 
 	@Override
@@ -104,34 +111,20 @@ public class GuiSkills extends GuiContainer
 			RenderHelperQ.drawTexturedRect(260, 61, 283, 17, 1, 88, 285, 180);
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
 		}
-		String name = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.zss.gui.description"));
+		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.zss.gui.click"));
 		isUnicode = fontRenderer.getUnicodeFlag();
 		fontRenderer.setUnicodeFlag(true);
-		fontRenderer.drawString(name, 158, 38, 4210752);
-		if (currentSkill == null) {
-			fontRenderer.drawString(StatCollector.translateToLocal("skill.zss.gui.click"), 158, 38 + (fontRenderer.FONT_HEIGHT * 2), 4210752);
-		} else {
-			fontRenderer.drawString(currentSkill.getLevelDisplay(false), (158 + fontRenderer.getStringWidth(name) < 223 ? 223 : 226), 38, 4210752);
-			textY = 38 + (fontRenderer.FONT_HEIGHT * 2);
-			List<String> desc = new ArrayList<String>();
-			desc.add(StatCollector.translateToLocal("skill.zss.gui.summary"));
-			currentSkill.addInformation(desc, mc.thePlayer);
-			desc.add("");
-			desc.add(StatCollector.translateToLocal("skill.zss.gui.activation"));
-			desc.addAll(fontRenderer.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
-			desc.add("");
-			desc.add(StatCollector.translateToLocal("skill.zss.gui.description"));
-			String[] temp = currentSkill.getEffectDisplay().split("\\\\n");
-			for (String s : temp) {
-				desc.addAll(fontRenderer.listFormattedStringToWidth(s, 101));
-				desc.add("");
-			}
-			numLines = desc.size();
-			int start = (needsScrollBar() ? (int)(scrollY * (numLines - MAX_LINES)) : 0);
-			for (int i = start; i < desc.size() && i < (MAX_LINES + start); ++i) {
-				fontRenderer.drawString(desc.get(i), 158, textY, 4210752);
-				textY += fontRenderer.FONT_HEIGHT;
-			}
+		fontRenderer.drawString(s, 158, 38, 4210752);
+		if (currentSkill != null) {
+			s = currentSkill.getLevelDisplay(false);
+			fontRenderer.drawString(s, 262 - fontRenderer.getStringWidth(s), 38, 4210752);
+		}
+		refreshDescription();
+		textY = 38 + (fontRenderer.FONT_HEIGHT * 2);
+		int start = (needsScrollBar() ? (int)(scrollY * (numLines - MAX_LINES)) : 0);
+		for (int i = start; i < desc.size() && i < (MAX_LINES + start); ++i) {
+			fontRenderer.drawString(desc.get(i), 158, textY, 4210752);
+			textY += fontRenderer.FONT_HEIGHT;
 		}
 		fontRenderer.setUnicodeFlag(isUnicode);
 	}
@@ -140,6 +133,30 @@ public class GuiSkills extends GuiContainer
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		RenderHelperQ.drawTexturedRect(texture, guiLeft, guiTop, 0, 0, xSize, ySize, 284, 180);
 		RenderHelperQ.drawPlayerModel(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
+	}
+
+	/**
+	 * Refreshes the description either when empty or the skill has changed
+	 */
+	private void refreshDescription() {
+		if (!desc.isEmpty()) {
+			return;
+		}
+		if (currentSkill != null) {
+			desc.add(StatCollector.translateToLocal("skill.zss.gui.summary"));
+			currentSkill.addInformation(desc, mc.thePlayer);
+			desc.add("");
+			desc.add(StatCollector.translateToLocal("skill.zss.gui.activation"));
+			desc.addAll(fontRenderer.listFormattedStringToWidth(currentSkill.getActivationDisplay(), 101));
+			desc.add("");
+		}
+		desc.add(StatCollector.translateToLocal("skill.zss.gui.description"));
+		String[] temp = (currentSkill != null ? currentSkill.getFullDescription().split("\\\\n") : StatCollector.translateToLocal("skill.zss.gui.explanation").split("\\\\n"));
+		for (String s : temp) {
+			desc.addAll(fontRenderer.listFormattedStringToWidth(s, 101));
+			desc.add("");
+		}
+		numLines = desc.size();
 	}
 
 	private boolean needsScrollBar() {
@@ -184,8 +201,10 @@ public class GuiSkills extends GuiContainer
 		Slot slot = this.getSlotAtPosition(mouseX, mouseY);
 		if (slot != null && slot.getStack() != null) {
 			int id = (slot.getStack().getItemDamage() % SkillBase.getNumSkills());
-			if (currentSkill != null && currentSkill.getId() != id) {
+			if (currentSkill == null || currentSkill.getId() != id) {
 				scrollY = 0.0F;
+				// clear the current description so it refreshes next time the screen draws
+				desc.clear();
 			}
 			currentSkill = ZSSPlayerInfo.get(mc.thePlayer).getPlayerSkill((byte) id);
 		}

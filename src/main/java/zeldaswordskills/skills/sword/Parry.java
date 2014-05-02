@@ -90,7 +90,8 @@ public class Parry extends SkillActive
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
 				(int)(getDisarmChance(player, null) * 100)));
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
-				(int)(2.5F * (6 + level - getParryDelay()))));
+				(int)(2.5F * (getActiveTime() - getParryDelay()))));
+		desc.add(getTimeLimitDisplay(getActiveTime() - getParryDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -112,7 +113,7 @@ public class Parry extends SkillActive
 	@Override
 	public boolean activate(World world, EntityPlayer player) {
 		if (super.activate(world, player)) {
-			parryTimer = (6 + level); // 2 tick window to parry at level 1
+			parryTimer = getActiveTime();
 			player.swingItem();
 			playMissSound = true;
 		}
@@ -137,9 +138,14 @@ public class Parry extends SkillActive
 		}
 	}
 
-	/** Number of ticks before player may attempt to parry again */
+	/** Number of ticks that skill will be considered active */
+	private int getActiveTime() {
+		return 6 + level;
+	}
+
+	/** Number of ticks before player may attempt to use this skill again */
 	private int getParryDelay() {
-		return (5 - (level / 2));
+		return (5 - (level / 2)); // 2 tick usage window at level 1
 	}
 
 	/**
