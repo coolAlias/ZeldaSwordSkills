@@ -195,6 +195,7 @@ public class ZSSCombatEvents
 				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
 					performComboAttack(mc, skill);
 				}
+
 				// always cancel left click to prevent weapons taking double durability damage
 				event.setCanceled(true);
 			} else if (event.button == 1 && Config.allowVanillaControls()) {
