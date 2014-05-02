@@ -60,10 +60,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSEntities
 {
-	/** Mod-only entity IDs */
-	private static int modEntityIndex = 0;
 	/** Spawn rates */
-	private static int spawnChu, spawnFairy, spawnKeese, spawnOctorok;
+	private static int spawnChu, spawnFairy, spawnGoron, spawnKeese, spawnOctorok;
+
+	public static int getGoronRatio() { return spawnGoron; }
 
 	/**
 	 * Initializes entity spawn rates 
@@ -72,6 +72,7 @@ public class ZSSEntities
 		// SPAWN RATES
 		spawnChu = config.get("Spawn Rates", "Chuchu spawn rate (0 to disable)[0+]", 1).getInt();
 		spawnFairy = config.get("Spawn Rates", "Fairy (wild) spawn rate (0 to disable)[0+]", 1).getInt();
+		spawnGoron = config.get("Spawn Rates", "Goron spawn rate, as a ratio of regular villagers to Gorons (0 to disable)[0+]", 4).getInt();
 		spawnKeese = config.get("Spawn Rates", "Keese spawn rate (0 to disable)[0+]", 1).getInt();
 		spawnOctorok = config.get("Spawn Rates", "Octorok spawn rate (0 to disable)[0+]", 8).getInt();
 	}
@@ -85,6 +86,7 @@ public class ZSSEntities
 	}
 
 	private static void registerEntities() {
+		int modEntityIndex = 0;
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBomb.class, "bomb", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
@@ -100,20 +102,19 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityMagicSpell.class, "magicspell", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 
 		// MOBS
-		registerEntity(EntityFairy.class, "fairy", 0xADFF2F, 0xFFFF00);
-		registerEntity(EntityChu.class, "chu", 0xEE2C2C, 0x00CED1);
-		registerEntity(EntityKeese.class, "keese", 0x555555, 0x000000);
-		registerEntity(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3);
-		registerEntity(EntityGoron.class, "goron", 0xB8860B, 0x8B5A00);
+		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 0xADFF2F, 0xFFFF00);
+		registerEntity(EntityChu.class, "chu", ++modEntityIndex, 0xEE2C2C, 0x00CED1);
+		registerEntity(EntityKeese.class, "keese", ++modEntityIndex, 0x555555, 0x000000);
+		registerEntity(EntityOctorok.class, "octorok", ++modEntityIndex, 0x68228B, 0xBA55D3);
+		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 0xB8860B, 0x8B5A00);
 
 		// NPCS
 		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
 	}
 
-	public static void registerEntity(Class entityClass, String name, int primaryColor, int secondaryColor) {
-		int id = EntityRegistry.findGlobalUniqueEntityId();
-		EntityRegistry.registerGlobalEntityID(entityClass, name, id, primaryColor, secondaryColor);
-		EntityRegistry.registerModEntity(entityClass, name, ++modEntityIndex, ZSSMain.instance, 80, 3, false);
+	public static void registerEntity(Class entityClass, String name, int modEntityIndex, int primaryColor, int secondaryColor) {
+		EntityRegistry.registerGlobalEntityID(entityClass, name, EntityRegistry.findGlobalUniqueEntityId(), primaryColor, secondaryColor);
+		EntityRegistry.registerModEntity(entityClass, name, modEntityIndex, ZSSMain.instance, 80, 3, false);
 	}
 
 	@SideOnly(Side.CLIENT) 

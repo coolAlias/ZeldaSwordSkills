@@ -86,12 +86,10 @@ public class EndingBlow extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
+	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(level * 20, true) + "%");
 		desc.add(getDurationDisplay(getDuration(), true));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override
@@ -166,7 +164,7 @@ public class EndingBlow extends SkillActive
 		if (isActive()) {
 			activeTimer = 0;
 			if (!player.worldObj.isRemote) {
-				ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_DOWN, getDuration(), 50);
+				ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_DOWN, getDuration() * 2, 50);
 			}
 		}
 	}

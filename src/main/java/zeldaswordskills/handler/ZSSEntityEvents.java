@@ -28,7 +28,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -37,12 +36,10 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
-
-import org.lwjgl.opengl.GL11;
-
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.EntityMaskTrader;
+import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
@@ -170,23 +167,28 @@ public class ZSSEntityEvents
 				PacketDispatcher.sendPacketToPlayer(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)).makePacket(), (Player) player);
 				ZSSPlayerInfo.get(player).verifyStartingGear();
 			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
-				// workaround to prevent "already tracking this entity" errors on the spawned Gorons
-				// also, this event is called each time the entity joins, which is every time the world is
+				// this event is called each time the entity joins, which is every time the world is
 				// loaded, not just the first time the entity spawns, so need to restrict to first time only 
 				NBTTagCompound compound = event.entity.getEntityData();
-				// TODO config for goron frequency
-				if (!compound.hasKey("zssFirstJoinFlag") && event.world.rand.nextInt(4) == 0) {
+				if (!compound.hasKey("zssFirstJoinFlag")) {
 					compound.setBoolean("zssFirstJoinFlag", true);
-					int x = MathHelper.floor_double(event.entity.posX);
-					int y = MathHelper.floor_double(event.entity.posY);
-					int z = MathHelper.floor_double(event.entity.posZ);
-					if (event.entity.worldObj.villageCollectionObj.getVillageList().isEmpty() || event.entity.worldObj.villageCollectionObj.findNearestVillage(x, y, z, 32) != null) {
-						EntityGoron goron = new EntityGoron(event.entity.worldObj, event.entity.worldObj.rand.nextInt(5));
-						double posX = event.entity.posX + event.entity.worldObj.rand.nextInt(8) - 4;
-						double posZ = event.entity.posZ + event.entity.worldObj.rand.nextInt(8) - 4;
-						goron.setLocationAndAngles(posX, event.entity.posY + 1, posZ, event.entity.rotationYaw, event.entity.rotationPitch);
-						if (goron.getCanSpawnHere()) {
-							event.entity.worldObj.spawnEntityInWorld(goron);
+					int ratio = ZSSEntities.getGoronRatio();
+					if (ratio > 0 && event.world.rand.nextInt(ratio) == 0) {
+						int x = MathHelper.floor_double(event.entity.posX);
+						int y = MathHelper.floor_double(event.entity.posY);
+						int z = MathHelper.floor_double(event.entity.posZ);
+						try {
+							if (event.entity.worldObj.villageCollectionObj.getVillageList().isEmpty() || event.entity.worldObj.villageCollectionObj.findNearestVillage(x, y, z, 32) != null) {
+								EntityGoron goron = new EntityGoron(event.entity.worldObj, event.entity.worldObj.rand.nextInt(5));
+								double posX = event.entity.posX + event.entity.worldObj.rand.nextInt(8) - 4;
+								double posZ = event.entity.posZ + event.entity.worldObj.rand.nextInt(8) - 4;
+								goron.setLocationAndAngles(posX, event.entity.posY + 1, posZ, event.entity.rotationYaw, event.entity.rotationPitch);
+								if (goron.getCanSpawnHere()) {
+									event.entity.worldObj.spawnEntityInWorld(goron);
+								}
+							}
+						} catch (NullPointerException e) {
+							; // catches null pointer from block not found during world load (super-flat only?)
 						}
 					}
 				}
@@ -208,27 +210,6 @@ public class ZSSEntityEvents
 		}
 		if (event.entity instanceof EntityPlayer && ZSSPlayerInfo.get((EntityPlayer) event.entity) == null) {
 			ZSSPlayerInfo.register((EntityPlayer) event.entity);
-		}
-	}
-
-	@ForgeSubscribe
-	public void onRenderPlayer(RenderPlayerEvent.Pre event) {
-		ItemStack mask = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
-		if (mask != null && mask.getItem() == ZSSItems.maskGiants) {
-			GL11.glPushMatrix();
-			// TODO generalize transformations based on player's current height rather
-			// than on the mask worn; may need to flag this in extended properties to
-			// prevent possible conflicts with other mods
-			GL11.glTranslatef(0.0F, -6.325F, 0.0F);
-			GL11.glScalef(3.0F, 3.0F, 3.0F);
-		}
-	}
-
-	@ForgeSubscribe
-	public void onRenderPlayer(RenderPlayerEvent.Post event) {
-		ItemStack mask = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
-		if (mask != null && mask.getItem() == ZSSItems.maskGiants) {
-			GL11.glPopMatrix();
 		}
 	}
 

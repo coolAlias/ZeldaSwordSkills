@@ -33,6 +33,7 @@ import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.Config;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 {
@@ -44,7 +45,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 
 	/** Whether this bomb is capable of destroying blocks */
 	private boolean canGrief = true;
-	
+
 	/** Factor by which affected entity's motion will be multiplied */
 	protected float motionFactor = 1.0F;
 
@@ -100,12 +101,12 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		this.radius = radius;
 		return this;
 	}
-	
+
 	@Override
 	public float getMotionFactor() {
 		return motionFactor;
 	}
-	
+
 	/**
 	 * Sets amount by which entity's motion will be multiplied
 	 */
@@ -125,6 +126,11 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	public EntityBomb setDestructionFactor(float factor) {
 		this.destructionFactor = factor;
 		return this;
+	}
+
+	@Override
+	public boolean canGriefAdventureMode() {
+		return Config.canGriefAdventure();
 	}
 
 	/**
@@ -265,7 +271,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		boolean inNether = (worldObj.provider.dimensionId == -1 && getType() == BombType.BOMB_STANDARD);
 		return (ticksExisted >= fuseTime || inNether || (inFire && getType() == BombType.BOMB_STANDARD));
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
@@ -276,7 +282,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		compound.setFloat("destructionFactor", destructionFactor);
 		compound.setBoolean("canGrief", canGrief);
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

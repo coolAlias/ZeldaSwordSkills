@@ -26,10 +26,10 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
@@ -91,12 +91,12 @@ public class Dodge extends SkillActive
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(2),
-				(int)(getDodgeChance(player) * 100)));
+	public void addInformation(List<String> desc, EntityPlayer player) {
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
+				(int)(getBaseDodgeChance(player) * 100)));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
+				(getDodgeTime() + level - 5) * 2)); // don't use real time bonus, since timer is zero
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override
@@ -144,12 +144,21 @@ public class Dodge extends SkillActive
 		}
 	}
 
-	/** Returns player's chance to successfully evade an attack */
-	private float getDodgeChance(EntityPlayer player) {
+	/** Returns player's base chance to successfully evade an attack, including bonuses from buffs */
+	private float getBaseDodgeChance(EntityPlayer player) {
 		float evadeUp = ZSSEntityInfo.get(player).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
 		float evadeDown = ZSSEntityInfo.get(player).getBuffAmplifier(Buff.EVADE_DOWN) * 0.01F;
-		float timeBonus = (dodgeTimer * 0.02F);
-		return ((level * 0.1F) + timeBonus + evadeUp - evadeDown);
+		return ((level * 0.1F) + evadeUp - evadeDown);
+	}
+
+	/** Returns timing evasion bonus */
+	private float getTimeBonus() {
+		return ((dodgeTimer + level - 5) * 0.02F);
+	}
+
+	/** Returns full chance to dodge an attack, including all bonuses */
+	private float getDodgeChance(EntityPlayer player) {
+		return getBaseDodgeChance(player) + getTimeBonus();
 	}
 
 	/**

@@ -86,12 +86,12 @@ public class Parry extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(2),
+	public void addInformation(List<String> desc, EntityPlayer player) {
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
 				(int)(getDisarmChance(player, null) * 100)));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
+				(int)(2.5F * (6 + level - getParryDelay()))));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override

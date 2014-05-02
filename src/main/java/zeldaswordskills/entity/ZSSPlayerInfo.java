@@ -35,8 +35,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.CommonProxy;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
-import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemZeldaShield;
@@ -341,7 +341,7 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Returns false any skill is active that prevents left-clicks, such as most skills with animations
+	 * Returns whether skill interactions are currently allowed, i.e. no other skill is in progress
 	 */
 	public boolean canInteract() {
 		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkill(currentActiveSkillId))) {

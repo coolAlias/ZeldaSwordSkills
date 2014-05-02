@@ -18,6 +18,7 @@
 package zeldaswordskills.entity.projectile;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -29,6 +30,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
+import zeldaswordskills.lib.Config;
 
 public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 {
@@ -64,7 +66,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	}
 
 	@Override
-	protected DamageSource getDamageSource() {
+	protected DamageSource getDamageSource(Entity entity) {
 		return new EntityDamageSourceIndirect("bomb arrow", this, getShooter()).setProjectile().setExplosion();
 	}
 
@@ -74,6 +76,11 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	public EntityArrowBomb setRadius(float radius) {
 		this.radius = radius;
 		return this;
+	}
+
+	@Override
+	public boolean canGriefAdventureMode() {
+		return Config.canGriefAdventure();
 	}
 
 	/**

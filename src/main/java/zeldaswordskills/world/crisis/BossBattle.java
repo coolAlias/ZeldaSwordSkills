@@ -23,6 +23,7 @@ import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
@@ -156,7 +157,10 @@ public class BossBattle extends AbstractCrisis
 	 * Fills in the doorway and all other holes in the structure with appropriate blocks
 	 */
 	protected void fillAllGaps(World world) {
-		int blockId = BlockSecretStone.getIdFromMeta(world.getBlockMetadata(core.xCoord, core.yCoord, core.zCoord));
+		int blockId = (core.getRenderBlock() != null ? core.getRenderBlock().blockID : -1);
+		if (blockId < 1) {
+			blockId = BlockSecretStone.getIdFromMeta(world.getBlockMetadata(core.xCoord, core.yCoord, core.zCoord));
+		}
 		for (int i = box.minX; i <= box.maxX; ++i) {
 			for (int j = box.minY; j <= box.maxY; ++j) {
 				for (int k = box.minZ; k <= box.maxZ; ++k) {
@@ -232,6 +236,10 @@ public class BossBattle extends AbstractCrisis
 			if (equip) {
 				equipEntity(world, (EntityLivingBase) mob);
 			}
+		}
+		if (mob instanceof EntityLiving) {
+			// set persistence required to prevent despawning
+			((EntityLiving) mob).func_110163_bv();
 		}
 		if (!world.isRemote) {
 			// TODO boss spawn sound 'roar!' or whatever

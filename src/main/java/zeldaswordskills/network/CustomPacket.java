@@ -53,6 +53,7 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(i++), GetBombPacket.class);
 		builder.put(Integer.valueOf(i++), InLiquidPacket.class);
 		builder.put(Integer.valueOf(i++), MortalDrawPacket.class);
+		builder.put(Integer.valueOf(i++), OpenGuiPacket.class);
 		builder.put(Integer.valueOf(i++), PacketISpawnParticles.class);
 		builder.put(Integer.valueOf(i++), PlaySoundPacket.class);
 		builder.put(Integer.valueOf(i++), SpawnLeapingBlowPacket.class);

@@ -69,6 +69,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 					world.playSoundAtEntity(player, Sounds.LEVELUP, 1.0F, 1.0F);
 					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.skill.levelup",
 							skill.getDisplayName(), skills.getSkillLevel(skill)));
+					// TODO post an event here to allow ZSS to trigger achievements
 					if (skill == SkillBase.bonusHeart) {
 						player.triggerAchievement(ZSSAchievements.skillHeart);
 						if (skills.getSkillLevel(skill) > 19) {
@@ -160,13 +161,14 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 				if (skill.getId() != SkillBase.bonusHeart.getId()) {
 					list.add(EnumChatFormatting.GOLD + skill.getLevelDisplay(true));
 				}
-				list.addAll(ZSSPlayerInfo.get(player).getPlayerSkill(skill).getDescription(player));
+				list.addAll(skill.getTranslatedTooltip(player));
 			} else {
 				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.skillorb.desc.unknown"));
 			}
 		}
 	}
 
+	// TODO could use the API from DSS and strip interface if ZSS not loaded
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
 		if (!ZSSPlayerInfo.get(player).hasReceivedAllOrbs()) {

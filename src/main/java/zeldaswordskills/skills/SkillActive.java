@@ -17,8 +17,6 @@
 
 package zeldaswordskills.skills;
 
-import java.util.List;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
@@ -78,12 +76,6 @@ public abstract class SkillActive extends SkillBase
 		super(skill);
 		this.allowUserActivation = skill.allowUserActivation;
 		this.disablesLMB = skill.disablesLMB;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		return getDescription();
 	}
 
 	/** Returns true if this skill is currently active, however that is defined by the child class */

@@ -36,8 +36,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Sword beam shot from Link's sword when at full health. Inflicts half the original sword's
- * damage, including enchantment and other bonuses, to the first entity struck.
+ * Sword beam shot from Link's sword when at full health. Inflicts a portion of
+ * the original sword's base damage to the first entity struck, less 20% for each
+ * additional target thus struck.
  * 
  * If using the Master Sword, the beam will shoot through enemies, hitting all
  * entities in its direct path.
@@ -147,6 +148,7 @@ public class EntitySwordBeam extends EntityThrowable
 					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage)) {
 						WorldUtils.playSoundAtEntity(worldObj, entity, "damage.hit", 0.4F, 0.5F);
 					}
+					damage *= 0.8F;
 				}
 				if (!isMaster) {
 					setDead();

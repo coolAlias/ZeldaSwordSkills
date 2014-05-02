@@ -19,12 +19,12 @@ package zeldaswordskills;
 
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.client.TargetingTickHandler;
+import zeldaswordskills.client.ZSSClientEvents;
+import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntities;
-import zeldaswordskills.handler.SoundHandler;
-import zeldaswordskills.handler.TargetingTickHandler;
-import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.item.ZSSItems;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
@@ -36,9 +36,9 @@ public class ClientProxy extends CommonProxy {
 	public void initialize() {
 		super.initialize();
 		ZSSKeyHandler.init();
-		MinecraftForge.EVENT_BUS.register(new SoundHandler());
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new GuiBuffBar());
+		MinecraftForge.EVENT_BUS.register(new ZSSClientEvents());
 		TickRegistry.registerTickHandler(new TargetingTickHandler(), Side.CLIENT);
 	}
 

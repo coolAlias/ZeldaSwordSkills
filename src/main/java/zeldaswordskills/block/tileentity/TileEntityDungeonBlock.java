@@ -23,6 +23,8 @@ import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.Packet132TileEntityData;
 import net.minecraft.tileentity.TileEntity;
+import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.ZSSBlocks;
 
 /**
  * 
@@ -76,6 +78,12 @@ public class TileEntityDungeonBlock extends TileEntity
 	@Override
 	public void writeToNBT(NBTTagCompound compound) {
 		super.writeToNBT(compound);
+		// TODO this should update world saves correctly to new format:
+		if (renderBlock == null && this.getBlockType() == ZSSBlocks.dungeonCore) {
+			renderBlock = Block.blocksList[BlockSecretStone.getIdFromMeta(worldObj.getBlockMetadata(xCoord, yCoord, zCoord))];
+			renderMetadata = 0;
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);
+		}
 		compound.setInteger("renderBlock", renderBlock != null ? renderBlock.blockID : -1);
 		compound.setInteger("renderMetadata", renderMetadata);
 	}
@@ -83,7 +91,7 @@ public class TileEntityDungeonBlock extends TileEntity
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		int blockId = compound.getInteger("renderBlock");
+		int blockId = (compound.hasKey("renderBlock") ? compound.getInteger("renderBlock") : -1);
 		renderBlock = (blockId > -1 ? Block.blocksList[blockId] : null);
 		renderMetadata = compound.getInteger("renderMetadata");
 	}

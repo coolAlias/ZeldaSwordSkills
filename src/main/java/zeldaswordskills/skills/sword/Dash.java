@@ -23,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
@@ -45,7 +46,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * The player charges into the target, inflicting damage and knocking the target back.
  * 
  * Range: 4 blocks plus 1 block per additional level
- * Damage: 4 plus 1 per additional level
+ * Damage: 2 plus 1 per additional level
  * Knockback: 2 blocks, plus 1 per additional level
  * Exhaustion: 1.0F minus 0.1F per level (0.5F at level 5)
  * Special: Must be at least 2 blocks away from target when skill is activated to
@@ -79,12 +80,13 @@ public class Dash extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
-		desc.add(getRangeDisplay(getRange()));
+	public void addInformation(List<String> desc, EntityPlayer player) {
 		desc.add(getDamageDisplay(getDamage(), false));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), 2 + level));
+		desc.add(getRangeDisplay(getRange()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
+				String.format("%.1f", getMinDistance())));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override
@@ -95,7 +97,7 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && player.isUsingItem() && canUse(player);
+		return player.onGround && PlayerUtils.isUsingItem(player) && canUse(player);
 	}
 
 	@Override
@@ -104,14 +106,19 @@ public class Dash extends SkillActive
 		return super.canUse(player) && !isActive() && (PlayerUtils.isSkillItem(item) || item instanceof IDashItem);
 	}
 
-	/** Damage is base damage plus 1.0F per level */
-	private float getDamage() {
-		return (4.0F + level);
+	/** Damage is base damage plus one per level */
+	private int getDamage() {
+		return (2 + level);
 	}
 
 	/** Range increases by 1 block per level */
 	private double getRange() {
 		return (3.0D + level);
+	}
+
+	/** Minimum distance the player must cover before the dash is effective */
+	private double getMinDistance() {
+		return 2.0D - (0.2D * level);
 	}
 
 	/** Deactivates skill and resets local variables */
@@ -161,7 +168,7 @@ public class Dash extends SkillActive
 				distance += vec3.lengthVector();
 
 				if (f > 0.5F && target.getDistanceSqToEntity(player) <= 9.0D) {
-					if (distance > (2.0D - (0.2D * level))) {
+					if (distance > getMinDistance()) {
 						target.attackEntityFrom(DamageUtils.causeNonSwordDamage(player), getDamage() * f);
 						target.addVelocity(vec3.xCoord * f * (0.2D + (0.1D * level)), 0.1D + f * (level * 0.025D), vec3.zCoord * f * (0.2D + (0.1D * level)));
 					}

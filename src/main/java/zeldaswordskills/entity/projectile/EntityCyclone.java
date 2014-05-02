@@ -182,7 +182,7 @@ public class EntityCyclone extends EntityMobThrowable
 					releaseDrops();
 				}
 			}
-		} else if (mop.entityHit != null) {
+		} else if (mop.entityHit != null && (mop.entityHit != getThrower() || ticksExisted >= 5)) {
 			if (getDamage() > 0.0F && !affectedEntities.contains(mop.entityHit.entityId)) {
 				mop.entityHit.attackEntityFrom(getDamageSource(), getDamage());
 				affectedEntities.add(mop.entityHit.entityId);
@@ -207,7 +207,7 @@ public class EntityCyclone extends EntityMobThrowable
 			double d = Math.max(0.5D, getArea() - 1.0D);
 			List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, boundingBox.expand(d, d, d));
 			for (EntityLivingBase entity : entities) {
-				if (affectedEntities.contains(entity.entityId)) {
+				if (affectedEntities.contains(entity.entityId) || (entity == getThrower() && ticksExisted < 8)) {
 					continue;
 				}
 				entity.attackEntityFrom(new EntityDamageSourceIndirect("tornado", this, getThrower()).setProjectile().setMagicDamage(), getDamage());

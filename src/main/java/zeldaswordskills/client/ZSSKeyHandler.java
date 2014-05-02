@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.handler;
+package zeldaswordskills.client;
 
 import java.util.EnumSet;
 
@@ -31,9 +31,12 @@ import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.handler.GuiHandler;
+import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
+import zeldaswordskills.network.OpenGuiPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
@@ -56,16 +59,16 @@ public class ZSSKeyHandler extends KeyHandler
 	/** Key index for easy handling and retrieval of keys and key descriptions */
 	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
 			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_BOMB = 7,
-			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9;
+			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9, KEY_SKILLS_GUI = 10;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
 	public static final String[] desc = { "activate","next","attack","left","right","down",
-		"block","bomb","toggleat","togglebuff"};
+		"block","bomb","toggleat","togglebuff","skills_gui"};
 
 	/** Default key values */
 	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
 		Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_DOWN, Keyboard.KEY_RCONTROL,
-		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V};
+		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V, Keyboard.KEY_P};
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 
@@ -99,11 +102,11 @@ public class ZSSKeyHandler extends KeyHandler
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
 		if (tickEnd) {
-			if (mc.inGameHasFocus && ZSSPlayerInfo.get(mc.thePlayer) != null) {
+			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+			if (mc.inGameHasFocus && skills != null) {
 				if (kb == keys[KEY_SKILL_ACTIVATE]) {
-					SkillBase skill = ZSSPlayerInfo.get(mc.thePlayer).getPlayerSkill(SkillBase.swordBasic);
-					if (skill != null && skill.getLevel() > 0) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(skill).makePacket());
+					if (skills.hasSkill(SkillBase.swordBasic)) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBasic).makePacket());
 					}
 				} else if (kb == keys[KEY_BOMB]) {
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
@@ -117,9 +120,13 @@ public class ZSSKeyHandler extends KeyHandler
 					}
 				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
 					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+				} else if (kb == keys[KEY_SKILLS_GUI]) {
+					PacketDispatcher.sendPacketToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS).makePacket());
 				} else {
-					handleTargetingKeys(kb);
+					handleTargetingKeys(kb, skills);
 				}
+			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer != null) {
+				mc.thePlayer.closeScreen();
 			}
 		}
 	}
@@ -127,9 +134,7 @@ public class ZSSKeyHandler extends KeyHandler
 	/**
 	 * All ILockOnTarget skill related keys are handled here
 	 */
-	private void handleTargetingKeys(KeyBinding kb)
-	{
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+	private void handleTargetingKeys(KeyBinding kb, ZSSPlayerInfo skills) {
 		ILockOnTarget skill = skills.getTargetingSkill();
 		boolean canInteract = skills.canInteract() && !ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN);
 
@@ -164,7 +169,7 @@ public class ZSSKeyHandler extends KeyHandler
 				}
 				// handle separately so can attack and begin charging without pressing key twice
 				if (skills.hasSkill(SkillBase.armorBreak)) {
-					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer);
+					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, true);
 				}
 			} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
 				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
@@ -203,6 +208,10 @@ public class ZSSKeyHandler extends KeyHandler
 				keys[KEY_BLOCK].pressed = false;
 			} else if (kb == keys[KEY_ATTACK]) {
 				keys[KEY_ATTACK].pressed = false;
+				ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+				if (skills.hasSkill(SkillBase.armorBreak)) {
+					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, false);
+				}
 			} else if (kb == keys[KEY_LEFT]) {
 				keys[KEY_LEFT].pressed = false;
 			} else if (kb == keys[KEY_RIGHT]) {

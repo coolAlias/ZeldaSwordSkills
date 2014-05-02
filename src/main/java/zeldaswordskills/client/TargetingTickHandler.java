@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.handler;
+package zeldaswordskills.client;
 
 import java.util.EnumSet;
 
@@ -28,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.render.EntityRendererAlt;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -38,6 +39,7 @@ import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.RisingCut;
 import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBreak;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 import cpw.mods.fml.relauncher.Side;
@@ -82,7 +84,9 @@ public class TargetingTickHandler implements ITickHandler
 		player = mc.thePlayer;
 		if (player != null && ZSSPlayerInfo.get(player) != null) {
 			updateRenderer();
-
+			if (player.getItemInUse() != null && player.getItemInUse().getItem() instanceof ItemMagicRod) {
+				player.swingProgress = 0.5F;
+			}
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
 			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill != null) {
@@ -100,11 +104,11 @@ public class TargetingTickHandler implements ITickHandler
 					target = skill.getCurrentTarget();
 					updatePlayerView();
 				}
-				if (skill.isLockedOn() && skills.canInteract()) {
+				if (skill.isLockedOn() && skills.canInteract() && !skills.isNayruActive()) {
 					if (isVanillaKeyPressed(mc.gameSettings.keyBindJump)) {
-						if (skills.hasSkill(SkillBase.risingCut) && !skills.isSkillActive(SkillBase.risingCut) && !player.isUsingItem() && player.isSneaking()) {
+						if (skills.hasSkill(SkillBase.risingCut) && !skills.isSkillActive(SkillBase.risingCut) && !PlayerUtils.isUsingItem(player) && player.isSneaking()) {
 							((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).keyPressed();
-						} else if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) && player.isUsingItem()) {
+						} else if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) && PlayerUtils.isUsingItem(player)) {
 							skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
 							mc.gameSettings.keyBindUseItem.pressed = false;
 							ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed = false;

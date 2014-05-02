@@ -17,12 +17,8 @@
 
 package zeldaswordskills.skills;
 
-import java.util.List;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class SkillPassive extends SkillBase
 {
@@ -41,12 +37,6 @@ public class SkillPassive extends SkillBase
 	@Override
 	public SkillPassive newInstance() {
 		return new SkillPassive(this);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		return getDescription();
 	}
 
 	@Override

@@ -24,10 +24,11 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.handler.ZSSKeyHandler;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.AddExhaustionPacket;
@@ -53,7 +54,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 			Tapping attack will continue the spin (Super Spin Attack only)
  * Arc: 360 degrees, plus an extra 360 degrees for every level of Super Spin Attack
  * Charge time: 20 ticks, minus 2 per level
- * Range: 3.0D or 6.0D, plus 0.5D per level
+ * Range: 3.0D plus 0.5D per level each of Spin and Super Spin Attack
  * Exhaustion: 3.0F - 0.2F per level, added each spin
  *
  */
@@ -98,7 +99,6 @@ public class SpinAttack extends SkillActive
 	public SpinAttack(String name) {
 		super(name);
 		setDisablesLMB();
-		addDescription(getUnlocalizedDescription(2).replace("super", ""));
 	}
 
 	private SpinAttack(SpinAttack skill) {
@@ -112,15 +112,17 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
+	public void addInformation(List<String> desc, EntityPlayer player) {
+		byte temp = level;
 		if (!isActive()) {
-			superLevel = ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack);
+			superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+			level = ZSSPlayerInfo.get(player).getSkillLevel(spinAttack);
 		}
-		List<String> desc = getDescription();
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1).replace("super", ""), superLevel + 1));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
+		level = temp;
 	}
 
 	@Override

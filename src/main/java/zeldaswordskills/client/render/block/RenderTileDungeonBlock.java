@@ -24,6 +24,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
+import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -44,6 +46,11 @@ public class RenderTileDungeonBlock implements ISimpleBlockRenderingHandler
 		if (te instanceof TileEntityDungeonBlock) {
 			block = ((TileEntityDungeonBlock) te).getRenderBlock();
 			meta = ((TileEntityDungeonBlock) te).getRenderMetadata();
+		}
+		// TODO this should provide backward compatibility:
+		if (block == null || block == ZSSBlocks.secretStone || block == ZSSBlocks.dungeonCore) {
+			block = Block.blocksList[BlockSecretStone.getIdFromMeta(world.getBlockMetadata(x, y, z))];
+			meta = 0;
 		}
 		if (block == null || (!block.isOpaqueCube() && block != Block.ice)) {
 			return false;

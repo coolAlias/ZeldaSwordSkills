@@ -17,10 +17,12 @@
 
 package zeldaswordskills.util;
 
+import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.ISkillItem;
 import zeldaswordskills.api.item.ISword;
 import zeldaswordskills.item.ItemZeldaSword;
@@ -35,6 +37,18 @@ import cpw.mods.fml.common.network.Player;
  */
 public class PlayerUtils
 {
+	/**
+	 * Returns whether the player is using an item, accounting for possibility of Battlegear2 offhand item use
+	 */
+	public static boolean isUsingItem(EntityPlayer player) {
+		if (player.isUsingItem()) {
+			return true;
+		} else if (ZSSMain.isBG2Enabled) {
+			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
+		}
+		return false;
+	}
+	
 	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} */
 	public static boolean isHoldingSword(EntityPlayer player) {
 		return (player.getHeldItem() != null && isSwordItem(player.getHeldItem().getItem()));
@@ -101,7 +115,7 @@ public class PlayerUtils
 
 	/** Returns the difference between player's max and current health */
 	public static float getHealthMissing(EntityPlayer player) {
-		return (player.getMaxHealth() - player.getHealth());
+		return player.capabilities.isCreativeMode ? 0.0F : (player.getMaxHealth() - player.getHealth());
 	}
 
 	/**

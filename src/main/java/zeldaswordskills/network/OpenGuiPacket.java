@@ -15,28 +15,42 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.creativetab;
+package zeldaswordskills.network;
 
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.util.StatCollector;
-import zeldaswordskills.item.ZSSItems;
+import java.io.IOException;
+
+import net.minecraft.entity.player.EntityPlayer;
+import zeldaswordskills.ZSSMain;
+
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
+
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class ZSSTabKeys extends CreativeTabs
+public class OpenGuiPacket extends CustomPacket
 {
-	public ZSSTabKeys(String label) {
-		super(label);
+	private int id;
+
+	public OpenGuiPacket() {}
+	
+	public OpenGuiPacket(int id) {
+		this.id = id;
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public int getTabIconItemIndex() {
-		return ZSSItems.keySmall.itemID;
+	public void write(ByteArrayDataOutput out) throws IOException {
+		out.writeInt(id);
 	}
 
 	@Override
-	public String getTranslatedTabLabel() {
-		return StatCollector.translateToLocal("creativetab.zss.keys");
+	public void read(ByteArrayDataInput in) throws IOException {
+		id = in.readInt();
+	}
+
+	@Override
+	public void execute(EntityPlayer player, Side side) throws ProtocolException {
+		if (side.isServer()) {
+			player.openGui(ZSSMain.instance, id, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
+		}
 	}
 }

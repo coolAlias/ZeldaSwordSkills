@@ -25,7 +25,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import zeldaswordskills.handler.ZSSKeyHandler;
+import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.ActivateSkillPacket;
@@ -79,11 +79,9 @@ public class SwordBreak extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public List<String> getDescription(EntityPlayer player) {
-		List<String> desc = getDescription();
-		desc.add(StatCollector.translateToLocalFormatted(getUnlocalizedDescription(3),getMaxDamage()));
+	public void addInformation(List<String> desc, EntityPlayer player) {
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1), getMaxDamage()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
-		return desc;
 	}
 
 	@Override

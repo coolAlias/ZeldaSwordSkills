@@ -15,18 +15,17 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.creativetab;
+package zeldaswordskills.api.block;
 
-import net.minecraft.creativetab.CreativeTabs;
+import zeldaswordskills.api.entity.CustomExplosion;
 
-public class ZSSCreativeTabs
-{
-	public static CreativeTabs tabBlocks = new ZSSTabBlocks("zssTabBlocks");
-	public static CreativeTabs tabCombat = new ZSSTabCombat("zssTabCombat");
-	public static CreativeTabs tabTools = new ZSSTabTools("zssTabTools");
-	public static CreativeTabs tabSkills = new ZSSTabSkills("zssTabSkills");
-	public static CreativeTabs tabMasks = new ZSSTabMasks("zssTabMasks");
-	public static CreativeTabs tabMisc = new ZSSTabMisc("zssTabMisc");
-	public static CreativeTabs tabKeys = new ZSSTabKeys("zssTabKeys");
-	
+/**
+ * 
+ * Flags blocks that may be affected by {@link CustomExplosion custom explosions}
+ * even in Adventure Mode or when the explosion is targeting a specific block. If
+ * the explosion is non-griefing, no blocks will be affected.
+ *
+ */
+public interface IExplodable {
+
 }

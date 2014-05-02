@@ -25,6 +25,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
@@ -54,19 +55,16 @@ public class EntityHookShot extends EntityThrowable
 {
 	/** Watchable object index for thrower entity's id */
 	protected static final int THROWER_DATA_WATCHER_INDEX = 22;
-	
+
 	/** Watchable object index for target entity's id */
 	protected static final int TARGET_DATA_WATCHER_INDEX = 23;
-	
+
 	/** Watchable object index for hookshot's type */
 	protected static final int SHOTTYPE_DATA_WATCHER_INDEX = 24;
-	
-	/** Override the default thrower from EntityThrowable */
-	protected EntityPlayer thrower = null;
-	
+
 	/** These are set to inside the struck block to prevent player's motion from freaking out */
 	protected double hitX, hitY, hitZ;
-	
+
 	/** Stops reeling player in when true */
 	protected boolean reachedHook = false;
 
@@ -81,7 +79,7 @@ public class EntityHookShot extends EntityThrowable
 	public EntityHookShot(World world, double x, double y, double z) {
 		super(world, x, y, z);
 	}
-	
+
 	@Override
 	protected void entityInit() {
 		super.entityInit();
@@ -90,7 +88,7 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.addObject(TARGET_DATA_WATCHER_INDEX, -1);
 		dataWatcher.addObject(SHOTTYPE_DATA_WATCHER_INDEX, HookshotType.WOOD_SHOT.ordinal());
 	}
-	
+
 	/**
 	 * Return's this entity's hookshot Type
 	 */
@@ -105,28 +103,28 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.updateObject(SHOTTYPE_DATA_WATCHER_INDEX, type.ordinal());
 		return this;
 	}
-	
+
 	public int getMaxDistance() {
 		return Config.getHookshotRange() * (getType().ordinal() % 2 == 1 ? 2 : 1);
 	}
-	
-	public void setThrower(EntityPlayer player) {
-		dataWatcher.updateObject(THROWER_DATA_WATCHER_INDEX, player != null ? player.username : "");
-	}
-	
+
 	protected Entity getTarget() {
 		int id = dataWatcher.getWatchableObjectInt(TARGET_DATA_WATCHER_INDEX);
 		return (id == -1 ? null : worldObj.getEntityByID(id));
 	}
-	
+
 	protected void setTarget(Entity entity) {
 		dataWatcher.updateObject(TARGET_DATA_WATCHER_INDEX, entity != null ? entity.entityId : -1);
 	}
-	
+
 	@Override
 	public EntityLivingBase getThrower() {
 		String name = dataWatcher.getWatchableObjectString(THROWER_DATA_WATCHER_INDEX);
 		return (name.equals("") ? null : worldObj.getPlayerEntityByName(name));
+	}
+
+	public void setThrower(EntityPlayer player) {
+		dataWatcher.updateObject(THROWER_DATA_WATCHER_INDEX, player != null ? player.username : "");
 	}
 
 	/** Returns a hookshot damage source */
@@ -140,7 +138,7 @@ public class EntityHookShot extends EntityThrowable
 	protected boolean canGrabMaterial(int x, int y, int z) {
 		return canGrabMaterial(worldObj.getBlockMaterial(x, y, z));
 	}
-	
+
 	/**
 	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
 	 */
@@ -157,7 +155,7 @@ public class EntityHookShot extends EntityThrowable
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Returns true if the hookshot can destroy the block / material type
 	 */
@@ -177,12 +175,12 @@ public class EntityHookShot extends EntityThrowable
 		default: return result == Result.ALLOW;
 		}
 	}
-	
+
 	@Override // getVelocity
 	protected float func_70182_d() {
-        return 1.25F;
-    }
-	
+		return 1.25F;
+	}
+
 	@Override
 	protected float getGravityVelocity() {
 		return 0.0F;
@@ -255,7 +253,7 @@ public class EntityHookShot extends EntityThrowable
 			setDead();
 		}
 	}
-	
+
 	@Override
 	public void setDead() {
 		super.setDead();
@@ -263,7 +261,7 @@ public class EntityHookShot extends EntityThrowable
 			((EntityPlayer) getThrower()).clearItemInUse();
 		}
 	}
-	
+
 	/**
 	 * Returns true if the hookshot is allowed to update (i.e. thrower is holding correct item, etc.)
 	 */
@@ -276,7 +274,7 @@ public class EntityHookShot extends EntityThrowable
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Attempts to pull the thrower towards the hookshot's position;
 	 * canUpdate() should return true before this method is called
@@ -302,7 +300,7 @@ public class EntityHookShot extends EntityThrowable
 			}
 		}
 	}
-	
+
 	/**
 	 * Pulls target to player; already checked if player is wearing Heavy Boots
 	 */
@@ -333,5 +331,28 @@ public class EntityHookShot extends EntityThrowable
 				TargetUtils.setEntityHeading(target, dx, dy, dz, 1.0F, 1.0F, true);
 			}
 		}
+	}
+
+	@Override
+	public void writeEntityToNBT(NBTTagCompound compound) {
+		super.writeEntityToNBT(compound);
+		compound.setShort("hitX", (short) hitX);
+		compound.setShort("hitY", (short) hitY);
+		compound.setShort("hitZ", (short) hitZ);
+		compound.setByte("reachedHook", (byte)(reachedHook ? 1 : 0));
+		compound.setByte("shotType", (byte) getType().ordinal());
+		compound.setInteger("shotTarget", getTarget() != null ? getTarget().entityId : -1);
+	}
+
+	@Override
+	public void readEntityFromNBT(NBTTagCompound compound) {
+		super.readEntityFromNBT(compound);
+		hitX = compound.getShort("xTile");
+		hitY = compound.getShort("yTile");
+		hitZ = compound.getShort("zTile");
+		reachedHook = (compound.getByte("reachedHook") == 1);
+		dataWatcher.updateObject(THROWER_DATA_WATCHER_INDEX, compound.getString("ownerName"));
+		dataWatcher.updateObject(SHOTTYPE_DATA_WATCHER_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);
+		dataWatcher.updateObject(TARGET_DATA_WATCHER_INDEX, compound.getInteger("shotTarget"));
 	}
 }

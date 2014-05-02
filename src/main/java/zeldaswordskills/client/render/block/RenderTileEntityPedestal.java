@@ -20,7 +20,6 @@ package zeldaswordskills.client.render.block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -38,8 +37,6 @@ public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 {
 	private static final ResourceLocation glint = new ResourceLocation("textures/misc/enchanted_item_glint.png");
 
-	private final TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
-	
 	public RenderTileEntityPedestal() {}
 
 	@Override
@@ -52,7 +49,7 @@ public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 		if (sword != null) {
 			GL11.glPushMatrix();
 			GL11.glTranslated(dx + 0.5D, dy + 0.9D, dz + 0.5D);
-			textureManager.bindTexture(textureManager.getResourceLocation(sword.getItemSpriteNumber()));
+			bindTexture(tileEntityRenderer.renderEngine.getResourceLocation(sword.getItemSpriteNumber()));
 			Tessellator tessellator = Tessellator.instance;
 			Icon icon = sword.getItem().getIconFromDamage(sword.getItemDamage());
 			if (icon != null) {
@@ -67,7 +64,7 @@ public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 				if (sword.hasEffect(0)) {
 					GL11.glDepthFunc(GL11.GL_EQUAL);
 					GL11.glDisable(GL11.GL_LIGHTING);
-					textureManager.bindTexture(glint);
+					bindTexture(glint);
 					GL11.glEnable(GL11.GL_BLEND);
 					GL11.glBlendFunc(GL11.GL_SRC_COLOR, GL11.GL_ONE);
 					float f7 = 0.76F;
