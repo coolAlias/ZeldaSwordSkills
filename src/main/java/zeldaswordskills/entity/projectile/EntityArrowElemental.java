@@ -33,6 +33,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceHoly;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
@@ -113,13 +114,15 @@ public class EntityArrowElemental extends EntityArrowCustom
 	protected float getVelocityFactor() { return 1.3F; }
 
 	@Override
-	protected DamageSource getDamageSource() {
+	protected DamageSource getDamageSource(Entity entity) {
 		switch(getType()) {
 		case FIRE: return new DamageSourceIndirect("arrow.fire", this, getShooter()).setFireDamage().setProjectile().setMagicDamage();
 		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, getShooter(), 50, 1).setProjectile().setMagicDamage();
-		case LIGHT: return new DamageSourceHolyIndirect("arrow.light", this, getShooter()).setProjectile().setMagicDamage();
+		case LIGHT: return (entity instanceof EntityEnderman
+				? new DamageSourceHoly("arrow.light", (getShooter() != null ? getShooter() : this)).setProjectile().setMagicDamage()
+						: new DamageSourceHolyIndirect("arrow.light", this, getShooter()).setProjectile().setMagicDamage());
 		}
-		return super.getDamageSource();
+		return super.getDamageSource(entity);
 	}
 
 	@Override
@@ -181,9 +184,10 @@ public class EntityArrowElemental extends EntityArrowCustom
 
 	@Override
 	protected void onImpactEntity(MovingObjectPosition mop) {
-		if (getType() == ElementType.LIGHT && canOneHitKill(mop.entityHit)) {
-			EntityLivingBase ender = (EntityLivingBase) mop.entityHit;
-			ender.attackEntityFrom(getDamageSource(), ender.getMaxHealth());
+		if (getType() == ElementType.LIGHT && mop.entityHit instanceof EntityLivingBase && canOneHitKill(mop.entityHit)) {
+			float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+			EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
+			entity.attackEntityFrom(getDamageSource(entity), entity.getMaxHealth() * 0.4F * velocity);
 			playSound("random.bowhit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			// TODO render bright flash, different sound effect?
 			if (!worldObj.isRemote) {

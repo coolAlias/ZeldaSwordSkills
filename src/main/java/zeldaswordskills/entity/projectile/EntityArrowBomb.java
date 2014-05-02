@@ -18,6 +18,7 @@
 package zeldaswordskills.entity.projectile;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -65,7 +66,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	}
 
 	@Override
-	protected DamageSource getDamageSource() {
+	protected DamageSource getDamageSource(Entity entity) {
 		return new EntityDamageSourceIndirect("bomb arrow", this, getShooter()).setProjectile().setExplosion();
 	}
 

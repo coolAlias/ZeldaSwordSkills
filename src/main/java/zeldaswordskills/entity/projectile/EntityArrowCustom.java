@@ -51,9 +51,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class EntityArrowCustom extends EntityArrow implements IProjectile
 {
-	/** Watchable object index for thrower entity's id */
-	protected static final int SHOOTER_DATAWATCHER_INDEX = 22;
-
 	/** Watchable object index for whether this arrow is a homing arrow */
 	private static final int HOMING_DATAWATCHER_INDEX = 23;
 
@@ -113,7 +110,6 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	@Override
 	protected void entityInit() {
 		super.entityInit();
-		dataWatcher.addObject(SHOOTER_DATAWATCHER_INDEX, "");
 		dataWatcher.addObject(TARGET_DATAWATCHER_INDEX, -1);
 		dataWatcher.addObject(HOMING_DATAWATCHER_INDEX, Byte.valueOf((byte) 0));
 	}
@@ -122,15 +118,14 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	 * Returns the shooter of this arrow or null if none was available
 	 */
 	public Entity getShooter() {
-		String name = dataWatcher.getWatchableObjectString(SHOOTER_DATAWATCHER_INDEX);
-		return (name.equals("") ? shootingEntity : worldObj.getPlayerEntityByName(name));
+		return shootingEntity;
 	}
 
 	/**
-	 * Used to update the datawatcher shooting entity object
+	 * Sets the entity that shot the arrow
 	 */
-	public EntityArrowCustom setShooter(EntityPlayer player) {
-		dataWatcher.updateObject(SHOOTER_DATAWATCHER_INDEX, player != null ? player.username : "");
+	public EntityArrowCustom setShooter(Entity entity) {
+		this.shootingEntity = entity;
 		return this;
 	}
 
@@ -228,8 +223,8 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		return damage;
 	}
 
-	/** Returns the damage source this arrow will use */ 
-	protected DamageSource getDamageSource() {
+	/** Returns the damage source this arrow will use against the entity struck */ 
+	protected DamageSource getDamageSource(Entity entity) {
 		return new EntityDamageSourceIndirect("arrow", this, getShooter()).setProjectile();
 	}
 
@@ -421,7 +416,6 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox.addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
 		double hitBox = 0.3D;
-		shootingEntity = getShooter();
 
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = (Entity) list.get(i);
@@ -476,11 +470,10 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 				mop.entityHit.setFire(5);
 			}
 
-			if (mop.entityHit.attackEntityFrom(getDamageSource(), (float) dmg)) {
+			if (mop.entityHit.attackEntityFrom(getDamageSource(mop.entityHit), (float) dmg)) {
 				if (mop.entityHit instanceof EntityLivingBase) {
 					handlePostDamageEffects((EntityLivingBase) mop.entityHit);
 
-					shootingEntity = getShooter();
 					if (shootingEntity instanceof EntityPlayerMP && mop.entityHit != shootingEntity && mop.entityHit instanceof EntityPlayer) {
 						((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(6, 0));
 					}
@@ -573,12 +566,9 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		compound.setShort("zTile", (short) zTile);
 		compound.setByte("inTile", (byte) inTile);
 		compound.setByte("inData", (byte) inData);
-		compound.setByte("shake", (byte) arrowShake);
 		compound.setByte("inGround", (byte)(inGround ? 1 : 0));
-		compound.setByte("pickup", (byte) canBePickedUp);
 		compound.setDouble("damage", damage);
 		compound.setInteger("arrowId", arrowItemId);
-		compound.setString("shooter", getShooter() instanceof EntityPlayer ? ((EntityPlayer) getShooter()).username : "");
 		compound.setInteger("target", getTarget() != null ? getTarget().entityId : -1);
 	}
 
@@ -594,18 +584,11 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		zTile = compound.getShort("zTile");
 		inTile = compound.getByte("inTile") & 255;
 		inData = compound.getByte("inData") & 255;
-		arrowShake = compound.getByte("shake") & 255;
 		inGround = compound.getByte("inGround") == 1;
 		if (compound.hasKey("damage")) {
 			damage = compound.getDouble("damage");
 		}
-		if (compound.hasKey("pickup")) {
-			canBePickedUp = compound.getByte("pickup");
-		} else if (compound.hasKey("player")) {
-			canBePickedUp = compound.getBoolean("player") ? 1 : 0;
-		}
 		arrowItemId = (compound.hasKey("arrowId") ? compound.getInteger("arrowId") : Item.arrow.itemID);
-		dataWatcher.updateObject(SHOOTER_DATAWATCHER_INDEX, compound.hasKey("shooter") ? compound.getString("shooter") : "");
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, compound.hasKey("target") ? compound.getInteger("target") : -1);
 	}
 }
