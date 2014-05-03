@@ -143,7 +143,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			}
 			if (!stack.getTagCompound().hasKey("finishDate")) {
 				// creative players can redeem the check immediately
-				stack.getTagCompound().setLong("finishDate", 0L);
+				stack.getTagCompound().setLong("finishDate", villager.worldObj.getWorldTime());
 			}
 			return true;
 		}

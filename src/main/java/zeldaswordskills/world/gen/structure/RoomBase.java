@@ -45,7 +45,7 @@ public abstract class RoomBase
 {
 	/** Directional values, starting south (+z) and moving clockwise: */
 	public static final int SOUTH = 0, WEST = 1, NORTH = 2, EAST = 3;
-	
+
 	/** Whether this particular dungeon was below water */
 	public boolean submerged = false;
 
@@ -66,13 +66,13 @@ public abstract class RoomBase
 
 	/** This structure's bounding box */
 	protected StructureBoundingBox bBox;
-	
+
 	/** The structure's chunk coordinates */
 	public final int chunkX, chunkZ;
 
 	/** The block which must have a majority representation in the area to replace */
 	protected final int blockRequired;
-	
+
 	/** The metadata that will be used for setting this block's texture */
 	protected int metadata = 0;
 
@@ -80,23 +80,29 @@ public abstract class RoomBase
 	protected static final Set<Integer> replaceBlocks = new HashSet<Integer>();
 
 	/** Returns this structure's bounding box */
-	public final StructureBoundingBox getBoundingBox() { return bBox; }
+	public final StructureBoundingBox getBoundingBox() {
+		return bBox;
+	}
 
 	/** Returns total area of one horizontal slice of the structure's bounding box */
-	public final int getArea() { return (bBox.getXSize() * bBox.getZSize()); }
+	public final int getArea() {
+		return (bBox.getXSize() * bBox.getZSize());
+	}
 
 	/** Returns total cubic area represented by the structure's bounding box */
-	public final int getVolume() { return (bBox.getXSize() * bBox.getYSize() * bBox.getZSize()); }
+	public final int getVolume() {
+		return (bBox.getXSize() * bBox.getYSize() * bBox.getZSize());
+	}
 
 	/** Attempts to generate the structure at the given coordinates, returning true if successful */
 	public abstract boolean generate(ZSSMapGenBase mapGen, World world, Random rand, int x, int y, int z);
 
 	/** Adds the final touches: chests, dungeon core, pedestal, etc. */
 	protected abstract void decorateDungeon(World world, Random rand);
-	
+
 	/** Places and sets up the Dungeon Core for this room */
 	protected abstract void placeDungeonCore(World world);
-	
+
 	/**
 	 * Places a pedestal in the dungeon's center with a Master Sword stuck in it
 	 */
@@ -110,7 +116,7 @@ public abstract class RoomBase
 			((TileEntityPedestal) te).setSword(new ItemStack(ZSSItems.swordMaster), null);
 		}
 	}
-	
+
 	/**
 	 * Basic constructor for rooms sets up the bounding box and sets the block required field
 	 */
@@ -143,7 +149,7 @@ public abstract class RoomBase
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Standard room gen procedure builds basic cube, fills with liquids/air, and calls decorateDungeon
 	 */
@@ -153,15 +159,16 @@ public abstract class RoomBase
 		generateAir(world);
 		decorateDungeon(world, rand);
 	}
-	
+
 	/**
 	 * Returns true if the structure is considered well-hidden; i.e. not too many blocks exposed to air / water
 	 */
 	protected boolean isWellHidden(World world) {
 		int difficulty = Config.getMainDungeonDifficulty();
-		if (inOcean) { return true;
+		if (inOcean) {
+			return true;
 			//return world.rand.nextFloat() < (1.0F - (difficulty * 0.25F)) ||
-					//StructureGenUtils.getNumBlocksOfMaterialInArea(world, bBox, Material.water, 1) < (getArea() / (difficulty + 1));
+			//StructureGenUtils.getNumBlocksOfMaterialInArea(world, bBox, Material.water, 1) < (getArea() / (difficulty + 1));
 		}
 		Material material = (!inNether && StructureGenUtils.getNumBlocksOfMaterial(world, bBox, Material.water, 1) > 0 ? Material.water : Material.air);
 		int above = StructureGenUtils.getNumBlocksOfMaterial(world, bBox, material, 1);
@@ -170,7 +177,7 @@ public abstract class RoomBase
 			return world.rand.nextFloat() < (0.35F - (difficulty * 0.1F)) || ((difficulty != 3 || (above + below) < 4) &&
 					StructureGenUtils.getNumBlocksOfMaterialInArea(world, bBox, material, 1) < (getArea() / (difficulty + 1))); // above < (5 - difficulty) && 
 		}
-		
+
 		return world.rand.nextFloat() < (0.35F - (difficulty * 0.1F)) || (above + below) < (5 - difficulty);
 	}
 
@@ -190,17 +197,17 @@ public abstract class RoomBase
 		boolean flag2 = (inNether && Block.blocksList[id].blockMaterial == Material.lava);
 		return (replaceBlocks.contains(id) || flag1 || flag2 || (Block.blocksList[id].blockMaterial.isLiquid() && y < (bBox.maxY - 2)));
 	}
-	
+
 	/**
 	 * Returns the secret stone metadata value of the block to place
 	 */
 	protected int getMetadata() {
 		return metadata + (isLocked ? 8 : 0);
 	}
-	
+
 	/** Sets the room's metadata based on world biome */
 	protected abstract void setMetadata(World world, int x, int z);
-	
+
 	/**
 	 * Fills room with air according to submerged / ocean status
 	 */
@@ -209,7 +216,7 @@ public abstract class RoomBase
 			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, (submerged ? (inLava || isLocked ? 2 : 3) : 1), bBox.getYSize() - 1, 1, bBox.getZSize() - 1, 0, 0);
 		}
 	}
-	
+
 	/**
 	 * Generation for submerged dungeons adds liquid layers: lava 1, water 2, ocean filled
 	 * Checks internally if this room is valid for liquid generation
@@ -237,7 +244,7 @@ public abstract class RoomBase
 				bBox.offset(0, -1, 0);
 				++count;
 			}
-			
+
 			if (world.getBlockMaterial(x, bBox.minY, z) != Material.water) {
 				inOcean = true;
 				StructureGenUtils.adjustCornersForMaterial(world, bBox, Material.water, 6, false, false);
@@ -253,7 +260,7 @@ public abstract class RoomBase
 					}
 					bBox.offset(0, -(bBox.getYSize() - adj), 0);
 				}
-				
+
 				return true;
 			}
 		}
@@ -311,7 +318,7 @@ public abstract class RoomBase
 
 		return true;
 	}
-	
+
 	/**
 	 * Returns a new tag compound with the room's chunk coordinates and bounding box
 	 */
@@ -320,7 +327,7 @@ public abstract class RoomBase
 		compound.setTag("BB", bBox.func_143047_a("BB"));
 		return compound;
 	}
-	
+
 	/**
 	 * Reads the room's bounding box from NBT (currently unused)
 	 */
