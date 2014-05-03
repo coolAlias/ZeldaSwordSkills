@@ -128,7 +128,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		return this;
 	}
 
-	@Override
+	// TODO @Override
 	public boolean canGriefAdventureMode() {
 		return Config.canGriefAdventure();
 	}

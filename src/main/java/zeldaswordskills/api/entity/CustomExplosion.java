@@ -39,7 +39,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
-import net.minecraft.world.EnumGameType;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IExplodable;
@@ -48,8 +47,6 @@ import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Config;
 
 /**
- * 
- * @author coolAlias
  * 
  * Custom Explosion class that allows for specifying whether or not to destroy blocks,
  * whether to inflict damage, how much and what type of damage to inflict, whether to
@@ -60,6 +57,8 @@ import zeldaswordskills.lib.Config;
  * 
  * TODO allow setting custom particles to spawn
  * TODO allow setting custom sound filepath
+ * 
+ * @author coolAlias
  *
  */
 public class CustomExplosion extends Explosion
@@ -84,11 +83,12 @@ public class CustomExplosion extends Explosion
 	public static void createExplosion(IEntityBomb bomb, World world, double x, double y, double z, float radius, float damage, boolean canGrief) {
 		CustomExplosion explosion = new CustomExplosion(world, (Entity) bomb, x, y, z, radius).setDamage(damage);
 		BombType type = bomb.getType();
-		boolean isAdventureMode = (world.getWorldInfo().getGameType() == EnumGameType.ADVENTURE);
-		boolean restrictBlocks = (isAdventureMode && !bomb.canGriefAdventureMode());
+		// TODO Adventure Mode is only set per player, not per world
+		//boolean isAdventureMode = (world.getWorldInfo().getGameType() == EnumGameType.ADVENTURE);
+		boolean restrictBlocks = false;//(isAdventureMode && !bomb.canGriefAdventureMode());
 		explosion.setMotionFactor(bomb.getMotionFactor());
 		explosion.scalesWithDistance = (damage == 0.0F);
-		explosion.isSmoking = canGrief;//(canGrief && !restrictBlocks);
+		explosion.isSmoking = canGrief;
 		explosion.targetBlock = ((restrictBlocks || Config.onlyBombSecretStone()) ? ZSSBlocks.secretStone.blockID : -1);
 		explosion.ignoreLiquids = (type != BombType.BOMB_STANDARD);
 		explosion.ignoreLiquidType = (type == BombType.BOMB_FIRE ? 2 : (type == BombType.BOMB_WATER ? 1 : 0));

@@ -17,7 +17,6 @@
 
 package zeldaswordskills.api.entity;
 
-import zeldaswordskills.api.block.IExplodable;
 
 
 /**
@@ -46,6 +45,6 @@ public interface IEntityBomb {
 	 * Return false to restrict this bomb's destruction in Adventure Mode,
 	 * allowing it to affect only {@link IExplodable} blocks
 	 */
-	public boolean canGriefAdventureMode();
+	// TODO public boolean canGriefAdventureMode();
 
 }

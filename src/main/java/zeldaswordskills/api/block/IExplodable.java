@@ -20,7 +20,7 @@ package zeldaswordskills.api.block;
 import zeldaswordskills.api.entity.CustomExplosion;
 
 /**
- * 
+ * NOTE: Not currently working for Adventure Mode...
  * Flags blocks that may be affected by {@link CustomExplosion custom explosions}
  * even in Adventure Mode or when the explosion is targeting a specific block. If
  * the explosion is non-griefing, no blocks will be affected.
