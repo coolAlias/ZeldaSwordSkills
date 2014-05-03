@@ -64,14 +64,14 @@ public class ZSSMain
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;
-	
+
 	/** Helper class for registering custom tiles with Antique Atlas mod if loaded */
 	public static AntiqueAtlasHelper atlasHelper = new AntiqueAtlasHelper();
 	/** Whether Antique Atlas mod is loaded */
 	public static boolean isAtlasEnabled;
 	/** Whether Battlegear2 mod is loaded */
 	public static boolean isBG2Enabled;
-	
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		LogHelper.init();
@@ -84,11 +84,14 @@ public class ZSSMain
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
 		proxy.initialize();
-		if (Config.areBossDungeonsEnabled() || Config.getAttemptsPerChunk() > 0 || Config.getNetherAttemptsPerChunk() > 0) {
-			MinecraftForge.TERRAIN_GEN_BUS.register(new ZSSWorldGenEvent());
+
+		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
+		MinecraftForge.EVENT_BUS.register(dungeonGen);
+		if (Config.areBossDungeonsEnabled()) {
+			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
 		}
 	}
-	
+
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		proxy.registerRenderers();
@@ -98,7 +101,7 @@ public class ZSSMain
 		ZSSItemEvents.initializeDrops();
 		NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
 	}
-	
+
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();

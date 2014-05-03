@@ -53,7 +53,6 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
@@ -77,7 +76,6 @@ import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import zeldaswordskills.world.gen.feature.WorldGenJars;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -93,11 +91,9 @@ public class ZSSItemEvents
 	private static final Map<Class<? extends EntityLivingBase>, ItemStack> dropsList = new HashMap<Class<? extends EntityLivingBase>, ItemStack>();
 
 	/** Adds a mob-class to skill orb mapping */
-	public static void addDrop(Class<? extends EntityLivingBase> mobClass, int orbID) {
-		if (SkillBase.doesSkillExist(orbID)) {
-			ItemStack stack = new ItemStack(ZSSItems.skillOrb, 1, orbID);
-			dropsList.put(mobClass, stack);
-		}
+	private static void addDrop(Class<? extends EntityLivingBase> mobClass, SkillBase skill) {
+		ItemStack stack = new ItemStack(ZSSItems.skillOrb, 1, skill.getId());
+		dropsList.put(mobClass, stack);
 	}
 
 	/**
@@ -250,7 +246,7 @@ public class ZSSItemEvents
 			boolean isLiftable = block instanceof ILiftable;
 			boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
 			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta)
-							: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
+					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (isLiftable || !block.hasTileEntity(meta))) {
@@ -313,75 +309,23 @@ public class ZSSItemEvents
 	}
 
 	public static void initializeDrops() {
-		addDrop(EntityZombie.class, SkillBase.swordBasic.getId());
-		addDrop(EntitySkeleton.class, SkillBase.swordBasic.getId());
-		addDrop(EntityEnderman.class, SkillBase.dodge.getId());
-		addDrop(EntityKeese.class, SkillBase.dodge.getId());
-		addDrop(EntitySilverfish.class, SkillBase.dash.getId());
-		addDrop(EntityHorse.class, SkillBase.dash.getId());
-		addDrop(EntityPigZombie.class, SkillBase.parry.getId());
-		addDrop(EntityOcelot.class, SkillBase.parry.getId());
-		addDrop(EntitySpider.class, SkillBase.endingBlow.getId());
-		addDrop(EntityCaveSpider.class, SkillBase.leapingBlow.getId());
-		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow.getId());
-		addDrop(EntityBlaze.class, SkillBase.spinAttack.getId());
-		addDrop(EntityBat.class, SkillBase.spinAttack.getId());
-		addDrop(EntityCreeper.class, SkillBase.armorBreak.getId());
-		addDrop(EntityIronGolem.class, SkillBase.armorBreak.getId());
-		addDrop(EntityGhast.class, SkillBase.swordBeam.getId());
-		addDrop(EntityWitch.class, SkillBase.swordBeam.getId());
-		addDrop(EntityOctorok.class, SkillBase.risingCut.getId());
-	}
-
-	// TODO move this to a world gen event handler
-	@ForgeSubscribe
-	public void onDecorate(DecorateBiomeEvent.Pre event) {
-		try {
-			if (event.world.provider.isHellWorld) {
-				for (int n = 0; n < Config.getJarClustersPerChunkNether(); ++n) {
-					if (event.rand.nextFloat() < Config.getJarGenChanceNether()) {
-						(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerClusterNether(), true);
-					}
-				}
-			} else if (event.rand.nextFloat() < Config.getJarGenChance() && event.rand.nextInt(4) == 0) {
-				(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerCluster(), false);
-			}
-		} catch (Exception e) {
-			Throwable cause = e.getCause();
-			if (e.getMessage() != null && e.getMessage().equals("Already decorating!!") ||
-					(cause != null && cause.getMessage() != null && cause.getMessage().equals("Already decorating!!")))
-			{
-				;
-			} else {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	@ForgeSubscribe
-	public void onDecorate(DecorateBiomeEvent.Post event) {
-		try {
-			if (event.world.provider.isSurfaceWorld()) {
-				for (int n = 0; n < Config.getJarClustersPerChunkSub(); ++n) {
-					if (event.rand.nextFloat() < Config.getJarGenChanceSub()) {
-						int i = event.chunkX + event.rand.nextInt(16) + 8;
-						int j = event.rand.nextInt(48) + event.rand.nextInt(48);
-						int k = event.chunkZ + event.rand.nextInt(16) + 8;
-						if (j < 60) {
-							(new WorldGenJars()).generate2(event.world, event.rand, i, j, k, Config.getJarsPerClusterSub(), true);
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			Throwable cause = e.getCause();
-			if (e.getMessage() != null && e.getMessage().equals("Already decorating!!") ||
-					(cause != null && cause.getMessage() != null && cause.getMessage().equals("Already decorating!!")))
-			{
-				;
-			} else {
-				e.printStackTrace();
-			}
-		}
+		addDrop(EntityZombie.class, SkillBase.swordBasic);
+		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
+		addDrop(EntityEnderman.class, SkillBase.dodge);
+		addDrop(EntityKeese.class, SkillBase.dodge);
+		addDrop(EntitySilverfish.class, SkillBase.dash);
+		addDrop(EntityHorse.class, SkillBase.dash);
+		addDrop(EntityPigZombie.class, SkillBase.parry);
+		addDrop(EntityOcelot.class, SkillBase.parry);
+		addDrop(EntitySpider.class, SkillBase.endingBlow);
+		addDrop(EntityCaveSpider.class, SkillBase.leapingBlow);
+		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow);
+		addDrop(EntityBlaze.class, SkillBase.spinAttack);
+		addDrop(EntityBat.class, SkillBase.spinAttack);
+		addDrop(EntityCreeper.class, SkillBase.armorBreak);
+		addDrop(EntityIronGolem.class, SkillBase.armorBreak);
+		addDrop(EntityGhast.class, SkillBase.swordBeam);
+		addDrop(EntityWitch.class, SkillBase.swordBeam);
+		addDrop(EntityOctorok.class, SkillBase.risingCut);
 	}
 }

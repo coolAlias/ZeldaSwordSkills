@@ -17,8 +17,6 @@
 
 package zeldaswordskills.block.tileentity;
 
-import java.util.Calendar;
-
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import zeldaswordskills.lib.Config;
@@ -26,20 +24,20 @@ import zeldaswordskills.lib.Config;
 public class TileEntitySacredFlame extends TileEntity
 {
 	/** Minimum date before next spawn reset */
-	private int nextResetDate = 0;
+	private long nextResetDate = 0;
 
 	public TileEntitySacredFlame() {}
 	
 	/**
-	 * Called when the flame is extinguished to set the next reset date
+	 * Call when the flame is extinguished to set the next reset date
 	 */
 	public void extinguish() {
-		nextResetDate = Calendar.DATE + Config.getSacredFlameRefreshRate();
+		nextResetDate = worldObj.getWorldTime() + (24000 * Config.getSacredFlameRefreshRate());
 	}
 	
 	@Override
 	public void updateEntity() {
-		if (nextResetDate > 0 && worldObj.getWorldTime() % 256 == 0 && Calendar.DATE >= nextResetDate) {
+		if (nextResetDate > 0 && worldObj.getWorldTime() > nextResetDate) {
 			nextResetDate = 0;
 			int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, meta & ~0x8, 3);
@@ -49,12 +47,12 @@ public class TileEntitySacredFlame extends TileEntity
 	@Override
 	public void writeToNBT(NBTTagCompound compound) {
 		super.writeToNBT(compound);
-		compound.setInteger("nextResetDate", nextResetDate);
+		compound.setLong("nextResetDate", nextResetDate);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		nextResetDate = (compound.hasKey("nextResetDate") ? compound.getInteger("nextResetDate") : 0);
+		nextResetDate = (compound.hasKey("nextResetDate") ? compound.getLong("nextResetDate") : 0);
 	}
 }

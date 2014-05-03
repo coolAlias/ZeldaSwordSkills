@@ -17,7 +17,6 @@
 
 package zeldaswordskills.world.gen.feature;
 
-import java.util.Calendar;
 import java.util.List;
 
 import net.minecraft.entity.item.EntityItem;
@@ -50,7 +49,7 @@ public class FairySpawner
 	protected int fairiesSpawned = 0;
 
 	/** Minimum date before next spawn reset */
-	protected int nextResetDate = 0;
+	protected long nextResetDate = 0;
 
 	/** Scheduled update timer used for processing nearby dropped items */
 	protected int itemUpdate = -1;
@@ -142,12 +141,12 @@ public class FairySpawner
 				fairy.setFairyHome(x, y + 2, z);
 				world.spawnEntityInWorld(fairy);
 				if (++fairiesSpawned == maxFairies) {
-					nextResetDate = Calendar.DATE + world.rand.nextInt(Config.getDaysToRespawn()) + 1;
+					nextResetDate = world.getWorldTime() + 24000 * (world.rand.nextInt(Config.getDaysToRespawn()) + 1);
 				}
 			}
 		}
 
-		if (fairiesSpawned == maxFairies && world.getWorldTime() > 12000 && world.getWorldTime() < 12250 && Calendar.DATE >= nextResetDate) {
+		if (fairiesSpawned == maxFairies && !world.isDaytime() && world.getWorldTime() > nextResetDate) {
 			fairiesSpawned = 0;
 		}
 	}
@@ -189,7 +188,7 @@ public class FairySpawner
 		NBTTagCompound data = new NBTTagCompound();
 		data.setInteger("maxFairies", maxFairies);
 		data.setInteger("spawned", fairiesSpawned);
-		data.setInteger("nextResetDate", nextResetDate);
+		data.setLong("nextResetDate", nextResetDate);
 		data.setInteger("itemUpdate", itemUpdate);
 		data.setInteger("rupees", rupees);
 		data.setString("playerName", playerName);
@@ -203,7 +202,7 @@ public class FairySpawner
 		NBTTagCompound data = compound.getCompoundTag("FairySpawner");
 		maxFairies = data.getInteger("maxFairies");
 		fairiesSpawned = data.getInteger("spawned");
-		nextResetDate = data.getInteger("nextResetDate");
+		nextResetDate = data.getLong("nextResetDate");
 		itemUpdate = data.getInteger("itemUpdate");
 		rupees = data.getInteger("rupees");
 		playerName = data.getString("playerName");

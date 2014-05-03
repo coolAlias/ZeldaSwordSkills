@@ -48,6 +48,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ai.GenericAIDefendVillage;
+import zeldaswordskills.entity.buff.Buff;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -95,6 +96,8 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setAttribute(0.3D);
 		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setAttribute(0.75D);
 		getAttributeMap().func_111150_b(SharedMonsterAttributes.attackDamage);
+		isImmuneToFire = true;
+		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 	}
 
 	@Override

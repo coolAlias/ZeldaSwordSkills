@@ -19,9 +19,11 @@ package zeldaswordskills.world.gen;
 
 import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.world.gen.feature.WorldGenJars;
 import zeldaswordskills.world.gen.structure.MapGenBossRoom;
 import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoom;
@@ -33,7 +35,8 @@ public class ZSSWorldGenEvent
 	private MapGenSecretRoomNether netherRoomGen = new MapGenSecretRoomNether();
 	private MapGenBossRoom bossRoomGen = new MapGenBossRoom();
 	private MapGenBossRoomNether netherBossGen = new MapGenBossRoomNether();
-	
+
+	/*
 	@ForgeSubscribe
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
 		switch(event.world.provider.dimensionId) {
@@ -60,6 +63,98 @@ public class ZSSWorldGenEvent
 			}
 			break;
 		default: break;
+		}
+	}
+	 */
+
+	// TERRAIN_GEN_BUS event
+	@ForgeSubscribe
+	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
+		switch(event.world.provider.dimensionId) {
+		case -1: // the Nether
+			if (event.type == EventType.GLOWSTONE) {
+				netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			}
+			break;
+		case 0: // the Overworld
+			if (event.type == EventType.ICE) {
+				bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			} else if (event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
+				event.setResult(Result.DENY);
+			}
+			break;
+		default: break;
+		}
+	}
+
+	// EVENT_BUS event
+	@ForgeSubscribe
+	public void postPopulate(PopulateChunkEvent.Post event) {
+		switch(event.world.provider.dimensionId) {
+		case -1: // the Nether
+			if (Config.getNetherAttemptsPerChunk() > 0) {
+				netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			}
+			break;
+		case 0: // the Overworld
+			if (Config.getAttemptsPerChunk() > 0) {
+				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			}
+			break;
+		default: break;
+		}
+	}
+
+	// EVENT_BUS event
+	@ForgeSubscribe
+	public void onDecorate(DecorateBiomeEvent.Pre event) {
+		try {
+			if (event.world.provider.isHellWorld) {
+				for (int n = 0; n < Config.getJarClustersPerChunkNether(); ++n) {
+					if (event.rand.nextFloat() < Config.getJarGenChanceNether()) {
+						(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerClusterNether(), true);
+					}
+				}
+			} else if (event.rand.nextFloat() < Config.getJarGenChance() && event.rand.nextInt(4) == 0) {
+				(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerCluster(), false);
+			}
+		} catch (Exception e) {
+			Throwable cause = e.getCause();
+			if (e.getMessage() != null && e.getMessage().equals("Already decorating!!") ||
+					(cause != null && cause.getMessage() != null && cause.getMessage().equals("Already decorating!!")))
+			{
+				;
+			} else {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	// EVENT_BUS event
+	@ForgeSubscribe
+	public void onDecorate(DecorateBiomeEvent.Post event) {
+		try {
+			if (event.world.provider.isSurfaceWorld()) {
+				for (int n = 0; n < Config.getJarClustersPerChunkSub(); ++n) {
+					if (event.rand.nextFloat() < Config.getJarGenChanceSub()) {
+						int i = event.chunkX + event.rand.nextInt(16) + 8;
+						int j = event.rand.nextInt(48) + event.rand.nextInt(48);
+						int k = event.chunkZ + event.rand.nextInt(16) + 8;
+						if (j < 60) {
+							(new WorldGenJars()).generate2(event.world, event.rand, i, j, k, Config.getJarsPerClusterSub(), true);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			Throwable cause = e.getCause();
+			if (e.getMessage() != null && e.getMessage().equals("Already decorating!!") ||
+					(cause != null && cause.getMessage() != null && cause.getMessage().equals("Already decorating!!")))
+			{
+				;
+			} else {
+				e.printStackTrace();
+			}
 		}
 	}
 }

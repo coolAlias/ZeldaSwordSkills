@@ -59,7 +59,7 @@ public class WorldUtils
 {
 	/** Maximum explosionSize within which blocks can be affected, regardless of explosion size */
 	public static final int MAX_RADIUS = 16;
-	
+
 	/**
 	 * Switches active state of button or lever at x/y/z to and notifies neighbors
 	 */
@@ -102,7 +102,7 @@ public class WorldUtils
 			spawnItemWithRandom(world, inv.getStackInSlotOnClosing(i), x, y, z);
 		}
 	}
-	
+
 	/**
 	 * Generates a number of random chest contents, placing them in the chest either completely
 	 * at random or only in empty slots, as designated by the parameters
@@ -120,7 +120,7 @@ public class WorldUtils
 			}
 		}
 	}
-	
+
 	/**
 	 * Attempts to add the itemstack to a random slot in the inventory; failing that,
 	 * it will add to the first available slot
@@ -155,7 +155,7 @@ public class WorldUtils
 				inv.onInventoryChanged();
 			} else if (slotstack != null && stack.isStackable() && inv.isItemValidForSlot(i, stack)) {
 				if (slotstack.itemID == stack.itemID  && (!stack.getHasSubtypes() || 
-					stack.getItemDamage() == slotstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(stack, slotstack))
+						stack.getItemDamage() == slotstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(stack, slotstack))
 				{
 					int l = slotstack.stackSize + remaining;
 
@@ -171,10 +171,10 @@ public class WorldUtils
 				}
 			}
 		}
-		
+
 		return remaining;
 	}
-	
+
 	/**
 	 * Populates a list with blocks that can be affected within the given radius
 	 * @param targetBlock the block id to target, or -1 if all blocks may be targeted
@@ -223,37 +223,37 @@ public class WorldUtils
 
 		return hashset;
 	}
-	
+
 	/**
 	 * Returns a list of all Tile Entities matching the class given within the bounding box
 	 */
 	public static List getTileEntitiesWithinAABB(World world, Class clazz, AxisAlignedBB aabb) {
 		ArrayList list = new ArrayList();
-        int minX = MathHelper.floor_double(aabb.minX - World.MAX_ENTITY_RADIUS);
-        int maxX = MathHelper.floor_double(aabb.maxX + World.MAX_ENTITY_RADIUS);
-        int minY = MathHelper.floor_double(aabb.minY - World.MAX_ENTITY_RADIUS);
-        int maxY = MathHelper.floor_double(aabb.maxY + World.MAX_ENTITY_RADIUS);
-        int minZ = MathHelper.floor_double(aabb.minZ - World.MAX_ENTITY_RADIUS);
-        int maxZ = MathHelper.floor_double(aabb.maxZ + World.MAX_ENTITY_RADIUS);
+		int minX = MathHelper.floor_double(aabb.minX - World.MAX_ENTITY_RADIUS);
+		int maxX = MathHelper.floor_double(aabb.maxX + World.MAX_ENTITY_RADIUS);
+		int minY = MathHelper.floor_double(aabb.minY - World.MAX_ENTITY_RADIUS);
+		int maxY = MathHelper.floor_double(aabb.maxY + World.MAX_ENTITY_RADIUS);
+		int minZ = MathHelper.floor_double(aabb.minZ - World.MAX_ENTITY_RADIUS);
+		int maxZ = MathHelper.floor_double(aabb.maxZ + World.MAX_ENTITY_RADIUS);
 
-        if (!world.checkChunksExist(minX, minY, minZ, maxX, maxY, maxZ)) {
-        	return list;
-        }
-        
-        for (int i = minX; i <= maxX; ++i) {
-        	for (int j = minY; j <= maxY; ++j) {
-        		for (int k = minZ; k <= maxZ; ++k) {
-        			TileEntity te = world.getBlockTileEntity(i, j, k);
-        			if (te != null && clazz.isAssignableFrom(te.getClass())) {
-        				list.add(te);
-        			}
-        		}
-        	}
-        }
-		
+		if (!world.checkChunksExist(minX, minY, minZ, maxX, maxY, maxZ)) {
+			return list;
+		}
+
+		for (int i = minX; i <= maxX; ++i) {
+			for (int j = minY; j <= maxY; ++j) {
+				for (int k = minZ; k <= maxZ; ++k) {
+					TileEntity te = world.getBlockTileEntity(i, j, k);
+					if (te != null && clazz.isAssignableFrom(te.getClass())) {
+						list.add(te);
+					}
+				}
+			}
+		}
+
 		return list;
 	}
-	
+
 	/**
 	 * Returns the nearest fairy spawner dungeon core to the position, or null if none exists
 	 * @param requiresFairy if true, only returns a spawner with at least one fairy nearby
@@ -276,7 +276,7 @@ public class WorldUtils
 	public static void playSoundAtEntity(World world, Entity entity, String sound, float f, float add) {
 		playSoundAt(world, entity.posX, entity.posY, entity.posZ, sound, f, add);
 	}
-	
+
 	/**
 	 * Plays a sound on the server with randomized volume and pitch; no effect if called on client
 	 * @param f		Volume: nextFloat() * f + add
@@ -294,7 +294,7 @@ public class WorldUtils
 	public static void sendPacketToAllAround(Packet packet, World world, EntityPlayer player, double distanceSq) {
 		sendPacketToAllAround(packet, world, player.posX, player.posY, player.posZ, distanceSq);
 	}
-	
+
 	/**
 	 * Sends the provided packet to all players within the distance squared of the position
 	 */
@@ -309,7 +309,7 @@ public class WorldUtils
 			}
 		}
 	}
-	
+
 	/**
 	 * Spawns the provided ItemStack as an EntityItem with randomized position and motion
 	 * Used by blocks to scatter items when broken
@@ -328,7 +328,7 @@ public class WorldUtils
 			world.spawnEntityInWorld(entityitem);
 		}
 	}
-	
+
 	/**
 	 * Adds previously instantiated particle effect to the effect renderer depending on minecraft game settings
 	 */
@@ -348,7 +348,7 @@ public class WorldUtils
 			}
 		}
 	}
-	
+
 	/**
 	 * Spawns XP Orbs for the amount given with randomized position and motion
 	 */
@@ -356,7 +356,7 @@ public class WorldUtils
 		if (!world.isRemote) {
 			while (xpAmount > 0) {
 				int xp = (xpAmount > 50 ? 50 : EntityXPOrb.getXPSplit(xpAmount));
-                xpAmount -= xp;
+				xpAmount -= xp;
 				float spawnX = x + rand.nextFloat();
 				float spawnY = y + rand.nextFloat();
 				float spawnZ = z + rand.nextFloat();
@@ -366,7 +366,7 @@ public class WorldUtils
 			}
 		}
 	}
-	
+
 	/**
 	 * Sets an entity's location near x/y/z so that it doesn't spawn inside of walls.
 	 * @return false if no suitable location found
@@ -375,7 +375,7 @@ public class WorldUtils
 		if (entity == null) { return false; }
 		int i = 0;
 		entity.setLocationAndAngles(x, y, z, 0.0F, 0.0F);
-		
+
 		while (entity.isEntityInsideOpaqueBlock() && i < 8) {
 			if (i == 4) { entity.setPosition(x + 1, y, z + 1); }
 			switch(i % 4) {
@@ -386,12 +386,12 @@ public class WorldUtils
 			}
 			++i;
 		}
-		
+
 		if (entity.isEntityInsideOpaqueBlock()) {
 			entity.setPosition(entity.posX + 0.5D, entity.posY, entity.posZ + 0.5D);
 			return false;
 		}
-		
+
 		return true;
 	}
 }

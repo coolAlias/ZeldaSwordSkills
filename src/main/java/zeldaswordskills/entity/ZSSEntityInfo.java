@@ -40,7 +40,7 @@ import zeldaswordskills.lib.Config;
  */
 public class ZSSEntityInfo implements IExtendedEntityProperties
 {
-	private final static String EXT_PROP_NAME = "ZSSEntityInfo";
+	private static final String EXT_PROP_NAME = "ZSSEntityInfo";
 
 	/** The entity to which these properties belong */
 	private final EntityLivingBase entity;

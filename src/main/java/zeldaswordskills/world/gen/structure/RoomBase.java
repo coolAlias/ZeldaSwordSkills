@@ -336,6 +336,7 @@ public abstract class RoomBase
 		replaceBlocks.add(Block.gravel.blockID);
 		replaceBlocks.add(Block.netherrack.blockID);
 		replaceBlocks.add(Block.sand.blockID);
+		replaceBlocks.add(Block.sandStone.blockID);
 		replaceBlocks.add(Block.snow.blockID);
 	}
 }

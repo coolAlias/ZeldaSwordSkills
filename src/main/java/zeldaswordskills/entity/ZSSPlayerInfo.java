@@ -57,7 +57,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public final class ZSSPlayerInfo implements IExtendedEntityProperties
 {
-	private final static String EXT_PROP_NAME = "ZSSPlayerInfo";
+	private static final String EXT_PROP_NAME = "ZSSPlayerInfo";
 
 	private final EntityPlayer player;
 	

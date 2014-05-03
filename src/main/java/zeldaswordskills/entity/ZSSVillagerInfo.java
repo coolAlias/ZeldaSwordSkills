@@ -17,7 +17,6 @@
 
 package zeldaswordskills.entity;
 
-import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ import zeldaswordskills.lib.Config;
  */
 public class ZSSVillagerInfo implements IExtendedEntityProperties
 {
-	private final static String SAVE_KEY = "zssVillagerInfo";
+	private static final String SAVE_KEY = "zssVillagerInfo";
 
 	/** The villager to which these properties belong */
 	private final EntityVillager villager;
@@ -123,8 +122,8 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 				flag = villager instanceof EntityGoron;
 			}
 			if (treasure == Treasures.CLAIM_CHECK) {
-				flag = stack.hasTagCompound() && stack.getTagCompound().hasKey("dateReceived") &&
-						stack.getTagCompound().getInteger("dateReceived") > Calendar.DATE + 2;
+				flag = stack.hasTagCompound() && stack.getTagCompound().hasKey("finishDate") &&
+						villager.worldObj.getWorldTime() > stack.getTagCompound().getLong("finishDate");
 			}
 			return flag && specialTrade != -2 && (treasure != Treasures.TENTACLE || villager.isChild()) &&
 					(treasureVillager.get(treasure) == null || treasureVillager.get(treasure) == villager.getProfession());
@@ -142,8 +141,9 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			if (!stack.hasTagCompound()) {
 				stack.setTagCompound(new NBTTagCompound());
 			}
-			if (!stack.getTagCompound().hasKey("dateReceived")) {
-				stack.getTagCompound().setInteger("dateReceived", Calendar.DATE);
+			if (!stack.getTagCompound().hasKey("finishDate")) {
+				// creative players can redeem the check immediately
+				stack.getTagCompound().setLong("finishDate", 0L);
 			}
 			return true;
 		}
@@ -159,12 +159,13 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		switch(treasure) {
 		case COJIRO: specialTrade = Treasures.ODD_POTION.ordinal(); break;
 		case GORON_SWORD: specialTrade = Treasures.EYE_DROPS.ordinal(); break;
-		case EYE_DROPS: specialTrade = Treasures.CLAIM_CHECK.ordinal(); break;
-		case CLAIM_CHECK:
+		case EYE_DROPS:
+			// traded eye drops for claim check: set date for claiming finished sword
+			specialTrade = Treasures.CLAIM_CHECK.ordinal();
 			if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-			stack.getTagCompound().setInteger("dateReceived", Calendar.DATE);
-			specialTrade = -2;
+			stack.getTagCompound().setLong("finishDate", villager.worldObj.getWorldTime() + 48000);
 			break;
+		case CLAIM_CHECK: specialTrade = -2; break;
 		default: specialTrade = (treasureCustom.containsKey(treasure) ? -2 : -1);
 		}
 		return specialTrade >= 0;
