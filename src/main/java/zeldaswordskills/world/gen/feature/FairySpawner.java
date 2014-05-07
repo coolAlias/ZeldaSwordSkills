@@ -202,7 +202,8 @@ public class FairySpawner
 		NBTTagCompound data = compound.getCompoundTag("FairySpawner");
 		maxFairies = data.getInteger("maxFairies");
 		fairiesSpawned = data.getInteger("spawned");
-		nextResetDate = data.getLong("nextResetDate");
+		// 4 is LONG; fixes class cast exception from changing types; TODO remove next update
+		nextResetDate = (data.getTag("nextResetDate").getId() == 4 ? data.getLong("nextResetDate") : 0);
 		itemUpdate = data.getInteger("itemUpdate");
 		rupees = data.getInteger("rupees");
 		playerName = data.getString("playerName");

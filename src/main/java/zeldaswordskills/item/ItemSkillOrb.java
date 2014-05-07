@@ -163,7 +163,7 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade
 				}
 				list.addAll(skill.getTranslatedTooltip(player));
 			} else {
-				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.skillorb.desc.unknown"));
+				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.skillorb.desc.0"));
 			}
 		}
 	}

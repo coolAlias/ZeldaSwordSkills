@@ -33,6 +33,7 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
+import zeldaswordskills.inventory.ContainerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
@@ -126,7 +127,8 @@ public class ZSSKeyHandler extends KeyHandler
 				} else {
 					handleTargetingKeys(kb, skills);
 				}
-			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer != null) {
+			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer instanceof ContainerSkills) {
+				KeyBinding.setKeyBindState(kb.keyCode, false);
 				mc.thePlayer.closeScreen();
 			}
 		}
