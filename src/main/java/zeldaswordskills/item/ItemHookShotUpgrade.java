@@ -136,11 +136,12 @@ public class ItemHookShotUpgrade extends Item
 			if (villager.getProfession() == 3 && trades != null) {
 				MerchantRecipe trade = getHookShotTradeFromInventory(stack, player, trades);
 				if (trade != null && trades.size() >= Config.getFriendTradesRequired()) {
-					trades.add(trade);
+					MerchantRecipeHelper.addUniqueTrade(trades, trade);
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.new.0"));
 				} else {
 					trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
-					if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
+					if (MerchantRecipeHelper.doesListContain(trades, trade) || player.worldObj.rand.nextFloat() < 0.2F) {// && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
+						MerchantRecipeHelper.addUniqueTrade(trades, trade);
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
 					} else {
 						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));

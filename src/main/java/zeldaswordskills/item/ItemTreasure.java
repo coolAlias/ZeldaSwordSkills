@@ -139,14 +139,8 @@ public class ItemTreasure extends Item
 						player.setCurrentItemOrArmor(0, trade.getItemToSell());
 						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));
 						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.received", trade.getItemToSell().getDisplayName()));
-						if (treasure == Treasures.TENTACLE) {
-							player.triggerAchievement(ZSSAchievements.treasureFirst);
-						}
-						if (villagerInfo.onTradedTreasure(treasure, player.getHeldItem())) {
+						if (villagerInfo.onTradedTreasure(player, treasure, player.getHeldItem())) {
 							player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".next"));
-						} else if (treasure == Treasures.CLAIM_CHECK) {
-							player.triggerAchievement(ZSSAchievements.treasureBiggoron);
-							MerchantRecipeHelper.addUniqueTrade(villager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Item.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
 						}
 					} else {
 						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : "")));

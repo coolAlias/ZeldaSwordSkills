@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -30,11 +31,13 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.EntityChu.ChuType;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.util.MerchantRecipeHelper;
 
 /**
  * 
@@ -44,14 +47,14 @@ import zeldaswordskills.lib.Config;
 public class ZSSVillagerInfo implements IExtendedEntityProperties
 {
 	private static final String SAVE_KEY = "zssVillagerInfo";
+	/** Used for masks when the villager is not interested */
+	private static final int NONE = -1;
 
 	/** The villager to which these properties belong */
 	private final EntityVillager villager;
 	/** Additional save data for villager trading */
 	private NBTTagCompound data;
-	/** The type of treasure for which this villager will trade, if any */
-	private int specialTrade = 1;
-	/** The index of the mask that this villager wants, or -1 if none; initial value is masks.size() as a flag */
+	/** The index of the mask that this villager wants, or NONE; initial value is masks.size() as a flag */
 	private int desiredMask;
 
 	/** Trade mapping for a single Treasure enum type key to the full trade recipe output */
@@ -90,15 +93,15 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			if (villager.worldObj.rand.nextFloat() < Config.getMaskBuyChance()) {
 				desiredMask = villager.worldObj.rand.nextInt(EntityMaskTrader.getMaskMapSize());
 			} else {
-				desiredMask = -1;
+				desiredMask = NONE;
 			}
 		}
-		return (desiredMask > -1 ? EntityMaskTrader.getMask(desiredMask) : null);
+		return (desiredMask != NONE ? EntityMaskTrader.getMask(desiredMask) : null);
 	}
 	
 	/** Completes the mask trade, setting villager to no longer trade for masks */
 	public void onMaskTrade() {
-		desiredMask = -1;
+		desiredMask = NONE;
 	}
 
 	/** Returns true if this villager is any type of Hunter */
@@ -125,10 +128,10 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 				flag = stack.hasTagCompound() && stack.getTagCompound().hasKey("finishDate") &&
 						villager.worldObj.getWorldTime() > stack.getTagCompound().getLong("finishDate");
 			}
-			return flag && specialTrade != -2 && (treasure != Treasures.TENTACLE || villager.isChild()) &&
+			return flag && (treasure != Treasures.TENTACLE || villager.isChild()) &&
 					(treasureVillager.get(treasure) == null || treasureVillager.get(treasure) == villager.getProfession());
 		}
-		return (specialTrade > 0 && treasureVillager.get(treasure) == villager.getProfession());
+		return treasureVillager.get(treasure) == villager.getProfession();
 	}
 
 	/**
@@ -151,24 +154,28 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Called after the villager trades for a treasure to remove the trade and may set a new trade target
-	 * @param stack the ItemStack to be given to the player
-	 * @return true if a message should be displayed
+	 * Called after the villager trades for a treasure to handle case-specific scenarios, achievements, etc.
+	 * @param stack the ItemStack that was just given to the player
+	 * @return true if a message should be displayed, e.g. about the villager's next desired trade
 	 */
-	public boolean onTradedTreasure(Treasures treasure, ItemStack stack) {
+	public boolean onTradedTreasure(EntityPlayer player, Treasures treasure, ItemStack stack) {
 		switch(treasure) {
-		case COJIRO: specialTrade = Treasures.ODD_POTION.ordinal(); break;
-		case GORON_SWORD: specialTrade = Treasures.EYE_DROPS.ordinal(); break;
+		case TENTACLE: player.triggerAchievement(ZSSAchievements.treasureFirst); break;
+		case POCKET_EGG: player.triggerAchievement(ZSSAchievements.treasureSecond); break;
+		case COJIRO: return true;
+		case GORON_SWORD: return true;
 		case EYE_DROPS:
 			// traded eye drops for claim check: set date for claiming finished sword
-			specialTrade = Treasures.CLAIM_CHECK.ordinal();
 			if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
 			stack.getTagCompound().setLong("finishDate", villager.worldObj.getWorldTime() + 48000);
+			return true;
+		case CLAIM_CHECK:
+			player.triggerAchievement(ZSSAchievements.treasureBiggoron);
+			MerchantRecipeHelper.addUniqueTrade(villager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Item.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
 			break;
-		case CLAIM_CHECK: specialTrade = -2; break;
-		default: specialTrade = (treasureCustom.containsKey(treasure) ? -2 : -1);
+		default:
 		}
-		return specialTrade >= 0;
+		return false;
 	}
 
 	/** Adds the given amount of chu jellies to the current amount */
@@ -273,14 +280,12 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	@Override
 	public void saveNBTData(NBTTagCompound compound) {
 		compound.setTag(SAVE_KEY, data);
-		compound.setInteger("specialTrade", specialTrade);
 		compound.setInteger("desiredMask", desiredMask);
 	}
 
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
 		data = (compound.hasKey(SAVE_KEY) ? compound.getCompoundTag(SAVE_KEY) : new NBTTagCompound());
-		specialTrade = compound.getInteger("specialTrade");
 		desiredMask = compound.getInteger("desiredMask");
 	}
 

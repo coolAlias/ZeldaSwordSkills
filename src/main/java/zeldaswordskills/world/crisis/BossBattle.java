@@ -91,7 +91,7 @@ public class BossBattle extends AbstractCrisis
 		// TODO play boss battle music
 		difficulty = world.difficultySetting;
 		fillAllGaps(world);
-		generateBossMobs(world, 4);
+		generateBossMobs(world, Config.getNumBosses());
 		core.removeHinderBlock();
 	}
 

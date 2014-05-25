@@ -131,7 +131,7 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 
 	@Override
 	public int getSwingSpeed() {
-		return twoHanded ? 15 : (isMaster ? 10 : 5);
+		return (twoHanded ? 15 : 0);
 	}
 
 	@Override

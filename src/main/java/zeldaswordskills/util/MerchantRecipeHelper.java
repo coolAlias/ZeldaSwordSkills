@@ -61,7 +61,7 @@ public class MerchantRecipeHelper {
 	
 	/**
 	 * Shortcut method to attempt adding a trade without replacing a currently existing trade
-	 * @return returns true if the new trade was added or replaced a current trade
+	 * @return returns true if the new trade was added
 	 */
 	public static boolean addToListWithCheck(MerchantRecipeList list, MerchantRecipe trade) {
 		return addToListWithCheck(list, trade, false);
@@ -101,13 +101,10 @@ public class MerchantRecipeHelper {
 		ItemStack item2b = b.getItemToSell();
 		ItemStack item3a = a.getSecondItemToBuy();
 		ItemStack item3b = b.getSecondItemToBuy();
-		if (item1a.itemID == item1b.itemID && item1a.getItemDamage() == item1b.getItemDamage()) {
-			if (item2a.itemID == item2b.itemID && item2a.getItemDamage() == item2b.getItemDamage()) {
-				if ((item3a == null && item3b == null) || (item3a != null && item3b != null &&
-					item3a.itemID == item3b.itemID && item3a.getItemDamage() == item3b.getItemDamage()))
-				{
-					return true;
-				}
+		if (item1a != null && item1b != null && item1a.getItem() == item1b.getItem() && item1a.getItemDamage() == item1b.getItemDamage()) {
+			if (item2a != null && item2b != null && item2a.getItem() == item2b.getItem() && item2a.getItemDamage() == item2b.getItemDamage()) {
+				return (item3a == null && item3b == null) || (item3a != null && item3b != null &&
+					item3a.getItem() == item3b.getItem() && item3a.getItemDamage() == item3b.getItemDamage());
 			}
 		}
 		

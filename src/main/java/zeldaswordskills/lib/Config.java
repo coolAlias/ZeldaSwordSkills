@@ -47,8 +47,10 @@ public class Config
 	private static boolean enableVanillaSmash;
 	/** Always pick up small hearts regardless of health */
 	private static boolean alwaysPickupHearts;
-	/** Boss health multiplier */
+	/** [Boss] Boss health multiplier, as a percent increase per difficulty level (will not apply to real bosses) [100-500] */
 	private static int bossHealthFactor;
+	/** [Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8] */
+	private static int bossNumber;
 	/** [Achievements] Starting achievement ID */
 	private static int achievementID;
 	/** [Ceramic Jars] Allow ceramic jars to generate in water */
@@ -238,7 +240,8 @@ public class Config
 		enableVanillaLift = config.get("General", "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", true).getBoolean(true);
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
-		bossHealthFactor = config.get("General", "Boss health multiplier, as a percent increase per difficulty level [100-500]", 250).getInt();
+		bossHealthFactor = config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (will not apply to real bosses) [100-500]", 250).getInt();
+		bossNumber = config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8]", 4).getInt();
 		achievementID = config.get("General", "[Achievements] Starting achievement ID", 50).getInt();
 		allowJarsInWater = config.get("General", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
 		jarGenChance = config.get("General", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt();
@@ -356,6 +359,7 @@ public class Config
 	public static boolean canSmashVanilla() { return enableVanillaSmash; }
 	public static boolean alwaysPickupHearts() { return alwaysPickupHearts; }
 	public static float getBossHealthFactor() { return MathHelper.clamp_float(bossHealthFactor * 0.01F, 1F, 5F); }
+	public static int getNumBosses() { return MathHelper.clamp_int(bossNumber, 1, 8); }
 	public static int getStartingAchievementID() { return achievementID; }
 	public static boolean genJarsInWater() { return allowJarsInWater; }
 	public static float getJarGenChance() { return MathHelper.clamp_float(jarGenChance * 0.01F, 0F, 1F); }
