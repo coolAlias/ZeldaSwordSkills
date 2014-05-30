@@ -215,7 +215,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 
 	@Override
 	protected void collideWithEntity(Entity entity) {
-		if (entity instanceof IMob && getRNG().nextInt(20) == 0) {
+		if (entity instanceof IMob && canAttackClass(entity.getClass()) && getRNG().nextInt(20) == 0) {
 			setAttackTarget((EntityLivingBase) entity);
 		}
 		super.collideWithEntity(entity);
