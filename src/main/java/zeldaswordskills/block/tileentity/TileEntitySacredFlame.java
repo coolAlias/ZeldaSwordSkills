@@ -53,6 +53,6 @@ public class TileEntitySacredFlame extends TileEntity
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		nextResetDate = (compound.hasKey("nextResetDate") ? compound.getLong("nextResetDate") : 0);
+		nextResetDate = (compound.hasKey("nextResetDate") && compound.getTag("nextResetDate").getId() == 4 ? compound.getLong("nextResetDate") : 0);
 	}
 }
