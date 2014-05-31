@@ -17,6 +17,7 @@
 
 package zeldaswordskills.handler;
 
+import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.boss.EntityWither;
@@ -44,6 +45,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ItemCustomEgg;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
@@ -89,10 +91,10 @@ public class ZSSEntityEvents
 	 */
 	@ForgeSubscribe
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
-		if (ZSSPlayerInfo.get(event.entityPlayer) != null && event.entityPlayer.worldObj.isRemote) {
-			if (ZSSPlayerInfo.get(event.entityPlayer).isSkillActive(SkillBase.leapingBlow)) {
-				EntityPlayer player = event.entityPlayer;
-				((LeapingBlow) ZSSPlayerInfo.get(player).getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
+		ZSSPlayerInfo skills = ZSSPlayerInfo.get(event.entityPlayer);
+		if (skills != null && event.entityPlayer.worldObj.isRemote) {
+			if (skills.isSkillActive(SkillBase.leapingBlow)) {
+				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.entityPlayer, event.distance);
 			}
 		}
 	}
@@ -136,6 +138,13 @@ public class ZSSEntityEvents
 			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (helm != null && helm.getItem() instanceof ItemMask) {
 				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
+			}
+		}
+		// allow custom spawn eggs to create child entities:
+		if (!event.isCanceled() && event.target instanceof EntityAgeable) {
+			ItemStack stack = event.entityPlayer.getHeldItem();
+			if (stack != null && stack.getItem() instanceof ItemCustomEgg) {
+				event.setCanceled(ItemCustomEgg.spawnChild(event.entity.worldObj, stack, event.entityPlayer, (EntityAgeable) event.target));
 			}
 		}
 	}

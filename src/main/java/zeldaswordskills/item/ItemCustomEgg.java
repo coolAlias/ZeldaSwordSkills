@@ -25,6 +25,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
@@ -171,6 +172,44 @@ public class ItemCustomEgg extends Item
 		}
 
 		return entity;
+	}
+
+	/**
+	 * Attempts to spawn a child when the player interacts with an entity using a custom spawn egg
+	 * @param stack a stack containing an ItemCustomEgg item
+	 * @param player the player interacting with the entity
+	 * @param entity the entity that will spawn the child
+	 * @return true if a child was spawned and the EntityInteractEvent should be canceled
+	 */
+	public static boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
+		Class oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
+
+		if (oclass != null && oclass.isAssignableFrom(entity.getClass())) {
+			EntityAgeable child = entity.createChild(entity);
+
+			if (child != null) {
+				child.setGrowingAge(-24000);
+				child.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, 0.0F, 0.0F);
+				if (!world.isRemote) {
+					world.spawnEntityInWorld(child);
+				}
+
+				if (stack.hasDisplayName()) {
+					child.setCustomNameTag(stack.getDisplayName());
+				}
+
+				if (!player.capabilities.isCreativeMode) {
+					--stack.stackSize;
+					if (stack.stackSize <= 0) {
+						player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
+					}
+				}
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override
