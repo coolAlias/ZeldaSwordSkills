@@ -40,7 +40,7 @@ import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.util.TargetUtils;
 
-public class EntityOctorok extends EntityWaterMob implements IMob
+public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVariant
 {
 	/** Squid type data watcher index (skeleton's use 13) */
 	private static final int OCTOROK_TYPE_INDEX = 13;
@@ -71,21 +71,22 @@ public class EntityOctorok extends EntityWaterMob implements IMob
 	@Override
 	public void entityInit() {
 		super.entityInit();
-		dataWatcher.addObject(OCTOROK_TYPE_INDEX, new Byte((byte)(rand.nextInt(5) == 0 ? 1 : 0)));
+		dataWatcher.addObject(OCTOROK_TYPE_INDEX, (byte)(rand.nextInt(5) == 0 ? 1 : 0));
 	}
 	
 	/**
 	 * Returns the octorok's type: 0 - normal, 1 - bomb shooter
 	 */
-	public int getOctorokType() {
+	public int getType() {
 		return dataWatcher.getWatchableObjectByte(OCTOROK_TYPE_INDEX);
 	}
 	
 	/**
 	 * Sets the octorok's type: 0 - normal, 1 - bomb shooter
 	 */
-	public void setOctorokType(int type) {
-		dataWatcher.updateObject(OCTOROK_TYPE_INDEX, Byte.valueOf((byte) type));
+	@Override
+	public void setType(int type) {
+		dataWatcher.updateObject(OCTOROK_TYPE_INDEX, (byte)(type % 2));
 	}
 
 	@Override
@@ -311,7 +312,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob
 				attackTime = 20;
 				float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 				Entity projectile;
-				if (getOctorokType() == 1) {
+				if (getType() == 1) {
 					projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - worldObj.difficultySetting * 4)).
 							setType(BombType.BOMB_WATER).setTime(12 - (worldObj.difficultySetting * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * worldObj.difficultySetting);
 				} else {
@@ -341,7 +342,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob
 			entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal()), 0.0F);
 			break;
 		default:
-			if (getOctorokType() == 1) {
+			if (getType() == 1) {
 				entityDropItem(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 0.0F);
 			} else {
 				entityDropItem(new ItemStack(par1 == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
@@ -352,14 +353,14 @@ public class EntityOctorok extends EntityWaterMob implements IMob
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setByte("octorokType", (byte) getOctorokType());
+		compound.setByte("octorokType", (byte) getType());
 	}
 	
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		if (compound.hasKey("octorokType")) {
-			setOctorokType(compound.getByte("octorokType"));
+			setType(compound.getByte("octorokType"));
 		}
 	}
 }

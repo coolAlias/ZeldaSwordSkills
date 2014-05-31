@@ -18,16 +18,25 @@
 package zeldaswordskills.creativetab;
 
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.util.StatCollector;
+import zeldaswordskills.item.ZSSItems;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-public class ZSSCreativeTabs
+public class ZSSTabEggs extends CreativeTabs
 {
-	public static CreativeTabs tabBlocks = new ZSSTabBlocks("zssTabBlocks");
-	public static CreativeTabs tabCombat = new ZSSTabCombat("zssTabCombat");
-	public static CreativeTabs tabTools = new ZSSTabTools("zssTabTools");
-	public static CreativeTabs tabSkills = new ZSSTabSkills("zssTabSkills");
-	public static CreativeTabs tabMasks = new ZSSTabMasks("zssTabMasks");
-	public static CreativeTabs tabMisc = new ZSSTabMisc("zssTabMisc");
-	public static CreativeTabs tabKeys = new ZSSTabKeys("zssTabKeys");
-	public static CreativeTabs tabEggs = new ZSSTabEggs("zssTabEggs");
+	public ZSSTabEggs(String label) {
+		super(label);
+	}
 
+	@Override
+	@SideOnly(Side.CLIENT)
+	public int getTabIconItemIndex() {
+		return ZSSItems.eggSpawner.itemID;
+	}
+
+	@Override
+	public String getTranslatedTabLabel() {
+		return StatCollector.translateToLocal("creativetab.zss.eggs");
+	}
 }

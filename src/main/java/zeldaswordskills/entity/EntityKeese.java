@@ -46,7 +46,7 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 
-public class EntityKeese extends EntityBat implements IMob
+public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 {
 	/** The different varieties of Keese */
 	public static enum KeeseType {NORMAL,FIRE,ICE,THUNDER,CURSED};
@@ -85,6 +85,11 @@ public class EntityKeese extends EntityBat implements IMob
 		updateMaxHealth();
 	}
 
+	@Override
+	public void setType(int type) {
+		setType(KeeseType.values()[type % KeeseType.values().length]);
+	}
+
 	/**
 	 * Sets the Keese's type when spawned
 	 */
@@ -101,7 +106,7 @@ public class EntityKeese extends EntityBat implements IMob
 					String name = biome.biomeName.toLowerCase();
 					if (name.contains("frozen") || name.contains("ice") || name.contains("taiga") || name.contains("snow") || name.contains("cold")) {
 						type = KeeseType.ICE;
-					} else if (rand.nextInt(8) == 0) {
+					} else if (name.contains("desert") || rand.nextInt(8) == 0) {
 						type = KeeseType.THUNDER;
 					}
 				}
@@ -147,13 +152,16 @@ public class EntityKeese extends EntityBat implements IMob
 	 */
 	private void updateMaxHealth() {
 		switch(getType()) {
-		case CURSED: getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(16.0D); break;
+		case CURSED:
+			getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(16.0D);
+			break;
 		case FIRE:
 		case ICE:
 		case THUNDER:
 			getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(12.0D);
 			break;
 		default:
+			getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(8.0D);
 		}
 
 		setHealth(getMaxHealth());

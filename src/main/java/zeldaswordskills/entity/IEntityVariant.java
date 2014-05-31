@@ -15,19 +15,18 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.creativetab;
+package zeldaswordskills.entity;
 
-import net.minecraft.creativetab.CreativeTabs;
+/**
+ * 
+ * For Entities with variants that can be set upon spawning with a custom spawn egg.
+ *
+ */
+public interface IEntityVariant {
 
-public class ZSSCreativeTabs
-{
-	public static CreativeTabs tabBlocks = new ZSSTabBlocks("zssTabBlocks");
-	public static CreativeTabs tabCombat = new ZSSTabCombat("zssTabCombat");
-	public static CreativeTabs tabTools = new ZSSTabTools("zssTabTools");
-	public static CreativeTabs tabSkills = new ZSSTabSkills("zssTabSkills");
-	public static CreativeTabs tabMasks = new ZSSTabMasks("zssTabMasks");
-	public static CreativeTabs tabMisc = new ZSSTabMisc("zssTabMisc");
-	public static CreativeTabs tabKeys = new ZSSTabKeys("zssTabKeys");
-	public static CreativeTabs tabEggs = new ZSSTabEggs("zssTabEggs");
-
+	/**
+	 * Sets the Entity's sub-type, where type is often the ordinal value of an Enum set;
+	 * in such cases, it's best to get the Enum type and pass that to another setter method.
+	 */
+	public void setType(int type);
 }

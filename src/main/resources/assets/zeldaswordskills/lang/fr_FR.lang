@@ -352,6 +352,7 @@ combo.ending=TERMINE LE !!!!
 
 creativetab.zss.block=Zelda : Blocks
 creativetab.zss.combat=Zelda : Combat
+creativetab.zss.eggs=Zelda : Oeufs de Spawn
 creativetab.zss.keys=Zelda : Clés
 creativetab.zss.masks=Zelda : Masques
 creativetab.zss.misc=Zelda : Trésors
@@ -413,10 +414,21 @@ entity.zeldaswordskills.arrowelemental.name=Flèche magique
 entity.zeldaswordskills.magicspell.name=Sortilège
 
 entity.chu.name=Chu
+entity.chu.name.0=Chu Rouge
+entity.chu.name.1=Chu Vert
+entity.chu.name.2=Chu Bleu
+entity.chu.name.3=Chu Jaune
 entity.fairy.name=Fée
 entity.goron.name=Goron
 entity.keese.name=Keese
+entity.keese.name.0=Keese
+entity.keese.name.1=Keese Br�lent
+entity.keese.name.2=Keese Glac�
+entity.keese.name.3=Keese �lectrique
+entity.keese.name.4=Keese Noir
 entity.octorok.name=Octorok
+entity.octorok.name.0=Octorok
+entity.octorok.name.1=Octorok
 
 entity.zeldaswordskills.npc.mask_trader.name=Vendeur de Masques
 
@@ -513,6 +525,7 @@ item.zss.skill_wiper.name=Effaceur de compétences
 item.zss.slingshot.name=Lance-pierres des Fées
 item.zss.scattershot.name=Scattershot
 item.zss.supershot.name=Super lance-pierres
+item.zss.spawn_egg.name=Spawn
 item.zss.spirit_crystal_empty.name=Cristal des Esprits
 item.zss.spirit_crystal_din.name=Feu de Din
 item.zss.spirit_crystal_farore.name=Vent de Farore

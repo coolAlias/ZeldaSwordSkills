@@ -76,7 +76,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Drops yellow chu jelly. These are most often found in deserts.
  *
  */
-public class EntityChu extends EntityLiving implements IMob
+public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 {
 	/** Chuchu types, in order of rarity and strength */
 	public static enum ChuType {RED,GREEN,BLUE,YELLOW};
@@ -144,6 +144,11 @@ public class EntityChu extends EntityLiving implements IMob
 		applyTypeTraits();
 	}
 
+	@Override
+	public void setType(int type) {
+		setType(ChuType.values()[type % ChuType.values().length]);
+	}
+
 	/**
 	 * Applies traits based on Chu's type
 	 */
@@ -198,7 +203,7 @@ public class EntityChu extends EntityLiving implements IMob
 	}
 
 	protected void setSize(int size) {
-		dataWatcher.updateObject(CHU_SIZE_INDEX, new Byte((byte) size));
+		dataWatcher.updateObject(CHU_SIZE_INDEX, (byte) size);
 		setSize(0.6F * (float) size, 0.6F * (float) size);
 		setPosition(posX, posY, posZ);
 		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((double)((size + 1) * (size + 1)));

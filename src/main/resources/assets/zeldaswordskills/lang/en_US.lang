@@ -352,6 +352,7 @@ combo.ending=FINISH HIM!!!
 
 creativetab.zss.block=Zelda Blocks
 creativetab.zss.combat=Zelda Combat
+creativetab.zss.eggs=Zelda Spawn Eggs
 creativetab.zss.keys=Zelda Keys
 creativetab.zss.masks=Zelda Masks
 creativetab.zss.misc=Zelda Treasures
@@ -413,10 +414,21 @@ entity.zeldaswordskills.arrowelemental.name=Magic Arrow
 entity.zeldaswordskills.magicspell.name=Spell
 
 entity.chu.name=Chu
+entity.chu.name.0=Red Chu
+entity.chu.name.1=Green Chu
+entity.chu.name.2=Blue Chu
+entity.chu.name.3=Yellow Chu
 entity.fairy.name=Fairy
 entity.goron.name=Goron
 entity.keese.name=Keese
+entity.keese.name.0=Keese
+entity.keese.name.1=Fire Keese
+entity.keese.name.2=Ice Keese
+entity.keese.name.3=Thunder Keese
+entity.keese.name.4=Dark Keese
 entity.octorok.name=Octorok
+entity.octorok.name.0=Octorok
+entity.octorok.name.1=Octorok
 
 entity.zeldaswordskills.npc.mask_trader.name=Mask Salesman
 
@@ -513,6 +525,7 @@ item.zss.skill_wiper.name=Skill Wiper
 item.zss.slingshot.name=Fairy Slingshot
 item.zss.scattershot.name=Scattershot
 item.zss.supershot.name=Super Slingshot
+item.zss.spawn_egg.name=Spawn
 item.zss.spirit_crystal_empty.name=Spirit Crystal
 item.zss.spirit_crystal_din.name=Din's Fire
 item.zss.spirit_crystal_farore.name=Farore's Wind

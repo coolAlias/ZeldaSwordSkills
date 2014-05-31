@@ -305,7 +305,7 @@ public class BossBattle extends AbstractCrisis
 			}
 		} else {
 			if (entity instanceof EntityOctorok) {
-				((EntityOctorok) entity).setOctorokType((byte) 1);
+				((EntityOctorok) entity).setType((byte) 1);
 			}
 			AttributeInstance attribute = entity.getEntityAttribute(SharedMonsterAttributes.attackDamage);
 			AttributeModifier modifier = (new AttributeModifier(UUID.randomUUID(), "Boss Attack Bonus", difficulty * 2.0D, 0)).setSaved(true);

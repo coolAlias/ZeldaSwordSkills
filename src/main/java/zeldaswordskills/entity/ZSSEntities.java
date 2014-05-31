@@ -20,6 +20,7 @@ package zeldaswordskills.entity;
 import net.minecraft.client.model.ModelSquid;
 import net.minecraft.client.model.ModelVillager;
 import net.minecraft.client.renderer.entity.RenderSnowball;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.Configuration;
@@ -103,18 +104,21 @@ public class ZSSEntities
 
 		// MOBS
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 0xADFF2F, 0xFFFF00);
-		registerEntity(EntityChu.class, "chu", ++modEntityIndex, 0xEE2C2C, 0x00CED1);
-		registerEntity(EntityKeese.class, "keese", ++modEntityIndex, 0x555555, 0x000000);
-		registerEntity(EntityOctorok.class, "octorok", ++modEntityIndex, 0x68228B, 0xBA55D3);
+		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
+		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		CustomEntityList.addMapping(EntityKeese.class, "keese", 0x000000, 0x555555, 0x000000, 0xFF4500, 0x000000, 0x40E0D0, 0x000000, 0xFFD700, 0x000000, 0x800080);
+		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
 		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 0xB8860B, 0x8B5A00);
 
 		// NPCS
 		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
 	}
 
-	public static void registerEntity(Class entityClass, String name, int modEntityIndex, int primaryColor, int secondaryColor) {
-		EntityRegistry.registerGlobalEntityID(entityClass, name, EntityRegistry.findGlobalUniqueEntityId(), primaryColor, secondaryColor);
+	public static void registerEntity(Class<? extends Entity> entityClass, String name, int modEntityIndex, int primaryColor, int secondaryColor) {
 		EntityRegistry.registerModEntity(entityClass, name, modEntityIndex, ZSSMain.instance, 80, 3, false);
+		CustomEntityList.addMapping(entityClass, name, primaryColor, secondaryColor);
 	}
 
 	@SideOnly(Side.CLIENT) 

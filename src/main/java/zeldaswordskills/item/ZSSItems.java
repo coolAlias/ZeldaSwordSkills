@@ -49,6 +49,9 @@ import zeldaswordskills.client.render.item.RenderItemCustomBow;
 import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.EntityChu;
+import zeldaswordskills.entity.EntityKeese;
+import zeldaswordskills.entity.EntityOctorok;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityMagicSpell.MagicType;
 import zeldaswordskills.handler.TradeHandler;
@@ -227,6 +230,13 @@ public class ZSSItems
 	arrowFire,
 	arrowIce,
 	arrowLight;
+	
+	/** Custom Spawn Eggs */
+	public static Item
+	eggSpawner, // for all Entities with only one type
+	eggChu,
+	eggKeese,
+	eggOctorok;
 
 	/**
 	 * Initializes mod item indices from configuration file
@@ -482,6 +492,12 @@ public class ZSSItems
 		rodFire = new ItemMagicRod(modItemIndex++, MagicType.FIRE, 8.0F, 8.0F).setUnlocalizedName("zss.rod_fire");
 		rodIce = new ItemMagicRod(modItemIndex++, MagicType.ICE, 6.0F, 8.0F).setUnlocalizedName("zss.rod_ice");
 		rodTornado = new ItemMagicRod(modItemIndex++, MagicType.WIND, 4.0F, 4.0F).setUnlocalizedName("zss.rod_tornado");
+		
+		// Custom Spawn Eggs
+		eggSpawner = new ItemCustomEgg(modItemIndex++).setUnlocalizedName("zss.spawn_egg");
+		eggChu = new ItemCustomVariantEgg(modItemIndex++, EntityChu.class, "chu").setUnlocalizedName("zss.eggChu");
+		eggKeese = new ItemCustomVariantEgg(modItemIndex++, EntityKeese.class, "keese").setUnlocalizedName("zss.eggKeese");
+		eggOctorok = new ItemCustomVariantEgg(modItemIndex++, EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
 	}
 
 	private static void registerItems() {
@@ -604,6 +620,12 @@ public class ZSSItems
 		GameRegistry.registerItem(powerPiece, powerPiece.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(smallHeart, smallHeart.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(throwingRock, throwingRock.getUnlocalizedName().substring(5));
+		
+		// CUSTOM EGGS TAB ITEMS
+		GameRegistry.registerItem(eggSpawner, eggSpawner.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(eggChu, eggChu.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(eggKeese, eggKeese.getUnlocalizedName().substring(5));
+		GameRegistry.registerItem(eggOctorok, eggOctorok.getUnlocalizedName().substring(5));
 	}
 
 	private static void registerRecipes() {

@@ -77,7 +77,7 @@ public class RenderOctorok extends RenderLiving
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		return (((EntityOctorok) entity).getOctorokType() == 0 ? texture1 : texture2);
+		return (((EntityOctorok) entity).getType() == 0 ? texture1 : texture2);
 	}
 
 	@Override
