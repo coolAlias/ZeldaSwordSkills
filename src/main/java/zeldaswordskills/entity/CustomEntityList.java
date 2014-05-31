@@ -106,7 +106,7 @@ public class CustomEntityList
 	 * create a new instance of an entity from NBT store
 	 */
 	public static Entity createEntityFromNBT(NBTTagCompound compound, World world) {
-		Entity entity = createEntity(stringToClassMapping.get(compound.getString("id")), world);
+		Entity entity = createEntityByName(compound.getString("id"), world);
 		if (entity != null) {
 			try {
 				entity.readFromNBT(compound);

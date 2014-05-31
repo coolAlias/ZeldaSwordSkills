@@ -63,6 +63,7 @@ public class ItemCustomEgg extends Item
 		setCreativeTab(ZSSCreativeTabs.tabEggs);
 	}
 
+	@Override
 	public String getItemDisplayName(ItemStack stack) {
 		String s = ("" + StatCollector.translateToLocal("item.zss.spawn_egg.name")).trim();
 		String entityName = CustomEntityList.getStringFromID(stack.getItemDamage());
@@ -79,10 +80,7 @@ public class ItemCustomEgg extends Item
 		return colors != null && colors.size() > 1 ? colors.get((renderPass == 0 ? 0 : 1)) : 16777215;
 	}
 
-	/**
-	 * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-	 * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-	 */
+	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
 		if (world.isRemote) {
 			return true;
@@ -113,9 +111,7 @@ public class ItemCustomEgg extends Item
 		}
 	}
 
-	/**
-	 * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-	 */
+	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
 			MovingObjectPosition mop = getMovingObjectPositionFromPlayer(world, player, true);
