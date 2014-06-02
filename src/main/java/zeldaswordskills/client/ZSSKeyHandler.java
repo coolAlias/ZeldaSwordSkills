@@ -111,6 +111,10 @@ public class ZSSKeyHandler extends KeyHandler
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBasic).makePacket());
 					}
 				} else if (kb == keys[KEY_BOMB]) {
+					// prevent player from holding RMB while getting bombs, as it can crash the game
+					if (mc.gameSettings.keyBindUseItem.pressed) {
+						KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.keyCode, false);
+					}
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
 				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
 					if (mc.thePlayer.isSneaking()) {
