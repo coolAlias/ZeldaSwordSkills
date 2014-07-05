@@ -75,7 +75,7 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 	}
 
 	@Override
-	protected Entity spawnCreature(World world, int subtype, double x, double y, double z) {
+	public Entity spawnCreature(World world, int subtype, double x, double y, double z) {
 		Entity entity = null;
 
 		if (CustomEntityList.entityEggs.containsKey(classToSpawn)) {

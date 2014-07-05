@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.EnumToolMaterial;
@@ -55,6 +56,7 @@ import zeldaswordskills.entity.EntityOctorok;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityMagicSpell.MagicType;
 import zeldaswordskills.handler.TradeHandler;
+import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.skills.SkillBase;
@@ -270,15 +272,16 @@ public class ZSSItems
 	 * Loads all items, registers names, adds dungeon loot and registers trades
 	 */
 	public static void load() {
-		loadItems();
-		registerItems();
+		ZSSItems.loadItems();
+		ZSSItems.registerItems();
 		ItemChuJelly.initializeJellies();
 		ItemHeroBow.initializeArrows();
 		ItemSlingshot.initializeSeeds();
-		registerRecipes();
-		registerDungeonLoot();
+		ZSSItems.registerRecipes();
+		ZSSItems.registerDungeonLoot();
 		TradeHandler.registerTrades();
-		addGrassDrops();
+		ZSSItems.addGrassDrops();
+		ZSSItems.addDispenserBehaviors();
 	}
 
 	/**
@@ -673,5 +676,12 @@ public class ZSSItems
 		if (bonus) {
 			ChestGenHooks.getInfo(ChestGenHooks.BONUS_CHEST).addItem(loot);
 		}
+	}
+
+	private static void addDispenserBehaviors() {
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggSpawner, new BehaviorDispenseCustomMobEgg());
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggChu, new BehaviorDispenseCustomMobEgg());
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggKeese, new BehaviorDispenseCustomMobEgg());
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggOctorok, new BehaviorDispenseCustomMobEgg());
 	}
 }

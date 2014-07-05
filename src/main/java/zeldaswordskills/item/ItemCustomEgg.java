@@ -154,7 +154,7 @@ public class ItemCustomEgg extends Item
 	/**
 	 * Spawns the creature specified by the egg's type in the location specified by the last three parameters.
 	 */
-	protected Entity spawnCreature(World world, int entityID, double x, double y, double z) {
+	public Entity spawnCreature(World world, int entityID, double x, double y, double z) {
 		Entity entity = null;
 		Class<? extends Entity> oclass = CustomEntityList.getClassFromID(entityID);
 
