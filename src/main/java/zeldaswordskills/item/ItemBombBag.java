@@ -172,7 +172,7 @@ public class ItemBombBag extends Item
 		String bombName = StatCollector.translateToLocal((getBombsHeld(stack) > 0 && getBagBombType(stack) > 0) ?  "item.zss.bomb." + getBagBombType(stack) + ".name" : "item.zss.bomb.0.name");
 		list.add(EnumChatFormatting.BOLD + StatCollector.translateToLocalFormatted("tooltip.zss.bombbag.desc.bombs", new Object[] {bombName,getBombsHeld(stack),getCapacity(stack)}));
 	}
-	
+
 	/**
 	 * Attempts to add an amount of bombs to the bag, returning any that wouldn't fit
 	 * @return the number of bombs that wouldn't fit, if any (usually returns a negative value)
@@ -180,11 +180,12 @@ public class ItemBombBag extends Item
 	private int addBombs(ItemStack stack, int amount) {
 		int bombs = getBombsHeld(stack);
 		if (bombs <= getCapacity(stack)) {
+			verifyNBT(stack);
 			stack.getTagCompound().setInteger("bombs", Math.min(bombs + amount, getCapacity(stack)));
 		}
 		return (amount - (getCapacity(stack) - bombs));
 	}
-	
+
 	/**
 	 * ItemStack sensitive version for setting bag's type when adding bombs
 	 * @return the number of bombs that wouldn't fit, if any (usually returns a negative value)
@@ -210,7 +211,7 @@ public class ItemBombBag extends Item
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Empties the entire contents of the bomb bag into the player's inventory
 	 * or onto the ground if there is no more room
@@ -221,7 +222,7 @@ public class ItemBombBag extends Item
 		if (type < 0 || n < 1) { return; }
 		ItemStack newBag = new ItemStack(ZSSItems.bombBag);
 		setCapacity(newBag, getCapacity(stack));
-		
+
 		if (player.inventory.addItemStackToInventory(newBag)) {
 			player.setCurrentItemOrArmor(0, null);
 			while (n-- > 0) {
@@ -239,18 +240,14 @@ public class ItemBombBag extends Item
 	public int getCapacity(ItemStack stack) {
 		return getCapacity(stack, false);
 	}
-	
+
 	/**
 	 * Returns either the true NBT capacity for this bag, or the adjusted max capacity
 	 */
 	private int getCapacity(ItemStack stack, boolean trueCapacity) {
-		verifyNBT(stack);
+		int capacity = (stack.hasTagCompound() ? stack.getTagCompound().getInteger("capacity") : 0);
 		int type = getBagBombType(stack);
-		if (trueCapacity || type == -1 || type == BombType.BOMB_STANDARD.ordinal()) {
-			return stack.getTagCompound().getInteger("capacity");
-		} else {
-			return stack.getTagCompound().getInteger("capacity") / 2;
-		}
+		return (trueCapacity || type == -1 || type == BombType.BOMB_STANDARD.ordinal()) ? capacity : capacity / 2;
 	}
 
 	/**
@@ -265,18 +262,21 @@ public class ItemBombBag extends Item
 	 * Returns number of bombs held in this bag
 	 */
 	public int getBombsHeld(ItemStack stack) {
-		verifyNBT(stack);
-		return stack.getTagCompound().getInteger("bombs");
+		// fix for reports of ArrayIndexOutOfBoundsException from bombs held < 0
+		int bombsHeld = (stack.hasTagCompound() ? stack.getTagCompound().getInteger("bombs") : 0);
+		if (bombsHeld < 0) {
+			stack.getTagCompound().setInteger("bombs", 0);
+		}
+		return (bombsHeld < 0 ? 0 : bombsHeld);
 	}
-	
+
 	/**
 	 * Returns the ordinal value of the type of bomb held, or -1 if no current type
 	 */
-	public int getBagBombType(ItemStack bag) {
-		verifyNBT(bag);
-		return bag.getTagCompound().getInteger("type");
+	public int getBagBombType(ItemStack stack) {
+		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("type") : -1);
 	}
-	
+
 	/**
 	 * Sets the bags current type
 	 */
@@ -284,7 +284,7 @@ public class ItemBombBag extends Item
 		verifyNBT(bag);
 		bag.getTagCompound().setInteger("type", type);
 	}
-	
+
 	/**
 	 * Returns true if the stack is a bomb or a bomb bag and its type matches the
 	 * type currently stored in the bag, or true if no bombs are currently stored
