@@ -18,6 +18,7 @@
 package zeldaswordskills.world.gen;
 
 import net.minecraftforge.event.Event.Result;
+import net.minecraftforge.event.EventPriority;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
@@ -68,7 +69,7 @@ public class ZSSWorldGenEvent
 	 */
 
 	// TERRAIN_GEN_BUS event
-	@ForgeSubscribe
+	@ForgeSubscribe(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
@@ -88,7 +89,7 @@ public class ZSSWorldGenEvent
 	}
 
 	// EVENT_BUS event
-	@ForgeSubscribe
+	@ForgeSubscribe(priority=EventPriority.LOWEST)
 	public void postPopulate(PopulateChunkEvent.Post event) {
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
