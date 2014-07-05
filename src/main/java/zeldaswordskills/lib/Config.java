@@ -203,11 +203,13 @@ public class Config
 	private static int jarDropChance;
 	/** Creeper bomb drop chance */
 	private static int creeperDrop;
-	/** Chance of dropping random orb */
+	/** [Skill Orbs] Enable skill orbs to drop as loot from mobs */
+	private static boolean enableOrbDrops;
+	/** [Skill Orbs] Chance of dropping random orb */
 	private static int randomDropChance;
-	/** Chance for unmapped mob to drop an orb */
+	/** [Skill Orbs] Chance for unmapped mob to drop an orb */
 	private static int genericMobDropChance;
-	/** Individual drop chances for skill orbs and heart pieces */
+	/** [Skill Orbs] Individual drop chances for skill orbs and heart pieces */
 	private static Map<Byte, Integer> orbDropChance;
 	/** [Piece of Power] Approximate number of enemies you need to kill before a piece of power drops */
 	private static int powerDropRate;
@@ -323,12 +325,13 @@ public class Config
 		grassDropChance = config.get("Drops", "Chance (as a percent) of loot dropping from grass [0-100]", 15).getInt();
 		jarDropChance = config.get("Drops", "Chance (as a percent) of loot dropping from empty jars when broken [0-100]", 20).getInt();
 		creeperDrop = config.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt();
-		randomDropChance = config.get("Drops", "Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt();
-		genericMobDropChance = config.get("Drops", "Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt();
+		enableOrbDrops = config.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
+		randomDropChance = config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt();
+		genericMobDropChance = config.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt();
 		orbDropChance = new HashMap<Byte, Integer>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
 			if (skill.canDrop()) {
-				orbDropChance.put(skill.getId(), config.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt());
+				orbDropChance.put(skill.getId(), config.get("Drops", "[Skill Orbs] Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt());
 			}
 		}
 		powerDropRate = config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt();
@@ -444,6 +447,7 @@ public class Config
 	public static float getGrassDropChance() { return MathHelper.clamp_float(grassDropChance * 0.01F, 0F, 1.0F); }
 	public static float getJarDropChance() { return MathHelper.clamp_float(jarDropChance * 0.01F, 0F, 1.0F); }
 	public static float getCreeperDropChance() { return MathHelper.clamp_float(creeperDrop * 0.01F, 0F, 1.0F); }
+	public static boolean areOrbDropsEnabled() { return enableOrbDrops; }
 	public static float getChanceForRandomDrop() { return MathHelper.clamp_float(randomDropChance * 0.01F, 0F, 1.0F); }
 	public static float getRandomMobDropChance() { return MathHelper.clamp_float(genericMobDropChance * 0.0F, 0F, 1.0F); }
 	public static float getDropChance(int orbID) {

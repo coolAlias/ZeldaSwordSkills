@@ -123,7 +123,7 @@ public class ZSSItemEvents
 			boolean isBoss = mob instanceof IBossDisplayData;
 			boolean flag = ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.mortalDraw) == SkillBase.mortalDraw.getMaxLevel();
 			ItemStack orb = (isBoss && !flag ? new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.getId()) : getOrbDrop(mob, isBoss));
-			if (orb != null) {
+			if (orb != null && Config.areOrbDropsEnabled()) {
 				ItemStack helm = (player).getCurrentArmor(ArmorIndex.WORN_HELM);
 				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
 				if (isBoss || mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel))) {
