@@ -147,6 +147,11 @@ public abstract class SkillActive extends SkillBase
 		return this;
 	}
 
+	/** Return true if other skills can be activated while this skill is active */
+	/*public boolean allowsInteraction() {
+		return false;
+	}*/
+
 	/** Sets the skill to prevent left-mouse clicks while active */
 	protected SkillActive setDisablesLMB() {
 		disablesLMB = true;

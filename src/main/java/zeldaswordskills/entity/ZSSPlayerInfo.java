@@ -20,9 +20,13 @@ package zeldaswordskills.entity;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeInstance;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -74,6 +78,10 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** ZSS player statistics */
 	private final Map<Stats, Integer> playerStats = new EnumMap<Stats, Integer>(Stats.class);
 
+	private static final UUID hardcoreHeartUUID = UUID.fromString("83E54288-6BE2-4398-A880-957654F515AB");
+	/** Max health modifier for players with Hardcore Zelda Fan mode enabled */
+	private static final AttributeModifier hardcoreHeartModifier = (new AttributeModifier(hardcoreHeartUUID, "Hardcore Zelda Hearts", -14.0D, 0)).setSaved(true);
+
 	/** Set to true when the player receives the bonus starting gear */
 	private byte receivedGear = 0;
 
@@ -104,6 +112,9 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/** ID of currently active skill that prevents left-mouse button interaction */
 	private int currentActiveSkillId = -1;
+	
+	/** Currently active skill */
+	//private List<SkillActive> activeSkills = new LinkedList<SkillActive>();
 
 	/** Number of Super Spin Attack orbs received from the Great Fairy: used to prevent exploits */
 	private int fairySpinOrbsReceived = 0;
@@ -174,6 +185,22 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		skills.clear();
 		fairySpinOrbsReceived = 0;
 		PacketDispatcher.sendPacketToPlayer(new SyncPlayerInfoPacket(this).setReset().makePacket(), (Player) player);
+	}
+
+	/**
+	 * Applies hardcore Zelda fan heart modifier, if appropriate
+	 */
+	public void verifyMaxHealth() {
+		AttributeInstance attributeinstance = player.getEntityAttribute(SharedMonsterAttributes.maxHealth);
+		if (attributeinstance.getModifier(hardcoreHeartUUID) != null) {
+			attributeinstance.removeModifier(hardcoreHeartModifier);
+		}
+		if (Config.isHardcoreZeldaFan()) {
+			attributeinstance.applyModifier(hardcoreHeartModifier);
+		}
+		if (player.getHealth() > player.getMaxHealth()) {
+			player.setHealth(player.getMaxHealth());
+		}
 	}
 
 	/**
@@ -335,6 +362,13 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		}
 	}
 
+	/**
+	 * Adds the just-activated skill to the current list of active skills
+	 */
+	/*public void onSkillActivated(SkillActive skill) {
+		activeSkills.add(skill);
+	}*/
+
 	/** Used only for skills that disable left-mouse click interactions */
 	public void setCurrentActiveSkill(SkillBase skill) {
 		currentActiveSkillId = skill.getId();
@@ -344,6 +378,13 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * Returns whether skill interactions are currently allowed, i.e. no other skill is in progress
 	 */
 	public boolean canInteract() {
+		/*for (SkillActive skill : activeSkills) {
+			if (!skill.isActive()) {
+				activeSkills.remove(skill);
+			} else if (!skill.allowsInteraction()) {
+				return false;
+			}
+		}*/
 		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkill(currentActiveSkillId))) {
 			currentActiveSkillId = -1;
 		}
