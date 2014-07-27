@@ -26,6 +26,7 @@ import net.minecraftforge.common.Configuration;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.skills.BonusHeart;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.BossType;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -41,6 +42,8 @@ public class Config
 	private static boolean enableStunPlayer;
 	/** Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds */
 	private static boolean enableSwingSpeed;
+	/** Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
+	private static int baseSwingSpeed;
 	/** Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets) */
 	private static boolean enableVanillaLift;
 	/** Whether vanilla blocks can be smashed using appropriate items (e.g. hammers) */
@@ -132,6 +135,8 @@ public class Config
 	private static boolean allowVanillaControls;
 	/** Whether Dodge and Parry require double-tap or not */
 	private static boolean doubleTap;
+	/** Hardcore Zelda Fan: Start with only 3 hearts */
+	private static boolean enableHardcoreZeldaFanMode;
 	/** Max number of bonus 1/2 hearts (capped at 80) */
 	private static int maxBonusHearts;
 	/** Whether auto-targeting is enabled or not */
@@ -239,6 +244,7 @@ public class Config
 		/*================== GENERAL =====================*/
 		enableStunPlayer = config.get("General", "Whether players can be stunned; if false, item use is still interrupted", false).getBoolean(false);
 		enableSwingSpeed = config.get("General", "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", true).getBoolean(true);
+		baseSwingSpeed = config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt();
 		enableVanillaLift = config.get("General", "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", true).getBoolean(true);
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
@@ -288,6 +294,7 @@ public class Config
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
 		enablePlayerTarget = config.get("Skills", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
 		doubleTap = config.get("Skills", "Require double tap activation", true).getBoolean(true);
+		enableHardcoreZeldaFanMode = config.get("Skills", "Hardcore Zelda Fan: Start with only 3 hearts", false).getBoolean(false);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
 		beamRequiresFullHealth = config.get("Skills", "[Sword Beam] Whether to require a completely full health bar to use", false).getBoolean(false);
@@ -358,6 +365,7 @@ public class Config
 	/*================== GENERAL =====================*/
 	public static boolean canPlayersBeStunned() { return enableStunPlayer; }
 	public static boolean affectAllSwings() { return enableSwingSpeed; }
+	public static int getBaseSwingSpeed() { return MathHelper.clamp_int(baseSwingSpeed, 0, 20); }
 	public static boolean canLiftVanilla() { return enableVanillaLift; }
 	public static boolean canSmashVanilla() { return enableVanillaSmash; }
 	public static boolean alwaysPickupHearts() { return alwaysPickupHearts; }
@@ -406,7 +414,8 @@ public class Config
 	/*================== SKILLS =====================*/
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return doubleTap; }
-	public static byte getMaxBonusHearts() { return (byte) MathHelper.clamp_int(maxBonusHearts, 0, 50); }
+	public static boolean isHardcoreZeldaFan() { return enableHardcoreZeldaFanMode; }
+	public static byte getMaxBonusHearts() { return (byte) MathHelper.clamp_int(maxBonusHearts, 0, BonusHeart.MAX_BONUS_HEARTS); }
 	public static boolean autoTargetEnabled() { return autoTarget; }
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }

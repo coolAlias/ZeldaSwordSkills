@@ -238,8 +238,9 @@ public class ZSSCombatEvents
 	public static void setPlayerAttackTime(EntityPlayer player) {
 		if (!player.capabilities.isCreativeMode) {
 			ItemStack stack = player.getHeldItem();
+			int nextSwing = Config.getBaseSwingSpeed();
 			if (stack != null && stack.getItem() instanceof ISwingSpeed) {
-				player.attackTime = Math.max(player.attackTime, ((ISwingSpeed) stack.getItem()).getSwingSpeed());
+				nextSwing += Math.max(player.attackTime, ((ISwingSpeed) stack.getItem()).getSwingSpeed());
 				if (player.worldObj.isRemote) {
 					float exhaustion = ((ISwingSpeed) stack.getItem()).getExhaustion();
 					if (exhaustion > 0.0F) {
@@ -249,6 +250,7 @@ public class ZSSCombatEvents
 					PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) player);
 				}
 			}
+			player.attackTime = Math.max(player.attackTime, nextSwing);
 		}
 	}
 

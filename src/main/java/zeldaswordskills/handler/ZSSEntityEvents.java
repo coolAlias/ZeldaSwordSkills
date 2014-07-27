@@ -175,6 +175,7 @@ public class ZSSEntityEvents
 				ZSSPlayerInfo.loadProxyData(player);
 				PacketDispatcher.sendPacketToPlayer(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)).makePacket(), (Player) player);
 				ZSSPlayerInfo.get(player).verifyStartingGear();
+				ZSSPlayerInfo.get(player).verifyMaxHealth();
 			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
 				// this event is called each time the entity joins, which is every time the world is
 				// loaded, not just the first time the entity spawns, so need to restrict to first time only 

@@ -34,6 +34,8 @@ import zeldaswordskills.lib.ModInfo;
  */
 public class BonusHeart extends SkillPassive
 {
+	/** Max level that can be reached, regardless of config or other settings */
+	public static final int MAX_BONUS_HEARTS = 50;
 	private static final UUID bonusHeartUUID = UUID.fromString("14ED99DA-D333-4621-90C8-81C968A082E3");
 	private static final AttributeModifier bonusHeartModifier = (new AttributeModifier(bonusHeartUUID, "ZSS Bonus Heart", 2.0D, 0)).setSaved(true);
 
@@ -52,7 +54,7 @@ public class BonusHeart extends SkillPassive
 
 	@Override
 	public byte getMaxLevel() {
-		return Config.getMaxBonusHearts();
+		return (byte)(Config.getMaxBonusHearts() + (Config.isHardcoreZeldaFan() ? 7 : 0));
 	}
 
 	@Override
