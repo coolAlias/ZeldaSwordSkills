@@ -244,10 +244,10 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	}
 
 	@Override
-	protected void dropRareDrop(int par1) {
-		switch(par1) {
+	protected void dropRareDrop(int rarity) {
+		switch(rarity) {
 		case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal()), 0.0F); break;
-		default: entityDropItem(new ItemStack(par1 == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
+		default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
 		}
 	}
 

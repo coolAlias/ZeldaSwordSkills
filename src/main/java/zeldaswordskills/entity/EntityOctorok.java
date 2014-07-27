@@ -336,8 +336,8 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 	}
 	
 	@Override
-	protected void dropRareDrop(int par1) {
-		switch(par1) {
+	protected void dropRareDrop(int rarity) {
+		switch(rarity) {
 		case 1:
 			entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal()), 0.0F);
 			break;
@@ -345,7 +345,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 			if (getType() == 1) {
 				entityDropItem(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 0.0F);
 			} else {
-				entityDropItem(new ItemStack(par1 == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
+				entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
 	}

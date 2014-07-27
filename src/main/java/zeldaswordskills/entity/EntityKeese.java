@@ -203,18 +203,18 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 		}
 	}
 
-	// par1 may be 1 or 0
+	// rarity may be 1 or 0, with 1 being more rare
 	@Override
-	protected void dropRareDrop(int par1) {
+	protected void dropRareDrop(int rarity) {
 		if (getType() == KeeseType.CURSED) {
-			switch(par1) {
+			switch(rarity) {
 			case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal()), 0.0F); break;
 			default: entityDropItem(new ItemStack(rand.nextInt(8) == 0 ? ZSSItems.smallHeart : ZSSItems.heartPiece), 0.0F);
 			}
 		} else {
-			switch(par1) {
+			switch(rarity) {
 			case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.MONSTER_CLAW.ordinal()), 0.0F); break;
-			default: entityDropItem(new ItemStack(par1 == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
+			default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
 	}
