@@ -189,9 +189,9 @@ public class Parry extends SkillActive
 	 */
 	private float getDisarmChance(EntityPlayer player, EntityLivingBase attacker) {
 		float penalty = 0.0F;
-		float bonus = 0.025F * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
+		float bonus = Config.getDisarmTimingBonus() * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
 		if (attacker instanceof EntityPlayer) {
-			penalty = 0.1F * ZSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
+			penalty = Config.getDisarmPenalty() * ZSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
 		}
 		return ((level * 0.1F) - penalty + bonus);
 	}

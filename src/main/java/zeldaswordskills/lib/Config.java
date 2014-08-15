@@ -145,6 +145,10 @@ public class Config
 	private static boolean enablePlayerTarget;
 	/** Number of combo hits to display */
 	private static int hitsToDisplay;
+	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
+	private static int disarmTimingBonus;
+	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
+	private static int disarmPenalty;
 	/** [Sword Beam] Whether to require a completely full health bar to use */
 	private static boolean beamRequiresFullHealth;
 	/*================== DUNGEON GEN =====================*/
@@ -297,6 +301,8 @@ public class Config
 		enableHardcoreZeldaFanMode = config.get("Skills", "Hardcore Zelda Fan: Start with only 3 hearts", false).getBoolean(false);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
+		disarmTimingBonus = config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
+		disarmPenalty = config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
 		beamRequiresFullHealth = config.get("Skills", "[Sword Beam] Whether to require a completely full health bar to use", false).getBoolean(false);
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
@@ -421,6 +427,8 @@ public class Config
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }
 	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
+	public static float getDisarmPenalty() { return 0.01F * ((float) MathHelper.clamp_int(disarmPenalty, 0, 20)); }
+	public static float getDisarmTimingBonus() { return 0.001F * ((float) MathHelper.clamp_int(disarmTimingBonus, 0, 50)); }
 	public static boolean getBeamRequiresFullHealth() { return beamRequiresFullHealth; }
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
