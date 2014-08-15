@@ -205,7 +205,7 @@ public class EntitySeedShot extends EntityThrowable
 		} else {
 			playSound("damage.hit", 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			if (worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ) == Block.woodenButton.blockID) {
-				WorldUtils.activateButton(worldObj, mop.blockX, mop.blockY, mop.blockZ, Block.woodenButton.blockID);
+				WorldUtils.activateButton(worldObj, Block.woodenButton.blockID, mop.blockX, mop.blockY, mop.blockZ);
 			}
 			setDead();
 		}
