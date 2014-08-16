@@ -238,8 +238,8 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		int l1 = MathHelper.floor_double(player.posY + (double) radius + 1.0D);
 		int i2 = MathHelper.floor_double(player.posZ - (double) radius - 1.0D);
 		int j2 = MathHelper.floor_double(player.posZ + (double) radius + 1.0D);
-		List list = world.getEntitiesWithinAABBExcludingEntity(player, AxisAlignedBB.getAABBPool().getAABB((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
-		Vec3 vec3 = world.getWorldVec3Pool().getVecFromPool(player.posX, player.posY, player.posZ);
+		List list = world.getEntitiesWithinAABBExcludingEntity(player, AxisAlignedBB.getBoundingBox((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
+		Vec3 vec3 = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
 
 		for (int k2 = 0; k2 < list.size(); ++k2)
 		{

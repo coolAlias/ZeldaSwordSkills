@@ -259,8 +259,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	}
 
 	private boolean canAddBlockPosition(World world, EntityPlayer player, int i, int j, int k) {
-		Vec3 vec31 = world.getWorldVec3Pool().getVecFromPool(player.posX, player.posY + player.getEyeHeight(), player.posZ);
-		Vec3 vec32 = world.getWorldVec3Pool().getVecFromPool(i, j, k);
+		Vec3 vec31 = Vec3.createVectorHelper(player.posX, player.posY + player.getEyeHeight(), player.posZ);
+		Vec3 vec32 = Vec3.createVectorHelper(i, j, k);
 		MovingObjectPosition mop = world.clip(vec31, vec32);
 		if (mop == null) {
 			return true;

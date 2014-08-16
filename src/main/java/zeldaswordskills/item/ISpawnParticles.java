@@ -42,7 +42,7 @@ public interface ISpawnParticles {
 	 * @param y the y coordinate, typically based on the instigating player's position
 	 * @param z the z coordinate, typically based on the instigating player's position
 	 * @param r typically used as the radius in which to spawn particles
-	 * @param look the normalized look vector from the original player who caused the particles
+	 * @param lookVector the normalized look vector from the original player who caused the particles
 	 */
 	@SideOnly(Side.CLIENT)
 	public void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector);

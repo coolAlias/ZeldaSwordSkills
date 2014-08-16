@@ -45,7 +45,7 @@ public class PacketISpawnParticles extends CustomPacket
 	/** Radius in which to spawn the particles */
 	private float r;
 	/** Storage for the normalized look vector of the original player */
-	private double xCoord, yCoord, zCoord;
+	private double lookX, lookY, lookZ;
 
 	public PacketISpawnParticles() {}
 
@@ -55,9 +55,9 @@ public class PacketISpawnParticles extends CustomPacket
 		y = player.posY;
 		z = player.posZ;
 		r = radius;
-		xCoord = player.getLookVec().xCoord;
-		yCoord = player.getLookVec().yCoord;
-		zCoord = player.getLookVec().zCoord;
+		lookX = player.getLookVec().xCoord;
+		lookY = player.getLookVec().yCoord;
+		lookZ = player.getLookVec().zCoord;
 	}
 
 	@Override
@@ -67,9 +67,9 @@ public class PacketISpawnParticles extends CustomPacket
 		out.writeDouble(y);
 		out.writeDouble(z);
 		out.writeFloat(r);
-		out.writeDouble(xCoord);
-		out.writeDouble(yCoord);
-		out.writeDouble(zCoord);
+		out.writeDouble(lookX);
+		out.writeDouble(lookY);
+		out.writeDouble(lookZ);
 	}
 
 	@Override
@@ -79,15 +79,15 @@ public class PacketISpawnParticles extends CustomPacket
 		y = in.readDouble();
 		z = in.readDouble();
 		r = in.readFloat();
-		xCoord = in.readDouble();
-		yCoord = in.readDouble();
-		zCoord = in.readDouble();
+		lookX = in.readDouble();
+		lookY = in.readDouble();
+		lookZ = in.readDouble();
 	}
 
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isClient()) {
-			Vec3 vec3 = player.worldObj.getWorldVec3Pool().getVecFromPool(xCoord, yCoord, zCoord);
+			Vec3 vec3 = Vec3.createVectorHelper(lookX, lookY, lookZ);
 			if (item instanceof ISpawnParticles) {
 				((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r, vec3);
 			}

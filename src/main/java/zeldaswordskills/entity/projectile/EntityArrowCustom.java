@@ -319,7 +319,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		if (i > 0) {
 			Block.blocksList[i].setBlockBoundsBasedOnState(worldObj, xTile, yTile, zTile);
 			AxisAlignedBB axisalignedbb = Block.blocksList[i].getCollisionBoundingBoxFromPool(worldObj, xTile, yTile, zTile);
-			if (axisalignedbb != null && axisalignedbb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ))) {
+			if (axisalignedbb != null && axisalignedbb.isVecInside(Vec3.createVectorHelper(posX, posY, posZ))) {
 				inGround = true;
 			}
 		}
@@ -402,14 +402,14 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	 * Returns MovingObjectPosition of Entity or Block impacted, or null if nothing was struck
 	 */
 	protected MovingObjectPosition checkForImpact() {
-		Vec3 vec3 = worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ);
-		Vec3 vec31 = worldObj.getWorldVec3Pool().getVecFromPool(posX + motionX, posY + motionY, posZ + motionZ);
+		Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+		Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
 		MovingObjectPosition mop = worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
-		vec3 = worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ);
-		vec31 = worldObj.getWorldVec3Pool().getVecFromPool(posX + motionX, posY + motionY, posZ + motionZ);
+		vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+		vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
 
 		if (mop != null) {
-			vec31 = worldObj.getWorldVec3Pool().getVecFromPool(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
 		}
 
 		Entity entity = null;

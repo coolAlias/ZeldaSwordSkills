@@ -35,7 +35,7 @@ public class SpawnLeapingBlowPacket extends CustomPacket
 	private boolean isMaster;
 
 	public SpawnLeapingBlowPacket() {}
-	
+
 	public SpawnLeapingBlowPacket(boolean isMaster) {
 		this.isMaster = isMaster;
 	}
@@ -53,9 +53,10 @@ public class SpawnLeapingBlowPacket extends CustomPacket
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isServer()) {
-			if (ZSSPlayerInfo.get(player) != null) {
-				if (ZSSPlayerInfo.get(player).hasSkill(SkillBase.leapingBlow)) {
-					((LeapingBlow) ZSSPlayerInfo.get(player).getPlayerSkill(SkillBase.leapingBlow)).spawnLeapingBlowEntity(player.worldObj, player, isMaster);
+			ZSSPlayerInfo props = ZSSPlayerInfo.get(player);
+			if (props != null) {
+				if (props.hasSkill(SkillBase.leapingBlow)) {
+					((LeapingBlow) props.getPlayerSkill(SkillBase.leapingBlow)).spawnLeapingBlowEntity(player.worldObj, player, isMaster);
 				}
 			} else {
 				throw new ProtocolException("ZSSPlayerInfo is null while handling Spawn Leaping Blow Packet");

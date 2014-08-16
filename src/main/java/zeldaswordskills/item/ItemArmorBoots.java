@@ -224,7 +224,7 @@ public class ItemArmorBoots extends ItemArmor
 			return false;
 		} else {
 			boolean flag = false;
-			Vec3 vec3 = world.getWorldVec3Pool().getVecFromPool(0.0D, 0.0D, 0.0D);
+			Vec3 vec3 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
 			for (int k1 = i; k1 < j; ++k1) {
 				for (int l1 = k; l1 < l; ++l1) {
 					for (int i2 = i1; i2 < j1; ++i2) {
