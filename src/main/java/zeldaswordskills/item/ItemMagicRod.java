@@ -209,7 +209,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 		if (isUpgraded(stack)) {
 			r *= 1.5F;
 		}
-		WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, r).makePacket(), world, player, 4096.0D);
+		WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, r).makePacket(), world, player, 64.0D);
 		if (ticksInUse % 4 == 3) {
 			affectBlocks(world, player, r);
 			List<EntityLivingBase> targets = TargetUtils.acquireAllLookTargets(player, Math.round(r), 1.0F);

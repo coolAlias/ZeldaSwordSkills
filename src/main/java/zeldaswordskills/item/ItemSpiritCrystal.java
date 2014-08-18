@@ -191,7 +191,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	private int handleDin(ItemStack stack, World world, EntityPlayer player) {
 		float radius = 5.0F;
 		if (!world.isRemote) {
-			WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, radius).makePacket(), world, player, 4096.0D);
+			WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, radius).makePacket(), world, player, 64.0D);
 			affectDinBlocks(world, player, radius);
 		}
 		affectDinEntities(world, player, radius);

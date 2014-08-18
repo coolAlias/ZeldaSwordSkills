@@ -158,7 +158,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			player.addExhaustion(charge * 2.0F);
 			if (charge > 0.25F) {
 				if (!player.worldObj.isRemote) {
-					WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, 4.0F).makePacket(), world, player, 4096.0D);
+					WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, 4.0F).makePacket(), world, player, 64.0D);
 				}
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);
