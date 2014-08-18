@@ -17,9 +17,12 @@
 
 package zeldaswordskills.block;
 
+import java.lang.reflect.Field;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemBlockWithMetadata;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.Configuration;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
@@ -39,6 +42,7 @@ import zeldaswordskills.item.ItemCeramicJar;
 import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.item.ItemSacredFlame;
 import zeldaswordskills.item.ItemSecretStone;
+import zeldaswordskills.item.ZSSItems;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -55,14 +59,15 @@ public class ZSSBlocks
 	barrierHeavy,
 	ceramicJar,
 	chestLocked,
-	doorLocked,
-	dungeonCore,
-	dungeonStone,
 	pedestal,
 	pegWooden,
 	pegRusty,
 	secretStone,
-	sacredFlame;
+	sacredFlame,
+	// the following have a real Item, not an ItemBlock:
+	doorLocked,
+	dungeonCore,
+	dungeonStone;
 
 	/**
 	 * Initialize block index and other variables from config
@@ -125,5 +130,19 @@ public class ZSSBlocks
 		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, "tileEntityDungeonCore");
 		GameRegistry.registerTileEntity(TileEntityPedestal.class, "tileEntityPedestal");
 		GameRegistry.registerTileEntity(TileEntitySacredFlame.class, "tileEntitySacredFlame");
+		
+		// register item blocks for comparator sorting:
+		try {
+			for (Field f: ZSSBlocks.class.getFields()) {
+				if (Block.class.isAssignableFrom(f.getType())) {
+					Block block = (Block) f.get(null);
+					if (block != null) {
+						ZSSItems.registerItemBlock(new ItemStack(block).getItem());
+					}
+				}
+			}
+		} catch(Exception e) {
+
+		}
 	}
 }

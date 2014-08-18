@@ -20,7 +20,6 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -59,16 +58,6 @@ public class ItemMiscZSS extends Item
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public CreativeTabs getCreativeTab() {
-		if (this == ZSSItems.keySkeleton || this == ZSSItems.keySmall) {
-			return ZSSCreativeTabs.tabKeys;
-		} else {
-			return (this == ZSSItems.heartPiece || this == ZSSItems.skillWiper ? ZSSCreativeTabs.tabSkills : super.getCreativeTab());
-		}
-	}
-	
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (this == ZSSItems.dekuNut) {

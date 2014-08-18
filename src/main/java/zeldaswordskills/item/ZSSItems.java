@@ -17,9 +17,14 @@
 
 package zeldaswordskills.item;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
@@ -27,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.EnumToolMaterial;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.potion.Potion;
@@ -60,12 +66,42 @@ import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSItems
 {
+	/** Map Item to internal ID index for Creative Tab comparator sorting to force even old saves to have correct order */
+	private static final Map<Item, Integer> itemList = new HashMap<Item, Integer>(256);
+	private static int sortId = 0;
+	private static Comparator<Item> itemComparator = new Comparator<Item>() {
+		@Override
+		public int compare(Item a, Item b) {
+			if (itemList.containsKey(a) && itemList.containsKey(b)) {
+				return itemList.get(a) - itemList.get(b);
+			} else {
+				LogHelper.log(Level.WARNING, String.format("A mod item %s or %s is missing a comparator mapping", a.getUnlocalizedName(), b.getUnlocalizedName()));
+				return a.itemID - b.itemID;
+			}
+		}
+	};
+	public static Comparator<ItemStack> itemstackComparator = new Comparator<ItemStack>() {
+		@Override
+		public int compare(ItemStack a, ItemStack b) {
+			if (a.getItem() == b.getItem()) {
+				// hack for Bonus Heart ordering:
+				if (a.getItem() == skillOrb && (a.getItemDamage() == SkillBase.bonusHeart.getId() || b.getItemDamage() == SkillBase.bonusHeart.getId())) {
+					return (a.getItemDamage() == SkillBase.bonusHeart.getId() ? Byte.MAX_VALUE : Byte.MIN_VALUE);
+				}
+				return a.getItemDamage() - b.getItemDamage();
+			} else {
+				return itemComparator.compare(a.getItem(), b.getItem());
+			}
+		}
+	};
+
 	private static int modItemIndex;
 	private static final int MOD_ITEM_INDEX_DEFAULT = 27653;
 
@@ -107,60 +143,66 @@ public class ZSSItems
 	/** Material used for masks */
 	public static final EnumArmorMaterial WOOD = EnumHelper.addArmorMaterial("Wood", 5, new int[] {1,3,2,1}, 5);
 
-	/** Block items */
+	/* Creative Tabs are sorted in the order that Items are declared */
+
+	//================ BLOCKS TAB ================//
 	public static Item
 	dungeonCoreItem,
-	dungeonStoneItem;
+	dungeonStoneItem,
+	doorLocked;
 
-	/** Miscellaneous mod items */
+	//================ SKILLS TAB ================//
 	public static Item
-	skillOrb,
 	skillWiper,
+	skillOrb,
+	heartPiece;
+
+	//================ KEYS TAB ================//
+	public static Item
+	keyBig,
+	keySkeleton,
+	keySmall;
+
+	//================ TOOLS TAB ================//
+	public static Item
 	bomb,
 	bombBag,
-	boomerang,
-	boomerangMagic,
+	magicMirror,
 	crystalSpirit,
 	crystalDin,
 	crystalFarore,
 	crystalNayru,
 	dekuLeaf,
 	dekuNut,
-	doorLocked,
-	fairyBottle,
 	gauntletsSilver,
 	gauntletsGolden,
-	hammer,
-	hammerSkull,
-	hammerMegaton,
-	heartPiece,
-	heldBlock,
-	heroBow,
 	hookshot,
 	hookshotAddon,
-	jellyChu,
-	keyBig,
-	keySkeleton,
-	keySmall,
-	magicMirror,
-	masterOre,
-	pendant,
+	rodFire,
+	rodIce,
+	rodTornado,
+	fairyBottle,
 	potionRed,
 	potionGreen,
 	potionBlue,
 	potionYellow,
-	powerPiece,
-	rocsFeather,
-	rodFire,
-	rodIce,
-	rodTornado,
-	slingshot,
-	scattershot,
-	supershot,
-	smallHeart,
-	throwingRock,
+	rocsFeather;
+
+	//================ TREASURES TAB ================//
+	public static Item
+	pendant,
+	masterOre,
+	jellyChu,
 	treasure;
 
+	//================ NO TAB ================//
+	public static Item
+	heldBlock,
+	powerPiece,
+	smallHeart,
+	throwingRock;
+
+	//================ COMBAT TAB ================//
 	/** ZSS Armor Sets */
 	public static Item
 	tunicHeroHelm,
@@ -176,7 +218,7 @@ public class ZSSItems
 	tunicZoraHelm,
 	tunicZoraChest,
 	tunicZoraLegs;
-	//tunicZoraBoots;
+	//tunicZoraBoots; // flippers?
 
 	/** Special Boots */
 	public static Item
@@ -184,6 +226,12 @@ public class ZSSItems
 	bootsHover,
 	bootsPegasus,
 	bootsRubber;
+
+	/** Zelda Shields */
+	public static Item
+	shieldDeku,
+	shieldHylian,
+	shieldMirror;
 
 	/** Zelda Swords */
 	public static Item
@@ -197,13 +245,31 @@ public class ZSSItems
 	swordGolden,
 	swordMasterTrue;
 
-	/** Zelda Shields */
+	/** Other Melee Weapons */
 	public static Item
-	shieldDeku,
-	shieldHylian,
-	shieldMirror;
+	hammer,
+	hammerSkull,
+	hammerMegaton;
 
-	/** Masks and other headgear */
+	/** Ranged Weapons */
+	public static Item
+	boomerang,
+	boomerangMagic,
+	slingshot,
+	scattershot,
+	supershot;
+
+	/** Hero's Bow and Arrows */
+	public static Item
+	heroBow,
+	arrowBomb,
+	arrowBombWater,
+	arrowBombFire,
+	arrowFire,
+	arrowIce,
+	arrowLight;
+
+	//================ MASKS TAB ================//
 	public static Item
 	maskBlast,
 	maskBunny,
@@ -224,16 +290,7 @@ public class ZSSItems
 	maskFierce,
 	maskMajora;
 
-	/** Special Arrows */
-	public static Item
-	arrowBomb,
-	arrowBombWater,
-	arrowBombFire,
-	arrowFire,
-	arrowIce,
-	arrowLight;
-	
-	/** Custom Spawn Eggs */
+	//================ SPAWN EGGS TAB ================//
 	public static Item
 	eggSpawner, // for all Entities with only one type
 	eggChu,
@@ -301,7 +358,7 @@ public class ZSSItems
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldHylian.itemID, new RenderItemShield());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldMirror.itemID, new RenderItemShield());
 		//MinecraftForgeClient.registerItemRenderer(ZSSItems.hookshot.itemID, new RenderItemHookShot());
-	
+
 		// BLOCK ITEMS
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.dungeonCoreItem.itemID, new RenderItemDungeonBlock());
@@ -367,7 +424,7 @@ public class ZSSItems
 	private static void loadItems() {
 		// SKILL TAB ITEMS
 		skillOrb = new ItemSkillOrb(modItemIndex++).setUnlocalizedName("zss.skillorb");
-		heartPiece = new ItemMiscZSS(modItemIndex++,12).setUnlocalizedName("zss.heartpiece");
+		heartPiece = new ItemMiscZSS(modItemIndex++,12).setUnlocalizedName("zss.heartpiece").setCreativeTab(ZSSCreativeTabs.tabSkills);
 
 		// COMBAT TAB ITEMS
 		tunicHeroHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.hero_tunic_helm");
@@ -412,12 +469,12 @@ public class ZSSItems
 		bomb = new ItemBomb(modItemIndex++).setUnlocalizedName("zss.bomb");
 		pendant = new ItemPendant(modItemIndex++).setUnlocalizedName("zss.pendant");
 		masterOre = new ItemMiscZSS(modItemIndex++,24).setUnlocalizedName("zss.masterore");
-		keySmall = new ItemMiscZSS(modItemIndex++,6).setUnlocalizedName("zss.keysmall").setFull3D();
+		keySmall = new ItemMiscZSS(modItemIndex++,6).setUnlocalizedName("zss.keysmall").setFull3D().setCreativeTab(ZSSCreativeTabs.tabKeys);
 		keyBig = new ItemKeyBig(modItemIndex++).setUnlocalizedName("zss.keybig").setFull3D();
-		keySkeleton = new ItemMiscZSS(modItemIndex++,32).setUnlocalizedName("zss.keyskeleton").setFull3D().setMaxStackSize(1);
+		keySkeleton = new ItemMiscZSS(modItemIndex++,32).setUnlocalizedName("zss.keyskeleton").setFull3D().setMaxStackSize(1).setCreativeTab(ZSSCreativeTabs.tabKeys);
 		magicMirror = new ItemMagicMirror(modItemIndex++).setUnlocalizedName("zss.magicmirror");
 		fairyBottle = new ItemFairyBottle(modItemIndex++).setUnlocalizedName("zss.fairybottle");
-		rocsFeather = new ItemMiscZSS(modItemIndex++,12).setUnlocalizedName("zss.rocs_feather");
+		rocsFeather = new ItemMiscZSS(modItemIndex++,12).setUnlocalizedName("zss.rocs_feather").setCreativeTab(ZSSCreativeTabs.tabTools);
 
 		// ITEMS WITH NO TAB
 		smallHeart = new ItemPickupOnly(modItemIndex++).setUnlocalizedName("zss.heart");
@@ -432,10 +489,10 @@ public class ZSSItems
 		arrowIce = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_ice").setTextureName(ModInfo.ID + ":arrow_ice").setCreativeTab(ZSSCreativeTabs.tabCombat);
 		arrowLight = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_light").setTextureName(ModInfo.ID + ":arrow_light").setCreativeTab(ZSSCreativeTabs.tabCombat);
 
-		dekuNut = new ItemMiscZSS(modItemIndex++, 2).setUnlocalizedName("zss.deku_nut");
+		dekuNut = new ItemMiscZSS(modItemIndex++, 2).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
 
 		maskHawkeye = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_hawkeye");
-		crystalSpirit = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.spirit_crystal_empty").setMaxStackSize(1);
+		crystalSpirit = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.spirit_crystal_empty").setMaxStackSize(1).setCreativeTab(ZSSCreativeTabs.tabTools);
 		crystalDin = new ItemSpiritCrystal(modItemIndex++, BlockSacredFlame.DIN, 8, 16).setUnlocalizedName("zss.spirit_crystal_din");
 		crystalFarore = new ItemSpiritCrystal(modItemIndex++, BlockSacredFlame.FARORE, 8, 70).setUnlocalizedName("zss.spirit_crystal_farore");
 		crystalNayru = new ItemSpiritCrystal(modItemIndex++, BlockSacredFlame.NAYRU, 16, 0).setUnlocalizedName("zss.spirit_crystal_nayru");
@@ -482,7 +539,7 @@ public class ZSSItems
 		hammerSkull = new ItemHammer(modItemIndex++, BlockWeight.MEDIUM, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
 		hammerMegaton = new ItemHammer(modItemIndex++, BlockWeight.VERY_HEAVY, 16.0F, 50.0F).setUnlocalizedName("zss.hammer_megaton");
 
-		skillWiper = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.skill_wiper");
+		skillWiper = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.skill_wiper").setCreativeTab(ZSSCreativeTabs.tabSkills);
 
 		// 0.6.1 new items
 		shieldDeku = new ItemZeldaShield(modItemIndex++, 30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
@@ -495,7 +552,7 @@ public class ZSSItems
 		rodFire = new ItemMagicRod(modItemIndex++, MagicType.FIRE, 8.0F, 8.0F).setUnlocalizedName("zss.rod_fire");
 		rodIce = new ItemMagicRod(modItemIndex++, MagicType.ICE, 6.0F, 8.0F).setUnlocalizedName("zss.rod_ice");
 		rodTornado = new ItemMagicRod(modItemIndex++, MagicType.WIND, 4.0F, 4.0F).setUnlocalizedName("zss.rod_tornado");
-		
+
 		// Custom Spawn Eggs
 		eggSpawner = new ItemCustomEgg(modItemIndex++).setUnlocalizedName("zss.spawn_egg");
 		eggChu = new ItemCustomVariantEgg(modItemIndex++, EntityChu.class, "chu").setUnlocalizedName("zss.eggChu");
@@ -503,132 +560,31 @@ public class ZSSItems
 		eggOctorok = new ItemCustomVariantEgg(modItemIndex++, EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
 	}
 
+	/**
+	 * Registers an ItemBlock to the item sorter for creative tabs sorting
+	 */
+	public static void registerItemBlock(Item block) {
+		if (block instanceof ItemBlock) {
+			itemList.put(block, sortId++);
+		} else {
+			LogHelper.log(Level.WARNING, "Tried to register a non-ItemBlock item for " + block.getUnlocalizedName());
+		}
+	}
+
 	private static void registerItems() {
-		// SKILL TAB ITEMS
-		GameRegistry.registerItem(skillOrb, skillOrb.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(heartPiece, heartPiece.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(skillWiper, skillWiper.getUnlocalizedName().substring(5));
+		try {
+			for (Field f: ZSSItems.class.getFields()) {
+				if (Item.class.isAssignableFrom(f.getType())) {
+					Item item = (Item) f.get(null);
+					if (item != null) {
+						itemList.put(item, sortId++);
+						GameRegistry.registerItem(item, item.getUnlocalizedName().replace("item.", "").replace("zss.", "").trim());
+					}
+				}
+			}
+		} catch(Exception e) {
 
-		// COMBAT TAB ITEMS
-		GameRegistry.registerItem(tunicHeroHelm, tunicHeroHelm.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicHeroChest, tunicHeroChest.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicHeroLegs, tunicHeroLegs.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicGoronHelm, tunicGoronHelm.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicGoronChest, tunicGoronChest.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicGoronLegs, tunicGoronLegs.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicZoraHelm, tunicZoraHelm.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicZoraChest, tunicZoraChest.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicZoraLegs, tunicZoraLegs.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(tunicHeroBoots, tunicHeroBoots.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(bootsHeavy, bootsHeavy.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(bootsHover, bootsHover.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(bootsPegasus, bootsPegasus.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(bootsRubber, bootsRubber.getUnlocalizedName().substring(5));
-
-		GameRegistry.registerItem(shieldDeku, shieldDeku.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(shieldHylian, shieldHylian.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(shieldMirror, shieldMirror.getUnlocalizedName().substring(5));
-
-		GameRegistry.registerItem(swordKokiri, swordKokiri.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordOrdon, swordOrdon.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordGiant, swordGiant.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordBiggoron, swordBiggoron.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordMaster, swordMaster.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordTempered, swordTempered.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordGolden, swordGolden.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordMasterTrue, swordMasterTrue.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(swordBroken, swordBroken.getUnlocalizedName().substring(5));
-
-		GameRegistry.registerItem(hammer, hammer.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(hammerSkull, hammerSkull.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(hammerMegaton, hammerMegaton.getUnlocalizedName().substring(5));
-
-		GameRegistry.registerItem(boomerang, boomerang.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(boomerangMagic, boomerangMagic.getUnlocalizedName().substring(5));
-
-		GameRegistry.registerItem(heroBow, heroBow.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(arrowBomb, arrowBomb.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(arrowBombFire, arrowBombFire.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(arrowBombWater, arrowBombWater.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(arrowFire, arrowFire.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(arrowIce, arrowIce.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(arrowLight, arrowLight.getUnlocalizedName().substring(5));
-
-		GameRegistry.registerItem(slingshot, slingshot.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(scattershot, scattershot.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(supershot, supershot.getUnlocalizedName().substring(5));
-
-		// BLOCK TAB ITEMS
-		GameRegistry.registerItem(doorLocked, doorLocked.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(dungeonCoreItem, dungeonCoreItem.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(dungeonStoneItem, dungeonStoneItem.getUnlocalizedName().substring(5));
-
-		// KEYS TAB ITEMS
-		GameRegistry.registerItem(keyBig, keyBig.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(keySmall, keySmall.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(keySkeleton, keySkeleton.getUnlocalizedName().substring(5));
-
-		// TOOLS TAB ITEMS
-		GameRegistry.registerItem(hookshot, hookshot.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(hookshotAddon, hookshotAddon.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(bombBag, bombBag.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(bomb, bomb.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(crystalDin, crystalDin.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(crystalFarore, crystalFarore.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(crystalNayru, crystalNayru.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(gauntletsSilver, gauntletsSilver.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(gauntletsGolden, gauntletsGolden.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(rodFire, rodFire.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(rodIce, rodIce.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(rodTornado, rodTornado.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(magicMirror, magicMirror.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(fairyBottle, fairyBottle.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(potionRed, potionRed.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(potionGreen, potionGreen.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(potionBlue, potionBlue.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(potionYellow, potionYellow.getUnlocalizedName().substring(5));
-
-		// MASK TAB ITEMS
-		GameRegistry.registerItem(maskBlast, maskBlast.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskBunny, maskBunny.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskCouples, maskCouples.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskGerudo, maskGerudo.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskGiants, maskGiants.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskGibdo, maskGibdo.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskHawkeye, maskHawkeye.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskKeaton, maskKeaton.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskScents, maskScents.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskSkull, maskSkull.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskSpooky, maskSpooky.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskStone, maskStone.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskTruth, maskTruth.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskDeku, maskDeku.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskGoron, maskGoron.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskZora, maskZora.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskFierce, maskFierce.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(maskMajora, maskMajora.getUnlocalizedName().substring(5));
-
-		// MISCELLANEOUS TAB ITEMS
-		GameRegistry.registerItem(pendant, pendant.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(crystalSpirit, crystalSpirit.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(masterOre, masterOre.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(rocsFeather, rocsFeather.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(dekuLeaf, dekuLeaf.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(dekuNut, dekuNut.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(jellyChu, jellyChu.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(treasure, treasure.getUnlocalizedName().substring(5));
-
-		// ITEMS WITH NO TAB
-		GameRegistry.registerItem(heldBlock, heldBlock.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(powerPiece, powerPiece.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(smallHeart, smallHeart.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(throwingRock, throwingRock.getUnlocalizedName().substring(5));
-		
-		// CUSTOM EGGS TAB ITEMS
-		GameRegistry.registerItem(eggSpawner, eggSpawner.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(eggChu, eggChu.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(eggKeese, eggKeese.getUnlocalizedName().substring(5));
-		GameRegistry.registerItem(eggOctorok, eggOctorok.getUnlocalizedName().substring(5));
+		}
 	}
 
 	private static void registerRecipes() {

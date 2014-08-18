@@ -17,17 +17,139 @@
 
 package zeldaswordskills.creativetab;
 
+import java.util.Collections;
+import java.util.List;
+
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
+import net.minecraft.util.StatCollector;
+import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.item.ZSSItems;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSCreativeTabs
 {
-	public static CreativeTabs tabBlocks = new ZSSTabBlocks("zssTabBlocks");
-	public static CreativeTabs tabCombat = new ZSSTabCombat("zssTabCombat");
-	public static CreativeTabs tabTools = new ZSSTabTools("zssTabTools");
-	public static CreativeTabs tabSkills = new ZSSTabSkills("zssTabSkills");
-	public static CreativeTabs tabMasks = new ZSSTabMasks("zssTabMasks");
-	public static CreativeTabs tabMisc = new ZSSTabMisc("zssTabMisc");
-	public static CreativeTabs tabKeys = new ZSSTabKeys("zssTabKeys");
-	public static CreativeTabs tabEggs = new ZSSTabEggs("zssTabEggs");
+	/**
+	 * 
+	 * Sorts creative tab using {@link ZSSItems#itemstackComparator}, allowing
+	 * tabs to be sorted correctly even on old world saves.
+	 *
+	 */
+	public abstract static class ZSSCreativeTab extends CreativeTabs {
+		public ZSSCreativeTab(String label) {
+			super(label);
+		}
 
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void displayAllReleventItems(List itemstacks) {
+			super.displayAllReleventItems(itemstacks);
+			Collections.sort(itemstacks, ZSSItems.itemstackComparator);
+		}
+	}
+	
+	public static CreativeTabs tabBlocks = new ZSSCreativeTab("zssTabBlocks") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public int getTabIconItemIndex() {
+			return ZSSBlocks.pedestal.blockID;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.block");
+		}
+	};
+	
+	public static CreativeTabs tabCombat = new ZSSCreativeTab("zssTabCombat") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ZSSItems.swordMasterTrue;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.combat");
+		}
+	};
+
+	public static CreativeTabs tabTools = new ZSSCreativeTab("zssTabTools") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ZSSItems.bombBag;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.tools");
+		}
+	};
+
+	public static CreativeTabs tabSkills = new ZSSCreativeTab("zssTabSkills") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ZSSItems.skillOrb;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.skill");
+		}
+	};
+
+	public static CreativeTabs tabMasks = new ZSSCreativeTab("zssTabMasks") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ZSSItems.maskHawkeye;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.masks");
+		}
+	};
+
+	public static CreativeTabs tabMisc = new ZSSCreativeTab("zssTabMisc") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ZSSItems.pendant;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.misc");
+		}
+	};
+
+	public static CreativeTabs tabKeys = new ZSSCreativeTab("zssTabKeys") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ZSSItems.keySmall;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.keys");
+		}
+	};
+
+	public static CreativeTabs tabEggs = new ZSSCreativeTab("zssTabEggs") {
+		@Override
+		@SideOnly(Side.CLIENT)
+		public Item getTabIconItem() {
+			return ZSSItems.eggSpawner;
+		}
+
+		@Override
+		public String getTranslatedTabLabel() {
+			return StatCollector.translateToLocal("creativetab.zss.eggs");
+		}
+	};
 }
