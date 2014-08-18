@@ -67,11 +67,6 @@ public class GuiSkills extends GuiContainer
 	}
 
 	@Override
-	public boolean doesGuiPauseGame() {
-		return true;
-	}
-
-	@Override
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		super.drawScreen(mouseX, mouseY, f);
 		xSize_lo = mouseX;
