@@ -336,9 +336,9 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setShort("hitX", (short) hitX);
-		compound.setShort("hitY", (short) hitY);
-		compound.setShort("hitZ", (short) hitZ);
+		compound.setDouble("hitX", hitX);
+		compound.setDouble("hitY", hitY);
+		compound.setDouble("hitZ", hitZ);
 		compound.setByte("reachedHook", (byte)(reachedHook ? 1 : 0));
 		compound.setByte("shotType", (byte) getType().ordinal());
 		compound.setInteger("shotTarget", getTarget() != null ? getTarget().entityId : -1);
@@ -347,9 +347,9 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		hitX = compound.getShort("xTile");
-		hitY = compound.getShort("yTile");
-		hitZ = compound.getShort("zTile");
+		hitX = compound.getDouble("hitX");
+		hitY = compound.getDouble("hitY");
+		hitZ = compound.getDouble("hitZ");
 		reachedHook = (compound.getByte("reachedHook") == 1);
 		dataWatcher.updateObject(THROWER_DATA_WATCHER_INDEX, compound.getString("ownerName"));
 		dataWatcher.updateObject(SHOTTYPE_DATA_WATCHER_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);
