@@ -37,7 +37,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.block.BlockSecretStone;
@@ -49,6 +48,7 @@ import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
 import zeldaswordskills.util.WorldUtils;
+import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
 /**
  * 
@@ -106,7 +106,7 @@ public class BossBattle extends AbstractCrisis
 		if (world.difficultySetting > 0) {
 			WorldUtils.spawnXPOrbsWithRandom(world, world.rand, box.getCenterX(), box.getCenterY(), box.getCenterZ(), 1000 * difficulty);
 		}
-		ZSSMain.atlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", core.xCoord, core.yCoord, core.zCoord);
+		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", core.xCoord, core.yCoord, core.zCoord);
 	}
 
 	@Override

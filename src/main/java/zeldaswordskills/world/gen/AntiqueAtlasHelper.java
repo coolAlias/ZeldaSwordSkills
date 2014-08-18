@@ -40,14 +40,14 @@ public class AntiqueAtlasHelper
 	/**
 	 * Places custom tile at the given world position
 	 */
-	public void placeCustomTile(World world, String tileName, int x, int y, int z) {
+	public static void placeCustomTile(World world, String tileName, int x, int y, int z) {
 		placeCustomTile(world, tileName, x >> 4, z >> 4);
 	}
 	
 	/**
 	 * Places custom tile at the given chunk coordinates
 	 */
-	public void placeCustomTile(World world, String tileName, int chunkX, int chunkZ) {
+	public static void placeCustomTile(World world, String tileName, int chunkX, int chunkZ) {
 		if (ZSSMain.isAtlasEnabled && !world.isRemote) {
 			try {
 				AtlasAPI.getTileAPI().putCustomTile(world, world.provider.dimensionId, tileName, chunkX, chunkZ);
@@ -61,7 +61,7 @@ public class AntiqueAtlasHelper
 	 * Registers all custom tile textures to the Atlas
 	 */
 	@SideOnly(Side.CLIENT)
-	public void registerTextures() {
+	public static void registerTextures() {
 		if (ZSSMain.isAtlasEnabled) {
 			try {
 				for (BossType type : BossType.values()) {

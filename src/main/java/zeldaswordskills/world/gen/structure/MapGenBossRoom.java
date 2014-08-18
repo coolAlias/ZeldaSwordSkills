@@ -26,12 +26,12 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;
+import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
 /**
  * 
@@ -56,7 +56,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 				if (room.generate(this, world, rand, posX, posY, posZ)) {
 					//LogHelper.log(Level.INFO, "Boss room of type " + type.toString() + " successfully generated at " + room.getBoundingBox().toString());
 					onStructureGenerated(type, chunkX, chunkZ);
-					ZSSMain.atlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + type.ordinal(), room.getBoundingBox().getCenterX() >> 4, room.getBoundingBox().getCenterZ() >> 4);
+					AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + type.ordinal(), room.getBoundingBox().getCenterX() >> 4, room.getBoundingBox().getCenterZ() >> 4);
 				} else {
 					//LogHelper.log(Level.INFO, "Boss room of type " + type.toString() + " failed to generate at " + room.getBoundingBox().toString());
 				}

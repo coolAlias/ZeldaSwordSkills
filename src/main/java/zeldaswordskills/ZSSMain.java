@@ -30,7 +30,6 @@ import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.ZSSPacketHandler;
 import zeldaswordskills.util.LogHelper;
-import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
 import cpw.mods.fml.common.Loader;
@@ -65,8 +64,6 @@ public class ZSSMain
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;
 
-	/** Helper class for registering custom tiles with Antique Atlas mod if loaded */
-	public static AntiqueAtlasHelper atlasHelper = new AntiqueAtlasHelper();
 	/** Whether Antique Atlas mod is loaded */
 	public static boolean isAtlasEnabled;
 	/** Whether Battlegear2 mod is loaded */
