@@ -42,6 +42,7 @@ import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -60,6 +61,8 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	private static final Byte ATTACK_FLAG = (byte) 4;
 	/** Timer for health regeneration, similar to players when satiated */
 	private int regenTimer;
+	/** Flag to allow attributes to update to adult status */
+	private boolean wasChild;
 
 	public EntityGoron(World world) {
 		this(world, 0);
@@ -92,12 +95,35 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(60.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(100.0D);
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setAttribute(0.3D);
 		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setAttribute(0.75D);
-		getAttributeMap().func_111150_b(SharedMonsterAttributes.attackDamage);
+		getAttributeMap().func_111150_b(SharedMonsterAttributes.attackDamage).setAttribute(2.0D);
 		isImmuneToFire = true;
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
+	}
+
+	/**
+	 * Updates Goron attributes (maxHealth, etc.) as appropriate for growing age;
+	 * necessary because NBT is read AFTER applyEntityAttributes(), as well as for
+	 * updating after transition from childhood to adulthood
+	 * @notes Passes return value of {@link #isChild()} to {@link #updateEntityAttributes(boolean)}
+	 */
+	private void updateEntityAttributes() {
+		updateEntityAttributes(isChild());
+	}
+
+	/**
+	 * As {@link #updateEntityAttributes} with parameter to force child values for use
+	 * when spawning child entities, as their growing age is not yet set.
+	 * @param isChild Whether the entity is a child; wasChild is set to this value
+	 */
+	private void updateEntityAttributes(boolean isChild) {
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((isChild ? 40.0D : 100.0D));
+		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setAttribute((isChild ? 0.5D : 0.3D));
+		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setAttribute((isChild ? 0.25D : 0.75D));
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setAttribute((isChild ? 2.0D : 8.0D));
+		wasChild = isChild;
 	}
 
 	@Override
@@ -116,7 +142,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 			updateHealth();
 		}
 	}
-	
+
 	@Override
 	public void updateAITick() {
 		super.updateAITick();
@@ -139,6 +165,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 				heal(1.0F);
 				regenTimer = 0;
 			}
+		}
+		if (wasChild && !isChild()) {
+			updateEntityAttributes();
 		}
 	}
 
@@ -223,7 +252,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 
 	@Override
 	public int getTotalArmorValue() {
-		return super.getTotalArmorValue() + (isChild() ? 0 : 6);
+		return super.getTotalArmorValue() + (isChild() ? 4 : 10);
 	}
 
 	// TODO update sounds to Goron-specific sounds
@@ -255,11 +284,18 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	public EntityGoron func_90012_b(EntityAgeable entity) {
 		EntityGoron goron = new EntityGoron(worldObj);
 		goron.onSpawnWithEgg(null);
+		goron.updateEntityAttributes(true);
 		return goron;
 	}
 
 	@Override
 	public Village getVillageToDefend() {
 		return village;
+	}
+
+	@Override
+	public void readEntityFromNBT(NBTTagCompound compound) {
+		super.readEntityFromNBT(compound);
+		updateEntityAttributes();
 	}
 }
