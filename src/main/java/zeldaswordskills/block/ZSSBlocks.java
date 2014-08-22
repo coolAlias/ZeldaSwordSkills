@@ -77,9 +77,9 @@ public class ZSSBlocks
 	}
 
 	/**
-	 * Initializes and registers all blocks
+	 * Call during FMLPreInitializationEvent to initialize and register all blocks
 	 */
-	public static void load() {
+	public static void init() {
 		secretStone = new BlockSecretStone(modBlockIndex++, Material.rock).setUnlocalizedName("zss.secretstone");
 		dungeonCore = new BlockDungeonCore(modBlockIndex++, Material.rock).setUnlocalizedName("zss.dungeoncore");
 		pedestal = new BlockPedestal(modBlockIndex++).setUnlocalizedName("zss.pedestal");

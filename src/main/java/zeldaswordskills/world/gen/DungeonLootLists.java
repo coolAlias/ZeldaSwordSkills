@@ -82,7 +82,7 @@ public class DungeonLootLists
 	/**
 	 * Initializes all of the loot tables for dungeon generation
 	 */
-	public static void initLootLists() {
+	public static void init() {
 		initBasicConsumables();
 		initBossLoot();
 		initJarDrops();

@@ -326,16 +326,18 @@ public class ZSSItems
 	}
 
 	/**
-	 * Loads all items, registers names, adds dungeon loot and registers trades
+	 * Call during FMLPreInitializationEvent to initialize and register all items.
+	 * Also calls various initialization methods for special Items, registers recipes,
+	 * adds loot to vanilla chests, trades, dispenser behavior, and adds drops.
 	 */
-	public static void load() {
-		ZSSItems.loadItems();
+	public static void init() {
+		ZSSItems.initItems();
 		ZSSItems.registerItems();
 		ItemChuJelly.initializeJellies();
 		ItemHeroBow.initializeArrows();
 		ItemSlingshot.initializeSeeds();
 		ZSSItems.registerRecipes();
-		ZSSItems.registerDungeonLoot();
+		ZSSItems.addVanillaDungeonLoot();
 		TradeHandler.registerTrades();
 		ZSSItems.addGrassDrops();
 		ZSSItems.addDispenserBehaviors();
@@ -421,7 +423,7 @@ public class ZSSItems
 		return true;
 	}
 
-	private static void loadItems() {
+	private static void initItems() {
 		// SKILL TAB ITEMS
 		skillOrb = new ItemSkillOrb(modItemIndex++).setUnlocalizedName("zss.skillorb");
 		heartPiece = new ItemMiscZSS(modItemIndex++,12).setUnlocalizedName("zss.heartpiece").setCreativeTab(ZSSCreativeTabs.tabSkills);
@@ -603,7 +605,10 @@ public class ZSSItems
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Item.dyePowder,1,4));
 	}
 
-	private static void registerDungeonLoot() {
+	/**
+	 * Adds some special loot to vanilla chests
+	 */
+	private static void addVanillaDungeonLoot() {
 		if (enableBombLoot) {
 			addLootToAll(new WeightedRandomChestContent(new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight()), true, true);
 		}

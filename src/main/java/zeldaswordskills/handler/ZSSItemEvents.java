@@ -308,7 +308,7 @@ public class ZSSItemEvents
 		return block.blockMaterial == Material.glass || block.blockMaterial == Material.ice;
 	}
 
-	public static void initializeDrops() {
+	public static void load() {
 		addDrop(EntityZombie.class, SkillBase.swordBasic);
 		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
 		addDrop(EntityEnderman.class, SkillBase.dodge);

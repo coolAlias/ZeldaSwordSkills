@@ -81,7 +81,7 @@ public class ZSSEntities
 	/**
 	 * Registers all entities, entity eggs, and adds spawns
 	 */
-	public static void load() {
+	public static void init() {
 		registerEntities();
 		addSpawns();
 	}

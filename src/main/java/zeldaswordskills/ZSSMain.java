@@ -73,13 +73,13 @@ public class ZSSMain
 	public void preInit(FMLPreInitializationEvent event) {
 		LogHelper.init();
 		Config.init(event);
-		ZSSBlocks.load();
-		ZSSItems.load();
-		ZSSEntities.load();
-		ZSSAchievements.init();
-		DungeonLootLists.initLootLists();
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
+		ZSSBlocks.init();
+		ZSSItems.init();
+		ZSSEntities.init();
+		ZSSAchievements.init();
+		DungeonLootLists.init();
 		proxy.initialize();
 
 		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
@@ -95,7 +95,7 @@ public class ZSSMain
 		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
-		ZSSItemEvents.initializeDrops();
+		ZSSItemEvents.load();
 		NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
 	}
 
