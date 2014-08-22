@@ -114,7 +114,9 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	}
 
 	/** Whether this sword is considered a 'master' sword for purposes of skills and such*/
-	public boolean isMasterSword() { return isMaster; }
+	public boolean isMasterSword() {
+		return isMaster;
+	}
 
 	/**
 	 * Sets this sword to not give the broken item version when the sword breaks
