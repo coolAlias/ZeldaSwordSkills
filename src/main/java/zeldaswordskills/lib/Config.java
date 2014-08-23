@@ -44,6 +44,8 @@ public class Config
 	private static boolean enableSwingSpeed;
 	/** Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
 	private static int baseSwingSpeed;
+	/** Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time) */
+	private static boolean enableHardcoreZeldaFanMode;
 	/** Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets) */
 	private static boolean enableVanillaLift;
 	/** Whether vanilla blocks can be smashed using appropriate items (e.g. hammers) */
@@ -135,8 +137,6 @@ public class Config
 	private static boolean allowVanillaControls;
 	/** Whether Dodge and Parry require double-tap or not */
 	private static boolean doubleTap;
-	/** Hardcore Zelda Fan: Start with only 3 hearts */
-	private static boolean enableHardcoreZeldaFanMode;
 	/** Max number of bonus 1/2 hearts (capped at 80) */
 	private static int maxBonusHearts;
 	/** Whether auto-targeting is enabled or not */
@@ -242,7 +242,7 @@ public class Config
 		ZSSEntities.init(config);
 		ZSSBlocks.init(config);
 		ZSSItems.init(config);
-		
+
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
 		/*================== GENERAL =====================*/
@@ -252,6 +252,7 @@ public class Config
 		enableVanillaLift = config.get("General", "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", true).getBoolean(true);
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
+		enableHardcoreZeldaFanMode = config.get("General", "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", false).getBoolean(false);
 		bossHealthFactor = config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (will not apply to real bosses) [100-500]", 250).getInt();
 		bossNumber = config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8]", 4).getInt();
 		achievementID = config.get("General", "[Achievements] Starting achievement ID", 50).getInt();
@@ -298,7 +299,6 @@ public class Config
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
 		enablePlayerTarget = config.get("Skills", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
 		doubleTap = config.get("Skills", "Require double tap activation", true).getBoolean(true);
-		enableHardcoreZeldaFanMode = config.get("Skills", "Hardcore Zelda Fan: Start with only 3 hearts", false).getBoolean(false);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
 		disarmTimingBonus = config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
@@ -356,7 +356,7 @@ public class Config
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-25]", 15).getInt();
 	}
-	
+
 	public static void postInit() {
 		for (BossType type : BossType.values()) {
 			BossType.addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.getDefaultBiomes()).getStringList());
@@ -375,6 +375,7 @@ public class Config
 	public static boolean canLiftVanilla() { return enableVanillaLift; }
 	public static boolean canSmashVanilla() { return enableVanillaSmash; }
 	public static boolean alwaysPickupHearts() { return alwaysPickupHearts; }
+	public static boolean isHardcoreZeldaFan() { return enableHardcoreZeldaFanMode; }
 	public static float getBossHealthFactor() { return MathHelper.clamp_float(bossHealthFactor * 0.01F, 1F, 5F); }
 	public static int getNumBosses() { return MathHelper.clamp_int(bossNumber, 1, 8); }
 	public static int getStartingAchievementID() { return achievementID; }
@@ -420,7 +421,6 @@ public class Config
 	/*================== SKILLS =====================*/
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return doubleTap; }
-	public static boolean isHardcoreZeldaFan() { return enableHardcoreZeldaFanMode; }
 	public static byte getMaxBonusHearts() { return (byte) MathHelper.clamp_int(maxBonusHearts, 0, BonusHeart.MAX_BONUS_HEARTS); }
 	public static boolean autoTargetEnabled() { return autoTarget; }
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
