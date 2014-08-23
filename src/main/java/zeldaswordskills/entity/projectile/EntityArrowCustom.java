@@ -58,12 +58,11 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	private static final int TARGET_DATAWATCHER_INDEX = 24;
 
 	/** Private fields from EntityArrow are now protected instead */
-	protected int xTile = -1, yTile = -1, zTile = -1, inTile, inData;
+	protected int inTile, inData;
 	protected int ticksInGround = 0, ticksInAir = 0;
 	protected boolean inGround = false;
 
-	/** damage and knockback have getters and setters, so can be private */
-	private double damage = 2.0D;
+	/** EntityArrow has a setter for private knockbackStrength field, but no getter; add it here */
 	private int knockbackStrength;
 
 	/** The item id to return when picked up */
@@ -211,16 +210,6 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 				setDead();
 			}
 		}
-	}
-
-	/** Sets the amount of damage the arrow will inflict when it hits a mob */
-	public void setDamage(double value) {
-		damage = value;
-	}
-
-	/** Returns the amount of damage the arrow will inflict when it hits a mob */
-	public double getDamage() {
-		return damage;
 	}
 
 	/** Returns the damage source this arrow will use against the entity struck */ 
@@ -525,7 +514,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	 */
 	protected int calculateDamage(Entity entityHit) {
 		float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-		int dmg = MathHelper.ceiling_double_int((double) velocity * damage);
+		int dmg = MathHelper.ceiling_double_int((double) velocity * getDamage());
 		if (getIsCritical()) {
 			dmg += rand.nextInt(dmg / 2 + 2);
 		}
@@ -560,14 +549,16 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	 */
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
-		super.writeEntityToNBT(compound);
+		//super.writeEntityToNBT(compound); // writes the same data
 		compound.setShort("xTile", (short) xTile);
 		compound.setShort("yTile", (short) yTile);
 		compound.setShort("zTile", (short) zTile);
 		compound.setByte("inTile", (byte) inTile);
 		compound.setByte("inData", (byte) inData);
+		compound.setByte("shake", (byte) arrowShake);
 		compound.setByte("inGround", (byte)(inGround ? 1 : 0));
-		compound.setDouble("damage", damage);
+		compound.setByte("pickup", (byte) canBePickedUp);
+		compound.setDouble("damage", getDamage());
 		compound.setInteger("arrowId", arrowItemId);
 		compound.setInteger("target", getTarget() != null ? getTarget().entityId : -1);
 	}
@@ -578,15 +569,17 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 	 */
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
-		super.readEntityFromNBT(compound);
+		//super.readEntityFromNBT(compound);
 		xTile = compound.getShort("xTile");
 		yTile = compound.getShort("yTile");
 		zTile = compound.getShort("zTile");
 		inTile = compound.getByte("inTile") & 255;
 		inData = compound.getByte("inData") & 255;
+		arrowShake = compound.getByte("shake") & 255;
 		inGround = compound.getByte("inGround") == 1;
+		canBePickedUp = compound.getByte("pickup");
 		if (compound.hasKey("damage")) {
-			damage = compound.getDouble("damage");
+			setDamage(compound.getDouble("damage"));
 		}
 		arrowItemId = (compound.hasKey("arrowId") ? compound.getInteger("arrowId") : Item.arrow.itemID);
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, compound.hasKey("target") ? compound.getInteger("target") : -1);
