@@ -67,7 +67,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 
 	@Override
 	protected DamageSource getDamageSource(Entity entity) {
-		return new EntityDamageSourceIndirect("bomb arrow", this, getShooter()).setProjectile().setExplosion();
+		return new EntityDamageSourceIndirect("bomb arrow", this, shootingEntity).setProjectile().setExplosion();
 	}
 
 	/**

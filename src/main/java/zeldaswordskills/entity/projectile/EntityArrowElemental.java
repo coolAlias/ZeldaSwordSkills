@@ -116,11 +116,11 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected DamageSource getDamageSource(Entity entity) {
 		switch(getType()) {
-		case FIRE: return new DamageSourceIndirect("arrow.fire", this, getShooter()).setFireDamage().setProjectile().setMagicDamage();
-		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, getShooter(), 50, 1).setProjectile().setMagicDamage();
+		case FIRE: return new DamageSourceIndirect("arrow.fire", this, shootingEntity).setFireDamage().setProjectile().setMagicDamage();
+		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, shootingEntity, 50, 1).setProjectile().setMagicDamage();
 		case LIGHT: return (entity instanceof EntityEnderman
-				? new DamageSourceHoly("arrow.light", (getShooter() != null ? getShooter() : this)).setDamageBypassesArmor().setProjectile().setMagicDamage()
-						: new DamageSourceHolyIndirect("arrow.light", this, getShooter()).setDamageBypassesArmor().setProjectile().setMagicDamage());
+				? new DamageSourceHoly("arrow.light", (shootingEntity != null ? shootingEntity : this)).setDamageBypassesArmor().setProjectile().setMagicDamage()
+						: new DamageSourceHolyIndirect("arrow.light", this, shootingEntity).setDamageBypassesArmor().setProjectile().setMagicDamage());
 		}
 		return super.getDamageSource(entity);
 	}

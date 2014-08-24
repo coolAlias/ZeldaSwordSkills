@@ -23,7 +23,6 @@ import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentThorns;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -39,6 +38,11 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
+
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -49,7 +53,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * multiple overridable steps
  *
  */
-public class EntityArrowCustom extends EntityArrow implements IProjectile
+public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalSpawnData
 {
 	/** Watchable object index for whether this arrow is a homing arrow */
 	private static final int HOMING_DATAWATCHER_INDEX = 23;
@@ -111,21 +115,6 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		super.entityInit();
 		dataWatcher.addObject(TARGET_DATAWATCHER_INDEX, -1);
 		dataWatcher.addObject(HOMING_DATAWATCHER_INDEX, Byte.valueOf((byte) 0));
-	}
-
-	/**
-	 * Returns the shooter of this arrow or null if none was available
-	 */
-	public Entity getShooter() {
-		return shootingEntity;
-	}
-
-	/**
-	 * Sets the entity that shot the arrow
-	 */
-	public EntityArrowCustom setShooter(Entity entity) {
-		this.shootingEntity = entity;
-		return this;
 	}
 
 	/**
@@ -214,7 +203,7 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 
 	/** Returns the damage source this arrow will use against the entity struck */ 
 	protected DamageSource getDamageSource(Entity entity) {
-		return new EntityDamageSourceIndirect("arrow", this, getShooter()).setProjectile();
+		return new EntityDamageSourceIndirect("arrow", this, shootingEntity).setProjectile();
 	}
 
 	/** Returns whether this arrow can target the entity; used for Endermen */
@@ -553,7 +542,8 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		compound.setShort("xTile", (short) xTile);
 		compound.setShort("yTile", (short) yTile);
 		compound.setShort("zTile", (short) zTile);
-		compound.setByte("inTile", (byte) inTile);
+		// vanilla arrow uses Byte for the block; use Integer instead for modded blocks
+		compound.setInteger("inTile", inTile);
 		compound.setByte("inData", (byte) inData);
 		compound.setByte("shake", (byte) arrowShake);
 		compound.setByte("inGround", (byte)(inGround ? 1 : 0));
@@ -573,15 +563,28 @@ public class EntityArrowCustom extends EntityArrow implements IProjectile
 		xTile = compound.getShort("xTile");
 		yTile = compound.getShort("yTile");
 		zTile = compound.getShort("zTile");
-		inTile = compound.getByte("inTile") & 255;
+		// vanilla arrow uses Byte for the block; use Integer instead for modded blocks
+		inTile = compound.getInteger("inTile");
 		inData = compound.getByte("inData") & 255;
 		arrowShake = compound.getByte("shake") & 255;
 		inGround = compound.getByte("inGround") == 1;
+		setDamage(compound.getDouble("damage"));
 		canBePickedUp = compound.getByte("pickup");
-		if (compound.hasKey("damage")) {
-			setDamage(compound.getDouble("damage"));
-		}
 		arrowItemId = (compound.hasKey("arrowId") ? compound.getInteger("arrowId") : Item.arrow.itemID);
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, compound.hasKey("target") ? compound.getInteger("target") : -1);
+	}
+
+	@Override
+	public void writeSpawnData(ByteArrayDataOutput buffer) {
+		buffer.writeInt(shootingEntity != null ? shootingEntity.entityId : -1);
+	}
+
+	@Override
+	public void readSpawnData(ByteArrayDataInput buffer) {
+		// Replicate EntityArrow's special spawn packet handling from NetClientHandler#handleVehicleSpawn:
+		Entity shooter = worldObj.getEntityByID(buffer.readInt());
+		if (shooter instanceof EntityLivingBase) {
+			shootingEntity = (EntityLivingBase) shooter;
+		}
 	}
 }
