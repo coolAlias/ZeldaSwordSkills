@@ -119,8 +119,8 @@ public class EntityArrowElemental extends EntityArrowCustom
 		case FIRE: return new DamageSourceIndirect("arrow.fire", this, getShooter()).setFireDamage().setProjectile().setMagicDamage();
 		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, getShooter(), 50, 1).setProjectile().setMagicDamage();
 		case LIGHT: return (entity instanceof EntityEnderman
-				? new DamageSourceHoly("arrow.light", (getShooter() != null ? getShooter() : this)).setProjectile().setMagicDamage()
-						: new DamageSourceHolyIndirect("arrow.light", this, getShooter()).setProjectile().setMagicDamage());
+				? new DamageSourceHoly("arrow.light", (getShooter() != null ? getShooter() : this)).setDamageBypassesArmor().setProjectile().setMagicDamage()
+						: new DamageSourceHolyIndirect("arrow.light", this, getShooter()).setDamageBypassesArmor().setProjectile().setMagicDamage());
 		}
 		return super.getDamageSource(entity);
 	}
@@ -187,7 +187,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 		if (getType() == ElementType.LIGHT && mop.entityHit instanceof EntityLivingBase && canOneHitKill(mop.entityHit)) {
 			float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
 			EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
-			entity.attackEntityFrom(getDamageSource(entity), entity.getMaxHealth() * 0.4F * velocity);
+			entity.attackEntityFrom(getDamageSource(entity), entity.getMaxHealth() * 0.425F * velocity);
 			playSound("random.bowhit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			// TODO render bright flash, different sound effect?
 			if (!worldObj.isRemote) {
