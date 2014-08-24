@@ -160,7 +160,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		if (worldObj.isRemote) {
 			return;
 		}
-		EntityPlayer closestPlayer = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, (double)(box.getXSize() - 2) / 2.0D);
+		EntityPlayer closestPlayer = (box == null ? null : worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, (double)(box.getXSize() - 2) / 2.0D));
 		if (isBossRoom && bossBattle == null && closestPlayer != null) {
 			if (!isOpened) { // player got in somehow other than the door:
 				closestPlayer.addChatMessage("Ganon: Thought you could sneak in, eh? Mwa ha ha ha!");
