@@ -262,6 +262,7 @@ public class ItemBombBag extends Item
 	 * Returns number of bombs held in this bag
 	 */
 	public int getBombsHeld(ItemStack stack) {
+		verifyNBT(stack); // fixes bags from creative tab not having nbt tag
 		// fix for reports of ArrayIndexOutOfBoundsException from bombs held < 0
 		int bombsHeld = (stack.hasTagCompound() ? stack.getTagCompound().getInteger("bombs") : 0);
 		if (bombsHeld < 0) {
