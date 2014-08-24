@@ -52,7 +52,7 @@ public class ItemFairyBottle extends Item {
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
-	
+
 	/**
 	 * Checks player's action bar for a fairy bottle and uses it if present, restoring 5 hearts
 	 * Call from LivingDeathEvent and return true if event should be canceled
@@ -93,7 +93,7 @@ public class ItemFairyBottle extends Item {
 				player.heal(player.getMaxHealth());
 			}
 		}
-		
+
 		if (used) {
 			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.CORK, 0.4F, 1.0F);
 			if (!player.capabilities.isCreativeMode) {
@@ -111,6 +111,12 @@ public class ItemFairyBottle extends Item {
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		return true;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean hasEffect(ItemStack stack, int pass) {
 		return true;
 	}
 

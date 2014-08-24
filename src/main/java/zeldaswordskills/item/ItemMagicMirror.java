@@ -55,29 +55,29 @@ public class ItemMagicMirror extends Item
 {
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
-	
+
 	public ItemMagicMirror(int par1) {
 		super(par1);
 		setMaxStackSize(1);
 		setMaxDamage(16);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
-	
+
 	/**
 	 * Returns time required before mirror's effect occurs
 	 */
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) { return 140; }
-	
+
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) { return EnumAction.block; }
-	
+
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		player.setItemInUse(stack, getMaxItemUseDuration(stack));
 		return stack;
 	}
-	
+
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
 		if (!world.isRemote && ticksRemaining < (getMaxItemUseDuration(stack) / 2)) {
@@ -95,14 +95,14 @@ public class ItemMagicMirror extends Item
 				break;
 			default: break;
 			}
-			
+
 			stack.damageItem(1, player);
 			if (stack.stackSize == 0 || stack.getItemDamage() == stack.getMaxDamage()) {
 				player.destroyCurrentEquippedItem();
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
@@ -121,7 +121,7 @@ public class ItemMagicMirror extends Item
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
 		if (!world.isRemote && entity.dimension == 0 && world.getTotalWorldTime() % 10 == 0) {
@@ -130,7 +130,7 @@ public class ItemMagicMirror extends Item
 			}
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
@@ -147,7 +147,13 @@ public class ItemMagicMirror extends Item
 			return iconArray[0];
 		}
 	}
-	
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean hasEffect(ItemStack stack, int pass) {
+		return true;
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
@@ -157,14 +163,14 @@ public class ItemMagicMirror extends Item
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + (i > 0 ? i : ""));
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.1"));
 	}
-	
+
 	/**
 	 * Returns last recorded above-ground position for player, or null if none available
 	 */
@@ -178,7 +184,7 @@ public class ItemMagicMirror extends Item
 		}
 		return coordinates;
 	}
-	
+
 	/**
 	 * Records entity's current position in the stack's NBT tag, creating the tag if necessary
 	 */

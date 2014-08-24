@@ -484,12 +484,12 @@ public class ZSSItems
 
 		// 0.5.16 NEW ITEMS
 		heroBow = new ItemHeroBow(modItemIndex++).setUnlocalizedName("zss.bow_hero");
-		arrowBomb = new ItemZeldaArrow(modItemIndex++, "arrow_bomb");
-		arrowBombFire = new ItemZeldaArrow(modItemIndex++, "arrow_bomb_fire");
-		arrowBombWater = new ItemZeldaArrow(modItemIndex++, "arrow_bomb_water");
-		arrowFire = new ItemZeldaArrow(modItemIndex++, "arrow_fire");
-		arrowIce = new ItemZeldaArrow(modItemIndex++, "arrow_ice");
-		arrowLight = new ItemZeldaArrow(modItemIndex++, "arrow_light");
+		arrowBomb = new ItemZeldaArrow(modItemIndex++, "arrow_bomb", false);
+		arrowBombFire = new ItemZeldaArrow(modItemIndex++, "arrow_bomb_fire", false);
+		arrowBombWater = new ItemZeldaArrow(modItemIndex++, "arrow_bomb_water", false);
+		arrowFire = new ItemZeldaArrow(modItemIndex++, "arrow_fire", true);
+		arrowIce = new ItemZeldaArrow(modItemIndex++, "arrow_ice", true);
+		arrowLight = new ItemZeldaArrow(modItemIndex++, "arrow_light", true);
 
 		dekuNut = new ItemMiscZSS(modItemIndex++, 2).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
 
@@ -580,7 +580,7 @@ public class ZSSItems
 					Item item = (Item) f.get(null);
 					if (item != null) {
 						itemList.put(item, sortId++);
-						GameRegistry.registerItem(item, item.getUnlocalizedName().replace("item.", "").replace("zss.", "").trim());
+						GameRegistry.registerItem(item, item.getUnlocalizedName().replace("item.", "").trim());
 					}
 				}
 			}

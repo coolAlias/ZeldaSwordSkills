@@ -200,7 +200,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 			}
 		}
 	}
-	
+
 	/**
 	 * Handles fire and ice rod update tick
 	 */
@@ -351,6 +351,12 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	@SideOnly(Side.CLIENT)
 	public EnumRarity getRarity(ItemStack stack) {
 		return isUpgraded(stack) ? EnumRarity.rare : EnumRarity.common;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean hasEffect(ItemStack stack, int pass) {
+		return true;
 	}
 
 	@Override
