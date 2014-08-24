@@ -484,12 +484,12 @@ public class ZSSItems
 
 		// 0.5.16 NEW ITEMS
 		heroBow = new ItemHeroBow(modItemIndex++).setUnlocalizedName("zss.bow_hero");
-		arrowBomb = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_bomb").setTextureName(ModInfo.ID + ":arrow_bomb").setCreativeTab(ZSSCreativeTabs.tabCombat);
-		arrowBombFire = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_bomb_fire").setTextureName(ModInfo.ID + ":arrow_bomb_fire").setCreativeTab(ZSSCreativeTabs.tabCombat);
-		arrowBombWater = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_bomb_water").setTextureName(ModInfo.ID + ":arrow_bomb_water").setCreativeTab(ZSSCreativeTabs.tabCombat);
-		arrowFire = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_fire").setTextureName(ModInfo.ID + ":arrow_fire").setCreativeTab(ZSSCreativeTabs.tabCombat);
-		arrowIce = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_ice").setTextureName(ModInfo.ID + ":arrow_ice").setCreativeTab(ZSSCreativeTabs.tabCombat);
-		arrowLight = new Item(modItemIndex++).setUnlocalizedName("zss.arrow_light").setTextureName(ModInfo.ID + ":arrow_light").setCreativeTab(ZSSCreativeTabs.tabCombat);
+		arrowBomb = new ItemZeldaArrow(modItemIndex++, "arrow_bomb");
+		arrowBombFire = new ItemZeldaArrow(modItemIndex++, "arrow_bomb_fire");
+		arrowBombWater = new ItemZeldaArrow(modItemIndex++, "arrow_bomb_water");
+		arrowFire = new ItemZeldaArrow(modItemIndex++, "arrow_fire");
+		arrowIce = new ItemZeldaArrow(modItemIndex++, "arrow_ice");
+		arrowLight = new ItemZeldaArrow(modItemIndex++, "arrow_light");
 
 		dekuNut = new ItemMiscZSS(modItemIndex++, 2).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
 
