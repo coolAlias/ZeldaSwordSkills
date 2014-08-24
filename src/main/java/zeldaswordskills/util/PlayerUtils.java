@@ -48,7 +48,7 @@ public class PlayerUtils
 		}
 		return false;
 	}
-	
+
 	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} */
 	public static boolean isHoldingSword(EntityPlayer player) {
 		return (player.getHeldItem() != null && isSwordItem(player.getHeldItem().getItem()));
@@ -100,6 +100,14 @@ public class PlayerUtils
 	}
 
 	/**
+	 * Subtype sensitive version of {@link #hasItem(EntityPlayer, Item) hasItem},
+	 * checks Item and damage values, ignoring stack size and NBT.
+	 */
+	public static boolean hasItem(EntityPlayer player, ItemStack stack) {
+		return hasItem(player, stack.getItem(), stack.getItemDamage());
+	}
+
+	/**
 	 * Returns true if the player has the Item somewhere in the inventory, with
 	 * optional metadata for subtyped items
 	 * @param meta use -1 to ignore the stack's damage value
@@ -107,7 +115,9 @@ public class PlayerUtils
 	public static boolean hasItem(EntityPlayer player, Item item, int meta) {
 		for (ItemStack stack : player.inventory.mainInventory) {
 			if (stack != null && stack.getItem() == item) {
-				return meta == -1 || stack.getItemDamage() == meta;
+				if (meta == -1 || stack.getItemDamage() == meta) {
+					return true;
+				}
 			}
 		}
 		return false;
