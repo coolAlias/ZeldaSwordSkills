@@ -98,10 +98,14 @@ public class ItemArmorBoots extends ItemArmor
 	}
 
 	@Override
-	public int getItemEnchantability() { return 0; }
+	public int getItemEnchantability() {
+		return 0;
+	}
 
 	@Override
-	public boolean getIsRepairable(ItemStack stack1, ItemStack stack2) { return false; }
+	public boolean getIsRepairable(ItemStack stack1, ItemStack stack2) {
+		return false;
+	}
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
@@ -168,6 +172,7 @@ public class ItemArmorBoots extends ItemArmor
 
 	/**
 	 * Applies or removes attribute modifiers for boots when equipped or unequipped
+	 * @param stack Either the currently equipped boots or NULL
 	 */
 	public static void applyAttributeModifiers(ItemStack stack, EntityPlayer player) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
