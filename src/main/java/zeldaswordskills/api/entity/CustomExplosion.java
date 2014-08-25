@@ -45,6 +45,7 @@ import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.Sounds;
 
 /**
  * 
@@ -217,7 +218,7 @@ public class CustomExplosion extends Explosion
 	 */
 	@Override
 	public void doExplosionB(boolean spawnExtraParticles) {
-		worldObj.playSoundEffect(explosionX, explosionY, explosionZ, "random.explode", 4.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
+		worldObj.playSoundEffect(explosionX, explosionY, explosionZ, Sounds.EXPLOSION, 4.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
 		if (explosionSize >= 2.0F && isSmoking) {
 			worldObj.spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D);
 		} else {
