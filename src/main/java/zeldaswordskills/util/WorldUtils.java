@@ -47,6 +47,7 @@ import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityFairy;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -67,7 +68,7 @@ public class WorldUtils
 		int meta = world.getBlockMetadata(x, y, z);
 		world.setBlockMetadataWithNotify(x, y, z, (meta < 8 ? meta | 8 : meta & ~8), 3);
 		world.markBlockForRenderUpdate(x, y, z);
-		world.playSoundEffect((double) x + 0.5D, (double) y + 0.5D, (double) z + 0.5D, "random.click", 0.3F, 0.6F);
+		world.playSoundEffect((double) x + 0.5D, (double) y + 0.5D, (double) z + 0.5D, Sounds.CLICK, 0.3F, 0.6F);
 		world.scheduleBlockUpdate(x, y, z, blockId, Block.blocksList[blockId].tickRate(world));
 		world.notifyBlocksOfNeighborChange(x, y, z, blockId);
 		switch(meta & 7) {
