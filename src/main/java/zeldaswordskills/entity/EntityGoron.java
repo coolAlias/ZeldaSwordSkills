@@ -50,6 +50,7 @@ import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ai.GenericAIDefendVillage;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -263,17 +264,17 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 
 	@Override
 	protected String getLivingSound() {
-		return isTrading() ? "mob.villager.haggle" : "mob.villager.idle";
+		return isTrading() ? Sounds.VILLAGER_HAGGLE : Sounds.VILLAGER_IDLE;
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return "mob.villager.hit";
+		return Sounds.VILLAGER_HIT;
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return "mob.villager.death";
+		return Sounds.VILLAGER_DEATH;
 	}
 
 	/**

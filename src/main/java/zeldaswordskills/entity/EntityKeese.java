@@ -226,7 +226,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 				&& player.attackEntityFrom(getDamageSource(), getDamage()))
 		{
 			attackTime = rand.nextInt(20) + 20;
-			playSound("mob.attack", 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
+			playSound(Sounds.MOB_ATTACK, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
 			switch(getType()) {
 			case CURSED:
 				applyRandomCurse(player);

@@ -32,6 +32,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 public class EntitySeedShot extends EntityThrowable
@@ -170,7 +171,7 @@ public class EntitySeedShot extends EntityThrowable
 			}
 
 			if (mop.entityHit.attackEntityFrom(getDamageSource(), calculateDamage())) {
-				playSound("damage.hit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+				playSound(Sounds.DAMAGE_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (knockback > 0) {
 					float f = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
 					if (f > 0.0F) {
@@ -203,7 +204,7 @@ public class EntitySeedShot extends EntityThrowable
 				prevRotationYaw += 180.0F;
 			}
 		} else {
-			playSound("damage.hit", 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+			playSound(Sounds.DAMAGE_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			if (worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ) == Block.woodenButton.blockID) {
 				WorldUtils.activateButton(worldObj, Block.woodenButton.blockID, mop.blockX, mop.blockY, mop.blockZ);
 			}

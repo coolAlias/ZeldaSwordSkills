@@ -19,6 +19,26 @@ package zeldaswordskills.lib;
 
 public class Sounds {
 
+	// VANILLA SOUNDS
+	public static final String BOMB_FUSE = "random.fuse";
+	public static final String BOW_RELEASE = "random.bow";
+	public static final String BOW_HIT = "random.bowhit";
+	public static final String CLICK = "random.click";
+	public static final String DAMAGE_HIT = "damage.hit";
+	public static final String EXPLOSION = "random.explode";
+	public static final String FIRE_FIZZ = "random.fizz";
+	public static final String FIRE_IGNITE = "fire.ignite";
+	public static final String ITEM_BREAK = "random.break";
+	public static final String GLASS_BREAK = "random.glass";
+	public static final String MOB_ATTACK = "mob.attack";
+	public static final String POP = "random.pop";
+	public static final String VILLAGER_DEATH = "mob.villager.death";
+	public static final String VILLAGER_HAGGLE = "mob.villager.haggle";
+	public static final String VILLAGER_HIT = "mob.villager.hit";
+	public static final String VILLAGER_IDLE = "mob.villager.idle";
+	public static final String WOOD_CLICK = "random.wood_click";
+	public static final String XP_ORB = "random.orb";
+
 	// BLOCK SOUNDS
 	public static final String BREAK_JAR = ModInfo.ID + ":ceramic";
 	public static final String HIT_PEG = ModInfo.ID + ":hit_peg";

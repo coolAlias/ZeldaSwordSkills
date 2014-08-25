@@ -195,7 +195,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 			affectDinBlocks(world, player, radius);
 		}
 		affectDinEntities(world, player, radius);
-		world.playSoundAtEntity(player, "random.explode", 4.0F, (1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
+		world.playSoundAtEntity(player, Sounds.EXPLOSION, 4.0F, (1.0F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
 		return costToUse;
 	}
 
@@ -222,7 +222,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 					world.setBlock(i, j, k, Block.fire.blockID);
 				}
 			} else if (WorldUtils.canMeltBlock(world, l, i, j, k)) {
-				world.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+				world.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 				world.setBlockToAir(i, j, k);
 			}
 		}

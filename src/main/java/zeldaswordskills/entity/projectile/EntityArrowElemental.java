@@ -39,6 +39,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 /**
@@ -111,7 +112,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	@Override
-	protected float getVelocityFactor() { return 1.3F; }
+	protected float getVelocityFactor() {
+		return 1.3F;
+	}
 
 	@Override
 	protected DamageSource getDamageSource(Entity entity) {
@@ -151,7 +154,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 		}
 		if (flag) {
 			if (getType() == ElementType.FIRE) {
-				worldObj.playSoundEffect(posX, posY, posZ, "random.fizz", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+				worldObj.playSoundEffect(posX, posY, posZ, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 			}
 			if (!worldObj.isRemote) {
 				setDead();
@@ -208,7 +211,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 			int k = MathHelper.floor_double(entity.posZ);
 			worldObj.setBlock(i, j, k, Block.ice.blockID);
 			worldObj.setBlock(i, j + 1, k, Block.ice.blockID);
-			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.glass", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 		}
 	}
 
@@ -239,12 +242,12 @@ public class EntityArrowElemental extends EntityArrowCustom
 				if (l == 0 && Config.enableFireArrowIgnite()) {
 					int i1 = worldObj.getBlockId(i, j - 1, k);
 					if (Block.opaqueCubeLookup[i1] && rand.nextInt(8) == 0) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "fire.ignite", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_IGNITE, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 						worldObj.setBlock(i, j, k, Block.fire.blockID);
 						flag = true;
 					}
 				} else if (WorldUtils.canMeltBlock(worldObj, l, i, j, k)) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 					worldObj.setBlockToAir(i, j, k);
 					flag = true;
 				}
@@ -253,15 +256,15 @@ public class EntityArrowElemental extends EntityArrowCustom
 				if (l > 0) {
 					Block block = Block.blocksList[l];
 					if (block.blockMaterial == Material.water) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.glass", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 						worldObj.setBlock(i, j, k, Block.ice.blockID);
 						flag = true;
 					} else if (block.blockMaterial == Material.lava) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 						worldObj.setBlock(i, j, k, (l == Block.lavaStill.blockID ? Block.obsidian.blockID : Block.cobblestone.blockID));
 						flag = true;
 					} else if (block.blockMaterial == Material.fire) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.fizz", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 						worldObj.setBlockToAir(i, j, k);
 						flag = true;
 					}

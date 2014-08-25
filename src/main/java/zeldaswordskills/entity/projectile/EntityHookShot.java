@@ -40,6 +40,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemHookShot;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.TargetUtils;
 
 /**
@@ -221,7 +222,7 @@ public class EntityHookShot extends EntityThrowable
 			}
 		} else if (mop.entityHit != null && getTarget() == null) {
 			mop.entityHit.attackEntityFrom(getDamageSource(), 1.0F);
-			worldObj.playSoundAtEntity(mop.entityHit, "random.wood_click", 1.0F, 1.0F);
+			worldObj.playSoundAtEntity(mop.entityHit, Sounds.WOOD_CLICK, 1.0F, 1.0F);
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
 			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null &&
 					player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
@@ -241,7 +242,7 @@ public class EntityHookShot extends EntityThrowable
 		if (canUpdate()) {
 			if ((ticksExisted > getMaxDistance() && !inGround && getTarget() == null) || ticksExisted > (getMaxDistance() * 8)) {
 				if (Config.enableHookshotMissSound()) {
-					worldObj.playSoundAtEntity(getThrower() != null ? getThrower() : this, "random.wood_click", 1.0F, 1.0F);
+					worldObj.playSoundAtEntity(getThrower() != null ? getThrower() : this, Sounds.WOOD_CLICK, 1.0F, 1.0F);
 				}
 				setDead();
 			} else if (getTarget() != null) {

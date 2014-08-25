@@ -28,6 +28,7 @@ import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.util.WorldUtils;
@@ -48,13 +49,13 @@ public class EntitySwordBeam extends EntityThrowable
 {
 	/** Damage that will be inflicted on impact */
 	private float damage = 4.0F;
-	
+
 	/** Skill level of user; affects range */
 	private int level = 1;
-	
+
 	/** Base number of ticks this entity can exist */
 	private int lifespan = 12;
-	
+
 	/** Whether this is the master sword version, which can strike  multiple targets */
 	private boolean isMaster = false;
 
@@ -69,12 +70,12 @@ public class EntitySwordBeam extends EntityThrowable
 	public EntitySwordBeam(World world, double x, double y, double z) {
 		super(world, x, y, z);
 	}
-	
+
 	@Override
 	public void entityInit() {
 		setSize(0.5F, 0.5F);
 	}
-	
+
 	/**
 	 * Each level increases the distance the beam will travel
 	 */
@@ -83,7 +84,7 @@ public class EntitySwordBeam extends EntityThrowable
 		this.lifespan += level;
 		return this;
 	}
-	
+
 	/**
 	 * Sets amount of damage that will be caused onImpact
 	 */
@@ -91,7 +92,7 @@ public class EntitySwordBeam extends EntityThrowable
 		this.damage = amount;
 		return this;
 	}
-	
+
 	/**
 	 * Sets whether this beam is capable of striking multiple targets
 	 */
@@ -110,18 +111,18 @@ public class EntitySwordBeam extends EntityThrowable
 	public float getGravityVelocity() {
 		return 0.0F;
 	}
-	
+
 	@Override
 	public float getBrightness(float partialTick) {
-        return 1.0F;
-    }
-	
+		return 1.0F;
+	}
+
 	@Override
 	@SideOnly(Side.CLIENT)
-    public int getBrightnessForRender(float partialTick) {
-        return 0xf000f0;
-    }
-	
+	public int getBrightnessForRender(float partialTick) {
+		return 0xf000f0;
+	}
+
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -133,7 +134,7 @@ public class EntitySwordBeam extends EntityThrowable
 			worldObj.spawnParticle((i % 2 == 1 ? "magicCrit" : "crit"), posX, posY, posZ, -motionX + rand.nextGaussian(), 0.01D, -motionZ + rand.nextGaussian());
 		}
 	}
-	
+
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (!worldObj.isRemote) {
@@ -146,7 +147,7 @@ public class EntitySwordBeam extends EntityThrowable
 						skill.onImpact(player, false);
 					}
 					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage)) {
-						WorldUtils.playSoundAtEntity(worldObj, entity, "damage.hit", 0.4F, 0.5F);
+						WorldUtils.playSoundAtEntity(worldObj, entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
 				}
@@ -164,7 +165,7 @@ public class EntitySwordBeam extends EntityThrowable
 			}
 		}
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
@@ -173,7 +174,7 @@ public class EntitySwordBeam extends EntityThrowable
 		compound.setInteger("level", level);
 		compound.setInteger("lifespan", lifespan);
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

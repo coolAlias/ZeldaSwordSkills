@@ -128,17 +128,17 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 
 	@Override
 	protected String getLivingSound() {
-		return "mob.villager.haggle";
+		return Sounds.VILLAGER_HAGGLE;
 	}
 
 	@Override
 	protected String getHurtSound() {
-		return "mob.villager.hit";
+		return Sounds.VILLAGER_HIT;
 	}
 
 	@Override
 	protected String getDeathSound() {
-		return "mob.villager.death";
+		return Sounds.VILLAGER_DEATH;
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 				if (stack != null && stack.getItem() == mask) {
 					player.setCurrentItemOrArmor(0, null);
 					info.setBorrowedMask(null);
-					PlayerUtils.playSound(player, "random.pop", 1.0F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+					PlayerUtils.playSound(player, Sounds.POP, 1.0F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 					player.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.returned"));
 				} else if (mask != null) {
 					new TimedChatDialogue(player, Arrays.asList(

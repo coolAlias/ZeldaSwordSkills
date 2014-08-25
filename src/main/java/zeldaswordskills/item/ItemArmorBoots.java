@@ -257,11 +257,11 @@ public class ItemArmorBoots extends ItemArmor
 
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer) {
-		if (stack.getItem() == ZSSItems.bootsHeavy) {
+		if (this == ZSSItems.bootsHeavy) {
 			return "textures/models/armor/iron_layer_1.png";
-		} else if (stack.getItem() == ZSSItems.bootsHover) {
+		} else if (this == ZSSItems.bootsHover) {
 			return ModInfo.ID + ":textures/armor/mask_hawkeye_layer_1.png";
-		} else if (stack.getItem() == ZSSItems.bootsRubber) {
+		} else if (this == ZSSItems.bootsRubber) {
 			return ModInfo.ID + ":textures/armor/boots_rubber_layer_1.png";
 		} else {
 			return ModInfo.ID + ":textures/armor/hero_tunic_layer_1.png";

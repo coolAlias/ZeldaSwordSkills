@@ -181,7 +181,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 			}
 		}
 
-		world.playSoundAtEntity(player, "random.bow", 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
+		world.playSoundAtEntity(player, Sounds.BOW_RELEASE, 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
 		if (!player.capabilities.isCreativeMode) {
 			int seedId = typeToSeed.get(type);
 			PlayerUtils.consumeInventoryItem(player, seedId, seedId == Item.dyePowder.itemID ? 3 : 0);

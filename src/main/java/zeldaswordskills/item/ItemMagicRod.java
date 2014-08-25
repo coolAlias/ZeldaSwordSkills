@@ -287,11 +287,11 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 				if (blockId > 0 && WorldUtils.canMeltBlock(world, blockId, position.x, position.y, position.z) && world.rand.nextInt(4) == 0) {
 					world.setBlockToAir(position.x, position.y, position.z);
 					world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-							"random.fizz", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+							Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 				} else if (blockId == 0 && Block.opaqueCubeLookup[world.getBlockId(position.x, position.y - 1, position.z)] && world.rand.nextInt(8) == 0) {
 					world.setBlock(position.x, position.y, position.z, Block.fire.blockID);
 					world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-							"fire.ignite", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+							Sounds.FIRE_IGNITE, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 				}
 				break;
 			case ICE:
@@ -300,16 +300,16 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 					if (block.blockMaterial == Material.water && world.rand.nextInt(4) == 0) {
 						world.setBlock(position.x, position.y, position.z, Block.ice.blockID);
 						world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-								"random.glass", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+								Sounds.GLASS_BREAK, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 					} else if (block.blockMaterial == Material.lava && world.rand.nextInt(8) == 0) {
 						Block solid = (blockId == Block.lavaStill.blockID ? Block.obsidian : Block.cobblestone);
 						world.setBlock(position.x, position.y, position.z, solid.blockID);
 						world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-								"random.fizz", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+								Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 					} else if (block.blockMaterial == Material.fire) {
 						world.setBlockToAir(position.x, position.y, position.z);
 						world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-								"random.fizz", 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+								Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 					}
 				}
 				break;

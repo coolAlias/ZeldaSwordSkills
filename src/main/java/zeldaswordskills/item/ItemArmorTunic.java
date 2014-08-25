@@ -44,6 +44,7 @@ import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -151,7 +152,7 @@ public class ItemArmorTunic extends ItemArmor
 	private void damageStack(ItemStack stack, EntityLivingBase entity, int amount) {
 		stack.damageItem(amount, entity);
 		if (stack.stackSize == 0 || stack.getItemDamage() >= stack.getMaxDamage()) {
-			entity.worldObj.playSoundAtEntity(entity, "random.break", 1.0F, 1.0F);
+			entity.worldObj.playSoundAtEntity(entity, Sounds.ITEM_BREAK, 1.0F, 1.0F);
 			entity.setCurrentItemOrArmor(EntityLiving.getArmorPosition(stack), null);
 		}
 	}

@@ -176,7 +176,7 @@ public class SwordBreak extends SkillActive
 			int dmg = Math.max(getMaxDamage() / 3, player.worldObj.rand.nextInt(getMaxDamage()));
 			stackToDamage.damageItem(dmg, attacker);
 			if (stackToDamage.stackSize <= 0) {
-				player.worldObj.playSoundAtEntity(attacker, "random.break", 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
+				player.worldObj.playSoundAtEntity(attacker, Sounds.ITEM_BREAK, 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
 				attacker.setCurrentItemOrArmor(0, null);
 			}
 			TargetUtils.knockTargetBack(attacker, player);

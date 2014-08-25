@@ -43,6 +43,7 @@ import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -130,7 +131,7 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 			if (Config.showSecretMessage()) {
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.block.secret"));
 			}
-			world.playSoundAtEntity(player, "random.break", 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+			world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}
 	}
 

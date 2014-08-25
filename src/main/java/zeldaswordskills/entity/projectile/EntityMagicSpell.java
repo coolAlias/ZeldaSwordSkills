@@ -37,6 +37,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ItemMagicRod;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -181,7 +182,7 @@ public class EntityMagicSpell extends EntityMobThrowable
 			spawnImpactParticles("largeexplode", 4, -0.1F);
 			spawnImpactParticles(getParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
 		} else {
-			worldObj.playSoundAtEntity(this, "random.explode", 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
+			worldObj.playSoundAtEntity(this, Sounds.EXPLOSION, 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
 			Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, -1));
 			ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
 			setDead();
@@ -210,7 +211,7 @@ public class EntityMagicSpell extends EntityMobThrowable
 			int k = MathHelper.floor_double(entity.posZ);
 			worldObj.setBlock(i, j, k, Block.ice.blockID);
 			worldObj.setBlock(i, j + 1, k, Block.ice.blockID);
-			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, "random.glass", 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 			break;
 		case FIRE:
 			if (!entity.isImmuneToFire()) {

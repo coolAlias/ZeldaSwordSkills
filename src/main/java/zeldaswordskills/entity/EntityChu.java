@@ -371,7 +371,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	public void onCollideWithPlayer(EntityPlayer player) {
 		double d = 0.36D * (getSize() * getSize());
 		if (canEntityBeSeen(player) && getDistanceSqToEntity(player) < d && player.attackEntityFrom(getDamageSource(), getDamage())) {
-			playSound("mob.attack", 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
+			playSound(Sounds.MOB_ATTACK, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
 			if (rand.nextFloat() < (0.25F * getSize())) {
 				applySecondaryEffects(player);
 			}

@@ -38,6 +38,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.lib.Sounds;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -194,7 +195,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 			}
 
 			if (flag) {
-				playSound("random.pop", 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+				playSound(Sounds.POP, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 				player.onItemPickup(this, 1);
 				setDead();
 			}
@@ -457,7 +458,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 					}
 				}
 
-				playSound("random.bowhit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+				playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (canTargetEntity(mop.entityHit)) {
 					setDead();
 				}
@@ -488,7 +489,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		posX -= motionX / (double) f2 * 0.05000000074505806D;
 		posY -= motionY / (double) f2 * 0.05000000074505806D;
 		posZ -= motionZ / (double) f2 * 0.05000000074505806D;
-		playSound("random.bowhit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+		playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 		inGround = true;
 		arrowShake = 7;
 		setIsCritical(false);
@@ -532,10 +533,6 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		}
 	}
 
-	/**
-	 * Super must be called in order for arrow's flight path to be correct,
-	 * despite the otherwise wasteful duplication of labor 
-	 */
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		//super.writeEntityToNBT(compound); // writes the same data
@@ -553,10 +550,6 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		compound.setInteger("target", getTarget() != null ? getTarget().entityId : -1);
 	}
 
-	/**
-	 * Super must be called in order for arrow's flight path to be correct,
-	 * despite the otherwise wasteful duplication of labor 
-	 */
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		//super.readEntityFromNBT(compound);
@@ -564,6 +557,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		yTile = compound.getShort("yTile");
 		zTile = compound.getShort("zTile");
 		// vanilla arrow uses Byte for the block; use Integer instead for modded blocks
+		// otherwise, could call super to have parent get correct values for private fields
 		inTile = compound.getInteger("inTile");
 		inData = compound.getByte("inData") & 255;
 		arrowShake = compound.getByte("shake") & 255;

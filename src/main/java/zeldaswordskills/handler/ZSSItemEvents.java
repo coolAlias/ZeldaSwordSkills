@@ -192,7 +192,7 @@ public class ZSSItemEvents
 			if (((IHandlePickup) stack.getItem()).onPickupItem(stack, player)) {
 				if (stack.stackSize < size) {
 					GameRegistry.onPickupNotification(player, event.item);
-					event.item.playSound("random.pop", 0.2F, ((event.item.worldObj.rand.nextFloat()
+					event.item.playSound(Sounds.POP, 0.2F, ((event.item.worldObj.rand.nextFloat()
 							- event.item.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 					player.onItemPickup(event.item, size - stack.stackSize);
 				}

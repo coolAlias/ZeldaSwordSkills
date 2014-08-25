@@ -34,6 +34,7 @@ import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.Sounds;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 {
@@ -221,7 +222,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		}
 
 		if (ticksExisted % 20 == 0) {
-			playSound("random.fuse", 1.0F, 2.0F + rand.nextFloat() * 0.4F);
+			playSound(Sounds.BOMB_FUSE, 1.0F, 2.0F + rand.nextFloat() * 0.4F);
 		}
 
 		if (!worldObj.isRemote && shouldExplode(inFire)) {

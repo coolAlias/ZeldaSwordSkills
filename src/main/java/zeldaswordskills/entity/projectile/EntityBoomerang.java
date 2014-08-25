@@ -47,7 +47,7 @@ public class EntityBoomerang extends EntityMobThrowable
 {
 	/** Watchable object index for the boomerang ItemStack */
 	private static final int ITEM_DATAWATCHER_INDEX = 22;
-	
+
 	/** Watchable object index for target entity's id */
 	private static final int TARGET_DATAWATCHER_INDEX = 23;
 
@@ -59,13 +59,13 @@ public class EntityBoomerang extends EntityMobThrowable
 
 	/** The original inventory slot occupied by the boomerang item */
 	private int slot;
-	
+
 	/** Whether this boomerang can carry multiple items */
 	private boolean captureAll = false;
-	
+
 	/** ItemStack version of captured drops is more efficient for NBT storage */
 	private List<ItemStack> capturedItems = new ArrayList<ItemStack>();
-	
+
 	/** The amount of xp captured */
 	private int xp = 0;
 
@@ -100,7 +100,7 @@ public class EntityBoomerang extends EntityMobThrowable
 		this.slot = slot;
 		return this;
 	}
-	
+
 	/** Returns the boomerang itemstack */
 	public ItemStack getBoomerang() {
 		return dataWatcher.getWatchableObjectItemStack(ITEM_DATAWATCHER_INDEX);
@@ -111,7 +111,7 @@ public class EntityBoomerang extends EntityMobThrowable
 		this.distance = range;
 		return this;
 	}
-	
+
 	/** Sets this boomerang to capture all dropped items */
 	public EntityBoomerang setCaptureAll(boolean captureAll) {
 		this.captureAll = captureAll;
@@ -209,7 +209,7 @@ public class EntityBoomerang extends EntityMobThrowable
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
 			if (mop.entityHit != getThrower() && mop.entityHit.attackEntityFrom(getDamageSource(), getDamage())) {
-				playSound("damage.hit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+				playSound(Sounds.DAMAGE_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (mop.entityHit instanceof EntityLivingBase && getThrower() != null) {
 					EnchantmentThorns.func_92096_a(getThrower(), (EntityLivingBase) mop.entityHit, rand);
 				}
@@ -257,7 +257,7 @@ public class EntityBoomerang extends EntityMobThrowable
 			}
 		}
 	}
-	
+
 	/**
 	 * Releases all captured drops either into the player's inventory or on the ground, if player is null
 	 */
@@ -270,7 +270,7 @@ public class EntityBoomerang extends EntityMobThrowable
 			}
 		}
 	}
-	
+
 	/**
 	 * Scans for and captures nearby XP Orbs
 	 */
@@ -278,11 +278,11 @@ public class EntityBoomerang extends EntityMobThrowable
 		List<EntityXPOrb> orbs = worldObj.getEntitiesWithinAABB(EntityXPOrb.class, boundingBox.expand(1.0D, 1.0D, 1.0D));
 		for (EntityXPOrb orb : orbs) {
 			xp += orb.getXpValue();
-			worldObj.playSoundAtEntity(this, "random.orb", 0.1F, 0.5F * ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.8F));
+			worldObj.playSoundAtEntity(this, Sounds.XP_ORB, 0.1F, 0.5F * ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.8F));
 			orb.setDead();
 		}
 	}
-	
+
 	/**
 	 * Drops all captured xp as orbs
 	 */
@@ -292,10 +292,10 @@ public class EntityBoomerang extends EntityMobThrowable
 			int j = EntityXPOrb.getXPSplit(i);
 			i -= j;
 			worldObj.spawnEntityInWorld(new EntityXPOrb(worldObj, posX, posY, posZ, j));
-			worldObj.playSoundAtEntity(this, "random.orb", 0.1F, 0.5F * ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.8F));
+			worldObj.playSoundAtEntity(this, Sounds.XP_ORB, 0.1F, 0.5F * ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.8F));
 		}
 	}
-	
+
 	/**
 	 * Checks for and destroys vines each update tick
 	 */

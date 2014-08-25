@@ -35,6 +35,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.api.damage.DamageUtils;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 
@@ -155,7 +156,7 @@ public class EntityLeapingBlow extends EntityThrowable
 				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.entityId) && entity != getThrower()) {
 					affectedEntities.add(entity.entityId);
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
-						WorldUtils.playSoundAtEntity(worldObj, entity, "damage.hit", 0.4F, 0.5F);
+						WorldUtils.playSoundAtEntity(worldObj, entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
 						if (entity instanceof EntityLivingBase) {
 							((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.weakness.id, 60));
 						}

@@ -119,7 +119,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	public void explode(ItemStack stack, World world, double x, double y, double z) {
 		if (this == ZSSItems.maskBlast) {
 			if (isCooling(stack)) {
-				world.playSoundEffect(x, y, z, "random.click", 0.3F, 0.6F);
+				world.playSoundEffect(x, y, z, Sounds.CLICK, 0.3F, 0.6F);
 			} else {
 				CustomExplosion.createExplosion(new EntityBomb(world), world, x, y, z, 3.0F, 10.0F, false);
 				setCooldown(stack, 40);

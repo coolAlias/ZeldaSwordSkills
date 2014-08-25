@@ -46,6 +46,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.BombTickPacket;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import cpw.mods.fml.common.network.PacketDispatcher;
@@ -222,7 +223,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 		if (canTick(world, type, stack.getTagCompound().getBoolean("inWater"))) {
 			int time = stack.getTagCompound().getInteger("time");
 			if (time % 20 == 0) {
-				world.playSoundAtEntity(entity, "random.fuse", 1.0F, 2.0F + entity.worldObj.rand.nextFloat() * 0.4F);
+				world.playSoundAtEntity(entity, Sounds.BOMB_FUSE, 1.0F, 2.0F + entity.worldObj.rand.nextFloat() * 0.4F);
 			}
 			stack.getTagCompound().setInteger("time", ((world.provider.dimensionId == -1 && type == BombType.BOMB_STANDARD) ? Config.getBombFuseTime() : ++time));
 			if (time == Config.getBombFuseTime() && !world.isRemote) {
