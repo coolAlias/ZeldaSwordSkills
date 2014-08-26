@@ -146,10 +146,7 @@ public class ZSSItems
 	/* Creative Tabs are sorted in the order that Items are declared */
 
 	//================ BLOCKS TAB ================//
-	public static Item
-	dungeonCoreItem,
-	dungeonStoneItem,
-	doorLocked;
+	public static Item doorLocked;
 
 	//================ SKILLS TAB ================//
 	public static Item
@@ -363,8 +360,8 @@ public class ZSSItems
 
 		// BLOCK ITEMS
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heldBlock.itemID, new RenderHeldItemBlock());
-		MinecraftForgeClient.registerItemRenderer(ZSSItems.dungeonCoreItem.itemID, new RenderItemDungeonBlock());
-		MinecraftForgeClient.registerItemRenderer(ZSSItems.dungeonStoneItem.itemID, new RenderItemDungeonBlock());
+		MinecraftForgeClient.registerItemRenderer(ZSSBlocks.dungeonCore.blockID, new RenderItemDungeonBlock());
+		MinecraftForgeClient.registerItemRenderer(ZSSBlocks.dungeonStone.blockID, new RenderItemDungeonBlock());
 	}
 
 	private static void addGrassDrops() {
@@ -461,8 +458,6 @@ public class ZSSItems
 
 		// BLOCK TAB ITEMS
 		doorLocked = new ItemDoorLocked(modItemIndex++).setUnlocalizedName("zss.doorlocked");
-		dungeonCoreItem = new ItemDungeonBlock(ZSSBlocks.dungeonCore.blockID - 256, ZSSBlocks.dungeonCore).setUnlocalizedName("item_dungeon_core");
-		dungeonStoneItem = new ItemDungeonBlock(ZSSBlocks.dungeonStone.blockID - 256, ZSSBlocks.dungeonStone).setUnlocalizedName("item_dungeon_stone");
 
 		// MISCELLANEOUS TAB ITEMS
 		hookshot = new ItemHookShot(modItemIndex++).setUnlocalizedName("zss.hookshot");
@@ -518,7 +513,6 @@ public class ZSSItems
 		gauntletsGolden = new ItemPowerGauntlets(modItemIndex++, BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.gauntlets_golden");
 
 		// MASK TAB ITEMS
-		// TODO next reorganization, move Hawkeye Mask here
 		maskBlast = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_blast");
 		// can't use CLOTH as it expects an overlay and crashes when rendering
 		maskBunny = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(1, 64).setUnlocalizedName("zss.mask_bunny");
@@ -580,11 +574,11 @@ public class ZSSItems
 					Item item = (Item) f.get(null);
 					if (item != null) {
 						itemList.put(item, sortId++);
-						GameRegistry.registerItem(item, item.getUnlocalizedName().replace("item.", "").trim());
+						GameRegistry.registerItem(item, item.getUnlocalizedName().substring(5).trim());
 					}
 				}
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 
 		}
 	}
