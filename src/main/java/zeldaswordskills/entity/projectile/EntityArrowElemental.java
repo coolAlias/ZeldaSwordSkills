@@ -96,14 +96,14 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	/**
-	 * Returns the element type of this arrow
+	 * Returns the {@link ElementType} of this arrow
 	 */
 	public ElementType getType() {
 		return ElementType.values()[dataWatcher.getWatchableObjectInt(ARROWTYPE_DATAWATCHER_INDEX)];
 	}
 
 	/**
-	 * Sets this arrow's element
+	 * Sets this arrow's {@link ElementType}
 	 */
 	public EntityArrowElemental setType(ElementType type) {
 		dataWatcher.updateObject(ARROWTYPE_DATAWATCHER_INDEX, type.ordinal());
@@ -304,6 +304,6 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		setType(ElementType.values()[compound.getInteger("arrowType")]);
+		setType(ElementType.values()[compound.getInteger("arrowType") % ElementType.values().length]);
 	}
 }

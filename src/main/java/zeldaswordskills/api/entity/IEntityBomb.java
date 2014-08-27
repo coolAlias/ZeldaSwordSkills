@@ -28,7 +28,7 @@ package zeldaswordskills.api.entity;
  */
 public interface IEntityBomb {
 	
-	/** Get this bomb's type */
+	/** Get this bomb's {@link BombType} */
 	public BombType getType();
 	
 	/** Factor by which affected entity's motion will be multiplied */

@@ -142,17 +142,17 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		return this;
 	}
 
+	@Override
+	public BombType getType() {
+		return BombType.values()[dataWatcher.getWatchableObjectInt(BOMBTYPE_DATAWATCHER_INDEX)];
+	}
+
 	/**
-	 * Set this bomb's type
+	 * Set this bomb's {@link BombType}
 	 */
 	public EntityBomb setType(BombType type) {
 		dataWatcher.updateObject(BOMBTYPE_DATAWATCHER_INDEX, type.ordinal());
 		return this;
-	}
-
-	@Override
-	public BombType getType() {
-		return BombType.values()[dataWatcher.getWatchableObjectInt(BOMBTYPE_DATAWATCHER_INDEX)];
 	}
 
 	@Override
@@ -287,7 +287,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		setType(BombType.values()[compound.getByte("bombType")]);
+		setType(BombType.values()[compound.getByte("bombType") % BombType.values().length]);
 		fuseTime = compound.getInteger("fuseTime");
 		radius = compound.getFloat("bombRadius");
 		motionFactor = compound.getFloat("motionFactor");
