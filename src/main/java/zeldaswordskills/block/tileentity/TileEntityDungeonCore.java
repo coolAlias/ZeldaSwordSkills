@@ -167,14 +167,16 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				removeCoreBlock();
 			} else {
 				EntityPlayer closestPlayer = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, (double)(box.getXSize() - 2) / 2.0D);
-				if (closestPlayer != null && !isOpened) { // player got in somehow other than the door:
-					closestPlayer.addChatMessage("Ganon: Thought you could sneak in, eh? Mwa ha ha ha!");
-					verifyStructure(true);
-					alreadyVerified = true;
-				}
-				bossBattle = dungeonType.getBossBattle(this);
-				if (bossBattle != null) {
-					bossBattle.beginCrisis(worldObj);
+				if (closestPlayer != null) {
+					if (!isOpened) { // player got in somehow other than the door:
+						closestPlayer.addChatMessage("Ganon: Thought you could sneak in, eh? Mwa ha ha ha!");
+						verifyStructure(true);
+						alreadyVerified = true;
+					}
+					bossBattle = dungeonType.getBossBattle(this);
+					if (bossBattle != null) {
+						bossBattle.beginCrisis(worldObj);
+					}
 				}
 			}
 		}
@@ -182,12 +184,13 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 			bossBattle.onUpdate(worldObj);
 			if (bossBattle.isFinished()) {
 				bossBattle = null;
+				LogHelper.log(Level.FINE, String.format("Boss battle is finished, removing core block at %d/%d/%d", xCoord, yCoord, zCoord));
 				removeCoreBlock();
 			}
 		} else if (shouldUpdate()) {
-			LogHelper.log(Level.FINER, String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
+			LogHelper.log(Level.FINEST, String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
-				LogHelper.log(Level.FINER, "Failed verification; setting blocks to stone");
+				LogHelper.log(Level.FINER, String.format("Failed verification at %d/%d/%d; setting blocks to stone", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				alreadyVerified = true;
 				if (isBossRoom) {
@@ -385,7 +388,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				dungeonType = BossType.getBossType(tag.getString("dungeonName"));
 			} else {
 				// TODO remove after all previous worlds update to String storage:
-				LogHelper.log(Level.WARNING, String.format("Detected old boss dungeon save format at %d/%d/%d - if you still see this message after saving and reloading, please contact the mod author", xCoord, yCoord, zCoord));
+				LogHelper.log(Level.WARNING, String.format("Detected old boss dungeon save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
 				dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
 			}
 			isOpened = tag.getBoolean("isOpened");
@@ -405,7 +408,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		}
 		// TODO workaround for backwards compatibility:
 		if (tag.getBoolean("isSpawner")) {
-			LogHelper.log(Level.WARNING, String.format("Detected old fairy spawner save format at %d/%d/%d - if you still see this message after saving and reloading, please contact the mod author", xCoord, yCoord, zCoord));
+			LogHelper.log(Level.WARNING, String.format("Detected old fairy spawner save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
 			NBTTagCompound spawnerData = new NBTTagCompound();
 			spawnerData.setInteger("maxFairies", tag.getInteger("maxFairies"));
 			spawnerData.setInteger("spawned", tag.getInteger("spawned"));
