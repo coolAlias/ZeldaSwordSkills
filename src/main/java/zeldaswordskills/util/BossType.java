@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -122,7 +121,7 @@ public enum BossType
 			}
 			biome = biome.toLowerCase().replace(" ", "");
 			if (bossBiomeList.containsKey(biome)) {
-				LogHelper.log(Level.WARNING, String.format("Error while adding %s for %s: biome already mapped to %s",
+				LogHelper.warning(String.format("Error while adding %s for %s: biome already mapped to %s",
 						biome, type.getDisplayName(), bossBiomeList.get(biome).getDisplayName()));
 			} else {
 				bossBiomeList.put(biome, type);
@@ -148,7 +147,7 @@ public enum BossType
 	public static BossType getBossType(World world, int x, int z) {
 		BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
 		if (biome == null) {
-			LogHelper.log(Level.WARNING, "Null biome at " + x + "/" + z + " while getting Boss Type");
+			LogHelper.warning("Null biome at " + x + "/" + z + " while getting Boss Type");
 			return null;
 		}
 		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
@@ -241,7 +240,7 @@ public enum BossType
 	@SuppressWarnings("finally")
 	public final BossBattle getBossBattle(TileEntityDungeonCore core) {
 		if (bossBattle == null) {
-			LogHelper.log(Level.WARNING, "Error retrieving boss battle event for " + toString());
+			LogHelper.warning("Error retrieving boss battle event for " + toString());
 			return null;
 		}
 		BossBattle battle = null;
@@ -270,7 +269,7 @@ public enum BossType
 	@SuppressWarnings("finally")
 	public final Entity getNewMob(World world) {
 		if (bossMob == null) {
-			LogHelper.log(Level.WARNING, "Error retrieving boss mob for " + toString());
+			LogHelper.warning("Error retrieving boss mob for " + toString());
 			return null;
 		}
 		Entity entity = null;

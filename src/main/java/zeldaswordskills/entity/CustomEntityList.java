@@ -87,7 +87,7 @@ public class CustomEntityList
 		} else if (!IDtoClassMapping.containsKey(entitiesAdded)) {
 			return entitiesAdded++;
 		} else {
-			LogHelper.log(Level.WARNING, "ID Conflict: Entity ID " + entitiesAdded + " already taken while getting ID for entity of class " + oclass);
+			LogHelper.warning("ID Conflict: Entity ID " + entitiesAdded + " already taken while getting ID for entity of class " + oclass);
 			while (IDtoClassMapping.containsKey(entitiesAdded)) {
 				++entitiesAdded;
 			}

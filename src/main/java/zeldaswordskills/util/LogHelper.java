@@ -53,6 +53,30 @@ public class LogHelper
 	public static void log(Level logLevel, String message) {
 		logger.log(logLevel, message);
 	}
+
+	public static void severe(String message) {
+		logger.log(Level.SEVERE, message);
+	}
+
+	public static void warning(String message) {
+		logger.log(Level.WARNING, message);
+	}
+
+	public static void info(String message) {
+		logger.log(Level.INFO, message);
+	}
+
+	public static void fine(String message) {
+		logger.log(Level.FINE, message);
+	}
+
+	public static void finer(String message) {
+		logger.log(Level.FINER, message);
+	}
+
+	public static void finest(String message) {
+		logger.log(Level.FINEST, message);
+	}
 }
 
 /**
@@ -62,14 +86,19 @@ public class LogHelper
  */
 final class ZSSLogFormatter extends Formatter {
 	static final String LINE_SEPARATOR = System.getProperty("line.separator");
-	//private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	//private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
 	public String format(LogRecord record)
 	{
 		StringBuilder msg = new StringBuilder();
 		//msg.append(this.dateFormat.format(Long.valueOf(record.getMillis())));
-		Level lvl = record.getLevel();
+		if (record.getLoggerName() != null) {
+			msg.append("["+record.getLoggerName()+"] ");
+		} else {
+			msg.append("[] ");
+		}
 
+		Level lvl = record.getLevel();
 		String name = lvl.getLocalizedName();
 		if ( name == null ) {
 			name = lvl.getName();
@@ -79,12 +108,6 @@ final class ZSSLogFormatter extends Formatter {
 			msg.append("[" + name + "] ");
 		} else {
 			msg.append(" ");
-		}
-
-		if (record.getLoggerName() != null) {
-			msg.append("["+record.getLoggerName()+"] ");
-		} else {
-			msg.append("[] ");
 		}
 		msg.append(formatMessage(record));
 		msg.append(LINE_SEPARATOR);

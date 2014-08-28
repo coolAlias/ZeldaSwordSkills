@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
@@ -82,7 +81,7 @@ public class ZSSItems
 			if (itemList.containsKey(a) && itemList.containsKey(b)) {
 				return itemList.get(a) - itemList.get(b);
 			} else {
-				LogHelper.log(Level.WARNING, String.format("A mod item %s or %s is missing a comparator mapping", a.getUnlocalizedName(), b.getUnlocalizedName()));
+				LogHelper.warning(String.format("A mod item %s or %s is missing a comparator mapping", a.getUnlocalizedName(), b.getUnlocalizedName()));
 				return a.itemID - b.itemID;
 			}
 		}
@@ -563,7 +562,7 @@ public class ZSSItems
 		if (block instanceof ItemBlock) {
 			itemList.put(block, sortId++);
 		} else {
-			LogHelper.log(Level.WARNING, "Tried to register a non-ItemBlock item for " + block.getUnlocalizedName());
+			LogHelper.warning("Tried to register a non-ItemBlock item for " + block.getUnlocalizedName());
 		}
 	}
 

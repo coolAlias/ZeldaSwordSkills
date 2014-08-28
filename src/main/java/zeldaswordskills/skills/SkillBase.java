@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -107,7 +106,7 @@ public abstract class SkillBase
 		this.id = skillIndex++;
 		if (register) {
 			if (skillsMap.containsKey(id)) {
-				LogHelper.log(Level.WARNING,"CONFLICT @ skill " + id + " id already occupied by "
+				LogHelper.warning("CONFLICT @ skill " + id + " id already occupied by "
 						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
 			}
 			skillsMap.put(id, this);

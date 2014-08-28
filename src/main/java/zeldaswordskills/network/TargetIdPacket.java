@@ -18,7 +18,6 @@
 package zeldaswordskills.network;
 
 import java.io.IOException;
-import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -99,7 +98,7 @@ public class TargetIdPacket extends CustomPacket
 					} else {
 						// For some reason the target id is sometimes incorrect or out of date
 						skill.setCurrentTarget(side, (Entity) null);
-						LogHelper.log(Level.WARNING,"Invalid target; entity with id " + this.entityId + " is null");
+						LogHelper.warning("Invalid target; entity with id " + this.entityId + " is null");
 					}
 				} else {
 					skill.setCurrentTarget(side, (Entity) null);

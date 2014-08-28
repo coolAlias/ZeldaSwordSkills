@@ -17,8 +17,6 @@
 
 package zeldaswordskills.handler;
 
-import java.util.logging.Level;
-
 import mods.battlegear2.api.PlayerEventChild.ShieldBlockEvent;
 import mods.battlegear2.api.quiver.IArrowContainer2;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
@@ -30,9 +28,7 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import zeldaswordskills.item.ItemHeroBow;
-import zeldaswordskills.item.ItemZeldaArrow;
 import zeldaswordskills.item.ItemZeldaShield;
-import zeldaswordskills.util.LogHelper;
 
 /**
  * 
@@ -84,10 +80,7 @@ public class BattlegearEvents {
 					event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result) - EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, event.result) * 20000);
 				}
 				isCanceled = true;
-			} else if (arrow.getItem() instanceof ItemZeldaArrow && !event.entityPlayer.capabilities.isCreativeMode) {
-				LogHelper.log(Level.FINE, "Canceling nock event for zelda arrow in non-Hero's Bow");
-				isCanceled = true; // allow API for other bows to shoot zelda arrows?
-			}
+			} // cannot handle vanilla bow or other cases since this is not the real event...
 		} else if (event.result.getItem() instanceof ItemHeroBow) {
 			// standard nock must set an item and cancel to prevent BG2 processing
 			if (((ItemHeroBow) event.result.getItem()).nockArrowFromInventory(event.result, event.entityPlayer)) {
@@ -109,15 +102,12 @@ public class BattlegearEvents {
 		ItemStack quiverStack = QuiverArrowRegistry.getArrowContainer(event.bow, event.entityPlayer);
 		ItemStack arrowStack = getQuiverArrow(event.bow, quiverStack, event.entityPlayer);
 		if (arrowStack != null) { // quiverStack implicitly checked by getQuiverArrow
-			LogHelper.log(Level.FINE, "Posted arrow loose event with arrow from quiver: " + arrowStack);
 			if (event.bow.getItem() instanceof ItemHeroBow) {
 				((ItemHeroBow) event.bow.getItem()).bg2FireArrow(event, quiverStack, arrowStack);
 				isCanceled = true;
-			} else if (arrowStack.getItem() instanceof ItemZeldaArrow && !event.entityPlayer.capabilities.isCreativeMode) {
-				// Does this ever happen???
-				LogHelper.log(Level.FINE, "Attempted to nock Zelda Arrow from vanilla bow - canceling");
-				isCanceled = true; // allow API for other bows to shoot zelda arrows?
 			}
+			// cannot handle vanilla bow or other cases since this is not the real event...
+			// BG2 BUG: Arrows shot from vanilla bow + quiver while in Creative Mode are added to the inventory when picked up
 		}
 		return isCanceled;
 	}

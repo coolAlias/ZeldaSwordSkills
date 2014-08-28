@@ -18,7 +18,6 @@
 package zeldaswordskills.network;
 
 import java.io.IOException;
-import java.util.logging.Level;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -70,7 +69,7 @@ public class UpdateComboPacket extends CustomPacket
 					skill.setCombo(combo);
 				}
 			} catch (ClassCastException e) {
-				LogHelper.log(Level.SEVERE, "Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
+				LogHelper.severe("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
 			}
 		} else {
 			throw new ProtocolException("Update Combo Packet should only be sent from server to client");

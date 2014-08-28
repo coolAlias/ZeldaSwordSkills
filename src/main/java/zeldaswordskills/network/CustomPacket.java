@@ -20,7 +20,6 @@
 package zeldaswordskills.network;
 
 import java.io.IOException;
-import java.util.logging.Level;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -107,7 +106,7 @@ public abstract class CustomPacket {
 		try {
 			write(dataOut);
 		} catch (IOException e) {
-			LogHelper.log(Level.WARNING, "Error writing packet: " + e.toString());
+			LogHelper.warning("Error writing packet: " + e.toString());
 		}
 		byte[] data = dataOut.toByteArray();
 		ByteArrayDataOutput packetOut = ByteStreams.newDataOutput();

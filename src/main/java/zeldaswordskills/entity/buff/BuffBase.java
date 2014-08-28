@@ -17,8 +17,6 @@
 
 package zeldaswordskills.entity.buff;
 
-import java.util.logging.Level;
-
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -92,7 +90,7 @@ public class BuffBase
 	 */
 	public void combine(BuffBase newBuff) {
 		if (newBuff.buff != this.buff) {
-			LogHelper.log(Level.WARNING, "Combining two buffs of different types should be impossible!");
+			LogHelper.warning("Combining two buffs of different types should be impossible!");
 		} else if (this.isPermanent()) {
 			// can't combine permanent effects
 		} else if (newBuff.amplifier > this.amplifier) {

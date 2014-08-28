@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import mods.battlegear2.api.PlayerEventChild;
 import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
@@ -227,15 +226,14 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 			MinecraftForge.EVENT_BUS.post(event);
 		}
 		if (event.isCanceled()) {
-			// make sure bow does not have an arrow 'nocked' in NBT if no longer in use:
+			// May not be needed: make sure bow does not have an arrow 'nocked' in NBT if no longer in use
 			if (player.getItemInUse() == null && getArrow(stack) != null) {
-				LogHelper.log(Level.FINE, "Removing arrow from bow when not in use after nock event");
+				LogHelper.fine("Removing arrow from bow when not in use after nock event");
 				setArrow(stack, null);
 			}
 			return event.result;
 		}
 		// This can only be reached if BG2 is not installed
-		LogHelper.log(Level.FINE, "Nock event not canceled - using standard Hero Bow nocking algorithm");
 		if (nockArrowFromInventory(stack, player)) {
 			player.setItemInUse(stack, getMaxItemUseDuration(stack));
 		}
@@ -255,8 +253,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		}
 		if (event.isCanceled()) {
 			if (getArrow(bow) != null) {
-				LogHelper.log(Level.FINE, "Bow had nocked arrow NBT data! This should not be possible - setting arrow data to null.");
-				setArrow(bow, null); // arrow already fired or not shot, de-nock
+				setArrow(bow, null); // nocked from inventory from empty quiver slot, then hot-swapped
 			}
 			return;
 		}
@@ -264,13 +261,13 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		// be retrieved from the bow's NBT
 		ItemStack arrowStack = getArrow(bow);
 		if (arrowStack != null) {
-			LogHelper.log(Level.FINER, "Retrieved arrow from NBT: " + arrowStack);
+			LogHelper.finer("Retrieved arrow from NBT: " + arrowStack);
 			if (canShootArrow(player, bow, arrowStack)) {
 				fireArrow(event, arrowStack, bow, player);
 			}
 			setArrow(bow, null);
 		} else { // this should never happen: (unless hot-swapped arrows???)
-			LogHelper.log(Level.FINE, "Arrow from bow NBT was null! Cannot call fireArrow.");
+			LogHelper.fine("Arrow from bow NBT was null! Cannot call fireArrow.");
 		}
 	}
 
@@ -287,10 +284,9 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 */
 	@Method(modid="battlegear2")
 	public void bg2FireArrow(ArrowLooseEvent event, ItemStack quiverStack, ItemStack arrowStack) {
-		LogHelper.log(Level.FINER, "Called BG2 fireArrow...");
+		LogHelper.finer("Called BG2 fireArrow...");
 		if (!canShootArrow(event.entityPlayer, event.bow, arrowStack)) {
-			LogHelper.log(Level.FINE, "Unable to fire " + arrowStack + "! Returning without firing.");
-			return;
+			return; // prevents hot-swap firing, since we are bypassing the fire handlers
 		}
 		float charge = new PlayerEventChild.QuiverArrowEvent.ChargeCalculations(event).getCharge();
 		if (charge < 0.1F) {
@@ -303,10 +299,10 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 			arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, world, event.entityPlayer, charge * 2.0F);
 		}
 		if (arrowEntity != null) {
-			LogHelper.log(Level.FINE, "Created arrow entity: " + arrowEntity);
 			if (arrowEntity instanceof EntityArrowCustom) {
 				applyCustomArrowSettings(event.entityPlayer, event.bow, arrowStack, (EntityArrowCustom) arrowEntity, charge);
 			}
+			// replicate BG2's ArrowLooseEvent handling here:
 			PlayerEventChild.QuiverArrowEvent.Firing arrowEvent = new PlayerEventChild.QuiverArrowEvent.Firing(event, quiverStack, arrowEntity);
 			quiver.onPreArrowFired(arrowEvent);
 			if (!MinecraftForge.EVENT_BUS.post(arrowEvent)) {
@@ -337,7 +333,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 * @param arrowStack	The stack retrieved from {@link ItemHeroBow#getArrow}, i.e. from the stack's NBT
 	 */
 	private void fireArrow(ArrowLooseEvent event, ItemStack arrowStack, ItemStack bow, EntityPlayer player) {
-		LogHelper.log(Level.FINER, "Called standard fireArrow; no quiver action here.");
+		LogHelper.finer("Called standard fireArrow; no quiver action here.");
 		boolean flag = (player.capabilities.isCreativeMode || EnchantmentHelper.getEnchantmentLevel(Enchantment.infinity.effectId, bow) > 0);
 
 		if (flag || PlayerUtils.hasItem(player, arrowStack)) {
@@ -352,7 +348,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 				arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, player.worldObj, player, charge * 2.0F);
 			}
 			if (arrowEntity != null) {
-				LogHelper.log(Level.FINE, "Created arrow entity: " + arrowEntity);
+				LogHelper.fine("Created arrow entity: " + arrowEntity);
 				applyArrowSettings(arrowEntity, bow, charge);
 				if (arrowEntity instanceof EntityArrowCustom) {
 					applyCustomArrowSettings(event.entityPlayer, event.bow, arrowStack, (EntityArrowCustom) arrowEntity, charge);
@@ -405,7 +401,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		ItemStack arrow = null;
 		for (ItemStack stack : player.inventory.mainInventory) {
 			if (stack != null && canShootArrow(player, bow, stack)) {
-				LogHelper.log(Level.FINER, "Arrow found in inventory: " + stack);
+				LogHelper.finer("Arrow found in inventory: " + stack);
 				arrow = stack;
 				break;
 			}
@@ -431,7 +427,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 */
 	public boolean nockArrowFromInventory(ItemStack bow, EntityPlayer player) {
 		ItemStack arrow = getArrowFromInventory(bow, player);
-		LogHelper.log(Level.FINER, "Nocking arrow from inventory into NBT: " + arrow);
+		LogHelper.finer("Nocking arrow from inventory into NBT: " + arrow);
 		setArrow(bow, arrow);
 		return arrow != null;
 	}

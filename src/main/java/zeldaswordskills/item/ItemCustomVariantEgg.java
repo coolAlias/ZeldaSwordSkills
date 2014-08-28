@@ -18,7 +18,6 @@
 package zeldaswordskills.item;
 
 import java.util.List;
-import java.util.logging.Level;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -102,9 +101,9 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 	public void getSubItems(int item, CreativeTabs tab, List itemList) {
 		List<Integer> colors = CustomEntityList.entityEggs.get(classToSpawn);
 		if (colors.isEmpty()) {
-			LogHelper.log(Level.WARNING, "Custom entity egg has an empty color list");
+			LogHelper.warning("Custom entity egg has an empty color list");
 		} else if (colors.size() % 2 != 0) {
-			LogHelper.log(Level.WARNING, "Custom entity egg has an odd number of colors");
+			LogHelper.warning("Custom entity egg has an odd number of colors");
 		}
 		for (int i = 0; i < (colors.size() / 2); ++i) {
 			itemList.add(new ItemStack(item, 1, i));

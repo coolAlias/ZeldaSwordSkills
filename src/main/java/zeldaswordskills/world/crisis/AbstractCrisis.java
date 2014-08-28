@@ -17,8 +17,6 @@
 
 package zeldaswordskills.world.crisis;
 
-import java.util.logging.Level;
-
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import zeldaswordskills.util.LogHelper;
@@ -51,7 +49,7 @@ public abstract class AbstractCrisis
 	 */
 	protected final void scheduleUpdateTick(int n) {
 		if (n < 0) {
-			LogHelper.log(Level.WARNING, "Oops! Scheduling a crisis tick with n less than zero.");
+			LogHelper.warning("Oops! Scheduling a crisis tick with n less than zero.");
 		}
 		nextTick = (n > 0 ? eventTimer - n : 0);
 	}
@@ -74,7 +72,7 @@ public abstract class AbstractCrisis
 				onUpdateTick(world);
 			}
 		} else {
-			LogHelper.log(Level.WARNING, "Unexpected timer value: crisis terminated but not handled");
+			LogHelper.warning("Unexpected timer value: crisis terminated but not handled");
 			eventTimer = -1;
 		}
 	}

@@ -18,7 +18,6 @@
 package zeldaswordskills.world.gen.structure;
 
 import java.util.Random;
-import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
@@ -129,7 +128,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), bossType);
 			//LogHelper.log(Level.INFO, "Loaded roomList data for chunk " + i + "/" + j);
 		} else {
-			LogHelper.log(Level.WARNING, "Failed to translate Boss Room NBT compound into structure map");
+			LogHelper.warning("Failed to translate Boss Room NBT compound into structure map");
 		}
 	}
 

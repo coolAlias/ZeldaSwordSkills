@@ -18,7 +18,6 @@
 package zeldaswordskills.world.gen.structure;
 
 import java.util.Random;
-import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -248,7 +247,7 @@ public class RoomBoss extends RoomBase
 		case NORTH: z = bBox.minZ; break;
 		case EAST: x = bBox.maxX; break;
 		case WEST: x = bBox.minX; break;
-		default: LogHelper.log(Level.WARNING, "Placing Boss door with invalid door side");
+		default: LogHelper.warning("Placing Boss door with invalid door side");
 		}
 		
 		world.setBlock(x, y, z, ZSSBlocks.doorLocked.blockID, type.ordinal() & ~0x8, 2);

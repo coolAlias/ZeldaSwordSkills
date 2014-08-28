@@ -18,9 +18,6 @@
 package zeldaswordskills.world.gen;
 
 import hunternif.mc.atlas.api.AtlasAPI;
-
-import java.util.logging.Level;
-
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
@@ -52,7 +49,7 @@ public class AntiqueAtlasHelper
 			try {
 				AtlasAPI.getTileAPI().putCustomTile(world, world.provider.dimensionId, tileName, chunkX, chunkZ);
 			} catch (Exception e) {
-				LogHelper.log(Level.WARNING, "Unable to add Atlas data: " + e.getLocalizedMessage());
+				LogHelper.warning("Unable to add Atlas data: " + e.getLocalizedMessage());
 			}
 		}
 	}
@@ -70,7 +67,7 @@ public class AntiqueAtlasHelper
 					AtlasAPI.getTileAPI().setTextureIfNone(name + "_fin", new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + "_fin.png"));
 				}
 			} catch (Exception e) {
-				LogHelper.log(Level.WARNING, e.getLocalizedMessage());
+				LogHelper.warning(e.getLocalizedMessage());
 			}
 		}
 	}

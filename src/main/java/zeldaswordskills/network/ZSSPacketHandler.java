@@ -20,7 +20,6 @@
 package zeldaswordskills.network;
 
 import java.io.IOException;
-import java.util.logging.Level;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -56,9 +55,9 @@ public class ZSSPacketHandler implements IPacketHandler {
 		} catch (ProtocolException e) {
 			if (player instanceof EntityPlayerMP) {
 				((EntityPlayerMP) player).playerNetServerHandler.kickPlayerFromServer("Protocol Exception!");
-				LogHelper.log(Level.WARNING, String.format("Player %s caused a Protocol Exception and was kicked.", ((EntityPlayer)player).username) + e.toString());
+				LogHelper.warning(String.format("Player %s caused a Protocol Exception and was kicked.", ((EntityPlayer)player).username) + e.toString());
 			} else {
-				LogHelper.log(Level.SEVERE, e.toString());
+				LogHelper.severe(e.toString());
 			}
 		} catch (InstantiationException e) {
 			throw new RuntimeException("Unexpected InstantiationException during Packet construction!", e);

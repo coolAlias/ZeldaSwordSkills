@@ -18,7 +18,6 @@
 package zeldaswordskills.world.gen.structure;
 
 import java.util.Random;
-import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
@@ -102,7 +101,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 			NBTTagList roomList = compound.getTagList("roomList");
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), roomList);
 		} else {
-			LogHelper.log(Level.WARNING, "Failed to translate NBT compound into structure map");
+			LogHelper.warning("Failed to translate NBT compound into structure map");
 		}
 	}
 	
@@ -182,7 +181,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 					}
 				}
 			} else {
-				LogHelper.log(Level.WARNING, "Invalid tag while checking for structures in chunk " + chunkX + "/" + chunkZ);
+				LogHelper.warning("Invalid tag while checking for structures in chunk " + chunkX + "/" + chunkZ);
 			}
 		}
 		

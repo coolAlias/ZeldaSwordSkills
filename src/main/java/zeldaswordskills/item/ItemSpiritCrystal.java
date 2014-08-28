@@ -20,7 +20,6 @@ package zeldaswordskills.item;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -132,7 +131,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 			case BlockSacredFlame.DIN: cost = handleDin(stack, world, player); break;
 			case BlockSacredFlame.FARORE: cost = handleFarore(stack, world, player); break;
 			case BlockSacredFlame.NAYRU: break;
-			default: LogHelper.log(Level.WARNING, "Invalid spirit type " + spiritType + " while using spirit crystal");
+			default: LogHelper.warning("Invalid spirit type " + spiritType + " while using spirit crystal");
 			}
 
 			if (damageStack(stack, player, cost)) {

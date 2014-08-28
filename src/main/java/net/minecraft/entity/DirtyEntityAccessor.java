@@ -17,8 +17,6 @@
 
 package net.minecraft.entity;
 
-import java.util.logging.Level;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -66,7 +64,7 @@ public class DirtyEntityAccessor {
 				((EntityPlayer) entity).eyeHeight = ((EntityPlayer) entity).getDefaultEyeHeight();
 			}
 		} else {
-			LogHelper.log(Level.WARNING, "Attempted to restore original size without any available data");
+			LogHelper.warning("Attempted to restore original size without any available data");
 		}
 	}
 }

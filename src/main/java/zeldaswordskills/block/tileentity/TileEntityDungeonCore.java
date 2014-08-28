@@ -17,8 +17,6 @@
 
 package zeldaswordskills.block.tileentity;
 
-import java.util.logging.Level;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -162,7 +160,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		}
 		if (isBossRoom && bossBattle == null) {
 			if (box == null) {
-				LogHelper.log(Level.WARNING, String.format("Boss room at %d/%d/%d missing structure bounding box - dungeon is being disabled", xCoord, yCoord, zCoord));
+				LogHelper.warning(String.format("Boss room at %d/%d/%d missing structure bounding box - dungeon is being disabled", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				removeCoreBlock();
 			} else {
@@ -184,19 +182,19 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 			bossBattle.onUpdate(worldObj);
 			if (bossBattle.isFinished()) {
 				bossBattle = null;
-				LogHelper.log(Level.FINE, String.format("Boss battle is finished, removing core block at %d/%d/%d", xCoord, yCoord, zCoord));
+				LogHelper.fine(String.format("Boss battle is finished, removing core block at %d/%d/%d", xCoord, yCoord, zCoord));
 				removeCoreBlock();
 			}
 		} else if (shouldUpdate()) {
-			LogHelper.log(Level.FINEST, String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
+			LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
-				LogHelper.log(Level.FINER, String.format("Failed verification at %d/%d/%d; setting blocks to stone", xCoord, yCoord, zCoord));
+				LogHelper.finer(String.format("Failed verification at %d/%d/%d; setting blocks to stone", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				alreadyVerified = true;
 				if (isBossRoom) {
 					isOpened = true;
 				} else {
-					LogHelper.log(Level.FINER, "Calling removeCoreBlock after all blocks set to stone");
+					LogHelper.finer("Calling removeCoreBlock after all blocks set to stone");
 					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 					removeCoreBlock();
 				}
@@ -211,7 +209,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called only when validation fails during an update, not when block broken
 	 */
 	protected void removeCoreBlock() {
-		LogHelper.log(Level.FINE, String.format("Removing core block from update at %d/%d/%d", xCoord, yCoord, zCoord));
+		LogHelper.fine(String.format("Removing core block from update at %d/%d/%d", xCoord, yCoord, zCoord));
 		EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 2.5D, zCoord + 0.5D, 16.0D);
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
@@ -227,7 +225,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				}
 			} else {
 				info.addStat(Stats.STAT_SECRET_ROOMS, 1);
-				LogHelper.log(Level.FINE, "Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
+				LogHelper.fine("Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
 				player.triggerAchievement(ZSSAchievements.bombsAway);
 				if (info.getStat(Stats.STAT_SECRET_ROOMS) > 49) {
 					player.triggerAchievement(ZSSAchievements.bombJunkie);
@@ -266,7 +264,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		case RoomBoss.NORTH: z = box.minZ; break;
 		case RoomBoss.EAST: x = box.maxX; break;
 		case RoomBoss.WEST: x = box.minX; break;
-		default: LogHelper.log(Level.WARNING, "Verifying door in Dungeon Core with invalid door side");
+		default: LogHelper.warning("Verifying door in Dungeon Core with invalid door side");
 		}
 		for (int y = box.minY; y < box.maxY; ++y) {
 			if (worldObj.getBlockId(x, y, z) == door.blockID) {
@@ -280,9 +278,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called when core block is broken; re-verifies structure and/or sets all blocks to stone
 	 */
 	public void onBlockBroken() {
-		LogHelper.log(Level.FINER, String.format("Verifying structure after core block broken at %d/%d/%d", xCoord, yCoord, zCoord));
+		LogHelper.finer(String.format("Verifying structure after core block broken at %d/%d/%d", xCoord, yCoord, zCoord));
 		if (!alreadyVerified) {
-			LogHelper.log(Level.FINER, "Wasn't already verified: removing structure after core block broken");
+			LogHelper.finer("Wasn't already verified: removing structure after core block broken");
 			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			verifyStructure(true);
 		}
@@ -308,16 +306,16 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 							int id = worldObj.getBlockId(i, j, k);
 							if (replace) {
 								if (id == ZSSBlocks.secretStone.blockID) {
-									LogHelper.log(Level.FINEST, String.format("Replacing secret stone block at %d/%d/%d", i, j, k));
+									LogHelper.finest(String.format("Replacing secret stone block at %d/%d/%d", i, j, k));
 									int meta = worldObj.getBlockMetadata(i, j, k);
 									worldObj.setBlock(i, j, k, BlockSecretStone.getIdFromMeta(meta), 0, 2);
 								}
 							} else {
 								Block block = (id > 0 ? Block.blocksList[id] : null);
 								if (!(block instanceof IDungeonBlock)) {
-									LogHelper.log(Level.FINER, String.format("Block %s with id %d at %d/%d/%d with is invalid for this structure", block, id, i, j, k));
+									LogHelper.finer(String.format("Block %s with id %d at %d/%d/%d with is invalid for this structure", block, id, i, j, k));
 									if (++invalid > 2) {
-										LogHelper.log(Level.FINER, "Too many invalid blocks during verification; returning false");
+										LogHelper.finer("Too many invalid blocks during verification; returning false");
 										return false;
 									}
 								}
@@ -388,7 +386,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				dungeonType = BossType.getBossType(tag.getString("dungeonName"));
 			} else {
 				// TODO remove after all previous worlds update to String storage:
-				LogHelper.log(Level.WARNING, String.format("Detected old boss dungeon save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
+				LogHelper.warning(String.format("Detected old boss dungeon save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
 				dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
 			}
 			isOpened = tag.getBoolean("isOpened");
@@ -397,7 +395,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				if (bossBattle != null) {
 					bossBattle.readFromNBT(tag);
 				} else {
-					LogHelper.log(Level.WARNING, String.format("Error retrieving Boss Battle while loading Dungeon Core from NBT at %d/%d/%d", xCoord, yCoord, zCoord));
+					LogHelper.warning(String.format("Error retrieving Boss Battle while loading Dungeon Core from NBT at %d/%d/%d", xCoord, yCoord, zCoord));
 				}
 			}
 		}
@@ -408,7 +406,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		}
 		// TODO workaround for backwards compatibility:
 		if (tag.getBoolean("isSpawner")) {
-			LogHelper.log(Level.WARNING, String.format("Detected old fairy spawner save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
+			LogHelper.warning(String.format("Detected old fairy spawner save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
 			NBTTagCompound spawnerData = new NBTTagCompound();
 			spawnerData.setInteger("maxFairies", tag.getInteger("maxFairies"));
 			spawnerData.setInteger("spawned", tag.getInteger("spawned"));
