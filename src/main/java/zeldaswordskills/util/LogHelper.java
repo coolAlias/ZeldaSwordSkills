@@ -26,11 +26,12 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.common.FMLLog;
 
 public class LogHelper
 {
-	private static Logger logger = Logger.getLogger("ZeldaSwordSkills");
+	private static Logger logger = Logger.getLogger(ModInfo.NAME.replace(" ", ""));
 	private static Handler consoleHandler = new ConsoleHandler();
 	private static Formatter zssFormatter = new ZSSLogFormatter();
 
