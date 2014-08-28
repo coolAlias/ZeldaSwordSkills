@@ -21,12 +21,15 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
 
+import zeldaswordskills.ZSSMain;
+import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.item.ItemHeroBow;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -79,15 +82,20 @@ public class RenderItemCustomBow implements IItemRenderer {
 			EntityPlayer player = (EntityPlayer) entity;
 			Icon icon = stack.getItem().getIcon(stack, 0, player, player.getItemInUse(), player.getItemInUseCount());
 			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
-			// The following code is copied in large part from Battlegear2's BowRenderer
 			int useDuration = player.getItemInUseDuration();
 			if (useDuration > 0) {
 				int drawAmount = (useDuration > 17 ? 2 : (useDuration > 13 ? 1 : 0));
-				int arrowId = ((ItemHeroBow) stack.getItem()).getArrow(stack);
-				ItemStack arrow = (arrowId > -1 ? new ItemStack(arrowId, 1, 0) : null);
-				if (arrow != null) {
-					icon = arrow.getIconIndex();
+				ItemStack arrowStack = (stack.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) stack.getItem()).getArrow(stack) : new ItemStack(Item.arrow));
+				if (ZSSMain.isBG2Enabled) {
+					ItemStack quiverArrow = BattlegearEvents.getQuiverArrow(stack, player);
+					if (quiverArrow != null) {
+						arrowStack = quiverArrow;
+					}
+				}
+				if (arrowStack != null) {
+					icon = arrowStack.getIconIndex();
 					GL11.glPushMatrix();
+					// Thanks to BG2 team for the translation calculations:
 					GL11.glTranslatef(-(-3F+drawAmount)/16F, -(-3F+drawAmount)/16F, firstPerson?-0.5F/16F:0.5F/16F);
 					ItemRenderer.renderItemIn2D(tessellator, icon.getMinU(), icon.getMinV(), icon.getMaxU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 					GL11.glPopMatrix();

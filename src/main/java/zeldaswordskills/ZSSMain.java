@@ -17,6 +17,8 @@
 
 package zeldaswordskills;
 
+import java.util.logging.Level;
+
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntities;
@@ -25,6 +27,7 @@ import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.handler.ZSSEntityEvents;
 import zeldaswordskills.handler.ZSSItemEvents;
+import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
@@ -71,7 +74,7 @@ public class ZSSMain
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		LogHelper.init();
+		LogHelper.init(Level.INFO);
 		Config.init(event);
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
@@ -103,6 +106,7 @@ public class ZSSMain
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
 		if (isBG2Enabled) {
+			ItemHeroBow.registerBG2();
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
 	}

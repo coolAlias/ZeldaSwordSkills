@@ -17,9 +17,22 @@
 
 package zeldaswordskills.handler;
 
+import java.util.logging.Level;
+
 import mods.battlegear2.api.PlayerEventChild.ShieldBlockEvent;
+import mods.battlegear2.api.quiver.IArrowContainer2;
+import mods.battlegear2.api.quiver.QuiverArrowRegistry;
+import mods.battlegear2.enchantments.BaseEnchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraftforge.event.entity.player.ArrowLooseEvent;
+import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import zeldaswordskills.item.ItemHeroBow;
+import zeldaswordskills.item.ItemZeldaArrow;
 import zeldaswordskills.item.ItemZeldaShield;
+import zeldaswordskills.util.LogHelper;
 
 /**
  * 
@@ -35,5 +48,77 @@ public class BattlegearEvents {
 			event.performAnimation = false;
 			event.damageShield = false;
 		}
+	}
+
+	/**
+	 * Returns the currently selected quiver arrow, or null if empty or no quiver
+	 * @param quiver if null, current quiver retrieved using {@link QuiverArrowRegistry#getArrowContainer}
+	 */
+	public static ItemStack getQuiverArrow(ItemStack bow, EntityPlayer player) {
+		return getQuiverArrow(bow, QuiverArrowRegistry.getArrowContainer(bow, player), player);
+	}
+
+	/**
+	 * Returns the currently selected quiver arrow, or null if quiver is null or does not contain arrows
+	 */
+	private static ItemStack getQuiverArrow(ItemStack bow, ItemStack quiver, EntityPlayer player) {
+		if (quiver != null) {
+			int slot = ((IArrowContainer2) quiver.getItem()).getSelectedSlot(quiver);
+			return ((IArrowContainer2) quiver.getItem()).getStackInSlot(quiver, slot);
+		}
+		return null;
+	}
+
+	/**
+	 * Fake event listener to handle arrow nock events, since BG2's handler is set
+	 * to receive canceled -.-
+	 * In order to allow quiver use, must not post the event to the event bus.
+	 * @return True if event is 'canceled'
+	 */
+	public static boolean preArrowNock(ArrowNockEvent event) {
+		boolean isCanceled = false;
+		ItemStack arrow = getQuiverArrow(event.result, event.entityPlayer);
+		if (arrow != null) { // cancel event if arrow can not be nocked:
+			if (event.result.getItem() instanceof ItemHeroBow) {
+				if (((ItemHeroBow) event.result.getItem()).canShootArrow(event.entityPlayer, event.result, arrow)) {
+					event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result) - EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, event.result) * 20000);
+				}
+				isCanceled = true;
+			} else if (arrow.getItem() instanceof ItemZeldaArrow && !event.entityPlayer.capabilities.isCreativeMode) {
+				LogHelper.log(Level.FINE, "Canceling nock event for zelda arrow in non-Hero's Bow");
+				isCanceled = true; // allow API for other bows to shoot zelda arrows?
+			}
+		} else if (event.result.getItem() instanceof ItemHeroBow) {
+			// standard nock must set an item and cancel to prevent BG2 processing
+			if (((ItemHeroBow) event.result.getItem()).nockArrowFromInventory(event.result, event.entityPlayer)) {
+				event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result) - EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, event.result) * 20000);
+			}
+			isCanceled = true;
+		}
+		return isCanceled;
+	}
+
+	/**
+	 * Fake event listener to handle arrow loose events, since BG2's handler is set
+	 * to receive canceled -.-
+	 * In order to allow quiver use, must not post the event to the event bus.
+	 * @return True if event is 'canceled'
+	 */
+	public static boolean preArrowLoose(ArrowLooseEvent event) {
+		boolean isCanceled = false;
+		ItemStack quiverStack = QuiverArrowRegistry.getArrowContainer(event.bow, event.entityPlayer);
+		ItemStack arrowStack = getQuiverArrow(event.bow, quiverStack, event.entityPlayer);
+		if (arrowStack != null) { // quiverStack implicitly checked by getQuiverArrow
+			LogHelper.log(Level.FINE, "Posted arrow loose event with arrow from quiver: " + arrowStack);
+			if (event.bow.getItem() instanceof ItemHeroBow) {
+				((ItemHeroBow) event.bow.getItem()).bg2FireArrow(event, quiverStack, arrowStack);
+				isCanceled = true;
+			} else if (arrowStack.getItem() instanceof ItemZeldaArrow && !event.entityPlayer.capabilities.isCreativeMode) {
+				// Does this ever happen???
+				LogHelper.log(Level.FINE, "Attempted to nock Zelda Arrow from vanilla bow - canceling");
+				isCanceled = true; // allow API for other bows to shoot zelda arrows?
+			}
+		}
+		return isCanceled;
 	}
 }
