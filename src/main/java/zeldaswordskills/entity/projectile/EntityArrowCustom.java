@@ -63,7 +63,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	private static final int TARGET_DATAWATCHER_INDEX = 24;
 
 	/** Private fields from EntityArrow are now protected instead */
-	protected int inTile, inData;
+	protected int xTile = -1, yTile = -1, zTile = -1, inTile, inData;
 	protected int ticksInGround = 0, ticksInAir = 0;
 	protected boolean inGround = false;
 
