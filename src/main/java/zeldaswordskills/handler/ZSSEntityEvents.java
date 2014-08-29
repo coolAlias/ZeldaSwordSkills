@@ -26,8 +26,6 @@ import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
@@ -40,7 +38,6 @@ import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.EntityMaskTrader;
-import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
@@ -177,31 +174,7 @@ public class ZSSEntityEvents
 				ZSSPlayerInfo.get(player).verifyStartingGear();
 				ZSSPlayerInfo.get(player).verifyMaxHealth();
 			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
-				// this event is called each time the entity joins, which is every time the world is
-				// loaded, not just the first time the entity spawns, so need to restrict to first time only 
-				NBTTagCompound compound = event.entity.getEntityData();
-				if (!compound.hasKey("zssFirstJoinFlag")) {
-					compound.setBoolean("zssFirstJoinFlag", true);
-					int ratio = ZSSEntities.getGoronRatio();
-					if (ratio > 0 && event.world.rand.nextInt(ratio) == 0) {
-						int x = MathHelper.floor_double(event.entity.posX);
-						int y = MathHelper.floor_double(event.entity.posY);
-						int z = MathHelper.floor_double(event.entity.posZ);
-						try {
-							if (event.entity.worldObj.villageCollectionObj.getVillageList().isEmpty() || event.entity.worldObj.villageCollectionObj.findNearestVillage(x, y, z, 32) != null) {
-								EntityGoron goron = new EntityGoron(event.entity.worldObj, event.entity.worldObj.rand.nextInt(5));
-								double posX = event.entity.posX + event.entity.worldObj.rand.nextInt(8) - 4;
-								double posZ = event.entity.posZ + event.entity.worldObj.rand.nextInt(8) - 4;
-								goron.setLocationAndAngles(posX, event.entity.posY + 1, posZ, event.entity.rotationYaw, event.entity.rotationPitch);
-								if (goron.getCanSpawnHere()) {
-									event.entity.worldObj.spawnEntityInWorld(goron);
-								}
-							}
-						} catch (NullPointerException e) {
-							; // catches null pointer from block not found during world load (super-flat only?)
-						}
-					}
-				}
+				EntityGoron.doVillagerSpawn((EntityVillager) event.entity, event.entity.worldObj);
 			}
 
 			if (!Config.areVanillaBuffsDisabled() && event.entity instanceof EntityLivingBase) {

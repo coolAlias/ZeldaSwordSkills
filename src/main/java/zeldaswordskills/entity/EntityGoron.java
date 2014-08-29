@@ -299,4 +299,37 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 		super.readEntityFromNBT(compound);
 		updateEntityAttributes();
 	}
+
+	/**
+	 * Attempts to spawn a goron on the coat-tails of a villager joining the world
+	 * Sets the 'zssFirstJoinFlag' in the villager's NBT data to prevent processing
+	 * again when the game is restarted.
+	 * @param villager The villager currently spawning
+	 * @result Depending on the current ration of villagers to gorons, a goron will be spawned near the villager
+	 */
+	public static void doVillagerSpawn(EntityVillager villager, World world) {
+		NBTTagCompound compound = villager.getEntityData();
+		if (!compound.hasKey("zssFirstJoinFlag")) {
+			compound.setBoolean("zssFirstJoinFlag", true);
+			int ratio = ZSSEntities.getGoronRatio();
+			if (ratio > 0 && world.rand.nextInt(ratio) == 0) {
+				int x = MathHelper.floor_double(villager.posX);
+				int y = MathHelper.floor_double(villager.posY);
+				int z = MathHelper.floor_double(villager.posZ);
+				try {
+					if (world.villageCollectionObj.getVillageList().isEmpty() || world.villageCollectionObj.findNearestVillage(x, y, z, 32) != null) {
+						EntityGoron goron = new EntityGoron(world, world.rand.nextInt(5));
+						double posX = villager.posX + world.rand.nextInt(8) - 4;
+						double posZ = villager.posZ + world.rand.nextInt(8) - 4;
+						goron.setLocationAndAngles(posX, villager.posY + 1, posZ, villager.rotationYaw, villager.rotationPitch);
+						if (goron.getCanSpawnHere()) {
+							world.spawnEntityInWorld(goron);
+						}
+					}
+				} catch (NullPointerException e) {
+					; // catches null pointer from block not found during world load (super-flat only?)
+				}
+			}
+		}
+	}
 }
