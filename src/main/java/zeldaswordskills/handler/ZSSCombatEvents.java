@@ -19,19 +19,13 @@ package zeldaswordskills.handler;
 
 import java.util.Set;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.FOVUpdateEvent;
-import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.event.EventPriority;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -47,25 +41,20 @@ import zeldaswordskills.api.damage.IPostDamageEffect;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISwingSpeed;
-import zeldaswordskills.api.item.IZoom;
-import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemArmorTunic;
 import zeldaswordskills.item.ItemFairyBottle;
-import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.network.MortalDrawPacket;
 import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.ICombo;
-import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dodge;
@@ -73,14 +62,10 @@ import zeldaswordskills.skills.sword.EndingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.skills.sword.RisingCut;
-import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBreak;
-import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -89,144 +74,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ZSSCombatEvents
 {
-	/**
-	 * FOV is determined initially in EntityPlayerSP; fov is recalculated for
-	 * the vanilla bow only in the case that zoom-enhancing gear is worn
-	 */
-	@ForgeSubscribe
-	@SideOnly(Side.CLIENT)
-	public void updateFOV(FOVUpdateEvent event) {
-		ItemStack stack = (event.entity.isUsingItem() ? event.entity.getItemInUse() : null);
-		if (stack != null) {
-			boolean flag = stack.getItem() instanceof IZoom;
-			if (flag || stack.getItem() == Item.bow) {
-				float magnify = 1.0F;
-				for (ItemStack armor : event.entity.inventory.armorInventory) {
-					if (armor != null && armor.getItem() instanceof IZoomHelper) {
-						magnify += ((IZoomHelper) armor.getItem()).getMagnificationFactor();
-					}
-				}
-				if (flag || magnify != 1.0F) {
-					float maxTime = (flag ? ((IZoom) stack.getItem()).getMaxZoomTime() : 20.0F);
-					float factor = (flag ? ((IZoom) stack.getItem()).getZoomFactor() : 0.15F);
-					float charge = (float) event.entity.getItemInUseDuration() / maxTime;
-					AttributeInstance attributeinstance = event.entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-					float fov = (event.entity.capabilities.isFlying ? 1.1F : 1.0F);
-					fov *= (attributeinstance.getAttributeValue() / (double) event.entity.capabilities.getWalkSpeed() + 1.0D) / 2.0D;
-					if (event.entity.capabilities.getWalkSpeed() == 0.0F || Float.isNaN(fov) || Float.isInfinite(fov)) {
-						fov = 1.0F;
-					}
-					if (charge > 1.0F) {
-						charge = 1.0F;
-					} else {
-						charge *= charge;
-					}
-					event.newfov = fov * (1.0F - charge * factor * magnify);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Handles mouse clicks for skills, canceling where appropriate; note that left click will
-	 * ALWAYS be canceled, as the attack is passed to {@link #performComboAttack(Minecraft, ILockOnTarget) performComboAttack};
-	 * allowing left click results in the attack processing twice, doubling durability damage to weapons
-	 * no button clicked -1, left button 0, right click 1, middle click 2
-	 */
-	@ForgeSubscribe
-	@SideOnly(Side.CLIENT)
-	public void onMouseChanged(MouseEvent event) {
-		if (event.button == -1 && event.dwheel == 0) {
-			return;
-		}
-		Minecraft mc = Minecraft.getMinecraft();
-		EntityPlayer player = mc.thePlayer;
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
-		// check pre-conditions for attacking and item use (not stunned, etc.):
-		if (event.buttonstate || event.dwheel != 0) {
-			if (skills.isSkillActive(SkillBase.mortalDraw)) {
-				event.setCanceled(true);
-			} else if (event.button == 0) {
-				Item heldItem = (player.getHeldItem() != null ? player.getHeldItem().getItem() : null);
-				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN) || heldItem instanceof ItemHeldBlock ||
-						(player.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
-			} else if (event.button == 1) {
-				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN));
-			}
-		} else if (!event.buttonstate && event.button == 0) {
-			if (skills.hasSkill(SkillBase.armorBreak)) {
-				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, false);
-			}
-		}
-		if (event.isCanceled()) {
-			return;
-		}
-		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
-		if (skill != null && skill.isLockedOn() && !skills.isNayruActive()) {
-			if (event.button == 0 && event.buttonstate) {
-				if (!skills.canInteract()) {
-					if (skills.isSkillActive(SkillBase.spinAttack)) {
-						((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
-					}
-					event.setCanceled(true);
-					return;
-				}
-				// specific held item and other requirements are checked in skill's canExecute method
-				if (Config.allowVanillaControls() && player.getHeldItem() != null) {
-					if (skills.shouldSkillActivate(SkillBase.dash)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-					} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
-						performComboAttack(mc, skill);
-					} else if (skills.shouldSkillActivate(SkillBase.swordBeam)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
-					} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
-						performComboAttack(mc, skill);
-					} else {
-						performComboAttack(mc, skill);
-					}
-					// handle separately so can attack and begin charging without pressing key twice
-					if (skills.hasSkill(SkillBase.armorBreak)) {
-						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, true);
-					}
-				} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
-				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
-					performComboAttack(mc, skill);
-				}
-
-				// always cancel left click to prevent weapons taking double durability damage
-				event.setCanceled(true);
-			} else if (event.button == 1 && Config.allowVanillaControls()) {
-				if (!skills.canInteract() && event.buttonstate) {
-					event.setCanceled(true);
-				}
-			}
-		} else { // not locked on to a target, normal item swing
-			if (event.button == 0 && event.buttonstate) {
-				setPlayerAttackTime(player);
-			}
-		}
-	}
-
-	/**
-	 * Attacks current target if player is not currently using an item and ICombo.onAttack
-	 * doesn't return false (i.e. doesn't miss)
-	 * @param skill must implement BOTH ILockOnTarget AND ICombo
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void performComboAttack(Minecraft mc, ILockOnTarget skill) {
-		if (!mc.thePlayer.isUsingItem()) {
-			mc.thePlayer.swingItem();
-			setPlayerAttackTime(mc.thePlayer);
-			if (skill instanceof ICombo && ((ICombo) skill).onAttack(mc.thePlayer)) {
-				Entity entity = TargetUtils.getMouseOverEntity();
-				mc.playerController.attackEntity(mc.thePlayer, (entity != null ? entity : skill.getCurrentTarget()));
-			}
-		}
-	}
-
 	/**
 	 * Sets the attack timer for the player if using an ISwingSpeed item
 	 * All other items default to vanilla behavior, which is spam-happy

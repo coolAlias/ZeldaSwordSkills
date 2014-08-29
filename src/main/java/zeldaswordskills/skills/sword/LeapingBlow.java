@@ -24,9 +24,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
-import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.AddExhaustionPacket;
 import zeldaswordskills.network.SpawnLeapingBlowPacket;
@@ -133,7 +133,7 @@ public class LeapingBlow extends SkillActive
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isHoldingSword(player)) {
 			isActive = false;
 			if (distance < 1.0F) {
-				ZSSCombatEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
+				ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);
 			} else {
 				player.swingItem();
 				PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(getExhaustion()).makePacket());

@@ -21,8 +21,8 @@ import java.io.IOException;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
@@ -56,7 +56,7 @@ public class MortalDrawPacket extends CustomPacket
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
 				ILockOnTarget skill = skills.getTargetingSkill();
 				if (skill instanceof ICombo) {
-					ZSSCombatEvents.performComboAttack(Minecraft.getMinecraft(), skill);
+					ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
 				}
 			}
 		}
