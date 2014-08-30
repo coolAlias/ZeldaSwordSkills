@@ -186,7 +186,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				removeCoreBlock();
 			}
 		} else if (shouldUpdate()) {
-			LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
+			//LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
 				LogHelper.finer(String.format("Failed verification at %d/%d/%d; setting blocks to stone", xCoord, yCoord, zCoord));
 				verifyStructure(true);
@@ -306,7 +306,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 							int id = worldObj.getBlockId(i, j, k);
 							if (replace) {
 								if (id == ZSSBlocks.secretStone.blockID) {
-									LogHelper.finest(String.format("Replacing secret stone block at %d/%d/%d", i, j, k));
+									//LogHelper.finest(String.format("Replacing secret stone block at %d/%d/%d", i, j, k));
 									int meta = worldObj.getBlockMetadata(i, j, k);
 									worldObj.setBlock(i, j, k, BlockSecretStone.getIdFromMeta(meta), 0, 2);
 								}
