@@ -42,11 +42,13 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemArmorBoots;
+import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.AttackBlockedPacket;
+import zeldaswordskills.network.SetNockedArrowPacket;
 import zeldaswordskills.network.SpawnNayruParticlesPacket;
 import zeldaswordskills.network.SyncPlayerInfoPacket;
 import zeldaswordskills.skills.ICombo;
@@ -64,7 +66,7 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	private static final String EXT_PROP_NAME = "ZSSPlayerInfo";
 
 	private final EntityPlayer player;
-	
+
 	/** Special block timer for shields; player cannot block while this is greater than zero */
 	private int blockTime = 0;
 
@@ -112,7 +114,7 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/** ID of currently active skill that prevents left-mouse button interaction */
 	private int currentActiveSkillId = -1;
-	
+
 	/** Currently active skill */
 	//private List<SkillActive> activeSkills = new LinkedList<SkillActive>();
 
@@ -125,6 +127,12 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Current stage in the Mask trading sequence */
 	private int maskStage = 0;
 
+	/** [Hero's Bow] Stores the currently nocked arrow in order to avoid the graphical glitch caused by writing to the stack's NBT */
+	private ItemStack arrowStack = null;
+
+	/** [Hero's Bow] Part of the graphical glitch fix: Whether the player retrieved a bomb arrow via getAutoBombArrow */
+	public boolean hasAutoBombArrow = false;
+
 	/** Reduces fall damage next impact; used for Rising Cut */
 	public float reduceFallAmount = 0.0F;
 
@@ -133,12 +141,12 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
 		initStats();
 	}
-	
+
 	/** Whether the player is able to block at this time (block timer is zero) */
 	public boolean canBlock() {
 		return blockTime == 0;
 	}
-	
+
 	/**
 	 * Sets the player's block timer, clears the item in use and adds exhaustion upon blocking an attack
 	 * @param damage only used server side to calculate exhaustion: 0.3F * damage
@@ -307,6 +315,24 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Increments the mask quest stage by one */
 	public void completeCurrentMaskStage() {
 		++maskStage;
+	}
+
+	/**
+	 * Returns the currently nocked arrow for the Hero's Bow, possibly null
+	 */
+	public ItemStack getNockedArrow() {
+		return arrowStack;
+	}
+
+	/**
+	 * Marks this arrow as nocked in the Hero's Bow
+	 * @param stack The current arrow or null if empty
+	 */
+	public void setNockedArrow(ItemStack stack) {
+		arrowStack = stack;
+		if (!player.worldObj.isRemote) {
+			PacketDispatcher.sendPacketToPlayer(new SetNockedArrowPacket(stack).makePacket(), (Player) player);
+		}
 	}
 
 	/** Returns true if the player has at least one level in the specified skill */
@@ -509,6 +535,9 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 				&& !player.capabilities.isFlying && player.worldObj.getWorldTime() % 2 == 0) {
 			player.motionX *= 1.15D;
 			player.motionZ *= 1.15D;
+		}
+		if (hasAutoBombArrow && (player.getItemInUse() == null || !(player.getItemInUse().getItem() instanceof ItemHeroBow))) {
+			hasAutoBombArrow = false;
 		}
 		for (SkillBase skill : skills.values()) {
 			skill.onUpdate(player);

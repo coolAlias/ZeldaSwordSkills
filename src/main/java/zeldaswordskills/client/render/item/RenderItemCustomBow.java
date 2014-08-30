@@ -85,7 +85,7 @@ public class RenderItemCustomBow implements IItemRenderer {
 			int useDuration = player.getItemInUseDuration();
 			if (useDuration > 0) {
 				int drawAmount = (useDuration > 17 ? 2 : (useDuration > 13 ? 1 : 0));
-				ItemStack arrowStack = (stack.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) stack.getItem()).getArrow(stack) : new ItemStack(Item.arrow));
+				ItemStack arrowStack = (stack.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) stack.getItem()).getArrow(player) : new ItemStack(Item.arrow));
 				if (ZSSMain.isBG2Enabled) {
 					ItemStack quiverArrow = BattlegearEvents.getQuiverArrow(stack, player);
 					if (quiverArrow != null) {

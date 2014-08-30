@@ -132,40 +132,17 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	}
 
 	/**
-	 * Retrieves the arrow currently nocked in the bow's NBT, or null
+	 * Retrieves the currently nocked arrow (retrieved from player's extended properties)
 	 */
-	public ItemStack getArrow(ItemStack bow) {
-		if (bow.hasTagCompound() && bow.getTagCompound().hasKey("nockedArrow")) {
-			int arrowId = bow.getTagCompound().getInteger("nockedArrow");
-			if (arrowId > -1 && Item.itemsList[arrowId] != null) {
-				return new ItemStack(arrowId, 1, bow.getTagCompound().getInteger("nockedArrowMeta"));
-			}
-		}
-		return null;
+	public ItemStack getArrow(EntityPlayer player) {
+		return ZSSPlayerInfo.get(player).getNockedArrow();
 	}
 
 	/**
-	 * Sets the arrow type currently in the stack
+	 * Stores the currently nocked arrow in the player's extended properties
 	 */
-	private void setArrow(ItemStack bow, ItemStack arrow) {
-		if (!bow.hasTagCompound()) { bow.setTagCompound(new NBTTagCompound()); }
-		bow.getTagCompound().setInteger("nockedArrow", arrow != null ? arrow.itemID : -1);
-		bow.getTagCompound().setInteger("nockedArrowMeta", arrow != null ? arrow.getItemDamage() : 0);
-	}
-
-	/**
-	 * Returns true if a bomb arrow has already been automatically loaded
-	 */
-	private boolean hasAutoArrow(ItemStack bow) {
-		return (bow.hasTagCompound() && bow.getTagCompound().hasKey("hasAutoArrow") && bow.getTagCompound().getBoolean("hasAutoArrow"));
-	}
-
-	/**
-	 * Sets whether the bow stack has had a bomb arrow automatically loaded or not
-	 */
-	private void setHasAutoArrow(ItemStack bow, boolean value) {
-		if (!bow.hasTagCompound()) { bow.setTagCompound(new NBTTagCompound()); }
-		bow.getTagCompound().setBoolean("hasAutoArrow", value);
+	private void setArrow(EntityPlayer player, ItemStack arrow) {
+		ZSSPlayerInfo.get(player).setNockedArrow(arrow);
 	}
 
 	@Override
@@ -178,13 +155,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	@SideOnly(Side.CLIENT)
 	public float getZoomFactor() {
 		return 0.15F;
-	}
-
-	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (!isHeld && hasAutoArrow(stack)) {
-			setHasAutoArrow(stack, false);
-		}
 	}
 
 	@Override
@@ -227,9 +197,9 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		}
 		if (event.isCanceled()) {
 			// May not be needed: make sure bow does not have an arrow 'nocked' in NBT if no longer in use
-			if (player.getItemInUse() == null && getArrow(stack) != null) {
-				LogHelper.fine("Removing arrow from bow when not in use after nock event");
-				setArrow(stack, null);
+			if (player.getItemInUse() == null && getArrow(player) != null) {
+				LogHelper.warning("Removing arrow from bow when not in use after nock event");
+				setArrow(player, null);
 			}
 			return event.result;
 		}
@@ -242,7 +212,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 
 	@Override
 	public void onPlayerStoppedUsing(ItemStack bow, World world, EntityPlayer player, int ticksRemaining) {
-		setHasAutoArrow(bow, false);
+		ZSSPlayerInfo.get(player).hasAutoBombArrow = false;
 		int ticksInUse = getMaxItemUseDuration(bow) - ticksRemaining;
 
 		ArrowLooseEvent event = new ArrowLooseEvent(player, bow, ticksInUse);
@@ -252,22 +222,19 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 			MinecraftForge.EVENT_BUS.post(event);
 		}
 		if (event.isCanceled()) {
-			if (getArrow(bow) != null) {
-				setArrow(bow, null); // nocked from inventory from empty quiver slot, then hot-swapped
+			if (getArrow(player) != null) {
+				setArrow(player, null); // nocked from inventory from empty quiver slot, then hot-swapped
 			}
 			return;
 		}
-		// This code can only be reached if not using a quiver, and the arrow must
-		// be retrieved from the bow's NBT
-		ItemStack arrowStack = getArrow(bow);
-		if (arrowStack != null) {
-			LogHelper.finer("Retrieved arrow from NBT: " + arrowStack);
+		// This code can only be reached if not using a quiver
+		ItemStack arrowStack = getArrow(player);
+		if (arrowStack != null) { // can be null when hot-swapping to an empty quiver slot
+			LogHelper.finer("Retrieved arrow player props: " + arrowStack);
 			if (canShootArrow(player, bow, arrowStack)) {
 				fireArrow(event, arrowStack, bow, player);
 			}
-			setArrow(bow, null);
-		} else { // this should never happen: (unless hot-swapped arrows???)
-			LogHelper.fine("Arrow from bow NBT was null! Cannot call fireArrow.");
+			setArrow(player, null);
 		}
 	}
 
@@ -348,7 +315,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 				arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, player.worldObj, player, charge * 2.0F);
 			}
 			if (arrowEntity != null) {
-				LogHelper.fine("Created arrow entity: " + arrowEntity);
+				LogHelper.finer("Created arrow entity: " + arrowEntity);
 				applyArrowSettings(arrowEntity, bow, charge);
 				if (arrowEntity instanceof EntityArrowCustom) {
 					applyCustomArrowSettings(event.entityPlayer, event.bow, arrowStack, (EntityArrowCustom) arrowEntity, charge);
@@ -358,7 +325,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 				if (flag) {
 					arrowEntity.canBePickedUp = 2;
 				} else {
-					PlayerUtils.consumeInventoryItems(player, arrowStack);
+					PlayerUtils.consumeInventoryItem(player, arrowStack, 1);
 				}
 
 				if (!player.worldObj.isRemote) {
@@ -401,7 +368,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		ItemStack arrow = null;
 		for (ItemStack stack : player.inventory.mainInventory) {
 			if (stack != null && canShootArrow(player, bow, stack)) {
-				LogHelper.finer("Arrow found in inventory: " + stack);
 				arrow = stack;
 				break;
 			}
@@ -420,16 +386,11 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	}
 
 	/**
-	 * Searches player inventory for a shoot-able arrow and writes it to the bow's NBT tag
-	 * so that the correct arrow may be retrieved upon release
-	 * @return returns true if an arrow was found and 'nocked'
-	 * NOTE: Writing to NBT causes the item to re-render, which appears as a graphical glitch
+	 * Returns true if a suitable arrow to fire was found in the inventory
 	 */
 	public boolean nockArrowFromInventory(ItemStack bow, EntityPlayer player) {
-		ItemStack arrow = getArrowFromInventory(bow, player);
-		LogHelper.finer("Nocking arrow from inventory into NBT: " + arrow);
-		setArrow(bow, arrow);
-		return arrow != null;
+		setArrow(player, getArrowFromInventory(bow, player));
+		return getArrow(player) != null;
 	}
 
 	/**
@@ -443,7 +404,8 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		// Player must have a standard arrow to construct bomb arrow from bomb or bomb bag
 		boolean hasArrow = (player.capabilities.isCreativeMode || player.inventory.hasItem(Item.arrow.itemID));
 		// Flag whether the bomb arrow was already determined and items need not be consumed
-		boolean hasAutoArrow = hasAutoArrow(bow);
+		boolean hasAutoArrow = ZSSPlayerInfo.get(player).hasAutoBombArrow;
+
 		for (int i = 0; i < player.inventory.getSizeInventory() && arrow == null; ++i) {
 			ItemStack stack = player.inventory.getStackInSlot(i);
 			if (stack != null) {
@@ -465,7 +427,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 									bombBag.addBombs(stack, bombArrow);
 								}
 							} else {
-								PlayerUtils.consumeInventoryItems(player, bombArrow);
+								PlayerUtils.consumeInventoryItem(player, bombArrow, 1);
 							}
 						}
 					}
@@ -481,7 +443,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 			}
 		}
 
-		setHasAutoArrow(bow, arrow != null);
+		ZSSPlayerInfo.get(player).hasAutoBombArrow = (arrow != null);
 		return arrow;
 	}
 
@@ -715,7 +677,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		@Override
 		public boolean canFireArrow(ItemStack arrow, World world, EntityPlayer player, float charge) {
 			ItemStack bow = player.getHeldItem();
-			if (bow != null) {
+			if (bow != null) { // allow creative players to shoot custom Zelda arrows using any bow
 				return (bow.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) bow.getItem()).canShootArrow(player, bow, arrow) : player.capabilities.isCreativeMode);
 			}
 			return false;

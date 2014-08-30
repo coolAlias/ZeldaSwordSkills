@@ -55,6 +55,7 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(i++), OpenGuiPacket.class);
 		builder.put(Integer.valueOf(i++), PacketISpawnParticles.class);
 		builder.put(Integer.valueOf(i++), PlaySoundPacket.class);
+		builder.put(Integer.valueOf(i++), SetNockedArrowPacket.class);
 		builder.put(Integer.valueOf(i++), SpawnLeapingBlowPacket.class);
 		builder.put(Integer.valueOf(i++), SpawnNayruParticlesPacket.class);
 		builder.put(Integer.valueOf(i++), SyncEntityInfoPacket.class);
