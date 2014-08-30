@@ -168,14 +168,7 @@ public class ZSSClientEvents
 		mouseKey = event.button - 100;
 		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.keyCode);
 		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.keyCode);
-		if (event.button == -1 && event.dwheel == 0) {
-			return;
-		} else if ((!isAttackKey && !isUseKey)) {
-			if (event.buttonstate) { // pass mouse clicks to custom key handler when pressed
-				ZSSKeyHandler.onKeyPressed(mc, getKeyBindFromCode(mouseKey));
-			} else {
-				ZSSKeyHandler.onKeyReleased(mc, getKeyBindFromCode(mouseKey));
-			}
+		if ((event.button == -1 && event.dwheel == 0) || (!isAttackKey && !isUseKey)) {
 			return;
 		}
 		EntityPlayer player = mc.thePlayer;

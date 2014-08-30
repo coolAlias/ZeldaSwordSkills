@@ -103,80 +103,56 @@ public class ZSSKeyHandler extends KeyHandler
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
 		if (tickEnd && mc.thePlayer != null) {
-			onKeyPressed(mc, kb);
+			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+			if (mc.inGameHasFocus && skills != null) {
+				if (kb == keys[KEY_SKILL_ACTIVATE]) {
+					if (skills.hasSkill(SkillBase.swordBasic)) {
+						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBasic).makePacket());
+					}
+				} else if (kb == keys[KEY_BOMB]) {
+					// prevent player from holding RMB while getting bombs, as it can crash the game
+					if (mc.gameSettings.keyBindUseItem.pressed) {
+						KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.keyCode, false);
+					}
+					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
+				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
+					if (mc.thePlayer.isSneaking()) {
+						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggletp",
+								(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					} else {
+						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
+								(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					}
+				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
+					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+				} else if (kb == keys[KEY_SKILLS_GUI]) {
+					PacketDispatcher.sendPacketToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS).makePacket());
+				} else {
+					handleTargetingKeys(mc, kb, skills);
+				}
+			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer instanceof ContainerSkills) {
+				KeyBinding.setKeyBindState(kb.keyCode, false);
+				mc.thePlayer.closeScreen();
+			}
 		}
 	}
 
 	@Override
 	public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
 		if (tickEnd) {
-			onKeyReleased(mc, kb);
-		}
-	}
-
-	/**
-	 * Reciprocal version of {@link #onKeyReleased}, to be called when a key is pressed.
-	 * Call for any key code, mouse or keyboard, to handle custom key bindings that may
-	 * have been remapped to mouse. From MouseEvent, ONLY call this method when the mouse
-	 * key is pressed, not when it is released (i.e. when event.buttonstate is true).
-	 * @param mc	Pass in Minecraft instance, since this is a static method
-	 * @param kb	The key binding pressed; NULL is acceptable
-	 */
-	public static void onKeyPressed(Minecraft mc, KeyBinding kb) {
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
-		if (mc.inGameHasFocus && skills != null) {
-			if (kb == keys[KEY_SKILL_ACTIVATE]) {
-				if (skills.hasSkill(SkillBase.swordBasic)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBasic).makePacket());
+			if (kb == keys[KEY_BLOCK]) {
+				keys[KEY_BLOCK].pressed = false;
+			} else if (kb == keys[KEY_ATTACK]) {
+				keys[KEY_ATTACK].pressed = false;
+				ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+				if (skills.hasSkill(SkillBase.armorBreak)) {
+					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, false);
 				}
-			} else if (kb == keys[KEY_BOMB]) {
-				// prevent player from holding RMB while getting bombs, as it can crash the game
-				if (mc.gameSettings.keyBindUseItem.pressed) {
-					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.keyCode, false);
-				}
-				PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
-			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
-				if (mc.thePlayer.isSneaking()) {
-					mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggletp",
-							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
-				} else {
-					mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
-							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
-				}
-			} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
-				GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
-			} else if (kb == keys[KEY_SKILLS_GUI]) {
-				PacketDispatcher.sendPacketToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS).makePacket());
-			} else {
-				handleTargetingKeys(mc, kb, skills);
+			} else if (kb == keys[KEY_LEFT]) {
+				keys[KEY_LEFT].pressed = false;
+			} else if (kb == keys[KEY_RIGHT]) {
+				keys[KEY_RIGHT].pressed = false;
 			}
-		} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer instanceof ContainerSkills) {
-			KeyBinding.setKeyBindState(kb.keyCode, false);
-			mc.thePlayer.closeScreen();
-		}
-	}
-
-	/**
-	 * Reciprocal version of {@link #onKeyPressed}, to be called when a key is released.
-	 * Call for any key code, mouse or keyboard, to handle custom key bindings that may
-	 * have been remapped to mouse. From MouseEvent, ONLY call this method when the mouse
-	 * key is released, not when it is pressed (i.e. when event.buttonstate is false).
-	 * @param mc	Pass in Minecraft instance, since this is a static method
-	 * @param kb	The key binding pressed; NULL is acceptable
-	 */
-	public static void onKeyReleased(Minecraft mc, KeyBinding kb) {
-		if (kb == keys[KEY_BLOCK]) {
-			keys[KEY_BLOCK].pressed = false;
-		} else if (kb == keys[KEY_ATTACK]) {
-			keys[KEY_ATTACK].pressed = false;
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
-			if (skills.hasSkill(SkillBase.armorBreak)) {
-				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, false);
-			}
-		} else if (kb == keys[KEY_LEFT]) {
-			keys[KEY_LEFT].pressed = false;
-		} else if (kb == keys[KEY_RIGHT]) {
-			keys[KEY_RIGHT].pressed = false;
 		}
 	}
 
