@@ -21,8 +21,7 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.packet.Packet;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -31,36 +30,40 @@ import com.google.common.io.ByteArrayDataOutput;
 
 import cpw.mods.fml.relauncher.Side;
 
+/**
+ * 
+ * Sent from the Mask Trader's GUI with the mask the player borrowed.
+ *
+ */
 public class BorrowMaskPacket extends CustomPacket
 {
-	private NBTTagCompound item;
+	private ItemStack mask;
 
 	public BorrowMaskPacket() {}
-	
+
 	public BorrowMaskPacket(ItemStack mask) {
-		item = new NBTTagCompound();
-		mask.writeToNBT(item);
+		this.mask = mask;
 	}
 
 	@Override
 	public void write(ByteArrayDataOutput out) throws IOException {
-		CompressedStreamTools.write(item, out);
+		out.writeByte(mask == null ? (byte) 0 : (byte) 1);
+		if (mask != null) {
+			Packet.writeItemStack(mask, out);
+		}
 	}
 
 	@Override
 	public void read(ByteArrayDataInput in) throws IOException {
-		item = CompressedStreamTools.read(in);
+		mask = (in.readByte() > 0 ? Packet.readItemStack(in) : null);
 	}
 
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isServer()) {
-			try {
-				ItemStack mask = ItemStack.loadItemStackFromNBT(item);
+			if (mask != null) {
 				PlayerUtils.addItemToInventory(player, mask);
 				ZSSPlayerInfo.get(player).setBorrowedMask(mask.getItem());
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 	}
