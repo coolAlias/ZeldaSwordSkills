@@ -80,15 +80,15 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 	protected final float spread;
 
 	/** Maps the seed types to seed Items for consuming seed shot */
-	private static final Map<SeedType, Integer> typeToSeed = new EnumMap(SeedType.class);
+	private static final Map<SeedType, Item> typeToSeed = new EnumMap(SeedType.class);
 
 	public static void initializeSeeds(){
-		typeToSeed.put(SeedType.COCOA, Item.dyePowder.itemID);
-		typeToSeed.put(SeedType.DEKU, ZSSItems.dekuNut.itemID);
-		typeToSeed.put(SeedType.GRASS, Item.seeds.itemID);
-		typeToSeed.put(SeedType.MELON, Item.melonSeeds.itemID);
-		typeToSeed.put(SeedType.NETHERWART, Item.netherStalkSeeds.itemID);
-		typeToSeed.put(SeedType.PUMPKIN, Item.pumpkinSeeds.itemID);
+		typeToSeed.put(SeedType.COCOA, Item.dyePowder);
+		typeToSeed.put(SeedType.DEKU, ZSSItems.dekuNut);
+		typeToSeed.put(SeedType.GRASS, Item.seeds);
+		typeToSeed.put(SeedType.MELON, Item.melonSeeds);
+		typeToSeed.put(SeedType.NETHERWART, Item.netherStalkSeeds);
+		typeToSeed.put(SeedType.PUMPKIN, Item.pumpkinSeeds);
 	}
 
 	public ItemSlingshot(int id) {
@@ -183,8 +183,8 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 
 		world.playSoundAtEntity(player, Sounds.BOW_RELEASE, 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
 		if (!player.capabilities.isCreativeMode) {
-			int seedId = typeToSeed.get(type);
-			PlayerUtils.consumeInventoryItem(player, seedId, seedId == Item.dyePowder.itemID ? 3 : 0);
+			Item seed = typeToSeed.get(type);
+			PlayerUtils.consumeInventoryItem(player, seed, seed == Item.dyePowder ? 3 : 0, 1);
 		}
 	}
 

@@ -19,6 +19,7 @@ package zeldaswordskills.util;
 
 import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
@@ -138,46 +139,48 @@ public class PlayerUtils
 	}
 
 	/**
-	 * Metadata-sensitive version of consumeInventoryItem
+	 * Returns true if the required number of item were removed from the player's inventory;
+	 * if the entire quantity is not present, then no items are removed.
 	 */
-	public static boolean consumeInventoryItem(EntityPlayer player, int id, int meta) {
-		for (int i = 0; i < player.inventory.getSizeInventory(); ++i) {
-			ItemStack stack = player.inventory.getStackInSlot(i);
-			if (stack != null && stack.itemID == id && stack.getItemDamage() == meta) {
-				--stack.stackSize;
-				if (stack.stackSize == 0) {
-					player.inventory.setInventorySlotContents(i, null);
-				}
-				return true;
-			}
-		}
-		return false;
+	public static boolean consumeInventoryItem(EntityPlayer player, Item item, int required) {
+		return consumeInventoryItem(player, item, 0, required);
 	}
 
 	/**
-	 * Returns true if the provided ItemStack was consumed
-	 * The method is stackSize sensitive, consuming the exact amount as the argument
+	 * Calls {@link #consumeInventoryItem} with the stack's item and damage value
 	 */
-	public static boolean consumeInventoryItems(EntityPlayer player, ItemStack stack) {
-		int required = stack.stackSize;
-		for (int i = 0; i < player.inventory.getSizeInventory() && required > 0; ++i) {
+	public static boolean consumeInventoryItem(EntityPlayer player, ItemStack stack, int required) {
+		return consumeInventoryItem(player, stack.getItem(), stack.getItemDamage(), required);
+	}
+
+	/**
+	 * A metadata-sensitive version of {@link InventoryPlayer#consumeInventoryItem(int)}
+	 * @param item	The type of item to consume
+	 * @param meta	The required damage value of the stack
+	 * @param required	The number of such items to consume
+	 * @return	True if the entire amount was consumed; if this is not possible, no items are consumed and it returns false
+	 */
+	public static boolean consumeInventoryItem(EntityPlayer player, Item item, int meta, int required) {
+		// decremented until it reaches zero, meaning the entire required amount was consumed
+		int consumed = required;
+		for (int i = 0; i < player.inventory.getSizeInventory() && consumed > 0; ++i) {
 			ItemStack invStack = player.inventory.getStackInSlot(i);
-			if (invStack != null && invStack.getItem() == stack.getItem() && invStack.getItemDamage() == stack.getItemDamage()) {
-				if (invStack.stackSize <= required) {
-					required -= invStack.stackSize;
+			if (invStack != null && invStack.getItem() == item && invStack.getItemDamage() == meta) {
+				if (invStack.stackSize <= consumed) {
+					consumed -= invStack.stackSize;
 					player.inventory.setInventorySlotContents(i, null);
 				} else {
-					player.inventory.setInventorySlotContents(i, invStack.splitStack(invStack.stackSize - required));
-					required = 0;
+					player.inventory.setInventorySlotContents(i, invStack.splitStack(invStack.stackSize - consumed));
+					consumed = 0;
 					break;
 				}
 			}
 		}
-		if (required > 0) {
-			player.inventory.addItemStackToInventory(new ItemStack(stack.getItem(), stack.stackSize - required, stack.getItemDamage()));
+		if (consumed > 0) {
+			player.inventory.addItemStackToInventory(new ItemStack(item, required - consumed, meta));
 		}
 
-		return required == 0;
+		return consumed == 0;
 	}
 
 	/**

@@ -134,7 +134,7 @@ public class ItemTreasure extends Item
 					}
 				} else if (trade != null && villagerInfo.isInterested(treasure, stack)) {
 					ItemStack required = trade.getSecondItemToBuy();
-					if (required == null || PlayerUtils.consumeInventoryItems(player, trade.getSecondItemToBuy())) {
+					if (required == null || PlayerUtils.consumeInventoryItem(player, required, required.stackSize)) {
 						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.setCurrentItemOrArmor(0, trade.getItemToSell());
 						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));

@@ -200,7 +200,7 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 					break;
 				case 2: // need to pay for mask
 					int price = (mask instanceof ItemMask ? ((ItemMask) mask).getBuyPrice() : 16);
-					if (PlayerUtils.consumeInventoryItems(player, new ItemStack(Item.emerald, price))) {
+					if (PlayerUtils.consumeInventoryItem(player, Item.emerald, price)) {
 						PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
 						info.completeCurrentMaskStage();
 						if (info.getCurrentMaskStage() == (maskMap.size() * NUM_STAGES)) {
