@@ -151,7 +151,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 				}
 				magic.setDamage(isUpgraded ? damage * 1.5F : damage);
 				if (!world.isRemote) {
-					WorldUtils.playSoundAtEntity(world, player, Sounds.WHOOSH, 0.4F, 0.5F);
+					WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(magic);
 				}
 				player.addExhaustion(fatigue);
@@ -409,7 +409,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 			} else {
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
 			}
-			WorldUtils.playSoundAtEntity(world, player, Sounds.SWORD_MISS, 0.4F, 0.5F);
+			WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 		}
 		return false;
 	}

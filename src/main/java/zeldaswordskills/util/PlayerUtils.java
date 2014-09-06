@@ -197,10 +197,14 @@ public class PlayerUtils
 	}
 
 	/**
-	 * Plays a sound with randomized volume and pitch.
+	 * Plays a sound at the player's position with randomized volume and pitch.
 	 * Sends a packet to the client to play a sound on the client side only, or
 	 * sends a packet to the server to play a sound on the server for all to hear.
-	 * To avoid playing a sound twice, only call the method from one side or the other, not both.
+	 * 
+	 * To avoid playing a sound twice, only call the method from one side or the
+	 * other, not both. To play a sound directly on the server, use
+	 * {@link WorldUtils#playSoundAtEntity} instead.
+	 * 
 	 * @param f		Volume: nextFloat() * f + add
 	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
 	 */

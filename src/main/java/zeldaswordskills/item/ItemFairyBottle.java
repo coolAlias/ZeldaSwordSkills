@@ -61,7 +61,7 @@ public class ItemFairyBottle extends Item {
 		for (int i = 0; i < InventoryPlayer.getHotbarSize(); ++i) {
 			ItemStack stack = player.inventory.getStackInSlot(i);
 			if (stack != null && stack.getItem() instanceof ItemFairyBottle) {
-				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.FAIRY_LAUGH, 0.4F, 0.5F);
+				WorldUtils.playSoundAtEntity(player, Sounds.FAIRY_LAUGH, 0.4F, 0.5F);
 				player.setHealth(10F);
 				player.inventory.setInventorySlotContents(i, new ItemStack(Item.glassBottle));
 				return true;
@@ -95,7 +95,7 @@ public class ItemFairyBottle extends Item {
 		}
 
 		if (used) {
-			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.CORK, 0.4F, 1.0F);
+			WorldUtils.playSoundAtEntity(player, Sounds.CORK, 0.4F, 1.0F);
 			if (!player.capabilities.isCreativeMode) {
 				--stack.stackSize;
 				if (stack.stackSize <= 0) {

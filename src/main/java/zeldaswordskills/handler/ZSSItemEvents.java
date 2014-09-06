@@ -266,7 +266,7 @@ public class ZSSItemEvents
 				}
 				return true;
 			} else {
-				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.GRUNT, 0.3F, 0.8F);
+				WorldUtils.playSoundAtEntity(player, Sounds.GRUNT, 0.3F, 0.8F);
 			}
 		}
 		return false;

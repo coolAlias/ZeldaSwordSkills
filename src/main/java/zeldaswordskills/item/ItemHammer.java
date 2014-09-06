@@ -97,7 +97,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	@Override
 	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed) {
 		if (!wasSmashed) {
-			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.HAMMER, 0.4F, 0.5F);
+			WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 		}
 	}
 
@@ -113,7 +113,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 
 	@Override
 	public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-		WorldUtils.playSoundAtEntity(attacker.worldObj, attacker, Sounds.HAMMER, 0.4F, 0.5F);
+		WorldUtils.playSoundAtEntity(attacker, Sounds.HAMMER, 0.4F, 0.5F);
 		double dx = 0.15D * (attacker.posX - target.posX);
 		double dz = 0.15D * (attacker.posZ - target.posZ);
 		float f = MathHelper.sqrt_double(dx * dx + dz * dz);
@@ -162,7 +162,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 				}
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);
-				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.LEAPING_BLOW, 0.4F, 0.5F);
+				WorldUtils.playSoundAtEntity(player, Sounds.LEAPING_BLOW, 0.4F, 0.5F);
 				DamageSource specialAttack = new DamageSourceStun("player", player, (int)(60 * charge), 5).setCanStunPlayers().setDamageBypassesArmor();
 				float damage = (weaponDamage * charge) / 2.0F;
 				if (damage > 0.5F) {

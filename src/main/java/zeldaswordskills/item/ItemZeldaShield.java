@@ -121,7 +121,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	 */
 	public void onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
 		ZSSPlayerInfo.get(player).onAttackBlocked(shield, damage);
-		WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.HAMMER, 0.4F, 0.5F);
+		WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 		if (this == ZSSItems.shieldDeku) {
 			if (source.isProjectile() && source.getSourceOfDamage() instanceof IProjectile) {
                 if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
@@ -187,7 +187,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity target) {
 		if (target instanceof EntityLivingBase) {
-			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.HAMMER, 0.4F, 0.5F);
+			WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 			TargetUtils.knockTargetBack((EntityLivingBase) target, player);
 		}
 		return true;
@@ -215,7 +215,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 					DamageSource source = DamageSource.causeFireballDamage(fireball, fireball.shootingEntity);
 					if (canBlockDamage(stack, source) && fireball.attackEntityFrom(DamageSource.causePlayerDamage(player), 1.0F)) {
 						ZSSPlayerInfo.get(player).onAttackBlocked(stack, 1.0F);
-						WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.HAMMER, 0.4F, 0.5F);
+						WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 						break;
 					}
 				}

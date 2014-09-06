@@ -81,7 +81,7 @@ public class ItemDekuLeaf extends Item
 			if (player.onGround) {
 				if (!world.isRemote && getCooldown(stack) == 0) {
 					player.addExhaustion(2.0F);
-					WorldUtils.playSoundAtEntity(world, player, Sounds.WHOOSH, 0.4F, 0.5F);
+					WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));
 					if (!player.capabilities.isCreativeMode) {
 						setCooldown(stack, 15);

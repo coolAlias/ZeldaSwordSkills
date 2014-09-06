@@ -182,19 +182,19 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 			bossBattle.onUpdate(worldObj);
 			if (bossBattle.isFinished()) {
 				bossBattle = null;
-				LogHelper.fine(String.format("Boss battle is finished, removing core block at %d/%d/%d", xCoord, yCoord, zCoord));
+				//LogHelper.fine(String.format("Boss battle is finished, removing core block at %d/%d/%d", xCoord, yCoord, zCoord));
 				removeCoreBlock();
 			}
 		} else if (shouldUpdate()) {
 			//LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
-				LogHelper.finer(String.format("Failed verification at %d/%d/%d; setting blocks to stone", xCoord, yCoord, zCoord));
+				//LogHelper.finer(String.format("Failed verification at %d/%d/%d; setting blocks to stone", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				alreadyVerified = true;
 				if (isBossRoom) {
 					isOpened = true;
 				} else {
-					LogHelper.finer("Calling removeCoreBlock after all blocks set to stone");
+					//LogHelper.finer("Calling removeCoreBlock after all blocks set to stone");
 					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 					removeCoreBlock();
 				}
@@ -209,7 +209,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called only when validation fails during an update, not when block broken
 	 */
 	protected void removeCoreBlock() {
-		LogHelper.fine(String.format("Removing core block from update at %d/%d/%d", xCoord, yCoord, zCoord));
+		//LogHelper.fine(String.format("Removing core block from update at %d/%d/%d", xCoord, yCoord, zCoord));
 		EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 2.5D, zCoord + 0.5D, 16.0D);
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
@@ -225,7 +225,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				}
 			} else {
 				info.addStat(Stats.STAT_SECRET_ROOMS, 1);
-				LogHelper.fine("Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
+				//LogHelper.fine("Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
 				player.triggerAchievement(ZSSAchievements.bombsAway);
 				if (info.getStat(Stats.STAT_SECRET_ROOMS) > 49) {
 					player.triggerAchievement(ZSSAchievements.bombJunkie);
@@ -278,9 +278,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called when core block is broken; re-verifies structure and/or sets all blocks to stone
 	 */
 	public void onBlockBroken() {
-		LogHelper.finer(String.format("Verifying structure after core block broken at %d/%d/%d", xCoord, yCoord, zCoord));
+		//LogHelper.finer(String.format("Verifying structure after core block broken at %d/%d/%d", xCoord, yCoord, zCoord));
 		if (!alreadyVerified) {
-			LogHelper.finer("Wasn't already verified: removing structure after core block broken");
+			//LogHelper.finer("Wasn't already verified: removing structure after core block broken");
 			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			verifyStructure(true);
 		}
@@ -313,9 +313,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 							} else {
 								Block block = (id > 0 ? Block.blocksList[id] : null);
 								if (!(block instanceof IDungeonBlock)) {
-									LogHelper.finer(String.format("Block %s with id %d at %d/%d/%d with is invalid for this structure", block, id, i, j, k));
+									//LogHelper.finer(String.format("Block %s with id %d at %d/%d/%d with is invalid for this structure", block, id, i, j, k));
 									if (++invalid > 2) {
-										LogHelper.finer("Too many invalid blocks during verification; returning false");
+										//LogHelper.finer("Too many invalid blocks during verification; returning false");
 										return false;
 									}
 								}

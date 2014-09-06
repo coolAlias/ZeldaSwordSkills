@@ -147,7 +147,7 @@ public class EntitySwordBeam extends EntityThrowable
 						skill.onImpact(player, false);
 					}
 					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage)) {
-						WorldUtils.playSoundAtEntity(worldObj, entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
+						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
 				}

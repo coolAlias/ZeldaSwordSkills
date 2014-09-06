@@ -75,7 +75,7 @@ public class EntityCeramicJar extends EntityThrowable
 			worldObj.spawnParticle("tilecrack_" + ZSSBlocks.ceramicJar.blockID + "_0", posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
 		}
 
-		WorldUtils.playSoundAtEntity(worldObj, this, Sounds.BREAK_JAR, 0.4F, 0.5F);
+		WorldUtils.playSoundAtEntity(this, Sounds.BREAK_JAR, 0.4F, 0.5F);
 
 		if (stack == null && rand.nextFloat() < Config.getJarDropChance()) {
 			stack = ChestGenHooks.getInfo(DungeonLootLists.JAR_DROPS).getOneItem(rand);

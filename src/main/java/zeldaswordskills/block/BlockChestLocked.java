@@ -124,7 +124,7 @@ public class BlockChestLocked extends BlockContainer
 			if (!isChest) {
 				world.setBlockMetadataWithNotify(x, y, z, meta, 3);
 			}
-			WorldUtils.playSoundAtEntity(world, player, Sounds.LOCK_CHEST, 0.4F, 0.5F);
+			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_CHEST, 0.4F, 0.5F);
 
 			// copy the old inventory to the new chest
 			TileEntity chest = world.getBlockTileEntity(x, y, z);
@@ -136,7 +136,7 @@ public class BlockChestLocked extends BlockContainer
 			}
 			return true;
 		} else {
-			WorldUtils.playSoundAtEntity(world, player, Sounds.LOCK_RATTLE, 0.4F, 0.5F);
+			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.4F, 0.5F);
 		}
 		return false;
 	}

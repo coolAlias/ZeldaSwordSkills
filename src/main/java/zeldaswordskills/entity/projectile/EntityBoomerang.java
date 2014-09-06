@@ -159,7 +159,7 @@ public class EntityBoomerang extends EntityMobThrowable
 			setDead();
 		} else {
 			if (ticksExisted % 4 == 0) {
-				WorldUtils.playSoundAtEntity(worldObj, this, Sounds.SWORD_MISS, 0.4F, 0.5F);
+				WorldUtils.playSoundAtEntity(this, Sounds.SWORD_MISS, 0.4F, 0.5F);
 			}
 			captureDrops();
 			captureXpOrbs();

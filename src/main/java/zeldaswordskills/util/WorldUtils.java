@@ -274,8 +274,8 @@ public class WorldUtils
 	 * @param f		Volume: nextFloat() * f + add
 	 * @param add	Pitch: 1.0F / (nextFloat() * f + add)
 	 */
-	public static void playSoundAtEntity(World world, Entity entity, String sound, float f, float add) {
-		playSoundAt(world, entity.posX, entity.posY, entity.posZ, sound, f, add);
+	public static void playSoundAtEntity(Entity entity, String sound, float f, float add) {
+		playSoundAt(entity.worldObj, entity.posX, entity.posY, entity.posZ, sound, f, add);
 	}
 
 	/**

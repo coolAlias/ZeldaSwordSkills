@@ -156,7 +156,7 @@ public class EntityLeapingBlow extends EntityThrowable
 				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.entityId) && entity != getThrower()) {
 					affectedEntities.add(entity.entityId);
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
-						WorldUtils.playSoundAtEntity(worldObj, entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
+						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
 						if (entity instanceof EntityLivingBase) {
 							((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.weakness.id, 60));
 						}

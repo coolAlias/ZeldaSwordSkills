@@ -95,7 +95,7 @@ public class ItemKeyBig extends Item
 		if (world.getBlockId(x, y, z) == ZSSBlocks.doorLocked.blockID) {
 			if (stack.getItemDamage() == (world.getBlockMetadata(x, y, z) & ~0x8)) {
 				--stack.stackSize;
-				WorldUtils.playSoundAtEntity(world, player, Sounds.LOCK_DOOR, 0.4F, 0.5F);
+				WorldUtils.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.4F, 0.5F);
 				world.setBlockToAir(x, y, z);
 				return true;
 			}

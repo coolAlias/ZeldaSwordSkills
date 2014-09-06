@@ -198,7 +198,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		if (event.isCanceled()) {
 			// May not be needed: make sure bow does not have an arrow 'nocked' in NBT if no longer in use
 			if (player.getItemInUse() == null && getArrow(player) != null) {
-				LogHelper.warning("Removing arrow from bow when not in use after nock event");
+				//LogHelper.warning("Removing arrow from bow when not in use after nock event");
 				setArrow(player, null);
 			}
 			return event.result;

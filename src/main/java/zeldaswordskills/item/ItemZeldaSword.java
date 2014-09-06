@@ -279,7 +279,7 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
 			}
 		}
-		WorldUtils.playSoundAtEntity(world, player, Sounds.SWORD_MISS, 0.4F, 0.5F);
+		WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 		return false;
 	}
 
