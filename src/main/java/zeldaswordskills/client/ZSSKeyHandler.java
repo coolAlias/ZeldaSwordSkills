@@ -33,18 +33,13 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.inventory.ContainerSkills;
+import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.network.GetBombPacket;
 import zeldaswordskills.network.OpenGuiPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.skills.sword.ArmorBreak;
-import zeldaswordskills.skills.sword.Dodge;
-import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.skills.sword.SpinAttack;
-import zeldaswordskills.skills.sword.SwordBreak;
-import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.TickType;
@@ -131,28 +126,18 @@ public class ZSSKeyHandler extends KeyHandler
 					handleTargetingKeys(mc, kb, skills);
 				}
 			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer instanceof ContainerSkills) {
-				KeyBinding.setKeyBindState(kb.keyCode, false);
 				mc.thePlayer.closeScreen();
 			}
 		}
 	}
 
+	/**
+	 * Only fires for custom key bindings, not all keys
+	 */
 	@Override
 	public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
 		if (tickEnd) {
-			if (kb == keys[KEY_BLOCK]) {
-				keys[KEY_BLOCK].pressed = false;
-			} else if (kb == keys[KEY_ATTACK]) {
-				keys[KEY_ATTACK].pressed = false;
-				ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
-				if (skills.hasSkill(SkillBase.armorBreak)) {
-					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, false);
-				}
-			} else if (kb == keys[KEY_LEFT]) {
-				keys[KEY_LEFT].pressed = false;
-			} else if (kb == keys[KEY_RIGHT]) {
-				keys[KEY_RIGHT].pressed = false;
-			}
+			kb.pressed = false;
 		}
 	}
 
@@ -161,6 +146,7 @@ public class ZSSKeyHandler extends KeyHandler
 	 */
 	private static void handleTargetingKeys(Minecraft mc, KeyBinding kb, ZSSPlayerInfo skills) {
 		ILockOnTarget skill = skills.getTargetingSkill();
+		// key interaction is disabled if the player is stunned or a skill animation is in progress
 		boolean canInteract = skills.canInteract() && !ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN);
 
 		if (skill == null || !skill.isLockedOn()) {
@@ -170,59 +156,34 @@ public class ZSSKeyHandler extends KeyHandler
 			skill.getNextTarget(mc.thePlayer);
 		} else if (kb == keys[KEY_ATTACK]) {
 			Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
-			if (canInteract && !(mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed))) {
-				keys[KEY_ATTACK].pressed = true;
-			} else {
+			boolean flag = (heldItem instanceof ItemHeldBlock || (mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
+			if (canInteract && !flag) {
+				kb.pressed = true;
+			} else if (!flag) {
+				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(kb, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, kb, mc.thePlayer);
+					return;
 				}
-				return;
 			}
-			if (heldItem != null) {
-				if (skills.shouldSkillActivate(SkillBase.dash)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-				} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
-					ZSSClientEvents.performComboAttack(mc, skill);
-				} else if (skills.shouldSkillActivate(SkillBase.swordBeam)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
-				} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
-					ZSSClientEvents.performComboAttack(mc, skill);
-				} else {
+			// Only allow attack key to continue processing if it was set to pressed
+			if (kb.pressed) {
+				// Nayru's Love prevents skill activation, but can still attack
+				if (skills.isNayruActive() || !skills.onKeyPressed(mc, kb)) {
 					ZSSClientEvents.performComboAttack(mc, skill);
 				}
-				// handle separately so can attack and begin charging without pressing key twice
+				// hack for Armor Break to begin charging without having to press attack again
 				if (skills.hasSkill(SkillBase.armorBreak)) {
-					((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(mc.thePlayer, true);
-				}
-			} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
-			} else {
-				ZSSClientEvents.performComboAttack(mc, skill);
-			}
-		} else if (kb == keys[KEY_LEFT] || kb == keys[KEY_RIGHT]) {
-			if (kb == keys[KEY_RIGHT]) {
-				keys[KEY_RIGHT].pressed = true;
-			} else {
-				keys[KEY_LEFT].pressed = true;
-			}
-			if (canInteract) {
-				if (skills.hasSkill(SkillBase.dodge) && mc.thePlayer.onGround) {
-					((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed(kb, mc.thePlayer);
-				}
-				if (skills.hasSkill(SkillBase.spinAttack)) {
-					((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(kb, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, kb, mc.thePlayer);
 				}
 			}
-		} else if (kb == keys[KEY_DOWN] && canInteract) {
-			if (PlayerUtils.isUsingItem(mc.thePlayer) && skills.hasSkill(SkillBase.swordBreak)) {
-				((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(mc.thePlayer);
-			} else if (skills.hasSkill(SkillBase.parry)) {
-				((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(mc.thePlayer);
+		} else if (canInteract) {
+			// always allowed to block, but other keys only allowed if Nayru's Love not active
+			kb.pressed = (kb == keys[KEY_BLOCK] || !skills.isNayruActive());
+			// Nayru's Love prevents all skill interaction
+			if (!skills.isNayruActive()) {
+				skills.onKeyPressed(mc, kb);
 			}
-		} else if (kb == keys[KEY_BLOCK] && canInteract) {
-			keys[KEY_BLOCK].pressed = true;
 		}
 	}
 }

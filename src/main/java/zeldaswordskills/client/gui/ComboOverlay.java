@@ -50,22 +50,22 @@ public class ComboOverlay extends Gui
 
 	/** Texture location for the targeting overlay */
 	//private static final ResourceLocation targetTexture = new ResourceLocation(ModInfo.ID, "textures/gui/targeting_overlay.png");
-	
+
 	/** Height and width of the targeting overlay texture */
 	//private static final int HEIGHT = 15, WIDTH = 15;
-	
+
 	/** Rotation timer for targeting display */
 	//private int rotation = 0;
-	
+
 	/** Combo to display will update as combo updates, should fade after some time */
 	private Combo combo = null;
-	
+
 	/** Used to detect changes in the combo size */
 	private int lastComboSize = 0;
-	
+
 	/** Time at which the current combo first started displaying */
 	private long displayStartTime;
-	
+
 	/** Length of time combo pop-up will display */
 	private static final long DISPLAY_TIME = 5000;
 
@@ -88,7 +88,7 @@ public class ComboOverlay extends Gui
 			}
 		}
 	}
-	
+
 	/**
 	 * Displays current combo data if applicable
 	 */
@@ -105,7 +105,7 @@ public class ComboOverlay extends Gui
 				}
 			}
 		}
-		
+
 		if (combo != null && combo.getSize() > 0) {
 			// combo has changed, reset time
 			if (lastComboSize != combo.getSize()) {
@@ -122,7 +122,8 @@ public class ComboOverlay extends Gui
 				for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
 					mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
 				}
-				if (skills.canUseSkill(SkillBase.endingBlow)) {
+				// for Ending Blow, use canUse instead of canExecute to determine whether notification should be displayed
+				if (skills.getActiveSkill(SkillBase.endingBlow) != null && skills.getActiveSkill(SkillBase.endingBlow).canUse(mc.thePlayer)) {
 					ICombo skill = skills.getComboSkill();
 					ILockOnTarget target = skills.getTargetingSkill();
 					if (skill != null && skill.isComboInProgress() && target != null && target.getCurrentTarget() == skill.getCombo().getLastEntityHit()) {
@@ -132,7 +133,7 @@ public class ComboOverlay extends Gui
 			}
 		}
 	}
-	
+
 	/**
 	 * Displays the targeting overlay with an appropriate scale for the distance given
 	 */
@@ -145,7 +146,7 @@ public class ComboOverlay extends Gui
 		Vec3 vec3 = mc.thePlayer.getLookVec();
 		rotation += 15;
 		rotation %= 360;
-		
+
 		zLevel = -90.0F;
 		mc.getTextureManager().bindTexture(targetTexture);
 		GL11.glPushMatrix();
@@ -163,8 +164,8 @@ public class ComboOverlay extends Gui
 		GL11.glDepthMask(true);
 		GL11.glPopMatrix();
 	}
-	*/
-	
+	 */
+
 	public static void drawTexturedQuadFit(double x, double y, double width, double height, double zLevel){
 		Tessellator tessellator = Tessellator.instance;
 		tessellator.startDrawingQuads();

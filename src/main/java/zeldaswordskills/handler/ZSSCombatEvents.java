@@ -52,17 +52,11 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.AddExhaustionPacket;
-import zeldaswordskills.network.MortalDrawPacket;
 import zeldaswordskills.network.UnpressKeyPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
-import zeldaswordskills.skills.sword.Dodge;
-import zeldaswordskills.skills.sword.EndingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
-import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.skills.sword.RisingCut;
-import zeldaswordskills.skills.sword.SwordBreak;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -133,27 +127,7 @@ public class ZSSCombatEvents
 		}
 		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
-			if (skills.isSkillActive(SkillBase.dodge)) {
-				event.setCanceled(((Dodge) skills.getPlayerSkill(SkillBase.dodge)).dodgeAttack(player));
-			} else if (skills.isSkillActive(SkillBase.parry)) {
-				if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
-					EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
-					event.setCanceled(((Parry) skills.getPlayerSkill(SkillBase.parry)).parryAttack(player, attacker));
-				}
-			} else if (skills.isSkillActive(SkillBase.swordBreak)) {
-				if (event.source.getSourceOfDamage() instanceof EntityLivingBase) {
-					EntityLivingBase attacker = (EntityLivingBase) event.source.getSourceOfDamage();
-					event.setCanceled(((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).breakAttack(player, attacker));
-				}
-			} else if (skills.isSkillActive(SkillBase.mortalDraw) && event.source.getEntity() != null) {
-				if (!player.worldObj.isRemote) {
-					if (((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, event.source.getEntity())) {
-						PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
-						event.setCanceled(true);
-					}
-				}
-			}
+			ZSSPlayerInfo.get(player).onBeingAttacked(event);
 			// prevent non-entity sources of fire damage here to avoid hurt animation while in fire / lava
 			if (event.source.isFireDamage() && event.source.getSourceOfDamage() == null && !event.isCanceled()) {
 				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
@@ -164,7 +138,7 @@ public class ZSSCombatEvents
 			if (evade > 0.0F) {
 				float penalty = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_DOWN) * 0.01F;
 				if (entity.worldObj.rand.nextFloat() < evade - penalty) {
-					WorldUtils.playSoundAtEntity(entity.worldObj, entity, Sounds.SWORD_MISS, 0.4F, 0.5F);
+					WorldUtils.playSoundAtEntity(entity, Sounds.SWORD_MISS, 0.4F, 0.5F);
 					event.setCanceled(true);
 				}
 			}
@@ -185,6 +159,7 @@ public class ZSSCombatEvents
 					Entity opponent = event.source.getEntity();
 					boolean shouldBlock = opponent != null;
 					if (shouldBlock) {
+						// thanks again to Battlegear2 for the following code snippet
 						double dx = opponent.posX - player.posX;
 						double dz;
 						for (dz = opponent.posZ - player.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D) {
@@ -226,9 +201,11 @@ public class ZSSCombatEvents
 			}
 			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof IArmorBreak && event.source.damageType.equals("player")) {
 				float damage = (event.ammount * ((IArmorBreak) player.getHeldItem().getItem()).getPercentArmorIgnored() * 0.01F);
-				// use dirty accessor to avoid checking / setting hurt resistant time
+				// use dirty accessor to avoid checking / setting hurt resistant time, which
+				// allows the current remaining damage to process normally and the armor break
+				// damage to be applied from the second event posted from #damageEntity
 				DirtyEntityAccessor.damageEntity(event.entityLiving, DamageUtils.causeIArmorBreakDamage(player), damage);
-				event.ammount -= damage;
+				event.ammount -= damage; // subtract armor break damage
 			}
 		}
 
@@ -256,18 +233,10 @@ public class ZSSCombatEvents
 				combo.onPlayerHurt(player, event);
 			}
 		}
+		// final call for active skills to modify damage
 		// update combo last, after all resistances and weaknesses are accounted for
 		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.source.getEntity();
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
-			if (skills.isSkillActive(SkillBase.risingCut)) {
-				((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onImpact(event.entity);
-			} else if (skills.isSkillActive(SkillBase.endingBlow)) {
-				((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).onImpact(player, event);
-			}
-			if (skills.getComboSkill() != null) {
-				skills.getComboSkill().onHurtTarget(player, event);
-			}
+			ZSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onPostImpact(event);
 		}
 
 		handleSecondaryEffects(event);

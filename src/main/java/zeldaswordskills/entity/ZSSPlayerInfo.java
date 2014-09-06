@@ -19,10 +19,14 @@ package zeldaswordskills.entity;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
@@ -34,6 +38,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -112,11 +118,15 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Stores information on the player's skills */
 	private final Map<Byte, SkillBase> skills;
 
-	/** ID of currently active skill that prevents left-mouse button interaction */
-	private int currentActiveSkillId = -1;
+	/**
+	 * Currently active skill that {@link SkillActive#hasAnimation() has an animation};
+	 * it may or may not currently be {@link SkillActive#isAnimating() animating}
+	 */
+	@SideOnly(Side.CLIENT)
+	private SkillActive animatingSkill;
 
-	/** Currently active skill */
-	//private List<SkillActive> activeSkills = new LinkedList<SkillActive>();
+	/** Currently active skills */
+	private final List<SkillActive> activeSkills = new LinkedList<SkillActive>();
 
 	/** Number of Super Spin Attack orbs received from the Great Fairy: used to prevent exploits */
 	private int fairySpinOrbsReceived = 0;
@@ -193,6 +203,15 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		skills.clear();
 		fairySpinOrbsReceived = 0;
 		PacketDispatcher.sendPacketToPlayer(new SyncPlayerInfoPacket(this).setReset().makePacket(), (Player) player);
+	}
+
+	/**
+	 * Validates each skill upon player respawn, ensuring all bonuses are correct
+	 */
+	public final void validateSkills() {
+		for (SkillBase skill : skills.values()) {
+			skill.validateSkill(player);
+		}
 	}
 
 	/**
@@ -356,65 +375,98 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Returns true if the given skill may be activated; i.e. the player has the skill
-	 * and {@link SkillActive#canExecute(EntityPlayer) skill.canExecute} returns true.
-	 * Note that this does not guarantee the skill will successfully activate, but only
-	 * that the initial conditions are correct (e.g. all necessary keys pressed)
-	 */
-	@SideOnly(Side.CLIENT)
-	public boolean shouldSkillActivate(SkillBase skill) {
-		SkillActive active = getActiveSkill(skill);
-		return active != null && active.canExecute(player);
-	}
-
-	/**
-	 * Returns true if the player can currently use the skill; i.e. the player has the skill
-	 * and {@link SkillActive#canUse(EntityPlayer) skill.canUse} returns true. This implies
-	 * that the skill will trigger successfully if activated.
-	 */
-	public boolean canUseSkill(SkillBase skill) {
-		SkillActive active = getActiveSkill(skill);
-		return active != null && active.canUse(player);
-	}
-
-	/**
 	 * Returns true if the player has the skill and the skill is currently active
 	 */
 	public boolean isSkillActive(SkillBase skill) {
-		if (skill instanceof SkillActive && skills.containsKey(skill.getId())) {
-			return (getSkillLevel(skill) > 0 && ((SkillActive) skills.get(skill.getId())).isActive());
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Adds the just-activated skill to the current list of active skills
-	 */
-	/*public void onSkillActivated(SkillActive skill) {
-		activeSkills.add(skill);
-	}*/
-
-	/** Used only for skills that disable left-mouse click interactions */
-	public void setCurrentActiveSkill(SkillBase skill) {
-		currentActiveSkillId = skill.getId();
-	}
-
-	/**
-	 * Returns whether skill interactions are currently allowed, i.e. no other skill is in progress
-	 */
-	public boolean canInteract() {
-		/*for (SkillActive skill : activeSkills) {
-			if (!skill.isActive()) {
-				activeSkills.remove(skill);
-			} else if (!skill.allowsInteraction()) {
-				return false;
+		for (SkillActive active : activeSkills) {
+			if (active.getId() == skill.getId()) {
+				return active.isActive();
 			}
-		}*/
-		if (currentActiveSkillId > -1 && !isSkillActive(SkillBase.getSkill(currentActiveSkillId))) {
-			currentActiveSkillId = -1;
 		}
-		return currentActiveSkillId == -1;
+		return false;
+	}
+
+	/**
+	 * Returns the {@link #animatingSkill}, which may be null
+	 */
+	@SideOnly(Side.CLIENT)
+	public SkillActive getCurrentlyAnimatingSkill() {
+		return animatingSkill;
+	}
+
+	/**
+	 * This method is called automatically from {@link #onSkillActivated} for each skill activated.
+	 * @param skill If this skill {@link SkillActive#hasAnimation has an animation}, it will be set
+	 * 				as the currently animating skill.
+	 */
+	@SideOnly(Side.CLIENT)
+	public void setCurrentlyAnimatingSkill(SkillActive skill) {
+		animatingSkill = (skill == null || skill.hasAnimation() ? skill : animatingSkill);
+	}
+
+	/**
+	 * Returns whether key/mouse input and skill interactions are currently allowed,
+	 * i.e. the {@link #animatingSkill} is either null or not currently animating
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean canInteract() {
+		// don't set the current skill to null just yet if it is still animating
+		// this allows skills to prevent key/mouse input without having to be 'active'
+		if (animatingSkill != null && !animatingSkill.isActive() && !animatingSkill.isAnimating()) {
+			animatingSkill = null;
+		}
+		return animatingSkill == null || !animatingSkill.isAnimating();
+	}
+
+	/**
+	 * Call when a key is pressed to pass the key press to the player's skills'
+	 * {@link SkillActive#keyPressed keyPressed} method, but only if the skill returns
+	 * true from {@link SkillActive#isKeyListener isKeyListener} for the key pressed.
+	 * The first skill to return true from keyPressed precludes any remaining skills
+	 * from receiving the key press.
+	 * @return	True if a listening skill's {@link SkillActive#keyPressed} signals that the key press was handled
+	 */
+	@SideOnly(Side.CLIENT)
+	public boolean onKeyPressed(Minecraft mc, KeyBinding key) {
+		for (SkillBase skill : skills.values()) {
+			if (skill instanceof SkillActive && ((SkillActive) skill).isKeyListener(mc, key)) {
+				if (((SkillActive) skill).keyPressed(mc, key, player)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Called from LivingAttackEvent to trigger {@link SkillActive#onBeingAttacked} for each
+	 * currently active skill, potentially canceling the event. If the event is canceled, it
+	 * returns immediately without processing any remaining active skills.
+	 */
+	public void onBeingAttacked(LivingAttackEvent event) {
+		for (SkillActive skill : activeSkills) {
+			if (skill.isActive() && skill.onBeingAttacked(player, event.source)) {
+				event.setCanceled(true);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Called from LivingHurtEvent to trigger {@link SkillActive#postImpact} for each
+	 * currently active skill, potentially altering the value of event.ammount, as
+	 * well as calling {@link ICombo#onHurtTarget onHurtTarget} for the current ICombo.
+	 */
+	public void onPostImpact(LivingHurtEvent event) {
+		for (SkillActive skill : activeSkills) {
+			if (skill.isActive()) {
+				event.ammount = skill.postImpact(player, event.entityLiving, event.ammount);
+			}
+		}
+		// combo gets updated last, after all damage modifications are completed
+		if (getComboSkill() != null) {
+			getComboSkill().onHurtTarget(player, event);
+		}
 	}
 
 	/**
@@ -470,36 +522,55 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		}
 	}
 
-	/** Returns true if the player successfully activates his/her skill */
+	/**
+	 * Call after activating any skill to ensure it is added to the list of 
+	 * current active skills and set as the currently animating skill
+	 */
+	private void onSkillActivated(World world, SkillActive skill) {
+		if (skill.isActive()) {
+			activeSkills.add(skill);
+		}
+		if (world.isRemote) {
+			setCurrentlyAnimatingSkill(skill);
+		}
+	}
+
+	/**
+	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
+	 */
 	public boolean activateSkill(World world, SkillBase skill) {
 		return activateSkill(world, skill.getId());
 	}
 
 	/**
-	 * Returns true if the player successfully activates his/her skill
+	 * Returns true if the player has this skill and {@link SkillActive#activate} returns true
 	 */
 	public boolean activateSkill(World world, byte id) {
-		if (skills.containsKey(id) && skills.get(id) instanceof SkillActive) {
-			return ((SkillActive) skills.get(id)).activate(world, player);
-		} else {
-			return false;
+		SkillBase skill = skills.get(id);
+		if (skill instanceof SkillActive && ((SkillActive) skill).activate(world, player)) {
+			onSkillActivated(world, (SkillActive) skill);
+			return true;
 		}
+		return false;
 	}
 
-	/** Returns true if the skill was triggered (e.g. activated without player input) */
+	/**
+	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
+	 */
 	public boolean triggerSkill(World world, SkillBase skill) {
 		return triggerSkill(world, skill.getId());
 	}
 
 	/**
-	 * Returns true if the skill was successfully triggered (e.g. activated without player input)
+	 * Returns true if the player has this skill and {@link SkillActive#trigger} returns true
 	 */
 	public boolean triggerSkill(World world, byte id) {
-		if (skills.containsKey(id) && skills.get(id) instanceof SkillActive) {
-			return ((SkillActive) skills.get(id)).trigger(world, player);
-		} else {
-			return false;
+		SkillBase skill = skills.get(id);
+		if (skill instanceof SkillActive && ((SkillActive) skill).trigger(world, player, true)) {
+			onSkillActivated(world, (SkillActive) skill);
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -539,8 +610,17 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		if (hasAutoBombArrow && (player.getItemInUse() == null || !(player.getItemInUse().getItem() instanceof ItemHeroBow))) {
 			hasAutoBombArrow = false;
 		}
+		// let skill's update tick occur first
 		for (SkillBase skill : skills.values()) {
 			skill.onUpdate(player);
+		} // and then remove from active list if no longer active
+		// must use iterators to avoid concurrent modification exceptions to list
+		Iterator<SkillActive> iterator = activeSkills.iterator();
+		while (iterator.hasNext()) {
+			SkillActive skill = iterator.next();
+			if (!skill.isActive()) {
+				iterator.remove();
+			}
 		}
 		if (player.worldObj.isRemote) {
 			if (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed && isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null) {
@@ -602,15 +682,6 @@ public final class ZSSPlayerInfo implements IExtendedEntityProperties
 		}
 		info.validateSkills();
 		PacketDispatcher.sendPacketToPlayer(new SyncPlayerInfoPacket(info).makePacket(), (Player) player);
-	}
-
-	/**
-	 * Validates each skill upon player respawn, ensuring all bonuses are correct
-	 */
-	public final void validateSkills() {
-		for (SkillBase skill : skills.values()) {
-			skill.validateSkill(player);
-		}
 	}
 
 	@Override

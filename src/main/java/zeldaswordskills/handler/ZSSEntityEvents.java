@@ -61,38 +61,34 @@ import cpw.mods.fml.common.network.Player;
 public class ZSSEntityEvents
 {
 	/**
-	 * NOTE 1: Leaping Blow's onImpact method is client-side only
-	 * NOTE 2: LivingFallEvent is only called when not in Creative mode
+	 * NOTE: LivingFallEvent is not called in Creative mode, so must
+	 * 		also listen for {@link PlayerFlyableFallEvent}
+	 * Should receive canceled to make sure LeapingBlow triggers/deactivates
 	 */
-	@ForgeSubscribe
+	@ForgeSubscribe(receiveCanceled=true)
 	public void onFall(LivingFallEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
-			if (event.entity.worldObj.isRemote && skills.isSkillActive(SkillBase.leapingBlow)) {
+			if (skills.isSkillActive(SkillBase.leapingBlow)) {
 				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
 			}
-			if (skills.reduceFallAmount > 0.0F) {
+			if (!event.isCanceled() && skills.reduceFallAmount > 0.0F) {
 				event.distance -= skills.reduceFallAmount;
 				skills.reduceFallAmount = 0.0F;
 			}
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null
+		if (!event.isCanceled() && event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null
 				&& event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
 			event.distance -= 5.0F;
 		}
 	}
 
-	/**
-	 * NOTE: Leaping Blow's onImpact method is client-side only
-	 */
 	@ForgeSubscribe
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
 		ZSSPlayerInfo skills = ZSSPlayerInfo.get(event.entityPlayer);
-		if (skills != null && event.entityPlayer.worldObj.isRemote) {
-			if (skills.isSkillActive(SkillBase.leapingBlow)) {
-				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.entityPlayer, event.distance);
-			}
+		if (skills.isSkillActive(SkillBase.leapingBlow)) {
+			((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.entityPlayer, event.distance);
 		}
 	}
 
@@ -101,13 +97,17 @@ public class ZSSEntityEvents
 		if (event.entityLiving.getHeldItem() != null && event.entityLiving.getHeldItem().getItem() == ZSSItems.rocsFeather) {
 			event.entityLiving.motionY += (event.entityLiving.isSprinting() ? 0.30D : 0.15D);
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS) != null
-				&& event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS).getItem() == ZSSItems.bootsPegasus) {
+		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS) != null && event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS).getItem() == ZSSItems.bootsPegasus) {
 			event.entityLiving.motionY += 0.15D;
+			if (event.entity instanceof EntityPlayer) {
+				ZSSPlayerInfo.get((EntityPlayer) event.entity).reduceFallAmount += 1.0F;
+			}
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null
-				&& event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
+		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null && event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
 			event.entityLiving.motionY += 0.30D;
+			if (event.entity instanceof EntityPlayer) {
+				ZSSPlayerInfo.get((EntityPlayer) event.entity).reduceFallAmount += 5.0F;
+			}
 		}
 	}
 

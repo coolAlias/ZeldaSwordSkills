@@ -1,6 +1,6 @@
 /**
     Copyright (C) <2014> <coolAlias>
-    
+
     @author original credits go to diesieben07
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
@@ -48,6 +48,8 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(i++), AttackBlockedPacket.class);
 		builder.put(Integer.valueOf(i++), BombTickPacket.class);
 		builder.put(Integer.valueOf(i++), BorrowMaskPacket.class);
+		builder.put(Integer.valueOf(i++), DashImpactPacket.class);
+		builder.put(Integer.valueOf(i++), DeactivateSkillPacket.class);
 		builder.put(Integer.valueOf(i++), EndComboPacket.class);
 		builder.put(Integer.valueOf(i++), GetBombPacket.class);
 		builder.put(Integer.valueOf(i++), InLiquidPacket.class);
@@ -55,8 +57,8 @@ public abstract class CustomPacket {
 		builder.put(Integer.valueOf(i++), OpenGuiPacket.class);
 		builder.put(Integer.valueOf(i++), PacketISpawnParticles.class);
 		builder.put(Integer.valueOf(i++), PlaySoundPacket.class);
+		builder.put(Integer.valueOf(i++), RefreshSpinPacket.class);
 		builder.put(Integer.valueOf(i++), SetNockedArrowPacket.class);
-		builder.put(Integer.valueOf(i++), SpawnLeapingBlowPacket.class);
 		builder.put(Integer.valueOf(i++), SpawnNayruParticlesPacket.class);
 		builder.put(Integer.valueOf(i++), SyncEntityInfoPacket.class);
 		builder.put(Integer.valueOf(i++), SyncPlayerInfoPacket.class);
@@ -77,7 +79,7 @@ public abstract class CustomPacket {
 			return clazz.newInstance();
 		}
 	}
-	
+
 	public static class ProtocolException extends Exception {
 		/** Automatically generated serial version UID */
 		private static final long serialVersionUID = -7850212538983273200L;
@@ -101,7 +103,7 @@ public abstract class CustomPacket {
 			throw new RuntimeException("Packet " + getClass().getSimpleName() + " is missing a mapping!");
 		}
 	}
-	
+
 	public final Packet makePacket() {
 		ByteArrayDataOutput dataOut = ByteStreams.newDataOutput();
 		try {
@@ -117,17 +119,17 @@ public abstract class CustomPacket {
 	}
 
 	public abstract void write(ByteArrayDataOutput out) throws IOException;
-	
+
 	public abstract void read(ByteArrayDataInput in) throws IOException;
-	
+
 	public abstract void execute(EntityPlayer player, Side side) throws ProtocolException;
-	
+
 	public void process(ByteArrayDataInput in, EntityPlayer player, Side side)
 			throws IOException, ProtocolException {
 		read(in);
 		execute(player, side);
 	}
-	
+
 	/**
 	 * Adapted to a public version from Minecraft's Packet class method
 	 */

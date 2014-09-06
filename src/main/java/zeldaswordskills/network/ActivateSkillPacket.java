@@ -30,13 +30,16 @@ import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
- * Attempts to activate a skill for player. When activated on the server, a packet is automatically
- * sent to the client, so skills shouldn't be manually activated client side.
- *
+ * Send from the client when activating a skill (such as from {@link SkillActive#keyPressed});
+ * if the server determines that it is allowed, the skill will be activated and this packet
+ * sent back to the client to activate the skill on the client side as well.
+ * 
+ * See {@link SkillActive#activate} and {@link SkillActive#trigger}.
+ * 
  */
 public class ActivateSkillPacket extends CustomPacket
 {
-	/** If true, calls triggerSkill(), otherwise uses activateSkill() */
+	/** If true, calls {@link ZSSPlayerInfo#triggerSkill}, otherwise uses {@link ZSSPlayerInfo#activateSkill} */
 	private boolean wasTriggered = false;
 	
 	/** Skill to activate */

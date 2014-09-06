@@ -19,19 +19,24 @@ package zeldaswordskills.skills.sword;
 
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -82,7 +87,7 @@ public class SwordBeam extends SkillActive
 		desc.add(getDamageDisplay(getDamageFactor(player), false) + "%");
 		desc.add(getRangeDisplay(12 + level));
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
-				String.format("%.1f", getHealthAllowance() / 2.0F)));
+				String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
 
@@ -92,9 +97,23 @@ public class SwordBeam extends SkillActive
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean canExecute(EntityPlayer player) {
-		return player.isSneaking() && canUse(player);
+	protected float getExhaustion() {
+		return 2.0F - (0.1F * level);
+	}
+
+	/** Returns true if players current health is within the allowed limit */
+	private boolean checkHealth(EntityPlayer player) {
+		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= Config.getHealthAllowance(level);
+	}
+
+	/** The percent of base sword damage that should be inflicted, as an integer */
+	private int getDamageFactor(EntityPlayer player) {
+		return 30 + (level * 10);
+	}
+
+	/** Returns player's base damage (with sword) plus 1.0F per level */
+	private float getDamage(EntityPlayer player) {
+		return (float)((double)(getDamageFactor(player)) * 0.01D * player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
 	}
 
 	@Override
@@ -103,9 +122,52 @@ public class SwordBeam extends SkillActive
 				&& PlayerUtils.isHoldingSword(player);
 	}
 
+	/**
+	 * Player must be on ground to prevent conflict with RisingCut
+	 */
 	@Override
-	protected float getExhaustion() {
-		return 2.0F - (0.1F * level);
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return player.onGround && player.isSneaking() && canUse(player);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		return (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (canExecute(player)) {
+			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	protected boolean onActivated(World world, EntityPlayer player) {
+		if (!world.isRemote) {
+			missTimer = 12 + level;
+			WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
+			Vec3 vec3 = player.getLookVec();
+			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level);
+			beam.setDamage(getDamage(player));
+			beam.setMasterSword(PlayerUtils.isHoldingMasterSword(player));
+			beam.setPosition(beam.posX + vec3.xCoord * 2, beam.posY + vec3.yCoord * 2, beam.posZ + vec3.zCoord * 2);
+			world.spawnEntityInWorld(beam);
+		} else {
+			player.swingItem();
+			player.attackTime = (player.capabilities.isCreativeMode ? 0 : 20 - level);
+		}
+		return true;
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		missTimer = 0;
 	}
 
 	@Override
@@ -121,53 +183,12 @@ public class SwordBeam extends SkillActive
 		}
 	}
 
-	@Override
-	public boolean trigger(World world, EntityPlayer player) {
-		if (super.trigger(world, player)) {
-			player.attackTime = (player.capabilities.isCreativeMode ? 0 : 20 - level);
-			if (!world.isRemote) {
-				missTimer = 12 + level;
-				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.WHOOSH, 0.4F, 0.5F);
-				Vec3 vec3 = player.getLookVec();
-				EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level);
-				beam.setDamage(getDamage(player));
-				beam.setMasterSword(PlayerUtils.isHoldingMasterSword(player));
-				beam.setPosition(beam.posX + vec3.xCoord * 2, beam.posY + vec3.yCoord * 2, beam.posZ + vec3.zCoord * 2);
-				world.spawnEntityInWorld(beam);
-			} else {
-				player.swingItem();
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	/**
-	 * Call upon impacting a target to determine whether combo should be terminated
-	 * @param endCombo true if the combo should be terminated
+	 * Call from {@link EntitySwordBeam#onImpact} to allow handling of ICombo;
+	 * striking an entity sets the missTimer to zero
+	 * @param hitBlock true if sword beam hit a block rather than an entity
 	 */
-	public void onImpact(EntityPlayer player, boolean endCombo) {
-		missTimer = (endCombo && missTimer > 0 ? 1 : 0);
-	}
-
-	/** The amount of health that the player can be missing and still use this skill */
-	private float getHealthAllowance() {
-		return (Config.getBeamRequiresFullHealth() ? 0.0F : (0.6F * level));
-	}
-
-	/** Returns true if players current health is within the allowed limit */
-	private boolean checkHealth(EntityPlayer player) {
-		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= getHealthAllowance();
-	}
-
-	/** The percent of base sword damage that should be inflicted, as an integer */
-	private int getDamageFactor(EntityPlayer player) {
-		return 30 + (level * 10);
-	}
-
-	/** Returns player's base damage (with sword) plus 1.0F per level */
-	private float getDamage(EntityPlayer player) {
-		return (float)((double)(getDamageFactor(player)) * 0.01D * player.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue());
+	public void onImpact(EntityPlayer player, boolean hitBlock) {
+		missTimer = (hitBlock && missTimer > 0 ? 1 : 0);
 	}
 }

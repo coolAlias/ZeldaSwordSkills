@@ -20,9 +20,11 @@ package zeldaswordskills.skills.sword;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
@@ -54,9 +56,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class SwordBreak extends SkillActive
 {
 	/** Timer during which player is considered actively parrying */
-	private int breakTimer = 0;
+	private int breakTimer;
 
-	/** Only for vanilla activation: Current number of ticks remaining before skill will not activate */
+	/** Only for double-tap activation: Current number of ticks remaining before skill will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
@@ -65,7 +67,6 @@ public class SwordBreak extends SkillActive
 
 	public SwordBreak(String name) {
 		super(name);
-		setDisablesLMB();
 	}
 
 	private SwordBreak(SwordBreak skill) {
@@ -91,45 +92,8 @@ public class SwordBreak extends SkillActive
 	}
 
 	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
-	}
-
-	@Override
 	protected float getExhaustion() {
 		return 2.0F - (0.1F * level);
-	}
-
-	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		if (super.activate(world, player)) {
-			breakTimer = getActiveTime();
-			playMissSound = true;
-			if (world.isRemote) {
-				Minecraft.getMinecraft().gameSettings.keyBindUseItem.pressed = false;
-				ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed = false;
-				player.swingItem();
-			}
-		}
-
-		return isActive();
-	}
-
-	@Override
-	public void onUpdate(EntityPlayer player) {
-		if (isActive()) {
-			if (--breakTimer <= getUseDelay() && playMissSound) {
-				playMissSound = false;
-				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_MISS, 0.4F, 0.5F);
-			}
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
-			if (!Config.requiresDoubleTap() && !Minecraft.getMinecraft().gameSettings.keyBindBack.pressed) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
-				ticksTilFail = 0;
-			} else {
-				--ticksTilFail;
-			}
-		}
 	}
 
 	/** Number of ticks that skill will be considered active */
@@ -147,40 +111,95 @@ public class SwordBreak extends SkillActive
 		return (level + 1) * 15;
 	}
 
-	/**
-	 * Sets the key pressed and starts the key timer;
-	 * only used for vanilla control scheme to prevent activation on movement
-	 */
-	@SideOnly(Side.CLIENT)
-	public void keyPressed(EntityPlayer player) {
-		if (!isActive()) {
-			if (Config.requiresDoubleTap() && ticksTilFail > 0) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
-				ticksTilFail = 0;
-			} else {
-				ticksTilFail = (Config.requiresDoubleTap() ? 6 : 3);
-			}
-		}
+	@Override
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
 	}
 
 	/**
-	 * Attempts to block the incoming attack, damaging the attacker's weapon
-	 * @return true if the attack was blocked and the attack event should be canceled
+	 * Only allow activation if player is using item, to prevent clashing with Parry
 	 */
-	public boolean breakAttack(EntityPlayer player, EntityLivingBase attacker) {
-		ItemStack stackToDamage = attacker.getHeldItem();
-		if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isHoldingSkillItem(player)) {
-			breakTimer = getUseDelay(); // only block one attack
-			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
-			playMissSound = false;
-			int dmg = Math.max(getMaxDamage() / 3, player.worldObj.rand.nextInt(getMaxDamage()));
-			stackToDamage.damageItem(dmg, attacker);
-			if (stackToDamage.stackSize <= 0) {
-				player.worldObj.playSoundAtEntity(attacker, Sounds.ITEM_BREAK, 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
-				attacker.setCurrentItemOrArmor(0, null);
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return canUse(player) && PlayerUtils.isUsingItem(player);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		return (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_DOWN] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (canExecute(player)) {
+			if (Config.requiresDoubleTap()) {
+				if (ticksTilFail > 0) {
+					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+					ticksTilFail = 0;
+					return true;
+				} else {
+					ticksTilFail = 6;
+				}
+			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
+				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				return true;
 			}
-			TargetUtils.knockTargetBack(attacker, player);
-			return true;
+		}
+		return false;
+	}
+
+	@Override
+	protected boolean onActivated(World world, EntityPlayer player) {
+		breakTimer = getActiveTime();
+		playMissSound = true;
+		if (world.isRemote) {
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.keyCode, false);
+			KeyBinding.setKeyBindState(ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].keyCode, false);
+			player.swingItem();
+		}
+		return isActive();
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		breakTimer = 0;
+	}
+
+	@Override
+	public void onUpdate(EntityPlayer player) {
+		if (isActive()) {
+			if (--breakTimer <= getUseDelay() && playMissSound) {
+				playMissSound = false;
+				WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
+			}
+		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+			--ticksTilFail;
+		}
+	}
+
+	@Override
+	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
+		if (source.getEntity() instanceof EntityLivingBase) {
+			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
+			ItemStack stackToDamage = attacker.getHeldItem();
+			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isHoldingSkillItem(player)) {
+				breakTimer = getUseDelay(); // only block one attack
+				WorldUtils.playSoundAtEntity(player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
+				playMissSound = false;
+				if (!player.worldObj.isRemote) {
+					int dmg = Math.max(getMaxDamage() / 3, player.worldObj.rand.nextInt(getMaxDamage()));
+					stackToDamage.damageItem(dmg, attacker);
+					if (stackToDamage.stackSize <= 0) {
+						player.worldObj.playSoundAtEntity(attacker, Sounds.ITEM_BREAK, 0.8F, 0.8F + player.worldObj.rand.nextFloat() * 0.4F);
+						attacker.setCurrentItemOrArmor(0, null);
+					}
+				}
+				TargetUtils.knockTargetBack(attacker, player);
+				return true;
+			} // don't deactivate early, as there is a delay between uses
 		}
 		return false;
 	}

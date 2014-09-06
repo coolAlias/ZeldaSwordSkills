@@ -22,8 +22,6 @@ import java.util.EnumSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.render.EntityRendererAlt;
@@ -32,14 +30,7 @@ import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.skills.ILockOnTarget;
-import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.skills.sword.Dodge;
-import zeldaswordskills.skills.sword.EndingBlow;
-import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.skills.sword.RisingCut;
-import zeldaswordskills.skills.sword.SpinAttack;
-import zeldaswordskills.skills.sword.SwordBreak;
-import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.skills.SkillActive;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 import cpw.mods.fml.relauncher.Side;
@@ -47,7 +38,12 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * A render tick handler for updating the player's facing while locked on to a target.
+ * Calls {@link SkillActive#onRenderTick} for currently animating skills and the current
+ * ILockOnTarget skill, if necessary to update the player's view.
+ * 
+ * Updates the current player renderer for transformations (e.g. Giant's Mask).
+ * 
+ * Also handles vanilla movement key presses, since KeyHandler only fires for custom key bindings.
  *
  */
 @SideOnly(Side.CLIENT)
@@ -58,11 +54,8 @@ public class TargetingTickHandler implements ITickHandler
 	/** Allows swapping entity renderer for camera viewpoint when transformed */
 	private EntityRenderer renderer, prevRenderer;
 
-	/** The player whose view will update */
-	private EntityPlayer player = null;
-
-	/** Target from player's currently active ILockOnTarget */
-	private Entity target = null;
+	/** The currently animating skill, if any */
+	private SkillActive skillToAnimate = null;
 
 	/** Whether the left movement key has been pressed; used every tick */
 	boolean isLeftPressed;
@@ -77,61 +70,46 @@ public class TargetingTickHandler implements ITickHandler
 	}
 
 	@Override
-	public String getLabel() { return null; }
+	public String getLabel() {
+		return null;
+	}
 
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
-		player = mc.thePlayer;
-		if (player != null && ZSSPlayerInfo.get(player) != null) {
+		if (mc.thePlayer != null && ZSSPlayerInfo.get(mc.thePlayer) != null) {
 			updateRenderer();
-			if (player.getItemInUse() != null && player.getItemInUse().getItem() instanceof ItemMagicRod) {
-				player.swingProgress = 0.5F;
+			// Hack for magic rods, since the item's update tick isn't called frequently enough
+			if (mc.thePlayer.getItemInUse() != null && mc.thePlayer.getItemInUse().getItem() instanceof ItemMagicRod) {
+				mc.thePlayer.swingProgress = 0.5F;
 			}
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+			// flags whether a skill is currently animating
+			boolean flag = false;
+			skillToAnimate = skills.getCurrentlyAnimatingSkill();
+			if (skillToAnimate != null) {
+				if (skillToAnimate.isAnimating()) {
+					flag = skillToAnimate.onRenderTick(mc.thePlayer);
+				} else if (!skillToAnimate.isActive()) {
+					skills.setCurrentlyAnimatingSkill(null);
+				}
+			}
 			ILockOnTarget skill = skills.getTargetingSkill();
-			if (skill != null) {
-				// Flag is true if an animation is in progress
-				boolean flag = false;
-
-				if (skills.isSkillActive(SkillBase.dodge)) {
-					flag = ((Dodge) skills.getPlayerSkill(SkillBase.dodge)).onRenderTick(player);
-				} else if (skills.isSkillActive(SkillBase.spinAttack)) {
-					flag = ((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).onRenderTick(player);
-				} else if (skills.isSkillActive(SkillBase.risingCut)) {
-					flag = ((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).onRenderTick(player);
+			if (skill != null && skill.isLockedOn()) {
+				if (!flag) {
+					((SkillActive) skill).onRenderTick(mc.thePlayer);
 				}
-				if (!flag && skill.isLockedOn()) {
-					target = skill.getCurrentTarget();
-					updatePlayerView();
-				}
-				if (skill.isLockedOn() && skills.canInteract() && !skills.isNayruActive()) {
+				// Handle vanilla movement keys here, since KeyHandler doesn't fire for vanilla keys
+				if (skills.canInteract() && !skills.isNayruActive()) {
 					if (isVanillaKeyPressed(mc.gameSettings.keyBindJump)) {
-						if (skills.hasSkill(SkillBase.risingCut) && !skills.isSkillActive(SkillBase.risingCut) && !PlayerUtils.isUsingItem(player) && player.isSneaking()) {
-							((RisingCut) skills.getPlayerSkill(SkillBase.risingCut)).keyPressed();
-						} else if (skills.hasSkill(SkillBase.leapingBlow) && !skills.isSkillActive(SkillBase.leapingBlow) && PlayerUtils.isUsingItem(player)) {
-							skills.activateSkill(mc.theWorld, SkillBase.leapingBlow);
-							mc.gameSettings.keyBindUseItem.pressed = false;
-							ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed = false;
-						}
+						skills.onKeyPressed(mc, mc.gameSettings.keyBindJump);
 					} else if (isVanillaKeyPressed(mc.gameSettings.keyBindForward)) {
-						if (skills.hasSkill(SkillBase.endingBlow)) {
-							((EndingBlow) skills.getPlayerSkill(SkillBase.endingBlow)).keyPressed();
-						}
+						skills.onKeyPressed(mc, mc.gameSettings.keyBindForward);
 					} else if (Config.allowVanillaControls()) {
 						isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);
 						if (isLeftPressed || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
-							if (skills.hasSkill(SkillBase.spinAttack)) {
-								((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
-							}
-							if (skills.hasSkill(SkillBase.dodge) && player.onGround) {
-								((Dodge) skills.getPlayerSkill(SkillBase.dodge)).keyPressed((isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight), player);
-							}
+							skills.onKeyPressed(mc, (isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight));
 						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack)) {
-							if (PlayerUtils.isUsingItem(player) && skills.hasSkill(SkillBase.swordBreak)) {
-								((SwordBreak) skills.getPlayerSkill(SkillBase.swordBreak)).keyPressed(player);
-							} else if (skills.hasSkill(SkillBase.parry)) {
-								((Parry) skills.getPlayerSkill(SkillBase.parry)).keyPressed(player);
-							}
+							skills.onKeyPressed(mc, mc.gameSettings.keyBindBack);
 						}
 					}
 				}
@@ -140,10 +118,7 @@ public class TargetingTickHandler implements ITickHandler
 	}
 
 	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		this.player = null;
-		this.target = null;
-	}
+	public void tickEnd(EnumSet<TickType> type, Object... tickData) {}
 
 	/**
 	 * Returns true if a vanilla keybinding is both pressed and isPressed()
@@ -153,23 +128,6 @@ public class TargetingTickHandler implements ITickHandler
 	@SideOnly(Side.CLIENT)
 	private boolean isVanillaKeyPressed(KeyBinding key) {
 		return key.isPressed() && key.pressed;
-	}
-
-	/**
-	 * Rotates the player to face the current target
-	 */
-	private void updatePlayerView() {
-		double dx = player.posX - target.posX;
-		double dz = player.posZ - target.posZ;
-		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
-		double pitch = Math.atan2(player.posY - (target.posY + (target.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
-		double distance = player.getDistanceToEntity(target);
-		float rYaw = (float)(angle - player.rotationYaw);
-		while (rYaw > 180) { rYaw -= 360; }
-		while (rYaw < -180) { rYaw += 360; }
-		rYaw += 90F;
-		float rPitch = (float) pitch - (float)(10.0F / Math.sqrt(distance)) + (float)(distance * Math.PI / 90);
-		player.setAngles(rYaw, -(rPitch - player.rotationPitch));
 	}
 
 	/**

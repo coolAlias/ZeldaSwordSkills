@@ -21,48 +21,50 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.skills.sword.LeapingBlow;
+import zeldaswordskills.util.LogHelper;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 
 import cpw.mods.fml.relauncher.Side;
 
-public class SpawnLeapingBlowPacket extends CustomPacket
+/**
+ * 
+ * Send to either side to {@link SkillActive#deactivate deactivate} a skill.
+ *
+ */
+public class DeactivateSkillPacket extends CustomPacket
 {
-	/** Whether the player was wielding a Master Sword at the time activated */
-	private boolean isMaster;
+	/** Skill to deactivate */
+	private byte skillId;
 
-	public SpawnLeapingBlowPacket() {}
+	public DeactivateSkillPacket() {}
 
-	public SpawnLeapingBlowPacket(boolean isMaster) {
-		this.isMaster = isMaster;
+	public DeactivateSkillPacket(SkillActive skill) {
+		this.skillId = skill.getId();
 	}
 
 	@Override
 	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeBoolean(isMaster);
+		out.writeByte(skillId);
 	}
 
 	@Override
 	public void read(ByteArrayDataInput in) throws IOException {
-		isMaster = in.readBoolean();
+		skillId = in.readByte();
 	}
 
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isServer()) {
-			ZSSPlayerInfo props = ZSSPlayerInfo.get(player);
-			if (props != null) {
-				if (props.hasSkill(SkillBase.leapingBlow)) {
-					((LeapingBlow) props.getPlayerSkill(SkillBase.leapingBlow)).spawnLeapingBlowEntity(player.worldObj, player, isMaster);
-				}
+		if (ZSSPlayerInfo.get(player) != null) {
+			SkillBase skill = ZSSPlayerInfo.get(player).getPlayerSkill(skillId);
+			if (skill instanceof SkillActive) {
+				((SkillActive) skill).deactivate(player);
 			} else {
-				throw new ProtocolException("ZSSPlayerInfo is null while handling Spawn Leaping Blow Packet");
+				LogHelper.warning("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + skillId + " was not valid for this player.");
 			}
-		} else {
-			throw new ProtocolException("Leaping Blow entity can only be spawned on the server");
 		}
 	}
 }

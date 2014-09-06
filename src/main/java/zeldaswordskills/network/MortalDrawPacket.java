@@ -35,7 +35,7 @@ import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
- * Sent to client to sync sword swap on the hotbar and initiate attack
+ * Sent to client upon successful draw, notifying player to attack current target
  *
  */
 public class MortalDrawPacket extends CustomPacket

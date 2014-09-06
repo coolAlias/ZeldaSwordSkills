@@ -31,10 +31,12 @@ import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.AddExhaustionPacket;
+import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.RefreshSpinPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -60,16 +62,17 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class SpinAttack extends SkillActive
 {
-	/** Current charge time */
-	@SideOnly(Side.CLIENT)
+	/** Current charge time; only ever set on the client - server is never charging */
 	private int charge;
 
-	/** Tracks current spin progress */
-	@SideOnly(Side.CLIENT)
+	/** Current spin progress is incremented each tick and signals that the skill is active */
 	private float currentSpin;
 
-	/** Set to true when activated, then back to false when spin 'animation' completed */
-	private boolean isActive = false;
+	/** Number of degrees to spin and used as flag for isActive(); incremented by 360F each time spin is refreshed */
+	private float arc;
+
+	/** Number of times the spin has been 'refreshed' during this activation cycle; incremented in {@link #startSpin} */
+	private int refreshed;
 
 	/** Direction in which to spin */
 	@SideOnly(Side.CLIENT)
@@ -79,16 +82,9 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private boolean wasKeyPressed;
 
-	/** Number of degrees to spin; incremented when keypressed and already active for Super Spin Attack */
-	@SideOnly(Side.CLIENT)
-	private float arc;
-
 	/** Entities within range upon activation so no entity targeted more than once */
 	@SideOnly(Side.CLIENT)
 	private List<EntityLivingBase> targets;
-
-	/** Number of times the spin has been 'refreshed' during this activation cycle */
-	private int refreshed;
 
 	/** Whether flame particles should render along the sword's arc */
 	private boolean isFlaming;
@@ -98,7 +94,6 @@ public class SpinAttack extends SkillActive
 
 	public SpinAttack(String name) {
 		super(name);
-		setDisablesLMB();
 	}
 
 	private SpinAttack(SpinAttack skill) {
@@ -115,7 +110,7 @@ public class SpinAttack extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		byte temp = level;
 		if (!isActive()) {
-			superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+			superLevel = (checkHealth(player) ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
 			level = ZSSPlayerInfo.get(player).getSkillLevel(spinAttack);
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
@@ -137,7 +132,48 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	public boolean isActive() {
-		return isActive;
+		return arc > 0;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isAnimating() {
+		return isActive() && !isCharging();
+	}
+
+	@Override
+	protected float getExhaustion() {
+		return 3.0F - (0.2F * level);
+	}
+
+	/** Returns time required before spin will execute */
+	private int getChargeTime() {
+		return 20 - (level * 2);
+	}
+
+	/** Returns true if the skill is still charging up */
+	private boolean isCharging() {
+		return charge > 0;
+	}
+
+	/** Returns true if the arc may be extended by 360 more degrees */
+	private boolean canRefresh() {
+		return (refreshed < (superLevel + 1) && arc == (360F * refreshed));
+	}
+
+	/** Max sword range for striking targets */
+	private float getRange() {
+		return (3.0F + ((superLevel + level) * 0.5F));
+	}
+
+	/** Returns the spin speed modified based on the skill's level */
+	private float getSpinSpeed() {
+		return 70 + (3 * (superLevel + level));
+	}
+
+	/** Returns true if players current health is within the allowed limit */
+	private boolean checkHealth(EntityPlayer player) {
+		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= Config.getHealthAllowance(level);
 	}
 
 	@Override
@@ -146,86 +182,11 @@ public class SpinAttack extends SkillActive
 	}
 
 	@Override
-	protected float getExhaustion() {
-		return 3.0F - (0.2F * level);
-	}
-
-	/**
-	 * Activation only occurs client side, so server is never notified; this is intentional
-	 */
-	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		// prevents accidental activation on server
-		if (world.isRemote) {
-			isActive = super.activate(world, player);
-			if (isActive()) {
-				refreshed = 0;
-				arc = 360F;
-				charge = getChargeTime();
-				superLevel = (PlayerUtils.getHealthMissing(player) == 0.0F ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
-				isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
-			}
-		}
-		return isActive();
-	}
-
-	/**
-	 * isActive() should return false on the server, so updates only on the client; this is intentional
-	 */
-	@Override
-	public void onUpdate(EntityPlayer player) {
-		if (isActive() && isCharging()) {
-			if (isKeyPressed()) {
-				if (charge < (getChargeTime() - 1)) {
-					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
-				}
-				--charge;
-				if (charge == 0) {
-					startSpin(player.worldObj, player);
-				}
-			} else {
-				isActive = false;
-				charge = 0;
-			}
-		}
-	}
-
-	/** Returns time required before spin will execute */
 	@SideOnly(Side.CLIENT)
-	private int getChargeTime() {
-		return 20 - (level * 2);
-	}
-
-	/** Returns true if the skill is still charging up */
-	@SideOnly(Side.CLIENT)
-	public boolean isCharging() {
-		return charge > 0;
-	}
-
-	/**
-	 * Sets direction of spin and activates skill when left or right arrow key pressed
-	 * or adds extra spin for Super Spin Attack when attack key pressed
-	 */
-	@SideOnly(Side.CLIENT)
-	public void keyPressed(KeyBinding key, EntityPlayer player) {
-		if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || key == Minecraft.getMinecraft().gameSettings.keyBindAttack) {
-			if (PlayerUtils.isHoldingSkillItem(player) && isActive && arc < (360F * (superLevel + 1)) && arc == (360F * refreshed)) {
-				arc += 360F;
-			}
-		} else {
-			// prevents activation of Dodge from interfering with spin direction
-			if (wasKeyPressed) {
-				wasKeyPressed = false;
-			} else {
-				clockwise = (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] ||
-						(Config.allowVanillaControls() && key == Minecraft.getMinecraft().gameSettings.keyBindRight));
-				wasKeyPressed = true;
-			}
-			if (isKeyPressed()) {
-				wasKeyPressed = false;
-				activate(player.worldObj, player);
-			}
-		}
+	public boolean canExecute(EntityPlayer player) {
+		// return super.canUse instead of this.canUse to avoid !isActive() check; allows
+		// canExecute to be checked when refreshing super spin attack
+		return super.canUse(player) && PlayerUtils.isHoldingSkillItem(player);
 	}
 
 	/** Returns true if either left or right arrow key is currently being pressed (or both in the case of vanilla controls) */
@@ -236,55 +197,93 @@ public class SpinAttack extends SkillActive
 						&& Minecraft.getMinecraft().gameSettings.keyBindRight.pressed));
 	}
 
-	/** Max sword range for striking targets */
+	@Override
 	@SideOnly(Side.CLIENT)
-	private float getRange() {
-		return (3.0F + ((superLevel + level) * 0.5F));
-	}
-
-	/** Returns the spin speed modified based on the skill's level */
-	@SideOnly(Side.CLIENT)
-	public float getSpinSpeed() {
-		return 70 + (3 * (superLevel + level));
-	}
-
-	/** Initiates spin attack by populating the nearby target list */
-	@SideOnly(Side.CLIENT)
-	private void startSpin(World world, EntityPlayer player) {
-		++refreshed;
-		PlayerUtils.playRandomizedSound(player, Sounds.SPIN_ATTACK, 0.4F, 0.5F);
-		// TODO PlayerUtils.playSound(player, Sounds.YELL, (world.rand.nextFloat() * 0.4F + 0.5F), world.rand.nextFloat() * 0.2F + 0.95F);
-		PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(getExhaustion()).makePacket());
-		targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(getRange(), 0.0D, getRange()));
-		if (targets.contains(player)) {
-			targets.remove(player);
-		}
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		// attack key is handled separately in order to intercept the key before it may be passed
+		// to other skills; this is necessary to prevent another skill activating while spin attack is active
+		return (//key == mc.gameSettings.keyBindAttack || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] ||
+				(Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
+				key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT] || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT]);
 	}
 
 	/**
-	 * Increments the spin progress counter and terminates the spin once it reaches the max spin arc
+	 * Sets direction of spin and activates skill when left or right arrow key pressed
+	 * or adds extra spin for Super Spin Attack when attack key pressed
+	 * NOTE: Super Spin Attack requires this method to be called explicitly for the
+	 * 		 attack key, since the attack key is normally only processed if canInteract
+	 * 		 returns true, which is not the case while spin attack is active
 	 */
+	@Override
 	@SideOnly(Side.CLIENT)
-	private void incrementSpin(EntityPlayer player) {
-		player.swingProgress = 0.5F;
-		player.setAngles((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
-		// 0.15D is the multiplier from Entity.setAngles
-		currentSpin += getSpinSpeed() * 0.15D;
-		if (currentSpin >= arc) {
-			currentSpin = 0.0F;
-			isActive = false;
-		} else if (currentSpin > (360F * refreshed)) {
-			startSpin(player.worldObj, player);
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (key == mc.gameSettings.keyBindAttack || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK]) {
+			if (isActive() && canRefresh() && canExecute(player)) {
+				PacketDispatcher.sendPacketToServer(new RefreshSpinPacket().makePacket());
+				arc += 360F;
+				return true;
+			}
+		} else if (!isCharging()) {
+			// prevents activation of Dodge from interfering with spin direction
+			if (wasKeyPressed) {
+				wasKeyPressed = false;
+			} else {
+				clockwise = (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || key == mc.gameSettings.keyBindRight);
+				wasKeyPressed = true;
+			}
+			if (isKeyPressed()) {
+				wasKeyPressed = false;
+				charge = getChargeTime();
+				return true;
+			}
 		}
+		return false;
+	}
+
+	@Override
+	protected boolean onActivated(World world, EntityPlayer player) {
+		currentSpin = 0F;
+		arc = 360F;
+		refreshed = 0;
+		superLevel = (checkHealth(player) ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
+		startSpin(world, player);
+		return true;
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		currentSpin = 0.0F;
+		arc = 0.0F;
 	}
 
 	/**
-	 * Updates total spin motion and attacks targets in front of player
-	 * @return returns true if animation is in progress
+	 * isActive() should return false on the server, so updates only on the client; this is intentional
 	 */
+	@Override
+	public void onUpdate(EntityPlayer player) {
+		// isCharging can only be true on the client, which is where charging is handled
+		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
+			if (player.worldObj.isRemote && isKeyPressed()) { 
+				if (charge < (getChargeTime() - 1)) {
+					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
+				}
+				--charge;
+				if (charge == 0) {
+					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				}
+			} else {
+				charge = 0;
+			}
+		} else if (isActive()) {
+			incrementSpin(player);
+		}
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player) {
-		if (!isCharging() && PlayerUtils.isHoldingSkillItem(player)) {
+		if (PlayerUtils.isHoldingSkillItem(player)) {
 			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
 			for (EntityLivingBase target : list) {
 				if (targets != null && targets.contains(target)) {
@@ -293,10 +292,44 @@ public class SpinAttack extends SkillActive
 				}
 			}
 			spawnParticles(player);
-			incrementSpin(player);
-			return true;
+			player.swingProgress = 0.5F;
+			player.setAngles((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
 		}
-		return false;
+		return true;
+	}
+
+	/**
+	 * Initiates spin attack and increments refreshed
+	 * Client populates the nearby target list
+	 * Server plays spin sound and, if not the first spin, adds exhaustion
+	 */
+	private void startSpin(World world, EntityPlayer player) {
+		++refreshed;
+		if (world.isRemote) {
+			targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(getRange(), 0.0D, getRange()));
+			if (targets.contains(player)) {
+				targets.remove(player);
+			}
+		} else {
+			WorldUtils.playSoundAtEntity(player, Sounds.SPIN_ATTACK, 0.4F, 0.5F);
+			if (refreshed > 1) {
+				player.addExhaustion(getExhaustion());
+			}
+		}
+	}
+
+	/**
+	 * Updates the spin progress counter and terminates the spin once it reaches the max spin arc
+	 */
+	private void incrementSpin(EntityPlayer player) {
+		// 0.15D is the multiplier from Entity.setAngles, but that is too little now that no longer in render tick
+		// 0.24D results in a perfect circle per spin, at all levels, taking 21 ticks to complete at level 1, and 15 at level 10
+		currentSpin += getSpinSpeed() * 0.24D;
+		if (currentSpin >= arc) {
+			deactivate(player);
+		} else if (currentSpin > (360F * refreshed)) {
+			startSpin(player.worldObj, player);
+		}
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -309,6 +342,15 @@ public class SpinAttack extends SkillActive
 		double posZ = player.posZ + (vec3.zCoord * getRange());
 		for (int i = 0; i < 2; ++i) {
 			player.worldObj.spawnParticle(particle, posX, posY, posZ, vec3.xCoord * 0.15D, 0.01D, vec3.zCoord * 0.15D);
+		}
+	}
+
+	/**
+	 * Called on the server after receiving the {@link RefreshSpinPacket}
+	 */
+	public void refreshServerSpin(EntityPlayer player) {
+		if (canRefresh() && super.canUse(player) && PlayerUtils.isHoldingSkillItem(player)) {
+			arc += 360F;
 		}
 	}
 }

@@ -627,6 +627,7 @@ skill.zss.parry.desc.activate=While locked on, tap back just as an incoming atta
 skill.zss.parry.desc.full=Parrying is a fundamental defensive skill, even more powerful than blocking as it will completely negate damage when successful, as well as possibly disarming an attacker. The chance to disarm is affected greatly by timing, and is the sole deciding factor amongst opponents of equal skill.\nNote that it is impossible to parry natural attacks such as the feared zombie punch or creeper blast; only attacks with weapons or items may be parried.
 skill.zss.parry.desc.info.1=Base Disarm Chance: %d%%
 skill.zss.parry.desc.info.2=Max Timing Bonus: +%d%%
+skill.zss.parry.desc.info.3=Max Attacks Parried: %d
 skill.zss.parry.desc.tooltip.1=Actively parry incoming attacks
 skill.zss.risingcut.name=Rising Cut
 skill.zss.risingcut.desc.activate=While locked on, crouch by pressing the sneak key, then jump and attack. 

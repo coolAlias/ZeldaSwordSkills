@@ -17,8 +17,6 @@
 
 package zeldaswordskills.entity.projectile;
 
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentThorns;
 import net.minecraft.entity.Entity;
@@ -39,6 +37,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.TargetUtils;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -331,7 +330,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	protected void updateInAir() {
 		++ticksInAir;
-		MovingObjectPosition mop = checkForImpact();
+		MovingObjectPosition mop = TargetUtils.checkForImpact(worldObj, this, shootingEntity, 0.3D, ticksInAir >= 5);
 		if (mop != null) {
 			onImpact(mop);
 		}
@@ -375,57 +374,6 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 						-motionX, -motionY + 0.2D, -motionZ);
 			}
 		}
-	}
-
-	/**
-	 * Returns MovingObjectPosition of Entity or Block impacted, or null if nothing was struck
-	 */
-	protected MovingObjectPosition checkForImpact() {
-		Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
-		Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-		MovingObjectPosition mop = worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
-		vec3 = Vec3.createVectorHelper(posX, posY, posZ);
-		vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-
-		if (mop != null) {
-			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
-		}
-
-		Entity entity = null;
-		List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox.addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
-		double d0 = 0.0D;
-		double hitBox = 0.3D;
-
-		for (int i = 0; i < list.size(); ++i) {
-			Entity entity1 = (Entity) list.get(i);
-			if (entity1.canBeCollidedWith() && (entity1 != shootingEntity || ticksInAir >= 5)) {
-				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
-				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
-
-				if (mop1 != null) {
-					double d1 = vec3.distanceTo(mop1.hitVec);
-					if (d1 < d0 || d0 == 0.0D) {
-						entity = entity1;
-						d0 = d1;
-					}
-				}
-			}
-		}
-
-		if (entity != null) {
-			mop = new MovingObjectPosition(entity);
-		}
-
-		if (mop != null && mop.entityHit instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) mop.entityHit;
-			if (player.capabilities.disableDamage || (shootingEntity instanceof EntityPlayer
-					&& !((EntityPlayer) shootingEntity).canAttackPlayer(player)))
-			{
-				mop = null;
-			}
-		}
-
-		return mop;
 	}
 
 	/**

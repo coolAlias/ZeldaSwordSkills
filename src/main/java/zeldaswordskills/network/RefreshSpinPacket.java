@@ -20,6 +20,10 @@ package zeldaswordskills.network;
 import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
+import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.skills.SkillActive;
+import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.skills.sword.SpinAttack;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -28,38 +32,28 @@ import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
- * Packet to add exhaustion to the player; NOT meant to be used with skills, since those
- * should all be adding exhaustion automatically when activated or from the server side.
+ * Packet to notify server that player is trying to add one more spin to SpinAttack.
  * 
- * Used for ISwingSpeed items to add exhaustion from ZSSCombatEvents#setPlayerAttackTime.
- * 
+ * It does not require any data to be sent other than the packet itself.
+ *
  */
-public class AddExhaustionPacket extends CustomPacket
-{
-	private float amount;
+public class RefreshSpinPacket extends CustomPacket {
 
-	public AddExhaustionPacket() {}
-
-	public AddExhaustionPacket(float amount) {
-		this.amount = amount;
-	}
+	public RefreshSpinPacket() {}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeFloat(amount);
-	}
+	public void write(ByteArrayDataOutput out) throws IOException {}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		this.amount = in.readFloat();
-	}
+	public void read(ByteArrayDataInput in) throws IOException {}
 
 	@Override
 	public void execute(EntityPlayer player, Side side) throws ProtocolException {
 		if (side.isServer()) {
-			player.addExhaustion(amount);
-		} else {
-			throw new ProtocolException("AddExhaustionPacket can only be sent to the server");
+			SkillActive skill = ZSSPlayerInfo.get(player).getActiveSkill(SkillBase.spinAttack);
+			if (skill instanceof SpinAttack && skill.isActive()) {
+				((SpinAttack) skill).refreshServerSpin(player);
+			}
 		}
 	}
 }

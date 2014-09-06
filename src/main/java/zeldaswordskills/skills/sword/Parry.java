@@ -20,13 +20,16 @@ package zeldaswordskills.skills.sword;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
@@ -61,9 +64,12 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class Parry extends SkillActive
 {
 	/** Timer during which player is considered actively parrying */
-	private int parryTimer = 0;
+	private int parryTimer;
 
-	/** Only for vanilla activation: Current number of ticks remaining before skill will not activate */
+	/** Number of attacks parried this activation cycle */
+	private int attacksParried;
+
+	/** Only for double-tap activation: Current number of ticks remaining before skill will not activate */
 	@SideOnly(Side.CLIENT)
 	private int ticksTilFail;
 
@@ -72,7 +78,6 @@ public class Parry extends SkillActive
 
 	public Parry(String name) {
 		super(name);
-		setDisablesLMB();
 	}
 
 	private Parry(Parry skill) {
@@ -91,6 +96,7 @@ public class Parry extends SkillActive
 				(int)(getDisarmChance(player, null) * 100)));
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2),
 				(int)(2.5F * (getActiveTime() - getParryDelay()))));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 3), getMaxParries()));
 		desc.add(getTimeLimitDisplay(getActiveTime() - getParryDelay()));
 		desc.add(getExhaustionDisplay(getExhaustion()));
 	}
@@ -101,41 +107,8 @@ public class Parry extends SkillActive
 	}
 
 	@Override
-	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
-	}
-
-	@Override
 	protected float getExhaustion() {
 		return 0.3F - (0.02F * level);
-	}
-
-	@Override
-	public boolean activate(World world, EntityPlayer player) {
-		if (super.activate(world, player)) {
-			parryTimer = getActiveTime();
-			player.swingItem();
-			playMissSound = true;
-		}
-
-		return isActive();
-	}
-
-	@Override
-	public void onUpdate(EntityPlayer player) {
-		if (isActive()) {
-			if (--parryTimer <= getParryDelay() && playMissSound) {
-				playMissSound = false;
-				WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_MISS, 0.4F, 0.5F);
-			}
-		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
-			if (!Config.requiresDoubleTap() && !Minecraft.getMinecraft().gameSettings.keyBindBack.pressed) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
-				ticksTilFail = 0;
-			} else {
-				--ticksTilFail;
-			}
-		}
 	}
 
 	/** Number of ticks that skill will be considered active */
@@ -148,38 +121,9 @@ public class Parry extends SkillActive
 		return (5 - (level / 2)); // 2 tick usage window at level 1
 	}
 
-	/**
-	 * Sets the key pressed and starts the key timer;
-	 * only used for vanilla control scheme to prevent activation on movement
-	 */
-	@SideOnly(Side.CLIENT)
-	public void keyPressed(EntityPlayer player) {
-		if (!isActive()) {
-			if (Config.requiresDoubleTap() && ticksTilFail > 0) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
-				ticksTilFail = 0;
-			} else {
-				ticksTilFail = (Config.requiresDoubleTap() ? 6 : 3);
-			}
-		}
-	}
-
-	/**
-	 * Attempts to parry the incoming attack and possibly disarms the attacker
-	 * @return true if the attack was parried and the attack event should be canceled
-	 */
-	public boolean parryAttack(EntityPlayer player, EntityLivingBase attacker) {
-		if (parryTimer > getParryDelay() && attacker.getHeldItem() != null && PlayerUtils.isHoldingSkillItem(player)) {
-			parryTimer = getParryDelay(); // fix probable bug where player can disarm multiple opponents at once
-			WorldUtils.playSoundAtEntity(player.worldObj, player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
-			playMissSound = false;
-			TargetUtils.knockTargetBack(attacker, player);
-			if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
-				disarm(attacker);
-			}
-			return true;
-		}
-		return false;
+	/** The maximum number of attacks that may be parried per use of the skill */
+	private int getMaxParries() {
+		return (1 + level) / 2;
 	}
 
 	/**
@@ -188,19 +132,103 @@ public class Parry extends SkillActive
 	 * of being disarmed
 	 */
 	private float getDisarmChance(EntityPlayer player, EntityLivingBase attacker) {
-		float penalty = 0.0F;
+		float penalty = (0.15F * attacksParried);
 		float bonus = Config.getDisarmTimingBonus() * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
 		if (attacker instanceof EntityPlayer) {
-			penalty = Config.getDisarmPenalty() * ZSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
+			penalty += Config.getDisarmPenalty() * ZSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
 		}
 		return ((level * 0.1F) - penalty + bonus);
+	}
+
+	@Override
+	public boolean canUse(EntityPlayer player) {
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
+	}
+
+	/**
+	 * Only allow activation if player not using item, to prevent clashing with SwordBreak
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean canExecute(EntityPlayer player) {
+		return canUse(player) && !PlayerUtils.isUsingItem(player);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
+		return (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_DOWN] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
+		if (canExecute(player)) {
+			if (Config.requiresDoubleTap()) {
+				if (ticksTilFail > 0) {
+					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+					ticksTilFail = 0;
+					return true;
+				} else {
+					ticksTilFail = 6;
+				}
+			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
+				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	protected boolean onActivated(World world, EntityPlayer player) {
+		parryTimer = getActiveTime();
+		attacksParried = 0;
+		playMissSound = true;
+		player.swingItem();
+		return isActive();
+	}
+
+	@Override
+	protected void onDeactivated(World world, EntityPlayer player) {
+		parryTimer = 0;
+	}
+
+	@Override
+	public void onUpdate(EntityPlayer player) {
+		if (isActive()) {
+			if (--parryTimer <= getParryDelay() && playMissSound) {
+				playMissSound = false;
+				WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
+			}
+		} else if (player.worldObj.isRemote && ticksTilFail > 0) {
+			--ticksTilFail;
+		}
+	}
+
+	@Override
+	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
+		if (source.getEntity() instanceof EntityLivingBase) {
+			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
+			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItem() != null && PlayerUtils.isHoldingSkillItem(player)) {
+				if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
+					disarm(attacker);
+				}
+				++attacksParried; // increment after disarm
+				WorldUtils.playSoundAtEntity(player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
+				playMissSound = false;
+				TargetUtils.knockTargetBack(attacker, player);
+				return true;
+			} // don't deactivate early, as there is a delay between uses
+		}
+		return false;
 	}
 
 	/**
 	 * Drops attacker's held item into the world
 	 */
 	private void disarm(EntityLivingBase attacker) {
-		if (attacker.getHeldItem() != null) {
+		if (attacker.getHeldItem() != null && !attacker.worldObj.isRemote) {
 			EntityItem drop = new EntityItem(attacker.worldObj, attacker.posX,
 					attacker.posY - 0.30000001192092896D + (double) attacker.getEyeHeight(),
 					attacker.posZ, attacker.getHeldItem().copy());

@@ -135,7 +135,7 @@ public class Config
 	/*================== SKILLS =====================*/
 	/** Whether to use default movement controls to activate skills such as Dodge */
 	private static boolean allowVanillaControls;
-	/** Whether Dodge and Parry require double-tap or not */
+	/** Whether Dodge and Parry require double-tap or not (double-tap always required for vanilla movement keys) */
 	private static boolean doubleTap;
 	/** Max number of bonus 1/2 hearts (capped at 80) */
 	private static int maxBonusHearts;
@@ -149,8 +149,8 @@ public class Config
 	private static int disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
 	private static int disarmPenalty;
-	/** [Sword Beam] Whether to require a completely full health bar to use */
-	private static boolean beamRequiresFullHealth;
+	/** [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
+	private static boolean requireFullHealth;
 	/*================== DUNGEON GEN =====================*/
 	/** Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected */
 	private static boolean avoidModBlocks;
@@ -298,12 +298,12 @@ public class Config
 		allowVanillaControls = config.get("Skills", "Allow vanilla controls to activate skills", true).getBoolean(true);
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
 		enablePlayerTarget = config.get("Skills", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
-		doubleTap = config.get("Skills", "Require double tap activation", true).getBoolean(true);
+		doubleTap = config.get("Skills", "Require double tap activation (double-tap always required for vanilla movement keys)", true).getBoolean(true);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
 		disarmTimingBonus = config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
 		disarmPenalty = config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
-		beamRequiresFullHealth = config.get("Skills", "[Sword Beam] Whether to require a completely full health bar to use", false).getBoolean(false);
+		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
 		enableWindows = config.get("Dungeon Generation", "Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
@@ -429,7 +429,10 @@ public class Config
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
 	public static float getDisarmPenalty() { return 0.01F * ((float) MathHelper.clamp_int(disarmPenalty, 0, 20)); }
 	public static float getDisarmTimingBonus() { return 0.001F * ((float) MathHelper.clamp_int(disarmTimingBonus, 0, 50)); }
-	public static boolean getBeamRequiresFullHealth() { return beamRequiresFullHealth; }
+	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
+	public static float getHealthAllowance(int level) {
+		return (requireFullHealth ? 0.0F : (0.6F * level));
+	}
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }

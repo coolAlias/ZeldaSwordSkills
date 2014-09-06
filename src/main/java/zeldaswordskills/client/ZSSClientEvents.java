@@ -17,14 +17,10 @@
 
 package zeldaswordskills.client;
 
-import java.util.Iterator;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.FOVUpdateEvent;
@@ -47,14 +43,10 @@ import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.skills.sword.ArmorBreak;
-import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.util.TargetUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -83,23 +75,6 @@ public class ZSSClientEvents
 
 	public ZSSClientEvents() {
 		this.mc = Minecraft.getMinecraft();
-	}
-
-	/**
-	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
-	 * @param keyCode Will be a negative number for mouse keys, or positive for keyboard
-	 */
-	@SideOnly(Side.CLIENT)
-	public static KeyBinding getKeyBindFromCode(int keyCode) {
-		// Doesn't seem to be an easy way to get the KeyBinding from the key code...
-		Iterator iterator = KeyBinding.keybindArray.iterator();
-		while (iterator.hasNext()) {
-			KeyBinding kb = (KeyBinding) iterator.next();
-			if (kb.keyCode == keyCode) {
-				return kb;
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -157,87 +132,71 @@ public class ZSSClientEvents
 	}
 
 	/**
-	 * Handles mouse clicks for skills, canceling where appropriate; note that left click will
-	 * ALWAYS be canceled, as the attack is passed to {@link #performComboAttack(Minecraft, ILockOnTarget) performComboAttack};
-	 * allowing left click results in the attack processing twice, doubling durability damage to weapons
-	 * no button clicked -1, left button 0, right click 1, middle click 2, possibly 3+ for other buttons
-	 * NOTE: Corresponding key codes for the mouse in Minecraft are (event.button -100)
+	 * Handles mouse clicks for skills, canceling where appropriate; note that while the player
+	 * is locked on with a targeting skill, keyBindAttack will ALWAYS be canceled, as the attack
+	 * is passed to {@link #performComboAttack}; if the event were left uncanceled, the attack
+	 * would process again in the vanilla system, doubling durability damage to weapons
+	 * @buttons no button clicked -1, left button 0, right click 1, middle click 2, possibly 3+ for other buttons
+	 * @notes Corresponding key codes for the mouse in Minecraft are (event.button -100)
 	 */
 	@ForgeSubscribe
 	public void onMouseChanged(MouseEvent event) {
 		mouseKey = event.button - 100;
 		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.keyCode);
 		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.keyCode);
-		if ((event.button == -1 && event.dwheel == 0) || (!isAttackKey && !isUseKey)) {
+		// no wheel, no button: just moving the mouse around
+		// no wheel, unchecked key bound to mouse: passed automatically to the key handler
+		if (event.dwheel == 0 && (event.button == -1 || (!isAttackKey && !isUseKey))) {
 			return;
 		}
-		EntityPlayer player = mc.thePlayer;
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
 		// check pre-conditions for attacking and item use (not stunned, etc.):
 		if (event.buttonstate || event.dwheel != 0) {
-			if (skills.isSkillActive(SkillBase.mortalDraw)) {
-				event.setCanceled(true);
-			} else if (isAttackKey) {
-				Item heldItem = (player.getHeldItem() != null ? player.getHeldItem().getItem() : null);
-				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN) || heldItem instanceof ItemHeldBlock ||
-						(player.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
+			if (isAttackKey) {
+				// hack for spin attack: allows key press information to be received while animating
+				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
+					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+					event.setCanceled(true);
+				} else if (!skills.canInteract() || ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN)) {
+					event.setCanceled(true);
+				} else {
+					Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
+					event.setCanceled(heldItem instanceof ItemHeldBlock || (mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
+				}
 			} else if (isUseKey) {
-				event.setCanceled(ZSSEntityInfo.get(player).isBuffActive(Buff.STUN));
-			}
-		} else if (!event.buttonstate && isAttackKey) {
-			if (skills.hasSkill(SkillBase.armorBreak)) {
-				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, false);
+				event.setCanceled(!skills.canInteract() || ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN));
+			} else { // cancel mouse wheel while animations are in progress
+				event.setCanceled(!skills.canInteract());
 			}
 		}
-		if (event.isCanceled()) {
+		if (event.isCanceled() || !event.buttonstate) {
 			return;
 		}
-		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ILockOnTarget skill = skills.getTargetingSkill();
 		if (skill != null && skill.isLockedOn() && !skills.isNayruActive()) {
-			if (isAttackKey && event.buttonstate) {
-				if (!skills.canInteract()) {
-					if (skills.isSkillActive(SkillBase.spinAttack)) {
-						((SpinAttack) skills.getPlayerSkill(SkillBase.spinAttack)).keyPressed(mc.gameSettings.keyBindAttack, mc.thePlayer);
-					}
-					event.setCanceled(true);
-					return;
-				}
-				// specific held item and other requirements are checked in skill's canExecute method
-				if (Config.allowVanillaControls() && player.getHeldItem() != null) {
-					if (skills.shouldSkillActivate(SkillBase.dash)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.dash).makePacket());
-					} else if (skills.shouldSkillActivate(SkillBase.risingCut)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.risingCut).makePacket());
-						performComboAttack(mc, skill);
-					} else if (skills.shouldSkillActivate(SkillBase.swordBeam)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBeam).makePacket());
-					} else if (skills.shouldSkillActivate(SkillBase.endingBlow)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.endingBlow).makePacket());
-						performComboAttack(mc, skill);
-					} else {
+			if (isAttackKey) {
+				// mouse attack will always be canceled while locked on, as the click has been handled
+				if (Config.allowVanillaControls()) {
+					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
+						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
 					}
-					// handle separately so can attack and begin charging without pressing key twice
+					// hack for Armor Break: allows charging to begin without having to press attack key a second time
 					if (skills.hasSkill(SkillBase.armorBreak)) {
-						((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).keyPressed(player, true);
+						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					}
-				} else if (skills.shouldSkillActivate(SkillBase.mortalDraw)) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.mortalDraw).makePacket());
-				} else { // Vanilla controls not enabled simply attacks; handles possibility of being ICombo
-					performComboAttack(mc, skill);
 				}
 
-				// always cancel left click to prevent weapons taking double durability damage
+				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
+				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
 			} else if (isUseKey && Config.allowVanillaControls()) {
-				if (!skills.canInteract() && event.buttonstate) {
+				if (!skills.canInteract()) {
 					event.setCanceled(true);
 				}
 			}
-		} else { // not locked on to a target, normal item swing
-			if (isAttackKey && event.buttonstate) {
-				ZSSCombatEvents.setPlayerAttackTime(player);
-			}
+		} else if (isAttackKey) { // not locked on to a target, normal item swing
+			ZSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 		}
 	}
 
