@@ -55,7 +55,9 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 	}
 	
 	@Override
-	public int getMobilityFlag() { return 2; }
+	public int getMobilityFlag() {
+		return 2;
+	}
 
 	@Override
 	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta) {

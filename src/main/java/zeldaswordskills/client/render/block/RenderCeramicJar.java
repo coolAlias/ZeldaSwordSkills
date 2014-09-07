@@ -32,7 +32,7 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 public class RenderCeramicJar implements ISimpleBlockRenderingHandler
 {
 	public static final int renderId = RenderingRegistry.getNextAvailableRenderId();
-	
+
 	private final TileEntityCeramicJar jar = new TileEntityCeramicJar();
 
 	public RenderCeramicJar() {}
@@ -52,9 +52,12 @@ public class RenderCeramicJar implements ISimpleBlockRenderingHandler
 	}
 
 	@Override
-	public boolean shouldRender3DInInventory() { return true; }
+	public boolean shouldRender3DInInventory() {
+		return true;
+	}
 
 	@Override
-	public int getRenderId() { return renderId; }
-	
+	public int getRenderId() {
+		return renderId;
+	}
 }

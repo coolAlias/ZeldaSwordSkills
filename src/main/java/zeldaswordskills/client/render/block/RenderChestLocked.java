@@ -17,13 +17,14 @@
 
 package zeldaswordskills.client.render.block;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.world.IBlockAccess;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -31,7 +32,7 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 public class RenderChestLocked implements ISimpleBlockRenderingHandler
 {
 	public static final int renderId = RenderingRegistry.getNextAvailableRenderId();
-	
+
 	private final TileEntityChestLocked chest = new TileEntityChestLocked();
 
 	public RenderChestLocked() {}
@@ -50,9 +51,12 @@ public class RenderChestLocked implements ISimpleBlockRenderingHandler
 	}
 
 	@Override
-	public boolean shouldRender3DInInventory() { return true; }
+	public boolean shouldRender3DInInventory() {
+		return true;
+	}
 
 	@Override
-	public int getRenderId() { return renderId; }
-
+	public int getRenderId() {
+		return renderId;
+	}
 }

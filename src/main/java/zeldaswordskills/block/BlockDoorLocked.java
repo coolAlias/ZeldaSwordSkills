@@ -53,18 +53,22 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundMetalFootstep);
 	}
-	
+
 	@Override
-	public boolean isOpaqueCube() { return false; }
-	
+	public boolean isOpaqueCube() {
+		return false;
+	}
+
 	@Override
-	public int getMobilityFlag() { return 2; }
-	
+	public int getMobilityFlag() {
+		return 2;
+	}
+
 	@Override
 	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
 		return y >= 255 ? false : world.doesBlockHaveSolidTopSurface(x, y - 1, z) && super.canPlaceBlockAt(world, x, y, z) && super.canPlaceBlockAt(world, x, y + 1, z);
 	}
-	
+
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote) {
@@ -77,7 +81,7 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void breakBlock(World world, int x, int y, int z, int oldId, int oldMeta) {
 		y += (oldMeta > 0x7 ? -1 : 1);
@@ -85,7 +89,7 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 			world.setBlockToAir(x, y, z);
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIcon(int side, int meta) {

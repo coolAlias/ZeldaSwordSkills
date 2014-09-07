@@ -63,51 +63,57 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.285F, 0.0F, 0.285F, 0.715F, 0.665F, 0.715F);
 	}
-	
+
 	@Override
 	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
 		return BlockWeight.VERY_LIGHT;
 	}
-	
+
 	@Override
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
 		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 		world.destroyBlock(x, y, z, false);
 		return Result.ALLOW;
 	}
-	
+
 	@Override
 	public int idDropped(int meta, Random rand, int fortune) {
 		return 0;
 	}
-	
+
 	@Override
-	public boolean isOpaqueCube() { return false; }
-	
+	public boolean isOpaqueCube() {
+		return false;
+	}
+
 	@Override
-	public boolean renderAsNormalBlock() { return false; }
-	
+	public boolean renderAsNormalBlock() {
+		return false;
+	}
+
 	@Override
-	public int getRenderType() { return RenderCeramicJar.renderId; }
+	public int getRenderType() {
+		return RenderCeramicJar.renderId;
+	}
 
 	@Override
 	public TileEntity createNewTileEntity(World world) {
 		return new TileEntityCeramicJar();
 	}
-	
+
 	@Override
 	public boolean canDropFromExplosion(Explosion explosion) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean canHarvestBlock(EntityPlayer player, int meta) { return false; }
-	
+
 	@Override
 	public boolean canBlockStay(World world, int x, int y, int z) {
 		return world.isBlockOpaqueCube(x, y - 1, z);
 	}
-	
+
 	@Override
 	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
 		return super.canPlaceBlockAt(world, x, y, z) && world.isBlockOpaqueCube(x, y - 1, z);
@@ -127,7 +133,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 		}
 		super.breakBlock(world, x, y, z, id, meta);
 	}
-	
+
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote && player.getHeldItem() == null) {
@@ -149,7 +155,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
@@ -157,7 +163,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 			world.destroyBlock(x, y, z, false);
 		}
 	}
-	
+
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("jarStack")) {
@@ -168,13 +174,13 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 			}
 		}
 	}
-	
+
 	@Override
 	public void onBlockDestroyedByExplosion(World world, int x, int y, int z, Explosion explosion) {
 		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 		world.destroyBlock(x, y, z, false);
 	}
-	
+
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
 		if (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot) {
@@ -182,7 +188,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 			world.destroyBlock(x, y, z, false);
 		}
 	}
-	
+
 	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, int blockID) {
 		if (!canBlockStay(world, x, y, z)) {
@@ -190,7 +196,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 			world.destroyBlock(x, y, z, false);
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {

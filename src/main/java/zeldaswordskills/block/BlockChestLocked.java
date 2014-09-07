@@ -65,16 +65,24 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	@Override
-	public boolean isOpaqueCube() { return false; }
+	public boolean isOpaqueCube() {
+		return false;
+	}
 
 	@Override
-	public boolean renderAsNormalBlock() { return false; }
+	public boolean renderAsNormalBlock() {
+		return false;
+	}
 
 	@Override
-	public int getMobilityFlag() { return 2; }
+	public int getMobilityFlag() {
+		return 2;
+	}
 
 	@Override
-	public int getRenderType() { return RenderChestLocked.renderId; }
+	public int getRenderType() {
+		return RenderChestLocked.renderId;
+	}
 
 	@Override
 	public TileEntity createNewTileEntity(World world) {
@@ -82,7 +90,9 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) { return false; }
+	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+		return false;
+	}
 
 	@Override
 	public void breakBlock(World world, int x, int y, int z, int id, int meta) {
