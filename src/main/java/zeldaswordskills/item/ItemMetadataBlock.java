@@ -18,22 +18,20 @@
 package zeldaswordskills.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
+import net.minecraft.item.ItemBlockWithMetadata;
+import zeldaswordskills.api.item.IUnenchantable;
 
 /**
  * 
- * For rendering in the inventory as well as implementing uses for each.
+ * Can be used for any generic block with metadata subtypes and no special naming scheme
+ * 
+ * Required since ItemBlockWithMetadata doesn't have a one-Block constructor, and that
+ * causes the game to crash during block registration.
  *
  */
-public class ItemSacredFlame extends ItemMetadataBlock
+public class ItemMetadataBlock extends ItemBlockWithMetadata implements IUnenchantable
 {
-	public ItemSacredFlame(Block block) {
-		super(block);
-	}
-
-	@Override
-	public String getItemStackDisplayName(ItemStack stack) {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal("misc.zss.sacred_flame.name." + stack.getItemDamage());
+	public ItemMetadataBlock(Block block) {
+		super(block, block);
 	}
 }

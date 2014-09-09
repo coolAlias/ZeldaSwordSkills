@@ -23,13 +23,14 @@ import java.util.Map;
 
 import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemSeeds;
@@ -44,10 +45,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.lib.Config;
@@ -71,7 +73,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattlegearWeapon
+public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable, IZoom, IBattlegearWeapon
 {
 	/** The number of seeds this slingshot will fire per shot */
 	protected final int seedsFired;
@@ -83,20 +85,20 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 	private static final Map<SeedType, Item> typeToSeed = new EnumMap(SeedType.class);
 
 	public static void initializeSeeds(){
-		typeToSeed.put(SeedType.COCOA, Item.dyePowder);
+		typeToSeed.put(SeedType.COCOA, Items.dye);
 		typeToSeed.put(SeedType.DEKU, ZSSItems.dekuNut);
-		typeToSeed.put(SeedType.GRASS, Item.seeds);
-		typeToSeed.put(SeedType.MELON, Item.melonSeeds);
-		typeToSeed.put(SeedType.NETHERWART, Item.netherStalkSeeds);
-		typeToSeed.put(SeedType.PUMPKIN, Item.pumpkinSeeds);
+		typeToSeed.put(SeedType.GRASS, Items.wheat_seeds);
+		typeToSeed.put(SeedType.MELON, Items.melon_seeds);
+		typeToSeed.put(SeedType.NETHERWART, Items.nether_wart);
+		typeToSeed.put(SeedType.PUMPKIN, Items.pumpkin_seeds);
 	}
 
-	public ItemSlingshot(int id) {
-		this(id, 1, 0);
+	public ItemSlingshot() {
+		this(1, 0);
 	}
 
-	public ItemSlingshot(int id, int seedsFired, float spread) {
-		super(id);
+	public ItemSlingshot(int seedsFired, float spread) {
+		super();
 		this.seedsFired = seedsFired;
 		this.spread = spread;
 		setFull3D();
@@ -184,7 +186,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 		world.playSoundAtEntity(player, Sounds.BOW_RELEASE, 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
 		if (!player.capabilities.isCreativeMode) {
 			Item seed = typeToSeed.get(type);
-			PlayerUtils.consumeInventoryItem(player, seed, seed == Item.dyePowder ? 3 : 0, 1);
+			PlayerUtils.consumeInventoryItem(player, seed, seed == Items.dye ? 3 : 0, 1);
 		}
 	}
 
@@ -194,14 +196,14 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (trades != null) {
-				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 6 + (2 * seedsFired)));
+				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 6 + (2 * seedsFired)));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
 			}
 		}
 		return true;
@@ -216,7 +218,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 			if (stack != null) {
 				if (stack.getItem() instanceof ItemSeeds || stack.getItem() == ZSSItems.dekuNut) {
 					return true;
-				} else if (stack.getItem() == Item.dyePowder && stack.getItemDamage() == 3) {
+				} else if (stack.getItem() == Items.dye && stack.getItemDamage() == 3) {
 					return true;
 				}
 			}
@@ -230,15 +232,15 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 	protected SeedType getSeedType(EntityPlayer player) {
 		for (ItemStack stack : player.inventory.mainInventory) {
 			if (stack != null) {
-				if (stack.getItem() == Item.seeds) {
+				if (stack.getItem() == Items.wheat_seeds) {
 					return SeedType.GRASS;
-				} else if (stack.getItem() == Item.melonSeeds) {
+				} else if (stack.getItem() == Items.melon_seeds) {
 					return SeedType.MELON;
-				} else if (stack.getItem() == Item.netherStalkSeeds) {
+				} else if (stack.getItem() == Items.nether_wart) {
 					return SeedType.NETHERWART;
-				} else if (stack.getItem() == Item.pumpkinSeeds) {
+				} else if (stack.getItem() == Items.pumpkin_seeds) {
 					return SeedType.PUMPKIN;
-				} else if (stack.getItem() == Item.dyePowder && stack.getItemDamage() == 3) {
+				} else if (stack.getItem() == Items.dye && stack.getItemDamage() == 3) {
 					return SeedType.COCOA;
 				} else if (stack.getItem() == ZSSItems.dekuNut) {
 					return SeedType.DEKU;
@@ -250,7 +252,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
@@ -290,7 +292,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 	 * Checks for and adds any applicable fairy enchantments to the slingshot
 	 */
 	private void addFairyEnchantments(ItemStack stack, EntityPlayer player, TileEntityDungeonCore core) {
-		int hearts = ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart);
+		int hearts = ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart);
 		int divisor = (seedsFired == 1 ? 5 : seedsFired < 4 ? 7 : 10);
 		int newLvl = Math.min((hearts / divisor), Enchantment.power.getMaxLevel());
 		int lvl = newLvl;
@@ -300,7 +302,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("ench")) {
 			NBTTagList enchList = (NBTTagList) stack.getTagCompound().getTag("ench");
 			for (int i = 0; i < enchList.tagCount(); ++i) {
-				NBTTagCompound compound = (NBTTagCompound) enchList.tagAt(i);
+				NBTTagCompound compound = (NBTTagCompound) enchList.getCompoundTagAt(i);
 				if (compound.getShort("id") == Enchantment.power.effectId) {
 					int oldLvl = compound.getShort("lvl");
 					lvl = newLvl - oldLvl;
@@ -333,8 +335,8 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 			player.triggerAchievement(ZSSAchievements.fairyEnchantment);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}
 

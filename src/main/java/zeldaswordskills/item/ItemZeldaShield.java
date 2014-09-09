@@ -24,8 +24,7 @@ import mods.battlegear2.api.core.InventoryPlayerBattle;
 import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -33,6 +32,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -40,7 +40,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
@@ -51,6 +51,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -71,7 +72,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
 public class ItemZeldaShield extends Item implements IDashItem, IFairyUpgrade,
-ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;
@@ -81,15 +82,15 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	private final float bg2RecoveryRate;
 
 	@SideOnly(Side.CLIENT)
-	private Icon backIcon;
+	private IIcon backIcon;
 
 	/**
 	 * @param recoveryTime time in ticks it takes to recover from a block when held normally
 	 * @param decayRate number of seconds it will take the BG2 stamina bar to deplete
 	 * @param recoveryRate number of seconds until BG2 stamina bar will completely replenish
 	 */
-	public ItemZeldaShield(int id, int recoveryTime, float decayRate, float recoveryRate) {
-		super(id);
+	public ItemZeldaShield(int recoveryTime, float decayRate, float recoveryRate) {
+		super();
 		this.recoveryTime = recoveryTime;
 		this.bg2DecayRate = 1F / decayRate / 20F;
 		this.bg2RecoveryRate = 1F / recoveryRate / 20F;
@@ -124,12 +125,12 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 		if (this == ZSSItems.shieldDeku) {
 			if (source.isProjectile() && source.getSourceOfDamage() instanceof IProjectile) {
-                if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
-                    if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
-                        ((InventoryPlayerBattle) player.inventory).hasChanged = true;
-                    }
-                }
-            }
+				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
+					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
+						((InventoryPlayerBattle) player.inventory).hasChanged = true;
+					}
+				}
+			}
 			int dmg = Math.round(source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
@@ -202,7 +203,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	}
 
 	@Override
-	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
+	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 		if (this == ZSSItems.shieldMirror) {
 			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock()) {
 				Vec3 vec3 = player.getLookVec();
@@ -230,17 +231,17 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return this == ZSSItems.shieldDeku && stack.getItem() == Item.itemsList[Block.planks.blockID];
+		return this == ZSSItems.shieldDeku && stack.getItem() == Item.getItemFromBlock(Blocks.planks);
 	}
 
 	@SideOnly(Side.CLIENT)
-	public Icon getBackIcon() {
+	public IIcon getBackIcon() {
 		return backIcon;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 		backIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_back");
 	}
@@ -259,8 +260,8 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.shieldMirror), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.sword"));
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.sword"));
 		}
 	}
 
@@ -338,14 +339,11 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Method(modid="battlegear2")
 	@Override
-	public void blockAnimation(EntityPlayer player, float amount) {
-		// TODO BG2 sends a BattlegearShieldFlashPacket to all around; not sure what that does
-		player.worldObj.playSoundAtEntity(player, "battlegear2:shield", 1, 1);
-	}
+	public void blockAnimation(EntityPlayer player, float amount) {}
 
 	@Method(modid="battlegear2")
 	@Override
 	public float getDamageReduction(ItemStack shield, DamageSource source) {
-		return (this == ZSSItems.shieldDeku ? (source.isFireDamage() ? -10.0F : 2.0F) : Float.MAX_VALUE);
+		return 0.0F;
 	}
 }

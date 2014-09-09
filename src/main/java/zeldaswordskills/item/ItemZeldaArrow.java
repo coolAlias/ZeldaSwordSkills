@@ -17,12 +17,12 @@
 
 package zeldaswordskills.item;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -39,8 +39,8 @@ public class ItemZeldaArrow extends Item
 	 * @param name Used as texture name; unlocalized name is 'zss.name'
 	 * @param isMagic Gives this arrow the enchanted glow if true
 	 */
-	public ItemZeldaArrow(int id, String name, boolean isMagic) {
-		super(id);
+	public ItemZeldaArrow(String name, boolean isMagic) {
+		super();
 		this.isMagic = isMagic;
 		setUnlocalizedName("zss." + name);
 		setTextureName(ModInfo.ID + ":" + name);

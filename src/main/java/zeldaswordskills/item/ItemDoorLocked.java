@@ -20,13 +20,14 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
@@ -38,13 +39,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Item version of locked doors for use in Creative mode and Creative Tabs.
  *
  */
-public class ItemDoorLocked extends Item
+public class ItemDoorLocked extends Item implements IUnenchantable
 {
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
+	private IIcon[] iconArray;
 
-	public ItemDoorLocked(int id) {
-		super(id);
+	public ItemDoorLocked() {
+		super();
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
@@ -57,6 +58,7 @@ public class ItemDoorLocked extends Item
 		} else {
 			++y;
 			Block block = ZSSBlocks.doorLocked;
+
 			if (player.canPlayerEdit(x, y, z, side, stack) && player.canPlayerEdit(x, y + 1, z, side, stack)) {
 				if (!block.canPlaceBlockAt(world, x, y, z)) {
 					return false;
@@ -70,25 +72,25 @@ public class ItemDoorLocked extends Item
 			}
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (int i = 0; i < 8; ++i) {
-			list.add(new ItemStack(itemID, 1, i));
+			list.add(new ItemStack(item, 1, i));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
+	public IIcon getIconFromDamage(int par1) {
 		return iconArray[par1 % 8];
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[8];
+	public void registerIcons(IIconRegister register) {
+		iconArray = new IIcon[8];
 		for (int i = 0; i < iconArray.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9).toLowerCase() + i);
 		}
@@ -98,9 +100,9 @@ public class ItemDoorLocked extends Item
 	 * Places first the bottom then the top block with correct metadata values
 	 */
 	public static void placeDoorBlock(World world, int x, int y, int z, int meta, Block block) {
-		world.setBlock(x, y, z, block.blockID, meta, 2);
-		world.setBlock(x, y + 1, z, block.blockID, meta | 0x8, 2);
-		world.notifyBlocksOfNeighborChange(x, y, z, block.blockID);
-		world.notifyBlocksOfNeighborChange(x, y + 1, z, block.blockID);
+		world.setBlock(x, y, z, block, meta, 2);
+		world.setBlock(x, y + 1, z, block, meta | 0x8, 2);
+		world.notifyBlocksOfNeighborChange(x, y, z, block);
+		world.notifyBlocksOfNeighborChange(x, y + 1, z, block);
 	}
 }

@@ -21,7 +21,7 @@ import java.util.List;
 
 import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,14 +33,16 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
@@ -48,7 +50,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWeapon
+public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable, IBattlegearWeapon
 {
 	/** The amount of damage this boomerang will cause */
 	private final float damage;
@@ -59,8 +61,8 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWea
 	/** Whether this boomerang will capture all drops */
 	private boolean captureAll;
 
-	public ItemBoomerang(int id, float damage, int range) {
-		super(id);
+	public ItemBoomerang(float damage, int range) {
+		super();
 		this.damage = damage;
 		this.range = range;
 		this.captureAll = false;
@@ -99,7 +101,7 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWea
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
@@ -114,14 +116,14 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWea
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
-		if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart) >= Config.getMaxBonusHearts() / 2) {
+		if (ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart) >= Config.getMaxBonusHearts() / 2) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairyBoomerang);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.boomerangMagic), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}
 

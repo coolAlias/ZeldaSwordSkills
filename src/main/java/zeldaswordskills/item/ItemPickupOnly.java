@@ -17,11 +17,12 @@
 
 package zeldaswordskills.item;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.IHandlePickup;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.Config;
@@ -37,13 +38,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * sort of effect when picked up (i.e. collided with)
  *
  */
-public class ItemPickupOnly extends Item implements IHandlePickup {
-
-	public ItemPickupOnly(int id) {
-		super(id);
+public class ItemPickupOnly extends Item implements IHandlePickup, IUnenchantable
+{
+	public ItemPickupOnly() {
+		super();
 		setMaxStackSize(1);
 	}
-	
+
 	@Override
 	public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
 		if (this == ZSSItems.smallHeart) {
@@ -62,10 +63,10 @@ public class ItemPickupOnly extends Item implements IHandlePickup {
 		stack.stackSize = 0;
 		return true;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 }

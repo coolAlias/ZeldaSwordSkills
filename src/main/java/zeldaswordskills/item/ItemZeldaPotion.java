@@ -19,16 +19,17 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -36,52 +37,52 @@ import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemZeldaPotion extends ItemFood
+public class ItemZeldaPotion extends ItemFood implements IUnenchantable
 {
 	/** Amount of HP to restore when consumed */
 	private final float restoreHP;
-	
+
 	/** Id of the buff to add, if any */
-    private Buff buff;
-    /** Duration the buff will last */
-    private int buffDuration;
-    /** Amplifier of the buff, similar to vanilla potions */
-    private int buffAmplifier;
-    /** Probability of the set buff effect occurring */
-    private float buffProbability;
-	
-    /** Creates a potion with no healing or hunger-restoring properties */
-    public ItemZeldaPotion(int id) {
-    	this(id, 0, 0.0F, 0.0F);
-    }
-    
-	public ItemZeldaPotion(int id, int restoreHunger, float saturationModifier, float healAmount) {
-		super(id, restoreHunger, saturationModifier, false);
+	private Buff buff;
+	/** Duration the buff will last */
+	private int buffDuration;
+	/** Amplifier of the buff, similar to vanilla potions */
+	private int buffAmplifier;
+	/** Probability of the set buff effect occurring */
+	private float buffProbability;
+
+	/** Creates a potion with no healing or hunger-restoring properties */
+	public ItemZeldaPotion() {
+		this(0, 0.0F, 0.0F);
+	}
+
+	public ItemZeldaPotion(int restoreHunger, float saturationModifier, float healAmount) {
+		super(restoreHunger, saturationModifier, false);
 		restoreHP = healAmount;
 		setAlwaysEdible();
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
-	
+
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
 		return EnumAction.drink;
 	}
-	
+
 	@Override
 	public ItemStack onEaten(ItemStack stack, World world, EntityPlayer player) {
-		player.getFoodStats().addStats(this);
+		player.getFoodStats().func_151686_a(this, stack);
 		player.heal(restoreHP);
 		onFoodEaten(stack, world, player);
 		if (!player.capabilities.isCreativeMode) {
 			if (--stack.stackSize <= 0) {
-				return new ItemStack(Item.glassBottle);
+				return new ItemStack(Items.glass_bottle);
 			}
-			player.inventory.addItemStackToInventory(new ItemStack(Item.glassBottle));
+			player.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
 		}
 		return stack;
 	}
-	
+
 	@Override
 	protected void onFoodEaten(ItemStack stack, World world, EntityPlayer player) {
 		super.onFoodEaten(stack, world, player);
@@ -89,7 +90,7 @@ public class ItemZeldaPotion extends ItemFood
 			ZSSEntityInfo.get(player).applyBuff(buff, buffDuration, buffAmplifier);
 		}
 	}
-	
+
 	/**
 	 * Sets the Buff that this potion will grant when consumed
 	 */
@@ -100,21 +101,21 @@ public class ItemZeldaPotion extends ItemFood
 		buffProbability = probability;
 		return this;
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		return true;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
-    public boolean hasEffect(ItemStack stack) {
+	public boolean hasEffect(ItemStack stack, int pass) {
 		return true;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 

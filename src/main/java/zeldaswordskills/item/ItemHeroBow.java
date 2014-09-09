@@ -28,7 +28,7 @@ import mods.battlegear2.api.quiver.IArrowContainer2;
 import mods.battlegear2.api.quiver.IArrowFireHandler;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -37,12 +37,13 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
@@ -56,6 +57,7 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -64,11 +66,9 @@ import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityArrowElemental.ElementType;
-import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
@@ -90,10 +90,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattlegearWeapon
+public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantable, IZoom, IBattlegearWeapon
 {
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
+	private IIcon[] iconArray;
 
 	/** Maps arrow IDs to arrow entity class */
 	private static final Map<Item, Class<? extends EntityArrowCustom>> arrowMap = new HashMap<Item, Class<? extends EntityArrowCustom>>();
@@ -104,8 +104,8 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	/** Maps arrow IDs to elemental arrow Element Type */
 	private static final Map<Item, ElementType> elementalArrowMap = new HashMap<Item, ElementType>();
 
-	public ItemHeroBow(int id) {
-		super(id);
+	public ItemHeroBow() {
+		super();
 		setFull3D();
 		setMaxDamage(0);
 		setMaxStackSize(1);
@@ -166,21 +166,21 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 				int level = getLevel(stack);
 				MerchantRecipe trade = null;
 				if (level > 1) {
-					trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowFire, 4), new ItemStack(Item.emerald, 16));
+					trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowFire, 4), new ItemStack(Items.emerald, 16));
 					if (MerchantRecipeHelper.doesListContain(trades, trade)) {
-						trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowIce, 4), new ItemStack(Item.emerald, 20));
+						trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowIce, 4), new ItemStack(Items.emerald, 20));
 						if (level > 2 && MerchantRecipeHelper.doesListContain(trades, trade)) {
-							trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowLight, 4), new ItemStack(Item.emerald, 40));
+							trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowLight, 4), new ItemStack(Items.emerald, 40));
 						}
 					}
 				}
 				if (trade != null && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.arrow"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.arrow"));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
 			}
 		}
 
@@ -190,11 +190,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		ArrowNockEvent event = new ArrowNockEvent(player, stack);
-		if (ZSSMain.isBG2Enabled) { // 'fake' event:
-			event.setCanceled(BattlegearEvents.preArrowNock(event));
-		} else {
-			MinecraftForge.EVENT_BUS.post(event);
-		}
+		MinecraftForge.EVENT_BUS.post(event);
 		if (event.isCanceled()) {
 			// May not be needed: make sure bow does not have an arrow 'nocked' in NBT if no longer in use
 			if (player.getItemInUse() == null && getArrow(player) != null) {
@@ -216,21 +212,17 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		int ticksInUse = getMaxItemUseDuration(bow) - ticksRemaining;
 
 		ArrowLooseEvent event = new ArrowLooseEvent(player, bow, ticksInUse);
-		if (ZSSMain.isBG2Enabled) { // 'fake' event:
-			event.setCanceled(BattlegearEvents.preArrowLoose(event));
-		} else {
-			MinecraftForge.EVENT_BUS.post(event);
-		}
+		MinecraftForge.EVENT_BUS.post(event);
 		if (event.isCanceled()) {
 			if (getArrow(player) != null) {
 				setArrow(player, null); // nocked from inventory from empty quiver slot, then hot-swapped
 			}
 			return;
 		}
-		// This code can only be reached if not using a quiver
+
+		// If not using a quiver, the arrow must be retrieved from the bow's NBT
 		ItemStack arrowStack = getArrow(player);
 		if (arrowStack != null) { // can be null when hot-swapping to an empty quiver slot
-			LogHelper.finer("Retrieved arrow player props: " + arrowStack);
 			if (canShootArrow(player, bow, arrowStack)) {
 				fireArrow(event, arrowStack, bow, player);
 			}
@@ -239,19 +231,17 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	}
 
 	/**
-	 * Call from ArrowLooseEvent when using Battlegear2's quiver system to prevent handling by
-	 * the default fire handler, which allows any bow to fire any registered arrow (e.g. the
-	 * vanilla bow could fire Light Arrows) and also has first priority, preventing vanilla
-	 * arrows from being handled by Hero's Bow.
+	 * Call from ArrowLooseEvent when using Battlegear2's quiver system to allow vanilla
+	 * arrow to be handled by the custom fire handler, otherwise it will always use the
+	 * default BG2 handler.
 	 * 
 	 * This will not be necessary if pull request to quiver API is accepted.
 	 * 
-	 * @param quiverStack	The IArrowContainer2-containing stack, i.e. a quiver
-	 * @param arrowStack	The arrow stack as retrieved from the quiver
+	 * @param quiverStack	The IArrowContainer2-containing stack, i.e. a quiver; must not be NULL
+	 * @param arrowStack	The arrow stack as retrieved from the quiver; must not be NULL
 	 */
 	@Method(modid="battlegear2")
 	public void bg2FireArrow(ArrowLooseEvent event, ItemStack quiverStack, ItemStack arrowStack) {
-		LogHelper.finer("Called BG2 fireArrow...");
 		if (!canShootArrow(event.entityPlayer, event.bow, arrowStack)) {
 			return; // prevents hot-swap firing, since we are bypassing the fire handlers
 		}
@@ -297,10 +287,9 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 * Called if ArrowLooseEvent was not canceled, so either the player is not using a quiver,
 	 * or Battlegear2 is not loaded.
 	 * Constructs and fires the arrow, if possible, and may consume the appropriate inventory item.
-	 * @param arrowStack	The stack retrieved from {@link ItemHeroBow#getArrow}, i.e. from the stack's NBT
 	 */
 	private void fireArrow(ArrowLooseEvent event, ItemStack arrowStack, ItemStack bow, EntityPlayer player) {
-		LogHelper.finer("Called standard fireArrow; no quiver action here.");
+		//LogHelper.finer("Called standard fireArrow; no quiver action here.");
 		boolean flag = (player.capabilities.isCreativeMode || EnchantmentHelper.getEnchantmentLevel(Enchantment.infinity.effectId, bow) > 0);
 
 		if (flag || PlayerUtils.hasItem(player, arrowStack)) {
@@ -315,7 +304,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 				arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, player.worldObj, player, charge * 2.0F);
 			}
 			if (arrowEntity != null) {
-				LogHelper.finer("Created arrow entity: " + arrowEntity);
 				applyArrowSettings(arrowEntity, bow, charge);
 				if (arrowEntity instanceof EntityArrowCustom) {
 					applyCustomArrowSettings(event.entityPlayer, event.bow, arrowStack, (EntityArrowCustom) arrowEntity, charge);
@@ -366,20 +354,20 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 */
 	private ItemStack getArrowFromInventory(ItemStack bow, EntityPlayer player) {
 		ItemStack arrow = null;
-		for (ItemStack stack : player.inventory.mainInventory) {
-			if (stack != null && canShootArrow(player, bow, stack)) {
-				arrow = stack;
-				break;
+		if (Config.enableAutoBombArrows() && player.isSneaking()) {
+			arrow = getAutoBombArrow(bow, player);
+		}
+		if (arrow == null) {
+			for (ItemStack stack : player.inventory.mainInventory) {
+				if (stack != null && canShootArrow(player, bow, stack)) {
+					arrow = stack;
+					break;
+				}
 			}
 		}
 
 		if (arrow == null && player.capabilities.isCreativeMode) {
-			arrow = new ItemStack(Item.arrow);
-		}
-
-		if (arrow != null && arrow.getItem() == Item.arrow && Config.enableAutoBombArrows() && player.isSneaking()) {
-			ItemStack bombArrow = getAutoBombArrow(bow, player);
-			arrow = (bombArrow != null ? bombArrow : arrow);
+			arrow = new ItemStack(Items.arrow);
 		}
 
 		return arrow;
@@ -402,7 +390,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	private ItemStack getAutoBombArrow(ItemStack bow, EntityPlayer player) {
 		ItemStack arrow = null;
 		// Player must have a standard arrow to construct bomb arrow from bomb or bomb bag
-		boolean hasArrow = (player.capabilities.isCreativeMode || player.inventory.hasItem(Item.arrow.itemID));
+		boolean hasArrow = (player.capabilities.isCreativeMode || player.inventory.hasItem(Items.arrow));
 		// Flag whether the bomb arrow was already determined and items need not be consumed
 		boolean hasAutoArrow = ZSSPlayerInfo.get(player).hasAutoBombArrow;
 
@@ -411,7 +399,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 			if (stack != null) {
 				if (stack.getItem() == ZSSItems.arrowBomb || stack.getItem() == ZSSItems.arrowBombFire || stack.getItem() == ZSSItems.arrowBombWater) {
 					arrow = stack;
-				} else if (stack.getItem() == ZSSItems.bombBag) {
+				} else if (stack.getItem() instanceof ItemBombBag) {
 					ItemBombBag bombBag = (ItemBombBag) stack.getItem();
 					int bagType = bombBag.getBagBombType(stack);
 					if (bagType >= 0 && bombBag.getBombsHeld(stack) > 0) {
@@ -421,7 +409,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 							arrow = bombArrow;
 						} else if (hasArrow && player.inventory.addItemStackToInventory(bombArrow)) {
 							if (bombBag.removeBomb(stack)) {
-								if (player.inventory.consumeInventoryItem(Item.arrow.itemID)) {
+								if (player.inventory.consumeInventoryItem(Items.arrow)) {
 									arrow = bombArrow;
 								} else {
 									bombBag.addBombs(stack, bombArrow);
@@ -435,12 +423,15 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 					ItemStack bombArrow = new ItemStack(bombArrowMap.inverse().get(ItemBomb.getType(stack)),1,0);
 					if (hasAutoArrow || player.capabilities.isCreativeMode) {
 						arrow = bombArrow;
-					} else if (hasArrow && player.inventory.consumeInventoryItem(Item.arrow.itemID)) {
+					} else if (hasArrow && player.inventory.consumeInventoryItem(Items.arrow)) {
 						arrow = bombArrow;
 						player.inventory.setInventorySlotContents(i, bombArrow);
 					}
 				}
 			}
+		}
+		if (arrow == null && player.capabilities.isCreativeMode) {
+			arrow = new ItemStack(ZSSItems.arrowBomb);
 		}
 
 		ZSSPlayerInfo.get(player).hasAutoBombArrow = (arrow != null);
@@ -449,7 +440,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
+	public IIcon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
 		if (usingItem == null) { return itemIcon; }
 		int t = stack.getMaxItemUseDuration() - useRemaining;
 		return (t > 17 ? iconArray[2] : (t > 13 ? iconArray[1] : (t > 0 ? iconArray[0] : itemIcon)));
@@ -457,9 +448,9 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_standard_0");
-		iconArray = new Icon[3];
+		iconArray = new IIcon[3];
 		for (int i = 0; i < iconArray.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_standard_" + (i + 1));
 		}
@@ -478,14 +469,14 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		int n = getLevel(stack);
 		if (n < 3 && core.consumeRupees((n + 1) * Config.getHeroBowUpgradeCost())) {
 			setLevel(stack, ++n);
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			player.triggerAchievement(ZSSAchievements.fairyBow);
 			if (n == 3) {
 				player.triggerAchievement(ZSSAchievements.fairyBowMax);
 			}
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}
 
@@ -535,26 +526,22 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	}
 
 	/**
-	 * Applies vanilla arrow settings, such as enchantments and critical
-	 * NOTE: These settings would be added by BattleGear2 when using a quiver,
-	 * except it is not allowed to occur due to the current API limitations
+	 * Applies vanilla arrow enchantments and sets critical if applicable
+	 * NOTE: These settings are already added by BattleGear2 when shot from a quiver
 	 * @param charge should be a value between 0.0F and 1.0F, inclusive
 	 */
 	public static final void applyArrowSettings(EntityArrow arrow, ItemStack bow, float charge) {
 		if (charge == 1.0F) {
 			arrow.setIsCritical(true);
 		}
-
 		int k = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, bow);
 		if (k > 0) {
 			arrow.setDamage(arrow.getDamage() + (double) k * 0.5D + 0.5D);
 		}
-
 		int l = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, bow);
 		if (l > 0) {
 			arrow.setKnockbackStrength(l);
 		}
-
 		if (EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, bow) > 0) {
 			arrow.setFire(100);
 		}
@@ -562,13 +549,12 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 
 	/**
 	 * Applies custom arrow settings
-	 * @param charge should be a value between 0.0F and 1.0F, inclusive
-	 * @param arrowStack Arrow must be an ItemZeldaArrow; determines arrow type (fire, ice, etc.) and the item that the arrow entity will drop
+	 * @param charge A value between 0.0F and 1.0F, inclusive
+	 * @param arrowStack Determines arrow type (fire, ice, etc.) and the item that the arrow entity will drop
 	 */
-	private static void applyCustomArrowSettings(EntityPlayer player, ItemStack bow, ItemStack arrowStack, EntityArrowCustom arrowEntity, float charge) {
+	private static final void applyCustomArrowSettings(EntityPlayer player, ItemStack bow, ItemStack arrowStack, EntityArrowCustom arrowEntity, float charge) {
 		Item arrowItem = arrowStack.getItem();
-		arrowEntity.setArrowItem(arrowItem.itemID);
-
+		arrowEntity.setArrowItem(arrowItem);
 		if (player.getCurrentArmor(ArmorIndex.WORN_HELM) != null && player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == ZSSItems.maskHawkeye) {
 			EntityLivingBase target = TargetUtils.acquireLookTarget(player, 64, 1.0F);
 			if (target != null) {
@@ -576,7 +562,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 				arrowEntity.setTarget(target);
 			}
 		}
-
 		if (arrowEntity instanceof EntityArrowBomb && bombArrowMap.containsKey(arrowItem)) {
 			((EntityArrowBomb) arrowEntity).setType(bombArrowMap.get(arrowItem));
 			arrowEntity.setDamage(0.0F);
@@ -615,8 +600,11 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		}
 	}
 
+	/**
+	 * Adds all custom arrow items to maps - should be done in post-init.
+	 */
 	public static void initializeArrows() {
-		arrowMap.put(Item.arrow, EntityArrowCustom.class);
+		arrowMap.put(Items.arrow, EntityArrowCustom.class);
 		arrowMap.put(ZSSItems.arrowBomb, EntityArrowBomb.class);
 		arrowMap.put(ZSSItems.arrowBombFire, EntityArrowBomb.class);
 		arrowMap.put(ZSSItems.arrowBombWater, EntityArrowBomb.class);
@@ -642,30 +630,21 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	@Method(modid="battlegear2")
 	public static void registerBG2() {
 		QuiverArrowRegistry.addArrowFireHandler(new HeroBowFireHandler());
-		registerQuiverArrow(ZSSItems.arrowBomb, EntityArrowBomb.class);
-		registerQuiverArrow(ZSSItems.arrowBombFire, EntityArrowBomb.class);
-		registerQuiverArrow(ZSSItems.arrowBombWater, EntityArrowBomb.class);
-		registerQuiverArrow(ZSSItems.arrowFire, EntityArrowElemental.class);
-		registerQuiverArrow(ZSSItems.arrowIce, EntityArrowElemental.class);
-		registerQuiverArrow(ZSSItems.arrowLight, EntityArrowElemental.class);
+		// registering as null prevents default fire handler from handling these arrows:
+		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowBomb, null);
+		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowBombFire, null);
+		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowBombWater, null);
+		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowFire, null);
+		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowIce, null);
+		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowLight, null);
 	}
 
-	@Method(modid="battlegear2")
-	public static void registerQuiverArrow(Item item, Class<? extends EntityArrow> clazz) {
-		// registering entity as null allows arrows to be crafted with quiver, and forces
-		// the vanilla bow to use the custom fire handler rather than the default one
-		QuiverArrowRegistry.addArrowToRegistry(new ItemStack(item), null);
-	}
-
-	/**
-	 * 
+	/** 
 	 * Handler for building arrows shot with Hero's Bow from Battlegear2 quivers.
 	 * With the current API, however, this gets called after the default handler,
 	 * meaning it will not work for customizing vanilla arrows; thus, the Hero
-	 * Bow must handle itself internally, only passing off to the handlers for
-	 * BG2 arrows. This requires bypassing BG2 handling entirely, which is done by
-	 * not posting the ArrowNock and ArrowLooseEvents and using fake ones instead
-	 * (which was made necessary due to BG2 receiving canceled on those two events)
+	 * Bow requires handling the ArrowNock and ArrowLooseEvents, only allowing BG2's
+	 * listeners to handle BG2 arrows and Zelda arrows for the vanilla bow.
 	 * 
 	 * This fire handler is still used by the vanilla bow, though, for firing Zelda
 	 * arrows (or preventing them from being fired, as the case may  be).
@@ -676,6 +655,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		@Method(modid="battlegear2")
 		@Override
 		public boolean canFireArrow(ItemStack arrow, World world, EntityPlayer player, float charge) {
+			//LogHelper.finer("Called custom FireHandler#canFireArrow");
 			ItemStack bow = player.getHeldItem();
 			if (bow != null) { // allow creative players to shoot custom Zelda arrows using any bow
 				return (bow.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) bow.getItem()).canShootArrow(player, bow, arrow) : player.capabilities.isCreativeMode);
@@ -686,13 +666,14 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		@Method(modid="battlegear2")
 		@Override
 		public EntityArrow getFiredArrow(ItemStack arrow, World world, EntityPlayer player, float charge) {
+			//LogHelper.finer("Called custom FireHandler#getFiredArrow");
 			ItemStack bow = player.getHeldItem();
 			if (bow != null && (bow.getItem() instanceof ItemHeroBow || player.capabilities.isCreativeMode)) {
 				EntityArrowCustom arrowEntity = ItemHeroBow.getArrowEntity(arrow, world, player, charge);
 				if (arrowEntity != null) {
-					// Must apply vanilla settings as well, since BG2's ArrowLooseEvent is not triggered
-					ItemHeroBow.applyArrowSettings(arrowEntity, bow, charge);
+					// vanilla arrow settings will be applied by BG2's arrow loose event
 					ItemHeroBow.applyCustomArrowSettings(player, bow, arrow, arrowEntity, charge);
+					//LogHelper.finer("Returning custom arrow entity: " + arrowEntity);
 				}
 				return arrowEntity;
 			}

@@ -19,24 +19,27 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -62,18 +65,18 @@ import cpw.mods.fml.relauncher.SideOnly;
  * bag, it will simply be removed rather than dropping to the ground. This is vanilla behavior.
  * 
  */
-public class ItemBombBag extends Item
+public class ItemBombBag extends Item implements IUnenchantable
 {
 	private static final int BASE_CAPACITY = 10, MAX_CAPACITY = 50;
 
 	@SideOnly(Side.CLIENT)
-	private Icon[] ones;
+	private IIcon[] ones;
 
 	@SideOnly(Side.CLIENT)
-	private Icon[] tens;
+	private IIcon[] tens;
 
-	public ItemBombBag(int par1) {
-		super(par1);
+	public ItemBombBag() {
+		super();
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
@@ -84,7 +87,7 @@ public class ItemBombBag extends Item
 		if (!player.isSneaking() || !increaseCapacity(player, stack)) {
 			if (player.capabilities.isCreativeMode || removeBomb(stack)) {
 				if (!player.inventory.addItemStackToInventory(stack)) {
-					player.dropPlayerItem(stack);
+					player.dropPlayerItemWithRandomChoice(stack, false);
 				}
 				int type = getBagBombType(stack);
 				return new ItemStack(ZSSItems.bomb, 1, (type > 0 ? type : 0));
@@ -104,14 +107,14 @@ public class ItemBombBag extends Item
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (villager.getProfession() != 1 && trades != null) {
-				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
+				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
 			}
 		}
 		return true;
@@ -141,7 +144,7 @@ public class ItemBombBag extends Item
 	}
 
 	@Override
-	public Icon getIcon(ItemStack stack, int pass) {
+	public IIcon getIcon(ItemStack stack, int pass) {
 		int bombsHeld = getBombsHeld(stack);
 		switch(pass) {
 		case 0: return itemIcon;
@@ -153,10 +156,10 @@ public class ItemBombBag extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-		ones = new Icon[10];
-		tens = new Icon[10];
+		ones = new IIcon[10];
+		tens = new IIcon[10];
 		for (int i = 0; i < 10; ++i) {
 			ones[i] = register.registerIcon(ModInfo.ID + ":digits/" + (i == 0 ? "" : "00") + i);
 			tens[i] = register.registerIcon(ModInfo.ID + ":digits/0" + i + (i == 0 ? "" : "0"));

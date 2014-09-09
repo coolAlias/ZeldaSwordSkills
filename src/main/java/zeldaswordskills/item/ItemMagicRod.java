@@ -23,28 +23,30 @@ import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceDirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISacredFlame;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -56,7 +58,9 @@ import zeldaswordskills.entity.projectile.EntityMobThrowable;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.PacketISpawnParticles;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.PacketISpawnParticles;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -75,7 +79,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * tossing it and enough emeralds into an active fairy pool.
  *
  */
-public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, ISpawnParticles
+public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, ISpawnParticles, IUnenchantable
 {
 	/** The type of magic this rod uses (e.g. FIRE, ICE, etc.) */
 	private final MagicType magicType;
@@ -89,8 +93,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	 * @param damage	The amount of damage inflicted by the rod's projectile spell
 	 * @param fatigue	Amount of exhaustion added when used; fatigue / 20 is added per tick in use
 	 */
-	public ItemMagicRod(int id, MagicType magicType, float damage, float fatigue) {
-		super(id);
+	public ItemMagicRod(MagicType magicType, float damage, float fatigue) {
+		super();
 		this.magicType = magicType;
 		this.damage = damage;
 		this.fatigue = fatigue;
@@ -122,7 +126,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		String s = (isUpgraded(stack) ? StatCollector.translateToLocal("item.zss.rodmagic.nice") + " " : "");
 		return s + StatCollector.translateToLocal(getUnlocalizedName() + ".name");
 	}
@@ -180,7 +184,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	}
 
 	@Override
-	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
+	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 		if (this == ZSSItems.rodTornado) {
 			player.fallDistance = 0.0F;
 		}
@@ -209,7 +213,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 		if (isUpgraded(stack)) {
 			r *= 1.5F;
 		}
-		WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, r).makePacket(), world, player, 64.0D);
+		PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, this, r), player, 64.0D);
 		if (ticksInUse % 4 == 3) {
 			affectBlocks(world, player, r);
 			List<EntityLivingBase> targets = TargetUtils.acquireAllLookTargets(player, Math.round(r), 1.0F);
@@ -261,56 +265,43 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	private boolean canAddBlockPosition(World world, EntityPlayer player, int i, int j, int k) {
 		Vec3 vec31 = Vec3.createVectorHelper(player.posX, player.posY + player.getEyeHeight(), player.posZ);
 		Vec3 vec32 = Vec3.createVectorHelper(i, j, k);
-		MovingObjectPosition mop = world.clip(vec31, vec32);
-		if (mop == null) {
-			return true;
-		} else if (mop.typeOfHit == EnumMovingObjectType.TILE) {
-			if (mop.blockX == i && mop.blockY == j && mop.blockZ == k) {
-				return true;
-			}
-			int blockId = world.getBlockId(mop.blockX, mop.blockY, mop.blockZ);
-			Block block = (blockId > 0 ? Block.blocksList[blockId] : null);
-			return (block == null || block.getBlocksMovement(world, mop.blockX, mop.blockY, mop.blockZ));
-		} else {
-			return true;
-		}
+		MovingObjectPosition mop = world.rayTraceBlocks(vec31, vec32);
+		return (mop == null || (mop.typeOfHit == MovingObjectType.BLOCK && (mop.blockX == i && mop.blockY == j && mop.blockZ == k)
+				|| !world.getBlock(mop.blockX, mop.blockY, mop.blockZ).getBlocksMovement(world, mop.blockX, mop.blockY, mop.blockZ)));
 	}
 
 	/**
 	 * Affects all blocks in the set of chunk positions with the magic type's effect (freeze, thaw, etc.)
 	 */
 	public static void affectAllBlocks(World world, Set<ChunkPosition> blocks, MagicType type) {
-		for (ChunkPosition position : blocks) {
-			int blockId = world.getBlockId(position.x, position.y, position.z);
+		for (ChunkPosition p : blocks) {
+			Block block = world.getBlock(p.chunkPosX, p.chunkPosY, p.chunkPosZ);
 			switch(type) {
 			case FIRE:
-				if (blockId > 0 && WorldUtils.canMeltBlock(world, blockId, position.x, position.y, position.z) && world.rand.nextInt(4) == 0) {
-					world.setBlockToAir(position.x, position.y, position.z);
-					world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
+				if (WorldUtils.canMeltBlock(world, block, p.chunkPosX, p.chunkPosY, p.chunkPosZ) && world.rand.nextInt(4) == 0) {
+					world.setBlockToAir(p.chunkPosX, p.chunkPosY, p.chunkPosZ);
+					world.playSoundEffect(p.chunkPosX + 0.5D, p.chunkPosY + 0.5D, p.chunkPosZ + 0.5D,
 							Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
-				} else if (blockId == 0 && Block.opaqueCubeLookup[world.getBlockId(position.x, position.y - 1, position.z)] && world.rand.nextInt(8) == 0) {
-					world.setBlock(position.x, position.y, position.z, Block.fire.blockID);
-					world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
+				} else if (block.getMaterial() == Material.air && world.getBlock(p.chunkPosX, p.chunkPosY - 1, p.chunkPosZ).func_149730_j() && world.rand.nextInt(8) == 0) {
+					world.setBlock(p.chunkPosX, p.chunkPosY, p.chunkPosZ, Blocks.fire);
+					world.playSoundEffect(p.chunkPosX + 0.5D, p.chunkPosY + 0.5D, p.chunkPosZ + 0.5D,
 							Sounds.FIRE_IGNITE, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 				}
 				break;
 			case ICE:
-				Block block = (blockId > 0 ? Block.blocksList[blockId] : null);
-				if (block != null) {
-					if (block.blockMaterial == Material.water && world.rand.nextInt(4) == 0) {
-						world.setBlock(position.x, position.y, position.z, Block.ice.blockID);
-						world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-								Sounds.GLASS_BREAK, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
-					} else if (block.blockMaterial == Material.lava && world.rand.nextInt(8) == 0) {
-						Block solid = (blockId == Block.lavaStill.blockID ? Block.obsidian : Block.cobblestone);
-						world.setBlock(position.x, position.y, position.z, solid.blockID);
-						world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-								Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
-					} else if (block.blockMaterial == Material.fire) {
-						world.setBlockToAir(position.x, position.y, position.z);
-						world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
-								Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
-					}
+				if (block.getMaterial() == Material.water && world.rand.nextInt(4) == 0) {
+					world.setBlock(p.chunkPosX, p.chunkPosY, p.chunkPosZ, Blocks.ice);
+					world.playSoundEffect(p.chunkPosX + 0.5D, p.chunkPosY + 0.5D, p.chunkPosZ + 0.5D,
+							Sounds.GLASS_BREAK, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+				} else if (block.getMaterial() == Material.lava && world.rand.nextInt(8) == 0) {
+					Block solid = (block == Blocks.lava ? Blocks.obsidian : Blocks.cobblestone);
+					world.setBlock(p.chunkPosX, p.chunkPosY, p.chunkPosZ, solid);
+					world.playSoundEffect(p.chunkPosX + 0.5D, p.chunkPosY + 0.5D, p.chunkPosZ + 0.5D,
+							Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+				} else if (block.getMaterial() == Material.fire) {
+					world.setBlockToAir(p.chunkPosX, p.chunkPosY, p.chunkPosZ);
+					world.playSoundEffect(p.chunkPosX + 0.5D, p.chunkPosY + 0.5D, p.chunkPosZ + 0.5D,
+							Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 				}
 				break;
 			default:
@@ -322,7 +313,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	private DamageSource getDamageSource(EntityPlayer player) {
 		switch(magicType) {
 		case ICE: return new DamageSourceIce("blast.ice", player, 60, 1);
-		default: return new DamageSourceDirect("blast.fire", player).setFireDamage();
+		default: return new EntityDamageSource("blast.fire", player).setFireDamage();
 		}
 	}
 
@@ -361,7 +352,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
@@ -386,7 +377,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
 		if (!world.isRemote) {
 			if (hasAbsorbedFlame(stack)) {
-				player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.old.any", getItemDisplayName(stack)));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.old.any", getItemStackDisplayName(stack)));
 			} else if (isActive) {
 				boolean canAbsorb = false;
 				switch(magicType) {
@@ -400,14 +391,14 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 					}
 					stack.getTagCompound().setBoolean("absorbedFlame", true);
 					world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.new",
-							getItemDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type)));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.new",
+							getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type)));
 					return true;
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
 			}
 			WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 		}
@@ -424,8 +415,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 			item.getEntityItem().getTagCompound().setBoolean("isUpgraded", true);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
-			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
 	}
 

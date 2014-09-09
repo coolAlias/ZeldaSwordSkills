@@ -19,25 +19,28 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -47,52 +50,52 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Big Keys come in eight types for each of the eight typs of Boss Doors.
  *
  */
-public class ItemKeyBig extends Item
+public class ItemKeyBig extends Item implements IUnenchantable
 {
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
+	private IIcon[] iconArray;
 
-	public ItemKeyBig(int id) {
-		super(id);
+	public ItemKeyBig() {
+		super();
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabKeys);
 	}
-	
+
 	/**
 	 * Returns the appropriate big key for biome found at given coordinates, or null
 	 */
 	public static ItemStack getKeyForBiome(World world, int x, int z) {
 		BossType type = BossType.getBossType(world, x, z);
 		if (type != null) {
-			return new ItemStack(ZSSItems.keyBig.itemID,1,type.ordinal());
+			return new ItemStack(ZSSItems.keyBig,1,type.ordinal());
 		} else {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (trades != null) {
-				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
+				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
 			}
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		if (world.getBlockId(x, y, z) == ZSSBlocks.doorLocked.blockID) {
+		if (world.getBlock(x, y, z) == ZSSBlocks.doorLocked) {
 			if (stack.getItemDamage() == (world.getBlockMetadata(x, y, z) & ~0x8)) {
 				--stack.stackSize;
 				WorldUtils.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.4F, 0.5F);
@@ -102,13 +105,13 @@ public class ItemKeyBig extends Item
 		}
 		return false;
 	}
-	
+
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name",
 				BossType.values()[stack.getItemDamage() % BossType.values().length].getDisplayName());
 	}
-	
+
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		return getUnlocalizedName().substring(9) + stack.getItemDamage();
@@ -116,27 +119,27 @@ public class ItemKeyBig extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (BossType boss : BossType.values()) {
-			list.add(new ItemStack(itemID, 1, boss.ordinal()));
+			list.add(new ItemStack(item, 1, boss.ordinal()));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int damage) {
+	public IIcon getIconFromDamage(int damage) {
 		return iconArray[damage % BossType.values().length];
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[BossType.values().length];
+	public void registerIcons(IIconRegister register) {
+		iconArray = new IIcon[BossType.values().length];
 		for (int i = 0; i < iconArray.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":key_" + BossType.values()[i].getUnlocalizedName());
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {

@@ -21,16 +21,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumArmorMaterial;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -41,6 +40,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityMaskTrader;
@@ -61,7 +61,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * All types of Masks should use this class
  *
  */
-public class ItemMask extends ItemArmor implements IZoomHelper
+public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
@@ -78,8 +78,8 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	 * Armor types as used on player: 0 boots, 1 legs, 2 chest, 3 helm
 	 * Armor types as used in armor class: 0 helm, 1 chest, 2 legs, 3 boots
 	 */
-	public ItemMask(int id, EnumArmorMaterial material, int renderIndex) {
-		super(id, material, renderIndex, ArmorIndex.TYPE_HELM);
+	public ItemMask(ArmorMaterial material, int renderIndex) {
+		super(material, renderIndex, ArmorIndex.TYPE_HELM);
 		setMaxDamage(0);
 		setCreativeTab(ZSSCreativeTabs.tabMasks);
 	}
@@ -150,7 +150,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	}
 
 	@Override
-	public void onArmorTickUpdate(World world, EntityPlayer player, ItemStack stack) {
+	public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
 			info.setWearingHelm();
@@ -162,7 +162,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 			player.addPotionEffect(new PotionEffect(tickingEffect));
 		}
 		if (this == ZSSItems.maskCouples) {
-			if (world.getWorldTime() % 1024 == 0) {
+			if (world.getWorldTime() % 64 == 0) {
 				List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.boundingBox.expand(8.0D, 3.0D, 8.0D));
 				for (EntityVillager villager : villagers) {
 					if (world.rand.nextFloat() < 0.5F) {
@@ -181,7 +181,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	}
 
 	@Override
-	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer) {
+	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
 		return String.format("%s:textures/armor/%s_layer_%d.png", ModInfo.ID, getUnlocalizedName().substring(9), (slot == 2 ? 2 : 1));
 	}
 
@@ -198,9 +198,9 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 				//villager.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(this));
 				ZSSVillagerInfo.get(villager).onMaskTrade();
 				ZSSPlayerInfo.get(player).completeCurrentMaskStage();
-				player.setCurrentItemOrArmor(0, new ItemStack(Item.emerald, getSellPrice()));
+				player.setCurrentItemOrArmor(0, new ItemStack(Items.emerald, getSellPrice()));
 				PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.mask.sold." + player.worldObj.rand.nextInt(4)));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.mask.sold." + player.worldObj.rand.nextInt(4)));
 				player.triggerAchievement(ZSSAchievements.maskSold);
 			}
 		}
@@ -220,10 +220,10 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 					new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.mask.desired.0"),
 							StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
 				}
 			} else if (entity instanceof EntityMaskTrader) {
-				player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
 			} else {
 				return false;
 			}
@@ -233,7 +233,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
@@ -249,7 +249,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	public static void applyAttributeModifiers(ItemStack stack, EntityPlayer player) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 		info.setFlag(ZSSPlayerInfo.MOBILITY, false);
-		AttributeInstance movement = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+		IAttributeInstance movement = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 		if (movement.getModifier(bunnyHoodMoveBonusUUID) != null) {
 			movement.removeModifier(bunnyHoodMoveBonus);
 		}

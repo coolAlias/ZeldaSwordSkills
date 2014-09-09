@@ -22,15 +22,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.item.IHandleToss;
+import zeldaswordskills.api.item.IUnenchantable;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -44,10 +46,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  * immediately into the world.
  *
  */
-public class ItemHeldBlock extends Item implements IHandleToss {
-
-	public ItemHeldBlock(int id) {
-		super(id);
+public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
+{
+	public ItemHeldBlock() {
+		super();
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setTextureName("stone");
@@ -59,7 +61,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	public static ItemStack getBlockStack(Block block, int metadata, ItemStack gauntlets) {
 		ItemStack stack = new ItemStack(ZSSItems.heldBlock);
 		stack.setTagCompound(new NBTTagCompound());
-		stack.getTagCompound().setInteger("blockID", block.blockID);
+		stack.getTagCompound().setInteger("blockID", Block.getIdFromBlock(block));
 		stack.getTagCompound().setInteger("metadata", metadata);
 		if (gauntlets != null) {
 			stack.getTagCompound().setTag("gauntlets", gauntlets.writeToNBT(new NBTTagCompound()));
@@ -69,7 +71,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 
 	/** Returns the stored Block or null if none available */
 	public Block getBlockFromStack(ItemStack stack) {
-		return (stack.hasTagCompound() ? Block.blocksList[stack.getTagCompound().getInteger("blockID")] : null);
+		return (stack.hasTagCompound() ? Block.getBlockById(stack.getTagCompound().getInteger("blockID")) : null);
 	}
 
 	/** Returns the metadata value associated with the stored block */
@@ -96,11 +98,11 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 			if (!flag) {
 				flag = tryDropBlock(stack, world, x, y + 1, z, -dx, -dz, block, meta, 5);
 			}
-			if (!flag && !world.getBlockMaterial(x, y, z).isSolid()) {
+			if (!flag && !block.getMaterial().isSolid()) {
 				flag = placeBlockAt(stack, player ,world, x, y, z, 1, (float) player.posX, (float) player.posY, (float) player.posZ, block, meta);
 			}
 			if (flag) {
-				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D), block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D), block.stepSound.getBreakSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
 			}
 			return flag;
 		}
@@ -133,12 +135,13 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	 * Returns true if the block was placed at x/y/z; checks for entity collision and other blocks
 	 */
 	private boolean tryPlaceBlock(ItemStack stack, World world, int x, int y, int z, Block block, int meta) {
-		int i1 = world.getBlockId(x, y, z);
-		if (world.isBlockOpaqueCube(x, y - 1, z) && (Block.blocksList[i1] == null || Block.blocksList[i1].isBlockReplaceable(world, x, y, z))) {
-			if (world.canPlaceEntityOnSide(block.blockID, x, y, z, false, 1, null, stack)) {
+		Block b = world.getBlock(x, y, z);
+		// func_149730_j returns is opaque cube
+		if (world.getBlock(x, y - 1, z).func_149730_j() && b.isReplaceable(world, x, y, z)) {
+			if (world.canPlaceEntityOnSide(block, x, y, z, false, 1, null, stack)) {
 				int placedMeta = block.onBlockPlaced(world, x, y, z, 1, (float)(x + 0.5F), (float)(y + 0.5F), (float)(z + 0.5F), meta);
-				if (world.setBlock(x, y, z, block.blockID, placedMeta, 3)) {
-					if (world.getBlockId(x, y, z) == block.blockID) {
+				if (world.setBlock(x, y, z, block, placedMeta, 3)) {
+					if (world.getBlock(x, y, z) == block) {
 						block.onPostBlockPlaced(world, x, y, z, placedMeta);
 						if (block instanceof ILiftable) {
 							((ILiftable) block).onHeldBlockPlaced(world, stack, x, y, z, placedMeta);
@@ -174,12 +177,10 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 
 	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		int i1 = world.getBlockId(x, y, z);
-		if (i1 == Block.snow.blockID && (world.getBlockMetadata(x, y, z) & 7) < 1) {
+		Block b = world.getBlock(x, y, z);
+		if (b == Blocks.snow_layer) {
 			side = 1;
-		} else if (i1 != Block.vine.blockID && i1 != Block.tallGrass.blockID && i1 != Block.deadBush.blockID
-				&& (Block.blocksList[i1] == null || !Block.blocksList[i1].isBlockReplaceable(world, x, y, z)))
-		{
+		} else if (b != Blocks.vine && b != Blocks.tallgrass && b != Blocks.deadbush && !b.isReplaceable(world, x, y, z)) {
 			switch(side) {
 			case 0: --y; break;
 			case 1: ++y; break;
@@ -192,17 +193,17 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 		}
 
 		Block block = getBlockFromStack(stack);
-		if (block == null || stack.stackSize == 0) {
+		if (block == null|| stack.stackSize == 0) {
 			return false;
 		} else if (!player.canPlayerEdit(x, y, z, side, stack) && !(block instanceof ILiftable)) {
 			return false;
-		} else if (y == 255 && block.blockMaterial.isSolid()) {
+		} else if (y == 255 && block.getMaterial().isSolid()) {
 			return false;
-		} else if (world.canPlaceEntityOnSide(block.blockID, x, y, z, false, side, null, stack)) {
+		} else if (world.canPlaceEntityOnSide(block, x, y, z, false, side, null, stack)) {
 			int meta = getMetaFromStack(stack);
 			int placedMeta = block.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, meta);
 			if (placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, block, placedMeta)) {
-				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D), block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D), block.stepSound.getBreakSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
 				ItemStack gauntlets = (stack.hasTagCompound() && stack.getTagCompound().hasKey("gauntlets") ?
 						ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("gauntlets")) : null);
 				player.setCurrentItemOrArmor(0, gauntlets);
@@ -218,10 +219,10 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	 * all other checks have been made
 	 */
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, Block block, int meta) {
-		if (!world.setBlock(x, y, z, block.blockID, meta, 3)) {
+		if (!world.setBlock(x, y, z, block, meta, 3)) {
 			return false;
 		}
-		if (world.getBlockId(x, y, z) == block.blockID) {
+		if (world.getBlock(x, y, z) == block) {
 			block.onBlockPlacedBy(world, x, y, z, player, stack);
 			block.onPostBlockPlaced(world, x, y, z, meta);
 			if (block instanceof ILiftable) {
@@ -234,7 +235,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		Block block = getBlockFromStack(stack);
-		return (block != null ? block.getUnlocalizedName() : Block.stone.getUnlocalizedName());
+		return (block != null ? block.getUnlocalizedName() : Blocks.stone.getUnlocalizedName());
 	}
 
 	@Override
@@ -245,9 +246,9 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(ItemStack stack, int pass) {
+	public IIcon getIcon(ItemStack stack, int pass) {
 		Block block = getBlockFromStack(stack);
-		return (block != null ? block.getIcon(1, getMetaFromStack(stack)) : Block.stone.getIcon(1, 0));
+		return (block != null ? block.getIcon(1, getMetaFromStack(stack)) : Blocks.stone.getIcon(1, 0));
 	}
 
 	@Override

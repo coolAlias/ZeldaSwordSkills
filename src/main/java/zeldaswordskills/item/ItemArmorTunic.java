@@ -19,15 +19,15 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumArmorMaterial;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
@@ -41,11 +41,10 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityGoron;
-import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -72,8 +71,8 @@ public class ItemArmorTunic extends ItemArmor
 	 * Armor types as used on player: 0 boots, 1 legs, 2 chest, 3 helm
 	 * Armor types as used in armor class: 0 helm, 1 chest, 2 legs, 3 boots
 	 */
-	public ItemArmorTunic(int id, int renderIndex, int type) {
-		super(id, EnumArmorMaterial.CHAIN, renderIndex, type);
+	public ItemArmorTunic(int renderIndex, int type) {
+		super(ArmorMaterial.CHAIN, renderIndex, type);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
 
@@ -96,18 +95,18 @@ public class ItemArmorTunic extends ItemArmor
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && this == ZSSItems.tunicGoronChest && entity instanceof EntityGoron) {
 			if (stack.getItemDamage() > 0) {
-				MerchantRecipe trade = new MerchantRecipe(new ItemStack(ZSSItems.tunicGoronChest), new ItemStack(Item.emerald, 8), new ItemStack(ZSSItems.tunicGoronChest));
+				MerchantRecipe trade = new MerchantRecipe(new ItemStack(ZSSItems.tunicGoronChest), new ItemStack(Items.emerald, 8), new ItemStack(ZSSItems.tunicGoronChest));
 				MerchantRecipeHelper.addToListWithCheck(((EntityVillager) entity).getRecipes(player), trade);
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.goron.tunic.repair"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.goron.tunic.repair"));
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.goron.tunic.undamaged"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.goron.tunic.undamaged"));
 			}
 		}
 		return true;
 	}
 
 	@Override
-	public void onArmorTickUpdate(World world, EntityPlayer player, ItemStack stack) {
+	public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 		PotionEffect effect = getEffect();
 		if (effect != null && shouldDamageArmor(world, player, stack, effect.getPotionID())) {
 			player.addPotionEffect(new PotionEffect(effect));
@@ -122,10 +121,10 @@ public class ItemArmorTunic extends ItemArmor
 	 * @return true if attack event should be canceled
 	 */
 	public static boolean onFireDamage(EntityLivingBase entity, float damage) {
-		ItemStack stack = entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST);
+		ItemStack stack = entity.getEquipmentInSlot(ArmorIndex.EQUIPPED_CHEST);
 		if (!entity.worldObj.isRemote && stack != null && stack.getItem() == ZSSItems.tunicGoronChest) {
 			PotionEffect resist = entity.getActivePotionEffect(Potion.fireResistance);
-			if (resist != null && resist.duration > 0) {
+			if (resist != null && resist.getDuration() > 0) {
 				return false;
 			}
 			if (!stack.hasTagCompound()) {
@@ -133,11 +132,7 @@ public class ItemArmorTunic extends ItemArmor
 			}
 			if (!stack.getTagCompound().hasKey("lastDamaged") || entity.worldObj.getTotalWorldTime() > (stack.getTagCompound().getLong("lastDamaged") + 20)) {
 				stack.getTagCompound().setLong("lastDamaged", entity.worldObj.getTotalWorldTime());
-				damage *= 1.0F + (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
-				damage *= 1.0F - (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
-				if (damage > 0) {
-					((ItemArmorTunic) stack.getItem()).damageStack(stack, entity, Math.max((int) damage / 4, 1));
-				}
+				((ItemArmorTunic) stack.getItem()).damageStack(stack, entity, Math.max((int) damage / 4, 1));
 				entity.extinguish();
 			}
 
@@ -161,7 +156,7 @@ public class ItemArmorTunic extends ItemArmor
 	 * Returns true if the armor should be damaged this tick for applying potion effect
 	 */
 	private boolean shouldDamageArmor(World world, EntityPlayer player, ItemStack stack, int effectID) {
-		Material m = world.getBlockMaterial((int) player.posX, (int) player.posY + 1, (int) player.posZ);
+		Material m = world.getBlock((int) player.posX, (int) player.posY + 1, (int) player.posZ).getMaterial();
 		if (effectID == Potion.waterBreathing.id) {
 			return (m == Material.water && world.getWorldTime() % 50 == 0);
 		} else {
@@ -170,30 +165,30 @@ public class ItemArmorTunic extends ItemArmor
 	}
 
 	@Override
-	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer) {
+	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
 		String name = getUnlocalizedName().substring(9, getUnlocalizedName().lastIndexOf("_"));
 		return String.format("%s:textures/armor/%s_layer_%d.png", ModInfo.ID, name, (slot == 2 ? 2 : 1));
 	}
 
 	@Override
 	public int getItemEnchantability() {
-		return EnumArmorMaterial.CLOTH.getEnchantability();
+		return ArmorMaterial.CLOTH.getEnchantability();
 	}
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
 		if (this == ZSSItems.tunicGoronChest) {
 			// TODO return dodongo scales
-			return stack.getItem() == Item.magmaCream;
+			return stack.getItem() == Items.magma_cream;
 		} else if (this == ZSSItems.tunicZoraChest) {
 			// TODO return something interesting?
 		}
-		return stack.getItem() == Item.itemsList[Block.cloth.blockID];
+		return stack.getItem() == Item.getItemFromBlock(Blocks.wool);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 

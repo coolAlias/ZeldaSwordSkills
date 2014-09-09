@@ -35,7 +35,8 @@ import zeldaswordskills.item.ItemCustomEgg;
 public class BehaviorDispenseCustomMobEgg extends BehaviorDefaultDispenseItem {
 	@Override
 	public ItemStack dispenseStack(IBlockSource block, ItemStack stack) {
-		EnumFacing facing = BlockDispenser.getFacing(block.getBlockMetadata());
+		// BlockDispenser.func_149937_b(meta) is getFacing(meta)
+		EnumFacing facing = BlockDispenser.func_149937_b(block.getBlockMetadata());
 		double d0 = block.getX() + facing.getFrontOffsetX();
 		double d1 = block.getYInt() + 0.2D;
 		double d2 = block.getZ() + facing.getFrontOffsetZ();
