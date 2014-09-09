@@ -19,7 +19,7 @@ package zeldaswordskills.world.gen.structure;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -35,20 +35,20 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 		NBTTagList roomList = getStructureListFor(chunkX, chunkZ);
 		int posX = chunkX << 4;
 		int posZ = chunkZ << 4;
-		
+
 		for (int i = 0; i < Config.getNetherAttemptsPerChunk(); ++i) {
 			if (rand.nextFloat() < Config.getNetherSecretRoomChance()) {
 				int x = posX + rand.nextInt(16);
 				int y = rand.nextInt((i % 4 == 1 ? 64 : 128)) - rand.nextInt(16);
 				int z = posZ + rand.nextInt(16);
-				RoomSecret room = new RoomSecret(chunkX, chunkZ, rand.nextInt(6) + 3, Block.netherrack.blockID);
+				RoomSecret room = new RoomSecret(chunkX, chunkZ, rand.nextInt(6) + 3, Blocks.netherrack);
 				if (room.generate(this, world, rand, x, y, z)) {
 					roomList.appendTag(room.writeToNBT());
 					updateChunkStructureMap(roomList, chunkX, chunkZ);
 				}
 			}
 		}
-		
+
 		if (roomList.tagCount() > 0) {
 			//LogHelper.log(Level.INFO, "Nether roomList for chunk " + chunkX + "/" + chunkZ + " contains " + roomList.tagCount() + " elements");
 			NBTTagCompound compound = new NBTTagCompound();
@@ -58,7 +58,7 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 			//LogHelper.log(Level.INFO, "Nether roomList for chunk " + chunkX + "/" + chunkZ + " contains ZERO elements");
 		}
 	}
-	
+
 	@Override
 	public String getTagName() {
 		return "zssSecretNether";

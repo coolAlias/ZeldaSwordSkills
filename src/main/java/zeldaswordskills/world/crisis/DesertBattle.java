@@ -17,9 +17,9 @@
 
 package zeldaswordskills.world.crisis;
 
-import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
@@ -40,14 +40,14 @@ public class DesertBattle extends BossBattle {
 			scheduleUpdateTick(300 - world.rand.nextInt(100));
 			handleDispensers(world, false);
 			if (difficulty == 3) {
-				setDungeonFloorTo(world, Block.slowSand, 0, null);
+				setDungeonFloorTo(world, Blocks.soul_sand, 0, null);
 			}
 		}
 	}
 
 	@Override
 	protected void endCrisis(World world) {
-		setDungeonFloorTo(world, Block.sandStone, 0, Block.slowSand);
+		setDungeonFloorTo(world, Blocks.sandstone, 0, Blocks.soul_sand);
 		super.endCrisis(world);
 	}
 
@@ -72,15 +72,15 @@ public class DesertBattle extends BossBattle {
 			for (int i = minX; i < maxX; ++i) {
 				for (int k = minZ; k < maxZ; ++k) {
 					if (activate) {
-						if (world.getBlockId(i, j, k) == Block.dispenser.blockID && world.rand.nextInt(9 - (2 * difficulty)) == 0) { 
-							Block.blocksList[Block.dispenser.blockID].updateTick(world, i, j, k, world.rand);
+						if (world.getBlock(i, j, k) == Blocks.dispenser && world.rand.nextInt(9 - (2 * difficulty)) == 0) { 
+							Blocks.dispenser.updateTick(world, i, j, k, world.rand);
 						}
 					} else {
-						world.setBlock(i, j, k, Block.dispenser.blockID);
+						world.setBlock(i, j, k, Blocks.dispenser);
 						world.setBlockMetadataWithNotify(i, j, k, RoomBoss.facingToOrientation[(side + 2) % 4], 2);
-						TileEntity te = world.getBlockTileEntity(i, j, k);
+						TileEntity te = world.getTileEntity(i, j, k);
 						if (te instanceof IInventory) {
-							WorldUtils.addItemToInventory(new ItemStack(Item.arrow, (difficulty == 3 ? 24 : 16)), (IInventory) te);
+							WorldUtils.addItemToInventory(new ItemStack(Items.arrow, (difficulty == 3 ? 24 : 16)), (IInventory) te);
 						}
 					}
 				}

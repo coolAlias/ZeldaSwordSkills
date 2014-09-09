@@ -19,7 +19,7 @@ package zeldaswordskills.world.gen.structure;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
@@ -49,15 +49,15 @@ public class MapGenBossRoom extends ZSSMapGenBase
 
 		BossType type = BossType.getBossType(world, posX, posZ);
 		if (type != null) {
-			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, rand.nextInt(5) + 9, Block.stone.blockID);
+			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, rand.nextInt(5) + 9, Blocks.stone);
 			if (rand.nextFloat() < 0.2F && !areStructuresWithinRange(room, Config.getMinBossDistance())) {
 				int posY = StructureGenUtils.getAverageSurfaceHeight(world, posX, posZ);
 				if (room.generate(this, world, rand, posX, posY, posZ)) {
-					//LogHelper.log(Level.INFO, "Boss room of type " + type.toString() + " successfully generated at " + room.getBoundingBox().toString());
+					//LogHelper.finer("Boss room of type " + type.toString() + " successfully generated at " + room.getBoundingBox().toString());
 					onStructureGenerated(type, chunkX, chunkZ);
 					AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + type.ordinal(), room.getBoundingBox().getCenterX() >> 4, room.getBoundingBox().getCenterZ() >> 4);
 				} else {
-					//LogHelper.log(Level.INFO, "Boss room of type " + type.toString() + " failed to generate at " + room.getBoundingBox().toString());
+					//LogHelper.finest("Boss room of type " + type.toString() + " failed to generate at " + room.getBoundingBox().toString());
 				}
 			}
 		}
@@ -106,10 +106,10 @@ public class MapGenBossRoom extends ZSSMapGenBase
 				if (structureMap.containsKey(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)))) {
 					BossType type = ((RoomBoss) room).getBossType();
 					if (type != null && type.ordinal() == getBossTypeFor(i, j)) {
-						//LogHelper.log(Level.INFO, "Boss room of same type found within " + range + " chunks of " + room.chunkX + "/" + room.chunkZ);
+						//LogHelper.finer("Boss room of same type found within " + range + " chunks of " + room.chunkX + "/" + room.chunkZ);
 						return true;
 					} else if (((room.chunkX - i) * (room.chunkX - i) + (room.chunkZ - j) * (room.chunkZ - j)) < (range * range) / 2) {
-						//LogHelper.log(Level.INFO, "Boss room of different type found within " + ((range * range) / 2) + " chunks squared of " + room.chunkX + "/" + room.chunkZ);
+						//LogHelper.finer("Boss room of different type found within " + ((range * range) / 2) + " chunks squared of " + room.chunkX + "/" + room.chunkZ);
 						return true;
 					}
 				}
@@ -126,7 +126,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			int j = compound.getInteger("chunkZ");
 			int bossType = compound.getInteger("bossType");
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), bossType);
-			//LogHelper.log(Level.INFO, "Loaded roomList data for chunk " + i + "/" + j);
+			//LogHelper.finer("Loaded roomList data for chunk " + i + "/" + j);
 		} else {
 			LogHelper.warning("Failed to translate Boss Room NBT compound into structure map");
 		}

@@ -17,7 +17,7 @@
 
 package zeldaswordskills.world.crisis;
 
-import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.lib.Sounds;
@@ -33,10 +33,10 @@ public class ForestBattle extends BossBattle {
 	public void beginCrisis(World world) {
 		super.beginCrisis(world);
 		scheduleUpdateTick(300 + world.rand.nextInt(300));
-		StructureGenUtils.fillWithoutReplace(world, box.minX + 1, box.minX + 2, box.minY + 1, box.minY + 4, box.minZ + 1, box.maxZ, Block.web.blockID, 0, 3);
-		StructureGenUtils.fillWithoutReplace(world, box.maxX - 1, box.maxX, box.minY + 1, box.minY + 4, box.minZ + 1, box.maxZ, Block.web.blockID, 0, 3);
-		StructureGenUtils.fillWithoutReplace(world, box.minX + 2, box.maxX - 1, box.minY + 1, box.minY + 4, box.minZ + 1, box.minZ + 2, Block.web.blockID, 0, 3);
-		StructureGenUtils.fillWithoutReplace(world, box.minX + 2, box.maxX - 1, box.minY + 1, box.minY + 4, box.maxZ - 1, box.maxZ, Block.web.blockID, 0, 3);
+		StructureGenUtils.fillWithoutReplace(world, box.minX + 1, box.minX + 2, box.minY + 1, box.minY + 4, box.minZ + 1, box.maxZ, Blocks.web, 0, 3);
+		StructureGenUtils.fillWithoutReplace(world, box.maxX - 1, box.maxX, box.minY + 1, box.minY + 4, box.minZ + 1, box.maxZ, Blocks.web, 0, 3);
+		StructureGenUtils.fillWithoutReplace(world, box.minX + 2, box.maxX - 1, box.minY + 1, box.minY + 4, box.minZ + 1, box.minZ + 2, Blocks.web, 0, 3);
+		StructureGenUtils.fillWithoutReplace(world, box.minX + 2, box.maxX - 1, box.minY + 1, box.minY + 4, box.maxZ - 1, box.maxZ, Blocks.web, 0, 3);
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class ForestBattle extends BossBattle {
 		if (world.rand.nextInt(4) < 3) {
 			flag = true;
 			for (int i = 0; i < (difficulty + 2); ++i) {
-				setRandomBlockTo(world, Block.web, 0, Sounds.WEB_SPLAT);
+				setRandomBlockTo(world, Blocks.web, 0, Sounds.WEB_SPLAT);
 			}
 		}
 		if (!flag || world.rand.nextInt(2) == 0) {

@@ -27,6 +27,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import net.minecraftforge.common.util.Constants;
 
 public abstract class ZSSMapGenBase
 {
@@ -51,7 +52,7 @@ public abstract class ZSSMapGenBase
 
 	/** Returns the StructureBoundingBox located at x/y/z or null if none intersects with those coordinates */
 	protected abstract StructureBoundingBox getStructureBBAt(int x, int y, int z);
-	
+
 	/**
 	 * Returns true if any other structures exist within the given range from the room
 	 * @param range the distance to check, either in blocks or chunks depending on implementation
@@ -63,7 +64,7 @@ public abstract class ZSSMapGenBase
 	 * allows for different storage formats (NBTTagCompound, NBTTagList, etc) in each MapGen
 	 */
 	protected abstract void translateNbtIntoMap(NBTTagCompound compound);
-	
+
 	/**
 	 * Wrapper method to add compound to roomData, using chunk coordinates as the tag identifier
 	 */
@@ -71,31 +72,32 @@ public abstract class ZSSMapGenBase
 		roomData.addRoomTag(compound, chunkX, chunkZ);
 		roomData.markDirty();
 	}
-	
+
 	/**
 	 * If roomData is null, it is loaded from world storage if available or a new one is created
 	 */
 	protected final void loadOrCreateData(World world) {
 		if (roomData == null) {
 			roomData = (RoomGenData) world.perWorldStorage.loadData(RoomGenData.class, getTagName());
-
 			if (roomData == null) {
 				roomData = new RoomGenData(getTagName());
 				world.perWorldStorage.setData(getTagName(), roomData);
 			} else {
 				NBTTagCompound compound = roomData.getRoomData();
-				Iterator iterator = compound.getTags().iterator();
+				// func_150296_c is getTags()
+				Iterator iterator = compound.func_150296_c().iterator();
 
 				while (iterator.hasNext()) {
-					NBTBase nbtbase = (NBTBase) iterator.next();
-					if (nbtbase.getId() == 10) {
+					String s = (String) iterator.next();
+					NBTBase nbtbase = compound.getTag(s);
+					if (nbtbase.getId() == Constants.NBT.TAG_COMPOUND) {
 						translateNbtIntoMap((NBTTagCompound) nbtbase);
 					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns true if the structure generator has generated a structure located at the given position tuple.
 	 */

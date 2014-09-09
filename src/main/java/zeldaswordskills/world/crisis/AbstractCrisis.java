@@ -61,11 +61,13 @@ public abstract class AbstractCrisis
 		if (eventTimer > 0) {
 			--eventTimer;
 			if (eventTimer % 20 == 0 && canCrisisConclude(world)) {
+				//LogHelper.log(Level.INFO, "Crisis can conclude before time is up! Currently on " + (world.isRemote ? "client" : "server"));
 				eventTimer = 0;
 			} else if (eventTimer < 40) {
 				eventTimer += 40;
 			}
 			if (eventTimer == 0) {
+				//LogHelper.log(Level.INFO, "Crisis timed out: ending crisis on " + (world.isRemote ? "client" : "server"));
 				endCrisis(world);
 				eventTimer = -1;
 			} else if (eventTimer == nextTick) {

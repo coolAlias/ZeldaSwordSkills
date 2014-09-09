@@ -19,7 +19,6 @@ package zeldaswordskills.world.gen.feature;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
@@ -33,7 +32,7 @@ public class WorldGenJars extends WorldGenerator {
 	public WorldGenJars(boolean doNotify) {
 		super(doNotify);
 	}
-	
+
 	/**
 	 * Generates n jars in a cluster around x/y/z
 	 */
@@ -43,17 +42,17 @@ public class WorldGenJars extends WorldGenerator {
 			int j = y + rand.nextInt(4) - rand.nextInt(4);
 			int k = z + rand.nextInt(4) - rand.nextInt(4);
 
-			if (canPlaceBlockAt(world, i, j, k, isUnderground) && (!world.provider.hasNoSky || j < 127) && Block.blocksList[ZSSBlocks.ceramicJar.blockID].canBlockStay(world, i, j, k)) {
-				world.setBlock(i, j, k, ZSSBlocks.ceramicJar.blockID, 0, 2);
+			if (canPlaceBlockAt(world, i, j, k, isUnderground) && (!world.provider.hasNoSky || j < 127) && ZSSBlocks.ceramicJar.canBlockStay(world, i, j, k)) {
+				world.setBlock(i, j, k, ZSSBlocks.ceramicJar, 0, 2);
 				--n;
 			}
 		}
 	}
-	
+
 	private boolean canPlaceBlockAt(World world, int i, int j, int k, boolean isUnderground) {
-		return world.isAirBlock(i, j, k) || (!isUnderground && Config.genJarsInWater() && world.getBlockMaterial(i, j, k) == Material.water && !world.canBlockFreeze(i, j, k, false));
+		return world.isAirBlock(i, j, k) || (!isUnderground && Config.genJarsInWater() && world.getBlock(i, j, k).getMaterial() == Material.water && !world.canBlockFreeze(i, j, k, false));
 	}
-	
+
 	/**
 	 * Attempts to generate a single jar cluster
 	 * @param jarsPerCluster max number of jars to generate in this cluster
@@ -64,13 +63,13 @@ public class WorldGenJars extends WorldGenerator {
 		int j = (world.provider.isHellWorld ? rand.nextInt(128) : world.getHeightValue(i, k) + 1);
 		int n = jarsPerCluster - rand.nextInt(jarsPerCluster);
 		if (Config.genJarsInWater() && !isUnderground) {
-			while (j > 0 && world.getBlockMaterial(i, j, k) == Material.water) {
+			while (j > 0 && world.getBlock(i, j, k).getMaterial() == Material.water) {
 				--j;
 			}
 		}
 		generate2(world, rand, i, j, k, n, isUnderground);
 	}
-	
+
 	@Override
 	public boolean generate(World world, Random rand, int i, int j, int k) {
 		generate2(world, rand, i, j, k, (Config.getJarsPerCluster() - rand.nextInt(Config.getJarsPerCluster())), false);

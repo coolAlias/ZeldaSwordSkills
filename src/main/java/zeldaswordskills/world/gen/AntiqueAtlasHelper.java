@@ -40,7 +40,7 @@ public class AntiqueAtlasHelper
 	public static void placeCustomTile(World world, String tileName, int x, int y, int z) {
 		placeCustomTile(world, tileName, x >> 4, z >> 4);
 	}
-	
+
 	/**
 	 * Places custom tile at the given chunk coordinates
 	 */
@@ -53,7 +53,7 @@ public class AntiqueAtlasHelper
 			}
 		}
 	}
-	
+
 	/**
 	 * Registers all custom tile textures to the Atlas
 	 */
