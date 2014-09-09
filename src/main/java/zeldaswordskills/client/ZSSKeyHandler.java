@@ -17,8 +17,6 @@
 
 package zeldaswordskills.client;
 
-import java.util.EnumSet;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.Item;
@@ -29,26 +27,26 @@ import org.lwjgl.input.Keyboard;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.GuiHandler;
-import zeldaswordskills.inventory.ContainerSkills;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.GetBombPacket;
-import zeldaswordskills.network.OpenGuiPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.packet.server.GetBombPacket;
+import zeldaswordskills.network.packet.server.OpenGuiPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import cpw.mods.fml.client.registry.KeyBindingRegistry;
-import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
-import cpw.mods.fml.common.TickType;
-import cpw.mods.fml.common.network.PacketDispatcher;
+import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ZSSKeyHandler extends KeyHandler
+public class ZSSKeyHandler
 {
 	private final Minecraft mc;
 
@@ -59,7 +57,7 @@ public class ZSSKeyHandler extends KeyHandler
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
 	public static final String[] desc = { "activate","next","attack","left","right","down",
-		"block","bomb","toggleat","togglebuff","skills_gui"};
+		"block","bomb","toggleat","togglebuff", "skills_gui"};
 
 	/** Default key values */
 	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
@@ -68,83 +66,62 @@ public class ZSSKeyHandler extends KeyHandler
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 
-	/**
-	 * Initializes keybindings and registers a new KeyHandler instance
-	 */
-	public static final void init() {
-		boolean[] repeat = new boolean[desc.length];
-		for (int i = 0; i < desc.length; ++i) {
-			keys[i] = new KeyBinding("key.zss." + desc[i] + ".desc", keyValues[i]);
-			repeat[i] = false;
-		}
-		KeyBindingRegistry.registerKeyBinding(new ZSSKeyHandler(keys, repeat));
-	}
-
-	private ZSSKeyHandler(KeyBinding[] keys, boolean[] repeat) {
-		super(keys, repeat);
+	public ZSSKeyHandler() {
 		this.mc = Minecraft.getMinecraft();
-	}
-
-	@Override
-	public String getLabel() {
-		return StatCollector.translateToLocal("key.zss.label");
-	}
-
-	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.CLIENT);
-	}
-
-	@Override
-	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
-		if (tickEnd && mc.thePlayer != null) {
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
-			if (mc.inGameHasFocus && skills != null) {
-				if (kb == keys[KEY_SKILL_ACTIVATE]) {
-					if (skills.hasSkill(SkillBase.swordBasic)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(SkillBase.swordBasic).makePacket());
-					}
-				} else if (kb == keys[KEY_BOMB]) {
-					// prevent player from holding RMB while getting bombs, as it can crash the game
-					if (mc.gameSettings.keyBindUseItem.pressed) {
-						KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.keyCode, false);
-					}
-					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
-				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
-					if (mc.thePlayer.isSneaking()) {
-						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggletp",
-								(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
-					} else {
-						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
-								(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
-					}
-				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
-					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
-				} else if (kb == keys[KEY_SKILLS_GUI]) {
-					PacketDispatcher.sendPacketToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS).makePacket());
-				} else {
-					handleTargetingKeys(mc, kb, skills);
-				}
-			} else if (kb == keys[KEY_SKILLS_GUI] && mc.thePlayer.openContainer instanceof ContainerSkills) {
-				mc.thePlayer.closeScreen();
-			}
+		for (int i = 0; i < desc.length; ++i) {
+			keys[i] = new KeyBinding("key.zss." + desc[i] + ".desc", keyValues[i], StatCollector.translateToLocal("key.zss.label"));
+			ClientRegistry.registerKeyBinding(keys[i]);
 		}
 	}
 
+	@SubscribeEvent
+	public void onKeyInput(KeyInputEvent event) {
+		onKeyPressed(mc, Keyboard.getEventKey());
+	}
+
 	/**
-	 * Only fires for custom key bindings, not all keys
+	 * Call for any key code, mouse or keyboard, to handle custom key bindings that may
+	 * have been remapped to mouse. From MouseEvent, ONLY call this method when the mouse
+	 * key is pressed, not when it is released (i.e. when event.buttonstate is true).
+	 * @param mc	Pass in Minecraft instance, since this is a static method
+	 * @param kb	The key code of the key pressed; for the mouse, this is the mouse button number minus 100
 	 */
-	@Override
-	public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
-		if (tickEnd) {
-			kb.pressed = false;
+	public static void onKeyPressed(Minecraft mc, int kb) {
+		if (mc.inGameHasFocus && mc.thePlayer != null) {
+			ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
+			if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
+				SkillBase skill = skills.getPlayerSkill(SkillBase.swordBasic);
+				if (skill != null && skill.getLevel() > 0) {
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(skill));
+				}
+			} else if (kb == keys[KEY_BOMB].getKeyCode()) {
+				// prevent player from holding RMB while getting bombs, as it can crash the game
+				if (mc.gameSettings.keyBindUseItem.getIsKeyPressed()) {
+					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+				}
+				PacketDispatcher.sendToServer(new GetBombPacket());
+			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
+				if (mc.thePlayer.isSneaking()) {
+					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocalFormatted("chat.zss.key.toggletp",
+							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+				} else {
+					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
+							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+				}
+			} else if (kb == keys[KEY_TOGGLE_BUFFBAR].getKeyCode()) {
+				GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
+				PacketDispatcher.sendToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS));
+			} else {
+				handleTargetingKeys(mc, kb, skills);
+			}
 		}
 	}
 
 	/**
 	 * All ILockOnTarget skill related keys are handled here
 	 */
-	private static void handleTargetingKeys(Minecraft mc, KeyBinding kb, ZSSPlayerInfo skills) {
+	private static void handleTargetingKeys(Minecraft mc, int kb, ZSSPlayerSkills skills) {
 		ILockOnTarget skill = skills.getTargetingSkill();
 		// key interaction is disabled if the player is stunned or a skill animation is in progress
 		boolean canInteract = skills.canInteract() && !ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN);
@@ -152,38 +129,84 @@ public class ZSSKeyHandler extends KeyHandler
 		if (skill == null || !skill.isLockedOn()) {
 			return;
 		}
-		if (kb == keys[KEY_NEXT_TARGET]) {
+		if (kb == keys[KEY_NEXT_TARGET].getKeyCode()) {
 			skill.getNextTarget(mc.thePlayer);
-		} else if (kb == keys[KEY_ATTACK]) {
+		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
+			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
 			Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
 			boolean flag = (heldItem instanceof ItemHeldBlock || (mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
 			if (canInteract && !flag) {
-				kb.pressed = true;
+				KeyBinding.setKeyBindState(key.getKeyCode(), true);
 			} else if (!flag) {
 				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
-					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, kb, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
 					return;
 				}
 			}
 			// Only allow attack key to continue processing if it was set to pressed
-			if (kb.pressed) {
+			if (key.getIsKeyPressed()) {
 				// Nayru's Love prevents skill activation, but can still attack
-				if (skills.isNayruActive() || !skills.onKeyPressed(mc, kb)) {
+				if (skills.isNayruActive() || !skills.onKeyPressed(mc, key)) {
 					ZSSClientEvents.performComboAttack(mc, skill);
 				}
 				// hack for Armor Break to begin charging without having to press attack again
 				if (skills.hasSkill(SkillBase.armorBreak)) {
-					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, kb, mc.thePlayer);
+					skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, key, mc.thePlayer);
 				}
 			}
 		} else if (canInteract) {
-			// always allowed to block, but other keys only allowed if Nayru's Love not active
-			kb.pressed = (kb == keys[KEY_BLOCK] || !skills.isNayruActive());
-			// Nayru's Love prevents all skill interaction
-			if (!skills.isNayruActive()) {
-				skills.onKeyPressed(mc, kb);
+			// Only works for keys mapped to custom key bindings, which is fine for remapped mouse keys
+			KeyBinding key = getKeyBindFromCode(mc, kb);
+			if (key != null) {
+				KeyBinding.setKeyBindState(kb, true);
+				// Nayru's Love prevents all skill interaction
+				if (!skills.isNayruActive()) {
+					skills.onKeyPressed(mc, key);
+				}
 			}
 		}
+	}
+
+	/**
+	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
+	 * Currently handles all custom keys, plus the following vanilla keys:
+	 * 	Always allowed: keyBindForward, keyBindJump
+	 * 	{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack
+	 * @param keyCode	Will be a negative number for mouse keys, or positive for keyboard
+	 * @param mc		Pass in Minecraft instance as a workaround to get vanilla KeyBindings
+	 */
+	@SideOnly(Side.CLIENT)
+	public static KeyBinding getKeyBindFromCode(Minecraft mc, int keyCode) {
+		for (KeyBinding k : keys) {
+			if (k.getKeyCode() == keyCode) {
+				return k;
+			}
+		}
+		// there must be a better way to do this...
+		if (keyCode == mc.gameSettings.keyBindForward.getKeyCode()) {
+			return mc.gameSettings.keyBindForward;
+		} else if (keyCode == mc.gameSettings.keyBindJump.getKeyCode()) {
+			return mc.gameSettings.keyBindJump;
+		} else if (Config.allowVanillaControls()) {
+			if (keyCode == mc.gameSettings.keyBindLeft.getKeyCode()) {
+				return mc.gameSettings.keyBindLeft;
+			} else if (keyCode == mc.gameSettings.keyBindRight.getKeyCode()) {
+				return mc.gameSettings.keyBindRight;
+			} else if (keyCode == mc.gameSettings.keyBindBack.getKeyCode()) {
+				return mc.gameSettings.keyBindBack;
+			}
+		}
+		// Doesn't seem to be an easy way to get the KeyBinding from the key code...
+		/* curse cpw for making both the key bind array and hash lookup private >.<
+		Iterator iterator = KeyBinding.keybindArray.iterator();
+		while (iterator.hasNext()) {
+			KeyBinding kb = (KeyBinding) iterator.next();
+			if (kb.getKeyCode() == keyCode) {
+				return kb;
+			}
+		}
+		 */
+		return null;
 	}
 }

@@ -20,14 +20,13 @@ package zeldaswordskills.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeInstance;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.sound.SoundLoadEvent;
-import net.minecraftforge.event.ForgeSubscribe;
 
 import org.lwjgl.opengl.GL11;
 
@@ -36,28 +35,23 @@ import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.TargetUtils;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * SoundManager is only available on the client side; when run on a server, it will crash
- * if sounds are registered indiscriminately.
- * 
- * Player render events must also be done here, even though they should only be called on
- * the client, they will crash the game when running a dedicated server if placed in a
- * regular event handler.
+ * Handles all client-sided events, such as render events, mouse event, etc.
  *
  */
 @SideOnly(Side.CLIENT)
@@ -78,7 +72,7 @@ public class ZSSClientEvents
 	}
 
 	/**
-	 * Attacks current target if player is not currently using an item and {@link ICombo#onAttack}
+	 * Attacks current target if player not currently using an item and {@link ICombo#onAttack}
 	 * doesn't return false (i.e. doesn't miss)
 	 * @param skill must implement BOTH {@link ILockOnTarget} AND {@link ICombo}
 	 */
@@ -98,25 +92,25 @@ public class ZSSClientEvents
 	 * FOV is determined initially in EntityPlayerSP; fov is recalculated for
 	 * the vanilla bow only in the case that zoom-enhancing gear is worn
 	 */
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void updateFOV(FOVUpdateEvent event) {
 		ItemStack stack = (event.entity.isUsingItem() ? event.entity.getItemInUse() : null);
 		if (stack != null) {
 			boolean flag = stack.getItem() instanceof IZoom;
-			if (flag || stack.getItem() == Item.bow) {
-				float magnify = 1.0F;
+			if (flag || stack.getItem() == Items.bow) {
+				float magify = 1.0F;
 				for (ItemStack armor : event.entity.inventory.armorInventory) {
 					if (armor != null && armor.getItem() instanceof IZoomHelper) {
-						magnify += ((IZoomHelper) armor.getItem()).getMagnificationFactor();
+						magify += ((IZoomHelper) armor.getItem()).getMagnificationFactor();
 					}
 				}
-				if (flag || magnify != 1.0F) {
+				if (flag || magify != 1.0F) {
 					float maxTime = (flag ? ((IZoom) stack.getItem()).getMaxZoomTime() : 20.0F);
 					float factor = (flag ? ((IZoom) stack.getItem()).getZoomFactor() : 0.15F);
 					float charge = (float) event.entity.getItemInUseDuration() / maxTime;
-					AttributeInstance attributeinstance = event.entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+					IAttributeInstance iattributeinstance = event.entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 					float fov = (event.entity.capabilities.isFlying ? 1.1F : 1.0F);
-					fov *= (attributeinstance.getAttributeValue() / (double) event.entity.capabilities.getWalkSpeed() + 1.0D) / 2.0D;
+					fov *= (iattributeinstance.getAttributeValue() / (double) event.entity.capabilities.getWalkSpeed() + 1.0D) / 2.0D;
 					if (event.entity.capabilities.getWalkSpeed() == 0.0F || Float.isNaN(fov) || Float.isInfinite(fov)) {
 						fov = 1.0F;
 					}
@@ -125,7 +119,7 @@ public class ZSSClientEvents
 					} else {
 						charge *= charge;
 					}
-					event.newfov = fov * (1.0F - charge * factor * magnify);
+					event.newfov = fov * (1.0F - charge * factor * magify);
 				}
 			}
 		}
@@ -139,17 +133,24 @@ public class ZSSClientEvents
 	 * @buttons no button clicked -1, left button 0, right click 1, middle click 2, possibly 3+ for other buttons
 	 * @notes Corresponding key codes for the mouse in Minecraft are (event.button -100)
 	 */
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onMouseChanged(MouseEvent event) {
 		mouseKey = event.button - 100;
-		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.keyCode);
-		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.keyCode);
-		// no wheel, no button: just moving the mouse around
-		// no wheel, unchecked key bound to mouse: passed automatically to the key handler
-		if (event.dwheel == 0 && (event.button == -1 || (!isAttackKey && !isUseKey))) {
-			return;
+		isAttackKey = (mouseKey == mc.gameSettings.keyBindAttack.getKeyCode());
+		isUseKey = (mouseKey == mc.gameSettings.keyBindUseItem.getKeyCode());
+		if (event.dwheel == 0) {
+			// no wheel, no button: just moving the mouse around
+			if (event.button == -1) {
+				return;
+			} else if (!isAttackKey && !isUseKey) {
+				// no wheel, unchecked key bound to mouse: pass input to custom key handler, as KeyInputEvent no longer receives these automatically
+				if (event.buttonstate) {
+					ZSSKeyHandler.onKeyPressed(mc, mouseKey);
+				}
+				return;
+			}
 		}
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
 		// check pre-conditions for attacking and item use (not stunned, etc.):
 		if (event.buttonstate || event.dwheel != 0) {
 			if (isAttackKey) {
@@ -158,6 +159,7 @@ public class ZSSClientEvents
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
 				} else if (!skills.canInteract() || ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN)) {
+					//LogHelper.info("Skills could not interact during left click - canceling");
 					event.setCanceled(true);
 				} else {
 					Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
@@ -178,6 +180,7 @@ public class ZSSClientEvents
 				// mouse attack will always be canceled while locked on, as the click has been handled
 				if (Config.allowVanillaControls()) {
 					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
+						//LogHelper.info("MouseEvent - no skill handled attack key press, performing combo attack");
 						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
 					}
@@ -195,20 +198,17 @@ public class ZSSClientEvents
 					event.setCanceled(true);
 				}
 			}
-		} else if (isAttackKey) { // not locked on to a target, normal item swing
+		} else  if (isAttackKey) { // not locked on to a target, normal item swing: set attack time only
 			ZSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onRenderPlayer(RenderPlayerEvent.Pre event) {
 		ItemStack mask = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
 		if (mask != null && mask.getItem() == ZSSItems.maskGiants) {
 			GL11.glPushMatrix();
 			needsPop = true;
-			// TODO generalize transformations based on player's current height rather
-			// than on the mask worn; may need to flag this in extended properties to
-			// prevent possible conflicts with other mods
 			if (event.entityPlayer == mc.thePlayer) {
 				if (mc.inGameHasFocus) {
 					GL11.glTranslatef(0.0F, -6.325F, 0.0F);
@@ -217,72 +217,36 @@ public class ZSSClientEvents
 			} else {
 				GL11.glScalef(3.0F, 3.0F, 3.0F);
 			}
+			/*
+			if (fakePlayer == null) {
+				fakePlayer = new FakeClientPlayer(event.entityPlayer.worldObj);
+			}
+			Vec3 vec3 = event.entityPlayer.getLookVec();
+			double dx = (Minecraft.getMinecraft().gameSettings.thirdPersonView > 0 ? 0.0D : vec3.xCoord);
+			double dz = (Minecraft.getMinecraft().gameSettings.thirdPersonView > 0 ? 0.0D : vec3.zCoord);
+			fakePlayer.setLocationAndAngles(event.entityPlayer.posX + dx, event.entityPlayer.posY, event.entityPlayer.posZ + dz, event.entityPlayer.rotationYaw, event.entityPlayer.rotationPitch);
+			fakePlayer.renderYawOffset = event.entityPlayer.renderYawOffset;
+			//fakePlayer.prevCameraPitch = event.entityPlayer.prevCameraPitch;
+			//fakePlayer.prevRotationPitch = event.entityPlayer.prevRotationPitch;
+			fakePlayer.prevRotationYaw = event.entityPlayer.prevRotationYaw;
+			fakePlayer.rotationYawHead = event.entityPlayer.rotationYawHead;
+			fakePlayer.prevPosX = event.entityPlayer.prevPosX + dx;
+			fakePlayer.prevPosY = event.entityPlayer.prevPosY;
+			fakePlayer.prevPosZ = event.entityPlayer.prevPosZ + dz;
+			Minecraft.getMinecraft().renderViewEntity = fakePlayer;
+		}
+
+		else if (fakePlayer != null) {
+			fakePlayer = null;
+		}*/
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onRenderPlayer(RenderPlayerEvent.Post event) {
 		if (needsPop) {
 			GL11.glPopMatrix();
 			needsPop = false;
-		}
-	}
-
-	@ForgeSubscribe
-	public void onLoadSound(SoundLoadEvent event) {
-		// the following sounds have only 1 file each
-		event.manager.addSound(Sounds.BOMB_WHISTLE + ".ogg");
-		event.manager.addSound(Sounds.BOSS_BATTLE + ".ogg");
-		event.manager.addSound(Sounds.BOSS_SPAWN + ".ogg");
-		event.manager.addSound(Sounds.CASH_SALE + ".ogg");
-		event.manager.addSound(Sounds.HOOKSHOT + ".ogg");
-		event.manager.addSound(Sounds.CHU_MERGE + ".ogg");
-		event.manager.addSound(Sounds.CORK + ".ogg");
-		event.manager.addSound(Sounds.FAIRY_BLESSING + ".ogg");
-		event.manager.addSound(Sounds.FAIRY_LAUGH + ".ogg");
-		event.manager.addSound(Sounds.FAIRY_LIVING + ".ogg");
-		event.manager.addSound(Sounds.FAIRY_SKILL + ".ogg");
-		event.manager.addSound(Sounds.FLAME_ABSORB + ".ogg");
-		event.manager.addSound(Sounds.LEVELUP + ".ogg");
-		event.manager.addSound(Sounds.LOCK_CHEST + ".ogg");
-		event.manager.addSound(Sounds.LOCK_DOOR + ".ogg");
-		event.manager.addSound(Sounds.LOCK_RATTLE + ".ogg");
-		event.manager.addSound(Sounds.MAGIC_FAIL + ".ogg");
-		event.manager.addSound(Sounds.MAGIC_FIRE + ".ogg");
-		event.manager.addSound(Sounds.MAGIC_ICE + ".ogg");
-		event.manager.addSound(Sounds.MASTER_SWORD + ".ogg");
-		event.manager.addSound(Sounds.SECRET_MEDLEY + ".ogg");
-		event.manager.addSound(Sounds.SPECIAL_DROP + ".ogg");
-		event.manager.addSound(Sounds.SUCCESS + ".ogg");
-		event.manager.addSound(Sounds.WEB_SPLAT + ".ogg");
-		event.manager.addSound(Sounds.WHOOSH + ".ogg");
-
-		// the following have 2
-		for (int i = 1; i < 3; ++i) {
-			event.manager.addSound(Sounds.MORTAL_DRAW + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.ROCK_FALL + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.WHIRLWIND + String.valueOf(i) + ".ogg");
-		}
-
-		// the following have 3
-		for (int i = 1; i < 4; ++i) {
-			event.manager.addSound(Sounds.ARMOR_BREAK + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.GRUNT + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.HAMMER + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.HIT_RUSTY + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.HURT_FLESH + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.LEAPING_BLOW + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.SLAM + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.SPIN_ATTACK + String.valueOf(i) + ".ogg");
-		}
-		// 4 files each
-		for (int i = 1; i < 5; ++i) {
-			event.manager.addSound(Sounds.BREAK_JAR + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.HIT_PEG + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.SHOCK + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.SWORD_CUT + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.SWORD_MISS + String.valueOf(i) + ".ogg");
-			event.manager.addSound(Sounds.SWORD_STRIKE + String.valueOf(i) + ".ogg");
 		}
 	}
 }

@@ -17,22 +17,18 @@
 
 package zeldaswordskills.client;
 
-import java.util.EnumSet;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.render.EntityRendererAlt;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -42,92 +38,32 @@ import cpw.mods.fml.relauncher.SideOnly;
  * ILockOnTarget skill, if necessary to update the player's view.
  * 
  * Updates the current player renderer for transformations (e.g. Giant's Mask).
- * 
- * Also handles vanilla movement key presses, since KeyHandler only fires for custom key bindings.
  *
  */
 @SideOnly(Side.CLIENT)
-public class TargetingTickHandler implements ITickHandler
+public class TargetingTickHandler
 {
 	private final Minecraft mc;
 
 	/** Allows swapping entity renderer for camera viewpoint when transformed */
 	private EntityRenderer renderer, prevRenderer;
 
-	/** The currently animating skill, if any */
-	private SkillActive skillToAnimate = null;
-
-	/** Whether the left movement key has been pressed; used every tick */
-	boolean isLeftPressed;
-
 	public TargetingTickHandler() {
 		this.mc = Minecraft.getMinecraft();
 	}
 
-	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.RENDER);
-	}
-
-	@Override
-	public String getLabel() {
-		return null;
-	}
-
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
-		if (mc.thePlayer != null && ZSSPlayerInfo.get(mc.thePlayer) != null) {
-			updateRenderer();
-			// Hack for magic rods, since the item's update tick isn't called frequently enough
-			if (mc.thePlayer.getItemInUse() != null && mc.thePlayer.getItemInUse().getItem() instanceof ItemMagicRod) {
-				mc.thePlayer.swingProgress = 0.5F;
-			}
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
-			// flags whether a skill is currently animating
-			boolean flag = false;
-			skillToAnimate = skills.getCurrentlyAnimatingSkill();
-			if (skillToAnimate != null) {
-				if (skillToAnimate.isAnimating()) {
-					flag = skillToAnimate.onRenderTick(mc.thePlayer);
-				} else if (!skillToAnimate.isActive()) {
-					skills.setCurrentlyAnimatingSkill(null);
-				}
-			}
-			ILockOnTarget skill = skills.getTargetingSkill();
-			if (skill != null && skill.isLockedOn()) {
-				if (!flag) {
-					((SkillActive) skill).onRenderTick(mc.thePlayer);
-				}
-				// Handle vanilla movement keys here, since KeyHandler doesn't fire for vanilla keys
-				if (skills.canInteract() && !skills.isNayruActive()) {
-					if (isVanillaKeyPressed(mc.gameSettings.keyBindJump)) {
-						skills.onKeyPressed(mc, mc.gameSettings.keyBindJump);
-					} else if (isVanillaKeyPressed(mc.gameSettings.keyBindForward)) {
-						skills.onKeyPressed(mc, mc.gameSettings.keyBindForward);
-					} else if (Config.allowVanillaControls()) {
-						isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);
-						if (isLeftPressed || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
-							skills.onKeyPressed(mc, (isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight));
-						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack)) {
-							skills.onKeyPressed(mc, mc.gameSettings.keyBindBack);
-						}
-					}
+	@SubscribeEvent
+	public void onRenderTick(RenderTickEvent event) {
+		if (event.phase == Phase.START) {
+			if (mc.thePlayer != null && ZSSPlayerSkills.get(mc.thePlayer) != null) {
+				updateRenderer();
+				ZSSPlayerSkills.get(mc.thePlayer).onRenderTick(event.renderTickTime);
+				// Hack for magic rods, since the item's update tick isn't called frequently enough
+				if (mc.thePlayer.getItemInUse() != null && mc.thePlayer.getItemInUse().getItem() instanceof ItemMagicRod) {
+					mc.thePlayer.swingProgress = 0.5F;
 				}
 			}
 		}
-	}
-
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {}
-
-	/**
-	 * Returns true if a vanilla keybinding is both pressed and isPressed()
-	 * This is necessary to prevent skills from being activated as soon as locking on to a target,
-	 * (when isPressed() is still true) or while the key is held down (pressed is true).
-	 */
-	@SideOnly(Side.CLIENT)
-	private boolean isVanillaKeyPressed(KeyBinding key) {
-		return key.isPressed() && key.pressed;
 	}
 
 	/**
