@@ -15,47 +15,43 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import zeldaswordskills.entity.ZSSEntityInfo;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
-
-public class SyncEntityInfoPacket extends CustomPacket
+public class SyncEntityInfoPacket implements IMessage
 {
 	/** NBTTagCompound used to store and transfer the Entity's Info */
 	private NBTTagCompound compound;
 
 	public SyncEntityInfoPacket() {}
-	
+
 	public SyncEntityInfoPacket(ZSSEntityInfo info) {
 		compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		writeNBTTagCompound(compound, out);
+	public void toBytes(ByteBuf buffer) {
+		ByteBufUtils.writeTag(buffer, compound);
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		compound = readNBTTagCompound(in);
+	public void fromBytes(ByteBuf buffer) {
+		compound = ByteBufUtils.readTag(buffer);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			ZSSEntityInfo.get(player).loadNBTData(compound);
-		} else {
-			throw new ProtocolException("Cannot send SyncEntityInfoPacket to the server!");
+	public static class Handler extends AbstractClientMessageHandler<SyncEntityInfoPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, SyncEntityInfoPacket message, MessageContext ctx) {
+			ZSSEntityInfo.get(player).loadNBTData(message.compound);
+			return null;
 		}
 	}
 }

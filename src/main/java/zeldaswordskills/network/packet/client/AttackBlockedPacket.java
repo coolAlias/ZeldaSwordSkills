@@ -15,21 +15,18 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
-
-public class AttackBlockedPacket extends CustomPacket
+public class AttackBlockedPacket implements IMessage
 {
 	/** Stores the shield ItemStack that was used to block */
 	private NBTTagCompound compound;
@@ -42,20 +39,21 @@ public class AttackBlockedPacket extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		writeNBTTagCompound(compound, out);
+	public void toBytes(ByteBuf buffer) {
+		ByteBufUtils.writeTag(buffer, compound);
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		compound = readNBTTagCompound(in);
+	public void fromBytes(ByteBuf buffer) {
+		compound = ByteBufUtils.readTag(buffer);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			ItemStack shield = ItemStack.loadItemStackFromNBT(compound);
+	public static class Handler extends AbstractClientMessageHandler<AttackBlockedPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, AttackBlockedPacket message, MessageContext ctx) {
+			ItemStack shield = ItemStack.loadItemStackFromNBT(message.compound);
 			ZSSPlayerInfo.get(player).onAttackBlocked(shield, 0.0F);
+			return null;
 		}
 	}
 }

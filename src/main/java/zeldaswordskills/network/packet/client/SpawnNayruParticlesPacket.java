@@ -1,6 +1,6 @@
 /**
     Copyright (C) <2014> <coolAlias>
-    
+
     @author original credits go to diesieben07
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
@@ -17,32 +17,28 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
  * Spawns the particles for Naryu's Love on client worlds
  *
  */
-public class SpawnNayruParticlesPacket extends CustomPacket
+public class SpawnNayruParticlesPacket implements IMessage
 {
 	/** Affected player's position */
 	private double x, y, z;
-	
+
 	/** Affected player's height and width */
 	private float h, w;
 
 	public SpawnNayruParticlesPacket() {}
-	
+
 	public SpawnNayruParticlesPacket(EntityPlayer player) {
 		x = player.posX;
 		y = player.posY;
@@ -52,36 +48,36 @@ public class SpawnNayruParticlesPacket extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeDouble(x);
-		out.writeDouble(y);
-		out.writeDouble(z);
-		out.writeFloat(h);
-		out.writeFloat(w);
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeDouble(x);
+		buffer.writeDouble(y);
+		buffer.writeDouble(z);
+		buffer.writeFloat(h);
+		buffer.writeFloat(w);
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		x = in.readDouble();
-		y = in.readDouble();
-		z = in.readDouble();
-		h = in.readFloat();
-		w = in.readFloat();
+	public void fromBytes(ByteBuf buffer) {
+		x = buffer.readDouble();
+		y = buffer.readDouble();
+		z = buffer.readDouble();
+		h = buffer.readFloat();
+		w = buffer.readFloat();
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
+	public static class Handler extends AbstractClientMessageHandler<SpawnNayruParticlesPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, SpawnNayruParticlesPacket message, MessageContext ctx) {
 			for (int i = 0; i < 3; ++i) {
 				double d0 = player.worldObj.rand.nextGaussian() * 0.02D;
 				double d1 = player.worldObj.rand.nextGaussian() * 0.02D;
 				double d2 = player.worldObj.rand.nextGaussian() * 0.02D;
-				player.worldObj.spawnParticle("magicCrit", x + (double)(player.worldObj.rand.nextFloat() * w * 2.0F) -
-						(double) w, y + (double)(player.worldObj.rand.nextFloat() * h),
-						z + (double)(player.worldObj.rand.nextFloat() * w * 2.0F) - (double) w, d0, d1, d2);
+				player.worldObj.spawnParticle("magicCrit",
+						message.x + (player.worldObj.rand.nextFloat() * message.w * 2.0F) -	message.w,
+						message.y + (player.worldObj.rand.nextFloat() * message.h),
+						message.z + (player.worldObj.rand.nextFloat() * message.w * 2.0F) - message.w, d0, d1, d2);
 			}
-		} else {
-			throw new ProtocolException("Particle packets may only be sent to clients");
+			return null;
 		}
 	}
 }

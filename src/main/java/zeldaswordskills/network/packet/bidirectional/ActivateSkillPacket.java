@@ -15,18 +15,16 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.bidirectional;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.ZSSMain;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.skills.SkillBase;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -37,14 +35,14 @@ import cpw.mods.fml.relauncher.Side;
  * See {@link SkillActive#activate} and {@link SkillActive#trigger}.
  * 
  */
-public class ActivateSkillPacket extends CustomPacket
+public class ActivateSkillPacket implements IMessage
 {
-	/** If true, calls {@link ZSSPlayerInfo#triggerSkill}, otherwise uses {@link ZSSPlayerInfo#activateSkill} */
+	/** If true, calls {@link ZSSPlayerSkills#triggerSkill}, otherwise uses {@link ZSSPlayerSkills#activateSkill} */
 	private boolean wasTriggered = false;
-	
+
 	/** Skill to activate */
-	private SkillBase skill;
-	
+	private byte skillId;
+
 	public ActivateSkillPacket() {}
 
 	public ActivateSkillPacket(SkillBase skill) {
@@ -53,31 +51,33 @@ public class ActivateSkillPacket extends CustomPacket
 
 	public ActivateSkillPacket(SkillBase skill, boolean wasTriggered) {
 		this.wasTriggered = wasTriggered;
-		this.skill = skill;
+		this.skillId = skill.getId();
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeBoolean(this.wasTriggered);
-		out.writeByte(skill.getId());
+	public void fromBytes(ByteBuf buffer) {
+		wasTriggered = buffer.readBoolean();
+		skillId = buffer.readByte();
 	}
 
 	@Override
-	public void process(ByteArrayDataInput in, EntityPlayer player, Side side) throws IOException, ProtocolException {
-		if (ZSSPlayerInfo.get(player) != null) {
-			if (in.readBoolean()) {
-				ZSSPlayerInfo.get(player).triggerSkill(player.worldObj, in.readByte());
-			} else {
-				ZSSPlayerInfo.get(player).activateSkill(player.worldObj, in.readByte());
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeBoolean(wasTriggered);
+		buffer.writeByte(skillId);
+	}
+
+	public static class Handler implements IMessageHandler<ActivateSkillPacket, IMessage> {
+		@Override
+		public IMessage onMessage(ActivateSkillPacket message, MessageContext ctx) {
+			EntityPlayer player = ZSSMain.proxy.getPlayerEntity(ctx);
+			if (ZSSPlayerSkills.get(player) != null) {
+				if (message.wasTriggered) {
+					ZSSPlayerSkills.get(player).triggerSkill(player.worldObj, message.skillId);
+				} else {
+					ZSSPlayerSkills.get(player).activateSkill(player.worldObj, message.skillId);
+				}
 			}
-		} else {
-			throw new ProtocolException("No Skills section");
+			return null;
 		}
 	}
-
-	@Override
-	public void read(ByteArrayDataInput in) throws IOException {}
-
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {}
 }

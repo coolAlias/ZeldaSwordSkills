@@ -15,19 +15,15 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -38,33 +34,36 @@ import cpw.mods.fml.relauncher.Side;
  * caused by writing to NBT.
  *
  */
-public class SetNockedArrowPacket extends CustomPacket
+public class SetNockedArrowPacket implements IMessage
 {
 	private ItemStack arrowStack;
 
 	public SetNockedArrowPacket() {}
-	
+
 	public SetNockedArrowPacket(ItemStack arrowStack) {
 		this.arrowStack = arrowStack;
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeByte(arrowStack == null ? (byte) 0 : (byte) 1);
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeByte(arrowStack == null ? (byte) 0 : (byte) 1);
 		if (arrowStack != null) {
-			Packet.writeItemStack(arrowStack, out);
+			ByteBufUtils.writeItemStack(buffer, arrowStack);
 		}
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		arrowStack = (in.readByte() > 0 ? Packet.readItemStack(in) : null);
+	public void fromBytes(ByteBuf buffer) {
+		arrowStack = (buffer.readByte() > 0 ? ByteBufUtils.readItemStack(buffer) : null);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			ZSSPlayerInfo.get(player).setNockedArrow(arrowStack);
+	public static class Handler extends AbstractClientMessageHandler<SetNockedArrowPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, SetNockedArrowPacket message, MessageContext ctx) {
+			if (message.arrowStack != null) {
+				ZSSPlayerInfo.get(player).setBorrowedMask(message.arrowStack.getItem());
+			}
+			return null;
 		}
 	}
 }

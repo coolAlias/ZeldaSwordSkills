@@ -6,7 +6,7 @@
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
+    This program is distributed buffer the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
@@ -15,19 +15,15 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.Vec3;
 import zeldaswordskills.item.ISpawnParticles;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -36,13 +32,13 @@ import cpw.mods.fml.relauncher.Side;
  * all client worlds
  *
  */
-public class PacketISpawnParticles extends CustomPacket
+public class PacketISpawnParticles implements IMessage
 {
 	/** The Item class which will spawn the particles; must implement ISpawnParticles */
 	private Item item;
 	/** Center of AoE */
 	private double x, y, z;
-	/** Radius in which to spawn the particles */
+	/** Radius buffer which to spawn the particles */
 	private float r;
 	/** Storage for the normalized look vector of the original player */
 	private double lookX, lookY, lookZ;
@@ -61,38 +57,37 @@ public class PacketISpawnParticles extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeInt(item.itemID);
-		out.writeDouble(x);
-		out.writeDouble(y);
-		out.writeDouble(z);
-		out.writeFloat(r);
-		out.writeDouble(lookX);
-		out.writeDouble(lookY);
-		out.writeDouble(lookZ);
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeInt(Item.getIdFromItem(item));
+		buffer.writeDouble(x);
+		buffer.writeDouble(y);
+		buffer.writeDouble(z);
+		buffer.writeFloat(r);
+		buffer.writeDouble(lookX);
+		buffer.writeDouble(lookY);
+		buffer.writeDouble(lookZ);
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		item = Item.itemsList[in.readInt()];
-		x = in.readDouble();
-		y = in.readDouble();
-		z = in.readDouble();
-		r = in.readFloat();
-		lookX = in.readDouble();
-		lookY = in.readDouble();
-		lookZ = in.readDouble();
+	public void fromBytes(ByteBuf buffer) {
+		item = Item.getItemById(buffer.readInt());
+		x = buffer.readDouble();
+		y = buffer.readDouble();
+		z = buffer.readDouble();
+		r = buffer.readFloat();
+		lookX = buffer.readDouble();
+		lookY = buffer.readDouble();
+		lookZ = buffer.readDouble();
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			Vec3 vec3 = Vec3.createVectorHelper(lookX, lookY, lookZ);
-			if (item instanceof ISpawnParticles) {
-				((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r, vec3);
+	public static class Handler extends AbstractClientMessageHandler<PacketISpawnParticles> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, PacketISpawnParticles message, MessageContext ctx) {
+			if (message.item instanceof ISpawnParticles) {
+				Vec3 vec3 = Vec3.createVectorHelper(message.lookX, message.lookY, message.lookZ);
+				((ISpawnParticles) message.item).spawnParticles(player.worldObj, message.x, message.y, message.z, message.r, vec3);
 			}
-		} else {
-			throw new ProtocolException("Particle packets may only be sent to clients");
+			return null;
 		}
 	}
 }

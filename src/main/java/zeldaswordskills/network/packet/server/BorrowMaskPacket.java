@@ -15,27 +15,23 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.server;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.util.PlayerUtils;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
  * Sent from the Mask Trader's GUI with the mask the player borrowed.
  *
  */
-public class BorrowMaskPacket extends CustomPacket
+public class BorrowMaskPacket implements IMessage
 {
 	private ItemStack mask;
 
@@ -46,25 +42,26 @@ public class BorrowMaskPacket extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeByte(mask == null ? (byte) 0 : (byte) 1);
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeByte(mask == null ? (byte) 0 : (byte) 1);
 		if (mask != null) {
-			Packet.writeItemStack(mask, out);
+			ByteBufUtils.writeItemStack(buffer, mask);
 		}
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		mask = (in.readByte() > 0 ? Packet.readItemStack(in) : null);
+	public void fromBytes(ByteBuf buffer) {
+		mask = (buffer.readByte() > 0 ? ByteBufUtils.readItemStack(buffer) : null);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isServer()) {
-			if (mask != null) {
-				PlayerUtils.addItemToInventory(player, mask);
-				ZSSPlayerInfo.get(player).setBorrowedMask(mask.getItem());
+	public static class Handler extends AbstractServerMessageHandler<BorrowMaskPacket> {
+		@Override
+		public IMessage handleServerMessage(EntityPlayer player, BorrowMaskPacket message, MessageContext ctx) {
+			if (message.mask != null) {
+				PlayerUtils.addItemToInventory(player, message.mask);
+				ZSSPlayerInfo.get(player).setBorrowedMask(message.mask.getItem());
 			}
+			return null;
 		}
 	}
 }

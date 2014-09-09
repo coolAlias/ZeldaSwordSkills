@@ -15,20 +15,16 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.server;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SpinAttack;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -37,23 +33,24 @@ import cpw.mods.fml.relauncher.Side;
  * It does not require any data to be sent other than the packet itself.
  *
  */
-public class RefreshSpinPacket extends CustomPacket {
-
+public class RefreshSpinPacket implements IMessage
+{
 	public RefreshSpinPacket() {}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {}
+	public void fromBytes(ByteBuf buf) {}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {}
+	public void toBytes(ByteBuf buf) {}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isServer()) {
-			SkillActive skill = ZSSPlayerInfo.get(player).getActiveSkill(SkillBase.spinAttack);
+	public static class Handler extends AbstractServerMessageHandler<RefreshSpinPacket> {
+		@Override
+		public IMessage handleServerMessage(EntityPlayer player, RefreshSpinPacket message, MessageContext ctx) {
+			SkillActive skill = ZSSPlayerSkills.get(player).getActiveSkill(SkillBase.spinAttack);
 			if (skill instanceof SpinAttack && skill.isActive()) {
 				((SpinAttack) skill).refreshServerSpin(player);
 			}
+			return null;
 		}
 	}
 }

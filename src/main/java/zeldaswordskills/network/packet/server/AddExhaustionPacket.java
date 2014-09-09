@@ -15,16 +15,12 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.server;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -34,7 +30,7 @@ import cpw.mods.fml.relauncher.Side;
  * Used for ISwingSpeed items to add exhaustion from ZSSCombatEvents#setPlayerAttackTime.
  * 
  */
-public class AddExhaustionPacket extends CustomPacket
+public class AddExhaustionPacket implements IMessage
 {
 	private float amount;
 
@@ -45,21 +41,20 @@ public class AddExhaustionPacket extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeFloat(amount);
+	public void fromBytes(ByteBuf buffer) {
+		this.amount = buffer.readFloat();
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		this.amount = in.readFloat();
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeFloat(amount);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isServer()) {
-			player.addExhaustion(amount);
-		} else {
-			throw new ProtocolException("AddExhaustionPacket can only be sent to the server");
+	public static class Handler extends AbstractServerMessageHandler<AddExhaustionPacket> {
+		@Override
+		public IMessage handleServerMessage(EntityPlayer player, AddExhaustionPacket message, MessageContext ctx) {
+			player.addExhaustion(message.amount);
+			return null;
 		}
 	}
 }

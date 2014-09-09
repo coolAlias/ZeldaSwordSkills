@@ -15,41 +15,33 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.server;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.item.ItemBomb;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
-
-public class BombTickPacket extends CustomPacket {
+public class BombTickPacket implements IMessage {
 
 	public BombTickPacket() {}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {}
+	public void toBytes(ByteBuf buffer) {}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {}
+	public void fromBytes(ByteBuf buffer) {}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {}
-
-	@Override
-	public void process(ByteArrayDataInput in, EntityPlayer player, Side side) throws IOException, ProtocolException {
-		if (side.isServer()) {
+	public static class Handler extends AbstractServerMessageHandler<BombTickPacket> {
+		@Override
+		public IMessage handleServerMessage(EntityPlayer player, BombTickPacket message, MessageContext ctx) {
 			ItemStack held = player.getHeldItem();
 			if (held != null && held.getItem() instanceof ItemBomb) {
 				((ItemBomb) held.getItem()).tickBomb(held, player.worldObj, player);
 			}
-		} else {
-			throw new ProtocolException("BombTickPacket can only be sent to the server");
+			return null;
 		}
 	}
 }

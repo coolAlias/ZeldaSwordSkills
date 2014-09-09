@@ -6,7 +6,7 @@
     General Public License as published by the Free Software Foundation,
     either version 3 of the License, or (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
+    This program is distributed buffer the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
@@ -15,62 +15,58 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.BuffBase;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
  * Updates a buff on the client side, either adding or removing it from the activeBuffs map
  *
  */
-public class UpdateBuffPacket extends CustomPacket
+public class UpdateBuffPacket implements IMessage
 {
 	/** The buff to be applied or removed */
 	private BuffBase buff;
-	
+
 	/** Whether to apply or remove the specified buff */
 	private boolean remove;
 
 	public UpdateBuffPacket() {}
-	
+
 	public UpdateBuffPacket(BuffBase buff, boolean remove) {
 		this.buff = buff;
 		this.remove = remove;
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		writeNBTTagCompound(buff.writeToNBT(new NBTTagCompound()), out);
-		out.writeBoolean(remove);
+	public void toBytes(ByteBuf buffer) {
+		ByteBufUtils.writeTag(buffer, buff.writeToNBT(new NBTTagCompound()));
+		buffer.writeBoolean(remove);
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		this.buff = BuffBase.readFromNBT(readNBTTagCompound(in));
-		this.remove = in.readBoolean();
+	public void fromBytes(ByteBuf buffer) {
+		this.buff = BuffBase.readFromNBT(ByteBufUtils.readTag(buffer));
+		this.remove = buffer.readBoolean();
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			if (remove) {
-				ZSSEntityInfo.get(player).getActiveBuffsMap().remove(buff.getBuff());
+	public static class Handler extends AbstractClientMessageHandler<UpdateBuffPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, UpdateBuffPacket message, MessageContext ctx) {
+			if (message.remove) {
+				ZSSEntityInfo.get(player).getActiveBuffsMap().remove(message.buff.getBuff());
 			} else {
-				ZSSEntityInfo.get(player).getActiveBuffsMap().put(buff.getBuff(), buff);
+				ZSSEntityInfo.get(player).getActiveBuffsMap().put(message.buff.getBuff(), message.buff);
 			}
-		} else {
-			throw new ProtocolException("Update buff packet may only be sent to the client");
+			return null;
 		}
 	}
 }

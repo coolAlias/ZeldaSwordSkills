@@ -15,64 +15,59 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.util.LogHelper;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
- * Packet responsible for keeping attack Combos synchronized between client and server.
+ * Packet responsible for keeping attack Combos synchronized between server and client.
  *
  */
-public class UpdateComboPacket extends CustomPacket
+public class UpdateComboPacket implements IMessage
 {
 	/** Stores data of combo to be updated */
 	private NBTTagCompound compound;
-	
+
 	public UpdateComboPacket() {}
-	
+
 	public UpdateComboPacket(Combo combo) {
 		compound = combo.writeToNBT();
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		CompressedStreamTools.write(compound, out);
+	public void fromBytes(ByteBuf buffer) {
+		compound = ByteBufUtils.readTag(buffer);
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		compound = CompressedStreamTools.read(in);
+	public void toBytes(ByteBuf buffer) {
+		ByteBufUtils.writeTag(buffer, compound);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			Combo combo = Combo.readFromNBT(compound);
+	public static class Handler extends AbstractClientMessageHandler<UpdateComboPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, UpdateComboPacket message, MessageContext ctx) {
+			Combo combo = Combo.readFromNBT(message.compound);
 			try {
-				ICombo skill = (ICombo) ZSSPlayerInfo.get(player).getPlayerSkill(combo.getSkill());
+				ICombo skill = (ICombo) ZSSPlayerSkills.get(player).getPlayerSkill(combo.getSkill());
 				if (skill != null) {
 					combo.getEntityFromWorld(player.worldObj);
 					skill.setCombo(combo);
 				}
 			} catch (ClassCastException e) {
-				LogHelper.severe("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
+				LogHelper.warning("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
 			}
-		} else {
-			throw new ProtocolException("Update Combo Packet should only be sent from server to client");
+			return null;
 		}
 	}
 }

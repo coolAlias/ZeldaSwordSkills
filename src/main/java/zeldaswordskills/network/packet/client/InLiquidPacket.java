@@ -15,19 +15,15 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.item.ZSSItems;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -39,7 +35,7 @@ import cpw.mods.fml.relauncher.Side;
  * in liquid wearing Heavy Boots; use to increase velocity.
  *
  */
-public class InLiquidPacket extends CustomPacket
+public class InLiquidPacket implements IMessage
 {
 	/** If this is true, the magnitude of velocity increase will be higher*/
 	private boolean inLava;
@@ -51,32 +47,31 @@ public class InLiquidPacket extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeBoolean(inLava);
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeBoolean(inLava);
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		inLava = in.readBoolean();
+	public void fromBytes(ByteBuf buffer) {
+		inLava = buffer.readBoolean();
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
+	public static class Handler extends AbstractClientMessageHandler<InLiquidPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, InLiquidPacket message, MessageContext ctx) {
 			if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
-				double d = (inLava ? 1.75D : 1.125D);
+				double d = (message.inLava ? 1.75D : 1.125D);
 				if (player.onGround) {
 					player.motionX *= d;
 					player.motionZ *= d;
-				} else if (player.motionY < 0 && !Minecraft.getMinecraft().gameSettings.keyBindJump.pressed) {
+				} else if (player.motionY < 0 && !Minecraft.getMinecraft().gameSettings.keyBindJump.getIsKeyPressed()) {
 					player.motionY *= 1.5;
 					if (player.motionY < -0.35D) {
 						player.motionY = -0.35D;
 					}
 				}
 			}
-		} else {
-			throw new ProtocolException("InLiquid packet may only be sent to the client");
+			return null;
 		}
 	}
 }

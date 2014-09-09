@@ -15,25 +15,22 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
- * Synchronizes all ZSSPlayerInfo data on the client
+ * Synchronizes all PlayerInfo data on the client
  *
  */
-public class SyncPlayerInfoPacket extends CustomPacket
+public class SyncPlayerInfoPacket implements IMessage
 {
 	/** NBTTagCompound used to store and transfer the Player's Info */
 	private NBTTagCompound compound;
@@ -46,7 +43,7 @@ public class SyncPlayerInfoPacket extends CustomPacket
 		compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 	}
-	
+
 	/**
 	 * Sets validate to false for reset skills packets
 	 */
@@ -56,31 +53,28 @@ public class SyncPlayerInfoPacket extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		writeNBTTagCompound(compound, out);
-		out.writeBoolean(validate);
+	public void fromBytes(ByteBuf buffer) {
+		compound = ByteBufUtils.readTag(buffer);
+		validate = buffer.readBoolean();
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		compound = readNBTTagCompound(in);
-		validate = in.readBoolean();
+	public void toBytes(ByteBuf buffer) {
+		ByteBufUtils.writeTag(buffer, compound);
+		buffer.writeBoolean(validate);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
+	public static class Handler extends AbstractClientMessageHandler<SyncPlayerInfoPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, SyncPlayerInfoPacket message, MessageContext ctx) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			if (info != null) {
-				info.loadNBTData(compound);
-				if (validate) {
-					info.validateSkills();
+				info.loadNBTData(message.compound);
+				if (message.validate) {
+					info.getPlayerSkills().validateSkills();
 				}
-			} else {
-				throw new ProtocolException("No Skills section");
 			}
-		} else {
-			throw new ProtocolException("Cannot send SyncPlayerInfoPacket to the server!");
+			return null;
 		}
 	}
 }

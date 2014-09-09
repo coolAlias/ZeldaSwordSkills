@@ -15,54 +15,51 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
  * Send from the server to unpress a key (or all keys) on the client
  *
  */
-public class UnpressKeyPacket extends CustomPacket
+public class UnpressKeyPacket implements IMessage
 {
 	/** Values for Left, Right, and Middle Mouse Buttons */
 	public static final int LMB = -100, RMB = -99, MMB = -98;
 	private int keyCode;
 
 	public UnpressKeyPacket() {}
-	
+
 	public UnpressKeyPacket(int keyCode) {
 		this.keyCode = keyCode;
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeInt(keyCode);
+	public void fromBytes(ByteBuf buffer) {
+		keyCode = buffer.readInt();
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		keyCode = in.readInt();
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeInt(keyCode);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			KeyBinding kb = (KeyBinding) KeyBinding.hash.lookup(keyCode);
-			if (kb != null) {
-				KeyBinding.setKeyBindState(keyCode, false);
+	public static class Handler extends AbstractClientMessageHandler<UnpressKeyPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, UnpressKeyPacket message, MessageContext ctx) {
+			// KeyBinding kb = (KeyBinding) KeyBinding.hash.lookup(keyCode);
+			if (message.keyCode != 0) { // kb != null
+				KeyBinding.setKeyBindState(message.keyCode, false);
 			} else {
 				KeyBinding.unPressAllKeys();
 			}
+			return null;
 		}
 	}
 }

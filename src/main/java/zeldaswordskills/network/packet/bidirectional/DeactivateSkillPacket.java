@@ -15,27 +15,25 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.bidirectional;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.ZSSMain;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.LogHelper;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
  * Send to either side to {@link SkillActive#deactivate deactivate} a skill.
  *
  */
-public class DeactivateSkillPacket extends CustomPacket
+public class DeactivateSkillPacket implements IMessage
 {
 	/** Skill to deactivate */
 	private byte skillId;
@@ -47,24 +45,28 @@ public class DeactivateSkillPacket extends CustomPacket
 	}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeByte(skillId);
+	public void fromBytes(ByteBuf buffer) {
+		skillId = buffer.readByte();
 	}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		skillId = in.readByte();
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeByte(skillId);
 	}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (ZSSPlayerInfo.get(player) != null) {
-			SkillBase skill = ZSSPlayerInfo.get(player).getPlayerSkill(skillId);
-			if (skill instanceof SkillActive) {
-				((SkillActive) skill).deactivate(player);
-			} else {
-				LogHelper.warning("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + skillId + " was not valid for this player.");
+	public static class Handler implements IMessageHandler<DeactivateSkillPacket, IMessage> {
+		@Override
+		public IMessage onMessage(DeactivateSkillPacket message, MessageContext ctx) {
+			EntityPlayer player = ZSSMain.proxy.getPlayerEntity(ctx);
+			if (ZSSPlayerSkills.get(player) != null) {
+				SkillBase skill = ZSSPlayerSkills.get(player).getPlayerSkill(message.skillId);
+				if (skill instanceof SkillActive) {
+					((SkillActive) skill).deactivate(player);
+				} else {
+					LogHelper.warning("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + message.skillId + " was not valid for this player.");
+				}
 			}
+			return null;
 		}
 	}
 }

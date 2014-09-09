@@ -15,19 +15,15 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.server;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillBase;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
@@ -36,32 +32,32 @@ import cpw.mods.fml.relauncher.Side;
  * directly instead of sending a packet.
  *
  */
-public class EndComboPacket extends CustomPacket
+public class EndComboPacket implements IMessage
 {
 	/** Id of skill that implements ICombo */
 	private byte id;
 
 	public EndComboPacket() {}
-	
+
 	public EndComboPacket(SkillBase skill) {
 		this.id = skill.getId();
 	}
-	
+
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {
-		out.writeByte(this.id);
+	public void fromBytes(ByteBuf buffer) {
+		id = buffer.readByte();
 	}
-	
+
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {
-		this.id = in.readByte();
+	public void toBytes(ByteBuf buffer) {
+		buffer.writeByte(id);
 	}
-	
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isServer()) {
-			if (SkillBase.getSkill(this.id) instanceof ICombo) {
-				ICombo skill = (ICombo) ZSSPlayerInfo.get(player).getPlayerSkill(this.id);
+
+	public static class Handler extends AbstractServerMessageHandler<EndComboPacket> {
+		@Override
+		public IMessage handleServerMessage(EntityPlayer player, EndComboPacket message, MessageContext ctx) {
+			if (SkillBase.getSkill(message.id) instanceof ICombo) {
+				ICombo skill = (ICombo) ZSSPlayerSkills.get(player).getPlayerSkill(message.id);
 				if (skill != null) {
 					if (skill.isComboInProgress()) {
 						skill.getCombo().endCombo(player);
@@ -69,11 +65,8 @@ public class EndComboPacket extends CustomPacket
 						skill.setCombo(null);
 					}
 				}
-			} else {
-				throw new ProtocolException("Skill with id " + this.id + " is not a member of ICombo; unable to process EndComboPacket");
 			}
-		} else {
-			throw new ProtocolException("End combo packet should only be sent to server");
+			return null;
 		}
 	}
 }

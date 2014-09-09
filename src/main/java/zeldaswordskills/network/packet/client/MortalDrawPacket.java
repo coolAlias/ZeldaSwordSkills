@@ -15,43 +15,39 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.client;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import zeldaswordskills.client.ZSSClientEvents;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.MortalDraw;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * 
  * Sent to client upon successful draw, notifying player to attack current target
  *
  */
-public class MortalDrawPacket extends CustomPacket
-{
+public class MortalDrawPacket implements IMessage {
+
 	public MortalDrawPacket() {}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {}
+	public void fromBytes(ByteBuf buffer) {}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {}
+	public void toBytes(ByteBuf buffer) {}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isClient()) {
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+	public static class Handler extends AbstractClientMessageHandler<MortalDrawPacket> {
+		@Override
+		public IMessage handleClientMessage(EntityPlayer player, MortalDrawPacket message, MessageContext ctx) {
+			ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 			if (skills.hasSkill(SkillBase.mortalDraw)) {
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).drawSword(player, null);
 				ILockOnTarget skill = skills.getTargetingSkill();
@@ -59,6 +55,7 @@ public class MortalDrawPacket extends CustomPacket
 					ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), skill);
 				}
 			}
+			return null;
 		}
 	}
 }

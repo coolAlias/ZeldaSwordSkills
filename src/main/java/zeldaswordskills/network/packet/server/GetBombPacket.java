@@ -15,35 +15,31 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.network;
+package zeldaswordskills.network.packet.server;
 
-import java.io.IOException;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
-import cpw.mods.fml.relauncher.Side;
-
-public class GetBombPacket extends CustomPacket {
+public class GetBombPacket implements IMessage {
 
 	public GetBombPacket() {}
 
 	@Override
-	public void write(ByteArrayDataOutput out) throws IOException {}
+	public void toBytes(ByteBuf buffer) {}
 
 	@Override
-	public void read(ByteArrayDataInput in) throws IOException {}
+	public void fromBytes(ByteBuf buffer) {}
 
-	@Override
-	public void execute(EntityPlayer player, Side side) throws ProtocolException {
-		if (side.isServer()) {
+	public static class Handler extends AbstractServerMessageHandler<GetBombPacket> {
+		@Override
+		public IMessage handleServerMessage(EntityPlayer player, GetBombPacket message, MessageContext ctx) {
 			ItemStack heldItem = player.getHeldItem();
 			ItemStack mask = player.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (mask != null && mask.getItem() == ZSSItems.maskBlast) {
@@ -51,13 +47,14 @@ public class GetBombPacket extends CustomPacket {
 			} else if (player.isSneaking() && heldItem != null && heldItem.getItem() instanceof ItemBombBag) {
 				((ItemBombBag) heldItem.getItem()).emptyBag(heldItem, player);
 			} else {
+				// TODO should check if held item is a bomb bag first and take bomb from there
 				for (ItemStack invStack : player.inventory.mainInventory) {
 					if (invStack != null && invStack.getItem() instanceof ItemBombBag) {
 						ItemBombBag bombBag = (ItemBombBag) invStack.getItem();
 						if (player.capabilities.isCreativeMode || bombBag.removeBomb(invStack)) {
 							// TODO attempt to merge stackable items with inventory before dropping
 							if (heldItem != null && (heldItem.isStackable() || !player.inventory.addItemStackToInventory(heldItem))) {
-								player.dropPlayerItem(heldItem);
+								player.dropPlayerItemWithRandomChoice(heldItem, false);
 							}
 							int type = bombBag.getBagBombType(invStack);
 							player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.bomb, 1, (type > 0 ? type : 0)));
@@ -66,8 +63,7 @@ public class GetBombPacket extends CustomPacket {
 					}
 				}
 			}
-		} else {
-			throw new ProtocolException("Invalid side: GetBombPacket may only be sent to the server");
+			return null;
 		}
 	}
 }
