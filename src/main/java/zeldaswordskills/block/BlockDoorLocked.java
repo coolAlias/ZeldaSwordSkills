@@ -19,9 +19,9 @@ package zeldaswordskills.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.item.ZSSItems;
@@ -41,22 +41,17 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class BlockDoorLocked extends Block implements IDungeonBlock
 {
 	@SideOnly(Side.CLIENT)
-	private Icon iconTop;
+	private IIcon iconTop;
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconsUpper;
+	private IIcon[] iconsUpper;
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconsLower;
+	private IIcon[] iconsLower;
 
-	public BlockDoorLocked(int id, Material material) {
-		super(id, material);
+	public BlockDoorLocked(Material material) {
+		super(material);
 		setBlockUnbreakable();
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
-		setStepSound(soundMetalFootstep);
-	}
-
-	@Override
-	public boolean isOpaqueCube() {
-		return false;
+		setStepSound(soundTypeMetal);
 	}
 
 	@Override
@@ -65,14 +60,19 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
+	public boolean isOpaqueCube() {
+		return false;
+	}
+
+	@Override
 	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
-		return y >= 255 ? false : world.doesBlockHaveSolidTopSurface(x, y - 1, z) && super.canPlaceBlockAt(world, x, y, z) && super.canPlaceBlockAt(world, x, y + 1, z);
+		return y >= 255 ? false : World.doesBlockHaveSolidTopSurface(world, x, y - 1, z) && super.canPlaceBlockAt(world, x, y, z) && super.canPlaceBlockAt(world, x, y + 1, z);
 	}
 
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote) {
-			if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.keySkeleton && player.inventory.consumeInventoryItem(ZSSItems.keySkeleton.itemID)) {
+			if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.keySkeleton && player.inventory.consumeInventoryItem(ZSSItems.keySkeleton)) {
 				world.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 				world.setBlockToAir(x, y, z);
 			} else {
@@ -83,25 +83,25 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, int oldId, int oldMeta) {
+	public void breakBlock(World world, int x, int y, int z, Block oldBlock, int oldMeta) {
 		y += (oldMeta > 0x7 ? -1 : 1);
-		if (world.getBlockId(x, y, z) == this.blockID) {
+		if (world.getBlock(x, y, z) == this) {
 			world.setBlockToAir(x, y, z);
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int meta) {
+	public IIcon getIcon(int side, int meta) {
 		return (side == 1 ? iconTop : meta > 0x7 ? iconsUpper[meta % 8] : iconsLower[meta % 8]);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerBlockIcons(IIconRegister register) {
 		iconTop = register.registerIcon(ModInfo.ID + ":door_locked_top");
-		iconsUpper = new Icon[8];
-		iconsLower = new Icon[8];
+		iconsUpper = new IIcon[8];
+		iconsLower = new IIcon[8];
 		for (int i = 0; i < 8; ++i) {
 			iconsUpper[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_upper" + i);
 			iconsLower[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_lower" + i);

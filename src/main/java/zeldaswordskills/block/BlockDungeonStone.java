@@ -23,18 +23,21 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.ISmashable;
@@ -44,6 +47,8 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -56,16 +61,16 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, IExplodable, ISmashable
 {
-	public BlockDungeonStone(int id, Material material) {
-		super(id, material);
+	public BlockDungeonStone(Material material) {
+		super(material);
 		setBlockUnbreakable();
 		setResistance(6.0F);
-		setStepSound(soundStoneFootstep);
+		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
 
 	@Override
-	public TileEntity createNewTileEntity(World world) {
+	public TileEntity createNewTileEntity(World world, int meta) {
 		return new TileEntityDungeonBlock();
 	}
 
@@ -85,12 +90,12 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 	}
 
 	@Override
-	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
+	public boolean canEntityDestroy(IBlockAccess world, int x, int y, int z, Entity entity) {
 		return world.getBlockMetadata(x, y, z) < 0x8;
 	}
 
 	@Override
-	public boolean canCreatureSpawn(EnumCreatureType type, World world, int x, int y, int z) {
+	public boolean canCreatureSpawn(EnumCreatureType type, IBlockAccess world, int x, int y, int z) {
 		return false;
 	}
 
@@ -110,11 +115,11 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 	}
 
 	@Override
-	public ArrayList<ItemStack> getBlockDropped(World world, int x, int y, int z, int meta, int fortune) {
+	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int meta, int fortune) {
 		ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
 		Block block = null;
 		int blockMeta = 0;
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonBlock) {
 			block = ((TileEntityDungeonBlock) te).getRenderBlock();
 			blockMeta = ((TileEntityDungeonBlock) te).getRenderMetadata();
@@ -129,7 +134,7 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
 			if (Config.showSecretMessage()) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.block.secret"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.block.secret"));
 			}
 			world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}
@@ -138,24 +143,24 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 	// this may not even be necessary, since these blocks will only ever be placed by a player
 	@Override
 	public void onBlockAdded(World world, int x, int y, int z) {
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonBlock) {
 			TileEntityDungeonBlock stone = (TileEntityDungeonBlock) te;
 			if (stone.getRenderBlock() == null) {
-				stone.setRenderBlock(blocksList[BlockSecretStone.getIdFromMeta(world.getBlockMetadata(x, y, z))], 0);
+				stone.setRenderBlock(BlockSecretStone.getBlockFromMeta(world.getBlockMetadata(x, y, z)), 0);
 			}
 		}
 	}
 
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonBlock && stack != null && stack.getItem() instanceof ItemDungeonBlock) {
 			Block block = ((ItemDungeonBlock) stack.getItem()).getBlockFromStack(stack);
 			if (block == ZSSBlocks.dungeonStone) {
-				block = (stack.getItemDamage() == 0 ? Block.stone : Block.obsidian);
+				block = (stack.getItemDamage() == 0 ? Blocks.stone : Blocks.obsidian);
 			} else if (block == ZSSBlocks.dungeonCore) {
-				block = (stack.getItemDamage() == 0 ? Block.cobblestoneMossy : Block.stoneBrick);
+				block = (stack.getItemDamage() == 0 ? Blocks.mossy_cobblestone : Blocks.stonebrick);
 			}
 			int meta = ((ItemDungeonBlock) stack.getItem()).getMetaFromStack(stack);
 			((TileEntityDungeonBlock) te).setRenderBlock(block, meta);
@@ -164,19 +169,28 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 
 	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
+		// TODO BUG from vanilla Entity.getExplosionResistance passes (x, x, y) as position parameters
 		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 
+	// TODO remove when vanilla explosion resistance bug is fixed
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(int id, CreativeTabs tab, List list) {
-		list.add(new ItemStack(id, 1, 0x0));
-		list.add(new ItemStack(id, 1, 0x8));
+	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
+		if (world.getBlockMetadata(x, y, z) < 0x8) {
+			super.onBlockExploded(world, x, y, z, explosion);
+		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		list.add(new ItemStack(item, 1, 0x0));
+		list.add(new ItemStack(item, 1, 0x8));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerBlockIcons(IIconRegister register) {
 		blockIcon = register.registerIcon("stone");
 	}
 }

@@ -48,8 +48,8 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 	@Override
 	public void updateEntity() {
 		if (!worldObj.isRemote && getStackInSlot(0) == null && shouldUpdate()) {
-			List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().
-					getAABB(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1).expand(1.0D, 1.0D, 1.0D));
+			List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.
+					getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1).expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : list) {
 				ItemStack stack;
 				if (item.getEntityItem().stackSize > 64) {
@@ -65,12 +65,12 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 	}
 
 	@Override
-	public String getInvName() {
+	public String getInventoryName() {
 		return "";
 	}
 
 	@Override
-	public boolean isInvNameLocalized() {
+	public boolean hasCustomInventoryName() {
 		return true;
 	}
 

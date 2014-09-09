@@ -21,9 +21,7 @@ import java.lang.reflect.Field;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.item.ItemBlockWithMetadata;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.Configuration;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
@@ -40,9 +38,11 @@ import zeldaswordskills.client.render.block.RenderTileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
 import zeldaswordskills.item.ItemCeramicJar;
 import zeldaswordskills.item.ItemDungeonBlock;
+import zeldaswordskills.item.ItemMetadataBlock;
 import zeldaswordskills.item.ItemSacredFlame;
 import zeldaswordskills.item.ItemSecretStone;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.util.BlockRotationData;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -51,9 +51,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSBlocks
 {
-	private static int modBlockIndex;
-	private static final int MOD_BLOCK_INDEX_DEFAULT = 4080;
-
 	public static Block
 	barrierLight,
 	barrierHeavy,
@@ -70,29 +67,21 @@ public class ZSSBlocks
 	dungeonStone;
 
 	/**
-	 * Initialize block index and other variables from config
-	 */
-	public static void init(Configuration config) {
-		modBlockIndex = config.getBlock("modBlockIndex", MOD_BLOCK_INDEX_DEFAULT).getInt();
-	}
-
-	/**
 	 * Call during FMLPreInitializationEvent to initialize and register all blocks
 	 */
 	public static void init() {
-		secretStone = new BlockSecretStone(modBlockIndex++, Material.rock).setUnlocalizedName("zss.secretstone");
-		dungeonCore = new BlockDungeonCore(modBlockIndex++, Material.rock).setUnlocalizedName("zss.dungeoncore");
-		pedestal = new BlockPedestal(modBlockIndex++).setUnlocalizedName("zss.pedestal");
-		chestLocked = new BlockChestLocked(modBlockIndex++).setUnlocalizedName("zss.chest_locked");
-		doorLocked = new BlockDoorLocked(modBlockIndex++, Material.iron).setUnlocalizedName("zss.door_locked");
-		sacredFlame = new BlockSacredFlame(modBlockIndex++).setUnlocalizedName("zss.sacredflame");
-		ceramicJar = new BlockCeramicJar(modBlockIndex++).setUnlocalizedName("zss.ceramic_jar");
-		barrierLight = new BlockHeavy(modBlockIndex++, Material.rock, BlockWeight.MEDIUM).setUnlocalizedName("zss.barrier_light");
-		barrierHeavy = new BlockHeavy(modBlockIndex++, Material.rock, BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.barrier_heavy");
-		pegWooden = new BlockPeg(modBlockIndex++, BlockPeg.pegWoodMaterial, BlockWeight.VERY_LIGHT).setUnlocalizedName("zss.peg_wooden");
-		pegRusty = new BlockPeg(modBlockIndex++, BlockPeg.pegRustyMaterial, BlockWeight.MEDIUM).setUnlocalizedName("zss.peg_rusty");
-		dungeonStone = new BlockDungeonStone(modBlockIndex++, Material.rock).setUnlocalizedName("zss.dungeonstone");
-
+		barrierLight = new BlockHeavy(Material.rock, BlockWeight.MEDIUM).setBlockName("zss.barrier_light");
+		barrierHeavy = new BlockHeavy(Material.rock, BlockWeight.VERY_HEAVY).setBlockName("zss.barrier_heavy");
+		pegWooden = new BlockPeg(BlockPeg.pegWoodMaterial, BlockWeight.VERY_LIGHT).setBlockName("zss.peg_wooden");
+		pegRusty = new BlockPeg(BlockPeg.pegRustyMaterial, BlockWeight.MEDIUM).setBlockName("zss.peg_rusty");
+		ceramicJar = new BlockCeramicJar().setBlockName("zss.ceramic_jar").setBlockTextureName("stone");
+		chestLocked = new BlockChestLocked().setBlockName("zss.chest_locked");
+		pedestal = new BlockPedestal().setBlockName("zss.pedestal");
+		sacredFlame = new BlockSacredFlame().setBlockName("zss.sacredflame");
+		doorLocked = new BlockDoorLocked(Material.iron).setBlockName("zss.door_locked");
+		secretStone = new BlockSecretStone(Material.rock).setBlockName("zss.secretstone");
+		dungeonCore = new BlockDungeonCore(Material.rock).setBlockName("zss.dungeoncore");
+		dungeonStone = new BlockDungeonStone(Material.rock).setBlockName("zss.dungeonstone");
 		register();
 	}
 
@@ -117,12 +106,12 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(pegRusty, pegRusty.getUnlocalizedName());
 		GameRegistry.registerBlock(ceramicJar, ItemCeramicJar.class, ceramicJar.getUnlocalizedName());
 		GameRegistry.registerBlock(chestLocked, chestLocked.getUnlocalizedName());
+		GameRegistry.registerBlock(pedestal, ItemMetadataBlock.class, pedestal.getUnlocalizedName());
+		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName());
 		GameRegistry.registerBlock(doorLocked, doorLocked.getUnlocalizedName());
+		GameRegistry.registerBlock(secretStone, ItemSecretStone.class, secretStone.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonCore, ItemDungeonBlock.class, dungeonCore.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName());
-		GameRegistry.registerBlock(pedestal, ItemBlockWithMetadata.class, pedestal.getUnlocalizedName());
-		GameRegistry.registerBlock(secretStone, ItemSecretStone.class, secretStone.getUnlocalizedName());
-		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
@@ -130,7 +119,7 @@ public class ZSSBlocks
 		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, "tileEntityDungeonCore");
 		GameRegistry.registerTileEntity(TileEntityPedestal.class, "tileEntityPedestal");
 		GameRegistry.registerTileEntity(TileEntitySacredFlame.class, "tileEntitySacredFlame");
-		
+
 		// register item blocks for comparator sorting:
 		try {
 			for (Field f: ZSSBlocks.class.getFields()) {
@@ -144,5 +133,8 @@ public class ZSSBlocks
 		} catch(Exception e) {
 
 		}
+
+		// Register rotation types for custom blocks
+		BlockRotationData.registerCustomBlockRotation(chestLocked, BlockRotationData.Rotation.PISTON_CONTAINER);
 	}
 }

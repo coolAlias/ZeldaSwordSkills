@@ -22,15 +22,14 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
@@ -40,6 +39,7 @@ import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -63,18 +63,18 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	public static final MaterialPeg pegRustyMaterial = new MaterialPeg(MapColor.ironColor);
 
 	@SideOnly(Side.CLIENT)
-	private Icon iconTop;
+	private IIcon iconTop;
 	@SideOnly(Side.CLIENT)
-	private Icon iconBottom;
+	private IIcon iconBottom;
 
-	public BlockPeg(int id, Material material, BlockWeight weight) {
-		super(id, material);
+	public BlockPeg(Material material, BlockWeight weight) {
+		super(material);
 		this.weight = weight;
 		disableStats();
 		setTickRandomly(true);
 		setBlockUnbreakable();
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
-		setStepSound(soundStoneFootstep);
+		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F, 0.75F);
 	}
@@ -83,7 +83,6 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	private String getHitSound() {
 		return blockMaterial == Material.iron ? Sounds.HIT_RUSTY : Sounds.HIT_PEG;
 	}
-
 	@Override
 	public boolean canAlwaysGrab(HookshotType type, World world, int x, int y, int z) {
 		return type == HookshotType.MULTI_SHOT || type == HookshotType.MULTI_SHOT_EXT;
@@ -122,7 +121,8 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 				}
 				if (meta > MAX_STATE && impact > 1) {
 					flag = true;
-					world.destroyBlock(x, y, z, false);
+					// func_147480_a is destroyBlock
+					world.func_147480_a(x, y, z, false);
 				} else {
 					world.setBlockMetadataWithNotify(x, y, z, Math.min(meta, MAX_STATE), 3);
 				}
@@ -156,7 +156,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
+	public boolean canEntityDestroy(IBlockAccess world, int x, int y, int z, Entity entity) {
 		return false;
 	}
 
@@ -164,7 +164,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
 		int meta = world.getBlockMetadata(x, y, z);
 		if (meta == 0) {
-			return AxisAlignedBB.getAABBPool().getAABB(x + minX, y + minY, z + minZ, x + maxX, y + maxY + 0.5D, z + maxZ);
+			return AxisAlignedBB.getBoundingBox(x + minX, y + minY, z + minZ, x + maxX, y + maxY + 0.5D, z + maxZ);
 		} else if (meta >= MAX_STATE) {
 			return null;
 		} else {
@@ -185,13 +185,13 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int meta) {
+	public IIcon getIcon(int side, int meta) {
 		return (side == 0 ? iconBottom : side == 1 ? iconTop : blockIcon);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerBlockIcons(IIconRegister register) {
 		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_side");
 		iconTop = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top");
 		iconBottom = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_bottom");
