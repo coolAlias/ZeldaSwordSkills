@@ -25,9 +25,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.event.EventPriority;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -43,6 +42,7 @@ import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemArmorTunic;
 import zeldaswordskills.item.ItemFairyBottle;
@@ -51,15 +51,16 @@ import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.AddExhaustionPacket;
-import zeldaswordskills.network.UnpressKeyPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.UnpressKeyPacket;
+import zeldaswordskills.network.packet.server.AddExhaustionPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.common.eventhandler.EventPriority;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
@@ -85,10 +86,10 @@ public class ZSSCombatEvents
 				if (player.worldObj.isRemote) {
 					float exhaustion = ((ISwingSpeed) stack.getItem()).getExhaustion();
 					if (exhaustion > 0.0F) {
-						PacketDispatcher.sendPacketToServer(new AddExhaustionPacket(exhaustion).makePacket());
+						PacketDispatcher.sendToServer(new AddExhaustionPacket(exhaustion));
 					}
 				} else {
-					PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) player);
+					PacketDispatcher.sendTo(new UnpressKeyPacket(UnpressKeyPacket.LMB), (EntityPlayerMP) player);
 				}
 			}
 			player.attackTime = Math.max(player.attackTime, nextSwing);
@@ -99,14 +100,14 @@ public class ZSSCombatEvents
 	 * Using this event to set attack time on the server side only in order
 	 * to prevent left-click processing on blocks with ISmashBlock items
 	 */
-	@ForgeSubscribe(priority=EventPriority.HIGHEST, receiveCanceled=true)
+	@SubscribeEvent(priority=EventPriority.HIGHEST, receiveCanceled=true)
 	public void onPlayerAttack(AttackEntityEvent event) {
 		if (!event.entityPlayer.worldObj.isRemote) {
 			setPlayerAttackTime(event.entityPlayer);
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onSetAttackTarget(LivingSetAttackTargetEvent event) {
 		if (event.target instanceof EntityPlayer && event.entity instanceof EntityLiving) {
 			ItemStack mask = ((EntityPlayer) event.target).getCurrentArmor(ArmorIndex.WORN_HELM);
@@ -120,16 +121,16 @@ public class ZSSCombatEvents
 	 * This event is called when an entity is attacked by another entity; it is only
 	 * called on the server unless the source of the attack is an EntityPlayer
 	 */
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onAttacked(LivingAttackEvent event) {
 		if (event.source.getEntity() instanceof EntityLivingBase) {
 			event.setCanceled(ZSSEntityInfo.get((EntityLivingBase) event.source.getEntity()).isBuffActive(Buff.STUN));
 		}
 		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			ZSSPlayerInfo.get(player).onBeingAttacked(event);
+			ZSSPlayerSkills.get(player).onBeingAttacked(event);
 			// prevent non-entity sources of fire damage here to avoid hurt animation while in fire / lava
-			if (event.source.isFireDamage() && event.source.getSourceOfDamage() == null && !event.isCanceled()) {
+			if (!event.isCanceled() && event.source.isFireDamage() && event.source.getSourceOfDamage() == null) {
 				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
 			}
 		} else if (!event.isCanceled() && event.source.getEntity() != null) {
@@ -148,7 +149,7 @@ public class ZSSCombatEvents
 	/**
 	 * Pre-event to handle shield blocking
 	 */
-	@ForgeSubscribe(priority=EventPriority.NORMAL)
+	@SubscribeEvent(priority=EventPriority.NORMAL)
 	public void onPreHurt(LivingHurtEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
@@ -183,18 +184,20 @@ public class ZSSCombatEvents
 	/**
 	 * Use LOW or LOWEST priority to prevent interrupting a combo when the event may be canceled elsewhere.
 	 */
-	@ForgeSubscribe(priority=EventPriority.LOWEST)
+	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onHurt(LivingHurtEvent event) {
 		// handle armor break first, since it will post LivingHurtEvent once again
 		if (event.source.getEntity() instanceof EntityPlayer && !(event.source instanceof DamageSourceArmorBreak)) {
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+			ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 			ICombo combo = skills.getComboSkill();
 			if (combo != null && combo.isComboInProgress()) {
 				event.ammount += combo.getCombo().getSize();
 			}
 			if (skills.isSkillActive(SkillBase.armorBreak)) {
+				//LogHelper.info("Entity hurt by armor break; player weapon pre-impact damage: " + player.getHeldItem().getItemDamage());
 				((ArmorBreak) skills.getPlayerSkill(SkillBase.armorBreak)).onImpact(player, event);
+				//LogHelper.info("Entity hurt by armor break; player weapon post-impact damage: " + player.getHeldItem().getItemDamage());
 				return;
 			} else if (skills.isSkillActive(SkillBase.mortalDraw)) {
 				((MortalDraw) skills.getPlayerSkill(SkillBase.mortalDraw)).onImpact(player, event);
@@ -215,7 +218,7 @@ public class ZSSCombatEvents
 		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			/* TODO magic armor:
-				if (player.getCurrentArmor(ArmorIndex.WORN_CHEST) != null && player.getCurrentArmor(ArmorIndex.WORN_CHEST).getItem() == ZSSItems.armorMagicChest) {
+				if (player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == ZSSItems.tunicGoronChest) {
 					while (event.ammount > 0 && player.inventory.consumeInventoryItem(Item.emerald.itemID)) {
 						event.ammount -= 1.0F;
 					}
@@ -228,24 +231,23 @@ public class ZSSCombatEvents
 			if (event.isCanceled()) {
 				return;
 			}
-			ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
+			ICombo combo = ZSSPlayerSkills.get(player).getComboSkill();
 			if (combo != null && event.ammount > 0) {
 				combo.onPlayerHurt(player, event);
 			}
 		}
 		// final call for active skills to modify damage
-		// update combo last, after all resistances and weaknesses are accounted for
+		// update combo and last, after all resistances and weaknesses are accounted for
 		if (event.ammount > 0.0F && event.source.getEntity() instanceof EntityPlayer) {
-			ZSSPlayerInfo.get((EntityPlayer) event.source.getEntity()).onPostImpact(event);
+			ZSSPlayerSkills.get((EntityPlayer) event.source.getEntity()).onPostImpact(event);
 		}
-
 		handleSecondaryEffects(event);
 	}
 
 	/**
 	 * Set to highest priority to prevent loss of "extra lives" from HQM mod
 	 */
-	@ForgeSubscribe(priority=EventPriority.HIGHEST)
+	@SubscribeEvent(priority=EventPriority.HIGHEST)
 	public void onLivingDeathEvent(LivingDeathEvent event) {
 		if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
 			event.setCanceled(ItemFairyBottle.onDeath((EntityPlayer) event.entity));

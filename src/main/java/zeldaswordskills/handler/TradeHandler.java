@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Random;
 
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
@@ -50,12 +51,14 @@ public class TradeHandler implements IVillageTradeHandler
 	 * Adds the trade recipe to the map with the AddonType and  ItemStack as key
 	 */
 	public static final void addTradeToMap(AddonType type, ItemStack stack, MerchantRecipe trade) {
-		hookshotAddonTrades.put(Arrays.asList(type.ordinal(), stack.itemID, stack.getItemDamage()), trade);
+		hookshotAddonTrades.put(Arrays.asList(type.ordinal(), Item.getIdFromItem(stack.getItem()), stack.getItemDamage()), trade);
 	}
 
-	/** Returns the appropriate MerchantRecipe for the stack and Addon Type, or null if none was found */
+	/**
+	 * Returns the appropriate MerchantRecipe for the stack and Addon Type, or null if none was found
+	 */
 	public static final MerchantRecipe getTrade(AddonType type, ItemStack stack) {
-		return hookshotAddonTrades.get(Arrays.asList(type.ordinal(), stack.itemID, stack.getItemDamage()));
+		return hookshotAddonTrades.get(Arrays.asList(type.ordinal(), Item.getIdFromItem(stack.getItem()), stack.getItemDamage()));
 	}
 
 	public static void registerTrades() {
@@ -85,6 +88,7 @@ public class TradeHandler implements IVillageTradeHandler
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.STONECLAW.ordinal()),
 						new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal())));
 
+
 		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()), 
 				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.MULTI.ordinal()),
@@ -102,22 +106,22 @@ public class TradeHandler implements IVillageTradeHandler
 		if (villager instanceof EntityGoron) {
 			float bombChance = (villager.getProfession() == EnumVillager.BLACKSMITH.ordinal() ? 0.6F : 0.3F);
 			for (BombType bomb : BombType.values()) {
-				addTrade(trades, rand, bombChance, new MerchantRecipe(new ItemStack(Item.emerald, 8 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
+				addTrade(trades, rand, bombChance, new MerchantRecipe(new ItemStack(Items.emerald, 8 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
 			}
 			return;
 		}
 		if (villager.getCustomNameTag().equalsIgnoreCase("Barnes")) {
 			for (BombType bomb : BombType.values()) {
-				addTrade(trades, rand, 1F, new MerchantRecipe(new ItemStack(Item.emerald, 8 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
+				addTrade(trades, rand, 1F, new MerchantRecipe(new ItemStack(Items.emerald, 8 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
 			}
 		}
 		switch(EnumVillager.values()[villager.getProfession()]) {
 		case FARMER:
 			if (Config.enableTradeBomb()) {
-				addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 10 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb)));
+				addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb)));
 			}
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 10), new ItemStack(ZSSItems.tunicHeroBoots)));
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 10), new ItemStack(ZSSItems.tunicHeroHelm)));
+			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroBoots)));
+			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroHelm)));
 			break;
 		case LIBRARIAN:
 			break;
@@ -125,14 +129,14 @@ public class TradeHandler implements IVillageTradeHandler
 			break;
 		case BLACKSMITH:
 			if (Config.enableTradeBomb()) {
-				addTrade(trades, rand, 0.6F, new MerchantRecipe(new ItemStack(Item.emerald, 5 + rand.nextInt(4)), new ItemStack(Item.gunpowder, 4), new ItemStack(ZSSItems.bomb)));
+				addTrade(trades, rand, 0.6F, new MerchantRecipe(new ItemStack(Items.emerald, 5 + rand.nextInt(4)), new ItemStack(Items.gunpowder, 4), new ItemStack(ZSSItems.bomb)));
 			}
-			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Item.emerald, 16), new ItemStack(ZSSItems.swordKokiri)));
-			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Item.emerald, 16), new ItemStack(ZSSItems.shieldDeku)));
+			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.swordKokiri)));
+			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.shieldDeku)));
 			break;
 		case BUTCHER:
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 20), new ItemStack(ZSSItems.tunicHeroChest)));
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 10), new ItemStack(ZSSItems.tunicHeroLegs)));
+			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 20), new ItemStack(ZSSItems.tunicHeroChest)));
+			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroLegs)));
 			break;
 		default:
 			break;

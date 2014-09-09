@@ -48,12 +48,12 @@ public class ZSSCreativeTabs
 			Collections.sort(itemstacks, ZSSItems.itemstackComparator);
 		}
 	}
-	
+
 	public static CreativeTabs tabBlocks = new ZSSCreativeTab("zssTabBlocks") {
 		@Override
 		@SideOnly(Side.CLIENT)
-		public int getTabIconItemIndex() {
-			return ZSSBlocks.pedestal.blockID;
+		public Item getTabIconItem() {
+			return Item.getItemFromBlock(ZSSBlocks.pedestal);
 		}
 
 		@Override
@@ -61,7 +61,7 @@ public class ZSSCreativeTabs
 			return StatCollector.translateToLocal("creativetab.zss.block");
 		}
 	};
-	
+
 	public static CreativeTabs tabCombat = new ZSSCreativeTab("zssTabCombat") {
 		@Override
 		@SideOnly(Side.CLIENT)
