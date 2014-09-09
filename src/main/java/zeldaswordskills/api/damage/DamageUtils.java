@@ -82,59 +82,7 @@ public class DamageUtils
 		return new EntityDamageSourceIndirect(INDIRECT_SWORD, direct, indirect);
 	}
 
-	/**
-	 * Class providing access to protected vanilla methods
-	 */
-	public static class DamageSourceDirect extends EntityDamageSource
-	{
-		/** Creates a basic direct damage source */
-		public DamageSourceDirect(String name, Entity entity) {
-			super(name, entity);
-		}
-		/** Wrapper method for accessing protected vanilla method */
-		public DamageSourceDirect setDamageBypassesArmor() {
-			super.setDamageBypassesArmor();
-			return this;
-		}
-		/** Wrapper method for accessing protected vanilla method */
-		public DamageSourceDirect setFireDamage() {
-			super.setFireDamage();
-			return this;
-		}
-		/** Wrapper method for accessing protected vanilla method */
-		public DamageSourceDirect setDamageAllowedInCreativeMode() {
-			super.setDamageAllowedInCreativeMode();
-			return this;
-		}
-	}
-
-	/**
-	 * Class providing access to protected vanilla methods
-	 */
-	public static class DamageSourceIndirect extends EntityDamageSourceIndirect
-	{
-		/** Creates a basic indirect damage source */
-		public DamageSourceIndirect(String name, Entity direct, Entity indirect) {
-			super(name, direct, indirect);
-		}
-		/** Wrapper method for accessing protected vanilla method */
-		public DamageSourceIndirect setDamageBypassesArmor() {
-			super.setDamageBypassesArmor();
-			return this;
-		}
-		/** Wrapper method for accessing protected vanilla method */
-		public DamageSourceIndirect setFireDamage() {
-			super.setFireDamage();
-			return this;
-		}
-		/** Wrapper method for accessing protected vanilla method */
-		public DamageSourceIndirect setDamageAllowedInCreativeMode() {
-			super.setDamageAllowedInCreativeMode();
-			return this;
-		}
-	}
-
-	public static class DamageSourceShock extends DamageSourceDirect implements IDamageType, IDamageSourceStun
+	public static class DamageSourceShock extends EntityDamageSource implements IDamageType, IDamageSourceStun
 	{
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
@@ -164,23 +112,32 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() { return duration; }
+		public int getDuration() {
+			return duration;
+		}
 
 		@Override
-		public int getAmplifier() { return 5; }
+		public int getAmplifier() {
+			return 5;
+		}
 
 		@Override
-		public boolean canStunPlayers() { return true; }
+		public boolean canStunPlayers() {
+			return true;
+		}
 
 		@Override
-		public boolean alwaysStuns() { return true; }
+		public boolean alwaysStuns() {
+			return true;
+		}
 
 		@Override
-		public float getHungerDamage() { return hunger; }
-
+		public float getHungerDamage() {
+			return hunger;
+		}
 	}
 
-	public static class DamageSourceShockIndirect extends DamageSourceIndirect implements IDamageType, IDamageSourceStun
+	public static class DamageSourceShockIndirect extends EntityDamageSourceIndirect implements IDamageType, IDamageSourceStun
 	{
 		/** Maximum stun time; will also be modified by total damage inflicted */
 		private final int duration;
@@ -210,23 +167,32 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() { return duration; }
+		public int getDuration() {
+			return duration;
+		}
 
 		@Override
-		public int getAmplifier() { return 5; }
+		public int getAmplifier() {
+			return 5;
+		}
 
 		@Override
-		public boolean canStunPlayers() { return true; }
+		public boolean canStunPlayers() {
+			return true;
+		}
 
 		@Override
-		public boolean alwaysStuns() { return true; }
+		public boolean alwaysStuns() {
+			return true;
+		}
 
 		@Override
-		public float getHungerDamage() { return hunger; }
-
+		public float getHungerDamage() {
+			return hunger;
+		}
 	}
 
-	public static class DamageSourceStun extends DamageSourceDirect implements IDamageType,IDamageSourceStun
+	public static class DamageSourceStun extends EntityDamageSource implements IDamageType,IDamageSourceStun
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -259,10 +225,14 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() { return duration; }
+		public int getDuration() {
+			return duration;
+		}
 
 		@Override
-		public int getAmplifier() { return amplifier; }
+		public int getAmplifier() {
+			return amplifier;
+		}
 
 		/** Allows this damage source to stun players if allowed in the config */
 		public DamageSourceStun setCanStunPlayers() {
@@ -271,14 +241,17 @@ public class DamageUtils
 		}
 
 		@Override
-		public boolean canStunPlayers() { return canStunPlayers; }
+		public boolean canStunPlayers() {
+			return canStunPlayers;
+		}
 
 		@Override
-		public boolean alwaysStuns() { return false; }
-
+		public boolean alwaysStuns() {
+			return false;
+		}
 	}
 
-	public static class DamageSourceStunIndirect extends DamageSourceIndirect implements IDamageType,IDamageSourceStun
+	public static class DamageSourceStunIndirect extends EntityDamageSourceIndirect implements IDamageType,IDamageSourceStun
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -311,10 +284,14 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() { return duration; }
+		public int getDuration() {
+			return duration;
+		}
 
 		@Override
-		public int getAmplifier() { return amplifier; }
+		public int getAmplifier() {
+			return amplifier;
+		}
 
 		/** Allows this damage source to stun players if allowed in the config */
 		public DamageSourceStunIndirect setCanStunPlayers() {
@@ -323,14 +300,17 @@ public class DamageUtils
 		}
 
 		@Override
-		public boolean canStunPlayers() { return canStunPlayers; }
+		public boolean canStunPlayers() {
+			return canStunPlayers; }
 
 		@Override
-		public boolean alwaysStuns() { return false; }
+		public boolean alwaysStuns() {
+			return false;
 
+		}
 	}
 
-	public static class DamageSourceHoly extends DamageSourceDirect implements IDamageType
+	public static class DamageSourceHoly extends EntityDamageSource implements IDamageType
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -348,7 +328,7 @@ public class DamageUtils
 		}
 	}
 
-	public static class DamageSourceHolyIndirect extends DamageSourceIndirect implements IDamageType
+	public static class DamageSourceHolyIndirect extends EntityDamageSourceIndirect implements IDamageType
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -366,7 +346,7 @@ public class DamageUtils
 		}
 	}
 
-	public static class DamageSourceIce extends DamageSourceDirect implements IDamageType, IPostDamageEffect
+	public static class DamageSourceIce extends EntityDamageSource implements IDamageType, IPostDamageEffect
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -383,10 +363,14 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() { return duration; }
+		public int getDuration() {
+			return duration;
+		}
 
 		@Override
-		public int getAmplifier() { return amplifier; }
+		public int getAmplifier() {
+			return amplifier;
+		}
 
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
@@ -394,7 +378,7 @@ public class DamageUtils
 		}
 	}
 
-	public static class DamageSourceIceIndirect extends DamageSourceIndirect implements IDamageType, IPostDamageEffect
+	public static class DamageSourceIceIndirect extends EntityDamageSourceIndirect implements IDamageType, IPostDamageEffect
 	{
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
@@ -411,10 +395,14 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() { return duration; }
+		public int getDuration() {
+			return duration;
+		}
 
 		@Override
-		public int getAmplifier() { return amplifier; }
+		public int getAmplifier() {
+			return amplifier;
+		}
 
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {

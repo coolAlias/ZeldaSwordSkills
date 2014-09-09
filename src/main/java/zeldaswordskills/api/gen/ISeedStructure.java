@@ -15,18 +15,24 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.api.item;
+package zeldaswordskills.api.gen;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 
 /**
  * 
- * Interface for weapons, not damage sources, that inflict armor break damage.
+ * A structure that may be generated during regular game-play, e.g. via right-click.
  * 
  */
-public interface IArmorBreak {
+public interface ISeedStructure {
 
 	/**
-	 * The percentage of damage inflicted that ignores armor (0 to 100)
+	 * Attempt to generate the structure at the coordinates of the block clicked
+	 * @param y		The y position of the block clicked, so may want to generate at y + 1
+	 * @param side	The side of the block clicked
+	 * @return		True if the structure generated successfully
 	 */
-	public float getPercentArmorIgnored();
+	public boolean generate(World world, EntityPlayer player, int x, int y, int z, int side);
 
 }

@@ -35,7 +35,7 @@ public interface ISwingSpeed {
 	 * anything was struck.
 	 */
 	public float getExhaustion();
-	
+
 	/**
 	 * The time for which all left-clicks will be prevented after swinging this item;
 	 * may be configured to allow non-ISwingSpeed items to ignore the timer, in which

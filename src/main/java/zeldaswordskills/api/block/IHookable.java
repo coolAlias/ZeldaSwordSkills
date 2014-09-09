@@ -19,8 +19,8 @@ package zeldaswordskills.api.block;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
-import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.item.HookshotType;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -29,13 +29,13 @@ import zeldaswordskills.api.item.HookshotType;
  *
  */
 public interface IHookable {
-	
+
 	/**
 	 * Return true to always allow hookshots to attach, regardless of block material
 	 * @param type the type of hookshot attempting to grapple the block
 	 */
 	public boolean canAlwaysGrab(HookshotType type, World world, int x, int y, int z);
-	
+
 	/**
 	 * Return true to allow hookshots to destroy the block, regardless of block material or
 	 * configuration settings; passes x, y, z in case tile entity will affect the outcome
@@ -45,7 +45,7 @@ public interface IHookable {
 	 * 			Result.DENY will prevent the block from being destroyed
 	 */
 	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z);
-	
+
 	/**
 	 * Returns the Material type that should be used to determine which, if
 	 * any, hookshots can attach to this block or, if it can't attach, whether
