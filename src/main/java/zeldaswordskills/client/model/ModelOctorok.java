@@ -38,9 +38,9 @@ public class ModelOctorok extends ModelBase
 	private ModelRenderer shape5;
 	private ModelRenderer shape6;
 	private ModelRenderer shape7;
-	
+
 	/** The octorok's tentacles */
-    private ModelRenderer[] tentacles;
+	private ModelRenderer[] tentacles;
 
 	public ModelOctorok() {
 		textureWidth = 128;
@@ -87,7 +87,7 @@ public class ModelOctorok extends ModelBase
 		shape7.setTextureSize(128, 64);
 		shape7.mirror = true;
 		setRotation(shape7, 0F, 0F, 0F);
-		
+
 		tentacles = new ModelRenderer[6];
 		for (int i = 0; i < tentacles.length; ++i) {
 			tentacles[i] = new ModelRenderer(this, 67, 0);

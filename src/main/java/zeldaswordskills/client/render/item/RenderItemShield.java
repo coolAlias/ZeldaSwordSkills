@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
@@ -56,7 +56,7 @@ public class RenderItemShield implements IItemRenderer
 			ItemZeldaShield shield = (ItemZeldaShield) item.getItem();
 			GL11.glPushMatrix();
 			Tessellator tessellator = Tessellator.instance;
-			Icon icon = shield.getIconIndex(item);
+			IIcon icon = shield.getIconIndex(item);
 
 			switch (type){
 			case ENTITY:

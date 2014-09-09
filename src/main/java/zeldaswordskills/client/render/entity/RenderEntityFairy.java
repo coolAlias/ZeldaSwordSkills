@@ -40,48 +40,48 @@ public class RenderEntityFairy extends Render
 
 	public RenderEntityFairy() {
 		shadowSize = 0.15F;
-        shadowOpaque = 0.75F;
+		shadowOpaque = 0.75F;
 	}
-	
+
 	public void renderFairy(EntityFairy fairy, double x, double y, double z, float yaw, float partialTick) {
 		GL11.glPushMatrix();
-        GL11.glTranslated(x, y, z);
-        bindEntityTexture(fairy);
-        int i = 10;
-        float f2 = (i % 4 * 16 + 0) / 64.0F;
-        float f3 = (i % 4 * 16 + 16) / 64.0F;
-        float f4 = (i / 4 * 16 + 0) / 64.0F;
-        float f5 = (i / 4 * 16 + 16) / 64.0F;
-        float f6 = 1.0F;
-        float f7 = 0.5F;
-        float f8 = 0.25F;
-        int j = fairy.getBrightnessForRender(partialTick);
-        int k = j % 65536;
-        int l = j / 65536;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, k / 1.0F, l / 1.0F);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        float f9 = 255.0F;
-        float f10 = (0x00EE00 + partialTick + fairy.ticksExisted) / 2.0F;
-        l = (int)((MathHelper.sin(f10) + 1.0F) * 0.5F * f9);
-        int i1 = (int)f9;
-        int j1 = (int)((MathHelper.sin(f10 + 4.1887903F) + 1.0F) * 0.1F * f9);
-        int k1 = l << 16 | i1 << 8 | j1;
-        GL11.glRotatef(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(-renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-        float f11 = 0.3F;
-        GL11.glScalef(f11, f11, f11);
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.setColorRGBA_I(k1, 128);
-        tessellator.setNormal(0.0F, 1.0F, 0.0F);
-        tessellator.addVertexWithUV((0.0F - f7), (0.0F - f8), 0.0D, f2, f5);
-        tessellator.addVertexWithUV((f6 - f7), (0.0F - f8), 0.0D, f3, f5);
-        tessellator.addVertexWithUV((f6 - f7), (1.0F - f8), 0.0D, f3, f4);
-        tessellator.addVertexWithUV((0.0F - f7), (1.0F - f8), 0.0D, f2, f4);
-        tessellator.draw();
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-        GL11.glPopMatrix();
+		GL11.glTranslated(x, y, z);
+		bindEntityTexture(fairy);
+		int i = 10;
+		float f2 = (i % 4 * 16 + 0) / 64.0F;
+		float f3 = (i % 4 * 16 + 16) / 64.0F;
+		float f4 = (i / 4 * 16 + 0) / 64.0F;
+		float f5 = (i / 4 * 16 + 16) / 64.0F;
+		float f6 = 1.0F;
+		float f7 = 0.5F;
+		float f8 = 0.25F;
+		int j = fairy.getBrightnessForRender(partialTick);
+		int k = j % 65536;
+		int l = j / 65536;
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, k / 1.0F, l / 1.0F);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		float f9 = 255.0F;
+		float f10 = (0x00EE00 + partialTick + fairy.ticksExisted) / 2.0F;
+		l = (int)((MathHelper.sin(f10) + 1.0F) * 0.5F * f9);
+		int i1 = (int)f9;
+		int j1 = (int)((MathHelper.sin(f10 + 4.1887903F) + 1.0F) * 0.1F * f9);
+		int k1 = l << 16 | i1 << 8 | j1;
+		GL11.glRotatef(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+		GL11.glRotatef(-renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+		float f11 = 0.3F;
+		GL11.glScalef(f11, f11, f11);
+		Tessellator tessellator = Tessellator.instance;
+		tessellator.startDrawingQuads();
+		tessellator.setColorRGBA_I(k1, 128);
+		tessellator.setNormal(0.0F, 1.0F, 0.0F);
+		tessellator.addVertexWithUV((0.0F - f7), (0.0F - f8), 0.0D, f2, f5);
+		tessellator.addVertexWithUV((f6 - f7), (0.0F - f8), 0.0D, f3, f5);
+		tessellator.addVertexWithUV((f6 - f7), (1.0F - f8), 0.0D, f3, f4);
+		tessellator.addVertexWithUV((0.0F - f7), (1.0F - f8), 0.0D, f2, f4);
+		tessellator.draw();
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+		GL11.glPopMatrix();
 	}
 
 	@Override

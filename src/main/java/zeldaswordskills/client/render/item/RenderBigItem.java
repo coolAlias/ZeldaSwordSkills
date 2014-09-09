@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
@@ -69,7 +69,7 @@ public class RenderBigItem implements IItemRenderer
 			GL11.glTranslatef(1.0F - f, -0.125F * scale, 0.05F * scale);
 		}
 		GL11.glScalef(f, f, f);
-		Icon icon = stack.getItem().getIcon(stack, 0);
+		IIcon icon = stack.getItem().getIcon(stack, 0);
 		Tessellator tessellator = Tessellator.instance;
 		ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 		GL11.glPopMatrix();

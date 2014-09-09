@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
@@ -43,14 +43,14 @@ public class RenderEntityBoomerang extends Render
 			GL11.glRotatef(entity.rotationYaw + (entity.prevRotationYaw - entity.rotationYaw) * partialTick - 60.0F, 0.0F, 1.0F, 0.0F);
 			GL11.glRotatef(Math.abs(entity.rotationPitch + (entity.prevRotationPitch - entity.rotationPitch)) * partialTick - rotation, 0.0F, 0.0F, 1.0F);
 			GL11.glTranslatef(-0.5F, -0.5F, 0.0F);
-			Icon icon = boomerang.getItem().getIconFromDamage(0);
+			IIcon icon = boomerang.getItem().getIconFromDamage(0);
 			bindTexture(renderManager.renderEngine.getResourceLocation(boomerang.getItem().getSpriteNumber()));
 			Tessellator tessellator = Tessellator.instance;
 			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 			GL11.glPopMatrix();
 		}
 	}
-	
+
 	@Override
 	public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick) {
 		renderBoomerang((EntityBoomerang) entity, x, y, z, yaw, partialTick);

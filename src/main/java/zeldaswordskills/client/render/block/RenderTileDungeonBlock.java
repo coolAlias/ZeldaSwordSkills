@@ -21,8 +21,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.ZSSBlocks;
@@ -42,26 +43,26 @@ public class RenderTileDungeonBlock implements ISimpleBlockRenderingHandler
 	@Override
 	public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks renderer) {
 		int meta = world.getBlockMetadata(x, y, z);
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonBlock) {
 			block = ((TileEntityDungeonBlock) te).getRenderBlock();
 			meta = ((TileEntityDungeonBlock) te).getRenderMetadata();
 		}
 		// TODO this should provide backward compatibility:
-		if (block == null || block == ZSSBlocks.secretStone || block == ZSSBlocks.dungeonCore) {
-			block = Block.blocksList[BlockSecretStone.getIdFromMeta(world.getBlockMetadata(x, y, z))];
+		if (block == Blocks.air || block == ZSSBlocks.secretStone || block == ZSSBlocks.dungeonCore) {
+			block = BlockSecretStone.getBlockFromMeta(world.getBlockMetadata(x, y, z));
 			meta = 0;
 		}
-		if (block == null || (!block.isOpaqueCube() && block != Block.ice)) {
+		if (block == null || (!block.isOpaqueCube() && block != Blocks.ice)) {
 			return false;
 		}
 		// ideally, all blocks will simply render right here by render type
-		if (meta == 0 || block == Block.ice) {
+		if (meta == 0 || block == Blocks.ice) {
 			return renderer.renderBlockByRenderType(block, x, y, z);
 		}
 		// the following is for blocks with meta-based icons, such as pumpkins
 		boolean rendered = false;
-		Icon icon = block.getIcon(0, meta);
+		IIcon icon = block.getIcon(0, meta);
 		if (icon != null) {
 			int l = block.colorMultiplier(world, x, y, z);
 			float r = (float)(l >> 16 & 255) / 255.0F;
@@ -84,7 +85,7 @@ public class RenderTileDungeonBlock implements ISimpleBlockRenderingHandler
 			float f17 = f5;
 			float f18 = f6;
 
-			if (block != Block.grass) {
+			if (block != Blocks.grass) {
 				f10 = f3 * r;
 				f11 = f5 * r;
 				f12 = f6 * r;
@@ -161,7 +162,7 @@ public class RenderTileDungeonBlock implements ISimpleBlockRenderingHandler
 	}
 
 	@Override
-	public boolean shouldRender3DInInventory() {
+	public boolean shouldRender3DInInventory(int modelId) {
 		return false;
 	}
 

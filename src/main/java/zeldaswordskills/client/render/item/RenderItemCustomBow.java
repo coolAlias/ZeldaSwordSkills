@@ -21,9 +21,9 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
@@ -43,7 +43,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @SideOnly(Side.CLIENT)
-public class RenderItemCustomBow implements IItemRenderer {
+public class RenderItemCustomBow implements IItemRenderer
+{
+	/** Used for default arrow rendering */
+	private static final ItemStack vanillaArrow = new ItemStack(Items.arrow);
 
 	public RenderItemCustomBow() {}
 
@@ -80,18 +83,19 @@ public class RenderItemCustomBow implements IItemRenderer {
 				GL11.glTranslated(0.1D, -0.3D, 0.2D);
 			}
 			EntityPlayer player = (EntityPlayer) entity;
-			Icon icon = stack.getItem().getIcon(stack, 0, player, player.getItemInUse(), player.getItemInUseCount());
+			IIcon icon = stack.getItem().getIcon(stack, 0, player, player.getItemInUse(), player.getItemInUseCount());
 			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 			int useDuration = player.getItemInUseDuration();
 			if (useDuration > 0) {
 				int drawAmount = (useDuration > 17 ? 2 : (useDuration > 13 ? 1 : 0));
-				ItemStack arrowStack = (stack.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) stack.getItem()).getArrow(player) : new ItemStack(Item.arrow));
+				ItemStack arrowStack = (stack.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) stack.getItem()).getArrow(player) : vanillaArrow);
 				if (ZSSMain.isBG2Enabled) {
 					ItemStack quiverArrow = BattlegearEvents.getQuiverArrow(stack, player);
 					if (quiverArrow != null) {
 						arrowStack = quiverArrow;
 					}
 				}
+
 				if (arrowStack != null) {
 					icon = arrowStack.getIconIndex();
 					GL11.glPushMatrix();
@@ -102,7 +106,7 @@ public class RenderItemCustomBow implements IItemRenderer {
 				}
 			}
 		} else {
-			Icon icon = stack.getItem().getIcon(stack, 0);
+			IIcon icon = stack.getItem().getIcon(stack, 0);
 			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
 		}
 

@@ -23,8 +23,9 @@ import net.minecraft.entity.Entity;
 
 /**
  * 
- * Model for a cube. Both the cube's dimensions and texture size can be set
  * @author original credit to Hunternif; modified by coolAlias
+ * 
+ * Model for a cube. Both the cube's dimensions and texture size can be set
  *
  */
 public class ModelCube extends ModelBase
@@ -38,14 +39,14 @@ public class ModelCube extends ModelBase
 	public ModelCube(int size) {
 		this(size, 16, 16, 0, 0);
 	}
-	
+
 	/**
 	 * Model cube of given size with custom texture height and width
 	 */
 	public ModelCube(int size, int textureX, int textureY) {
 		this(size, textureX, textureY, 0, 0);
 	}
-	
+
 	/**
 	 * Model cube of given size with custom texture height, width, and offsets U and V (untested)
 	 */
@@ -64,7 +65,7 @@ public class ModelCube extends ModelBase
 		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
 		cube.render(f5);
 	}
-	
+
 	public void render(Entity entity) {
 		cube.render(0.0625f);
 	}

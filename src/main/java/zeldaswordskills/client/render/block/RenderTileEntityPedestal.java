@@ -23,7 +23,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
@@ -49,9 +49,9 @@ public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 		if (sword != null) {
 			GL11.glPushMatrix();
 			GL11.glTranslated(dx + 0.5D, dy + 0.9D, dz + 0.5D);
-			bindTexture(tileEntityRenderer.renderEngine.getResourceLocation(sword.getItemSpriteNumber()));
+			bindTexture(field_147501_a.field_147553_e.getResourceLocation(sword.getItemSpriteNumber()));
 			Tessellator tessellator = Tessellator.instance;
-			Icon icon = sword.getItem().getIconFromDamage(sword.getItemDamage());
+			IIcon icon = sword.getItem().getIconFromDamage(sword.getItemDamage());
 			if (icon != null) {
 				float minU = icon.getMinU();
 				float maxU = icon.getMaxU();

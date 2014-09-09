@@ -19,7 +19,7 @@ package zeldaswordskills.client.render.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.world.IBlockAccess;
 
 import org.lwjgl.opengl.GL11;
@@ -42,7 +42,7 @@ public class RenderCeramicJar implements ISimpleBlockRenderingHandler
 		GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
 		GL11.glTranslatef(-1.2F, -0.3F, -0.5F);
 		GL11.glScalef(1.75F, 1.75F, 1.75F);
-		TileEntityRenderer.instance.renderTileEntityAt(jar, 0.0D, 0.0D, 0.0D, 0.0F);
+		TileEntityRendererDispatcher.instance.renderTileEntityAt(jar, 0.0D, 0.0D, 0.0D, 0.0F);
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 	}
 
@@ -52,7 +52,7 @@ public class RenderCeramicJar implements ISimpleBlockRenderingHandler
 	}
 
 	@Override
-	public boolean shouldRender3DInInventory() {
+	public boolean shouldRender3DInInventory(int modelId) {
 		return true;
 	}
 

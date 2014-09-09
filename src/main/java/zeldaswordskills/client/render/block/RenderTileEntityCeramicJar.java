@@ -37,7 +37,7 @@ public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 {
 	/** Ceramic jar model texture */
 	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/ceramic_jar.png");
-	
+
 	private ModelCeramicJar model = new ModelCeramicJar();
 
 	public RenderTileEntityCeramicJar() {}
@@ -46,7 +46,7 @@ public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 	public void renderTileEntityAt(TileEntity te, double dx, double dy, double dz, float partialTick) {
 		renderTileEntityJarAt((TileEntityCeramicJar) te, dx, dy, dz, partialTick);
 	}
-	
+
 	/**
 	 * Renders the TileEntity for the jar at a position.
 	 */
