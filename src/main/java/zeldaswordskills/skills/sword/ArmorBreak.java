@@ -28,15 +28,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -122,7 +122,7 @@ public class ArmorBreak extends SkillActive
 
 	/** Returns true if the skill is still charging up; always false on the server, as charge is handled client-side */
 	public boolean isCharging(EntityPlayer player) {
-		ILockOnTarget target = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ILockOnTarget target = ZSSPlayerSkills.get(player).getTargetingSkill();
 		return charge > 0 && target != null && target.isLockedOn();
 	}
 
@@ -143,8 +143,9 @@ public class ArmorBreak extends SkillActive
 	}
 
 	/**
-	 * Must be called manually when the attack key is pressed to initiate charging with a single
-	 * key press, when other skills might otherwise preclude ArmorBreak's keyPressed from being called.
+	 * Must be called manually when the attack key is pressed (and, for the mouse, when released);
+	 * this is necessary to allow charging to start from a single key press, when other skills
+	 * might otherwise preclude ArmorBreak's keyPressed from being called.
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -155,7 +156,7 @@ public class ArmorBreak extends SkillActive
 			if (requiresReset) {
 				// manually set the keybind state, since it will not be set by the canceled mouse event
 				// releasing the mouse unsets it normally, but it must be manually unset if the skill is triggered
-				KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, true);
+				KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
 			}
 			return true; // doesn't matter, as ArmorBreak is handled outside the normal framework
 		}
@@ -167,7 +168,7 @@ public class ArmorBreak extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyPressed() {
-		return (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].pressed || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.pressed));
+		return (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].getIsKeyPressed() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.getIsKeyPressed()));
 	}
 
 	/**
@@ -183,7 +184,7 @@ public class ArmorBreak extends SkillActive
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 1; // needs to be active for hurt event to process correctly
 		// Attack first so skill still active upon impact, then set timer to zero
-		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
 			player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 		}
@@ -198,7 +199,7 @@ public class ArmorBreak extends SkillActive
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (isCharging(player)) { // isCharging can only ever return true on the client, as charge not set on the server
+		if (isCharging(player)) {
 			if (isKeyPressed() && PlayerUtils.isHoldingSkillItem(player)) {
 				if (!player.isSwingInProgress) {
 					if (charge < (getChargeTime(player) - 1)) {
@@ -210,14 +211,14 @@ public class ArmorBreak extends SkillActive
 				if (charge == 0) {
 					// can't use the standard animation methods to prevent key/mouse input,
 					// since Armor Break will not return true for isActive
-					player.attackTime = 4;
+					player.attackTime = 4; // flag for isAnimating? no player parameter
 					player.swingItem();
 					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
-						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.keyCode, false);
+						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);
 					}
-					SwordBasic skill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
+					SwordBasic skill = (SwordBasic) ZSSPlayerSkills.get(player).getPlayerSkill(swordBasic);
 					if (skill != null && skill.onAttack(player)) {
-						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this, true).makePacket());
+						PacketDispatcher.sendToServer(new ActivateSkillPacket(this, true));
 					}
 				}
 			} else {

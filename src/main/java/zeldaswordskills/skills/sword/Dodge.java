@@ -30,15 +30,15 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -73,6 +73,8 @@ public class Dodge extends SkillActive
 	private int dodgeTimer = 0;
 
 	/** Entity dodged, since the attack event may fire multiple times in quick succession for mobs like zombies */
+	// TODO make a List<Entity>, for dodging multiple entities; lower dodge chance as list grows in size
+	// TODO perhaps limit the size of the list by skill level
 	private Entity entityDodged;
 
 	public Dodge(String name) {
@@ -137,7 +139,7 @@ public class Dodge extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && ZSSPlayerSkills.get(player).isSkillActive(swordBasic);
 	}
 
 	@Override
@@ -159,16 +161,16 @@ public class Dodge extends SkillActive
 		if (canExecute(player)) {
 			if (Config.requiresDoubleTap()) {
 				if (ticksTilFail > 0 && key == keyPressed) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
 					return true;
 				} else {
 					keyPressed = key;
-					ticksTilFail = (Config.requiresDoubleTap() ? 6 : 3);
+					ticksTilFail = 6;
 				}
 				// Single-tap activation only allowed using custom key bindings:
 			} else if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT] || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT]) {
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				return true;
 			}
 		}
@@ -197,10 +199,6 @@ public class Dodge extends SkillActive
 		}
 	}
 
-	/**
-	 * Override to allow other skills, movement, etc. to operate after the dodge is
-	 * finished but before it is allowed to activate again
-	 */
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isAnimating() {
@@ -209,14 +207,13 @@ public class Dodge extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
-		double d = 0.05D;
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
+		double d = 0.15;
 		if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
-			d = 0.01D;
+			d = 0.025D;
 		}
 		Vec3 vec3 = player.getLookVec();
-		if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls()
-				&& keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight)) {
+		if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 		} else {
 			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);

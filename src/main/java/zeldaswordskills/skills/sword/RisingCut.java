@@ -29,11 +29,12 @@ import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -123,8 +124,8 @@ public class RisingCut extends SkillActive
 				return true;
 			}
 		} else if (canExecute(player)) {
-			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
-			ZSSClientEvents.performComboAttack(mc, ZSSPlayerInfo.get(player).getTargetingSkill());
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+			ZSSClientEvents.performComboAttack(mc, ZSSPlayerSkills.get(player).getTargetingSkill());
 			return true;
 		}
 		return false;
@@ -167,7 +168,7 @@ public class RisingCut extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		player.swingProgress = 0.5F; // keep sword extended
 		return false; // return false so targeting camera remains locked on target
 	}

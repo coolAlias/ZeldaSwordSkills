@@ -30,15 +30,15 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -135,7 +135,7 @@ public class Parry extends SkillActive
 		float penalty = (0.15F * attacksParried);
 		float bonus = Config.getDisarmTimingBonus() * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
 		if (attacker instanceof EntityPlayer) {
-			penalty += Config.getDisarmPenalty() * ZSSPlayerInfo.get((EntityPlayer) attacker).getSkillLevel(this);
+			penalty += Config.getDisarmPenalty() * ZSSPlayerSkills.get((EntityPlayer) attacker).getSkillLevel(this);
 		}
 		return ((level * 0.1F) - penalty + bonus);
 	}
@@ -166,14 +166,14 @@ public class Parry extends SkillActive
 		if (canExecute(player)) {
 			if (Config.requiresDoubleTap()) {
 				if (ticksTilFail > 0) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
 					return true;
 				} else {
 					ticksTilFail = 6;
 				}
 			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				return true;
 			}
 		}

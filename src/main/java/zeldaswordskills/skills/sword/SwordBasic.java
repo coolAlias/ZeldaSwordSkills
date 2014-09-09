@@ -30,9 +30,9 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.CustomPacket.ProtocolException;
-import zeldaswordskills.network.EndComboPacket;
-import zeldaswordskills.network.TargetIdPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.server.EndComboPacket;
+import zeldaswordskills.network.packet.server.TargetIdPacket;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -40,13 +40,12 @@ import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * BASIC TECHNIQUE
+ * BASIC SWORD SKILL
  * Description: Foundation for all other Sword Skills
  * Activation: Standard (toggle), but must be looking near a target within range
  * Effects:	1. must be active in order to use any of the Sword Skills (see below)
@@ -199,7 +198,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		double dx = player.posX - currentTarget.posX;
 		double dz = player.posZ - currentTarget.posZ;
 		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
@@ -225,15 +224,9 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	public void setCurrentTarget(Side side, Entity entity) throws ProtocolException {
-		if (side.isServer()) {
-			if (entity == null || entity instanceof EntityLivingBase) {
-				currentTarget = (EntityLivingBase) entity;
-			} else {
-				throw new ProtocolException("Sword combos can only target EntityLivingBase");
-			}
-		} else {
-			throw new ProtocolException("Target can only be directly set on the server side.");
+	public void setCurrentTarget(Entity entity) {
+		if (entity == null || entity instanceof EntityLivingBase) {
+			currentTarget = (EntityLivingBase) entity;
 		}
 	}
 
@@ -269,7 +262,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			currentTarget = prevTarget;
 			prevTarget = nextTarget;
 		}
-		PacketDispatcher.sendPacketToServer(new TargetIdPacket(this).makePacket());
+		PacketDispatcher.sendToServer(new TargetIdPacket(this));
 	}
 
 	/**
@@ -323,7 +316,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		if (!attackHit) {
 			PlayerUtils.playRandomizedSound(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 			if (isComboInProgress()) {
-				PacketDispatcher.sendPacketToServer(new EndComboPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new EndComboPacket(this));
 			}
 		}
 		return attackHit;

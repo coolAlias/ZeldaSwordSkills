@@ -19,7 +19,6 @@ package zeldaswordskills.skills;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.network.CustomPacket.ProtocolException;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -33,15 +32,15 @@ public interface ILockOnTarget
 {	
 	/** Returns true if player currently targeting an entity */
 	public boolean isLockedOn();
-	
+
 	/** Returns entity currently locked on to, or null if not locked on */
 	public Entity getCurrentTarget();
-	
-	/** Should only use on the server side; client side should throw an exception */
-	public void setCurrentTarget(Side side, Entity entity) throws ProtocolException;
-	
+
+	/** Should only use on the server side */
+	public void setCurrentTarget(Entity entity);
+
 	/** Should find and return the next valid target or null */
 	@SideOnly(Side.CLIENT)
 	public void getNextTarget(EntityPlayer player);
-	
+
 }

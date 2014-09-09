@@ -25,29 +25,29 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
-import net.minecraft.network.packet.Packet28EntityVelocity;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.DashImpactPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.packet.server.DashImpactPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -162,7 +162,7 @@ public class Dash extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 			return true;
 		}
 		return false;
@@ -171,8 +171,8 @@ public class Dash extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		isActive = true;
-		initialPosition = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
-		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
+		initialPosition = Vec3.createVectorHelper(player.posX, player.posY + player.getEyeHeight() - 0.10000000149011612D, player.posZ);
+		ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
 			target = skill.getCurrentTarget();
 		} else {
@@ -209,22 +209,24 @@ public class Dash extends SkillActive
 			if (player.worldObj.isRemote) {
 				MovingObjectPosition mop = TargetUtils.checkForImpact(player.worldObj, player, player, 0.5D, false);
 				if (mop != null) {
-					PacketDispatcher.sendPacketToServer(new DashImpactPacket(player, mop).makePacket());
+					PacketDispatcher.sendToServer(new DashImpactPacket(player, mop));
 					// Player cannot attack directly after impacting something
 					player.attackTime = (player.capabilities.isCreativeMode ? 0 : 10 - level);
 					impactTime = 5;
-					if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
+					if (mop.typeOfHit == MovingObjectType.ENTITY) {
 						target = mop.entityHit;
 					}
 					double d = Math.sqrt((player.motionX * player.motionX) + (player.motionZ * player.motionZ));
 					player.setVelocity(-player.motionX * d, 0.15D * d, -player.motionZ * d);
+					//player.motionY = 0.15D * d; // TODO adding y motion does not seem to work
+					//player.motionZ = -player.motionZ * d;
 					trajectory = null; // set to null so player doesn't keep moving forward
 					setNotDashing();
 				}
 			}
 			// increment distance AFTER update, otherwise Dash thinks it can damage entities right in front of player
 			++distance;
-			if (distance > getRange() || !(target instanceof EntityLivingBase)) {
+			if (distance > (getRange() + 1.0D) || !(target instanceof EntityLivingBase)) {
 				setNotDashing();
 			}
 		}
@@ -232,11 +234,12 @@ public class Dash extends SkillActive
 
 	/**
 	 * Called on the server from {@link DashImpactPacket} to process the impact data from the client
+	 * @param player	Player's motionX and motionZ have been set by the packet, so the values may be used
 	 * @param mop	Null assumes a block was hit (none of the block data is needed, so it is not sent),
 	 * 				or a valid MovingObjectPosition for the entity hit
 	 */
 	public void onImpact(World world, EntityPlayer player, MovingObjectPosition mop) {
-		if (mop != null && mop.typeOfHit == EnumMovingObjectType.ENTITY) {
+		if (mop != null && mop.typeOfHit == MovingObjectType.ENTITY) {
 			target = mop.entityHit;
 			double dist = target.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord);
 			// Subtract half the width for each entity to account for their bounding box size
@@ -246,25 +249,31 @@ public class Dash extends SkillActive
 			// Base player speed is 0.1D; heavy boots = 0.04D, pegasus = 0.13D
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue();
 			double sf = (1.0D + (speed - BASE_MOVE)); // speed factor
+			//LogHelper.info("Impacted entity; player's motion factor: " + d + " | movement speed: " + speed);
 			if (speed > 0.075D && dist > getMinDistance() && player.getDistanceSqToEntity(target) < 6.0D) {
 				float dmg = (float) getDamage() + (float)((dist / 2.0D) - 2.0D);
-				//if (speed > 0.08D && dist > (1.0D + getMinDistance()) && player.getDistanceSqToEntity(target) < 6.0D) {
-				//float dmg = ((float) getDamage()) - (float)((getRange() / 2D) - (dist - getMinDistance()));
+				//LogHelper.info("Dash distance-modified damage: " + dmg + " | Movement-modified damage: " + (dmg * (1.0D + (speed - BASE_MOVE))));
 				impactTime = 5; // time player will be immune to damage from the target entity
 				target.attackEntityFrom(DamageUtils.causeNonSwordDamage(player), (float)(dmg * sf * sf));
+				// tried putting knock-back even when damage not dealt, but not working for some reason
 				double resist = 1.0D;
-				// Account for knockback resistance:
 				if (target instanceof EntityLivingBase) {
 					resist -= ((EntityLivingBase) target).getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
 				}
 				double k = sf * resist * (distance / 3.0F) * 0.6000000238418579D;
+				//LogHelper.info("Struck entity's knockback resistance: " + resist + " | velocity modifier: " + k);
 				target.addVelocity(player.motionX * k * (0.2D + (0.1D * level)), 0.1D + k * (level * 0.025D), player.motionZ * k * (0.2D + (0.1D * level)));
 				// if player, send velocity update to client
-				if (target instanceof EntityPlayer && !player.worldObj.isRemote) {
-					PacketDispatcher.sendPacketToPlayer(new Packet28EntityVelocity(mop.entityHit), (Player) mop.entityHit);
+				if (target instanceof EntityPlayerMP && !player.worldObj.isRemote) {
+					((EntityPlayerMP) target).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(target));
 				}
 			}
 		}
+		// see if setting the motion here will work better; may need to send vanilla velocity update packet
+		//if (d > 0.5D) { d = 0.5D; }
+		//player.motionX = -player.motionX * d;
+		//player.motionY = 0.15D * d;
+		//player.motionZ = -player.motionZ * d;
 		WorldUtils.playSoundAtEntity(player, Sounds.SLAM, 0.4F, 0.5F);
 		setNotDashing();
 	}
@@ -277,7 +286,7 @@ public class Dash extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (target instanceof EntityLivingBase && trajectory != null) {
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - BASE_MOVE;
 			double dfactor = (1.0D + (speed) + (speed * (1.0D - ((getRange() - distance) / getRange()))));

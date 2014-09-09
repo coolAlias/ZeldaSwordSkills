@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,17 +30,17 @@ import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -121,7 +122,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		if (!isActive() && super.canUse(player) && PlayerUtils.isHoldingSkillItem(player)) {
-			ICombo skill = ZSSPlayerInfo.get(player).getComboSkill();
+			ICombo skill = ZSSPlayerSkills.get(player).getComboSkill();
 			if (skill != null && skill.isComboInProgress()) {
 				if (lastNumHits > 0) {
 					return skill.getCombo().getConsecutiveHits() > 1 && skill.getCombo().getSize() > lastNumHits + 2;
@@ -161,7 +162,7 @@ public class EndingBlow extends SkillActive
 		} else if (canExecute(player)) {
 			ticksTilFail = 0;
 			keyPressed = 0;
-			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 			return true;
 		}
 		return false;
@@ -170,12 +171,12 @@ public class EndingBlow extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 3; // gives server some time for client attack to occur
-		ICombo skill = ZSSPlayerInfo.get(player).getComboSkill();
+		ICombo skill = ZSSPlayerSkills.get(player).getComboSkill();
 		if (skill.getCombo() != null) {
 			lastNumHits = skill.getCombo().getSize();
 		}
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
-			ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), ZSSPlayerInfo.get(player).getTargetingSkill());
+			ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), ZSSPlayerSkills.get(player).getTargetingSkill());
 			ticksTilFail = 0;
 			keyPressed = 0;
 		}
@@ -205,7 +206,7 @@ public class EndingBlow extends SkillActive
 			if (entityHit != null && xp > 0) {
 				updateEntityState(player);
 			}
-			ICombo skill = ZSSPlayerInfo.get(player).getComboSkill();
+			ICombo skill = ZSSPlayerSkills.get(player).getComboSkill();
 			if (skill == null || !skill.isComboInProgress()) {
 				lastNumHits = 0;
 			}
@@ -226,7 +227,7 @@ public class EndingBlow extends SkillActive
 		if (!player.worldObj.isRemote) {
 			if (entityHit.getHealth() <= 0.0F) {
 				if (entityHit instanceof EntityLiving) {
-					((EntityLiving) entityHit).experienceValue += xp;
+					DirtyEntityAccessor.setLivingXp((EntityLiving) entityHit, xp, true);
 				} else {
 					WorldUtils.spawnXPOrbsWithRandom(player.worldObj, player.worldObj.rand, MathHelper.floor_double(entityHit.posX),
 							MathHelper.floor_double(entityHit.posY), MathHelper.floor_double(entityHit.posZ), xp);
@@ -243,8 +244,8 @@ public class EndingBlow extends SkillActive
 	@Override
 	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		activeTimer = 0;
-		ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
-		ILockOnTarget lock = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ICombo combo = ZSSPlayerSkills.get(player).getComboSkill();
+		ILockOnTarget lock = ZSSPlayerSkills.get(player).getTargetingSkill();
 		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 			amount *= 1.0F + (level * 0.2F);
 			WorldUtils.playSoundAtEntity(player, Sounds.MORTAL_DRAW, 0.4F, 0.5F);

@@ -23,22 +23,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.MortalDrawPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.packet.client.MortalDrawPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -49,7 +49,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Effect: The art of drawing the sword, or Battoujutsu, is a risky but deadly move, capable
  * of inflicting deadly wounds on unsuspecting opponents with a lightning-fast blade strike
  * Exhaustion: 3.0F - (0.2F * level)
- * Damage: If successful, inflicts double damage
+ * Damage: If successful, inflicts damage + (damage * multiplier)
  * Duration: Window of attack opportunity is (level + 2) ticks
  * Notes:
  * - The first sword found in the action bar will be used for the strike; plan accordingly
@@ -158,8 +158,8 @@ public class MortalDraw extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
 		// can't use player.isUsingItem, since hands are empty!
-		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.pressed
-				|| ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].pressed);
+		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.getIsKeyPressed()
+				|| ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].getIsKeyPressed());
 	}
 
 	@Override
@@ -172,7 +172,7 @@ public class MortalDraw extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 			return true;
 		}
 		return false;
@@ -199,7 +199,7 @@ public class MortalDraw extends SkillActive
 			if (attackTimer == DELAY && !player.worldObj.isRemote) {
 				drawSword(player, null);
 				if (player.getHeldItem() != null) {
-					PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
+					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
 				}
 			}
 		}
@@ -213,7 +213,7 @@ public class MortalDraw extends SkillActive
 				return true;
 			} else if (attackTimer > DELAY) {
 				if (drawSword(player, source.getEntity())) {
-					PacketDispatcher.sendPacketToPlayer(new MortalDrawPacket().makePacket(), (Player) player);
+					PacketDispatcher.sendTo(new MortalDrawPacket(), (EntityPlayerMP) player);
 					target = source.getEntity();
 					return true;
 				} else { // failed - do not continue trying
@@ -253,7 +253,7 @@ public class MortalDraw extends SkillActive
 			if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItem() == null) {
 				player.setCurrentItemOrArmor(0, player.inventory.getStackInSlot(swordSlot));
 				player.inventory.setInventorySlotContents(swordSlot, null);
-				ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
+				ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
 				flag = (skill != null && skill.getCurrentTarget() == attacker);
 			}
 		}

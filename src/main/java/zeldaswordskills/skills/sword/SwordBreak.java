@@ -30,12 +30,12 @@ import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -137,14 +137,14 @@ public class SwordBreak extends SkillActive
 		if (canExecute(player)) {
 			if (Config.requiresDoubleTap()) {
 				if (ticksTilFail > 0) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
 					return true;
 				} else {
 					ticksTilFail = 6;
 				}
 			} else if (key != mc.gameSettings.keyBindBack) { // activate on first press, but not for vanilla key!
-				PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				return true;
 			}
 		}
@@ -156,8 +156,8 @@ public class SwordBreak extends SkillActive
 		breakTimer = getActiveTime();
 		playMissSound = true;
 		if (world.isRemote) {
-			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.keyCode, false);
-			KeyBinding.setKeyBindState(ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].keyCode, false);
+			KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem.getKeyCode(), false);
+			KeyBinding.setKeyBindState(ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 			player.swingItem();
 		}
 		return isActive();
@@ -182,8 +182,8 @@ public class SwordBreak extends SkillActive
 
 	@Override
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
-		if (source.getEntity() instanceof EntityLivingBase) {
-			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
+		if (source.getSourceOfDamage() instanceof EntityLivingBase) {
+			EntityLivingBase attacker = (EntityLivingBase) source.getSourceOfDamage();
 			ItemStack stackToDamage = attacker.getHeldItem();
 			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isHoldingSkillItem(player)) {
 				breakTimer = getUseDelay(); // only block one attack

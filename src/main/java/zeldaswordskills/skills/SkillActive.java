@@ -21,16 +21,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.DeactivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.packet.bidirectional.DeactivateSkillPacket;
 import zeldaswordskills.util.LogHelper;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -76,6 +77,15 @@ public abstract class SkillActive extends SkillBase
 		super(skill);
 	}
 
+	/**
+	 * Return false if this skill may not be directly activated manually, in which case it
+	 * should have some other method of {@link #trigger(World, EntityPlayer) triggering}
+	 * @return	Default returns TRUE, allowing activation via {@link #activate}
+	 */
+	protected boolean allowUserActivation() {
+		return true;
+	}
+
 	/** Returns true if this skill is currently active, however that is defined by the child class */
 	public abstract boolean isActive();
 
@@ -92,15 +102,6 @@ public abstract class SkillActive extends SkillBase
 
 	@Override
 	protected void levelUp(EntityPlayer player) {}
-
-	/**
-	 * Return false if this skill may not be directly activated manually, in which case it
-	 * should have some other method of {@link #trigger(World, EntityPlayer) triggering}
-	 * @return	Default returns TRUE, allowing activation via {@link #activate}
-	 */
-	protected boolean allowUserActivation() {
-		return true;
-	}
 
 	/**
 	 * Returns true if this skill can currently be used by the player (i.e. activated or triggered)
@@ -203,9 +204,9 @@ public abstract class SkillActive extends SkillBase
 			if (isActive()) {
 				LogHelper.severe(getDisplayName() + " is still active after onDeactivated called - this may result in SEVERE errors or even crashes!!!");
 			} else if (player.worldObj.isRemote) {
-				PacketDispatcher.sendPacketToServer(new DeactivateSkillPacket(this).makePacket());
+				PacketDispatcher.sendToServer(new DeactivateSkillPacket(this));
 			} else {
-				PacketDispatcher.sendPacketToPlayer(new DeactivateSkillPacket(this).makePacket(), (Player) player);
+				PacketDispatcher.sendTo(new DeactivateSkillPacket(this), (EntityPlayerMP) player);
 			}
 		}
 	}
@@ -234,13 +235,13 @@ public abstract class SkillActive extends SkillBase
 			}
 			if (!world.isRemote) {
 				if (sendClientUpdate()) {
-					PacketDispatcher.sendPacketToPlayer(new ActivateSkillPacket(this, wasTriggered).makePacket(), (Player) player);
+					PacketDispatcher.sendTo(new ActivateSkillPacket(this, wasTriggered), (EntityPlayerMP) player);
 				}
 			}
 			return onActivated(world, player);
 		} else {
 			if (level > 0) {
-				player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.skill.use.fail", getDisplayName()));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.skill.use.fail", getDisplayName()));
 			}
 			return false;
 		}
@@ -267,10 +268,11 @@ public abstract class SkillActive extends SkillBase
 
 	/**
 	 * This method is called each render tick that {@link #isAnimating} returns true
+	 * @param partialTickTime	The current render tick time
 	 * @return Return true to prevent the targeting camera from auto-updating the player's view
 	 */
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		return false;
 	}
 
@@ -285,6 +287,16 @@ public abstract class SkillActive extends SkillBase
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		return false;
 	}
+
+	/**
+	 * Called from LivingHurtEvent when a player using this skill first damages an entity,
+	 * before any other modifiers are applied.
+	 * The skill should currently be {@link #isActive() active}. Setting the event damage
+	 * to zero or canceling the event will prevent any further processing of the LivingHurtEvent.
+	 * @param player	The skill-using player inflicting damage (i.e. event.source.getEntity() is the player)
+	 * @param event		The hurt event may be canceled, damage amount modified, etc.
+	 */
+	//public void onImpact(EntityPlayer player, LivingHurtEvent event) {}
 
 	/**
 	 * Called from LivingHurtEvent only if the skill is currently {@link #isActive() active}
