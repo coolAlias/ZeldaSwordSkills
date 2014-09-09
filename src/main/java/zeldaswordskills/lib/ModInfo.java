@@ -18,15 +18,14 @@
 package zeldaswordskills.lib;
 
 public class ModInfo {
-
 	public static final String ID = "zeldaswordskills";
 	public static final String NAME = "Zelda Sword Skills";
-	public static final String VERSION = "1.6.4-1.0";
+	public static final String VERSION = "1.7.10-beta-0.1.4";
 	public static final String CHANNEL = "zss_channel";
 	public static final String CLIENT_PROXY = "zeldaswordskills.ClientProxy";
 	public static final String COMMON_PROXY = "zeldaswordskills.CommonProxy";
 	public static final String CONFIG_PATH = ("/" + ID + ".cfg");
-	
+
 	/** Identifier for custom tiles added to Antique Atlas */
 	public static final String ATLAS_DUNGEON_ID = "zss_dungeon";
 
