@@ -17,8 +17,6 @@
 
 package zeldaswordskills;
 
-import java.util.logging.Level;
-
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSEntities;
@@ -31,8 +29,9 @@ import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.ZSSPacketHandler;
+import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.util.LogHelper;
+import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
 import cpw.mods.fml.common.Loader;
@@ -43,11 +42,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
-
-@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION)
-@NetworkMod(clientSideRequired=true, serverSideRequired=true, channels = {ModInfo.CHANNEL}, packetHandler = ZSSPacketHandler.class)
 
 /**
  * 
@@ -59,6 +54,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
  * included.
  *
  */
+@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION)
 public class ZSSMain
 {
 	@Instance(ModInfo.ID)
@@ -67,6 +63,8 @@ public class ZSSMain
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;
 
+	/** Helper class for registering custom tiles with Antique Atlas mod if loaded */
+	public static AntiqueAtlasHelper atlasHelper = new AntiqueAtlasHelper();
 	/** Whether Antique Atlas mod is loaded */
 	public static boolean isAtlasEnabled;
 	/** Whether Battlegear2 mod is loaded */
@@ -74,7 +72,7 @@ public class ZSSMain
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		LogHelper.init(Level.INFO);
+		LogHelper.init();
 		Config.init(event);
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
@@ -90,6 +88,7 @@ public class ZSSMain
 		if (Config.areBossDungeonsEnabled()) {
 			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
 		}
+		PacketDispatcher.initialize();
 	}
 
 	@EventHandler
@@ -99,7 +98,7 @@ public class ZSSMain
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
 		ZSSItemEvents.load();
-		NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
+		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 	}
 
 	@EventHandler
