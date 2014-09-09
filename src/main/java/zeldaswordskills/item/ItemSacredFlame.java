@@ -18,7 +18,6 @@
 package zeldaswordskills.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.item.ItemBlockWithMetadata;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 
@@ -27,14 +26,14 @@ import net.minecraft.util.StatCollector;
  * For rendering in the inventory as well as implementing uses for each.
  *
  */
-public class ItemSacredFlame extends ItemBlockWithMetadata
+public class ItemSacredFlame extends ItemMetadataBlock
 {
-	public ItemSacredFlame(int id, Block block) {
-		super(id, block);
+	public ItemSacredFlame(Block block) {
+		super(block);
 	}
-	
+
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal("misc.zss.sacred_flame.name." + stack.getItemDamage());
 	}
 }

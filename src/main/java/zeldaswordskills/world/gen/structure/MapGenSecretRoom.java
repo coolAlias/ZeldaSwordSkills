@@ -19,7 +19,7 @@ package zeldaswordskills.world.gen.structure;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -56,22 +56,22 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 				int x = posX + rand.nextInt(16);
 				int y = rand.nextInt(posY) + (i % 2 == 0 ? rand.nextInt(16) : rand.nextInt(8));
 				int z = posZ + rand.nextInt(16);
-				RoomSecret room = new RoomSecret(chunkX, chunkZ, Math.min(rand.nextInt(6) + 3, 6), Block.stone.blockID);
+				RoomSecret room = new RoomSecret(chunkX, chunkZ, Math.min(rand.nextInt(6) + 3, 6), Blocks.stone);
 				if (room.generate(this, world, rand, x, y, z)) {
 					roomList.appendTag(room.writeToNBT());
 					updateChunkStructureMap(roomList, chunkX, chunkZ);
 				}
 			}
 		}
-		
+
 		if (roomList.tagCount() > 0) {
-			//LogHelper.log(Level.INFO, "roomList for chunk " + chunkX + "/" + chunkZ + " contains " + roomList.tagCount() + " elements");
+			LogHelper.finer("roomList for chunk " + chunkX + "/" + chunkZ + " contains " + roomList.tagCount() + " elements");
 			NBTTagCompound compound = new NBTTagCompound();
 			compound.setTag("roomList", roomList);
 			addRoomTag(compound, chunkX, chunkZ);
 		}
 	}
-	
+
 	@Override
 	public String getTagName() {
 		return "zssSecretRooms";
@@ -81,7 +81,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 	protected StructureBoundingBox getStructureBBAt(int x, int y, int z) {
 		NBTTagList roomList = getStructureListFor(x >> 4, z >> 4);
 		for (int i = 0; i < roomList.tagCount(); ++i) {
-			NBTTagCompound compound = (NBTTagCompound) roomList.tagAt(i);
+			NBTTagCompound compound = (NBTTagCompound) roomList.getCompoundTagAt(i);
 			if (compound.hasKey("BB")) {
 				StructureBoundingBox box = new StructureBoundingBox(compound.getIntArray("BB"));
 				if (box.isVecInside(x, y, z)) {
@@ -92,19 +92,19 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 
 		return null;
 	}
-	
+
 	@Override
 	protected void translateNbtIntoMap(NBTTagCompound compound) {
 		if (compound.hasKey("chunkX") && compound.hasKey("chunkZ") && compound.hasKey("roomList")) {
 			int i = compound.getInteger("chunkX");
 			int j = compound.getInteger("chunkZ");
-			NBTTagList roomList = compound.getTagList("roomList");
+			NBTTagList roomList = compound.getTagList("roomList", compound.getId());
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), roomList);
 		} else {
 			LogHelper.warning("Failed to translate NBT compound into structure map");
 		}
 	}
-	
+
 	/**
 	 * Returns an NBTTagList of all the structures generated in the given chunk or a new list if none exists
 	 */
@@ -116,7 +116,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 			return new NBTTagList();
 		}
 	}
-	
+
 	/** Keeps the structure map's room list for this chunk up-to-date during generation */
 	protected void updateChunkStructureMap(NBTTagList roomList, int chunkX, int chunkZ) {
 		structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)), roomList);
@@ -129,7 +129,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		if (isNearStructureInChunk(room, box, room.chunkX, room.chunkZ, range)) {
 			return true;
 		}
-		
+
 		for (int i = 0; i <= (range + 8) / 16; ++i) {
 			// neighbors along x and z axis directly
 			if (isNearStructureInChunk(room, box, room.chunkX + i + 1, room.chunkZ, range)) {
@@ -162,14 +162,14 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 
 		return false;
 	}
-	
+
 	/**
 	 * Returns true if the room's bounding box is within the specified range of any other structures in the given chunk
 	 */
 	protected boolean isNearStructureInChunk(RoomBase room, StructureBoundingBox box1, int chunkX, int chunkZ, int range) {
 		NBTTagList roomList = getStructureListFor(chunkX, chunkZ);
 		for (int i = 0; i < roomList.tagCount(); ++i) {
-			NBTTagCompound compound = (NBTTagCompound) roomList.tagAt(i);
+			NBTTagCompound compound = (NBTTagCompound) roomList.getCompoundTagAt(i);
 			if (compound.hasKey("BB")) {
 				StructureBoundingBox box2 = new StructureBoundingBox(compound.getIntArray("BB"));
 				double dx = (box1.getXSize() + box2.getXSize()) / 2;
@@ -184,7 +184,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 				LogHelper.warning("Invalid tag while checking for structures in chunk " + chunkX + "/" + chunkZ);
 			}
 		}
-		
+
 		return false;
 	}
 }

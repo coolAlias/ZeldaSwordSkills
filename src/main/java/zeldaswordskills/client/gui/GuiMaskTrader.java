@@ -33,9 +33,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class GuiMaskTrader extends GuiContainer
 {
 	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/gui/gui_mask_trader.png");
-	
+
 	private GuiButton borrow;
-	
+
 	public GuiMaskTrader() {
 		super(new ContainerMaskTrader());
 	}
@@ -48,7 +48,7 @@ public class GuiMaskTrader extends GuiContainer
 		borrow.enabled = ((ContainerMaskTrader) inventorySlots).canBorrow();
 		buttonList.add(borrow);
 	}
-	
+
 	@Override
 	public void updateScreen() {
 		super.updateScreen();
@@ -62,8 +62,8 @@ public class GuiMaskTrader extends GuiContainer
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
-		String s = I18n.getString("gui.zss.mask_trader.name");
-		fontRenderer.drawString(s, xSize / 2 - fontRenderer.getStringWidth(s) / 2, ySize - 56, 4210752);
+		String s = I18n.format("gui.zss.mask_trader.name");
+		fontRendererObj.drawString(s, xSize / 2 - fontRendererObj.getStringWidth(s) / 2, ySize - 56, 4210752);
 	}
 
 	@Override

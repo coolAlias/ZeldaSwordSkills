@@ -26,15 +26,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.api.entity.BombType;
@@ -89,7 +91,7 @@ public class BossBattle extends AbstractCrisis
 	@Override
 	public void beginCrisis(World world) {
 		// TODO play boss battle music
-		difficulty = world.difficultySetting;
+		difficulty = world.difficultySetting.ordinal();
 		fillAllGaps(world);
 		generateBossMobs(world, Config.getNumBosses());
 		core.removeHinderBlock();
@@ -103,7 +105,7 @@ public class BossBattle extends AbstractCrisis
 	protected void endCrisis(World world) {
 		// TODO play victory music instead of secret medley:
 		world.playSoundEffect(box.getCenterX() + 0.5D, box.getCenterY() + 1, box.getCenterZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
-		if (world.difficultySetting > 0) {
+		if (world.difficultySetting != EnumDifficulty.PEACEFUL) {
 			WorldUtils.spawnXPOrbsWithRandom(world, world.rand, box.getCenterX(), box.getCenterY(), box.getCenterZ(), 1000 * difficulty);
 		}
 		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", core.xCoord, core.yCoord, core.zCoord);
@@ -125,7 +127,7 @@ public class BossBattle extends AbstractCrisis
 	 */
 	private boolean areAllEnemiesDead(World world) {
 		// TODO instead, add all enemies by id to a List and check if still alive in world
-		return (world.getEntitiesWithinAABB(IMob.class, AxisAlignedBB.getAABBPool().getAABB(
+		return (world.getEntitiesWithinAABB(IMob.class, AxisAlignedBB.getBoundingBox(
 				box.getCenterX() - 0.5D, box.getCenterY(), box.getCenterZ() - 0.5D,
 				box.getCenterX() + 0.5D, box.getCenterY() + 1, box.getCenterZ() + 0.5D).
 				expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2)).isEmpty());
@@ -149,7 +151,7 @@ public class BossBattle extends AbstractCrisis
 				CustomExplosion.createExplosion(world, x, y, z, radius, BombType.BOMB_STANDARD);
 			}
 			world.playSoundEffect(x + 0.5D, box.getCenterY(), z + 0.5D, Sounds.ROCK_FALL, 1.0F, 1.0F);
-			StructureGenUtils.destroyBlocksAround(world, x - 1, x + 2, y, box.maxY - 2, z - 1, z + 2, -1, false);
+			StructureGenUtils.destroyBlocksAround(world, x - 1, x + 2, y, box.maxY - 2, z - 1, z + 2, null, false);
 		}
 	}
 
@@ -157,16 +159,17 @@ public class BossBattle extends AbstractCrisis
 	 * Fills in the doorway and all other holes in the structure with appropriate blocks
 	 */
 	protected void fillAllGaps(World world) {
-		int blockId = (core.getRenderBlock() != null ? core.getRenderBlock().blockID : -1);
-		if (blockId < 1) {
-			blockId = BlockSecretStone.getIdFromMeta(world.getBlockMetadata(core.xCoord, core.yCoord, core.zCoord));
+		Block block = core.getRenderBlock();
+		if (block == null) {
+			block = BlockSecretStone.getBlockFromMeta(world.getBlockMetadata(core.xCoord, core.yCoord, core.zCoord));
 		}
 		for (int i = box.minX; i <= box.maxX; ++i) {
 			for (int j = box.minY; j <= box.maxY; ++j) {
 				for (int k = box.minZ; k <= box.maxZ; ++k) {
 					if (i == box.minX || i == box.maxX || j == box.minY || j == box.maxY || k == box.minZ || k == box.maxZ) {
-						if (!world.isBlockOpaqueCube(i, j, k)) {
-							world.setBlock(i, j, k, blockId, 0, 2);
+						// func_149730_j is opaqueCubeLookup
+						if (!world.getBlock(i, j, k).func_149730_j()) {
+							world.setBlock(i, j, k, block, 0, 2);
 						}
 					}
 				}
@@ -179,11 +182,11 @@ public class BossBattle extends AbstractCrisis
 	 * @param toReplace if null, checks for standard dungeon blocks instead
 	 */
 	protected void setDungeonFloorTo(World world, Block block, int meta, Block toReplace) {
-		int replace = (toReplace != null ? toReplace.blockID : BlockSecretStone.getIdFromMeta(world.getBlockMetadata(core.xCoord, core.yCoord, core.zCoord)));
+		Block replace = (toReplace != null ? toReplace : BlockSecretStone.getBlockFromMeta(world.getBlockMetadata(core.xCoord, core.yCoord, core.zCoord)));
 		for (int i = box.minX + 1; i < box.maxX; ++i) {
 			for (int j = box.minZ + 1; j < box.maxZ; ++j) {
-				if (world.getBlockId(i, box.minY, j) == replace) {
-					world.setBlock(i, box.minY, j, block.blockID, meta, 2);
+				if (world.getBlock(i, box.minY, j) == replace) {
+					world.setBlock(i, box.minY, j, block, meta, 2);
 				}
 			}
 		}
@@ -198,7 +201,7 @@ public class BossBattle extends AbstractCrisis
 		int y = box.minY + world.rand.nextInt(4) + 3;
 		int z = box.minZ + world.rand.nextInt(box.getZSize() - 1) + 1;
 		if (world.isAirBlock(x, y, z)) {
-			world.setBlock(x, y, z, block.blockID, meta, 3);
+			world.setBlock(x, y, z, block, meta, 3);
 			if (sound.length() > 0) {
 				world.playSoundEffect(x, y, z, sound, 1.0F, 1.0F);
 			}
@@ -227,7 +230,7 @@ public class BossBattle extends AbstractCrisis
 	protected void spawnMobInCorner(World world, Entity mob, int corner, boolean equip, boolean health) {
 		int x = (corner < 2 ? box.minX + 2 : box.maxX - 2);
 		int z = (corner % 2 == 0 ? box.minZ + 2 : box.maxZ - 2);
-		int y = (world.doesBlockHaveSolidTopSurface(x, box.minY + 1, z) ? box.minY + 1 : box.minY + 3);
+		int y = (World.doesBlockHaveSolidTopSurface(world, x, box.minY + 1, z) ? box.minY + 1 : box.minY + 3);
 		WorldUtils.setEntityInStructure(world, mob, x, y, z);
 		if (mob instanceof EntityLivingBase) {
 			if (health) {
@@ -252,7 +255,7 @@ public class BossBattle extends AbstractCrisis
 	 */
 	protected void boostHealth(World world, EntityLivingBase entity) {
 		double d =  (2 * difficulty * Config.getBossHealthFactor());
-		entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).getAttributeValue() * d);
+		entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).getAttributeValue() * d);
 		entity.setHealth(entity.getMaxHealth());
 	}
 
@@ -261,24 +264,24 @@ public class BossBattle extends AbstractCrisis
 	 */
 	protected void equipEntity(World world, EntityLivingBase entity) {
 		ItemStack melee = null;
-		ItemStack ranged = new ItemStack(Item.bow);
+		ItemStack ranged = new ItemStack(Items.bow);
 		Item[] armorSet = null;
 		switch(difficulty) {
 		case 1:
-			armorSet = new Item[]{Item.bootsChain, Item.legsChain, Item.plateChain, Item.helmetChain};
-			melee = new ItemStack(Item.swordIron);
+			armorSet = new Item[]{Items.chainmail_boots, Items.chainmail_leggings, Items.chainmail_chestplate, Items.chainmail_helmet};
+			melee = new ItemStack(Items.iron_sword);
 			ranged.addEnchantment(Enchantment.power, 1);
 			break;
 		case 2:
-			armorSet = new Item[]{Item.bootsIron, Item.legsIron, Item.plateIron, Item.helmetIron};
-			melee = new ItemStack(Item.swordIron);
+			armorSet = new Item[]{Items.iron_boots, Items.iron_leggings, Items.iron_chestplate, Items.iron_helmet};
+			melee = new ItemStack(Items.iron_sword);
 			melee.addEnchantment(Enchantment.sharpness, 2);
 			ranged.addEnchantment(Enchantment.punch, 1);
 			ranged.addEnchantment(Enchantment.power, 3);
 			break;
 		case 3:
-			armorSet = new Item[]{Item.bootsDiamond, Item.legsDiamond, Item.plateDiamond, Item.helmetDiamond};
-			melee = new ItemStack(Item.swordDiamond);
+			armorSet = new Item[]{Items.diamond_boots, Items.diamond_leggings, Items.diamond_chestplate, Items.diamond_helmet};
+			melee = new ItemStack(Items.diamond_sword);
 			melee.addEnchantment(Enchantment.sharpness, 4);
 			melee.addEnchantment(Enchantment.fireAspect, 1);
 			ranged.addEnchantment(Enchantment.flame, 1);
@@ -307,9 +310,9 @@ public class BossBattle extends AbstractCrisis
 			if (entity instanceof EntityOctorok) {
 				((EntityOctorok) entity).setType((byte) 1);
 			}
-			AttributeInstance attribute = entity.getEntityAttribute(SharedMonsterAttributes.attackDamage);
+			IAttributeInstance iattribute = entity.getEntityAttribute(SharedMonsterAttributes.attackDamage);
 			AttributeModifier modifier = (new AttributeModifier(UUID.randomUUID(), "Boss Attack Bonus", difficulty * 2.0D, 0)).setSaved(true);
-			attribute.applyModifier(modifier);
+			iattribute.applyModifier(modifier);
 		}
 	}
 

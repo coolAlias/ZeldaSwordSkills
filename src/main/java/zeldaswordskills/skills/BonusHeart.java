@@ -20,8 +20,8 @@ package zeldaswordskills.skills;
 import java.util.UUID;
 
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
@@ -39,7 +39,7 @@ public class BonusHeart extends SkillPassive
 	private static final UUID bonusHeartUUID = UUID.fromString("14ED99DA-D333-4621-90C8-81C968A082E3");
 	private static final AttributeModifier bonusHeartModifier = (new AttributeModifier(bonusHeartUUID, "ZSS Bonus Heart", 2.0D, 0)).setSaved(true);
 
-	protected BonusHeart(String name) {
+	public BonusHeart(String name) {
 		super(name);
 	}
 
@@ -69,7 +69,7 @@ public class BonusHeart extends SkillPassive
 
 	@Override
 	protected void levelUp(EntityPlayer player) {
-		AttributeInstance attributeinstance = player.getEntityAttribute(SharedMonsterAttributes.maxHealth);
+		IAttributeInstance attributeinstance = player.getEntityAttribute(SharedMonsterAttributes.maxHealth);
 		if (attributeinstance.getModifier(bonusHeartUUID) != null) { attributeinstance.removeModifier(bonusHeartModifier); }
 		AttributeModifier newModifier = (new AttributeModifier(bonusHeartUUID, "Bonus Heart", level * 2.0D, 0)).setSaved(true);
 		attributeinstance.applyModifier(newModifier);

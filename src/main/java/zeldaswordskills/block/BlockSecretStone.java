@@ -22,23 +22,28 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -53,19 +58,19 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class BlockSecretStone extends Block implements IDungeonBlock, IExplodable, ISmashable
 {
 	/** List of all currently available secret blocks */
-	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","quartz_block_chiseled","end_stone"};
+	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","cobblestone","end_stone"}; // 6 = "quartz_block_chiseled"
 
 	/** Slab metadata values associated with each stone type */
-	private static final int[] slabs = {0,1,6,5,3,7,7,7};
+	private static final int[] slabs = {0,1,6,5,3,7,3,7}; // [6] = 7
 
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
+	private IIcon[] iconArray;
 
-	public BlockSecretStone(int id, Material material) {
-		super(id, material);
+	public BlockSecretStone(Material material) {
+		super(material);
 		setBlockUnbreakable();
 		setResistance(6.0F);
-		setStepSound(soundStoneFootstep);
+		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
 
@@ -80,12 +85,12 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	}
 
 	@Override
-	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
+	public boolean canEntityDestroy(IBlockAccess world, int x, int y, int z, Entity entity) {
 		return world.getBlockMetadata(x, y, z) < 0x8;
 	}
 
 	@Override
-	public boolean canCreatureSpawn(EnumCreatureType type, World world, int x, int y, int z) {
+	public boolean canCreatureSpawn(EnumCreatureType type, IBlockAccess world, int x, int y, int z) {
 		return false;
 	}
 
@@ -105,15 +110,15 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	}
 
 	@Override
-	public int idDropped(int meta, Random rand, int fortune) {
-		return getIdFromMeta(meta);
+	public Item getItemDropped(int meta, Random rand, int fortune) {
+		return Item.getItemFromBlock(getBlockFromMeta(meta));
 	}
 
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
 			if (Config.showSecretMessage()) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.block.secret"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.block.secret"));
 			}
 			world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}
@@ -121,28 +126,37 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 
 	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
+		// TODO BUG from vanilla Entity.getExplosionResistance passes (x, x, y) as position parameters
 		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 
+	// TODO remove when vanilla explosion resistance bug is fixed
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(int id, CreativeTabs tab, List list) {
-		for (int i = 0; i < names.length; ++i) {
-			list.add(new ItemStack(id, 1, i));
-			list.add(new ItemStack(id, 1, i | 0x8));
+	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
+		if (world.getBlockMetadata(x, y, z) < 0x8) {
+			super.onBlockExploded(world, x, y, z, explosion);
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int meta) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		for (int i = 0; i < names.length; ++i) {
+			list.add(new ItemStack(item, 1, i));
+			list.add(new ItemStack(item, 1, i | 0x8));
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public IIcon getIcon(int side, int meta) {
 		return iconArray[(meta & ~0x8) % names.length];
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[names.length];
+	public void registerBlockIcons(IIconRegister register) {
+		iconArray = new IIcon[names.length];
 		for (int i = 0; i < names.length; ++i) {
 			iconArray[i] = register.registerIcon(names[i]);
 		}
@@ -151,34 +165,35 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	/**
 	 * Returns the block ID associated with the given metadata value; bit8 is ignored
 	 */
-	public static int getIdFromMeta(int meta) {
+	public static Block getBlockFromMeta(int meta) {
 		switch(meta & ~0x8) {
-		case 0: return Block.stone.blockID;
-		case 1: return Block.sandStone.blockID;
-		case 2: return Block.netherBrick.blockID;
-		case 3: return Block.stoneBrick.blockID;
-		case 4: return Block.cobblestoneMossy.blockID;
-		case 5: return Block.ice.blockID;
-		case 6: return Block.blockNetherQuartz.blockID;
-		case 7: return Block.whiteStone.blockID;
-		default: return 0;
+		case 0: return Blocks.stone;
+		case 1: return Blocks.sandstone;
+		case 2: return Blocks.nether_brick;
+		case 3: return Blocks.stonebrick;
+		case 4: return Blocks.mossy_cobblestone;
+		case 5: return Blocks.ice;
+		case 6: return Blocks.cobblestone; // return Blocks.quartz_block;
+		case 7: return Blocks.end_stone;
+		default: return Blocks.stone;
 		}
 	}
 
 	/**
 	 * Returns the stair block ID associated with the given metadata value; bit8 is ignored
 	 */
-	public static int getStairIdFromMeta(int meta) {
+	public static Block getStairsFromMeta(int meta) {
 		switch(meta & ~0x8) {
-		case 0: return Block.stairsStoneBrick.blockID;
-		case 4: return Block.stairsCobblestone.blockID;
-		case 1: return Block.stairsSandStone.blockID;
-		case 2: return Block.stairsNetherBrick.blockID;
-		case 3: return Block.stairsStoneBrick.blockID;
+		case 0: return Blocks.stone_brick_stairs;
+		case 4:
+		case 6: return Blocks.stone_stairs;
+		case 1: return Blocks.sandstone_stairs;
+		case 2: return Blocks.nether_brick_stairs;
+		case 3: return Blocks.stone_brick_stairs;
 		case 5:
-		case 6:
-		case 7: return Block.stairsNetherQuartz.blockID;
-		default: return Block.stairsCobblestone.blockID;
+			//case 6:
+		case 7: return Blocks.quartz_stairs;
+		default: return Blocks.stone_stairs;
 		}
 	}
 

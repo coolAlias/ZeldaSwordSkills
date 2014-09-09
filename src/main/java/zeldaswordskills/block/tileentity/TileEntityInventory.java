@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.util.Constants;
 
 /**
  * 
@@ -55,7 +56,7 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 		if (stack != null) {
 			if(stack.stackSize > amount) {
 				stack = stack.splitStack(amount);
-				onInventoryChanged();
+				markDirty();
 			} else {
 				setInventorySlotContents(slot, null);
 			}
@@ -76,15 +77,15 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 		if (itemstack != null && itemstack.stackSize > getInventoryStackLimit()) {
 			itemstack.stackSize = getInventoryStackLimit();
 		}
-		onInventoryChanged();
+		markDirty();
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		NBTTagList items = compound.getTagList("Items");
+		NBTTagList items = compound.getTagList("Items", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < items.tagCount(); ++i) {
-			NBTTagCompound item = (NBTTagCompound) items.tagAt(i);
+			NBTTagCompound item = (NBTTagCompound) items.getCompoundTagAt(i);
 			byte slot = item.getByte("Slot");
 			if (slot >= 0 && slot < inventory.length) {
 				inventory[slot] = ItemStack.loadItemStackFromNBT(item);
@@ -108,9 +109,9 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	}
 
 	@Override
-	public void openChest() {}
+	public void openInventory() {}
 
 	@Override
-	public void closeChest() {}
+	public void closeInventory() {}
 
 }

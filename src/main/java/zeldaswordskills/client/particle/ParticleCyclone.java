@@ -14,7 +14,7 @@ public class ParticleCyclone extends ModParticle {
 		this.particleScale = 2;
 		setFade(0, 0.5f);
 	}
-	
+
 	@Override
 	protected float scaleAtAge(float ageFraq) {
 		return ageFraq < 0.5f ? 2f : (2f + 2f * (ageFraq - 0.5f));

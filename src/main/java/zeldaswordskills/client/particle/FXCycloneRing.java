@@ -24,16 +24,16 @@ public class FXCycloneRing extends EntityFX {
 	public static int puffsPerRing = 8;
 	public static float maxRingHeight = 4;
 	public static float baseAngleVelocity = 0.4f;
-	
+
 	private EntityFX[] puffs;
 	private float dAngle;
-	
+
 	private float yaw;
 	private float pitch;
 	private Vec3 axis;
 	private float ringHeight;
 	private float baseAngle;
-	
+
 	public FXCycloneRing(World world, double x, double y, double z, double velX, double velY, double velZ,
 			float yaw, float pitch, float alpha, EffectRenderer renderer) {
 		super(world, x, y, z);
@@ -41,7 +41,7 @@ public class FXCycloneRing extends EntityFX {
 		motionX = velX;
 		motionY = velY;
 		motionZ = velZ;
-		
+
 		axis = Vec3.createVectorHelper(0, 1, 0);
 		particleGravity = 0;
 		this.yaw = yaw;
@@ -51,7 +51,7 @@ public class FXCycloneRing extends EntityFX {
 		ringHeight = ascendVelocity; // starts just a bit off the ground
 		baseAngle = 0;
 		this.particleAlpha = alpha;
-		
+
 		puffs = new EntityFX[puffsPerRing];
 		for (int i = 0; i < puffsPerRing; i++) {
 			if (Math.random() < 0.07) {
@@ -59,12 +59,12 @@ public class FXCycloneRing extends EntityFX {
 				int xInt = MathHelper.floor_double(x);
 				int yInt = MathHelper.floor_double(y) - 1;
 				int zInt = MathHelper.floor_double(z);
-				int blockId = world.getBlockId(xInt, yInt, zInt);
-				if (blockId > 0) {
+				Block block = world.getBlock(xInt, yInt, zInt);
+				if (block != null) {
 					int metadata = world.getBlockMetadata(xInt, yInt, zInt);
 					// The "y + 0.1" below is a workaround for the bug that digging
 					// particles stayed on the ground and didn't fly up for some reason.
-					puffs[i] = new EntityDiggingFX(world, x, y+0.1, z, velX, velY, velZ, Block.blocksList[blockId], SideHit.TOP, metadata).applyColourMultiplier(xInt, yInt, zInt).multipleParticleScaleBy(0.5f);
+					puffs[i] = new EntityDiggingFX(world, x, y+0.1, z, velX, velY, velZ, block, SideHit.TOP, metadata).applyColourMultiplier(xInt, yInt, zInt).multipleParticleScaleBy(0.5f);
 					renderer.addEffect(puffs[i]);
 					continue;
 				}
@@ -75,7 +75,7 @@ public class FXCycloneRing extends EntityFX {
 		}
 		dAngle = 2 * (float)Math.PI / ((float) puffs.length);
 	}
-	
+
 	@Override
 	public void setAlphaF(float alpha) {
 		super.setAlphaF(alpha);
@@ -83,22 +83,22 @@ public class FXCycloneRing extends EntityFX {
 			puffs[i].setAlphaF(alpha);
 		}
 	}
-	
+
 	@Override
 	public void renderParticle(Tessellator tessellator, float partialTick, float rotX, float rotXZ, float rotZ, float rotYZ, float rotXY) {}
-	
+
 	@Override
 	public void onUpdate() {
 		//super.onUpdate();
 		this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
-        this.posX += motionX;
-        this.posY += motionY;
-        this.posZ += motionZ;
+		this.prevPosY = this.posY;
+		this.prevPosZ = this.posZ;
+		this.posX += motionX;
+		this.posY += motionY;
+		this.posZ += motionZ;
 		float ringWidth = getWidthVSHeight(ringHeight);
 		for (int i = 0; i < puffs.length; i++) {
-			Vec3 vec = worldObj.getWorldVec3Pool().getVecFromPool(ringWidth, 0, 0);
+			Vec3 vec = Vec3.createVectorHelper(ringWidth, 0, 0);
 			vec.rotateAroundY(baseAngle + ((float)i)*dAngle);
 			vec.rotateAroundX(pitch);
 			vec.rotateAroundY(yaw);
@@ -128,7 +128,7 @@ public class FXCycloneRing extends EntityFX {
 			baseAngle -= 2*Math.PI;
 		}
 	}
-	
+
 	public static float getWidthVSHeight(float height) {
 		return height*0.2f + 0.15f;
 	}

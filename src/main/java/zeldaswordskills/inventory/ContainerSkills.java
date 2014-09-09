@@ -22,7 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillBase;
 
@@ -37,7 +37,7 @@ public class ContainerSkills extends Container
 	private final InventoryBasic inventory;
 
 	public ContainerSkills(EntityPlayer player) {
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 		inventory = new InventoryBasic("", true, SkillBase.getNumSkills());
 		boolean flag = false;
 		int x, y, i1;

@@ -23,18 +23,18 @@ import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.lib.Sounds;
@@ -118,7 +118,7 @@ public class EntityMagicSpell extends EntityMobThrowable
 		switch(getType()) {
 		case ICE: return new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
 		case WIND: return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
-		default: return new DamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
+		default: return new EntityDamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
 		}
 	}
 
@@ -165,12 +165,12 @@ public class EntityMagicSpell extends EntityMobThrowable
 		List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
 				AxisAlignedBB.getBoundingBox(x - r, y - r, z - r, x + r, y + r, z + r));
 		for (EntityLivingBase entity : list) {
-			Vec3 vec3 = worldObj.getWorldVec3Pool().getVecFromPool(posX - motionX, posY - motionY, posZ - motionZ);
-			Vec3 vec31 = worldObj.getWorldVec3Pool().getVecFromPool(entity.posX, entity.posY, entity.posZ);
-			MovingObjectPosition mop1 = worldObj.clip(vec3, vec31);
-			if (mop1 != null && mop1.typeOfHit == EnumMovingObjectType.TILE) {
-				Block block = Block.blocksList[worldObj.getBlockId(mop1.blockX, mop1.blockY, mop1.blockZ)];
-				if (block != null && block.blockMaterial.blocksMovement()) {
+			Vec3 vec3 = Vec3.createVectorHelper(posX - motionX, posY - motionY, posZ - motionZ);
+			Vec3 vec31 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
+			MovingObjectPosition mop1 = worldObj.rayTraceBlocks(vec3, vec31);
+			if (mop1 != null && mop1.typeOfHit == MovingObjectType.BLOCK) {
+				Block block = worldObj.getBlock(mop1.blockX, mop1.blockY, mop1.blockZ);
+				if (block.getMaterial().blocksMovement()) {
 					continue;
 				}
 			}
@@ -182,8 +182,8 @@ public class EntityMagicSpell extends EntityMobThrowable
 			spawnImpactParticles("largeexplode", 4, -0.1F);
 			spawnImpactParticles(getParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
 		} else {
-			worldObj.playSoundAtEntity(this, Sounds.EXPLOSION, 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
-			Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, -1));
+			worldObj.playSoundAtEntity(this, "random.explode", 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
+			Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
 			ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
 			setDead();
 		}
@@ -209,8 +209,8 @@ public class EntityMagicSpell extends EntityMobThrowable
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
-			worldObj.setBlock(i, j, k, Block.ice.blockID);
-			worldObj.setBlock(i, j + 1, k, Block.ice.blockID);
+			worldObj.setBlock(i, j, k, Blocks.ice);
+			worldObj.setBlock(i, j + 1, k, Blocks.ice);
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 			break;
 		case FIRE:

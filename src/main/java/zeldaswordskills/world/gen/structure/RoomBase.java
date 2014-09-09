@@ -23,6 +23,7 @@ import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -71,13 +72,13 @@ public abstract class RoomBase
 	public final int chunkX, chunkZ;
 
 	/** The block which must have a majority representation in the area to replace */
-	protected final int blockRequired;
+	protected final Block blockRequired;
 
 	/** The metadata that will be used for setting this block's texture */
 	protected int metadata = 0;
 
 	/** Set of all blocks that it's okay for this structure to replace */
-	protected static final Set<Integer> replaceBlocks = new HashSet<Integer>();
+	protected static final Set<Block> replaceBlocks = new HashSet<Block>();
 
 	/** Returns this structure's bounding box */
 	public final StructureBoundingBox getBoundingBox() {
@@ -107,11 +108,11 @@ public abstract class RoomBase
 	 * Places a pedestal in the dungeon's center with a Master Sword stuck in it
 	 */
 	protected void placePedestal(World world, int offsetY) {
-		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, offsetY, bBox.getZSize() / 2, ZSSBlocks.pedestal.blockID, 0);
+		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, offsetY, bBox.getZSize() / 2, ZSSBlocks.pedestal, 0);
 		int x = StructureGenUtils.getXWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
 		int y = StructureGenUtils.getYWithOffset(bBox, offsetY);
 		int z = StructureGenUtils.getZWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityPedestal) {
 			((TileEntityPedestal) te).setSword(new ItemStack(ZSSItems.swordMaster), null);
 		}
@@ -120,7 +121,7 @@ public abstract class RoomBase
 	/**
 	 * Basic constructor for rooms sets up the bounding box and sets the block required field
 	 */
-	public RoomBase(int chunkX, int chunkZ, int size, int maxHeight, int blockRequired) {
+	public RoomBase(int chunkX, int chunkZ, int size, int maxHeight, Block blockRequired) {
 		this.chunkX = chunkX;
 		this.chunkZ = chunkZ;
 		this.blockRequired = blockRequired;
@@ -136,9 +137,10 @@ public abstract class RoomBase
 		for (int i = bBox.minX; i <= bBox.maxX; ++i) {
 			for (int j = bBox.minY; j <= bBox.maxY; ++j) {
 				for (int k = bBox.minZ; k <= bBox.maxZ; ++k) {
-					int blockId = world.getBlockId(i, j, k);
-					if (!canReplaceBlockAt(j, blockId)) {
-						if (blockId == ZSSBlocks.secretStone.blockID || (Config.avoidModBlocks() && blockId > 255)) {
+					Block block = world.getBlock(i, j, k);
+					if (!canReplaceBlockAt(j, block)) {
+						// TODO avoid mod block check needs testing (are mod block IDs guaranteed to be > 255?)
+						if (block == ZSSBlocks.secretStone || (Config.avoidModBlocks() && Block.getIdFromBlock(block) > 255)) {
 							return false;
 						} else if (++failedAmount > maxFail) {
 							return false;
@@ -154,7 +156,7 @@ public abstract class RoomBase
 	 * Standard room gen procedure builds basic cube, fills with liquids/air, and calls decorateDungeon
 	 */
 	protected void doStandardRoomGen(World world, Random rand) {
-		StructureGenUtils.fillWithBlocks(world, bBox, 0, bBox.getXSize(), 0, bBox.getYSize(), 0, bBox.getZSize(), ZSSBlocks.secretStone.blockID, getMetadata());
+		StructureGenUtils.fillWithBlocks(world, bBox, 0, bBox.getXSize(), 0, bBox.getYSize(), 0, bBox.getZSize(), ZSSBlocks.secretStone, getMetadata());
 		genSubmerged(world);
 		generateAir(world);
 		decorateDungeon(world, rand);
@@ -183,19 +185,19 @@ public abstract class RoomBase
 
 	/** Shortcut for canReplaceBlockAt(int y, int id) */
 	protected boolean canReplaceBlockAt(World world, int x, int y, int z) {
-		return canReplaceBlockAt(y, world.getBlockId(x, y, z));
+		return canReplaceBlockAt(y, world.getBlock(x, y, z));
 	}
 
 	/**
-	 * Returns true if the block id at height y can be replaced by this structure,
+	 * Returns true if the block at height y can be replaced by this structure,
 	 * specifically if replaceBlocks contains the block or the block's material is
 	 * liquid and not in the top two layers
 	 */
-	protected boolean canReplaceBlockAt(int y, int id) {
-		if (id < 1 || Block.blocksList[id] == null) { return false; }
-		boolean flag1 = (submerged && !inLava && Block.blocksList[id].blockMaterial == Material.water);
-		boolean flag2 = (inNether && Block.blocksList[id].blockMaterial == Material.lava);
-		return (replaceBlocks.contains(id) || flag1 || flag2 || (Block.blocksList[id].blockMaterial.isLiquid() && y < (bBox.maxY - 2)));
+	protected boolean canReplaceBlockAt(int y, Block block) {
+		if (block == null) { return false; }
+		boolean flag1 = (submerged && !inLava && block.getMaterial() == Material.water);
+		boolean flag2 = (inNether && block.getMaterial() == Material.lava);
+		return (replaceBlocks.contains(block) || flag1 || flag2 || (block.getMaterial().isLiquid() && y < (bBox.maxY - 2)));
 	}
 
 	/**
@@ -213,7 +215,7 @@ public abstract class RoomBase
 	 */
 	protected void generateAir(World world) {
 		if (!inOcean) {
-			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, (submerged ? (inLava || isLocked ? 2 : 3) : 1), bBox.getYSize() - 1, 1, bBox.getZSize() - 1, 0, 0);
+			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, (submerged ? (inLava || isLocked ? 2 : 3) : 1), bBox.getYSize() - 1, 1, bBox.getZSize() - 1, Blocks.air, 0);
 		}
 	}
 
@@ -224,8 +226,8 @@ public abstract class RoomBase
 	protected void genSubmerged(World world) {
 		if (submerged && bBox.getXSize() > 3) {
 			int fillTo = (inLava ? 2 : inOcean ? bBox.getYSize() - 1 : 3);
-			int blockID = (inLava ? Block.lavaStill.blockID : Block.waterStill.blockID);
-			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, 1, fillTo, 1, bBox.getZSize() - 1, blockID, 0);
+			Block block = (inLava ? Blocks.lava : Blocks.water);
+			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, 1, fillTo, 1, bBox.getZSize() - 1, block, 0);
 		}
 	}
 
@@ -238,14 +240,14 @@ public abstract class RoomBase
 		int x = bBox.getCenterX();
 		int z = bBox.getCenterZ();
 		boolean flag = world.getBiomeGenForCoords(x, z).biomeName.toLowerCase().contains("ocean");
-		if (flag && !inLava && world.getBlockMaterial(x, bBox.maxY, z) == Material.water) {
+		if (flag && !inLava && world.getBlock(x, bBox.maxY, z).getMaterial() == Material.water) {
 			int count = 0;
-			while (bBox.minY > 16 && count < 8 && world.getBlockMaterial(x, bBox.minY, z) == Material.water) {
+			while (bBox.minY > 16 && count < 8 && world.getBlock(x, bBox.minY, z).getMaterial() == Material.water) {
 				bBox.offset(0, -1, 0);
 				++count;
 			}
 
-			if (world.getBlockMaterial(x, bBox.minY, z) != Material.water) {
+			if (world.getBlock(x, bBox.minY, z).getMaterial() != Material.water) {
 				inOcean = true;
 				StructureGenUtils.adjustCornersForMaterial(world, bBox, Material.water, 6, false, false);
 				if (sink) {
@@ -273,11 +275,11 @@ public abstract class RoomBase
 	 * @return true if final bottom block is not another secret dungeon block
 	 */
 	protected boolean placeInNether(World world) {
-		while (bBox.minY > 8 && world.getBlockMaterial(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()) == Material.lava) {
+		while (bBox.minY > 8 && world.getBlock(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()).getMaterial() == Material.lava) {
 			bBox.offset(0, -1, 0);
 		}
 		StructureGenUtils.adjustCornersForMaterial(world, bBox, Material.lava, 4, false, false);
-		return (world.getBlockId(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()) != ZSSBlocks.secretStone.blockID);
+		return (world.getBlock(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()) != ZSSBlocks.secretStone);
 	}
 
 	protected int validations = 0;
@@ -294,19 +296,18 @@ public abstract class RoomBase
 		int invalidBlocks = 0; // number of blocks not matching the required block type
 		int area = getArea();
 		++validations;
-
 		for (int i = bBox.minX; i <= bBox.maxX; ++i) {
 			for (int k = bBox.minZ; k <= bBox.maxZ; ++k) {
 				if (validations > NUM_VALIDATIONS || bBox.minY < 5) {
 					return false;
 				} else {
-					int blockId = world.getBlockId(i, bBox.maxY, k);
-					if (Block.blocksList[blockId] != null && Block.blocksList[blockId].blockMaterial.isLiquid()) {
+					Block block = world.getBlock(i, bBox.maxY, k);
+					if (block != null && block.getMaterial().isLiquid()) {
 						submerged = true;
-						inLava = (blockId == Block.lavaStill.blockID);
+						inLava = (block == Blocks.lava);
 						bBox.offset(0, -1, 0);
 						return ((inNether && bBox.maxY < 48) || validateTopLayer(world));
-					} else if (blockId != blockRequired) {
+					} else if (block != blockRequired) {
 						if (++invalidBlocks > area / 2) {
 							bBox.offset(0, -1, 0);
 							return validateTopLayer(world);
@@ -324,7 +325,7 @@ public abstract class RoomBase
 	 */
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound compound = new NBTTagCompound();
-		compound.setTag("BB", bBox.func_143047_a("BB"));
+		compound.setTag("BB", bBox.func_151535_h());
 		return compound;
 	}
 
@@ -336,14 +337,14 @@ public abstract class RoomBase
 	}
 
 	static {
-		replaceBlocks.add(Block.cobblestone.blockID);
-		replaceBlocks.add(Block.stone.blockID);
-		replaceBlocks.add(Block.dirt.blockID);
-		replaceBlocks.add(Block.grass.blockID);
-		replaceBlocks.add(Block.gravel.blockID);
-		replaceBlocks.add(Block.netherrack.blockID);
-		replaceBlocks.add(Block.sand.blockID);
-		replaceBlocks.add(Block.sandStone.blockID);
-		replaceBlocks.add(Block.snow.blockID);
+		replaceBlocks.add(Blocks.cobblestone);
+		replaceBlocks.add(Blocks.stone);
+		replaceBlocks.add(Blocks.dirt);
+		replaceBlocks.add(Blocks.grass);
+		replaceBlocks.add(Blocks.gravel);
+		replaceBlocks.add(Blocks.netherrack);
+		replaceBlocks.add(Blocks.sand);
+		replaceBlocks.add(Blocks.sandstone);
+		replaceBlocks.add(Blocks.snow);
 	}
 }

@@ -23,7 +23,8 @@ import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -44,11 +45,13 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceStun;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.ISwingSpeed;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.PacketISpawnParticles;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.PacketISpawnParticles;
 import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
@@ -59,7 +62,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed, IBattlegearWeapon
+public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IBattlegearWeapon
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -68,8 +71,8 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	/** Percentage of damage that ignores armor */
 	private final float ignoreArmorAmount;
 
-	public ItemHammer(int id, BlockWeight strength, float damage, float ignoreArmor) {
-		super(id);
+	public ItemHammer(BlockWeight strength, float damage, float ignoreArmor) {
+		super();
 		this.strength = strength;
 		this.weaponDamage = damage;
 		this.ignoreArmorAmount = ignoreArmor;
@@ -78,9 +81,10 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
-	
+
+	// func_150897_b is canHarvestBlock
 	@Override
-	public boolean canHarvestBlock(Block block) {
+	public boolean func_150897_b(Block block) {
 		return block instanceof ISmashable || block instanceof BlockBreakable;
 	}
 
@@ -158,7 +162,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 			player.addExhaustion(charge * 2.0F);
 			if (charge > 0.25F) {
 				if (!player.worldObj.isRemote) {
-					WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, 4.0F).makePacket(), world, player, 64.0D);
+					PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, this, 4.0F), player, 64.0D);
 				}
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);
@@ -195,9 +199,9 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	private void spawnParticlesAt(World world, double x, double y, double z) {
 		String particle;
 		int posY = MathHelper.floor_double(y);
-		int blockID = world.getBlockId(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
-		if (blockID > 0) {
-			particle = "tilecrack_" + blockID + "_" + world.getBlockMetadata(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
+		Block block = world.getBlock(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
+		if (block.getMaterial() != Material.air) {
+			particle = "blockcrack_" + Block.getIdFromBlock(block) + "_" + world.getBlockMetadata(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
 			for (int i = 0; i < 4; ++i) {
 				double dx = x + world.rand.nextFloat() - 0.5F;
 				double dy = posY + world.rand.nextFloat() * 0.2F;
@@ -208,15 +212,15 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	}
 
 	@Override
-	public Multimap getItemAttributeModifiers() {
-		Multimap multimap = super.getItemAttributeModifiers();
+	public Multimap getAttributeModifiers(ItemStack stack) {
+		Multimap multimap = super.getAttributeModifiers(stack);
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", (double) weaponDamage, 0));
 		return multimap;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 

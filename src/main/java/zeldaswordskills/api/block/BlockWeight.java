@@ -47,17 +47,17 @@ public enum BlockWeight {
 	private BlockWeight(float f) {
 		weight = f;
 	}
-
+	
 	/** Returns the next heavier BlockWeight, or IMPOSSIBLE if maxed */
 	public BlockWeight next() {
 		return (this != IMPOSSIBLE ? values()[this.ordinal() + 1] : IMPOSSIBLE);
 	}
-
+	
 	/** Returns the previous lighter BlockWeight, or VERY_LIGHT if already at the minimum */
 	public BlockWeight prev() {
 		return (this != VERY_LIGHT ? values()[this.ordinal() - 1] : VERY_LIGHT);
 	}
-
+	
 	/** Returns the vanilla post-setResistance bedrock resistance value (6000000.0F * 3.0F) */
 	public static float getMaxResistance() {
 		return IMPOSSIBLE.weight * 3.0F;

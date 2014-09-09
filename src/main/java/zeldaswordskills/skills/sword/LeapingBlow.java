@@ -27,14 +27,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -122,7 +122,8 @@ public class LeapingBlow extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return !isActive() && !player.onGround && PlayerUtils.isUsingItem(player);
+		// changed from !onGround now that jump key handled immediately from KeyInputEvent
+		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player);
 	}
 
 	@Override
@@ -135,9 +136,9 @@ public class LeapingBlow extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
-			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.keyCode, false);
-			KeyBinding.setKeyBindState(ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].keyCode, false);
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
+			KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+			KeyBinding.setKeyBindState(ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].getKeyCode(), false);
 			return true;
 		}
 		return false;
@@ -160,7 +161,7 @@ public class LeapingBlow extends SkillActive
 	 * @param distance distance fallen, passed from Forge fall Event
 	 */
 	public void onImpact(EntityPlayer player, float distance) {
-		SwordBasic swordSkill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
+		SwordBasic swordSkill = (SwordBasic) ZSSPlayerSkills.get(player).getPlayerSkill(swordBasic);
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isHoldingSword(player)) {
 			if (player.worldObj.isRemote) {
 				if (distance < 1.0F) {

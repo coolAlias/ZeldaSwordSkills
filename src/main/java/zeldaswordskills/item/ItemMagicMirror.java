@@ -19,26 +19,29 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -51,13 +54,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * world of light when in the dark (the Nether), as well as provides egress from dungeons.
  *
  */
-public class ItemMagicMirror extends Item
+public class ItemMagicMirror extends Item implements IUnenchantable
 {
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
+	private IIcon[] iconArray;
 
-	public ItemMagicMirror(int par1) {
-		super(par1);
+	public ItemMagicMirror() {
+		super();
 		setMaxStackSize(1);
 		setMaxDamage(16);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
@@ -67,10 +70,14 @@ public class ItemMagicMirror extends Item
 	 * Returns time required before mirror's effect occurs
 	 */
 	@Override
-	public int getMaxItemUseDuration(ItemStack stack) { return 140; }
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return 140;
+	}
 
 	@Override
-	public EnumAction getItemUseAction(ItemStack stack) { return EnumAction.block; }
+	public EnumAction getItemUseAction(ItemStack stack) {
+		return EnumAction.block;
+	}
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -109,14 +116,14 @@ public class ItemMagicMirror extends Item
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (villager.getProfession() == 1 && trades != null) {
-				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 8));
+				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 8));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
 			}
 		}
 		return true;
@@ -133,7 +140,13 @@ public class ItemMagicMirror extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
+	public boolean hasEffect(ItemStack stack, int pass) {
+		return true;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public IIcon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
 		if (usingItem == null) { return iconArray[0]; }
 		int ticksInUse = stack.getMaxItemUseDuration() - useRemaining;
 
@@ -150,15 +163,9 @@ public class ItemMagicMirror extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack, int pass) {
-		return true;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-		iconArray = new Icon[4];
+		iconArray = new IIcon[4];
 		for (int i = 0; i < iconArray.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + (i > 0 ? i : ""));
 		}

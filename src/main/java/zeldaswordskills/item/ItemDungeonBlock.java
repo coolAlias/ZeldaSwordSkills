@@ -21,12 +21,12 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemBlockWithMetadata;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.block.BlockSecretStone;
@@ -43,14 +43,14 @@ import cpw.mods.fml.relauncher.SideOnly;
  * of the itemblock to match, both while held and when placed. 
  *
  */
-public class ItemDungeonBlock extends ItemBlockWithMetadata {
-
-	public ItemDungeonBlock(int id, Block block) {
-		super(id, block);
+public class ItemDungeonBlock extends ItemMetadataBlock
+{
+	public ItemDungeonBlock(Block block) {
+		super(block);
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		return StatCollector.translateToLocal(getUnlocalizedName() + (stack.getItemDamage() > 7 ? ".name.unbreakable" : ".name"));
 	}
 
@@ -60,9 +60,9 @@ public class ItemDungeonBlock extends ItemBlockWithMetadata {
 	public Block getBlockFromStack(ItemStack stack) {
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("renderBlock")) {
 			int blockID = stack.getTagCompound().getInteger("renderBlock");
-			return Block.blocksList[blockID];
+			return Block.getBlockById(blockID);
 		}
-		return Block.blocksList[getBlockID()];
+		return this.field_150939_a;
 	}
 
 	/** Returns the metadata value associated with the block to place or render */
@@ -72,33 +72,32 @@ public class ItemDungeonBlock extends ItemBlockWithMetadata {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(ItemStack stack, int pass) {
+	public IIcon getIcon(ItemStack stack, int pass) {
 		Block block = getBlockFromStack(stack);
-		return (block != null && block.blockID != getBlockID() ? block.getIcon(1, getMetaFromStack(stack)) : Block.stone.getIcon(1, 0));
+		return (block != null && block != this.field_150939_a ? block.getIcon(1, getMetaFromStack(stack)) : Blocks.stone.getIcon(1, 0));
 	}
 
 	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
 		if (player.isSneaking()) {
 			if (!world.isRemote) {
-				int blockID = world.getBlockId(x, y, z);
+				Block block = world.getBlock(x, y, z);
 				int meta = world.getBlockMetadata(x, y, z);
-				Block block = (blockID > 0 ? Block.blocksList[blockID] : null);
 				if (block == ZSSBlocks.secretStone) {
-					block = Block.blocksList[BlockSecretStone.getIdFromMeta(meta)];
+					block = BlockSecretStone.getBlockFromMeta(meta);
 					meta = 0;
 				} else {
-					TileEntity te = world.getBlockTileEntity(x, y, z);
+					TileEntity te = world.getTileEntity(x, y, z);
 					if (te instanceof TileEntityDungeonBlock) {
 						block = ((TileEntityDungeonBlock) te).getRenderBlock();
 						meta = ((TileEntityDungeonBlock) te).getRenderMetadata();
 					}
 				}
-				if (block != null && (block.isOpaqueCube() || block == Block.ice)) {
+				if (block != null && (block.isOpaqueCube() || block == Blocks.ice)) {
 					if (!stack.hasTagCompound()) {
 						stack.setTagCompound(new NBTTagCompound());
 					}
-					stack.getTagCompound().setInteger("renderBlock", block.blockID);
+					stack.getTagCompound().setInteger("renderBlock", Block.getIdFromBlock(block));
 					stack.getTagCompound().setInteger("metadata", meta);
 				}
 			}
@@ -115,7 +114,7 @@ public class ItemDungeonBlock extends ItemBlockWithMetadata {
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.unbreakable.desc"));
 		} else {
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block." +
-					(getBlockID() == ZSSBlocks.dungeonCore.blockID ? "core" : "dungeon") + ".desc.0"));
+					(field_150939_a == ZSSBlocks.dungeonCore ? "core" : "dungeon") + ".desc.0"));
 		}
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.dungeon.desc.1"));
 	}

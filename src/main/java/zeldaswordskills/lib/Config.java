@@ -22,8 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.Configuration;
-import zeldaswordskills.block.ZSSBlocks;
+import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.BonusHeart;
@@ -56,8 +55,6 @@ public class Config
 	private static int bossHealthFactor;
 	/** [Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8] */
 	private static int bossNumber;
-	/** [Achievements] Starting achievement ID */
-	private static int achievementID;
 	/** [Ceramic Jars] Allow ceramic jars to generate in water */
 	private static boolean allowJarsInWater;
 	/** [Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk */
@@ -76,9 +73,9 @@ public class Config
 	private static int jarsPerClusterNether;
 	/** [Ceramic Jars][Nether] Max number of jar clusters per chunk */
 	private static int jarClustersPerChunkNether;
-	/** [Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100] */
+	/** [Mobs][Keese] Chance of Keese spawning in a swarm */
 	private static int keeseSwarmChance;
-	/** [Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16] */
+	/** [Mobs][Keese] Maximum number of Keese that can spawn in a swarm */
 	private static int keeseSwarmSize;
 	/** [Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30] */
 	private static int sacredRefreshRate;
@@ -108,6 +105,8 @@ public class Config
 	private static boolean enableDinIgnite;
 	/** [Din's Fire] Whether Din's Fire can melt unbreakable ice blocks */
 	private static boolean enableDinMelt;
+	/** [Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil */
+	private static boolean disableAllUnenchantables;
 	/** [Hero's Bow] Cost (in emeralds) to upgrade, per level */
 	private static int heroBowUpgradeCost;
 	/** [Hero's Bow] Whether the fire arrow can ignite affected blocks */
@@ -132,6 +131,21 @@ public class Config
 	private static int slingshotUpgradeOne;
 	/** [Slingshot] Cost (in emeralds) for second upgrade */
 	private static int slingshotUpgradeTwo;
+	/*================== STARTING GEAR =====================*/
+	/** Whether starting gear will be granted */
+	public static boolean enableStartingGear;
+	/** Whether starting gear is automatically equipped when granted */
+	public static boolean enableAutoEquip;
+	/** Begin the game with Link's House - place it anywhere you like! */
+	public static boolean enableLinksHouse;
+	/** Grants a single Basic Sword skill orb */
+	public static boolean enableOrb;
+	/** Grants the full set of Kokiri clothing: hat, tunic, trousers, boots */
+	public static boolean enableFullSet;
+	/** Grants only the Kokiri Tunic */
+	public static boolean enableTunic;
+	/** Grants the Kokiri sword (a named wooden sword) */
+	public static boolean enableSword;
 	/*================== SKILLS =====================*/
 	/** Whether to use default movement controls to activate skills such as Dodge */
 	private static boolean allowVanillaControls;
@@ -199,10 +213,10 @@ public class Config
 	private static int minNumChestItems;
 	/** Random loot generation weights for each individual item */
 	private static int  bombWeight,
-						bombBagWeight,
-						heartPieceWeight,
-						bigKeyWeight,
-						smallKeyWeight;
+	bombBagWeight,
+	heartPieceWeight,
+	bigKeyWeight,
+	smallKeyWeight;
 	/** Loot weight for items in locked chests */
 	private static int lockedLootWeight;
 	/*================== DROPS =====================*/
@@ -240,7 +254,6 @@ public class Config
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
 		config.load();
 		ZSSEntities.init(config);
-		ZSSBlocks.init(config);
 		ZSSItems.init(config);
 
 		/*================== MOD INTER-COMPATIBILITY =====================*/
@@ -255,7 +268,6 @@ public class Config
 		enableHardcoreZeldaFanMode = config.get("General", "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", false).getBoolean(false);
 		bossHealthFactor = config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (will not apply to real bosses) [100-500]", 250).getInt();
 		bossNumber = config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8]", 4).getInt();
-		achievementID = config.get("General", "[Achievements] Starting achievement ID", 50).getInt();
 		allowJarsInWater = config.get("General", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
 		jarGenChance = config.get("General", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt();
 		jarsPerCluster = config.get("General", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt();
@@ -282,6 +294,7 @@ public class Config
 		enableDekuDenude = config.get("Item", "[Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves", true).getBoolean(true);
 		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
+		disableAllUnenchantables = config.get("Item", "[Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", false).getBoolean(false);
 		heroBowUpgradeCost = config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt();
 		enableFireArrowIgnite = config.get("Item", "[Hero's Bow] Whether the fire arrow can ignite affected blocks", true).getBoolean(true);
 		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", true).getBoolean(true);
@@ -294,6 +307,14 @@ public class Config
 		temperedRequiredKills = config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt();
 		slingshotUpgradeOne = config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt();
 		slingshotUpgradeTwo = config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt();
+		/*================== STARTING GEAR =====================*/
+		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", false).getBoolean(false);
+		enableAutoEquip = config.get("Bonus Gear", "Automatically equip starting equipment", true).getBoolean(true);
+		enableLinksHouse = config.get("Bonus Gear", "Begin the game with Link's House - place it anywhere you like!", true).getBoolean(true);
+		enableOrb = config.get("Bonus Gear", "Grants a single Basic Sword skill orb", true).getBoolean(true);
+		enableFullSet = config.get("Bonus Gear", "Grants a full set of Kokiri clothing: hat, tunic, trousers, boots", true).getBoolean(true);
+		enableTunic = config.get("Bonus Gear", "Grants only a Kokiri Tunic (if full set is disabled)", true).getBoolean(true);
+		enableSword = config.get("Bonus Gear", "Grants a Kokiri sword", true).getBoolean(true);
 		/*================== SKILLS =====================*/
 		allowVanillaControls = config.get("Skills", "Allow vanilla controls to activate skills", true).getBoolean(true);
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
@@ -354,7 +375,7 @@ public class Config
 		minBombBagPrice = config.get("Trade", "[Bomb Bag] Minimum price (in emeralds) [32-64]", 64).getInt();
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
-		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-25]", 15).getInt();
+		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt();
 	}
 
 	public static void postInit() {
@@ -378,7 +399,6 @@ public class Config
 	public static boolean isHardcoreZeldaFan() { return enableHardcoreZeldaFanMode; }
 	public static float getBossHealthFactor() { return MathHelper.clamp_float(bossHealthFactor * 0.01F, 1F, 5F); }
 	public static int getNumBosses() { return MathHelper.clamp_int(bossNumber, 1, 8); }
-	public static int getStartingAchievementID() { return achievementID; }
 	public static boolean genJarsInWater() { return allowJarsInWater; }
 	public static float getJarGenChance() { return MathHelper.clamp_float(jarGenChance * 0.01F, 0F, 1F); }
 	public static int getJarsPerCluster() { return MathHelper.clamp_int(jarsPerCluster, 2, 20); }
@@ -406,6 +426,7 @@ public class Config
 	public static boolean canDekuDenude() { return enableDekuDenude; }
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
+	public static boolean allUnenchantablesAreDisabled() { return disableAllUnenchantables; }
 	public static int getHeroBowUpgradeCost() { return MathHelper.clamp_int(heroBowUpgradeCost, 128, 640); }
 	public static boolean enableFireArrowIgnite() { return enableFireArrowIgnite; }
 	public static boolean enableFireArrowMelt() { return enableFireArrowMelt; }
@@ -480,7 +501,7 @@ public class Config
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
 	public static int getMinBombBagPrice() { return Math.max(minBombBagPrice, 32); }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
-	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.25F); }
+	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.15F); }
 	public static int getFriendTradesRequired() { return Math.max(friendTradesRequired, 3); }
 
 }

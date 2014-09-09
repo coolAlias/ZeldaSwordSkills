@@ -27,7 +27,7 @@ import net.minecraft.world.WorldSavedData;
  */
 public class RoomGenData extends WorldSavedData
 {
-	private NBTTagCompound roomData = new NBTTagCompound("ZSSDungeons");
+	private NBTTagCompound roomData = new NBTTagCompound();
 
 	public RoomGenData(String tagName) {
 		super(tagName);
@@ -40,7 +40,7 @@ public class RoomGenData extends WorldSavedData
 
 	@Override
 	public void writeToNBT(NBTTagCompound compound) {
-		compound.setCompoundTag("ZSSDungeons", roomData);
+		compound.setTag("ZSSDungeons", roomData);
 	}
 
 	/**
@@ -48,7 +48,6 @@ public class RoomGenData extends WorldSavedData
 	 */
 	public void addRoomTag(NBTTagCompound compound, int chunkX, int chunkZ) {
 		String s = createTagName(chunkX, chunkZ);
-		compound.setName(s);
 		compound.setInteger("chunkX", chunkX);
 		compound.setInteger("chunkZ", chunkZ);
 		this.roomData.setTag(s, compound);

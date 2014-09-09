@@ -21,6 +21,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -41,10 +42,10 @@ public class RoomSecret extends RoomBase
 {
 	/** Max height any dungeon can reach */
 	protected static final int MAX_HEIGHT = 5;
-	
+
 	/** Block which will be placed as a door, if any */
 	private Block door = null;
-	
+
 	/** Side of the structure that the door is on */
 	private int side;
 
@@ -53,13 +54,15 @@ public class RoomSecret extends RoomBase
 	 * @param size minimum size of 3
 	 * @param blockRequired the block that must make up the majority of the structure's volume
 	 */
-	public RoomSecret(int chunkX, int chunkZ, int size, int blockRequired) {
+	public RoomSecret(int chunkX, int chunkZ, int size, Block blockRequired) {
 		super(chunkX, chunkZ, size, MAX_HEIGHT, blockRequired);
 	}
-	
+
 	@Override
 	public boolean generate(ZSSMapGenBase mapGen, World world, Random rand, int x, int y, int z) {
-		if (y < bBox.maxY) { return false; }
+		if (y < bBox.maxY) {
+			return false;
+		}
 		inNether = (world.provider.dimensionId == -1);
 		bBox.offset(x, y - bBox.maxY, z);
 		int worldHeight = (inNether ? 128 : world.getHeightValue(bBox.getCenterX(), bBox.getCenterZ()));
@@ -75,7 +78,7 @@ public class RoomSecret extends RoomBase
 		StructureGenUtils.adjustForAir(world, this, bBox);
 		checkSpecialCases(world, rand);
 		setMetadata(world, x, z);
-		
+
 		int range = (inOcean ? Config.getMinOceanDistance() : inNether ? Config.getNetherMinDistance() : Config.getMinLandDistance());
 		if (!mapGen.areStructuresWithinRange(this, range) && isWellHidden(world) && canGenerate(world)) {
 			doStandardRoomGen(world, rand);
@@ -84,7 +87,7 @@ public class RoomSecret extends RoomBase
 			return false;
 		}
 	}
-	
+
 	@Override
 	protected void setMetadata(World world, int x, int z) {
 		BossType type = BossType.getBossType(world, x, z);
@@ -92,18 +95,18 @@ public class RoomSecret extends RoomBase
 		if (type != null) {
 			switch(type) {
 			case HELL: metadata = 2; break; // nether brick
-			case OCEAN: metadata = (inWater ? 1 : 0); break; // sandstone or stone
+			case OCEAN: metadata = (inWater ? 6 : 0); break; // gravel or stone
 			default: metadata = 0;
 			}
 		} else {
 			//BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
-			metadata = (inWater ? 1 : 0); // biome != null && biome.biomeName.toLowerCase().contains("beach") && 
+			metadata = (inWater ? 6 : 0); // biome != null && biome.biomeName.toLowerCase().contains("beach") && 
 		}
 		if (door != null) {
 			metadata |= 8;
 		}
 	}
-	
+
 	@Override
 	protected void decorateDungeon(World world, Random rand) {
 		if (door != null) { placeDoor(world, rand); }
@@ -114,11 +117,11 @@ public class RoomSecret extends RoomBase
 
 	@Override
 	protected void placeDungeonCore(World world) {
-		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, 0, bBox.getZSize() / 2, ZSSBlocks.dungeonCore.blockID, getMetadata() | 0x8);
+		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, 0, bBox.getZSize() / 2, ZSSBlocks.dungeonCore, getMetadata() | 0x8);
 		int x = StructureGenUtils.getXWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
 		int y = StructureGenUtils.getYWithOffset(bBox, 0);
 		int z = StructureGenUtils.getZWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonCore) {
 			((TileEntityDungeonCore) te).setDungeonBoundingBox(bBox);
 			if (door != null) {
@@ -131,7 +134,7 @@ public class RoomSecret extends RoomBase
 			}
 		}
 	}
-	
+
 	/**
 	 * Makes final checks for submerged, lava, fairy spawners, etc. and adjusts bounding box minY if needed
 	 */
@@ -192,9 +195,9 @@ public class RoomSecret extends RoomBase
 		int j1 = StructureGenUtils.getYWithOffset(bBox, y);
 		int k1 = StructureGenUtils.getZWithOffset(bBox, x, z);
 		if (bBox.isVecInside(i1, j1, k1) && !StructureGenUtils.isBlockChest(world, i1, j1, k1)) {
-			Block chestBlock = (rand.nextFloat() < Config.getLockedChestChance() ? ZSSBlocks.chestLocked : Block.chest);
-			world.setBlock(i1, j1, k1, chestBlock.blockID, 0, 2);
-			TileEntity te = world.getBlockTileEntity(i1, j1, k1);
+			Block chestBlock = (rand.nextFloat() < Config.getLockedChestChance() ? ZSSBlocks.chestLocked : Blocks.chest);
+			world.setBlock(i1, j1, k1, chestBlock, 0, 2);
+			TileEntity te = world.getTileEntity(i1, j1, k1);
 			if (te instanceof IInventory) {
 				IInventory chest = (IInventory) te;
 				DungeonLootLists.generateChestContents(world, rand, chest, this, chestBlock == ZSSBlocks.chestLocked);
@@ -220,15 +223,16 @@ public class RoomSecret extends RoomBase
 				}
 			}
 			// this should set the block underneath the chest as stone if it's surrounded by lava
-			if (world.getBlockMaterial(i1, j1 - 1, k1) == Material.lava && bBox.getYSize() > 3) {
-				world.setBlock(i1, j1 - 1, k1, ZSSBlocks.secretStone.blockID, getMetadata(), 2);
+			if (world.getBlock(i1, j1 - 1, k1).getMaterial() == Material.lava && bBox.getYSize() > 3) {
+				world.setBlock(i1, j1 - 1, k1, ZSSBlocks.secretStone, getMetadata(), 2);
 			}
+
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Actually places the door; use after determining door side for best results
 	 */
@@ -242,10 +246,10 @@ public class RoomSecret extends RoomBase
 		case EAST: x = bBox.maxX; break;
 		case WEST: x = bBox.minX; break;
 		}
-		world.setBlock(x, y, z, door.blockID, 0, 2);
-		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? 0 : door.blockID), 0, 2);
+		world.setBlock(x, y, z, door, 0, 2);
+		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? Blocks.air : door), 0, 2);
 	}
-	
+
 	/**
 	 * Adds some random breakable jars, if possible
 	 */
@@ -257,9 +261,9 @@ public class RoomSecret extends RoomBase
 				int x = bBox.minX + rand.nextInt(size);
 				int y = bBox.minY + 1;
 				int z = bBox.minZ + rand.nextInt(bBox.getZSize());
-				Material m = world.getBlockMaterial(x, y, z);
+				Material m = world.getBlock(x, y, z).getMaterial();
 				if (m == Material.air || m.isLiquid()) {
-					world.setBlock(x, y, z, ZSSBlocks.ceramicJar.blockID);
+					world.setBlock(x, y, z, ZSSBlocks.ceramicJar);
 				}
 			}
 		}

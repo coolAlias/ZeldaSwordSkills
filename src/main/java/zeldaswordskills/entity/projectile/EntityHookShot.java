@@ -27,10 +27,9 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
-import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.api.item.ArmorIndex;
@@ -42,6 +41,7 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.TargetUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -55,16 +55,22 @@ import zeldaswordskills.util.TargetUtils;
 public class EntityHookShot extends EntityThrowable
 {
 	/** Watchable object index for thrower entity's id */
-	protected static final int THROWER_DATA_WATCHER_INDEX = 22;
+	protected static final int THROWER_INDEX = 22;
 
 	/** Watchable object index for target entity's id */
-	protected static final int TARGET_DATA_WATCHER_INDEX = 23;
+	protected static final int TARGET_INDEX = 23;
 
 	/** Watchable object index for hookshot's type */
-	protected static final int SHOTTYPE_DATA_WATCHER_INDEX = 24;
+	protected static final int SHOTTYPE_INDEX = 24;
 
-	/** These are set to inside the struck block to prevent player's motion from freaking out */
-	protected double hitX, hitY, hitZ;
+	/** Watchable object for if the player has reached the hookshot */
+	protected static final int IN_GROUND_INDEX = 25;
+
+	/**
+	 * Watchable objects for hookshot's impact position - prevents client from occasionally trying to go to 0,0,0 (due to client values not being set)
+	 * Used instead of super's integer versions and set to inside the struck block to prevent the player's motion from freaking out
+	 */
+	protected static final int HIT_X = 26, HIT_Y = 27, HIT_Z = 28;
 
 	/** Stops reeling player in when true */
 	protected boolean reachedHook = false;
@@ -85,23 +91,27 @@ public class EntityHookShot extends EntityThrowable
 	protected void entityInit() {
 		super.entityInit();
 		setSize(0.25F, 0.25F);
-		dataWatcher.addObject(THROWER_DATA_WATCHER_INDEX, "");
-		dataWatcher.addObject(TARGET_DATA_WATCHER_INDEX, -1);
-		dataWatcher.addObject(SHOTTYPE_DATA_WATCHER_INDEX, HookshotType.WOOD_SHOT.ordinal());
+		dataWatcher.addObject(THROWER_INDEX, "");
+		dataWatcher.addObject(TARGET_INDEX, -1);
+		dataWatcher.addObject(SHOTTYPE_INDEX, HookshotType.WOOD_SHOT.ordinal());
+		dataWatcher.addObject(IN_GROUND_INDEX, (byte) 0);
+		dataWatcher.addObject(HIT_X, 0.0F);
+		dataWatcher.addObject(HIT_Y, 0.0F);
+		dataWatcher.addObject(HIT_Z, 0.0F);
 	}
 
 	/**
 	 * Return's this entity's hookshot Type
 	 */
 	public HookshotType getType() {
-		return HookshotType.values()[dataWatcher.getWatchableObjectInt(SHOTTYPE_DATA_WATCHER_INDEX)];
+		return HookshotType.values()[dataWatcher.getWatchableObjectInt(SHOTTYPE_INDEX)];
 	}
 
 	/**
 	 * Sets the shot's type; returns itself for convenience
 	 */
 	public EntityHookShot setType(HookshotType type) {
-		dataWatcher.updateObject(SHOTTYPE_DATA_WATCHER_INDEX, type.ordinal());
+		dataWatcher.updateObject(SHOTTYPE_INDEX, type.ordinal());
 		return this;
 	}
 
@@ -109,23 +119,32 @@ public class EntityHookShot extends EntityThrowable
 		return Config.getHookshotRange() * (getType().ordinal() % 2 == 1 ? 2 : 1);
 	}
 
+	public void setThrower(EntityPlayer player) {
+		dataWatcher.updateObject(THROWER_INDEX, player != null ? player.getCommandSenderName() : "");
+	}
+
 	protected Entity getTarget() {
-		int id = dataWatcher.getWatchableObjectInt(TARGET_DATA_WATCHER_INDEX);
+		int id = dataWatcher.getWatchableObjectInt(TARGET_INDEX);
 		return (id == -1 ? null : worldObj.getEntityByID(id));
 	}
 
 	protected void setTarget(Entity entity) {
-		dataWatcher.updateObject(TARGET_DATA_WATCHER_INDEX, entity != null ? entity.entityId : -1);
+		dataWatcher.updateObject(TARGET_INDEX, entity != null ? entity.getEntityId() : -1);
 	}
 
 	@Override
 	public EntityLivingBase getThrower() {
-		String name = dataWatcher.getWatchableObjectString(THROWER_DATA_WATCHER_INDEX);
+		String name = dataWatcher.getWatchableObjectString(THROWER_INDEX);
 		return (name.equals("") ? null : worldObj.getPlayerEntityByName(name));
 	}
 
-	public void setThrower(EntityPlayer player) {
-		dataWatcher.updateObject(THROWER_DATA_WATCHER_INDEX, player != null ? player.username : "");
+	protected boolean isInGround() {
+		return (dataWatcher.getWatchableObjectByte(IN_GROUND_INDEX) & 1) == 1;
+	}
+
+	protected void setInGround(boolean isInGround) {
+		dataWatcher.updateObject(IN_GROUND_INDEX, isInGround ? (byte) 1 : (byte) 0);
+		inGround = isInGround;
 	}
 
 	/** Returns a hookshot damage source */
@@ -137,7 +156,7 @@ public class EntityHookShot extends EntityThrowable
 	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
 	 */
 	protected boolean canGrabMaterial(int x, int y, int z) {
-		return canGrabMaterial(worldObj.getBlockMaterial(x, y, z));
+		return canGrabMaterial(worldObj.getBlock(x, y, z).getMaterial());
 	}
 
 	/**
@@ -158,7 +177,7 @@ public class EntityHookShot extends EntityThrowable
 	}
 
 	/**
-	 * Returns true if the hookshot can destroy the block / material type
+	 * Returns true if the hookshot can destroy the material type
 	 */
 	protected boolean canDestroyBlock(Block block, Material m, int x, int y, int z) {
 		Result result = Result.DEFAULT;
@@ -189,34 +208,34 @@ public class EntityHookShot extends EntityThrowable
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		if (mop.typeOfHit == EnumMovingObjectType.TILE && getTarget() == null) {
-			Block block = Block.blocksList[worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ)];
-			if (!block.blockMaterial.blocksMovement()) {
+		if (mop.typeOfHit == MovingObjectType.BLOCK && getTarget() == null) {
+			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			if (!block.getMaterial().blocksMovement()) {
 				return;
 			}
 			block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-			if (!inGround && ticksExisted < getMaxDistance()) {
+			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				motionX = motionY = motionZ = 0.0D;
 				boolean flag = block instanceof IHookable;
-				Material m = flag ? ((IHookable) block).getHookableMaterial(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ) : block.blockMaterial;
+				Material m = flag ? ((IHookable) block).getHookableMaterial(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ) : block.getMaterial();
 				if ((flag && ((IHookable) block).canAlwaysGrab(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ)) || canGrabMaterial(m)) {
-					inGround = true;
-					hitX = mop.blockX + 0.5D;
-					hitY = mop.blockY;
-					hitZ = mop.blockZ + 0.5D;
+					setInGround(true);
+					dataWatcher.updateObject(HIT_X, (float) mop.blockX + 0.5F);
+					dataWatcher.updateObject(HIT_Y, (float) mop.blockY);
+					dataWatcher.updateObject(HIT_Z, (float) mop.blockZ + 0.5F);
 				} else if (!worldObj.isRemote) {
 					if (canDestroyBlock(block, m, mop.blockX, mop.blockY, mop.blockZ)) {
-						worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, false);
+						worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, false);
 					}
 					setDead();
 				}
 			}
 
 			if (!worldObj.isRemote) {
-				worldObj.playSoundAtEntity(this, block.stepSound.getStepSound(), 1.0F, 1.0F);
+				worldObj.playSoundAtEntity(this, block.stepSound.getStepResourcePath(), 1.0F, 1.0F);
 			} else {
 				for (int i = 0; i < 10; ++i) {
-					worldObj.spawnParticle("tilecrack_" + block.blockID + "_" + worldObj.getBlockMetadata(mop.blockX, mop.blockY, mop.blockZ),
+					worldObj.spawnParticle("blockcrack_" + Block.getIdFromBlock(block) + "_" + worldObj.getBlockMetadata(mop.blockX, mop.blockY, mop.blockZ),
 							posX, posY, posZ, rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
 				}
 			}
@@ -238,9 +257,17 @@ public class EntityHookShot extends EntityThrowable
 
 	@Override
 	public void onUpdate() {
-		super.onUpdate();
+		// Added DataWatcher to track inGround separately from EntityThrowable, and
+		// avoid the super.onUpdate if the hookshot is in the ground; not sure what
+		// changed from 1.6.4, but EntityThrowable's onUpdate is no longer working
+		// acceptably for the Hookshot
+		if (isInGround()) {
+			super.onEntityUpdate();
+		} else {
+			super.onUpdate();
+		}
 		if (canUpdate()) {
-			if ((ticksExisted > getMaxDistance() && !inGround && getTarget() == null) || ticksExisted > (getMaxDistance() * 8)) {
+			if ((ticksExisted > getMaxDistance() && !isInGround() && getTarget() == null) || ticksExisted > (getMaxDistance() * 8)) {
 				if (Config.enableHookshotMissSound()) {
 					worldObj.playSoundAtEntity(getThrower() != null ? getThrower() : this, Sounds.WOOD_CLICK, 1.0F, 1.0F);
 				}
@@ -282,9 +309,10 @@ public class EntityHookShot extends EntityThrowable
 	 */
 	protected void pullThrower() {
 		EntityLivingBase thrower = getThrower();
-		if (thrower != null && inGround) {
+		if (thrower != null && isInGround()) {
 			thrower.fallDistance = 0.0F;
-			double d = thrower.getDistanceSq(hitX, hitY, hitZ);
+			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_X), dataWatcher.getWatchableObjectFloat(HIT_Y), dataWatcher.getWatchableObjectFloat(HIT_Z));
+
 			if (!reachedHook) {
 				reachedHook = d < 1.0D;
 			}
@@ -294,9 +322,9 @@ public class EntityHookShot extends EntityThrowable
 			} else if (reachedHook && d < 1.0D) {
 				thrower.motionX = thrower.motionY = thrower.motionZ = 0.0D;
 			} else {
-				double dx = 0.15D * (hitX - thrower.posX);
-				double dy = 0.15D * (hitY + (this.height / 3.0F) - thrower.posY);
-				double dz = 0.15D * (hitZ - thrower.posZ);
+				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_X) - thrower.posX);
+				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_Y) + (this.height / 3.0F) - thrower.posY);
+				double dz = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_Z) - thrower.posZ);
 				TargetUtils.setEntityHeading(thrower, dx, dy, dz, 1.0F, 1.0F, true);
 			}
 		}
@@ -337,23 +365,25 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setDouble("hitX", hitX);
-		compound.setDouble("hitY", hitY);
-		compound.setDouble("hitZ", hitZ);
+		compound.setFloat("hitX", dataWatcher.getWatchableObjectFloat(HIT_X));
+		compound.setFloat("hitY", dataWatcher.getWatchableObjectFloat(HIT_Y));
+		compound.setFloat("hitZ", dataWatcher.getWatchableObjectFloat(HIT_Z));
+		compound.setByte("customInGround", (byte)(isInGround() ? 1 : 0));
 		compound.setByte("reachedHook", (byte)(reachedHook ? 1 : 0));
 		compound.setByte("shotType", (byte) getType().ordinal());
-		compound.setInteger("shotTarget", getTarget() != null ? getTarget().entityId : -1);
+		compound.setInteger("shotTarget", getTarget() != null ? getTarget().getEntityId() : -1);
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		hitX = compound.getDouble("hitX");
-		hitY = compound.getDouble("hitY");
-		hitZ = compound.getDouble("hitZ");
+		dataWatcher.updateObject(HIT_X, compound.getFloat("hitX"));
+		dataWatcher.updateObject(HIT_Y, compound.getFloat("hitY"));
+		dataWatcher.updateObject(HIT_Z, compound.getFloat("hitZ"));
 		reachedHook = (compound.getByte("reachedHook") == 1);
-		dataWatcher.updateObject(THROWER_DATA_WATCHER_INDEX, compound.getString("ownerName"));
-		dataWatcher.updateObject(SHOTTYPE_DATA_WATCHER_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);
-		dataWatcher.updateObject(TARGET_DATA_WATCHER_INDEX, compound.getInteger("shotTarget"));
+		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
+		dataWatcher.updateObject(SHOTTYPE_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);
+		dataWatcher.updateObject(TARGET_INDEX, compound.getInteger("shotTarget"));
+		dataWatcher.updateObject(IN_GROUND_INDEX, compound.getByte("customInGround"));
 	}
 }

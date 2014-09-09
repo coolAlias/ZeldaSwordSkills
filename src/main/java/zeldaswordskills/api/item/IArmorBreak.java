@@ -23,7 +23,7 @@ package zeldaswordskills.api.item;
  * 
  */
 public interface IArmorBreak {
-	
+
 	/**
 	 * The percentage of damage inflicted that ignores armor (0 to 100)
 	 */

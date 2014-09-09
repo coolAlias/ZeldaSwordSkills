@@ -44,7 +44,7 @@ public abstract class EntityMobThrowable extends EntityThrowable
 	public EntityMobThrowable(World world, double x, double y, double z) {
 		super(world, x, y, z);
 	}
-	
+
 	/**
 	 * Constructs a throwable entity heading towards target's initial position with given velocity, with possible abnormal trajectory;
 	 * @param wobble amount of deviation from base trajectory, used by Skeletons and the like; set to 0.0F for no x/z deviation
@@ -56,7 +56,6 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		double d1 = target.boundingBox.minY + (double) target.height - this.posY;
 		double d2 = target.posZ - shooter.posZ;
 		double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d2 * d2);
-
 		if (d3 >= 1.0E-7D) {
 			float f2 = (float)(Math.atan2(d2, d0) * 180.0D / Math.PI) - 90.0F;
 			float f3 = (float)(-(Math.atan2(d1, d3) * 180.0D / Math.PI));
@@ -68,12 +67,12 @@ public abstract class EntityMobThrowable extends EntityThrowable
 			setThrowableHeading(d0, d1 + (double) f4, d2, velocity, wobble);
 		}
 	}
-	
+
 	/** Returns the amount of damage this entity will cause upon impact */
 	public float getDamage() {
 		return damage;
 	}
-	
+
 	/**
 	 * Sets the damage this entity will cause upon impact
 	 */
@@ -81,13 +80,13 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		this.damage = amount;
 		return this;
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setFloat("damage", damage);
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

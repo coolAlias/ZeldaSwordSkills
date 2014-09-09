@@ -19,17 +19,20 @@ package zeldaswordskills.block;
 
 import java.util.List;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
@@ -57,27 +60,27 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class BlockPedestal extends BlockContainer
 {
 	@SideOnly(Side.CLIENT)
-	private Icon iconTop;
+	private IIcon iconTop;
 	@SideOnly(Side.CLIENT)
-	private Icon iconBottom;
+	private IIcon iconBottom;
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconSide;
+	private IIcon[] iconSide;
 
-	public BlockPedestal(int id) {
-		super(id, Material.rock);
+	public BlockPedestal() {
+		super(Material.rock);
 		setHardness(1.5F);
 		setResistance(15.0F);
-		setLightValue(0.5F);
-		setStepSound(soundStoneFootstep);
+		setLightLevel(0.5F);
+		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
 	}
-	
+
 	@Override
-	public TileEntity createNewTileEntity(World world) {
+	public TileEntity createNewTileEntity(World world, int meta) {
 		return new TileEntityPedestal();
 	}
-	
+
 	@Override
 	public boolean renderAsNormalBlock() {
 		return false;
@@ -87,39 +90,47 @@ public class BlockPedestal extends BlockContainer
 	public boolean isOpaqueCube() {
 		return false;
 	}
-	
+
 	@Override
 	public int getMobilityFlag() {
 		return 2;
 	}
-	
+
 	@Override
 	public boolean canHarvestBlock(EntityPlayer player, int meta) {
 		return meta == 0x8;
 	}
-	
+
 	@Override
 	public float getBlockHardness(World world, int x, int y, int z) {
 		return (world.getBlockMetadata(x, y, z) == 0x8 ? blockHardness : -1.0F);
 	}
-	
+
 	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
 		return (world.getBlockMetadata(x, y, z) == 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
-	
+
+	// TODO remove when vanilla explosion resistance bug is fixed
+	@Override
+	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
+		if (world.getBlockMetadata(x, y, z) == 0x8) {
+			super.onBlockExploded(world, x, y, z, explosion);
+		}
+	}
+
 	@Override
 	public int damageDropped(int meta) {
 		return (meta == 0x8 ? 0x8 : 0x0);
 	}
-	
+
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		if (player.isSneaking() || !(world.getBlockTileEntity(x, y, z) instanceof TileEntityPedestal)) {
+		if (player.isSneaking() || !(world.getTileEntity(x, y, z) instanceof TileEntityPedestal)) {
 			return false;
 		}
 		if (!world.isRemote) {
-			TileEntityPedestal te = (TileEntityPedestal) world.getBlockTileEntity(x, y, z);
+			TileEntityPedestal te = (TileEntityPedestal) world.getTileEntity(x, y, z);
 			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
 				te.setSword(player.getHeldItem(), player);
 				player.setCurrentItemOrArmor(0, null);
@@ -131,48 +142,48 @@ public class BlockPedestal extends BlockContainer
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote) {
-			TileEntity te = world.getBlockTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				((TileEntityPedestal) te).changeOrientation();
 			}
 		}
 	}
-	
+
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
 		if (stack.getItemDamage() == 0x8) {
-			TileEntity te = world.getBlockTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				((TileEntityPedestal) te).onBlockPlaced();
 			}
 		}
 	}
-	
+
 	@Override
-	public void breakBlock(World world, int x, int y, int z, int id, int meta) {
+	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
 		if (meta != 0x8) {
 			WorldUtils.dropContainerBlockInventory(world, x, y, z);
 		} else if (meta == 0x8) {
-			TileEntity te = world.getBlockTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				((TileEntityPedestal) te).retrieveSword();
 			}
 		}
-		super.breakBlock(world, x, y, z, id, meta);
+		super.breakBlock(world, x, y, z, block, meta);
 	}
-	
+
 	@Override
 	public boolean canProvidePower() {
 		return true;
 	}
-	
+
 	@Override
 	public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side) {
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityPedestal) {
 			ItemStack sword = ((TileEntityPedestal) te).getSword();
 			if (sword != null && sword.getItem() == ZSSItems.swordMaster) {
@@ -181,26 +192,26 @@ public class BlockPedestal extends BlockContainer
 		}
 		return 0;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
-    public void getSubBlocks(int id, CreativeTabs tab, List list) {
-		list.add(new ItemStack(id, 1, 0));
-		list.add(new ItemStack(id, 1, 8));
+	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		list.add(new ItemStack(item, 1, 0));
+		list.add(new ItemStack(item, 1, 8));
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int meta) {
+	public IIcon getIcon(int side, int meta) {
 		return (side == 0 ? iconBottom : side == 1 ? iconTop : iconSide[Math.min(meta, 7)]);
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerBlockIcons(IIconRegister register) {
 		iconTop = register.registerIcon(ModInfo.ID + ":pedestal_top");
 		iconBottom = register.registerIcon(ModInfo.ID + ":pedestal_bottom");
-		iconSide = new Icon[8];
+		iconSide = new IIcon[8];
 		for (int i = 0; i < iconSide.length; ++i) {
 			iconSide[i] = register.registerIcon(ModInfo.ID + ":pedestal_side_" + i);
 		}

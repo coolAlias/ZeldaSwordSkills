@@ -135,7 +135,7 @@ public class ModelCeramicJar extends ModelBase
 		Shape14.mirror = true;
 		setRotation(Shape14, 0F, 0F, 0F);
 	}
-	
+
 	public void renderAll() {
 		float f = 0.0625F;
 		Shape1.render(f);

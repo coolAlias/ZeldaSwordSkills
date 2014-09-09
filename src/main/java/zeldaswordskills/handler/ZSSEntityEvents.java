@@ -25,9 +25,9 @@ import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
@@ -40,6 +40,7 @@ import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemCustomEgg;
@@ -47,11 +48,12 @@ import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.network.SyncEntityInfoPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
@@ -65,45 +67,43 @@ public class ZSSEntityEvents
 	 * 		also listen for {@link PlayerFlyableFallEvent}
 	 * Should receive canceled to make sure LeapingBlow triggers/deactivates
 	 */
-	@ForgeSubscribe(receiveCanceled=true)
+	@SubscribeEvent(receiveCanceled=true)
 	public void onFall(LivingFallEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+			ZSSPlayerSkills skills = info.getPlayerSkills();
 			if (skills.isSkillActive(SkillBase.leapingBlow)) {
 				((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(player, event.distance);
 			}
-			if (!event.isCanceled() && skills.reduceFallAmount > 0.0F) {
-				event.distance -= skills.reduceFallAmount;
-				skills.reduceFallAmount = 0.0F;
+
+			if (!event.isCanceled() && info.reduceFallAmount > 0.0F) {
+				event.distance -= info.reduceFallAmount;
+				info.reduceFallAmount = 0.0F;
 			}
-		}
-		if (!event.isCanceled() && event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null
-				&& event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
-			event.distance -= 5.0F;
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onCreativeFall(PlayerFlyableFallEvent event) {
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(event.entityPlayer);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(event.entityPlayer);
 		if (skills.isSkillActive(SkillBase.leapingBlow)) {
 			((LeapingBlow) skills.getPlayerSkill(SkillBase.leapingBlow)).onImpact(event.entityPlayer, event.distance);
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onJump(LivingJumpEvent event) {
 		if (event.entityLiving.getHeldItem() != null && event.entityLiving.getHeldItem().getItem() == ZSSItems.rocsFeather) {
 			event.entityLiving.motionY += (event.entityLiving.isSprinting() ? 0.30D : 0.15D);
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS) != null && event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS).getItem() == ZSSItems.bootsPegasus) {
+		if (event.entityLiving.getEquipmentInSlot(ArmorIndex.EQUIPPED_BOOTS) != null && event.entityLiving.getEquipmentInSlot(ArmorIndex.EQUIPPED_BOOTS).getItem() == ZSSItems.bootsPegasus) {
 			event.entityLiving.motionY += 0.15D;
 			if (event.entity instanceof EntityPlayer) {
 				ZSSPlayerInfo.get((EntityPlayer) event.entity).reduceFallAmount += 1.0F;
 			}
 		}
-		if (event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM) != null && event.entityLiving.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
+		if (event.entityLiving.getEquipmentInSlot(ArmorIndex.EQUIPPED_HELM) != null && event.entityLiving.getEquipmentInSlot(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
 			event.entityLiving.motionY += 0.30D;
 			if (event.entity instanceof EntityPlayer) {
 				ZSSPlayerInfo.get((EntityPlayer) event.entity).reduceFallAmount += 5.0F;
@@ -111,7 +111,7 @@ public class ZSSEntityEvents
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onInteract(EntityInteractEvent event) {
 		if (event.target.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) event.target;
@@ -120,13 +120,13 @@ public class ZSSEntityEvents
 				ItemStack stack = event.entityPlayer.getHeldItem();
 				if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
 					if (flag2) {
-						event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
+						PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
 					} else {
-						event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".fail"));
+						PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".fail"));
 					}
 					flag2 = true;
 				} else if (flag2) {
-					event.entityPlayer.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.closed." + event.entity.worldObj.rand.nextInt(4)));
+					PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.npc.mask_trader.closed." + event.entity.worldObj.rand.nextInt(4)));
 				}
 			}
 			event.setCanceled(flag2);
@@ -146,7 +146,7 @@ public class ZSSEntityEvents
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onLivingUpdate(LivingUpdateEvent event) {
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
@@ -164,15 +164,15 @@ public class ZSSEntityEvents
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
 		if (!event.entity.worldObj.isRemote) {
 			if (event.entity instanceof EntityPlayer) {
 				EntityPlayer player = (EntityPlayer) event.entity;
 				ZSSPlayerInfo.loadProxyData(player);
-				PacketDispatcher.sendPacketToPlayer(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)).makePacket(), (Player) player);
+				PacketDispatcher.sendTo(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)), (EntityPlayerMP) player);
 				ZSSPlayerInfo.get(player).verifyStartingGear();
-				ZSSPlayerInfo.get(player).verifyMaxHealth();
+				ZSSPlayerSkills.get(player).verifyMaxHealth();
 			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
 				EntityGoron.doVillagerSpawn((EntityVillager) event.entity, event.entity.worldObj);
 			}
@@ -183,7 +183,7 @@ public class ZSSEntityEvents
 		}
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onEntityConstructing(EntityConstructing event) {
 		if (event.entity instanceof EntityLivingBase && ZSSEntityInfo.get((EntityLivingBase) event.entity) == null) {
 			ZSSEntityInfo.register((EntityLivingBase) event.entity);

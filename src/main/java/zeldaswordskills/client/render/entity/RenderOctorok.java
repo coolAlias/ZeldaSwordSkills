@@ -37,13 +37,13 @@ public class RenderOctorok extends RenderLiving
 {
 	private static final ResourceLocation texture1 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok1.png");
 	private static final ResourceLocation texture2 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok2.png");
-	
+
 	public RenderOctorok(ModelBase model, float size) {
 		super(new ModelOctorok(), size);
 	}
 
 	public void renderLivingSquid(EntityOctorok entity, double dx, double dy, double dz, float f, float f1) {
-		super.doRenderLiving(entity, dx, dy, dz, f, f1);
+		super.doRender(entity, dx, dy, dz, f, f1);
 	}
 
 	protected void rotateSquidsCorpse(EntityOctorok octorok, float dx, float dy, float dz) {
@@ -61,7 +61,7 @@ public class RenderOctorok extends RenderLiving
 	}
 
 	@Override
-	public void doRenderLiving(EntityLiving entity, double dx, double dy, double dz, float f, float f1) {
+	public void doRender(EntityLiving entity, double dx, double dy, double dz, float f, float f1) {
 		renderLivingSquid((EntityOctorok) entity, dx, dy, dz, f, f1);
 	}
 
@@ -73,6 +73,11 @@ public class RenderOctorok extends RenderLiving
 	@Override
 	protected void rotateCorpse(EntityLivingBase entity, float dx, float dy, float dz) {
 		rotateSquidsCorpse((EntityOctorok) entity, dx, dy, dz);
+	}
+
+	@Override
+	public void doRender(EntityLivingBase entity, double dx, double dy, double dz, float f, float f1) {
+		renderLivingSquid((EntityOctorok) entity, dx, dy, dz, f, f1);
 	}
 
 	@Override

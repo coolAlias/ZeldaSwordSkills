@@ -29,6 +29,7 @@ import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -56,10 +57,13 @@ public enum BossType
 	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, "hell"),
 	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, "desert", "deserthills"),
 	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, "forest", "foresthills"),
-	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, "taiga", "taigahills", "iceplains"),
-	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, "ocean", "frozenocean"),
+	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, "coldtaiga", "coldtaigahills", "iceplains"),
+	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, "ocean", "frozenocean", "deepocean"),
 	SWAMP("temple_wind", BossBattle.class, EntityWitch.class, 4, "swampland"),
 	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, "extremehills", "extremehillsedge");
+	//END("temple_shadow", EntityEnderman.class, 7, "sky");
+	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
+	// need to set their target and aggravation state so they attack automatically
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
 	private final String unlocalizedName;
@@ -110,7 +114,7 @@ public enum BossType
 		return String.format("Name: %s BossMob: %s Block: %s", getUnlocalizedName(),
 				(bossMob != null ? bossMob.toString() : "NULL"), metadata);
 	}
-	
+
 	/**
 	 * Adds each biome name to the mapping for this BossType
 	 */
@@ -140,7 +144,7 @@ public enum BossType
 		}
 		return stringToTypeMap.get(name.toLowerCase());
 	}
-	
+
 	/**
 	 * Returns the BossType for the biome at x/z, or null if no BossType exists for that biome
 	 */
@@ -150,6 +154,33 @@ public enum BossType
 			LogHelper.warning("Null biome at " + x + "/" + z + " while getting Boss Type");
 			return null;
 		}
+		/*
+		String name = biome.biomeName.toLowerCase().replace(" ", "");
+		if (bossBiomeList.isEmpty()) {
+			String[][] list = Config.getBossBiomeLists();
+			if (list.length != BossType.values().length) {
+				LogHelper.warning("List of Boss Dungeon biomes has incorrect number of entries");
+			} else {
+				for (BossType type : BossType.values()) {
+					addBiomes(type, list[type.ordinal()]);
+				}
+			}
+			// prevent list from getting initialized again if all config values were empty
+			bossBiomeList.put("InitializedBossBiomeList", null);
+		}
+		if (bossBiomeList.containsKey(name)) {
+			return bossBiomeList.get(name);
+		} else if (!unusedBiomes.contains(name)) {
+			for (BossType type : BossType.values()) {
+				for (String s : type.getDefaultBiomes()) {
+					if (name.equals(s)) {
+						return type;
+					}
+				}
+			}
+			unusedBiomes.add(name);
+		}
+		 */
 		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
 	}
 
@@ -204,7 +235,7 @@ public enum BossType
 		new ItemStack(ZSSItems.bootsPegasus),
 		new ItemStack(ZSSItems.maskBlast),
 		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.STONECLAW.ordinal()),
-		new ItemStack(ZSSItems.swordBroken, 1, ZSSItems.swordGiant.itemID)
+		new ItemStack(ZSSItems.swordBroken, 1, Item.getIdFromItem(ZSSItems.swordGiant))
 	};
 	private static final ItemStack[] netherItems = {
 		new ItemStack(ZSSItems.keySkeleton),

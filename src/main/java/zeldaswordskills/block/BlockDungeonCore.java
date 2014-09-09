@@ -17,6 +17,7 @@
 
 package zeldaswordskills.block;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,14 +37,14 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
  */
 public class BlockDungeonCore extends BlockDungeonStone
 {
-	public BlockDungeonCore(int id, Material material) {
-		super(id, material);
+	public BlockDungeonCore(Material material) {
+		super(material);
 		setHardness(1.5F);
 		setResistance(10.0F);
 	}
 
 	@Override
-	public TileEntity createNewTileEntity(World world) {
+	public TileEntity createNewTileEntity(World world, int meta) {
 		return new TileEntityDungeonCore();
 	}
 
@@ -53,12 +54,12 @@ public class BlockDungeonCore extends BlockDungeonStone
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, int oldId, int oldMeta) {
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+	public void breakBlock(World world, int x, int y, int z, Block oldBlock, int oldMeta) {
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (te instanceof TileEntityDungeonCore) {
 			((TileEntityDungeonCore) te).onBlockBroken();
 		}
-		super.breakBlock(world, x, y, z, oldId, oldMeta);
+		super.breakBlock(world, x, y, z, oldBlock, oldMeta);
 	}
 
 	@Override
@@ -71,7 +72,7 @@ public class BlockDungeonCore extends BlockDungeonStone
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
 		if (entity instanceof EntityPlayer) {
-			TileEntity te = world.getBlockTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityDungeonCore) {
 				((TileEntityDungeonCore) te).setSpawner();
 			}

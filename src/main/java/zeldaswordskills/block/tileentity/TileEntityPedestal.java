@@ -22,9 +22,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet132TileEntityData;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
 import zeldaswordskills.item.ZSSItems;
@@ -86,7 +86,7 @@ public class TileEntityPedestal extends TileEntityInventory
 			WorldUtils.playSoundAt(worldObj, xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 			WorldUtils.spawnItemWithRandom(worldObj, sword, xCoord, yCoord + 1, zCoord);
 			sword = null;
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlockId(xCoord, yCoord, zCoord));
+			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlock(xCoord, yCoord, zCoord));
 			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 		}
 	}
@@ -115,7 +115,7 @@ public class TileEntityPedestal extends TileEntityInventory
 				sword = stack.copy();
 			}
 			orientation = 0;
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlockId(xCoord, yCoord, zCoord));
+			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlock(xCoord, yCoord, zCoord));
 			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 			return true;
 		} else {
@@ -140,12 +140,12 @@ public class TileEntityPedestal extends TileEntityInventory
 			inventory[i] = new ItemStack(ZSSItems.pendant,1,i);
 		}
 		playSound = false;
-		onInventoryChanged();
+		markDirty();
 	}
 
 	@Override
-	public void onInventoryChanged() {
-		super.onInventoryChanged();
+	public void markDirty() {
+		super.markDirty();
 		int meta = 0;
 		for (int i = 0; i < getSizeInventory(); ++i) {
 			if (getStackInSlot(i) != null) {
@@ -173,12 +173,12 @@ public class TileEntityPedestal extends TileEntityInventory
 	}
 
 	@Override
-	public String getInvName() {
+	public String getInventoryName() {
 		return "";
 	}
 
 	@Override
-	public boolean isInvNameLocalized() {
+	public boolean hasCustomInventoryName() {
 		return true;
 	}
 
@@ -189,7 +189,7 @@ public class TileEntityPedestal extends TileEntityInventory
 
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer player) {
-		return worldObj.getBlockTileEntity(xCoord, yCoord, zCoord) != this ? false : player.getDistanceSq((double) xCoord + 0.5D, (double) yCoord + 0.5D, (double) zCoord + 0.5D) <= 64.0D;
+		return worldObj.getTileEntity(xCoord, yCoord, zCoord) != this ? false : player.getDistanceSq((double) xCoord + 0.5D, (double) yCoord + 0.5D, (double) zCoord + 0.5D) <= 64.0D;
 	}
 
 	@Override
@@ -201,12 +201,12 @@ public class TileEntityPedestal extends TileEntityInventory
 	public Packet getDescriptionPacket() {
 		NBTTagCompound tag = new NBTTagCompound();
 		this.writeToNBT(tag);
-		return new Packet132TileEntityData(xCoord, yCoord, zCoord, 1, tag);
+		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 1, tag);
 	}
 
 	@Override
-	public void onDataPacket(INetworkManager net, Packet132TileEntityData packet) {
-		readFromNBT(packet.data);
+	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
+		readFromNBT(packet.func_148857_g());
 	}
 
 	@Override

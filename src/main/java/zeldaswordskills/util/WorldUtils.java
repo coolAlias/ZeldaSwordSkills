@@ -19,7 +19,6 @@ package zeldaswordskills.util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -30,11 +29,8 @@ import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -64,39 +60,40 @@ public class WorldUtils
 	/**
 	 * Switches active state of button or lever at x/y/z to and notifies neighbors
 	 */
-	public static void activateButton(World world, int blockId, int x, int y, int z) {
+	public static void activateButton(World world, Block block, int x, int y, int z) {
 		int meta = world.getBlockMetadata(x, y, z);
 		world.setBlockMetadataWithNotify(x, y, z, (meta < 8 ? meta | 8 : meta & ~8), 3);
-		world.markBlockForRenderUpdate(x, y, z);
+		// func_147479_m is markBlockForRenderUpdate
+		world.func_147479_m(x, y, z);
 		world.playSoundEffect((double) x + 0.5D, (double) y + 0.5D, (double) z + 0.5D, Sounds.CLICK, 0.3F, 0.6F);
-		world.scheduleBlockUpdate(x, y, z, blockId, Block.blocksList[blockId].tickRate(world));
-		world.notifyBlocksOfNeighborChange(x, y, z, blockId);
+		world.scheduleBlockUpdate(x, y, z, block, block.tickRate(world));
+		world.notifyBlocksOfNeighborChange(x, y, z, block);
 		switch(meta & 7) {
 		case 0: // 0 and 7 are ceiling levers
-		case 7: world.notifyBlocksOfNeighborChange(x, y + 1, z, blockId); break;
-		case 1: world.notifyBlocksOfNeighborChange(x - 1, y, z, blockId); break;
-		case 2: world.notifyBlocksOfNeighborChange(x + 1, y, z, blockId); break;
-		case 3: world.notifyBlocksOfNeighborChange(x, y, z - 1, blockId); break;
-		case 4: world.notifyBlocksOfNeighborChange(x, y, z + 1, blockId); break;
-		default: world.notifyBlocksOfNeighborChange(x, y - 1, z, blockId);
+		case 7: world.notifyBlocksOfNeighborChange(x, y + 1, z, block); break;
+		case 1: world.notifyBlocksOfNeighborChange(x - 1, y, z, block); break;
+		case 2: world.notifyBlocksOfNeighborChange(x + 1, y, z, block); break;
+		case 3: world.notifyBlocksOfNeighborChange(x, y, z - 1, block); break;
+		case 4: world.notifyBlocksOfNeighborChange(x, y, z + 1, block); break;
+		default: world.notifyBlocksOfNeighborChange(x, y - 1, z, block);
 		}
 	}
 
 	/**
 	 * Whether the block at x/y/z can be melted by any of the various fire effects
 	 */
-	public static boolean canMeltBlock(World world, int blockId, int x, int y, int z) {
-		Material m = world.getBlockMaterial(x, y, z);
+	public static boolean canMeltBlock(World world, Block block, int x, int y, int z) {
 		int meta = world.getBlockMetadata(x, y, z);
 		boolean flag = Config.enableFireArrowMelt() ? (meta & ~8) == 5 : meta == 5;
-		return (m == Material.ice || m == Material.snow || (blockId == ZSSBlocks.secretStone.blockID && flag));
+		return (block.getMaterial() == Material.ice || block.getMaterial() == Material.snow ||
+				(block == ZSSBlocks.secretStone && flag));
 	}
 
 	/**
 	 * Call when a container block is broken to drop the entire inv into the world
 	 */
 	public static void dropContainerBlockInventory(World world, int x, int y, int z) {
-		TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
+		TileEntity tileEntity = world.getTileEntity(x, y, z);
 		if (!(tileEntity instanceof IInventory)) { return; }
 		IInventory inv = (IInventory) tileEntity;
 		for (int i = 0; i < inv.getSizeInventory(); ++i) {
@@ -146,28 +143,26 @@ public class WorldUtils
 	 */
 	public static int addItemToInventory(ItemStack stack, IInventory inv) {
 		int remaining = stack.stackSize;
-		for (int i = 0; i < inv.getSizeInventory() && remaining > 0; ++i)
-		{
+		for (int i = 0; i < inv.getSizeInventory() && remaining > 0; ++i) {
 			ItemStack slotstack = inv.getStackInSlot(i);
 			if (slotstack == null && inv.isItemValidForSlot(i, stack)) {
 				remaining -= inv.getInventoryStackLimit();
 				stack.stackSize = (remaining > 0 ? inv.getInventoryStackLimit() : stack.stackSize);
 				inv.setInventorySlotContents(i, stack);
-				inv.onInventoryChanged();
+				inv.markDirty();
 			} else if (slotstack != null && stack.isStackable() && inv.isItemValidForSlot(i, stack)) {
-				if (slotstack.itemID == stack.itemID  && (!stack.getHasSubtypes() || 
+				if (slotstack.getItem() == stack.getItem()  && (!stack.getHasSubtypes() || 
 						stack.getItemDamage() == slotstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(stack, slotstack))
 				{
 					int l = slotstack.stackSize + remaining;
-
 					if (l <= stack.getMaxStackSize() && l <= inv.getInventoryStackLimit()) {
 						remaining = 0;
 						slotstack.stackSize = l;
-						inv.onInventoryChanged();
+						inv.markDirty();
 					} else if (slotstack.stackSize < stack.getMaxStackSize() && stack.getMaxStackSize() <= inv.getInventoryStackLimit()) {
 						remaining -= stack.getMaxStackSize() - slotstack.stackSize;
 						slotstack.stackSize = stack.getMaxStackSize();
-						inv.onInventoryChanged();
+						inv.markDirty();
 					}
 				}
 			}
@@ -177,10 +172,49 @@ public class WorldUtils
 	}
 
 	/**
-	 * Populates a list with blocks that can be affected within the given radius
-	 * @param targetBlock the block id to target, or -1 if all blocks may be targeted
+	 * Attempts to add all items in the list to container at x/y/z, provided that the tile
+	 * entity at x/y/z is an IInventory. Items are added from the first available slot.
+	 * @return true if all items were successfully added
 	 */
-	public static HashSet<ChunkPosition> getAffectedBlocksList(World world, Random rand, float radius, double posX, double posY, double posZ, int targetBlock) {
+	public static boolean addInventoryContents(World world, int x, int y, int z, List<ItemStack> items) {
+		TileEntity te = world.getTileEntity(x, y, z);
+		if (te instanceof IInventory) {
+			IInventory inv = (IInventory) te;
+			for (ItemStack stack : items) {
+				if (addItemToInventory(stack, inv) > 0) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Attempts to add all items in the list to container at x/y/z, provided that the tile
+	 * entity at x/y/z is an IInventory using {@link #addItemToInventoryAtRandom}
+	 * @return true if all items were successfully added
+	 */
+	public static boolean addInventoryContentsRandomly(World world, int x, int y, int z, List<ItemStack> items) {
+		TileEntity te = world.getTileEntity(x, y, z);
+		if (te instanceof IInventory) {
+			IInventory inv = (IInventory) te;
+			boolean flag = true;
+			for (ItemStack stack : items) {
+				if (addItemToInventoryAtRandom(world.rand, stack, inv, 3) > 0) {
+					flag = false;
+				}
+			}
+			return flag;
+		}
+		return false;
+	}
+
+	/**
+	 * Populates a list with blocks that can be affected within the given radius
+	 * @param targetBlock the block to target, or null if all blocks may be targeted
+	 */
+	public static HashSet<ChunkPosition> getAffectedBlocksList(World world, Random rand, float radius, double posX, double posY, double posZ, Block targetBlock) {
 		HashSet<ChunkPosition> hashset = new HashSet<ChunkPosition>();
 		for (int i = 0; i < MAX_RADIUS; ++i) {
 			for (int j = 0; j < MAX_RADIUS; ++j) {
@@ -204,12 +238,11 @@ public class WorldUtils
 							int l = MathHelper.floor_double(d0);
 							int i1 = MathHelper.floor_double(d1);
 							int j1 = MathHelper.floor_double(d2);
-							int k1 = world.getBlockId(l, i1, j1);
-
-							if (k1 > 0) {
+							Block block = world.getBlock(l, i1, j1);
+							if (block.getMaterial() != Material.air) {
 								f1 -= 1.3F * f2;
 							}
-							if (f1 > 0.0F && (targetBlock < 0 || k1 == targetBlock)) {
+							if (f1 > 0.0F && (targetBlock == null || block == targetBlock)) {
 								hashset.add(new ChunkPosition(l, i1, j1));
 							}
 
@@ -236,7 +269,6 @@ public class WorldUtils
 		int maxY = MathHelper.floor_double(aabb.maxY + World.MAX_ENTITY_RADIUS);
 		int minZ = MathHelper.floor_double(aabb.minZ - World.MAX_ENTITY_RADIUS);
 		int maxZ = MathHelper.floor_double(aabb.maxZ + World.MAX_ENTITY_RADIUS);
-
 		if (!world.checkChunksExist(minX, minY, minZ, maxX, maxY, maxZ)) {
 			return list;
 		}
@@ -244,7 +276,7 @@ public class WorldUtils
 		for (int i = minX; i <= maxX; ++i) {
 			for (int j = minY; j <= maxY; ++j) {
 				for (int k = minZ; k <= maxZ; ++k) {
-					TileEntity te = world.getBlockTileEntity(i, j, k);
+					TileEntity te = world.getTileEntity(i, j, k);
 					if (te != null && clazz.isAssignableFrom(te.getClass())) {
 						list.add(te);
 					}
@@ -287,28 +319,6 @@ public class WorldUtils
 		float volume = world.rand.nextFloat() * f + add;
 		float pitch = 1.0F / (world.rand.nextFloat() * f + add);
 		world.playSoundEffect(x, y, z, sound, volume, pitch);
-	}
-
-	/**
-	 * Shortcut method sends the packet to all players within the distance squared of the player
-	 */
-	public static void sendPacketToAllAround(Packet packet, World world, EntityPlayer player, double distanceSq) {
-		sendPacketToAllAround(packet, world, player.posX, player.posY, player.posZ, distanceSq);
-	}
-
-	/**
-	 * Sends the provided packet to all players within the distance squared of the position
-	 */
-	public static void sendPacketToAllAround(Packet packet, World world, double posX, double posY, double posZ, double distanceSq) {
-		if (!world.isRemote) {
-			Iterator iterator = world.playerEntities.iterator();
-			while (iterator.hasNext()) {
-				EntityPlayer entityplayer = (EntityPlayer) iterator.next();
-				if (entityplayer.getDistanceSq(posX, posY, posZ) < distanceSq) {
-					((EntityPlayerMP) entityplayer).playerNetServerHandler.sendPacketToPlayer(packet);
-				}
-			}
-		}
 	}
 
 	/**
@@ -376,7 +386,6 @@ public class WorldUtils
 		if (entity == null) { return false; }
 		int i = 0;
 		entity.setLocationAndAngles(x, y, z, 0.0F, 0.0F);
-
 		while (entity.isEntityInsideOpaqueBlock() && i < 8) {
 			if (i == 4) { entity.setPosition(x + 1, y, z + 1); }
 			switch(i % 4) {
@@ -387,12 +396,10 @@ public class WorldUtils
 			}
 			++i;
 		}
-
 		if (entity.isEntityInsideOpaqueBlock()) {
 			entity.setPosition(entity.posX + 0.5D, entity.posY, entity.posZ + 0.5D);
 			return false;
 		}
-
 		return true;
 	}
 }

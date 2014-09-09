@@ -111,7 +111,7 @@ public class RenderCustomArrow extends Render
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		return getArrowTexture((EntityArrowCustom) entity);
 	}
-	
+
 	protected ResourceLocation getArrowTexture(EntityArrowCustom arrow) {
 		if (arrow instanceof EntityArrowBomb) {
 			return getBombArrowTexture((EntityArrowBomb) arrow);
@@ -120,7 +120,7 @@ public class RenderCustomArrow extends Render
 		}
 		return vanillaArrow;
 	}
-	
+
 	protected ResourceLocation getBombArrowTexture(EntityArrowBomb arrow) {
 		switch(arrow.getType()) {
 		case BOMB_FIRE:
@@ -128,7 +128,7 @@ public class RenderCustomArrow extends Render
 		default: return bombArrow;
 		}
 	}
-	
+
 	protected ResourceLocation getElementalArrowTexture(EntityArrowElemental arrow) {
 		switch(arrow.getType()) {
 		case FIRE: return fireArrow;

@@ -18,7 +18,6 @@
 package zeldaswordskills.entity;
 
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentThorns;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
@@ -72,14 +71,19 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	public EntityGoron(World world, int profession) {
 		super(world, profession);
 		setSize(1.5F, 2.8F);
+		//setCanPickUpLoot(true);
 		tasks.taskEntries.clear();
 		tasks.addTask(0, new EntityAISwimming(this));
+		//tasks.addTask(1, new EntityAIAvoidEntity(this, EntityZombie.class, 8.0F, 0.6D, 0.6D));
 		tasks.addTask(1, new EntityAITradePlayer(this));
 		tasks.addTask(1, new EntityAILookAtTradePlayer(this));
 		tasks.addTask(2, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
 		tasks.addTask(2, new EntityAIAttackOnCollide(this, IMob.class, 1.0D, false));
 		tasks.addTask(3, new EntityAIMoveTowardsTarget(this, getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue(), 16.0F));
 		tasks.addTask(4, new EntityAIMoveThroughVillage(this, 0.6D, true));
+		//tasks.addTask(2, new EntityAIMoveIndoors(this));
+		//tasks.addTask(3, new EntityAIRestrictOpenDoor(this));
+		//tasks.addTask(4, new EntityAIOpenDoor(this, true));
 		tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 1.0D));
 		tasks.addTask(6, new EntityAIVillagerMate(this));
 		tasks.addTask(7, new EntityAIFollowGolem(this));
@@ -88,6 +92,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 		tasks.addTask(9, new EntityAIWatchClosest2(this, EntityVillager.class, 5.0F, 0.02F));
 		tasks.addTask(9, new EntityAIWander(this, 0.6D));
 		tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
+
 		targetTasks.addTask(1, new GenericAIDefendVillage(this));
 		targetTasks.addTask(2, new EntityAIHurtByTarget(this, true));
 		targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));
@@ -96,10 +101,10 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(100.0D);
-		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setAttribute(0.3D);
-		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setAttribute(0.75D);
-		getAttributeMap().func_111150_b(SharedMonsterAttributes.attackDamage).setAttribute(2.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(100.0D);
+		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.3D);
+		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(0.75D);
+		getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(2.0D);
 		isImmuneToFire = true;
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 	}
@@ -120,10 +125,10 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	 * @param isChild Whether the entity is a child; wasChild is set to this value
 	 */
 	private void updateEntityAttributes(boolean isChild) {
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((isChild ? 40.0D : 100.0D));
-		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setAttribute((isChild ? 0.5D : 0.3D));
-		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setAttribute((isChild ? 0.25D : 0.75D));
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setAttribute((isChild ? 2.0D : 8.0D));
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue((isChild ? 40.0D : 100.0D));
+		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue((isChild ? 0.5D : 0.3D));
+		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue((isChild ? 0.25D : 0.75D));
+		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue((isChild ? 2.0D : 8.0D));
 		wasChild = isChild;
 	}
 
@@ -231,8 +236,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 			}
 
 			if (entity instanceof EntityLivingBase) {
-				EnchantmentThorns.func_92096_a(this, (EntityLivingBase) entity, rand);
+				EnchantmentHelper.func_151384_a((EntityLivingBase) entity, this);
 			}
+			EnchantmentHelper.func_151385_b(this, entity);
 		}
 
 		return flag;
@@ -258,11 +264,6 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 
 	// TODO update sounds to Goron-specific sounds
 	@Override
-	protected float getSoundPitch() {
-		return super.getSoundPitch() * 0.8F;
-	}
-
-	@Override
 	protected String getLivingSound() {
 		return isTrading() ? Sounds.VILLAGER_HAGGLE : Sounds.VILLAGER_IDLE;
 	}
@@ -282,7 +283,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	 * @return class-specific instance, rather than generic EntityAgeable
 	 */
 	@Override
-	public EntityGoron func_90012_b(EntityAgeable entity) {
+	public EntityGoron createChild(EntityAgeable entity) {
 		EntityGoron goron = new EntityGoron(worldObj);
 		goron.onSpawnWithEgg(null);
 		goron.updateEntityAttributes(true);

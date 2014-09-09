@@ -17,9 +17,6 @@
 
 package zeldaswordskills.world.gen;
 
-import net.minecraftforge.event.Event.Result;
-import net.minecraftforge.event.EventPriority;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
@@ -29,6 +26,9 @@ import zeldaswordskills.world.gen.structure.MapGenBossRoom;
 import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoom;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoomNether;
+import cpw.mods.fml.common.eventhandler.Event.Result;
+import cpw.mods.fml.common.eventhandler.EventPriority;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class ZSSWorldGenEvent
 {
@@ -37,39 +37,8 @@ public class ZSSWorldGenEvent
 	private MapGenBossRoom bossRoomGen = new MapGenBossRoom();
 	private MapGenBossRoomNether netherBossGen = new MapGenBossRoomNether();
 
-	/*
-	@ForgeSubscribe
-	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		switch(event.world.provider.dimensionId) {
-		case -1: // the Nether
-			if (event.type == EventType.GLOWSTONE) {
-				if (Config.getNetherAttemptsPerChunk() > 0) {
-					netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-				if (Config.areBossDungeonsEnabled()) {
-					netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-			}
-			break;
-		case 0: // the Overworld
-			if (event.type == EventType.ICE) {
-				if (Config.getAttemptsPerChunk() > 0) {
-					secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-				if (Config.areBossDungeonsEnabled()) {
-					bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-			} else if (event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-				event.setResult(Result.DENY);
-			}
-			break;
-		default: break;
-		}
-	}
-	 */
-
 	// TERRAIN_GEN_BUS event
-	@ForgeSubscribe(priority=EventPriority.LOWEST)
+	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
@@ -89,7 +58,7 @@ public class ZSSWorldGenEvent
 	}
 
 	// EVENT_BUS event
-	@ForgeSubscribe(priority=EventPriority.LOWEST)
+	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void postPopulate(PopulateChunkEvent.Post event) {
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
@@ -107,7 +76,7 @@ public class ZSSWorldGenEvent
 	}
 
 	// EVENT_BUS event
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onDecorate(DecorateBiomeEvent.Pre event) {
 		try {
 			if (event.world.provider.isHellWorld) {
@@ -132,7 +101,7 @@ public class ZSSWorldGenEvent
 	}
 
 	// EVENT_BUS event
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onDecorate(DecorateBiomeEvent.Post event) {
 		try {
 			if (event.world.provider.isSurfaceWorld()) {

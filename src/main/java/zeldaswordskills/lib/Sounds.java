@@ -20,16 +20,19 @@ package zeldaswordskills.lib;
 public class Sounds {
 
 	// VANILLA SOUNDS
-	public static final String BOMB_FUSE = "random.fuse";
 	public static final String BOW_RELEASE = "random.bow";
 	public static final String BOW_HIT = "random.bowhit";
 	public static final String CLICK = "random.click";
-	public static final String DAMAGE_HIT = "damage.hit";
+	/** "damage.hit" is registered to "game.[entity].hurt", where [entity] may also be a category such as "neutral"
+	 * "random.successful_hit" is the sound played when a player lands an attack, which is actually what we want here */
+	//public static final String DAMAGE_HIT = "damage.hit";
+	public static final String DAMAGE_SUCCESSFUL_HIT = "random.successful_hit";
+	//public static final String DAMAGE_HOSTILE_HIT = "game.hostile.hurt";
 	public static final String EXPLOSION = "random.explode";
 	public static final String FIRE_FIZZ = "random.fizz";
 	public static final String FIRE_IGNITE = "fire.ignite";
 	public static final String ITEM_BREAK = "random.break";
-	public static final String GLASS_BREAK = "random.glass";
+	public static final String GLASS_BREAK = "dig.glass"; // changed from 'random.glass'
 	public static final String MOB_ATTACK = "mob.attack";
 	public static final String POP = "random.pop";
 	public static final String VILLAGER_DEATH = "mob.villager.death";
@@ -40,7 +43,7 @@ public class Sounds {
 	public static final String XP_ORB = "random.orb";
 
 	// BLOCK SOUNDS
-	public static final String BREAK_JAR = ModInfo.ID + ":ceramic";
+	public static final String BREAK_JAR = ModInfo.ID + ":break_jar";
 	public static final String HIT_PEG = ModInfo.ID + ":hit_peg";
 	public static final String HIT_RUSTY = ModInfo.ID + ":hit_rusty";
 	public static final String LOCK_CHEST = ModInfo.ID + ":lock_chest";
@@ -50,7 +53,7 @@ public class Sounds {
 	public static final String WEB_SPLAT = ModInfo.ID + ":web_splat";
 
 	// ENTITY SOUNDS
-	// 1.7.2 sound: public static final String BOMB_FUSE = ModInfo.ID + ":bomb_fuse";
+	public static final String BOMB_FUSE = ModInfo.ID + ":bomb_fuse";
 	public static final String BOMB_WHISTLE = ModInfo.ID + ":bomb_whistle";
 	public static final String CHU_MERGE = ModInfo.ID + ":chu_merge";
 	public static final String FAIRY_BLESSING = ModInfo.ID + ":fairy_blessing";
@@ -60,9 +63,6 @@ public class Sounds {
 	public static final String SHOCK = ModInfo.ID + ":shock";
 	public static final String WHIRLWIND = ModInfo.ID + ":whirlwind";
 
-	// PLAYER SOUNDS
-	public static final String GRUNT = ModInfo.ID + ":grunt";
-
 	// ITEM SOUNDS
 	public static final String CORK = ModInfo.ID + ":cork";
 	public static final String HAMMER = ModInfo.ID + ":hammer";
@@ -71,6 +71,9 @@ public class Sounds {
 	public static final String MAGIC_FIRE = ModInfo.ID + ":magic_fire";
 	public static final String MAGIC_ICE = ModInfo.ID + ":magic_ice";
 	public static final String WHOOSH = ModInfo.ID + ":whoosh";
+
+	// PLAYER SOUNDS
+	public static final String GRUNT = ModInfo.ID + ":grunt";
 
 	// SPECIAL EVENT SOUNDS
 	public static final String BOSS_BATTLE = ModInfo.ID + ":boss_battle";

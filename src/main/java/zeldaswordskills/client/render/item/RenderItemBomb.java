@@ -36,7 +36,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class RenderItemBomb implements IItemRenderer
 {
 	protected final ModelBomb model;
-	
+
 	private final Minecraft mc;
 
 	// TODO expand to allow various spherical objects to be rendered with this class
@@ -60,7 +60,7 @@ public class RenderItemBomb implements IItemRenderer
 	public void renderItem(ItemRenderType type, ItemStack stack, Object... data) {
 		GL11.glPushMatrix();
 		float size = 0.0475F;
-		
+
 		boolean isFlashing = (stack.hasTagCompound() && stack.getTagCompound().hasKey("time") && stack.getTagCompound().getInteger("time") % 13 > 10);
 		mc.getTextureManager().bindTexture(getTexture(ItemBomb.getType(stack), isFlashing));
 		if (isFlashing && type != ItemRenderType.EQUIPPED_FIRST_PERSON) {
@@ -89,7 +89,7 @@ public class RenderItemBomb implements IItemRenderer
 		model.render((Entity) data[1], 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, size);
 		GL11.glPopMatrix();
 	}
-	
+
 	private ResourceLocation getTexture(BombType type, boolean isFlashing) {
 		switch(type) {
 		case BOMB_FIRE: return isFlashing ? ItemBomb.fireFlash : ItemBomb.fireBase;

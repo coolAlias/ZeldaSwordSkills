@@ -29,6 +29,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.lib.Config;
@@ -44,50 +45,50 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 
 	/** The entity to which these properties belong */
 	private final EntityLivingBase entity;
-	
+
 	/** Map of active buffs */
 	private Map<Buff, BuffBase> activeBuffs = new EnumMap<Buff, BuffBase>(Buff.class);
-	
+
 	/** Time this entity will remain immune to further stun effects */
 	private int stunResistTime;
-	
+
 	public ZSSEntityInfo(EntityLivingBase entity) {
 		this.entity = entity;
 	}
-	
+
 	@Override
 	public void init(Entity entity, World world) {}
-	
+
 	/** Whether a Buff is currently active */
 	public boolean isBuffActive(Buff buff) {
 		return activeBuffs.containsKey(buff);
 	}
-	
+
 	/** Returns a currently active buff or null if that buff isn't active */
 	public BuffBase getActiveBuff(Buff buff) {
 		return activeBuffs.get(buff);
 	}
-	
+
 	/** Returns the amplifier of the Buff, or 0 if not active */
 	public int getBuffAmplifier(Buff buff) {
 		return (isBuffActive(buff) ? getActiveBuff(buff).getAmplifier() : 0);
 	}
-	
+
 	/** Returns true if a buff is both active and permanent */
 	public boolean isBuffPermanent(Buff buff) {
 		return isBuffActive(buff) && getActiveBuff(buff).isPermanent();
 	}
-	
+
 	/** Returns active buffs map */
-	public Map getActiveBuffsMap() {
+	public Map<Buff, BuffBase> getActiveBuffsMap() {
 		return activeBuffs;
 	}
-	
+
 	/** Shortcut method for applying a new buff */
 	public void applyBuff(Buff buff, int duration, int amplifier) {
 		applyBuff(new BuffBase(buff, duration, amplifier));
 	}
-	
+
 	/**
 	 * Applies a new Buff to the active buffs map
 	 */
@@ -100,7 +101,7 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 			newBuff.onAdded(this.entity);
 		}
 	}
-	
+
 	/**
 	 * Removes all buffs from this entity
 	 */
@@ -114,7 +115,7 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 			}
 		}
 	}
-	
+
 	/**
 	 * Removes a buff from the entity
 	 */
@@ -124,7 +125,7 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 			buffBase.onRemoved(this.entity);
 		}
 	}
-	
+
 	/**
 	 * Updates all active buffs, removing any whose duration reaches zero
 	 */
@@ -135,12 +136,12 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 			}
 		}
 	}
-	
+
 	/** Stuns this entity for the time given (not additive with previous stuns) */
 	public void stun(int time) {
 		stun(time, false);
 	}
-	
+
 	/**
 	 * Stuns this entity for the time given with optional override for players
 	 * @param canStunPlayer whether the stun time should ignore config settings for players
@@ -156,7 +157,7 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns true if this property's entity is immune to stun effects
 	 */
@@ -203,9 +204,9 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
 		if (compound.hasKey("ActiveBuffs")) {
-			NBTTagList list = compound.getTagList("ActiveBuffs");
+			NBTTagList list = compound.getTagList("ActiveBuffs", Constants.NBT.TAG_COMPOUND);
 			for (int i = 0; i < list.tagCount(); ++i) {
-				NBTTagCompound tag = (NBTTagCompound) list.tagAt(i);
+				NBTTagCompound tag = list.getCompoundTagAt(i);
 				BuffBase buff = BuffBase.readFromNBT(tag);
 				activeBuffs.put(buff.getBuff(), buff);
 			}

@@ -129,7 +129,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		return this;
 	}
 
-	// TODO @Override
+	// TODO @Override // this is not yet implemented
 	public boolean canGriefAdventureMode() {
 		return Config.canGriefAdventure();
 	}
@@ -192,16 +192,17 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		prevPosY = posY;
 		prevPosZ = posZ;
 		motionY -= 0.03999999910593033D;
-		noClip = pushOutOfBlocks(posX, (boundingBox.minY + boundingBox.maxY) / 2.0D, posZ);
+		// func_145771_j is pushOutOfBlocks
+		noClip = func_145771_j(posX, (boundingBox.minY + boundingBox.maxY) / 2.0D, posZ);
 		moveEntity(motionX, motionY, motionZ);
 
 		float f = 0.98F;
 		if (onGround) {
 			f = 0.58800006F;
-			int i = worldObj.getBlockId(MathHelper.floor_double(posX), MathHelper.floor_double(boundingBox.minY) - 1, MathHelper.floor_double(posZ));
+			Block block = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(boundingBox.minY) - 1, MathHelper.floor_double(posZ));
 
-			if (i > 0) {
-				f = Block.blocksList[i].slipperiness * 0.98F;
+			if (block.getMaterial() != Material.air) {
+				f = block.slipperiness * 0.98F;
 			}
 		}
 
@@ -213,8 +214,9 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 			motionY *= -0.5D;
 		}
 
-		Material material = worldObj.getBlockMaterial(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
-		boolean inFire = (material == Material.lava || material == Material.fire) || worldObj.isBoundingBoxBurning(boundingBox);
+		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
+		// func_147470_e is isBoundingBoxBurning
+		boolean inFire = (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
 		if (isDud(inFire)) {
 			fuseTime += 10;
 			disarm(worldObj);
@@ -260,7 +262,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	private boolean isDud(boolean inFire) {
 		switch(getType()) {
 		case BOMB_WATER: return inFire || (ticksExisted > 8 && worldObj.provider.dimensionId == -1);
-		default: return (worldObj.getBlockMaterial((int) posX, (int) posY, (int) posZ) == Material.water);
+		default: return (worldObj.getBlock((int) posX, (int) posY, (int) posZ).getMaterial() == Material.water);
 		}
 	}
 

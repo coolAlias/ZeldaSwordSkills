@@ -18,10 +18,11 @@
 package zeldaswordskills.block.tileentity;
 
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet132TileEntityData;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.ZSSBlocks;
@@ -67,24 +68,24 @@ public class TileEntityDungeonBlock extends TileEntity
 	public Packet getDescriptionPacket() {
 		NBTTagCompound tag = new NBTTagCompound();
 		this.writeToNBT(tag);
-		return new Packet132TileEntityData(xCoord, yCoord, zCoord, 1, tag);
+		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 1, tag);
 	}
 
 	@Override
-	public void onDataPacket(INetworkManager net, Packet132TileEntityData packet) {
-		readFromNBT(packet.data);
+	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
+		readFromNBT(packet.func_148857_g());
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound compound) {
 		super.writeToNBT(compound);
 		// TODO this should update world saves correctly to new format:
-		if (renderBlock == null && this.getBlockType() == ZSSBlocks.dungeonCore) {
-			renderBlock = Block.blocksList[BlockSecretStone.getIdFromMeta(worldObj.getBlockMetadata(xCoord, yCoord, zCoord))];
+		if ((renderBlock == null || renderBlock == Blocks.air) && this.getBlockType() == ZSSBlocks.dungeonCore) {
+			renderBlock = BlockSecretStone.getBlockFromMeta(worldObj.getBlockMetadata(xCoord, yCoord, zCoord));
 			renderMetadata = 0;
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);
 		}
-		compound.setInteger("renderBlock", renderBlock != null ? renderBlock.blockID : -1);
+		compound.setInteger("renderBlock", renderBlock != null ? Block.getIdFromBlock(renderBlock) : -1);
 		compound.setInteger("renderMetadata", renderMetadata);
 	}
 
@@ -92,7 +93,7 @@ public class TileEntityDungeonBlock extends TileEntity
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
 		int blockId = (compound.hasKey("renderBlock") ? compound.getInteger("renderBlock") : -1);
-		renderBlock = (blockId > -1 ? Block.blocksList[blockId] : null);
+		renderBlock = (blockId > -1 ? Block.getBlockById(blockId) : null);
 		renderMetadata = compound.getInteger("renderMetadata");
 	}
 }

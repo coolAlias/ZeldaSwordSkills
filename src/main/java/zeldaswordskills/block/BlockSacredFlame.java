@@ -22,17 +22,20 @@ import java.util.List;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
 import zeldaswordskills.client.render.block.RenderSacredFlame;
@@ -41,6 +44,7 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -54,23 +58,23 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class BlockSacredFlame extends BlockContainer
 {
 	public static final int DIN = 0x1, FARORE = 0x2, NAYRU = 0x4;
-	
-	public static final Material materialSacredFlame = new MaterialSacredFlame(MapColor.airColor);
-	
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
 
-	public BlockSacredFlame(int id) {
-		super(id, materialSacredFlame);
+	public static final Material materialSacredFlame = new MaterialSacredFlame(MapColor.airColor);
+
+	@SideOnly(Side.CLIENT)
+	private IIcon[] iconArray;
+
+	public BlockSacredFlame() {
+		super(materialSacredFlame);
 		disableStats();
 		setBlockUnbreakable();
-		setResistance(5000.0F);
-		setLightValue(1.0F);
+		setResistance(BlockWeight.IMPOSSIBLE.weight);
+		setLightLevel(1.0F);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
-	
+
 	@Override
-	public TileEntity createNewTileEntity(World world) {
+	public TileEntity createNewTileEntity(World world, int meta) {
 		return new TileEntitySacredFlame();
 	}
 
@@ -78,7 +82,7 @@ public class BlockSacredFlame extends BlockContainer
 	public int damageDropped(int meta) {
 		return meta;
 	}
-	
+
 	@Override
 	public boolean isCollidable() {
 		return true;
@@ -105,7 +109,7 @@ public class BlockSacredFlame extends BlockContainer
 	}
 
 	@Override
-	public boolean canEntityDestroy(World world, int x, int y, int z, Entity entity) {
+	public boolean canEntityDestroy(IBlockAccess world, int x, int y, int z, Entity entity) {
 		return false;
 	}
 
@@ -119,7 +123,7 @@ public class BlockSacredFlame extends BlockContainer
 				return true;
 			}
 		} else if (!world.isRemote) {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
 		}
 		return false;
 	}
@@ -136,7 +140,7 @@ public class BlockSacredFlame extends BlockContainer
 				}
 			} else if (world.isRemote) {
 				;
-			} else if (stack.getItem() == Item.arrow && isActive) {
+			} else if (stack.getItem() == Items.arrow && isActive) {
 				int n = stack.stackSize;
 				player.setCurrentItemOrArmor(0, new ItemStack(meta == DIN ? ZSSItems.arrowFire :
 					meta == NAYRU ? ZSSItems.arrowIce : ZSSItems.arrowLight, n));
@@ -153,59 +157,57 @@ public class BlockSacredFlame extends BlockContainer
 				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
 				extinguishFlame(world, x, y, z);
 			} else if (isActive) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
 			}
 		}
 	}
-	
+
 	/**
 	 * Extinguishes the flames at this location, setting the block to air if flames are not renewable
 	 */
-	private void extinguishFlame(World world, int x, int y, int z) {
-		if (!world.isRemote) {
-			TileEntity te = world.getBlockTileEntity(x, y, z);
-			if (Config.getSacredFlameRefreshRate() > 0 && te instanceof TileEntitySacredFlame) {
-				int meta = world.getBlockMetadata(x, y, z);
-				world.setBlockMetadataWithNotify(x, y, z, meta | 0x8, 3);
-				((TileEntitySacredFlame) te).extinguish();
-			} else {
-				world.setBlockToAir(x, y, z);
-			}
+	protected void extinguishFlame(World world, int x, int y, int z) {
+		TileEntity te = world.getTileEntity(x, y, z);
+		if (Config.getSacredFlameRefreshRate() > 0 && te instanceof TileEntitySacredFlame) {
+			int meta = world.getBlockMetadata(x, y, z);
+			world.setBlockMetadataWithNotify(x, y, z, meta | 0x8, 3);
+			((TileEntitySacredFlame) te).extinguish();
+		} else {
+			world.setBlockToAir(x, y, z);
 		}
 	}
 
 	@Override
 	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
-		return world.doesBlockHaveSolidTopSurface(x, y - 1, z);
+		return World.doesBlockHaveSolidTopSurface(world, x, y - 1, z);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(int id, CreativeTabs tab, List list) {
-		list.add(new ItemStack(id, 1, DIN));
-		list.add(new ItemStack(id, 1, FARORE));
-		list.add(new ItemStack(id, 1, NAYRU));
+	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		list.add(new ItemStack(item, 1, DIN));
+		list.add(new ItemStack(item, 1, FARORE));
+		list.add(new ItemStack(item, 1, NAYRU));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[8];
+	public void registerBlockIcons(IIconRegister register) {
+		iconArray = new IIcon[8];
 		for (int i = 0; i < iconArray.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":fire" + (i / 2) + "_layer_" + (i % 2));
 		}
 	}
 
 	@SideOnly(Side.CLIENT)
-	public Icon getFireIcon(int layer, int meta) {
+	public IIcon getFireIcon(int layer, int meta) {
 		return iconArray[((meta & 0x8) == 0x8 ? 6 : (meta == DIN ? 0 : meta)) + layer];
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIcon(int side, int meta) {
+	public IIcon getIcon(int side, int meta) {
 		meta &= ~0x8;
 		return iconArray[(meta == DIN ? 0 : meta)];
 	}

@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity.projectile;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
@@ -72,7 +73,7 @@ public class EntityCeramicJar extends EntityThrowable
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), 2.0F);
 		}
 		for (int i = 0; i < 20; ++i) {
-			worldObj.spawnParticle("tilecrack_" + ZSSBlocks.ceramicJar.blockID + "_0", posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
+			worldObj.spawnParticle("blockcrack_" + Block.getIdFromBlock(ZSSBlocks.ceramicJar) + "_0", posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
 		}
 
 		WorldUtils.playSoundAtEntity(this, Sounds.BREAK_JAR, 0.4F, 0.5F);

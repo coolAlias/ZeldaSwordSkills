@@ -19,10 +19,11 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -31,13 +32,15 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -46,13 +49,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Miscellaneous items with no use other than trading should go here.
  *
  */
-public class ItemMiscZSS extends Item
+public class ItemMiscZSS extends Item implements IUnenchantable
 {
 	/** The price this item will fetch if sold to a villager */
 	private final int sell_price;
 
-	public ItemMiscZSS(int id, int price) {
-		super(id);
+	public ItemMiscZSS(int price) {
+		super();
 		setMaxDamage(0);
 		sell_price = price;
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
@@ -71,8 +74,8 @@ public class ItemMiscZSS extends Item
 			}
 		} else if (this == ZSSItems.skillWiper) {
 			if (!world.isRemote) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.skill.reset"));
-				ZSSPlayerInfo.get(player).resetSkills();
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.skill.reset"));
+				ZSSPlayerSkills.get(player).resetSkills();
 			}
 		}
 		return stack;
@@ -92,7 +95,7 @@ public class ItemMiscZSS extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
@@ -105,33 +108,33 @@ public class ItemMiscZSS extends Item
 	private void handleMasterOre(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
 		if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.smith"));
-			if (player.inventory.hasItem(ZSSItems.swordMaster.itemID)) {
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.smith"));
+			if (player.inventory.hasItem(ZSSItems.swordMaster)) {
 				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.new"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.new"));
 					player.triggerAchievement(ZSSAchievements.swordTempered);
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.old"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.old"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.unworthy"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.unworthy"));
 			}
 		} else {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.villager"));
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.villager"));
 		}
 	}
 
 	private void handleGenericTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
 		if (trades != null && sell_price > 0) {
-			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, sell_price));
+			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sell_price));
 			if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
 			}
 		} else {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
 		}
 	}
 }

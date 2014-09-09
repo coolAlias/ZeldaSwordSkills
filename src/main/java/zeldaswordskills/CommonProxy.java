@@ -20,7 +20,9 @@ package zeldaswordskills;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class CommonProxy
 {
@@ -33,6 +35,13 @@ public class CommonProxy
 	
 	public int addArmor(String string) {
 		return 0;
+	}
+	
+	/**
+	 * Returns a side-appropriate EntityPlayer for use during message handling
+	 */
+	public EntityPlayer getPlayerEntity(MessageContext ctx) {
+		return ctx.getServerHandler().playerEntity;
 	}
 	
 	/**

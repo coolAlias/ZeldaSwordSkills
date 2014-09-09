@@ -19,14 +19,15 @@ package zeldaswordskills.block;
 
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
@@ -34,7 +35,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
-import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.ISmashable;
@@ -47,19 +47,18 @@ import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class BlockCeramicJar extends BlockContainer implements IExplodable, ISmashable
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;
 
-	public BlockCeramicJar(int id) {
-		super(id, Material.clay);
+	public BlockCeramicJar() {
+		super(Material.clay);
 		disableStats();
 		setBlockUnbreakable();
-		setStepSound(soundStoneFootstep);
+		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.285F, 0.0F, 0.285F, 0.715F, 0.665F, 0.715F);
 	}
@@ -72,13 +71,13 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 	@Override
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
 		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.destroyBlock(x, y, z, false);
+		world.func_147480_a(x, y, z, false);
 		return Result.ALLOW;
 	}
 
 	@Override
-	public int idDropped(int meta, Random rand, int fortune) {
-		return 0;
+	public Item getItemDropped(int meta, Random rand, int fortune) {
+		return null;
 	}
 
 	@Override
@@ -97,7 +96,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 	}
 
 	@Override
-	public TileEntity createNewTileEntity(World world) {
+	public TileEntity createNewTileEntity(World world, int meta) {
 		return new TileEntityCeramicJar();
 	}
 
@@ -107,22 +106,24 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 	}
 
 	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) { return false; }
+	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+		return false;
+	}
 
 	@Override
 	public boolean canBlockStay(World world, int x, int y, int z) {
-		return world.isBlockOpaqueCube(x, y - 1, z);
+		return world.getBlock(x, y - 1, z).func_149730_j();
 	}
 
 	@Override
 	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
-		return super.canPlaceBlockAt(world, x, y, z) && world.isBlockOpaqueCube(x, y - 1, z);
+		return super.canPlaceBlockAt(world, x, y, z) && world.getBlock(x, y - 1, z).func_149730_j();
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, int id, int meta) {
+	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
 		if (!keepInventory) {
-			TileEntity te = world.getBlockTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof IInventory) {
 				IInventory inv = (IInventory) te;
 				if (inv.getStackInSlot(0) == null && world.rand.nextFloat() < Config.getJarDropChance()) {
@@ -131,21 +132,21 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 			}
 			WorldUtils.dropContainerBlockInventory(world, x, y, z);
 		}
-		super.breakBlock(world, x, y, z, id, meta);
+		super.breakBlock(world, x, y, z, block, meta);
 	}
 
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote && player.getHeldItem() == null) {
 			ItemStack jarStack = new ItemStack(this);
-			TileEntity te = world.getBlockTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof IInventory) {
 				ItemStack invStack = ((IInventory) te).getStackInSlot(0);
 				if (invStack != null) {
 					NBTTagCompound item = new NBTTagCompound();
 					invStack.writeToNBT(item);
 					jarStack.setTagCompound(new NBTTagCompound());
-					jarStack.getTagCompound().setCompoundTag("jarStack", item);
+					jarStack.getTagCompound().setTag("jarStack", item);
 				}
 			}
 			player.setCurrentItemOrArmor(0, jarStack);
@@ -160,14 +161,15 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
 			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-			world.destroyBlock(x, y, z, false);
+			// func_147480_a is destroyBlock
+			world.func_147480_a(x, y, z, false);
 		}
 	}
 
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("jarStack")) {
-			TileEntity te = world.getBlockTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof IInventory) {
 				ItemStack jarStack = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("jarStack"));
 				((IInventory) te).setInventorySlotContents(0, jarStack);
@@ -178,28 +180,23 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 	@Override
 	public void onBlockDestroyedByExplosion(World world, int x, int y, int z, Explosion explosion) {
 		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.destroyBlock(x, y, z, false);
+		world.func_147480_a(x, y, z, false);
 	}
 
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
 		if (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot) {
 			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-			world.destroyBlock(x, y, z, false);
+			// func_147480_a is destroyBlock
+			world.func_147480_a(x, y, z, false);
 		}
 	}
 
 	@Override
-	public void onNeighborBlockChange(World world, int x, int y, int z, int blockID) {
+	public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor) {
 		if (!canBlockStay(world, x, y, z)) {
 			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-			world.destroyBlock(x, y, z, false);
+			world.func_147480_a(x, y, z, false);
 		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		blockIcon = register.registerIcon("stone");
 	}
 }

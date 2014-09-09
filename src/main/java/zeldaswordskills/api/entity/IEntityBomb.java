@@ -18,7 +18,6 @@
 package zeldaswordskills.api.entity;
 
 
-
 /**
  * 
  * Interface for any entity that can cause an explosion involving BombType. This
@@ -27,10 +26,10 @@ package zeldaswordskills.api.entity;
  *
  */
 public interface IEntityBomb {
-	
+
 	/** Get this bomb's {@link BombType} */
 	public BombType getType();
-	
+
 	/** Factor by which affected entity's motion will be multiplied */
 	public float getMotionFactor();
 

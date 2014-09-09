@@ -26,7 +26,7 @@ import net.minecraft.item.ItemStack;
  *
  */
 public interface IHandlePickup {
-	
+
 	/**
 	 * This method is called when the item is picked up; if the stack's size is
 	 * less than the original size after the method is called, the event will be

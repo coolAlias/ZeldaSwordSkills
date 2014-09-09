@@ -21,28 +21,33 @@ import java.util.List;
 
 import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityGoron;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 
 import com.google.common.collect.Multimap;
 
@@ -57,10 +62,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemBrokenSword extends Item implements IBattlegearWeapon
+public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegearWeapon
 {
-	public ItemBrokenSword(int id) {
-		super(id);
+	public ItemBrokenSword() {
+		super();
 		setFull3D();
 		setMaxDamage(0);
 		setMaxStackSize(1);
@@ -74,25 +79,30 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 			boolean isGoron = (entity instanceof EntityGoron);
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
+			Item brokenItem = Item.getItemById(stack.getItemDamage());
+			if (!(brokenItem instanceof ItemSword)) {
+				LogHelper.warning("Broken sword contained a non-sword item: " + brokenItem + "; defaulting to Ordon Sword");
+				brokenItem = ZSSItems.swordOrdon;
+			}
 			if (villager.getProfession() == 3 || isGoron) {
-				if (stack.getItemDamage() != ZSSItems.swordGiant.itemID) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken"));
-					MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 5), new ItemStack(stack.getItemDamage(), 1, 0)));
+				if (brokenItem != ZSSItems.swordGiant) {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.broken"));
+					MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 5), new ItemStack(brokenItem)));
 				} else if (isGoron && villager.getCustomNameTag().equals("Medigoron")) {
-					if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart) > 9) {
+					if (ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart) > 9) {
 						player.triggerAchievement(ZSSAchievements.swordBroken);
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.1"));
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.2"));
-						MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 5), new ItemStack(stack.getItemDamage(), 1, 0)));
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.1"));
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.2"));
+						MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 5), new ItemStack(brokenItem)));
 					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.big"));
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.later"));
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.big"));
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.later"));
 					}
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
 			}
 
 			return true;
@@ -103,26 +113,27 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
-		if (Item.itemsList[par1] instanceof ItemZeldaSword) {
-			return Item.itemsList[par1].getIconFromDamage(-1);
+	public IIcon getIconFromDamage(int damage) {
+		if (Item.getItemById(damage) instanceof ItemZeldaSword) {
+			return Item.getItemById(damage).getIconFromDamage(-1); // -1 returns brokenIcon for ItemZeldaSword
 		} else {
 			return itemIcon;
 		}
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
-		String sword = stack.getItemDamage() > 0 ? (" " + StatCollector.translateToLocal(Item.itemsList[stack.getItemDamage()].getUnlocalizedName() + ".name")) : "";
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + sword;
+	public String getItemStackDisplayName(ItemStack stack) {
+		Item sword = Item.getItemById(stack.getItemDamage());
+		String name = sword instanceof ItemSword ? sword.getUnlocalizedName() : ZSSItems.swordOrdon.getUnlocalizedName();
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal(name + ".name");
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tab, List list) {
-		list.add(new ItemStack(itemID, 1, ZSSItems.swordKokiri.itemID));
-		list.add(new ItemStack(itemID, 1, ZSSItems.swordOrdon.itemID));
-		list.add(new ItemStack(itemID, 1, ZSSItems.swordGiant.itemID));
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
+		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordKokiri)));
+		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordOrdon)));
+		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordGiant)));
 	}
 
 	@Override
@@ -133,13 +144,13 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":broken_sword_ordon");
 	}
 
 	@Override
-	public Multimap getItemAttributeModifiers() {
-		Multimap multimap = super.getItemAttributeModifiers();
+	public Multimap getAttributeModifiers(ItemStack stack) {
+		Multimap multimap = super.getAttributeModifiers(stack);
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", 2.0D, 0));
 		return multimap;
 	}

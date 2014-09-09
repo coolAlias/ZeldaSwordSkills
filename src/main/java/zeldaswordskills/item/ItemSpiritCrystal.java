@@ -22,22 +22,24 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -45,8 +47,10 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.PacketISpawnParticles;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.PacketISpawnParticles;
 import zeldaswordskills.util.LogHelper;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -74,8 +78,8 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	/** Amount of time required before the crystal's effects activate */
 	private final int timeToUse;
 
-	public ItemSpiritCrystal(int id, int type, int cost, int time) {
-		super(id);
+	public ItemSpiritCrystal(int type, int cost, int time) {
+		super();
 		spiritType = type;
 		costToUse = cost;
 		timeToUse = time;
@@ -150,7 +154,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		if (world.isRemote) {
 			return false;
 		} else if (stack.getItemDamage() == 0) {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.full"));
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.full"));
 		} else if (isActive) {
 			if (spiritType == type) {
 				int originalDamage = stack.getItemDamage();
@@ -158,10 +162,10 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 				world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 				return (world.rand.nextInt(stack.getMaxDamage()) < originalDamage);
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.mismatch"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.mismatch"));
 			}
 		} else {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
 		}
 		return false;
 	}
@@ -190,7 +194,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	private int handleDin(ItemStack stack, World world, EntityPlayer player) {
 		float radius = 5.0F;
 		if (!world.isRemote) {
-			WorldUtils.sendPacketToAllAround(new PacketISpawnParticles(player, this, radius).makePacket(), world, player, 64.0D);
+			PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, this, radius), player, 64.0D);
 			affectDinBlocks(world, player, radius);
 		}
 		affectDinEntities(world, player, radius);
@@ -202,25 +206,26 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	 * Affects all blocks in the radius with the effects of Din's Fire
 	 */
 	private void affectDinBlocks(World world, EntityPlayer player, float radius) {
-		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, -1));
+		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, null));
 		Iterator iterator;
 		ChunkPosition chunkposition;
-		int i, j, k, l;
+		int i, j, k;
+		Block block;
 
 		iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
 			chunkposition = (ChunkPosition)iterator.next();
-			i = chunkposition.x;
-			j = chunkposition.y;
-			k = chunkposition.z;
-			l = world.getBlockId(i, j, k);
+			i = chunkposition.chunkPosX;
+			j = chunkposition.chunkPosY;
+			k = chunkposition.chunkPosZ;
+			block = world.getBlock(i, j, k);
 
-			if (l == 0 && Config.isDinIgniteEnabled()) {
-				int i1 = world.getBlockId(i, j - 1, k);
-				if (Block.opaqueCubeLookup[i1] && world.rand.nextInt(8) == 0) {
-					world.setBlock(i, j, k, Block.fire.blockID);
+			if (block.getMaterial() == Material.air && Config.isDinIgniteEnabled()) {
+				Block block1 = world.getBlock(i, j - 1, k);
+				if (block1.func_149730_j() && world.rand.nextInt(8) == 0) {
+					world.setBlock(i, j, k, Blocks.fire);
 				}
-			} else if (WorldUtils.canMeltBlock(world, l, i, j, k)) {
+			} else if (WorldUtils.canMeltBlock(world, block, i, j, k)) {
 				world.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
 				world.setBlockToAir(i, j, k);
 			}
@@ -259,7 +264,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 					amount *= 0.25F;
 				}
 
-				if (entity.attackEntityFrom(new DamageSourceIndirect("magic.din", player, player).setFireDamage().setMagicDamage(), amount) && !entity.isImmuneToFire()) {
+				if (entity.attackEntityFrom(new EntityDamageSourceIndirect("magic.din", player, player).setFireDamage().setMagicDamage(), amount) && !entity.isImmuneToFire()) {
 					if (world.rand.nextFloat() < d10) {
 						entity.setFire(10);
 					}
@@ -318,14 +323,14 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 				} else {
 					player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 					if (world.isRemote) {
-						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.spirit_crystal.farore.fail.dimension",
+						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.spirit_crystal.farore.fail.dimension",
 								new Object[]{StatCollector.translateToLocal(getUnlocalizedName() + ".name")}));
 					}
 				}
 			} else {
 				player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 				if (world.isRemote) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.farore.fail.mark"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.spirit_crystal.farore.fail.mark"));
 				}
 			}
 		}
@@ -387,7 +392,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 

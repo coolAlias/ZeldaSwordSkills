@@ -47,7 +47,7 @@ public class MerchantRecipeHelper {
 
 		return (recipe == null);
 	}
-	
+
 	/**
 	 * Adds a trade to the merchant's list only if a similar trade does not already exist
 	 */
@@ -58,7 +58,7 @@ public class MerchantRecipeHelper {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Shortcut method to attempt adding a trade without replacing a currently existing trade
 	 * @return returns true if the new trade was added
@@ -66,7 +66,7 @@ public class MerchantRecipeHelper {
 	public static boolean addToListWithCheck(MerchantRecipeList list, MerchantRecipe trade) {
 		return addToListWithCheck(list, trade, false);
 	}
-	
+
 	/**
 	 * Adds the trade to the list if and only if a similar trade (i.e. same IDs but different
 	 * stack sizes) doesn't already exist, or if 'replaceExistingTrade' is true.
@@ -89,7 +89,7 @@ public class MerchantRecipeHelper {
 		list.add(trade);
 		return true;
 	}
-	
+
 	/**
 	 * Returns true if all the items (to buy and sell) have matching item IDs and metadata
 	 * Does not care about stack size or NBT tags.
@@ -104,10 +104,10 @@ public class MerchantRecipeHelper {
 		if (item1a != null && item1b != null && item1a.getItem() == item1b.getItem() && item1a.getItemDamage() == item1b.getItemDamage()) {
 			if (item2a != null && item2b != null && item2a.getItem() == item2b.getItem() && item2a.getItemDamage() == item2b.getItemDamage()) {
 				return (item3a == null && item3b == null) || (item3a != null && item3b != null &&
-					item3a.getItem() == item3b.getItem() && item3a.getItemDamage() == item3b.getItemDamage());
+						item3a.getItem() == item3b.getItem() && item3a.getItemDamage() == item3b.getItemDamage());
 			}
 		}
-		
+
 		return false;
 	}
 }

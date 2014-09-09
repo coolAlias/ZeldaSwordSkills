@@ -26,15 +26,15 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.event.ForgeSubscribe;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.network.EndComboPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.server.EndComboPacket;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -74,12 +74,12 @@ public class ComboOverlay extends Gui
 		this.mc = Minecraft.getMinecraft();
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
 		if (event.type != ElementType.HOTBAR) {
 			return;
 		}
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
 		if (skills != null) {
 			displayComboText(skills, event.resolution);
 			ILockOnTarget skill = skills.getTargetingSkill();
@@ -92,7 +92,7 @@ public class ComboOverlay extends Gui
 	/**
 	 * Displays current combo data if applicable
 	 */
-	private void displayComboText(ZSSPlayerInfo skills, ScaledResolution resolution) {
+	private void displayComboText(ZSSPlayerSkills skills, ScaledResolution resolution) {
 		ICombo iCombo = skills.getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (combo != iCombo.getCombo()) {
@@ -101,7 +101,7 @@ public class ComboOverlay extends Gui
 				displayStartTime = Minecraft.getSystemTime();
 				if (iCombo.getCombo().isFinished()) {
 					iCombo.setCombo(null);
-					PacketDispatcher.sendPacketToServer(new EndComboPacket((SkillBase) iCombo).makePacket());
+					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) iCombo));
 				}
 			}
 		}
@@ -139,14 +139,13 @@ public class ComboOverlay extends Gui
 	 */
 	/*
 	private void displayTargetingOverlay(RenderGameOverlayEvent event, Entity target) {
-		float distance = mc.thePlayer.getDistanceToEntity(target);
-		float scale = MathHelper.clamp_float(20.0F / (distance > 0.1F ? distance : 0.1F), 1.0F, 8.0F);
+		//float distance = mc.thePlayer.getDistanceToEntity(target);
+		//float scale = MathHelper.clamp_float(20.0F / (distance > 0.1F ? distance : 0.1F), 1.0F, 8.0F);
 		int x = event.resolution.getScaledWidth() / 2 - 6;
 		int y = event.resolution.getScaledHeight() / 2 - 6;
-		Vec3 vec3 = mc.thePlayer.getLookVec();
+		//Vec3 vec3 = mc.thePlayer.getLookVec();
 		rotation += 15;
 		rotation %= 360;
-
 		zLevel = -90.0F;
 		mc.getTextureManager().bindTexture(targetTexture);
 		GL11.glPushMatrix();

@@ -20,7 +20,7 @@ package zeldaswordskills.api.block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraftforge.event.Event.Result;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 

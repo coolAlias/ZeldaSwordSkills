@@ -25,7 +25,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EntityOwnable;
+import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemStack;
@@ -80,7 +80,8 @@ public class TargetUtils
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
 		Vec3 vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
 		Vec3 vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
-		MovingObjectPosition mop = world.rayTraceBlocks_do_do(vec3, vec31, false, true);
+		// func_147447_a is the ray_trace method
+		MovingObjectPosition mop = world.func_147447_a(vec3, vec31, false, true, false);
 		vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
 		vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
 
@@ -309,8 +310,9 @@ public class TargetUtils
 			return true;
 		} else if (player.isOnSameTeam(entity)) {
 			return true;
-		} else if (entity instanceof EntityOwnable) {
-			return ((EntityOwnable) entity).getOwnerName().equals(player.username);
+		} else if (entity instanceof IEntityOwnable) {
+			// IEntityOwnable.func_152113_b() returns a String - is this getOwnerName ??? 
+			return ((IEntityOwnable) entity).func_152113_b().equals(player.getCommandSenderName());
 		} else {
 			return false;
 		}

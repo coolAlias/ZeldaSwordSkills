@@ -19,16 +19,18 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityFairy;
@@ -44,10 +46,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  * when Link would otherwise die.
  *
  */
-public class ItemFairyBottle extends Item {
-
-	public ItemFairyBottle(int par1) {
-		super(par1);
+public class ItemFairyBottle extends Item implements IUnenchantable
+{
+	public ItemFairyBottle() {
+		super();
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
@@ -63,7 +65,7 @@ public class ItemFairyBottle extends Item {
 			if (stack != null && stack.getItem() instanceof ItemFairyBottle) {
 				WorldUtils.playSoundAtEntity(player, Sounds.FAIRY_LAUGH, 0.4F, 0.5F);
 				player.setHealth(10F);
-				player.inventory.setInventorySlotContents(i, new ItemStack(Item.glassBottle));
+				player.inventory.setInventorySlotContents(i, new ItemStack(Items.glass_bottle));
 				return true;
 			}
 		}
@@ -99,9 +101,9 @@ public class ItemFairyBottle extends Item {
 			if (!player.capabilities.isCreativeMode) {
 				--stack.stackSize;
 				if (stack.stackSize <= 0) {
-					return new ItemStack(Item.glassBottle);
+					return new ItemStack(Items.glass_bottle);
 				} else {
-					player.inventory.addItemStackToInventory(new ItemStack(Item.glassBottle));
+					player.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
 				}
 			}
 		}
@@ -122,7 +124,7 @@ public class ItemFairyBottle extends Item {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 

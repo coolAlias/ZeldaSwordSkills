@@ -22,22 +22,23 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingData;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.Facing;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.CustomEntityList;
 import zeldaswordskills.entity.IEntityVariant;
@@ -51,21 +52,21 @@ import cpw.mods.fml.relauncher.SideOnly;
  * should use {@link ItemCustomVariantEgg} instead. 
  *
  */
-public class ItemCustomEgg extends Item 
+public class ItemCustomEgg extends Item implements IUnenchantable
 {
 	/** The egg's spotted and colored overlay icon */
 	@SideOnly(Side.CLIENT)
-	private Icon overlay;
+	private IIcon overlay;
 
-	public ItemCustomEgg(int id) {
-		super(id);
+	public ItemCustomEgg() {
+		super();
 		setHasSubtypes(true);
 		setTextureName("spawn_egg"); // Item.monsterPlacer.getIconString() is protected >.<
 		setCreativeTab(ZSSCreativeTabs.tabEggs);
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		String s = ("" + StatCollector.translateToLocal("item.zss.spawn_egg.name")).trim();
 		String entityName = CustomEntityList.getStringFromID(stack.getItemDamage());
 		if (entityName != null) {
@@ -86,7 +87,7 @@ public class ItemCustomEgg extends Item
 		if (world.isRemote) {
 			return true;
 		} else {
-			Block block = Block.blocksList[world.getBlockId(x, y, z)];
+			Block block = world.getBlock(x, y, z);
 			x += Facing.offsetsXForSide[side];
 			y += Facing.offsetsYForSide[side];
 			z += Facing.offsetsZForSide[side];
@@ -118,7 +119,7 @@ public class ItemCustomEgg extends Item
 			MovingObjectPosition mop = getMovingObjectPositionFromPlayer(world, player, true);
 
 			if (mop != null) {
-				if (mop.typeOfHit == EnumMovingObjectType.TILE) {
+				if (mop.typeOfHit == MovingObjectType.BLOCK) {
 					int i = mop.blockX;
 					int j = mop.blockY;
 					int k = mop.blockZ;
@@ -131,7 +132,7 @@ public class ItemCustomEgg extends Item
 						return stack;
 					}
 
-					if (world.getBlockMaterial(i, j, k) == Material.water) {
+					if (world.getBlock(i, j, k).getMaterial() == Material.water) {
 						Entity entity = spawnCreature(world, stack.getItemDamage(), i, j, k);
 
 						if (entity != null) {
@@ -165,7 +166,7 @@ public class ItemCustomEgg extends Item
 				entity.setLocationAndAngles(x, y, z, MathHelper.wrapAngleTo180_float(world.rand.nextFloat() * 360.0F), 0.0F);
 				entityliving.rotationYawHead = entityliving.rotationYaw;
 				entityliving.renderYawOffset = entityliving.rotationYaw;
-				entityliving.onSpawnWithEgg((EntityLivingData) null);
+				entityliving.onSpawnWithEgg((IEntityLivingData) null);
 				world.spawnEntityInWorld(entity);
 				entityliving.playLivingSound();
 			}
@@ -214,7 +215,7 @@ public class ItemCustomEgg extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int item, CreativeTabs tab, List itemList) {
+	public void getSubItems(Item item, CreativeTabs tab, List itemList) {
 		Iterator<Class<? extends Entity>> iterator = CustomEntityList.entityEggs.keySet().iterator();
 		while (iterator.hasNext()) {
 			Class<? extends Entity> oclass = iterator.next();
@@ -233,13 +234,13 @@ public class ItemCustomEgg extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamageForRenderPass(int damage, int pass) {
+	public IIcon getIconFromDamageForRenderPass(int damage, int pass) {
 		return pass > 0 ? overlay : super.getIconFromDamageForRenderPass(damage, pass);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		super.registerIcons(register);
 		overlay = register.registerIcon(getIconString() + "_overlay");
 	}

@@ -21,12 +21,13 @@ import java.util.List;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -104,7 +105,7 @@ public class FairySpawner
 	 * Call when the supporting tile entity is removed to release fairy pool contents
 	 */
 	public void onBlockBroken() {
-		onBlockBroken(core.worldObj, core.xCoord, core.yCoord, core.zCoord);
+		onBlockBroken(core.getWorldObj(), core.xCoord, core.yCoord, core.zCoord);
 	}
 
 	/**
@@ -115,7 +116,7 @@ public class FairySpawner
 			int k = (rupees > 64 ? 64 : rupees);
 			rupees -= k;
 			world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.orb", 1.0F, 1.0F);
-			WorldUtils.spawnItemWithRandom(world, new ItemStack(Item.emerald, k), x, y, z);
+			WorldUtils.spawnItemWithRandom(world, new ItemStack(Items.emerald, k), x, y, z);
 		}
 	}
 
@@ -123,8 +124,8 @@ public class FairySpawner
 	 * Call every tick to allow the fairy spawner to update
 	 */
 	public void onUpdate() {
-		updateSpawner(core.worldObj, core.xCoord, core.yCoord, core.zCoord);
-		updateItems(core.worldObj, core.xCoord, core.yCoord, core.zCoord);
+		updateSpawner(core.getWorldObj(), core.xCoord, core.yCoord, core.zCoord);
+		updateItems(core.getWorldObj(), core.xCoord, core.yCoord, core.zCoord);
 	}
 
 	/**
@@ -133,8 +134,8 @@ public class FairySpawner
 	 */
 	private void updateSpawner(World world, int x, int y, int z) {
 		if (fairiesSpawned < maxFairies && world.rand.nextFloat() < (world.isDaytime() ? 0.01F : 0.2F)) {
-			int nearby = world.getEntitiesWithinAABB(EntityFairy.class, AxisAlignedBB.getAABBPool().
-					getAABB(x, box.getCenterY(), z, x + 1, box.getCenterY() + 1, z + 1).
+			int nearby = world.getEntitiesWithinAABB(EntityFairy.class, AxisAlignedBB.
+					getBoundingBox(x, box.getCenterY(), z, x + 1, box.getCenterY() + 1, z + 1).
 					expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2)).size();
 			if (nearby < 4) {
 				EntityFairy fairy = new EntityFairy(world);
@@ -161,12 +162,12 @@ public class FairySpawner
 		} else if (itemUpdate == 0) {
 			EntityPlayer player = world.getPlayerEntityByName(playerName);
 			if (player != null) {
-				List<EntityItem> list = world.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().
-						getAABB(x, box.getCenterY(), z, x + 1, box.getCenterY() + 1, z + 1).
+				List<EntityItem> list = world.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.
+						getBoundingBox(x, box.getCenterY(), z, x + 1, box.getCenterY() + 1, z + 1).
 						expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2));
 				for (EntityItem item : list) {
 					ItemStack stack = item.getEntityItem();
-					if (stack.getItem() == Item.emerald) {
+					if (stack.getItem() == Items.emerald) {
 						player.triggerAchievement(ZSSAchievements.fairyEmerald);
 						world.playSoundEffect(x + 0.5D, y + 1, z + 0.5D, "random.orb", 1.0F, 1.0F);
 						rupees += stack.stackSize;
@@ -202,8 +203,8 @@ public class FairySpawner
 		NBTTagCompound data = compound.getCompoundTag("FairySpawner");
 		maxFairies = data.getInteger("maxFairies");
 		fairiesSpawned = data.getInteger("spawned");
-		// 4 is LONG; fixes class cast exception from changing types; TODO remove next update
-		nextResetDate = (data.getTag("nextResetDate").getId() == 4 ? data.getLong("nextResetDate") : 0);
+		// fixes class cast exception from changing types:
+		nextResetDate = (data.getTag("nextResetDate").getId() == Constants.NBT.TAG_LONG ? data.getLong("nextResetDate") : 0);
 		itemUpdate = data.getInteger("itemUpdate");
 		rupees = data.getInteger("rupees");
 		playerName = data.getString("playerName");

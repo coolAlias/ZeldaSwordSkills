@@ -19,6 +19,7 @@ package zeldaswordskills.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -27,7 +28,6 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import zeldaswordskills.lib.ModInfo;
-import cpw.mods.fml.common.FMLLog;
 
 public class LogHelper
 {
@@ -36,18 +36,21 @@ public class LogHelper
 	private static Formatter zssFormatter = new ZSSLogFormatter();
 
 	/**
+	 * Calls {@link #init(Level)} with level of Level.INFO
+	 */
+	public static void init() {
+		init(Level.INFO);
+	}
+
+	/**
 	 * Sets up the logger to output messages of up to the level given
 	 */
 	public static void init(Level level) {
 		logger.setLevel(level);
-		// only use custom handler when necessary to output FINE or lower logs
-		if (level.intValue() < Level.INFO.intValue()) { 
-			consoleHandler.setFormatter(zssFormatter);
-			consoleHandler.setLevel(logger.getLevel());
-			logger.addHandler(consoleHandler);
-		} else { // otherwise use FML logger formatting
-			logger.setParent(FMLLog.getLogger());
-		}
+		consoleHandler.setFormatter(zssFormatter);
+		consoleHandler.setLevel(logger.getLevel());
+		logger.setUseParentHandlers(false); // otherwise some messages appear 2+ times
+		logger.addHandler(consoleHandler);
 	}
 
 	public static void log(Level logLevel, String message) {
@@ -86,26 +89,21 @@ public class LogHelper
  */
 final class ZSSLogFormatter extends Formatter {
 	static final String LINE_SEPARATOR = System.getProperty("line.separator");
-	//private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
 	public String format(LogRecord record)
 	{
 		StringBuilder msg = new StringBuilder();
-		//msg.append(this.dateFormat.format(Long.valueOf(record.getMillis())));
+		msg.append("[" + dateFormat.format(Long.valueOf(record.getMillis())) + "] ");
 		if (record.getLoggerName() != null) {
-			msg.append("["+record.getLoggerName()+"] ");
+			msg.append("[" + record.getLoggerName() + "] ");
 		} else {
 			msg.append("[] ");
 		}
 
-		Level lvl = record.getLevel();
-		String name = lvl.getLocalizedName();
-		if ( name == null ) {
-			name = lvl.getName();
-		}
-
-		if ((name != null) && (name.length() > 0)) {
-			msg.append("[" + name + "] ");
+		String level = record.getLevel().getLocalizedName();
+		if ((level != null) && (level.length() > 0)) {
+			msg.append("[" + level + "] ");
 		} else {
 			msg.append(" ");
 		}

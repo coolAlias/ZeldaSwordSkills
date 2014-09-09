@@ -28,16 +28,16 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 public interface ICombo {
-	
+
 	/** Returns the Combo instance for associated class */
 	public Combo getCombo();
-	
+
 	/** Should assign the instance of Combo retrieved from getCombo() to the argument combo */
 	public void setCombo(Combo combo);
-	
+
 	/** Returns true if a combo is currently in progress */
 	public boolean isComboInProgress();
-	
+
 	/**
 	 * Should be called every time the player attacks (e.g. using MouseEvent for left click attack.)
 	 * If a combo should end when the player misses, this is the place to handle that.
@@ -45,7 +45,7 @@ public interface ICombo {
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean onAttack(EntityPlayer player);
-	
+
 	/**
 	 * Should be called when an EntityPlayer actively using a Combo damages an entity, creating a new
 	 * Combo if necessary and either combo.add(player, damage) or combo.addDamageOnly(player, damage).
@@ -53,7 +53,7 @@ public interface ICombo {
 	 * @param player should be gotten from '(EntityPlayer) event.source.getEntity()' if event.source.getEntity() is correct type
 	 */
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event);
-	
+
 	/**
 	 * Should be called when a player actively using a Combo receives damage. Useful for ending a
 	 * combo when damage exceeds a certain threshold. Note that LivingHurtEvent only gets called

@@ -60,7 +60,7 @@ public class RenderHeldItemBlock implements IItemRenderer
 					GL11.glScalef(1.0F, 1.0F, -1.0F);
 					GL11.glRotatef(210.0F, 1.0F, 0.0F, 0.0F);
 					GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-					int i1 = Item.itemsList[block.blockID].getColorFromItemStack(stack, 0);
+					int i1 = Item.getItemFromBlock(block).getColorFromItemStack(stack, 0);
 					float f = (float)(i1 >> 16 & 255) / 255.0F;
 					float f1 = (float)(i1 >> 8 & 255) / 255.0F;
 					float f2 = (float)(i1 & 255) / 255.0F;

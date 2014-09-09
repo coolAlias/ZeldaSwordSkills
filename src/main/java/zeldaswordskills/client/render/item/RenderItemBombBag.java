@@ -19,8 +19,11 @@ package zeldaswordskills.client.render.item;
 
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.client.IItemRenderer;
+
+import org.lwjgl.opengl.GL11;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -33,7 +36,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class RenderItemBombBag implements IItemRenderer
 {
 	/** Defines the zLevel of rendering of item on GUI. */
-	public float zLevel;
+	public float zLevel = 0.0F;
 
 	public RenderItemBombBag() {}
 
@@ -44,15 +47,19 @@ public class RenderItemBombBag implements IItemRenderer
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return type == ItemRenderType.ENTITY && (helper == ItemRendererHelper.ENTITY_BOBBING || helper == ItemRendererHelper.ENTITY_ROTATION);
+		return false;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
 			Tessellator tessellator = Tessellator.instance;
+			GL11.glPushMatrix();
+			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+			GL11.glEnable(GL11.GL_ALPHA_TEST);
+			GL11.glEnable(GL11.GL_BLEND);
 			for (int i = 0; i < 3; ++i) {
-				Icon icon = item.getItem().getIcon(item, i);
+				IIcon icon = item.getItem().getIcon(item, i);
 				tessellator.startDrawingQuads();
 				tessellator.addVertexWithUV(0, 16, zLevel, icon.getMinU(), icon.getMaxV());
 				tessellator.addVertexWithUV(16, 16, zLevel, icon.getMaxU(), icon.getMaxV());
@@ -60,6 +67,8 @@ public class RenderItemBombBag implements IItemRenderer
 				tessellator.addVertexWithUV(0, 0, zLevel, icon.getMinU(), icon.getMinV());
 				tessellator.draw();
 			}
+			GL11.glPopAttrib();
+			GL11.glPopMatrix();
 		}
 	}
 }

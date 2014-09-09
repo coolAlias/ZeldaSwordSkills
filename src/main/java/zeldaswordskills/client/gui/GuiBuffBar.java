@@ -25,7 +25,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.event.ForgeSubscribe;
 
 import org.lwjgl.opengl.GL11;
 
@@ -33,6 +32,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -46,12 +46,12 @@ public class GuiBuffBar extends Gui
 {
 	/** Whether the buff bar should be displayed */
 	public static boolean shouldDisplay;
-	
+
 	private final Minecraft mc;
-	
+
 	/** Buff icons texture sheet */
 	private final ResourceLocation textures;
-	
+
 	private static final int ICON_SIZE = 18;
 	private static final int ICON_SPACING = ICON_SIZE + 2;
 	private static final int ICONS_PER_ROW = 8;
@@ -62,21 +62,25 @@ public class GuiBuffBar extends Gui
 		this.mc = Minecraft.getMinecraft();
 		this.textures = new ResourceLocation(ModInfo.ID, "textures/gui/bufficons.png");
 	}
-	
-	@ForgeSubscribe
+
+	@SubscribeEvent
 	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
 		if (!shouldDisplay || event.type != ElementType.EXPERIENCE) {
 			return;
 		}
-		
+
 		int xPos = Config.isBuffBarLeft() ? 2 : event.resolution.getScaledWidth() - (ICON_SPACING + 2);
 		int yPos = 2;
 		int offset = 0;
 		int increment = Config.isBuffBarHorizontal() && !Config.isBuffBarLeft() ? -ICON_SPACING : ICON_SPACING;
 		Collection<BuffBase> collection = ZSSEntityInfo.get(mc.thePlayer).getActiveBuffsMap().values();
 		if (!collection.isEmpty()) {
+			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GL11.glDisable(GL11.GL_LIGHTING);
+			// alpha test and blend needed due to vanilla or Forge rendering bug
+			GL11.glEnable(GL11.GL_ALPHA_TEST);
+			GL11.glEnable(GL11.GL_BLEND);
 			mc.getTextureManager().bindTexture(textures);
 			for (Iterator<BuffBase> iterator = ZSSEntityInfo.get(mc.thePlayer).getActiveBuffsMap().values().iterator();
 					iterator.hasNext(); offset = increment)
@@ -91,6 +95,7 @@ public class GuiBuffBar extends Gui
 					drawTexturedModalRect(xPos, yPos, buff.isDebuff() ? ICON_SIZE : 0, 0, ICON_SIZE, ICON_SIZE);
 				}
 			}
+			GL11.glPopAttrib();
 		}
 	}
 }

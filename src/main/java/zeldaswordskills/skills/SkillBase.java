@@ -25,10 +25,12 @@ import java.util.Map;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.SyncSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.SyncSkillPacket;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
@@ -42,8 +44,6 @@ import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.skills.sword.SwordBreak;
 import zeldaswordskills.util.LogHelper;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -63,7 +63,6 @@ public abstract class SkillBase
 	/** Map containing all registered skills */
 	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
 
-	/* ACTIVE SKILLS */
 	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDescriptions(1);
 	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDescriptions(1);
 	public static final SkillBase dodge = new Dodge("dodge").addDescriptions(1);
@@ -73,13 +72,13 @@ public abstract class SkillBase
 	public static final SkillBase spinAttack = new SpinAttack("spinattack").addDescriptions(1);
 	public static final SkillBase superSpinAttack = new SpinAttack("superspinattack").addDescriptions(1);
 	public static final SkillBase swordBeam = new SwordBeam("swordbeam").addDescriptions(1);
+	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDescriptions(1);
+	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDescriptions(1);
 
 	/* PASSIVE SKILLS */
 	public static final SkillBase bonusHeart = new BonusHeart("bonusheart").addDescriptions(1);
 
 	/* NEW SKILLS */
-	public static final SkillBase mortalDraw = new MortalDraw("mortaldraw").addDescriptions(1);
-	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDescriptions(1);
 	public static final SkillBase risingCut = new RisingCut("risingcut").addDescriptions(1);
 	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDescriptions(1);
 
@@ -170,7 +169,9 @@ public abstract class SkillBase
 		return null;
 	}
 
-	/** Note that mutable objects such as this are not suitable as Map keys */
+	/**
+	 * Note that mutable objects such as this are not suitable as Map keys
+	 */
 	@Override
 	public int hashCode() {
 		return 31 * (31 + id) + level;
@@ -284,17 +285,17 @@ public abstract class SkillBase
 		return desc;
 	}
 
-	/** Returns the translated tooltip display */
+	/** Returns the translated list containing Strings for tooltip display */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getDescription() {
-		List<String> desc = new ArrayList();
+		List<String> desc = new ArrayList(tooltip.size());
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}
 		return desc;
 	}
 
-	/** Returns advanced tooltip display containing info about skill at current level */
+	/** Returns a personalized tooltip display containing info about skill at current level */
 	@SideOnly(Side.CLIENT)
 	public List<String> getDescription(EntityPlayer player) {
 		List<String> desc = getDescription();
@@ -393,7 +394,7 @@ public abstract class SkillBase
 			levelUp(player);
 		}
 		if (!player.worldObj.isRemote && oldLevel < level) {
-			PacketDispatcher.sendPacketToPlayer(new SyncSkillPacket(this).makePacket(), (Player) player);
+			PacketDispatcher.sendTo(new SyncSkillPacket(this), (EntityPlayerMP) player);
 		}
 		return oldLevel < level;
 	}

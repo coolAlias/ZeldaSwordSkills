@@ -28,7 +28,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 public interface IZoomHelper {
-	
+
 	/**
 	 * When this item is equipped in one of the vanilla armor slots and an
 	 * item in use modifies the field of view, the fov will be magnified by

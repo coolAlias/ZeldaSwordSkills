@@ -26,6 +26,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -33,6 +34,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
@@ -187,7 +189,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 
 	/** Returns max time affected entities will be stunned when shocked */
 	protected int getMaxStunTime() {
-		return (getSize() * worldObj.difficultySetting * 10);
+		return (getSize() * worldObj.difficultySetting.getDifficultyId() * 10);
 	}
 
 	/** Random interval between shocks */
@@ -206,7 +208,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 		dataWatcher.updateObject(CHU_SIZE_INDEX, (byte) size);
 		setSize(0.6F * (float) size, 0.6F * (float) size);
 		setPosition(posX, posY, posZ);
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute((double)((size + 1) * (size + 1)));
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue((double)((size + 1) * (size + 1)));
 		setHealth(getMaxHealth());
 		experienceValue = size + (getType().ordinal() + 1);
 	}
@@ -225,20 +227,20 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	}
 
 	@Override
-	protected int getDropItemId() {
-		return ZSSItems.jellyChu.itemID;
+	protected Item getDropItem() {
+		return ZSSItems.jellyChu;
 	}
 
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int looting) {
-		int itemId = getDropItemId();
-		if (itemId > 0 && getSize() > 1) {
+		Item item = getDropItem();
+		if (item != null && getSize() > 1) {
 			int k = rand.nextInt(4) - 2;
 			if (looting > 0) {
 				k += rand.nextInt(looting + 1);
 			}
 			for (int l = 0; l < k; ++l) {
-				entityDropItem(new ItemStack(itemId, 1, getType().ordinal()), 0.0F);
+				entityDropItem(new ItemStack(item, 1, getType().ordinal()), 0.0F);
 			}
 		}
 	}
@@ -247,7 +249,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	protected void dropRareDrop(int rarity) {
 		switch(rarity) {
 		case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal()), 0.0F); break;
-		default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
+		default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 		}
 	}
 
@@ -297,24 +299,21 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 		if (worldObj.getWorldInfo().getTerrainType().handleSlimeSpawnReduction(rand, worldObj)) {
 			return false;
 		} else {
-			if (worldObj.difficultySetting > 0) {
+			if (worldObj.difficultySetting != EnumDifficulty.PEACEFUL) {
 				BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
 				BiomeGenBase targetBiome = null;
-
 				switch(getType()) {
 				case RED: targetBiome = BiomeGenBase.swampland; break;
 				case GREEN: targetBiome = BiomeGenBase.plains; break;
 				case BLUE: targetBiome = BiomeGenBase.taiga; break;
 				case YELLOW: targetBiome = BiomeGenBase.desert; break;
 				}
-
 				if (targetBiome != null && biome == targetBiome && posY > 50.0D && posY < 70.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor()
 						&& worldObj.getBlockLightValue(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)) <= rand.nextInt(8)) {
 					return super.getCanSpawnHere();
 				}
-
 				Chunk chunk = worldObj.getChunkFromBlockCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
-				if (rand.nextInt(10) == 0 && chunk.getRandomWithSeed(432191789L).nextInt(10) == 0 && posY < 40.0D) {
+				if (rand.nextInt(10) == 0 && chunk.getRandomWithSeed(432191789L).nextInt(10) == 0 && posY < 50.0D) {
 					return super.getCanSpawnHere();
 				}
 			}
@@ -325,7 +324,6 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
-		// workaround to prevent recursive splitting and merging in some situations
 		if (source == DamageSource.inWall) {
 			return false;
 		} else if (getShockTime() > 0) {
@@ -391,7 +389,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 
 	@Override
 	public void onUpdate() {
-		if (!worldObj.isRemote && worldObj.difficultySetting == 0 && getSize() > 0) {
+		if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL && getSize() > 0) {
 			isDead = true;
 		}
 
@@ -444,7 +442,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 			float f2 = MathHelper.sin(f) * (float) i * 0.5F * f1;
 			float f3 = MathHelper.cos(f) * (float) i * 0.5F * f1;
 
-			EntityFX particle = new EntityBreakingFX(worldObj, posX + (double) f2, boundingBox.minY, posZ + (double) f3, Item.slimeBall);
+			EntityFX particle = new EntityBreakingFX(worldObj, posX + (double) f2, boundingBox.minY, posZ + (double) f3, Items.slime_ball);
 			if (particle != null) {
 				particle.setRBGColorF(r, g, b);
 				WorldUtils.spawnWorldParticles(worldObj, particle);
@@ -482,10 +480,10 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 
 		if (canChuTypeShock() && getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
 			if (player != null && (recentlyHit > 0 || rand.nextInt(getShockInterval()) == 0)) {
-				setShockTime(rand.nextInt(getSize() * 100) + (worldObj.difficultySetting * 100));
+				setShockTime(rand.nextInt(getSize() * 100) + (worldObj.difficultySetting.getDifficultyId() * 100));
 			}
 		}
-		if (getShockTime() % 8 > 6 && rand.nextInt(4) == 0) {
+		if (getShockTime() % 8 > 5 && rand.nextInt(4) == 0) {
 			worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 		}
 		if (onGround && getEntityData().getInteger("timesMerged") < 4) {

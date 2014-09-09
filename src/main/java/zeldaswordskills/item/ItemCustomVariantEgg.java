@@ -22,7 +22,8 @@ import java.util.List;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingData;
+import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
@@ -50,14 +51,14 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 	/** The unlocalized entity name, retrieved as "entity.{entityName}.name" and suffixed with ".n", where 'n' is the subtype index */
 	private final String entityName;
 
-	public ItemCustomVariantEgg(int id, Class<? extends Entity> classToSpawn, String entityName) {
-		super(id);
+	public ItemCustomVariantEgg(Class<? extends Entity> classToSpawn, String entityName) {
+		super();
 		this.classToSpawn = classToSpawn;
 		this.entityName = entityName;
 	}
 
 	@Override
-	public String getItemDisplayName(ItemStack stack) {
+	public String getItemStackDisplayName(ItemStack stack) {
 		String s = ("" + StatCollector.translateToLocal("item.zss.spawn_egg.name")).trim();
 		if (entityName != null) {
 			s = s + " " + StatCollector.translateToLocal("entity." + entityName + ".name." + stack.getItemDamage());
@@ -84,7 +85,7 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 				entity.setLocationAndAngles(x, y, z, MathHelper.wrapAngleTo180_float(world.rand.nextFloat() * 360.0F), 0.0F);
 				entityliving.rotationYawHead = entityliving.rotationYaw;
 				entityliving.renderYawOffset = entityliving.rotationYaw;
-				entityliving.onSpawnWithEgg((EntityLivingData) null);
+				entityliving.onSpawnWithEgg((IEntityLivingData) null);
 				if (entity instanceof IEntityVariant) {
 					((IEntityVariant) entity).setType(subtype);
 				}
@@ -98,7 +99,7 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int item, CreativeTabs tab, List itemList) {
+	public void getSubItems(Item item, CreativeTabs tab, List itemList) {
 		List<Integer> colors = CustomEntityList.entityEggs.get(classToSpawn);
 		if (colors.isEmpty()) {
 			LogHelper.warning("Custom entity egg has an empty color list");

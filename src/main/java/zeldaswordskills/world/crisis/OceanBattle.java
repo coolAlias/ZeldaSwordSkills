@@ -17,7 +17,7 @@
 
 package zeldaswordskills.world.crisis;
 
-import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.lib.Sounds;
@@ -39,7 +39,7 @@ public class OceanBattle extends BossBattle {
 	@Override
 	protected void onUpdateTick(World world) {
 		world.playSoundEffect(core.xCoord + 0.5D, box.getCenterY(), core.zCoord + 0.5D, Sounds.ROCK_FALL, 1.0F, 1.0F);
-		StructureGenUtils.fillWithoutReplace(world, box.minX + 1, box.maxX, box.maxY-1, box.maxY, box.minZ + 1, box.maxZ, Block.sand.blockID, 0, 3);
+		StructureGenUtils.fillWithoutReplace(world, box.minX + 1, box.maxX, box.maxY-1, box.maxY, box.minZ + 1, box.maxZ, Blocks.sand, 0, 3);
 		scheduleUpdateTick((100 - (difficulty * 20)) + world.rand.nextInt(60));
 	}
 }

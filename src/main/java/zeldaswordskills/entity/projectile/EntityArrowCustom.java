@@ -17,18 +17,21 @@
 
 package zeldaswordskills.entity.projectile;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
-import net.minecraft.enchantment.EnchantmentThorns;
+import net.minecraft.block.material.Material;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.Packet70GameEvent;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
@@ -38,10 +41,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.TargetUtils;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -61,16 +60,27 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	/** Watchable object index for target entity's id */
 	private static final int TARGET_DATAWATCHER_INDEX = 24;
 
-	/** Private fields from EntityArrow are now protected instead */
-	protected int xTile = -1, yTile = -1, zTile = -1, inTile, inData;
+	/** Shooter's name, if shooter is a player - based on EntityThrowable's code */
+	private String shooterName = null;
+
+	// x/y/zTile are not yet renamed:
+	// field_145791_d = xTile
+	// field_145792_e = yTile;
+	// field_145789_f = zTile;
+
+	// Private fields with no getters from EntityArrow; instead of repeating the fields here,
+	// it would be better to use use Reflection to get/set the actual values in EntityArrow,
+	// or use ASM to make them public
+	protected Block inTile;
+	protected int inData, xTile = -1, yTile = -1, zTile = -1;
 	protected int ticksInGround = 0, ticksInAir = 0;
 	protected boolean inGround = false;
 
-	/** EntityArrow has a setter for private knockbackStrength field, but no getter; add it here */
+	// Also private - has a setter, but no getter >.<
 	private int knockbackStrength;
 
-	/** The item id to return when picked up */
-	private int arrowItemId = Item.arrow.itemID;
+	/** The item to return when picked up */
+	private Item arrowItem = Items.arrow;
 
 	/** Basic constructor is necessary */
 	public EntityArrowCustom(World world) {
@@ -132,6 +142,16 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	}
 
 	/**
+	 * Returns the shootingEntity, or if null, tries to get the shooting player from the world based on shooterName, if available
+	 */
+	public Entity getShooter() {
+		if (shootingEntity == null && shooterName != null) {
+			shootingEntity = worldObj.getPlayerEntityByName(shooterName);
+		}
+		return shootingEntity;
+	}
+
+	/**
 	 * Returns this arrow's current target, if any (for homing arrows only)
 	 */
 	protected EntityLivingBase getTarget() {
@@ -143,14 +163,14 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 * Sets this arrow's current target (for homing arrows only)
 	 */
 	public void setTarget(EntityLivingBase target) {
-		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, target != null ? target.entityId : -1);
+		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, target != null ? target.getEntityId() : -1);
 	}
 
 	/**
 	 * Sets the arrow item that will be added to the player's inventory when picked up
 	 */
-	public EntityArrowCustom setArrowItem(int itemID) {
-		arrowItemId = itemID;
+	public EntityArrowCustom setArrowItem(Item item) {
+		arrowItem = item;
 		return this;
 	}
 
@@ -189,7 +209,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	public void onCollideWithPlayer(EntityPlayer player) {
 		if (!worldObj.isRemote && inGround && arrowShake <= 0) {
 			boolean flag = canBePickedUp == 1 || canBePickedUp == 2 && player.capabilities.isCreativeMode;
-			if (canBePickedUp == 1 && !player.inventory.addItemStackToInventory(new ItemStack(arrowItemId, 1, 0))) {
+			if (canBePickedUp == 1 && !player.inventory.addItemStackToInventory(new ItemStack(arrowItem, 1, 0))) {
 				flag = false;
 			}
 
@@ -211,14 +231,14 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		return (!(entity instanceof EntityEnderman));
 	}
 
-	/** Sets the amount of knockback the arrow applies when it hits a mob. */
-	public void setKnockbackStrength(int value) {
-		knockbackStrength = value;
-	}
-
 	/** Returns the amount of knockback the arrow applies when it hits a mob */
 	public int getKnockbackStrength() {
 		return knockbackStrength;
+	}
+
+	/** Sets the amount of knockback the arrow applies when it hits a mob. */
+	public void setKnockbackStrength(int value) {
+		knockbackStrength = value;
 	}
 
 	/**
@@ -293,10 +313,10 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 * Checks if entity is colliding with a block and if so, sets inGround to true
 	 */
 	protected void checkInGround() {
-		int i = worldObj.getBlockId(xTile, yTile, zTile);
-		if (i > 0) {
-			Block.blocksList[i].setBlockBoundsBasedOnState(worldObj, xTile, yTile, zTile);
-			AxisAlignedBB axisalignedbb = Block.blocksList[i].getCollisionBoundingBoxFromPool(worldObj, xTile, yTile, zTile);
+		Block block = worldObj.getBlock(xTile, yTile, zTile);
+		if (block.getMaterial() != Material.air) {
+			block.setBlockBoundsBasedOnState(worldObj, xTile, yTile, zTile);
+			AxisAlignedBB axisalignedbb = block.getCollisionBoundingBoxFromPool(worldObj, xTile, yTile, zTile);
 			if (axisalignedbb != null && axisalignedbb.isVecInside(Vec3.createVectorHelper(posX, posY, posZ))) {
 				inGround = true;
 			}
@@ -307,10 +327,9 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 * If entity is in ground, updates ticks in ground or adjusts position if block no longer in world
 	 */
 	protected void updateInGround() {
-		int j = worldObj.getBlockId(xTile, yTile, zTile);
+		Block block = worldObj.getBlock(xTile, yTile, zTile);
 		int k = worldObj.getBlockMetadata(xTile, yTile, zTile);
-
-		if (j == inTile && k == inData) {
+		if (block == inTile && k == inData) {
 			++ticksInGround;
 			if (ticksInGround == 1200) {
 				setDead();
@@ -330,13 +349,14 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	protected void updateInAir() {
 		++ticksInAir;
-		MovingObjectPosition mop = TargetUtils.checkForImpact(worldObj, this, shootingEntity, 0.3D, ticksInAir >= 5);
+		MovingObjectPosition mop = TargetUtils.checkForImpact(worldObj, this, getShooter(), 0.3D, ticksInAir >= 5);
 		if (mop != null) {
 			onImpact(mop);
 		}
 		spawnTrailingParticles();
 		updatePosition();
-		doBlockCollisions();
+		// func_145775_I is doBlockCollisions
+		func_145775_I();
 	}
 
 	/** Returns the arrow's velocity factor */
@@ -377,6 +397,60 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	}
 
 	/**
+	 * Returns MovingObjectPosition of Entity or Block impacted, or null if nothing was struck
+	 */
+	/*
+	protected MovingObjectPosition checkForImpact() {
+		Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+		Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
+		// func_147447_a is the ray_trace method
+		MovingObjectPosition mop = worldObj.func_147447_a(vec3, vec31, false, true, false);
+		vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+		vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
+
+		if (mop != null) {
+			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+		}
+
+		Entity entity = null;
+		List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox.addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
+		double d0 = 0.0D;
+		double hitBox = 0.3D;
+		// make sure shootingEntity is correct, e.g. if loaded from NBT
+		shootingEntity = getShooter();
+
+		for (int i = 0; i < list.size(); ++i) {
+			Entity entity1 = (Entity) list.get(i);
+			if (entity1.canBeCollidedWith() && (entity1 != shootingEntity || ticksInAir >= 5)) {
+				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
+				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
+				if (mop1 != null) {
+					double d1 = vec3.distanceTo(mop1.hitVec);
+					if (d1 < d0 || d0 == 0.0D) {
+						entity = entity1;
+						d0 = d1;
+					}
+				}
+			}
+		}
+
+		if (entity != null) {
+			mop = new MovingObjectPosition(entity);
+		}
+
+		if (mop != null && mop.entityHit instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) mop.entityHit;
+			if (player.capabilities.disableDamage || (shootingEntity instanceof EntityPlayer
+					&& !((EntityPlayer) shootingEntity).canAttackPlayer(player)))
+			{
+				mop = null;
+			}
+		}
+
+		return mop;
+	}*/
+
+	/**
 	 * Called when custom arrow impacts an entity or block
 	 */
 	protected void onImpact(MovingObjectPosition mop) {
@@ -392,20 +466,19 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	protected void onImpactEntity(MovingObjectPosition mop) {
 		if (mop.entityHit != null) {
+			// make sure shootingEntity is correct, e.g. if loaded from NBT
+			shootingEntity = getShooter();
 			int dmg = calculateDamage(mop.entityHit);
 			if (isBurning() && canTargetEntity(mop.entityHit)) {
 				mop.entityHit.setFire(5);
 			}
-
 			if (mop.entityHit.attackEntityFrom(getDamageSource(mop.entityHit), (float) dmg)) {
 				if (mop.entityHit instanceof EntityLivingBase) {
 					handlePostDamageEffects((EntityLivingBase) mop.entityHit);
-
 					if (shootingEntity instanceof EntityPlayerMP && mop.entityHit != shootingEntity && mop.entityHit instanceof EntityPlayer) {
-						((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(6, 0));
+						((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
 					}
 				}
-
 				playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (canTargetEntity(mop.entityHit)) {
 					setDead();
@@ -428,7 +501,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		xTile = mop.blockX;
 		yTile = mop.blockY;
 		zTile = mop.blockZ;
-		inTile = worldObj.getBlockId(xTile, yTile, zTile);
+		inTile = worldObj.getBlock(xTile, yTile, zTile);
 		inData = worldObj.getBlockMetadata(xTile, yTile, zTile);
 		motionX = (double)((float)(mop.hitVec.xCoord - posX));
 		motionY = (double)((float)(mop.hitVec.yCoord - posY));
@@ -441,9 +514,8 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		inGround = true;
 		arrowShake = 7;
 		setIsCritical(false);
-
-		if (inTile != 0) {
-			Block.blocksList[inTile].onEntityCollidedWithBlock(worldObj, xTile, yTile, zTile, this);
+		if (inTile.getMaterial() != Material.air) {
+			inTile.onEntityCollidedWithBlock(worldObj, xTile, yTile, zTile, this);
 		}
 	}
 
@@ -466,18 +538,19 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		if (!worldObj.isRemote) {
 			entityHit.setArrowCountInEntity(entityHit.getArrowCountInEntity() + 1);
 		}
-
-		if (knockbackStrength > 0) {
+		int k = getKnockbackStrength();
+		if (k > 0) {
 			float f3 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
-
 			if (f3 > 0.0F) {
-				double knockback = (double) knockbackStrength * 0.6000000238418579D / (double) f3;
+				double knockback = (double) k * 0.6000000238418579D / (double) f3;
 				entityHit.addVelocity(motionX * knockback, 0.1D, motionZ * knockback);
 			}
 		}
-
-		if (shootingEntity != null) {
-			EnchantmentThorns.func_92096_a(shootingEntity, entityHit, rand);
+		if (shootingEntity instanceof EntityLivingBase) {
+			// func_151384_a is the new way Thorns is handled
+			EnchantmentHelper.func_151384_a(entityHit, shootingEntity);
+			// TODO not sure what the following does yet, but it's in EntityArrow
+			EnchantmentHelper.func_151385_b((EntityLivingBase) shootingEntity, entityHit);
 		}
 	}
 
@@ -487,15 +560,20 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		compound.setShort("xTile", (short) xTile);
 		compound.setShort("yTile", (short) yTile);
 		compound.setShort("zTile", (short) zTile);
+		compound.setShort("life", (short) ticksInGround);
 		// vanilla arrow uses Byte for the block; use Integer instead for modded blocks
-		compound.setInteger("inTile", inTile);
+		compound.setInteger("inTile", Block.getIdFromBlock(inTile));
 		compound.setByte("inData", (byte) inData);
 		compound.setByte("shake", (byte) arrowShake);
 		compound.setByte("inGround", (byte)(inGround ? 1 : 0));
 		compound.setByte("pickup", (byte) canBePickedUp);
 		compound.setDouble("damage", getDamage());
-		compound.setInteger("arrowId", arrowItemId);
-		compound.setInteger("target", getTarget() != null ? getTarget().entityId : -1);
+		compound.setInteger("arrowId", Item.getIdFromItem(arrowItem));
+		if ((shooterName == null || shooterName.length() == 0) && shootingEntity != null && shootingEntity instanceof EntityPlayer) {
+			shooterName = shootingEntity.getCommandSenderName();
+		}
+		compound.setString("shooter", shooterName == null ? "" : shooterName);
+		compound.setInteger("target", getTarget() == null ? -1 : getTarget().getEntityId());
 	}
 
 	@Override
@@ -504,28 +582,33 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		xTile = compound.getShort("xTile");
 		yTile = compound.getShort("yTile");
 		zTile = compound.getShort("zTile");
+		ticksInGround = compound.getShort("life");
 		// vanilla arrow uses Byte for the block; use Integer instead for modded blocks
 		// otherwise, could call super to have parent get correct values for private fields
-		inTile = compound.getInteger("inTile");
+		inTile = Block.getBlockById(compound.getInteger("inTile"));
 		inData = compound.getByte("inData") & 255;
 		arrowShake = compound.getByte("shake") & 255;
 		inGround = compound.getByte("inGround") == 1;
 		setDamage(compound.getDouble("damage"));
 		canBePickedUp = compound.getByte("pickup");
-		arrowItemId = (compound.hasKey("arrowId") ? compound.getInteger("arrowId") : Item.arrow.itemID);
+		arrowItem = (compound.hasKey("arrowId") ? Item.getItemById(compound.getInteger("arrowId")) : Items.arrow);
+		shooterName = compound.getString("shooter");
+		if (shooterName != null && shooterName.length() == 0) {
+			shooterName = null;
+		}
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, compound.hasKey("target") ? compound.getInteger("target") : -1);
 	}
 
 	@Override
-	public void writeSpawnData(ByteArrayDataOutput buffer) {
-		buffer.writeInt(shootingEntity != null ? shootingEntity.entityId : -1);
+	public void writeSpawnData(ByteBuf buffer) {
+		buffer.writeInt(shootingEntity != null ? shootingEntity.getEntityId() : -1);
 	}
 
 	@Override
-	public void readSpawnData(ByteArrayDataInput buffer) {
-		// Replicate EntityArrow's special spawn packet handling from NetClientHandler#handleVehicleSpawn:
+	public void readSpawnData(ByteBuf buffer) {
+		// Replicate EntityArrow's special spawn packet handling from NetHandlerPlayClient#handleSpawnObject:
 		Entity shooter = worldObj.getEntityByID(buffer.readInt());
-		if (shooter instanceof EntityLivingBase) {
+		if (shooter instanceof EntityLivingBase) { // why check for EntityLivingBase when shootingEntity can be an Entity?
 			shootingEntity = (EntityLivingBase) shooter;
 		}
 	}

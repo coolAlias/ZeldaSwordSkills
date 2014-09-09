@@ -38,6 +38,11 @@ public class DirtyEntityAccessor {
 		return Math.max(amount - entity.getAbsorptionAmount(), 0.0F);
 	}
 
+	/** Sets or adds to the amount of xp the entity will drop when killed */
+	public static void setLivingXp(EntityLiving entity, int xp, boolean add) {
+		entity.experienceValue = (add ? entity.experienceValue + xp : xp);
+	}
+
 	/**
 	 * Sets an entity's size; stores original size in entity's extended data
 	 * @param width stored as "origWidth"

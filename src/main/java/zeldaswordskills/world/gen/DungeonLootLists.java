@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -59,12 +60,12 @@ public class DungeonLootLists
 		}
 	}
 
-	/** Item version: Creates a weighted chest content for a generic item with the min, max, and weight */
+	/** Items version: Creates a weighted chest content for a generic item with the min, max, and weight */
 	public static WeightedRandomChestContent getLoot(Item item, int min, int max, int weight) {
 		return new WeightedRandomChestContent(new ItemStack(item), min, max, weight);
 	}
 
-	/** Item with damage version: Creates a weighted chest content with the min, max, and weight */
+	/** Items with damage version: Creates a weighted chest content with the min, max, and weight */
 	public static WeightedRandomChestContent getLoot(Item item, int damage, int min, int max, int weight) {
 		return new WeightedRandomChestContent(new ItemStack(item, 1, damage), min, max, weight);
 	}
@@ -160,25 +161,25 @@ public class DungeonLootLists
 
 	private static void initBasicConsumables() {
 		setCategoryStats(ChestGenHooks.getInfo(BASIC_LOOT), Config.getMinNumItems(), Config.getMinNumItems() + 4, new WeightedRandomChestContent[] {
-			getLoot(Item.appleRed, 1, 2, 5),
-			getLoot(Item.bread, 1, 2, 5),
-			getLoot(Item.compass, 1, 2, 4),
-			getLoot(Item.emptyMap, 1, 3, 4),
-			getLoot(Item.expBottle, 1, 5, 5),
-			getLoot(Item.nameTag, 1, 2, 5),
-			getLoot(Item.diamond, 1, 2, 2),
-			getLoot(Item.ingotGold, 1, 2, 3),
-			getLoot(Item.ingotIron, 1, 2, 4),
-			getLoot(Item.glassBottle, 1, 3, 5),
-			getLoot(Item.emerald, 2, 5, 7),
-			getLoot(Item.arrow, 3, 7, 7),
-			getLoot(Item.melonSeeds, 1, 2, 3),
+			getLoot(Items.apple, 1, 2, 5),
+			getLoot(Items.bread, 1, 2, 5),
+			getLoot(Items.compass, 1, 2, 4),
+			getLoot(Items.map, 1, 3, 4),
+			getLoot(Items.experience_bottle, 1, 5, 5),
+			getLoot(Items.name_tag, 1, 2, 5),
+			getLoot(Items.diamond, 1, 2, 2),
+			getLoot(Items.gold_ingot, 1, 2, 3),
+			getLoot(Items.iron_ingot, 1, 2, 4),
+			getLoot(Items.glass_bottle, 1, 3, 5),
+			getLoot(Items.emerald, 2, 5, 7),
+			getLoot(Items.arrow, 3, 7, 7),
+			getLoot(Items.melon_seeds, 1, 2, 3),
 			getLoot(ZSSItems.bombBag, 1, 1, Config.getBombBagWeight() / 2),
 			getLoot(ZSSItems.keySmall, 1, 1, Config.getSmallKeyWeight()),
 			getLoot(ZSSItems.potionRed, 1, 1, 3),
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
 			getLoot(ZSSItems.shieldDeku, 1, 1, 1),
-			getLoot(ZSSItems.swordBroken, ZSSItems.swordKokiri.itemID, 1, 1, 1)
+			getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordKokiri), 1, 1, 1)
 		});
 	}
 
@@ -219,15 +220,15 @@ public class DungeonLootLists
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
 			getLoot(ZSSItems.smallHeart, 1, 1, 5),
 			getLoot(ZSSItems.dekuNut, 1, 1, 4),
-			getLoot(Item.arrow, 1, 1, 5),
-			getLoot(Item.emerald, 1, 1, 10)
+			getLoot(Items.arrow, 1, 1, 5),
+			getLoot(Items.emerald, 1, 1, 10)
 		});
 	}
-	
+
 	private static final WeightedRandomChestContent[] lavaLoot = {
-		getLoot(Item.netherStalkSeeds, 1, 2, 1),
-		getLoot(Item.potion, LibPotionID.FIRERESIST.id, 1, 1, 2),
-		getLoot(Item.fireballCharge, 1, 2, 3),
+		getLoot(Items.nether_wart, 1, 2, 1),
+		getLoot(Items.potionitem, LibPotionID.FIRERESIST.id, 1, 1, 2),
+		getLoot(Items.fire_charge, 1, 2, 3),
 		getLoot(ZSSItems.arrowBombFire, 2, 5, 3),
 		getLoot(ZSSItems.bomb, BombType.BOMB_FIRE.ordinal(), 1, 2, Config.getBombWeight() * 2),
 		getLoot(ZSSItems.tunicGoronHelm, 1, 1, 1),
@@ -240,9 +241,9 @@ public class DungeonLootLists
 			getLoot(ZSSItems.arrowFire, 2, 5, Config.getLockedLootWeight()),
 			getLoot(ZSSItems.arrowIce, 2, 5, Config.getLockedLootWeight()),
 			getLoot(ZSSItems.arrowLight, 1, 3, 1),
-			getLoot(Item.appleGold, 1, 2, Math.max(Config.getLockedLootWeight() / 3, 1)),
-			getLoot(Item.potion, LibPotionID.HEALING_II.id, 1, 1, Math.max(Config.getLockedLootWeight() / 2, 2)),
-			getLoot(Item.potion, LibPotionID.HEALING_SPLASH.id, 1, 1, Math.max(Config.getLockedLootWeight() / 2, 2)),
+			getLoot(Items.golden_apple, 1, 2, Math.max(Config.getLockedLootWeight() / 3, 1)),
+			getLoot(Items.potionitem, LibPotionID.HEALING_II.id, 1, 1, Math.max(Config.getLockedLootWeight() / 2, 2)),
+			getLoot(Items.potionitem, LibPotionID.HEALING_SPLASH.id, 1, 1, Math.max(Config.getLockedLootWeight() / 2, 2)),
 			getLoot(ZSSItems.bombBag, 1, 1, Config.getBombBagWeight()),
 			getLoot(ZSSItems.magicMirror, 1, 1, Config.getLockedLootWeight()),
 			getLoot(ZSSItems.potionBlue, 1, 1, 1),
@@ -253,48 +254,49 @@ public class DungeonLootLists
 			getLoot(ZSSItems.tunicHeroHelm, 1, 1, 1)
 		});
 	}
-	
+
 	private static final WeightedRandomChestContent[] mountainLoot = {
-		getLoot(Item.potion, LibPotionID.STRENGTH_II.id, 1, 1, 1),
-		getLoot(Item.potion, LibPotionID.STRENGTH.id, 1, 1, 3),
-		getLoot(Item.diamond, 1, 3, 3),
+		getLoot(Items.potionitem, LibPotionID.STRENGTH_II.id, 1, 1, 1),
+		getLoot(Items.potionitem, LibPotionID.STRENGTH.id, 1, 1, 3),
+		getLoot(Items.diamond, 1, 3, 3),
 		getLoot(ZSSItems.arrowBomb, 2, 5, 3),
 		getLoot(ZSSItems.bomb,BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight() * 2),
 		getLoot(ZSSItems.rocsFeather, 1, 1, 1),
-		getLoot(ZSSItems.swordBroken, ZSSItems.swordOrdon.itemID, 1, 1, 1)
+		getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1)
 	};
 
 	private static void initNetherLoot() {
 		setCategoryStats(ChestGenHooks.getInfo(NETHER_LOOT), 1, 2, new WeightedRandomChestContent[] {
-			getLoot(Item.ghastTear, 1, 2, 1),
-			getLoot(Item.netherStalkSeeds, 1, 2, 1),
-			getLoot(Item.potion, LibPotionID.FIRERESIST.id, 1, 1, 2),
-			getLoot(Item.blazeRod, 1, 3, 2),
-			getLoot(Item.fireballCharge, 1, 3, 3),
-			getLoot(Item.magmaCream, 1, 3, 3),
+			getLoot(Items.ghast_tear, 1, 2, 1),
+			getLoot(Items.nether_wart, 1, 2, 1),
+			getLoot(Items.potionitem, LibPotionID.FIRERESIST.id, 1, 1, 2),
+			getLoot(Items.blaze_rod, 1, 3, 2),
+			getLoot(Items.fire_charge, 1, 3, 3),
+			getLoot(Items.magma_cream, 1, 3, 3),
 			getLoot(ZSSItems.arrowBombFire, 2, 5, 3),
 			getLoot(ZSSItems.bomb, BombType.BOMB_FIRE.ordinal(), 1, 2, Config.getBombWeight() * 2)
 		});
 	}
-	
+
 	private static final WeightedRandomChestContent[] oceanLoot = {
-		getLoot(Item.fishingRod, 1, 1, 2),
-		getLoot(Item.fishRaw, 1, 2, 4),
+		getLoot(Items.fishing_rod, 1, 1, 2),
+		getLoot(Items.fish, 1, 2, 4),
+		getLoot(Items.potionitem, LibPotionID.WATER_BREATHING.id, 1, 1, 3),
 		getLoot(ZSSItems.arrowBombWater, 2, 5, 3),
 		getLoot(ZSSItems.bomb,BombType.BOMB_WATER.ordinal(), 1, 2, Config.getBombWeight() * 2),
 		getLoot(ZSSItems.tunicZoraHelm, 1, 1, 1),
 		getLoot(ZSSItems.tunicZoraChest, 1, 1, 1),
 		getLoot(ZSSItems.tunicZoraLegs, 1, 1, 1)
 	};
-	
+
 	private static final WeightedRandomChestContent[] regularLoot = {
-		getLoot(Item.horseArmorDiamond, 1, 1, 1),
-		getLoot(Item.horseArmorGold, 1, 1, 1),
-		getLoot(Item.horseArmorIron, 1, 1, 2),
-		getLoot(Item.saddle, 1, 1, 3),
+		getLoot(Items.diamond_horse_armor, 1, 1, 1),
+		getLoot(Items.golden_horse_armor, 1, 1, 1),
+		getLoot(Items.iron_horse_armor, 1, 1, 2),
+		getLoot(Items.saddle, 1, 1, 3),
 		getLoot(ZSSItems.arrowBomb, 2, 5, 3),
 		getLoot(ZSSItems.bomb,BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight() * 2),
-		getLoot(ZSSItems.swordBroken, ZSSItems.swordOrdon.itemID, 1, 1, 1),
+		getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1),
 		getLoot(ZSSItems.swordKokiri, 1, 1, 1)
 	};
 

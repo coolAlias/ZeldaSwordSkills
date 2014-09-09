@@ -38,14 +38,15 @@ import zeldaswordskills.api.block.BlockWeight;
  * that implement ISmashable, just in case the block does not use an Adventure Mode
  * exempt block material:
  * 
+ * // func_150897_b is canHarvestBlock
  * @Override
- * public boolean canHarvestBlock(Block block) {
+ * public boolean func_150897_b(Block block) {
  * 	return block instanceof ISmashable;
  * }
  *
  */
 public interface ISmashBlock {
-	
+
 	/**
 	 * Returns the strength of this item for the purpose of smashing blocks
 	 * Player-, ItemStack-, and Block- sensitive
@@ -53,7 +54,7 @@ public interface ISmashBlock {
 	 * @param meta the metadata of the block struck
 	 */
 	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta);
-	
+
 	/**
 	 * Called after the player has attempted to smash a block with the stack,
 	 * making it ideal for damaging the stack, for example

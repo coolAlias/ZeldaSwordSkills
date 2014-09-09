@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 public interface ISpawnParticles {
-	
+
 	/**
 	 * Method that is called on each client world upon receiving an ISpawnParticlesPacket
 	 * Any particles to be spawned should be spawned from this method.

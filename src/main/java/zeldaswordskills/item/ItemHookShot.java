@@ -19,26 +19,29 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -58,15 +61,15 @@ import cpw.mods.fml.relauncher.SideOnly;
  * by finding components and getting help from villagers.
  *
  */
-public class ItemHookShot extends Item
+public class ItemHookShot extends Item implements IUnenchantable
 {
 	protected static final String[] shotNames = {"Hookshot","Stoneshot","Multishot"};
 
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
+	private IIcon[] iconArray;
 
-	public ItemHookShot(int id) {
-		super(id);
+	public ItemHookShot() {
+		super();
 		setMaxStackSize(1);
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
@@ -90,7 +93,7 @@ public class ItemHookShot extends Item
 
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) { return 16000; }
-	
+
 	@Override
 	public boolean isItemTool(ItemStack stack) { return true; }
 
@@ -108,7 +111,7 @@ public class ItemHookShot extends Item
 	}
 
 	@Override
-	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
+	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 		if (count % 9 == 8 && !player.worldObj.isRemote) {
 			player.worldObj.playSoundAtEntity(player, Sounds.HOOKSHOT, 1.0F, 1.0F);
 		}
@@ -120,14 +123,14 @@ public class ItemHookShot extends Item
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (villager.getProfession() == 3) {
-				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
+				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
 			}
 		}
 		return true;
@@ -135,7 +138,7 @@ public class ItemHookShot extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int type) {
+	public IIcon getIconFromDamage(int type) {
 		return iconArray[getType(type).ordinal() / 2];
 	}
 
@@ -146,16 +149,16 @@ public class ItemHookShot extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (int i = 0; i < HookshotType.values().length; ++i) {
-			list.add(new ItemStack(itemID, 1, i));
+			list.add(new ItemStack(item, 1, i));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[HookshotType.values().length / 2];
+	public void registerIcons(IIconRegister register) {
+		iconArray = new IIcon[HookshotType.values().length / 2];
 		for (int i = 0; i < HookshotType.values().length; ++i) {
 			iconArray[i / 2] = register.registerIcon(ModInfo.ID + ":" + shotNames[getType(i).ordinal() / 2].toLowerCase());
 		}

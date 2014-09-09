@@ -20,7 +20,7 @@ package zeldaswordskills.client.render.block;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import zeldaswordskills.block.BlockSacredFlame;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
@@ -43,8 +43,8 @@ public class RenderSacredFlame implements ISimpleBlockRenderingHandler
 		BlockSacredFlame block = (BlockSacredFlame) parBlock;
 		Tessellator tessellator = Tessellator.instance;
 		int meta = world.getBlockMetadata(x, y, z);
-		Icon icon = block.getFireIcon(0, meta);
-		Icon icon1 = block.getFireIcon(1, meta);
+		IIcon icon = block.getFireIcon(0, meta);
+		IIcon icon1 = block.getFireIcon(1, meta);
 		/*
 		switch(meta) {
 		case 0x1: tessellator.setColorOpaque_F(1.0F, 0.188F, 0.188F); break;
@@ -52,7 +52,7 @@ public class RenderSacredFlame implements ISimpleBlockRenderingHandler
 		case 0x4: tessellator.setColorOpaque_F(0.255F, 0.412F, 0.882F); break;
 		default: tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
 		}
-		*/
+		 */
 		tessellator.setColorOpaque_F(1.0F, 1.0F, 1.0F);
 		tessellator.setBrightness(block.getMixedBrightnessForBlock(world, x, y, z));
 		double minU = icon.getMinU();
@@ -120,7 +120,7 @@ public class RenderSacredFlame implements ISimpleBlockRenderingHandler
 	}
 
 	@Override
-	public boolean shouldRender3DInInventory() {
+	public boolean shouldRender3DInInventory(int modelId) {
 		return false;
 	}
 

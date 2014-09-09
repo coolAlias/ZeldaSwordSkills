@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -28,8 +29,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -113,14 +114,12 @@ public class EntityLeapingBlow extends EntityThrowable
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (inGround || ticksExisted > lifespan) {
-			setDead();
-		}
+		if (inGround || ticksExisted > lifespan) { setDead(); }
 		if (!worldObj.isRemote) {
 			List<EntityLivingBase> targets = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, getAoE());
 			for (EntityLivingBase target : targets) {
-				if (!affectedEntities.contains(target.entityId) && target != getThrower() && !TargetUtils.isTargetInFrontOf(this, target, 30F)) {
-					affectedEntities.add(target.entityId);
+				if (!affectedEntities.contains(target.getEntityId()) && target != getThrower() && !TargetUtils.isTargetInFrontOf(this, target, 30F)) {
+					affectedEntities.add(target.getEntityId());
 					float d = damage;
 					if (getThrower() != null) {
 						double d0 = (1.0D - getThrower().getDistanceSqToEntity(target) / getRangeSquared());
@@ -133,14 +132,13 @@ public class EntityLeapingBlow extends EntityThrowable
 				}
 			}
 		}
-
 		/** Velocity x and z for spawning particles to left and right of entity */
 		double vX = motionZ;
 		double vZ = motionX;
 		String particle = (isMaster ? "magicCrit" : "crit");
-		int blockID = worldObj.getBlockId((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
-		if (blockID > 0) {
-			particle = "tilecrack_" + blockID + "_" + worldObj.getBlockMetadata((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
+		Block block = worldObj.getBlock((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
+		if (block.getMaterial() != Material.air) {
+			particle = "blockcrack_" + Block.getIdFromBlock(block) + "_" + worldObj.getBlockMetadata((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
 		}
 		for (int i = 0; i < 4; ++i) {
 			worldObj.spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian());
@@ -151,20 +149,20 @@ public class EntityLeapingBlow extends EntityThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (!worldObj.isRemote) {
-			if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
+			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
-				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.entityId) && entity != getThrower()) {
-					affectedEntities.add(entity.entityId);
+				if (entity instanceof EntityLivingBase && !affectedEntities.contains(entity.getEntityId()) && entity != getThrower()) {
+					affectedEntities.add(entity.getEntityId());
 					if (entity.attackEntityFrom(DamageUtils.causeIndirectSwordDamage(this, getThrower()), damage)) {
-						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
+						WorldUtils.playSoundAtEntity(entity, Sounds.HURT_FLESH, 0.4F, 0.5F);
 						if (entity instanceof EntityLivingBase) {
 							((EntityLivingBase) entity).addPotionEffect(new PotionEffect(Potion.weakness.id, 60));
 						}
 					}
 				}
 			} else {
-				int blockID = worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ);
-				if (Block.blocksList[blockID] != null && Block.blocksList[blockID].blockMaterial.blocksMovement()) {
+				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				if (block.getMaterial().blocksMovement()) {
 					setDead();
 				}
 			}

@@ -22,15 +22,15 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.network.BorrowMaskPacket;
-import cpw.mods.fml.common.network.PacketDispatcher;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.server.BorrowMaskPacket;
 
 public class ContainerMaskTrader extends Container
 {
 	private final InventoryMaskTrader inv;
 	/** Set to true when mask is borrowed, closing the screen */
 	private boolean maskBorrowed = false;
-	
+
 	public ContainerMaskTrader() {
 		inv = new InventoryMaskTrader();
 		for (int i = 0; i < inv.getSizeInventory(); ++i) {
@@ -38,16 +38,16 @@ public class ContainerMaskTrader extends Container
 		}
 		addSlotToContainer(new Slot(new InventoryBasic("", true, 1), 0, 80, 124));
 	}
-	
+
 	/** Returns true if there is a valid stack in the borrow slot */
 	public boolean canBorrow() {
 		return ((Slot) inventorySlots.get(inv.getSizeInventory())).getHasStack();
 	}
-	
+
 	/** Sends borrow mask packet to player and closes screen */
 	public void borrowMask() {
 		ItemStack mask = ((Slot) inventorySlots.get(inv.getSizeInventory())).getStack();
-		PacketDispatcher.sendPacketToServer(new BorrowMaskPacket(mask).makePacket());
+		PacketDispatcher.sendToServer(new BorrowMaskPacket(mask));
 		maskBorrowed = true;
 	}
 

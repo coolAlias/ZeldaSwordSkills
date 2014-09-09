@@ -28,16 +28,16 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.RefreshSpinPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.packet.server.RefreshSpinPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -110,8 +110,8 @@ public class SpinAttack extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		byte temp = level;
 		if (!isActive()) {
-			superLevel = (checkHealth(player) ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
-			level = ZSSPlayerInfo.get(player).getSkillLevel(spinAttack);
+			superLevel = (checkHealth(player) ? ZSSPlayerSkills.get(player).getSkillLevel(superSpinAttack) : 0);
+			level = ZSSPlayerSkills.get(player).getSkillLevel(spinAttack);
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
@@ -151,7 +151,7 @@ public class SpinAttack extends SkillActive
 		return 20 - (level * 2);
 	}
 
-	/** Returns true if the skill is still charging up */
+	/** Returns true if the skill is still charging up; always false on the server */
 	private boolean isCharging() {
 		return charge > 0;
 	}
@@ -178,7 +178,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
+		return super.canUse(player) && !isActive();
 	}
 
 	@Override
@@ -189,12 +189,14 @@ public class SpinAttack extends SkillActive
 		return super.canUse(player) && PlayerUtils.isHoldingSkillItem(player);
 	}
 
-	/** Returns true if either left or right arrow key is currently being pressed (or both in the case of vanilla controls) */
+	/**
+	 * Returns true if either left or right arrow key is currently being pressed (or both in the case of vanilla controls)
+	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
-		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT].pressed || ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT].pressed
-				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed
-						&& Minecraft.getMinecraft().gameSettings.keyBindRight.pressed));
+		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT].getIsKeyPressed() || ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT].getIsKeyPressed()
+				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.getIsKeyPressed()
+						&& Minecraft.getMinecraft().gameSettings.keyBindRight.getIsKeyPressed()));
 	}
 
 	@Override
@@ -219,7 +221,7 @@ public class SpinAttack extends SkillActive
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindAttack || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK]) {
 			if (isActive() && canRefresh() && canExecute(player)) {
-				PacketDispatcher.sendPacketToServer(new RefreshSpinPacket().makePacket());
+				PacketDispatcher.sendToServer(new RefreshSpinPacket());
 				arc += 360F;
 				return true;
 			}
@@ -245,7 +247,7 @@ public class SpinAttack extends SkillActive
 		currentSpin = 0F;
 		arc = 360F;
 		refreshed = 0;
-		superLevel = (checkHealth(player) ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+		superLevel = (checkHealth(player) ? ZSSPlayerSkills.get(player).getSkillLevel(superSpinAttack) : 0);
 		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
 		startSpin(world, player);
 		return true;
@@ -257,20 +259,17 @@ public class SpinAttack extends SkillActive
 		arc = 0.0F;
 	}
 
-	/**
-	 * isActive() should return false on the server, so updates only on the client; this is intentional
-	 */
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (player.worldObj.isRemote && isKeyPressed()) { 
+			if (player.worldObj.isRemote && isKeyPressed()) {
 				if (charge < (getChargeTime() - 1)) {
 					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 				}
 				--charge;
-				if (charge == 0) {
-					PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+				if (charge == 0 && canExecute(player)) {
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 				}
 			} else {
 				charge = 0;
@@ -282,7 +281,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (PlayerUtils.isHoldingSkillItem(player)) {
 			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
 			for (EntityLivingBase target : list) {
@@ -334,7 +333,7 @@ public class SpinAttack extends SkillActive
 
 	@SideOnly(Side.CLIENT)
 	private void spawnParticles(EntityPlayer player) {
-		// TODO these will not show up for other players
+		// TODO these will not be seen by other players
 		String particle = (isFlaming ? "flame" : (superLevel > 0 ? "magicCrit" : "crit"));
 		Vec3 vec3 = player.getLookVec();
 		double posX = player.posX + (vec3.xCoord * getRange());

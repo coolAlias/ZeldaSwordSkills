@@ -30,7 +30,7 @@ public class TimedChatDialogue
 	final EntityPlayer player;
 	/** The list of Strings to send */
 	final List<String> chat;
-	
+
 	/**
 	 * Use to send multiple chat messages to a player, one line at a time, with no initial
 	 * delay and a standardized delay between each line (1250 milliseconds)
@@ -54,14 +54,14 @@ public class TimedChatDialogue
 		timer = new Timer();
 		timer.schedule(new ChatTask(), start, delay);
 	}
-	
+
 	class ChatTask extends TimerTask {
 		int i = 0;
 		public void run() {
 			if (i == chat.size()) {
 				timer.cancel();
 			} else {
-				player.addChatMessage(chat.get(i++));
+				PlayerUtils.sendChat(player, chat.get(i++));
 			}
 		}
 	}

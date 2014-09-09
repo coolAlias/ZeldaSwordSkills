@@ -17,6 +17,8 @@
 
 package zeldaswordskills;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.client.TargetingTickHandler;
@@ -28,24 +30,29 @@ import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.registry.TickRegistry;
-import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void initialize() {
 		super.initialize();
-		ZSSKeyHandler.init();
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new GuiBuffBar());
 		MinecraftForge.EVENT_BUS.register(new ZSSClientEvents());
-		TickRegistry.registerTickHandler(new TargetingTickHandler(), Side.CLIENT);
+		FMLCommonHandler.instance().bus().register(new TargetingTickHandler());
+		FMLCommonHandler.instance().bus().register(new ZSSKeyHandler());
 	}
 
 	@Override
 	public int addArmor(String armor) {
 		return RenderingRegistry.addNewArmourRendererPrefix(armor);
+	}
+
+	@Override
+	public EntityPlayer getPlayerEntity(MessageContext ctx) {
+		return (ctx.side.isClient() ? Minecraft.getMinecraft().thePlayer : super.getPlayerEntity(ctx));
 	}
 
 	@Override

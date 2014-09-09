@@ -23,6 +23,7 @@ import java.util.Map;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -84,7 +85,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public static final ZSSVillagerInfo get(EntityVillager villager) {
 		return (ZSSVillagerInfo) villager.getExtendedProperties(SAVE_KEY);
 	}
-	
+
 	/**
 	 * Returns the mask that this villager desires, or null if none
 	 */
@@ -98,7 +99,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		}
 		return (desiredMask != NONE ? EntityMaskTrader.getMask(desiredMask) : null);
 	}
-	
+
 	/** Completes the mask trade, setting villager to no longer trade for masks */
 	public void onMaskTrade() {
 		desiredMask = NONE;
@@ -124,7 +125,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			if (flag && treasureCustom.get(treasure).equals("Biggoron")) {
 				flag = villager instanceof EntityGoron;
 			}
-			if (treasure == Treasures.CLAIM_CHECK) {
+			if (flag && treasure == Treasures.CLAIM_CHECK) {
 				flag = stack.hasTagCompound() && stack.getTagCompound().hasKey("finishDate") &&
 						villager.worldObj.getWorldTime() > stack.getTagCompound().getLong("finishDate");
 			}
@@ -171,7 +172,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			return true;
 		case CLAIM_CHECK:
 			player.triggerAchievement(ZSSAchievements.treasureBiggoron);
-			MerchantRecipeHelper.addUniqueTrade(villager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Item.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
+			MerchantRecipeHelper.addUniqueTrade(villager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Items.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
 			break;
 		default:
 		}
@@ -258,7 +259,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	}
 
 	private void giveBirth() {
-		EntityVillager baby = villager.func_90012_b(mate);
+		EntityVillager baby = villager.createChild(mate);
 		mate.setGrowingAge(6000);
 		villager.setGrowingAge(6000);
 		baby.setGrowingAge(-24000);

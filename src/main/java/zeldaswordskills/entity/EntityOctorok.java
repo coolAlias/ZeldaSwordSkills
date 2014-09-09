@@ -19,7 +19,6 @@ package zeldaswordskills.entity;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentThorns;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
@@ -27,11 +26,12 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.entity.projectile.EntityBomb;
@@ -44,7 +44,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 {
 	/** Squid type data watcher index (skeleton's use 13) */
 	private static final int OCTOROK_TYPE_INDEX = 13;
-	
+
 	/** Squid-related fields for random movement and rendering */
 	public float squidPitch;
 	public float prevSquidPitch;
@@ -67,20 +67,20 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 		setSize(0.95F, 0.95F);
 		rotationVelocity = 1.0F / (rand.nextFloat() + 1.0F) * 0.2F;
 	}
-	
+
 	@Override
 	public void entityInit() {
 		super.entityInit();
 		dataWatcher.addObject(OCTOROK_TYPE_INDEX, (byte)(rand.nextInt(5) == 0 ? 1 : 0));
 	}
-	
+
 	/**
 	 * Returns the octorok's type: 0 - normal, 1 - bomb shooter
 	 */
 	public int getType() {
 		return dataWatcher.getWatchableObjectByte(OCTOROK_TYPE_INDEX);
 	}
-	
+
 	/**
 	 * Sets the octorok's type: 0 - normal, 1 - bomb shooter
 	 */
@@ -98,7 +98,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 	protected boolean canTriggerWalking() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean canAttackClass(Class clazz) {
 		return super.canAttackClass(clazz) && clazz != EntityOctorok.class;
@@ -107,7 +107,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (!worldObj.isRemote && worldObj.difficultySetting == 0) {
+		if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
 			setDead();
 		}
 	}
@@ -157,7 +157,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 					motionZ = (double)(randomMotionVecZ * randomMotionSpeed);
 				}
 			}
-			
+
 			renderYawOffset += (-((float) Math.atan2(motionX, motionZ)) * 180.0F / (float) Math.PI - renderYawOffset) * 0.1F;
 			rotationYaw = renderYawOffset;
 			squidYaw += (float) Math.PI * field_70871_bB * 1.5F;
@@ -185,7 +185,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 	protected void updateEntityActionState() {
 		float distance = 0.0F;
 		++entityAge;
-		
+
 		if (entityToAttack == null) {
 			entityToAttack = findPlayerToAttack();
 		} else if (entityToAttack.isEntityAlive() && canAttackClass(entityToAttack.getClass())) {
@@ -220,16 +220,16 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(12.0D);
-		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setAttribute(0.75D);
-		getAttributeMap().func_111150_b(SharedMonsterAttributes.attackDamage).setAttribute(2.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(12.0D);
+		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(0.75D);
+		getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(2.0D);
 	}
 
 	@Override
 	public EnumCreatureAttribute getCreatureAttribute() {
 		return EnumCreatureAttribute.ARTHROPOD;
 	}
-	
+
 	@Override
 	public boolean isInWater() {
 		return worldObj.handleMaterialAcceleration(boundingBox.expand(0.0D, -0.6000000238418579D, 0.0D), Material.water, this);
@@ -237,7 +237,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 
 	@Override
 	public boolean getCanSpawnHere() {
-		return posY > 45.0D && posY < 63.0D && worldObj.difficultySetting > 0 && super.getCanSpawnHere();
+		return posY > 45.0D && posY < 63.0D && worldObj.difficultySetting != EnumDifficulty.PEACEFUL && super.getCanSpawnHere();
 	}
 
 	@Override
@@ -295,7 +295,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 			}
 
 			if (entity instanceof EntityLivingBase) {
-				EnchantmentThorns.func_92096_a(this, (EntityLivingBase)entity, rand);
+				// TODO verify that this is indeed the new way 'thorns' is handled
+				EnchantmentHelper.func_151384_a((EntityLivingBase) entity, this);
+				//EnchantmentThorns.func_151367_b(this, (EntityLivingBase) entity, EnchantmentHelper.func_92098_i(this));
 			}
 		}
 
@@ -312,12 +314,13 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 				attackTime = 20;
 				float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 				Entity projectile;
+				int difficulty = worldObj.difficultySetting.getDifficultyId();
 				if (getType() == 1) {
-					projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - worldObj.difficultySetting * 4)).
-							setType(BombType.BOMB_WATER).setTime(12 - (worldObj.difficultySetting * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * worldObj.difficultySetting);
+					projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
+							setType(BombType.BOMB_WATER).setTime(12 - (difficulty * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * difficulty);
 				} else {
-					projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - worldObj.difficultySetting * 4)).
-							setIgnoreWater().setDamage(f * worldObj.difficultySetting);
+					projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
+							setIgnoreWater().setDamage(f * difficulty);
 				}
 				// TODO worldObj.playSoundAtEntity(this, ModInfo.SOUND_WEB_SPLAT, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 				if (!worldObj.isRemote) {
@@ -331,10 +334,10 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		int j = rand.nextInt(2 + lootingLevel) + 1;
 		for (int k = 0; k < j; ++k) {
-			entityDropItem(new ItemStack(Item.dyePowder, 1, 0), 0.0F);
+			entityDropItem(new ItemStack(Items.dye, 1, 0), 0.0F);
 		}
 	}
-	
+
 	@Override
 	protected void dropRareDrop(int rarity) {
 		switch(rarity) {
@@ -345,7 +348,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 			if (getType() == 1) {
 				entityDropItem(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 0.0F);
 			} else {
-				entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
+				entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
 	}
@@ -355,7 +358,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 		super.writeEntityToNBT(compound);
 		compound.setByte("octorokType", (byte) getType());
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);

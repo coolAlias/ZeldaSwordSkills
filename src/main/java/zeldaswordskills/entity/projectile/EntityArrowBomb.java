@@ -97,7 +97,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	}
 
 	/**
-	 * Set this bomb's {@link BombType}
+	 * Sets this bomb's {@link BombType}
 	 */
 	public EntityArrowBomb setType(BombType type) {
 		dataWatcher.updateObject(BOMBTYPE_DATAWATCHER_INDEX, type.ordinal());
@@ -145,8 +145,9 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		Material material = worldObj.getBlockMaterial(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
-		if (!isDud(material == Material.lava || material == Material.fire) || worldObj.isBoundingBoxBurning(boundingBox)) {
+		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
+		// func_147470_e is isBoundingBoxBurning
+		if (!isDud(material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox)) {
 			if (!worldObj.isRemote) {
 				CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), (float) getDamage(), canGrief);
 				setDead();
@@ -163,7 +164,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	private boolean isDud(boolean inFire) {
 		switch(getType()) {
 		case BOMB_WATER: return inFire || (ticksExisted > 8 && worldObj.provider.dimensionId == -1);
-		default: return (worldObj.getBlockMaterial((int) posX, (int) posY, (int) posZ) == Material.water);
+		default: return (worldObj.getBlock((int) posX, (int) posY, (int) posZ).getMaterial() == Material.water);
 		}
 	}
 

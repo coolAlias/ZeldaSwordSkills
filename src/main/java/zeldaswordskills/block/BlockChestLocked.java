@@ -20,9 +20,10 @@ package zeldaswordskills.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -55,11 +56,11 @@ public class BlockChestLocked extends BlockContainer
 	/** Prevents inventory from dropping when block is changed to a normal chest */
 	private static boolean keepInventory;
 
-	public BlockChestLocked(int id) {
-		super(id, Material.wood);
+	public BlockChestLocked() {
+		super(Material.wood);
 		setBlockUnbreakable();
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
-		setStepSound(soundWoodFootstep);
+		setStepSound(soundTypeWood);
 		setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
@@ -85,7 +86,7 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	@Override
-	public TileEntity createNewTileEntity(World world) {
+	public TileEntity createNewTileEntity(World world, int meta) {
 		return new TileEntityChestLocked();
 	}
 
@@ -95,11 +96,11 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, int id, int meta) {
+	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
 		if (!keepInventory) {
 			WorldUtils.dropContainerBlockInventory(world, x, y, z);
 		}
-		super.breakBlock(world, x, y, z, id, meta);
+		super.breakBlock(world, x, y, z, block, meta);
 	}
 
 	@Override
@@ -107,7 +108,7 @@ public class BlockChestLocked extends BlockContainer
 		if (world.isRemote) {
 			return true;
 		}
-		TileEntity te = world.getBlockTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(x, y, z);
 		if (!(te instanceof IInventory)) {
 			return false;
 		}
@@ -118,26 +119,27 @@ public class BlockChestLocked extends BlockContainer
 			IInventory inv = (IInventory) te;
 			int meta = world.getBlockMetadata(x, y, z);
 			keepInventory = true;
-			world.setBlock(x, y, z, Block.chest.blockID);
+			world.setBlock(x, y, z, Blocks.chest);
 			keepInventory = false;
 
-			boolean isChest = world.getBlockId(x + 1, y, z) == Block.chest.blockID;
+			boolean isChest = world.getBlock(x + 1, y, z) == Blocks.chest;
 			if (!isChest) {
-				isChest = world.getBlockId(x - 1, y, z) == Block.chest.blockID;
+				isChest = world.getBlock(x - 1, y, z) == Blocks.chest;
 			}
 			if (!isChest) {
-				isChest = world.getBlockId(x, y, z + 1) == Block.chest.blockID;
+				isChest = world.getBlock(x, y, z + 1) == Blocks.chest;
 			}
 			if (!isChest) {
-				isChest = world.getBlockId(x, y, z - 1) == Block.chest.blockID;
+				isChest = world.getBlock(x, y, z - 1) == Blocks.chest;
 			}
 			if (!isChest) {
 				world.setBlockMetadataWithNotify(x, y, z, meta, 3);
 			}
+
 			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_CHEST, 0.4F, 0.5F);
 
 			// copy the old inventory to the new chest
-			TileEntity chest = world.getBlockTileEntity(x, y, z);
+			TileEntity chest = world.getTileEntity(x, y, z);
 			if (chest instanceof TileEntityChest) {
 				IInventory inv2 = (IInventory) chest;
 				for (int i = 0; i < inv.getSizeInventory() && i < inv2.getSizeInventory(); ++i) {
@@ -153,28 +155,28 @@ public class BlockChestLocked extends BlockContainer
 
 	private boolean canUnlock(EntityPlayer player) {
 		return (player.getHeldItem() != null && (player.getHeldItem().getItem() == ZSSItems.keySkeleton ||
-				(player.getHeldItem().getItem() == ZSSItems.keySmall && player.inventory.consumeInventoryItem(ZSSItems.keySmall.itemID))));
+				(player.getHeldItem().getItem() == ZSSItems.keySmall && player.inventory.consumeInventoryItem(ZSSItems.keySmall))));
 	}
 
 	@Override
 	public void onBlockAdded(World world, int x, int y, int z) {
 		super.onBlockAdded(world, x, y, z);
-		int l = world.getBlockId(x, y, z - 1);
-		int i1 = world.getBlockId(x, y, z + 1);
-		int j1 = world.getBlockId(x - 1, y, z);
-		int k1 = world.getBlockId(x + 1, y, z);
+		Block l = world.getBlock(x, y, z - 1);
+		Block i1 = world.getBlock(x, y, z + 1);
+		Block j1 = world.getBlock(x - 1, y, z);
+		Block k1 = world.getBlock(x + 1, y, z);
 		int meta = 3;
 
-		if (Block.opaqueCubeLookup[l] && !Block.opaqueCubeLookup[i1]) {
+		if (l.func_149730_j() && !i1.func_149730_j()) {
 			meta = 3;
 		}
-		if (Block.opaqueCubeLookup[i1] && !Block.opaqueCubeLookup[l]) {
+		if (i1.func_149730_j() && !l.func_149730_j()) {
 			meta = 2;
 		}
-		if (Block.opaqueCubeLookup[j1] && !Block.opaqueCubeLookup[k1]) {
+		if (j1.func_149730_j() && !k1.func_149730_j()) {
 			meta = 5;
 		}
-		if (Block.opaqueCubeLookup[k1] && !Block.opaqueCubeLookup[j1]) {
+		if (k1.func_149730_j() && !j1.func_149730_j()) {
 			meta = 4;
 		}
 
@@ -193,7 +195,7 @@ public class BlockChestLocked extends BlockContainer
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerBlockIcons(IIconRegister register) {
 		blockIcon = register.registerIcon("planks_oak");
 	}
 }

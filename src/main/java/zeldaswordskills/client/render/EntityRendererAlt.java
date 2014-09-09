@@ -32,10 +32,10 @@ public class EntityRendererAlt extends EntityRenderer
 {
 	private final Minecraft mc;
 	private float ySize = 3.0F;
-	private float offsetY = ySize;
+	private float offsetY = ySize / 2.0F;
 
 	public EntityRendererAlt(Minecraft mc) {
-		super(mc);
+		super(mc, mc.getResourceManager());
 		this.mc = mc;
 	}
 
@@ -56,18 +56,36 @@ public class EntityRendererAlt extends EntityRenderer
 			super.getMouseOver(partialTick);
 			return;
 		}
-		/* 
-		 * Need to adjust the y position to get a mouseover at eye-level
-		 * Clicking blocks that appear to be close (i.e. at eye level when
-		 * big) does not work sometimes, since the server still checks
-		 * distance apparently based on posY, rather than eye level
-		 */
-		mc.thePlayer.posY += offsetY;
-		mc.thePlayer.prevPosY += offsetY;
-		mc.thePlayer.lastTickPosY += offsetY;
+		/*
+		ModelData data = PlayerDataController.instance.getPlayerData(player.getCommandSenderName());
+
+		float offset = data.offsetY();
+		if (player.ridingEntity != null || data.animation == EnumAnimation.SITTING)
+			offset += -data.getLegsY();
+		if (data.isSleeping())
+			offset = 1.18f;
+
+		player.posY += -offset;
+		player.prevPosY += -offset;
+		player.lastTickPosY += -offset;
 		super.getMouseOver(partialTick);
+		player.posY -= -offset;
+		player.prevPosY -= -offset;
+		player.lastTickPosY -= -offset;
+		 */
+		/*
+		 * Need to adjust the player's position to get an accurate mouse-over.
+		 * Unlike 1.6.4, the player position must be adjusted the opposite direction.
+		 * Clicking blocks at the player's new height still does not work well if
+		 * the player is larger, as the distance seems to be calculated from the
+		 * player's foot level instead of eye level.
+		 */
 		mc.thePlayer.posY -= offsetY;
 		mc.thePlayer.prevPosY -= offsetY;
 		mc.thePlayer.lastTickPosY -= offsetY;
+		super.getMouseOver(partialTick);
+		mc.thePlayer.posY += offsetY;
+		mc.thePlayer.prevPosY += offsetY;
+		mc.thePlayer.lastTickPosY += offsetY;
 	}
 }

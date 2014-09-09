@@ -43,7 +43,7 @@ public class TimedAddItem {
 			PlayerUtils.addItemToInventory(player, stack);
 			PlayerUtils.playSound(player, "random.pop", 1.0F,
 					((player.worldObj.rand.nextFloat() -
-					player.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+							player.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 			timer.cancel();
 		}
 	}

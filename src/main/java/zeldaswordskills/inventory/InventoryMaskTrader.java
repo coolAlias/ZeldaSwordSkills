@@ -23,7 +23,7 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ZSSItems;
 
 public class InventoryMaskTrader extends AbstractInventory {
-	
+
 	private static final ItemStack[] masks = {
 		new ItemStack(ZSSItems.maskBunny),
 		new ItemStack(ZSSItems.maskCouples),
@@ -44,12 +44,12 @@ public class InventoryMaskTrader extends AbstractInventory {
 	}
 
 	@Override
-	public String getInvName() {
+	public String getInventoryName() {
 		return "gui.zss.mask_trader.name";
 	}
 
 	@Override
-	public boolean isInvNameLocalized() {
+	public boolean hasCustomInventoryName() {
 		return true;
 	}
 

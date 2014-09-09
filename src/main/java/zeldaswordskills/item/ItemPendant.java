@@ -19,7 +19,7 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -27,10 +27,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -43,19 +45,19 @@ import cpw.mods.fml.relauncher.SideOnly;
  * The Pendant of Wisdom (Nayru) is found in the House of Gales, hidden under a lake
  *
  */
-public class ItemPendant extends Item
+public class ItemPendant extends Item implements IUnenchantable
 {
 	/** The three Pendants of Virtue */
 	public static enum PendantType {POWER,WISDOM,COURAGE};
-	
+
 	/** Unlocalized name suffixes */
 	private String[] names = {"_power","_wisdom","_courage"};
-	
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
 
-	public ItemPendant(int id) {
-		super(id);
+	@SideOnly(Side.CLIENT)
+	private IIcon[] iconArray;
+
+	public ItemPendant() {
+		super();
 		setMaxDamage(0);
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
@@ -66,10 +68,10 @@ public class ItemPendant extends Item
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) entity;
 			if (villager.getProfession() == 2) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.pendant.priest.0"));
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.pendant.priest.1"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.pendant.priest.0"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.pendant.priest.1"));
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.pendant.villager"));
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.pendant.villager"));
 			}
 		}
 		return true;
@@ -77,7 +79,7 @@ public class ItemPendant extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
+	public IIcon getIconFromDamage(int par1) {
 		return iconArray[par1 % names.length];
 	}
 
@@ -88,16 +90,16 @@ public class ItemPendant extends Item
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (int i = 0; i < names.length; ++i) {
-			list.add(new ItemStack(itemID, 1, i));
+			list.add(new ItemStack(item, 1, i));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[names.length];
+	public void registerIcons(IIconRegister register) {
+		iconArray = new IIcon[names.length];
 		for (int i = 0; i < names.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":pendant" + names[i]);
 		}

@@ -27,16 +27,16 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -97,6 +97,11 @@ public class SwordBeam extends SkillActive
 	}
 
 	@Override
+	public boolean hasAnimation() {
+		return false;
+	}
+
+	@Override
 	protected float getExhaustion() {
 		return 2.0F - (0.1F * level);
 	}
@@ -118,8 +123,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && player.attackTime == 0
-				&& PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && checkHealth(player) && player.attackTime == 0 && PlayerUtils.isHoldingSword(player);
 	}
 
 	/**
@@ -141,7 +145,7 @@ public class SwordBeam extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
+			PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 			return true;
 		}
 		return false;
@@ -172,10 +176,10 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public void onUpdate(EntityPlayer player) {
-		if (missTimer > 0 && !player.worldObj.isRemote) {
+		if (missTimer > 0) {
 			--missTimer;
-			if (missTimer == 0) {
-				ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
+			if (missTimer == 0 && !player.worldObj.isRemote) {
+				ICombo combo = ZSSPlayerSkills.get(player).getComboSkill();
 				if (combo != null && combo.isComboInProgress()) {
 					combo.getCombo().endCombo(player);
 				}

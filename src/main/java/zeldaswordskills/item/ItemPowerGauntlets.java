@@ -20,7 +20,7 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -28,6 +28,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.item.ILiftBlock;
+import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
@@ -43,13 +44,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * exceed the required strength. Blocks with tile entities cannot be moved.
  *
  */
-public class ItemPowerGauntlets extends Item implements ILiftBlock
+public class ItemPowerGauntlets extends Item implements ILiftBlock, IUnenchantable
 {
-	/** Max weight that a block may have and still be picked up */
-	private BlockWeight strength;
+	/** Max resistance that a block may have and still be picked up */
+	private final BlockWeight strength;
 
-	public ItemPowerGauntlets(int id, BlockWeight strength) {
-		super(id);
+	public ItemPowerGauntlets(BlockWeight strength) {
+		super();
 		this.strength = strength;
 		setMaxDamage(0);
 		setMaxStackSize(1);
@@ -68,7 +69,7 @@ public class ItemPowerGauntlets extends Item implements ILiftBlock
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister register) {
+	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
