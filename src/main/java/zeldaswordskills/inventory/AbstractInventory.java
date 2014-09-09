@@ -26,10 +26,14 @@ public abstract class AbstractInventory implements IInventory
 	protected ItemStack[] inventory;
 
 	@Override
-	public int getSizeInventory() { return inventory.length; }
+	public int getSizeInventory() {
+		return inventory.length;
+	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot) { return inventory[slot]; }
+	public ItemStack getStackInSlot(int slot) {
+		return inventory[slot];
+	}
 
 	@Override
 	public ItemStack decrStackSize(int slot, int amount) {
@@ -37,7 +41,7 @@ public abstract class AbstractInventory implements IInventory
 		if (stack != null) {
 			if(stack.stackSize > amount) {
 				stack = stack.splitStack(amount);
-				onInventoryChanged();
+				markDirty();
 			} else {
 				setInventorySlotContents(slot, null);
 			}
@@ -59,17 +63,17 @@ public abstract class AbstractInventory implements IInventory
 		if (itemstack != null && itemstack.stackSize > getInventoryStackLimit()) {
 			itemstack.stackSize = getInventoryStackLimit();
 		}
-		onInventoryChanged();
+		markDirty();
 	}
 
 	@Override
-	public void openChest() {}
+	public void openInventory() {}
 
 	@Override
-	public void closeChest() {}
+	public void closeInventory() {}
 
 	@Override
-	public void onInventoryChanged() {
+	public void markDirty() {
 		for (int i = 0; i < getSizeInventory(); ++i) {
 			if (getStackInSlot(i) != null && getStackInSlot(i).stackSize == 0)
 				inventory[i] = null;

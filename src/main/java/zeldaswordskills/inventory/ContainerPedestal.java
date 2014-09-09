@@ -29,17 +29,17 @@ import zeldaswordskills.item.ItemPendant;
 public class ContainerPedestal extends Container
 {
 	private TileEntityPedestal pedestal;
-	
+
 	/** Slot indices; Pedestal has 3 slots (0, 1, 2) */
 	private static final int INV_START = 3, INV_END = INV_START+26,
-	HOTBAR_START = INV_END+1, HOTBAR_END = HOTBAR_START+8;
+			HOTBAR_START = INV_END+1, HOTBAR_END = HOTBAR_START+8;
 
 	public ContainerPedestal(InventoryPlayer inv, TileEntityPedestal pedestal) {
 		this.pedestal = pedestal;
 		addSlotToContainer(new SlotPedestal(pedestal, 0, 80, 19));
 		addSlotToContainer(new SlotPedestal(pedestal, 1, 49, 50));
 		addSlotToContainer(new SlotPedestal(pedestal, 2, 111, 50));
-		
+
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 9; ++j) {
 				addSlotToContainer(new Slot(inv, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
@@ -55,22 +55,22 @@ public class ContainerPedestal extends Container
 	public boolean canInteractWith(EntityPlayer player) {
 		return pedestal.isUseableByPlayer(player);
 	}
-	
+
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int slotIndex) {
-		ItemStack itemstack = null;
+		ItemStack stack = null;
 		Slot slot = (Slot) this.inventorySlots.get(slotIndex);
 
 		if (slot != null && slot.getHasStack())
 		{
 			ItemStack itemstack1 = slot.getStack();
-			itemstack = itemstack1.copy();
+			stack = itemstack1.copy();
 
 			if (slotIndex < INV_START) {
 				if (!mergeItemStack(itemstack1, INV_START, HOTBAR_END+1, true)) {
 					return null;
 				}
-				slot.onSlotChange(itemstack1, itemstack);
+				slot.onSlotChange(itemstack1, stack);
 			} else if (itemstack1.getItem() instanceof ItemPendant) {
 				if (!mergeItemStack(itemstack1, itemstack1.getItemDamage(), itemstack1.getItemDamage()+1, false)) {
 					return null;
@@ -89,31 +89,31 @@ public class ContainerPedestal extends Container
 				slot.onSlotChanged();
 			}
 
-			if (itemstack1.stackSize == itemstack.stackSize) {
+			if (itemstack1.stackSize == stack.stackSize) {
 				return null;
 			}
 
 			slot.onPickupFromSlot(player, itemstack1);
 		}
 
-		return itemstack;
+		return stack;
 	}
-	
+
 	@Override
 	public ItemStack slotClick(int slot, int par2, int par3, EntityPlayer player) {
-		if (slot < INV_START && pedestal.worldObj.getBlockMetadata(pedestal.xCoord, pedestal.yCoord, pedestal.zCoord) == 0x8) {
+		if (slot < INV_START && pedestal.getWorldObj().getBlockMetadata(pedestal.xCoord, pedestal.yCoord, pedestal.zCoord) == 0x8) {
 			return null;
 		} else {
 			return super.slotClick(slot, par2, par3, player);
 		}
 	}
-	
+
 	/**
 	 * Vanilla method fails to account for stacks of size one, as well as whether stack
 	 * is valid for slot
 	 */
 	@Override
-	protected boolean mergeItemStack(ItemStack itemstack, int start, int end, boolean backwards)
+	protected boolean mergeItemStack(ItemStack stack, int start, int end, boolean backwards)
 	{
 		boolean flag1 = false;
 		int k = start;
@@ -122,29 +122,31 @@ public class ContainerPedestal extends Container
 
 		if (backwards) { k = end - 1; }
 
-		if (itemstack.isStackable()) {
-			while (itemstack.stackSize > 0 && (!backwards && k < end || backwards && k >= start))
+		if (stack.isStackable()) {
+			while (stack.stackSize > 0 && (!backwards && k < end || backwards && k >= start))
 			{
 				slot = (Slot) inventorySlots.get(k);
 				itemstack1 = slot.getStack();
 
-				if (!slot.isItemValid(itemstack)) {
+				if (!slot.isItemValid(stack)) {
 					continue;
 				}
 
-				if (itemstack1 != null && itemstack1.itemID == itemstack.itemID && (!itemstack.getHasSubtypes() || itemstack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1))
+				if (itemstack1 != null && itemstack1.getItem() == stack.getItem() &&
+						(!stack.getHasSubtypes() || stack.getItemDamage() == itemstack1.getItemDamage()) &&
+						ItemStack.areItemStackTagsEqual(stack, itemstack1))
 				{
-					int l = itemstack1.stackSize + itemstack.stackSize;
+					int l = itemstack1.stackSize + stack.stackSize;
 
-					if (l <= itemstack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
-						itemstack.stackSize = 0;
+					if (l <= stack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
+						stack.stackSize = 0;
 						itemstack1.stackSize = l;
-						pedestal.onInventoryChanged();
+						pedestal.markDirty();
 						flag1 = true;
-					} else if (itemstack1.stackSize < itemstack.getMaxStackSize() && l < slot.getSlotStackLimit()) {
-						itemstack.stackSize -= itemstack.getMaxStackSize() - itemstack1.stackSize;
-						itemstack1.stackSize = itemstack.getMaxStackSize();
-						pedestal.onInventoryChanged();
+					} else if (itemstack1.stackSize < stack.getMaxStackSize() && l < slot.getSlotStackLimit()) {
+						stack.stackSize -= stack.getMaxStackSize() - itemstack1.stackSize;
+						itemstack1.stackSize = stack.getMaxStackSize();
+						pedestal.markDirty();
 						flag1 = true;
 					}
 				}
@@ -155,7 +157,7 @@ public class ContainerPedestal extends Container
 			}
 		}
 
-		if (itemstack.stackSize > 0)
+		if (stack.stackSize > 0)
 		{
 			if (backwards) { k = end - 1; }
 
@@ -164,24 +166,24 @@ public class ContainerPedestal extends Container
 			while (!backwards && k < end || backwards && k >= start) {
 				slot = (Slot) inventorySlots.get(k);
 				itemstack1 = slot.getStack();
-				
-				if (!slot.isItemValid(itemstack)) {
+
+				if (!slot.isItemValid(stack)) {
 					continue;
 				}
 
 				if (itemstack1 == null) {
-					int l = itemstack.stackSize;
+					int l = stack.stackSize;
 
 					if (l <= slot.getSlotStackLimit()) {
-						slot.putStack(itemstack.copy());
-						itemstack.stackSize = 0;
-						pedestal.onInventoryChanged();
+						slot.putStack(stack.copy());
+						stack.stackSize = 0;
+						pedestal.markDirty();
 						flag1 = true;
 						break;
 					} else {
-						putStackInSlot(k, new ItemStack(itemstack.getItem(), slot.getSlotStackLimit(), itemstack.getItemDamage()));
-						itemstack.stackSize -= slot.getSlotStackLimit();
-						pedestal.onInventoryChanged();
+						putStackInSlot(k, new ItemStack(stack.getItem(), slot.getSlotStackLimit(), stack.getItemDamage()));
+						stack.stackSize -= slot.getSlotStackLimit();
+						pedestal.markDirty();
 						flag1 = true;
 					}
 				}
@@ -201,9 +203,9 @@ class SlotPedestal extends Slot {
 	public SlotPedestal(IInventory inv, int index, int x, int y) {
 		super(inv, index, x, y);
 	}
-	
+
 	@Override
 	public boolean isItemValid(ItemStack stack) {
-        return stack != null && stack.getItem() instanceof ItemPendant && stack.getItemDamage() == slotNumber;
-    }
+		return stack != null && stack.getItem() instanceof ItemPendant && stack.getItemDamage() == slotNumber;
+	}
 }
