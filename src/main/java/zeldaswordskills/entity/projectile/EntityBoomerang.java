@@ -24,7 +24,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockButton;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.material.Material;
-import net.minecraft.enchantment.EnchantmentThorns;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -33,9 +33,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.item.ZSSItems;
@@ -126,7 +126,7 @@ public class EntityBoomerang extends EntityMobThrowable
 
 	/** Sets this the current target */
 	public void setTarget(EntityLivingBase target) {
-		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, target != null ? target.entityId : -1);
+		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, target != null ? target.getEntityId() : -1);
 	}
 
 	/** Returns a boomerang damage source */
@@ -178,9 +178,34 @@ public class EntityBoomerang extends EntityMobThrowable
 		}
 		EntityLivingBase target = getTarget(); 
 		if (target != null) {
+			// TODO make the boomerang curve
 			double d0 = target.posX - this.posX;
 			double d1 = target.boundingBox.minY + (double)(target.height) - this.posY;
 			double d2 = target.posZ - this.posZ;
+			/*
+			if (distance > -20) {
+			float yaw = (float)(Math.atan2(d0, d2) * 180.0D / Math.PI);
+		    float pitch = (float)(Math.atan2(d1, Math.sqrt(d0 * d0 + d2 * d2)) * 180.0D / Math.PI);
+		    float f = 0.4F;
+		    rotationYaw += (yaw - rotationYaw) / 90.0F;
+		    rotationPitch += (pitch - rotationPitch) / 90.0F;
+		    motionX = (double)(-MathHelper.sin(rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float) Math.PI) * f);
+		    motionZ = (double)(MathHelper.cos(rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float) Math.PI) * f);
+		    motionY = (double)(-MathHelper.sin(rotationPitch / 180.0F * (float) Math.PI) * f);
+			setThrowableHeading(motionX, motionY, motionZ, getVelocity(), 0.0F);
+			} else {
+			double d = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+			double d3 = Math.pow(d, 3);
+			double k = 0.1D;
+			motionX += k / d3 * d0;
+			motionY += k / d3 * d1;
+			motionZ += k / d3 * d2;
+			double velocity = Math.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
+			motionX *= getVelocity() / velocity;
+			motionY *= getVelocity() / velocity;
+			motionZ *= getVelocity() / velocity;
+			}
+			 */
 			setThrowableHeading(d0, d1, d2, getVelocity(), 0.0F);
 		}
 	}
@@ -207,33 +232,36 @@ public class EntityBoomerang extends EntityMobThrowable
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
+		if (mop.typeOfHit == MovingObjectType.ENTITY) {
 			if (mop.entityHit != getThrower() && mop.entityHit.attackEntityFrom(getDamageSource(), getDamage())) {
-				playSound(Sounds.DAMAGE_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (mop.entityHit instanceof EntityLivingBase && getThrower() != null) {
-					EnchantmentThorns.func_92096_a(getThrower(), (EntityLivingBase) mop.entityHit, rand);
+					// func_151384_a is the new way Thorns is handled
+					EnchantmentHelper.func_151384_a((EntityLivingBase) mop.entityHit, getThrower());
+					// TODO not sure what the following does yet, but it's in EntityArrow
+					EnchantmentHelper.func_151385_b(getThrower(), mop.entityHit);
 				}
 			}
 		} else {
-			int blockId = worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ);
-			Block block = (blockId > 0 ? Block.blocksList[blockId] : null);
-			if (block != null) {
-				boolean flag = block.blockMaterial.blocksMovement();
-				float hardness = block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ);
-				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-				if (block.blockMaterial != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
-					worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, true);
-				} else if (block instanceof BlockButton || (block instanceof BlockLever &&
-						getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
-					WorldUtils.activateButton(worldObj, blockId, mop.blockX, mop.blockY, mop.blockZ);
-					flag = true;
-				}
-				if (flag && !noClip) {
-					noClip = true;
-					distance = Math.min(distance, 0);
-					setThrowableHeading(-motionX, -motionY, -motionZ, getVelocity(), 1.0F);
-				}
+			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			//if (block != null) {
+			boolean flag = block.getMaterial().blocksMovement();
+			float hardness = block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ);
+			block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			if (block.getMaterial() != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
+				// func_147480_a is destroyBlock
+				worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, true);
+			} else if (block instanceof BlockButton || (block instanceof BlockLever &&
+					getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
+				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
+				flag = true;
 			}
+			if (flag && !noClip) {
+				noClip = true;
+				distance = Math.min(distance, 0);
+				setThrowableHeading(-motionX, -motionY, -motionZ, getVelocity(), 1.0F);
+			}
+			//}
 		}
 	}
 
@@ -303,9 +331,9 @@ public class EntityBoomerang extends EntityMobThrowable
 		int i = MathHelper.floor_double(posX);
 		int j = MathHelper.floor_double(posY);
 		int k = MathHelper.floor_double(posZ);
-		Material m = worldObj.getBlockMaterial(i, j, k);
-		if (m == Material.vine) {
-			worldObj.destroyBlock(i, j, k, true);
+		if (worldObj.getBlock(i, j, k).getMaterial() == Material.vine) {
+			// func_147480_a is destroyBlock
+			worldObj.func_147480_a(i, j, k, true);
 		}
 	}
 
@@ -317,7 +345,7 @@ public class EntityBoomerang extends EntityMobThrowable
 		getBoomerang().writeToNBT(item);
 		compound.setTag("item", item);
 		compound.setInteger("invSlot", slot);
-		compound.setInteger("target", getTarget() != null ? getTarget().entityId : -1);
+		compound.setInteger("target", getTarget() != null ? getTarget().getEntityId() : -1);
 		compound.setBoolean("captureAll", captureAll);
 		if (captureAll) {
 			NBTTagList items = new NBTTagList();
@@ -340,9 +368,9 @@ public class EntityBoomerang extends EntityMobThrowable
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, compound.hasKey("target") ? compound.getInteger("target") : -1);
 		captureAll = compound.getBoolean("captureAll");
 		if (captureAll) {
-			NBTTagList items = compound.getTagList("items");
+			NBTTagList items = compound.getTagList("items", compound.getId());
 			for (int i = 0; i < items.tagCount(); ++i) {
-				capturedItems.add(ItemStack.loadItemStackFromNBT((NBTTagCompound) items.tagAt(i)));
+				capturedItems.add(ItemStack.loadItemStackFromNBT((NBTTagCompound) items.getCompoundTagAt(i)));
 			}
 		}
 		xp = compound.getInteger("capturedXP");

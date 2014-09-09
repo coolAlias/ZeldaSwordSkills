@@ -22,13 +22,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import zeldaswordskills.util.LogHelper;
-import cpw.mods.fml.common.FMLLog;
 
 /**
  * 
@@ -111,13 +109,12 @@ public class CustomEntityList
 			try {
 				entity.readFromNBT(compound);
 			} catch (Exception e) {
-				FMLLog.log(Level.SEVERE, e,
-						"An Entity %s has thrown an exception during loading, its state cannot be restored. Report this to the mod author",
-						compound.getString("id"));
+				LogHelper.severe(String.format("An Entity %s has thrown an exception during loading, its state cannot be restored. Report this to the mod author", compound.getString("id")));
+				e.printStackTrace();
 				entity = null;
 			}
 		} else {
-			world.getWorldLogAgent().logWarning("Skipping Entity with id " + compound.getString("id"));
+			LogHelper.warning("Skipping Entity with id " + compound.getString("id"));
 		}
 
 		return entity;

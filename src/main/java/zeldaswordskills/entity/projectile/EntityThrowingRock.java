@@ -70,11 +70,9 @@ public class EntityThrowingRock extends EntityMobThrowable
 		for (int l = 0; l < 4; ++l) {
 			worldObj.spawnParticle("crit", posX, posY, posZ, 0.0D, 0.0D, 0.0D);
 		}
-
 		if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), getDamage());
 		}
-
 		if (!worldObj.isRemote) {
 			setDead();
 		}

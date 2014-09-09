@@ -17,11 +17,11 @@
 
 package zeldaswordskills.entity.projectile;
 
-import net.minecraft.block.Block;
-import net.minecraft.enchantment.EnchantmentThorns;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -30,7 +30,6 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
@@ -129,7 +128,7 @@ public class EntitySeedShot extends EntityThrowable
 	public DamageSource getDamageSource() {
 		switch(getType()) {
 		case DEKU: return new DamageSourceStunIndirect("slingshot", this, getThrower(), 80, 2).setCanStunPlayers().setProjectile();
-		case NETHERWART: return new DamageSourceIndirect("slingshot", this, getThrower()).setFireDamage().setProjectile();
+		case NETHERWART: return new EntityDamageSourceIndirect("slingshot", this, getThrower()).setFireDamage().setProjectile();
 		default: return new EntityDamageSourceIndirect("slingshot", this, getThrower()).setProjectile();
 		}
 	}
@@ -171,9 +170,10 @@ public class EntitySeedShot extends EntityThrowable
 			}
 
 			if (mop.entityHit.attackEntityFrom(getDamageSource(), calculateDamage())) {
-				playSound(Sounds.DAMAGE_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (knockback > 0) {
 					float f = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+
 					if (f > 0.0F) {
 						double d = (double) knockback * 0.6000000238418579D / (double) f;
 						mop.entityHit.addVelocity(motionX * d, 0.1D, motionZ * d);
@@ -188,8 +188,11 @@ public class EntitySeedShot extends EntityThrowable
 					default:
 					}
 
-					if (getThrower() != null) {
-						EnchantmentThorns.func_92096_a(getThrower(), entity, rand);
+					if (getThrower() instanceof EntityLivingBase) {
+						// func_151384_a is the new way Thorns is handled
+						EnchantmentHelper.func_151384_a((EntityLivingBase) mop.entityHit, getThrower());
+						// TODO not sure what the following does yet, but it's in EntityArro
+						EnchantmentHelper.func_151385_b((EntityLivingBase) getThrower(), mop.entityHit);
 					}
 				}
 
@@ -204,9 +207,9 @@ public class EntitySeedShot extends EntityThrowable
 				prevRotationYaw += 180.0F;
 			}
 		} else {
-			playSound(Sounds.DAMAGE_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-			if (worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ) == Block.woodenButton.blockID) {
-				WorldUtils.activateButton(worldObj, Block.woodenButton.blockID, mop.blockX, mop.blockY, mop.blockZ);
+			playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+			if (worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ) == Blocks.wooden_button) {
+				WorldUtils.activateButton(worldObj, Blocks.wooden_button, mop.blockX, mop.blockY, mop.blockZ);
 			}
 			setDead();
 		}

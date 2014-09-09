@@ -23,7 +23,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
@@ -123,7 +123,7 @@ public class EntityFairy extends EntityAmbientCreature
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(5.0D);
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(5.0D);
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class EntityFairy extends EntityAmbientCreature
 	@Override
 	protected boolean interact(EntityPlayer player) {
 		ItemStack stack = player.getHeldItem();
-		if (stack != null && stack.itemID == Item.glassBottle.itemID) {
+		if (stack != null && stack.getItem() == Items.glass_bottle) {
 			player.triggerAchievement(ZSSAchievements.fairyCatcher);
 			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.fairyBottle));
 			if (stack.stackSize > 1) {
@@ -166,7 +166,50 @@ public class EntityFairy extends EntityAmbientCreature
 				setDead();
 			}
 		}
+		/* if (isDead) { // reset the current block's light value
+			worldObj.updateLightByType(EnumSkyBlock.Block, MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
+		} else {
+			illuminateBlocks(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
+		} */
 	}
+
+	/**
+	 * Illuminates nearby blocks
+	 * Args: floor_double of current position x/y/z
+	 */
+	/*private void illuminateBlocks(int x, int y, int z) {
+		worldObj.updateLightByType(EnumSkyBlock.Block, MathHelper.floor_double(lastTickPosX), MathHelper.floor_double(lastTickPosY), MathHelper.floor_double(lastTickPosZ));
+		worldObj.setLightValue(EnumSkyBlock.Block, x, y, z, 15);
+		worldObj.markBlockRangeForRenderUpdate(x, y, z, 12, 12, 12);
+		//worldObj.markBlockForUpdate(x, y, z);
+		/*
+		worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y +1, z);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y +1, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y +1, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y +1, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y +1, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y +1, z);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x, y +1, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x, y +1, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x, y -1, z);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y -1, z);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y -1, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y -1, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y -1, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y -1, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y -1, z);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x, y -1, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x, y -1, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y, z);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x +1, y, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y, z -1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x -1, y, z);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x, y, z +1);
+        worldObj.updateLightByType(EnumSkyBlock.Block, x, y, z -1);
+
+	} */
 
 	@Override
 	public boolean getCanSpawnHere() {

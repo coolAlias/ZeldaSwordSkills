@@ -73,7 +73,7 @@ public enum Buff
 	WEAKNESS_SHOCK("buff.zss.weakness_shock", true, 5),
 	/** Increases stun time by a factor of (1.0F + (amplifier * 0.01F)) */
 	WEAKNESS_STUN("buff.zss.weakness_stun", true, 6);
-	
+
 	public final String unlocalizedName;
 	/** Whether this Buff is a negative effect */
 	public final boolean isDebuff;
@@ -81,18 +81,18 @@ public enum Buff
 	public final boolean displayArrow;
 	/** Icon's texture sheet index; 0 and 1 are the buff and debuff icons */
 	public final int iconIndex;
-	
+
 	private Buff(String name, boolean isDebuff, int index) {
 		this(name, isDebuff, true, index);
 	}
-	
+
 	private Buff(String name, boolean isDebuff, boolean displayArrow, int index) {
 		this.unlocalizedName = name;
 		this.isDebuff = isDebuff;
 		this.displayArrow = displayArrow;
 		this.iconIndex = index;
 	}
-	
+
 	/** Returns this buff's localized name */
 	public String getName() {
 		return StatCollector.translateToLocal(unlocalizedName + ".name");
@@ -111,12 +111,12 @@ public enum Buff
 		default:
 		}
 	}
-	
+
 	/**
 	 * Removes any effects that may have been applied when the buff is removed
 	 */
 	public void onRemoved(EntityLivingBase entity, int amplifier) {}
-	
+
 	/**
 	 * Updates this buff's effects, if any
 	 */

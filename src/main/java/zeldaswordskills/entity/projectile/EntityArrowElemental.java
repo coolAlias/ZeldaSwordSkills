@@ -27,8 +27,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
@@ -36,7 +38,6 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHoly;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
@@ -119,11 +120,11 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected DamageSource getDamageSource(Entity entity) {
 		switch(getType()) {
-		case FIRE: return new DamageSourceIndirect("arrow.fire", this, shootingEntity).setFireDamage().setProjectile().setMagicDamage();
+		case FIRE: return new EntityDamageSourceIndirect("arrow.fire", this, shootingEntity).setFireDamage().setProjectile().setMagicDamage();
 		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, shootingEntity, 50, 1).setProjectile().setMagicDamage();
 		case LIGHT: return (entity instanceof EntityEnderman
-				? new DamageSourceHoly("arrow.light", (shootingEntity != null ? shootingEntity : this)).setDamageBypassesArmor().setProjectile().setMagicDamage()
-						: new DamageSourceHolyIndirect("arrow.light", this, shootingEntity).setDamageBypassesArmor().setProjectile().setMagicDamage());
+				? new DamageSourceHoly("arrow.light", (shootingEntity != null ? shootingEntity : this)).setProjectile().setMagicDamage().setDamageBypassesArmor()
+						: new DamageSourceHolyIndirect("arrow.light", this, shootingEntity).setProjectile().setMagicDamage().setDamageBypassesArmor());
 		}
 		return super.getDamageSource(entity);
 	}
@@ -175,9 +176,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 			}
 		} else {
 			if (ticksExisted < 25) {
-				int blockId = worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ);
-				if (blockId > 0) {
-					Block.blocksList[blockId].onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				if (block.getMaterial() != Material.air) {
+					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
 				}
 			} else {
 				extinguishLightArrow();
@@ -191,7 +192,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 			float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
 			EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
 			entity.attackEntityFrom(getDamageSource(entity), entity.getMaxHealth() * 0.425F * velocity);
-			playSound("random.bowhit", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+			playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			// TODO render bright flash, different sound effect?
 			if (!worldObj.isRemote) {
 				setDead();
@@ -209,8 +210,8 @@ public class EntityArrowElemental extends EntityArrowCustom
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
-			worldObj.setBlock(i, j, k, Block.ice.blockID);
-			worldObj.setBlock(i, j + 1, k, Block.ice.blockID);
+			worldObj.setBlock(i, j, k, Blocks.ice);
+			worldObj.setBlock(i, j + 1, k, Blocks.ice);
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 		}
 	}
@@ -228,46 +229,44 @@ public class EntityArrowElemental extends EntityArrowCustom
 	 */
 	protected boolean affectBlocks() {
 		boolean flag = false;
-		Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, -1));
-		int i, j, k, l;
+		Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, null));
+		Block block;
+		int i, j, k;
 
 		for (ChunkPosition position : affectedBlocks) {
-			i = position.x;
-			j = position.y;
-			k = position.z;
-			l = worldObj.getBlockId(i, j, k);
+			i = position.chunkPosX;
+			j = position.chunkPosY;
+			k = position.chunkPosZ;
+			block = worldObj.getBlock(i, j, k);
 
 			switch(getType()) {
 			case FIRE:
-				if (l == 0 && Config.enableFireArrowIgnite()) {
-					int i1 = worldObj.getBlockId(i, j - 1, k);
-					if (Block.opaqueCubeLookup[i1] && rand.nextInt(8) == 0) {
+				if (block.getMaterial() == Material.air && Config.enableFireArrowIgnite()) {
+					Block block2 = worldObj.getBlock(i, j - 1, k);
+					if (block2.func_149730_j() && rand.nextInt(8) == 0) {
 						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_IGNITE, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-						worldObj.setBlock(i, j, k, Block.fire.blockID);
+						worldObj.setBlock(i, j, k, Blocks.fire);
 						flag = true;
 					}
-				} else if (WorldUtils.canMeltBlock(worldObj, l, i, j, k)) {
+				} else if (WorldUtils.canMeltBlock(worldObj, block, i, j, k)) {
 					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 					worldObj.setBlockToAir(i, j, k);
 					flag = true;
 				}
 				break;
 			case ICE:
-				if (l > 0) {
-					Block block = Block.blocksList[l];
-					if (block.blockMaterial == Material.water) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-						worldObj.setBlock(i, j, k, Block.ice.blockID);
-						flag = true;
-					} else if (block.blockMaterial == Material.lava) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-						worldObj.setBlock(i, j, k, (l == Block.lavaStill.blockID ? Block.obsidian.blockID : Block.cobblestone.blockID));
-						flag = true;
-					} else if (block.blockMaterial == Material.fire) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-						worldObj.setBlockToAir(i, j, k);
-						flag = true;
-					}
+				if (block.getMaterial() == Material.water) {
+					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlock(i, j, k, Blocks.ice);
+					flag = true;
+				} else if (block.getMaterial() == Material.lava) {
+					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlock(i, j, k, (block == Blocks.lava ? Blocks.obsidian : Blocks.cobblestone));
+					flag = true;
+				} else if (block.getMaterial() == Material.fire) {
+					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlockToAir(i, j, k);
+					flag = true;
 				}
 				break;
 			case LIGHT:

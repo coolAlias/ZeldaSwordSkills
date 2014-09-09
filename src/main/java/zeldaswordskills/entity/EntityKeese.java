@@ -18,12 +18,12 @@
 package zeldaswordskills.entity;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EntityLivingData;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -33,9 +33,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceDirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
@@ -63,6 +63,8 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 
 	public EntityKeese(World world) {
 		super(world);
+		setSize(0.5F, 0.9F);
+		setIsBatHanging(true);
 		setType(KeeseType.NORMAL);
 	}
 
@@ -153,15 +155,15 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 	private void updateMaxHealth() {
 		switch(getType()) {
 		case CURSED:
-			getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(16.0D);
+			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(16.0D);
 			break;
 		case FIRE:
 		case ICE:
 		case THUNDER:
-			getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(12.0D);
+			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(12.0D);
 			break;
 		default:
-			getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(8.0D);
+			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
 		}
 
 		setHealth(getMaxHealth());
@@ -194,10 +196,10 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 	 */
 	private DamageSource getDamageSource() {
 		if (getShockTime() > 0) {
-			return new DamageSourceShock("shock", this, worldObj.difficultySetting * 50, 1.0F);
+			return new DamageSourceShock("shock", this, worldObj.difficultySetting.getDifficultyId() * 50, 1.0F);
 		}
 		switch(getType()) {
-		case FIRE: return new DamageSourceDirect("mob", this).setFireDamage();
+		case FIRE: return new EntityDamageSource("mob", this).setFireDamage();
 		case ICE: return new DamageSourceIce("mob", this, 100, 0);
 		default: return new EntityDamageSource("mob", this);
 		}
@@ -214,7 +216,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 		} else {
 			switch(rarity) {
 			case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.MONSTER_CLAW.ordinal()), 0.0F); break;
-			default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Item.emerald : ZSSItems.smallHeart), 0.0F);
+			default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
 	}
@@ -286,7 +288,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 				worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
 		}
-		if (!worldObj.isRemote && worldObj.difficultySetting == 0) {
+		if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
 			this.setDead();
 		}
 	}
@@ -302,6 +304,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 			if (currentFlightTarget != null && (!worldObj.isAirBlock(currentFlightTarget.posX, currentFlightTarget.posY, currentFlightTarget.posZ) || currentFlightTarget.posY < 1)) {
 				currentFlightTarget = null;
 			}
+
 			if (currentFlightTarget == null || rand.nextInt(30) == 0 || currentFlightTarget.getDistanceSquared((int) posX, (int) posY, (int) posZ) < (attackingPlayer != null ? 1.0F : 4.0F)) {
 				attackingPlayer = getLastAttacker() instanceof EntityPlayer ? (EntityPlayer) getLastAttacker() : worldObj.getClosestPlayerToEntity(this, 8.0D);
 				if (attackingPlayer != null && !attackingPlayer.capabilities.isCreativeMode &&
@@ -325,11 +328,11 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 			moveForward = 0.5F;
 			rotationYaw += f1;
 
-			if (attackingPlayer == null && rand.nextInt(100) == 0 && worldObj.isBlockNormalCube(MathHelper.floor_double(posX), (int) posY + 1, MathHelper.floor_double(posZ))) {
+			if (attackingPlayer == null && rand.nextInt(100) == 0 && worldObj.getBlock(MathHelper.floor_double(posX), (int) posY + 1, MathHelper.floor_double(posZ)).isNormalCube()) {
 				setIsBatHanging(true);
 			} else if (canShock() && getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
 				if (attackingPlayer != null && ((recentlyHit > 0 && rand.nextInt(20) == 0) || rand.nextInt(300) == 0)) {
-					setShockTime(rand.nextInt(100) + (worldObj.difficultySetting * 50));
+					setShockTime(rand.nextInt(100) + (worldObj.difficultySetting.getDifficultyId() * 50));
 				}
 			}
 		}
@@ -361,7 +364,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 				return false;
 			}
 
-			return source != DamageSource.inWall && super.attackEntityFrom(source, amount);
+			return super.attackEntityFrom(source, amount);
 		}
 	}
 
@@ -380,7 +383,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 	}
 
 	@Override
-	public EntityLivingData onSpawnWithEgg(EntityLivingData data) {
+	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
 		data = super.onSpawnWithEgg(data);
 		setTypeOnSpawn();
 		return data;
@@ -388,7 +391,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 
 	@Override
 	public boolean getCanSpawnHere() {
-		return (worldObj.difficultySetting > 0 && (posY < 64.0D || rand.nextInt(16) > 13) && isValidLightLevel() && !worldObj.isAnyLiquid(boundingBox));
+		return (worldObj.difficultySetting != EnumDifficulty.PEACEFUL && (posY < 64.0D || rand.nextInt(16) > 13) && isValidLightLevel() && !worldObj.isAnyLiquid(boundingBox));
 	}
 
 	protected boolean isValidLightLevel() {

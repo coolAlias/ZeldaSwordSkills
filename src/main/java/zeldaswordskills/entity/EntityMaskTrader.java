@@ -36,6 +36,7 @@ import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -84,7 +85,7 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setAttribute(0.5D);
+		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.5D);
 	}
 
 	@Override
@@ -159,10 +160,10 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 					player.setCurrentItemOrArmor(0, null);
 					info.setBorrowedMask(null);
 					PlayerUtils.playSound(player, Sounds.POP, 1.0F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.returned"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.mask_trader.returned"));
 				} else if (mask != null) {
 					new TimedChatDialogue(player, Arrays.asList(
-							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.0", mask.getItemDisplayName(new ItemStack(mask))),
+							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
 							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.1")));
 				} else {
 					int x = MathHelper.floor_double(posX);
@@ -196,11 +197,11 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 					info.completeCurrentMaskStage();
 					break;
 				case 1: // still need to sell mask
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.selling." + rand.nextInt(4)));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.mask_trader.selling." + rand.nextInt(4)));
 					break;
 				case 2: // need to pay for mask
 					int price = (mask instanceof ItemMask ? ((ItemMask) mask).getBuyPrice() : 16);
-					if (PlayerUtils.consumeInventoryItem(player, Item.emerald, price)) {
+					if (PlayerUtils.consumeInventoryItem(player, Items.emerald, price)) {
 						PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
 						info.completeCurrentMaskStage();
 						if (info.getCurrentMaskStage() == (maskMap.size() * NUM_STAGES)) {
@@ -212,7 +213,7 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 							info.setBorrowedMask(ZSSItems.maskTruth);
 							player.triggerAchievement(ZSSAchievements.maskShop);
 						} else {
-							player.addChatMessage(StatCollector.translateToLocal("chat.zss.npc.mask_trader.sold"));
+							PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.mask_trader.sold"));
 						}
 					} else {
 						new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.npc.mask_trader.penniless.0"),

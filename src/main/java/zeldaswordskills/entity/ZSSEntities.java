@@ -20,10 +20,9 @@ package zeldaswordskills.entity;
 import net.minecraft.client.model.ModelSquid;
 import net.minecraft.client.model.ModelVillager;
 import net.minecraft.client.renderer.entity.RenderSnowball;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.client.model.ModelGoron;
 import zeldaswordskills.client.render.RenderNothing;
@@ -104,21 +103,16 @@ public class ZSSEntities
 
 		// MOBS
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 0xADFF2F, 0xFFFF00);
-		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
-		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityKeese.class, "keese", 0x000000, 0x555555, 0x000000, 0xFF4500, 0x000000, 0x40E0D0, 0x000000, 0xFFD700, 0x000000, 0x800080);
-		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 64, 3, true);
 		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
 		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 0xB8860B, 0x8B5A00);
 
 		// NPCS
-		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, false);
-	}
-
-	public static void registerEntity(Class<? extends Entity> entityClass, String name, int modEntityIndex, int primaryColor, int secondaryColor) {
-		EntityRegistry.registerModEntity(entityClass, name, modEntityIndex, ZSSMain.instance, 80, 3, false);
-		CustomEntityList.addMapping(entityClass, name, primaryColor, secondaryColor);
+		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 	}
 
 	@SideOnly(Side.CLIENT) 
@@ -128,6 +122,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang());
 		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar());
 		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu());
+		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing());
 		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy());
 		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(
 				new ModelGoron(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/goron.png"));
@@ -141,14 +136,18 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
 		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(ZSSItems.throwingRock));
-		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing());
+	}
+
+	public static void registerEntity(Class entityClass, String name, int modEntityIndex, int primaryColor, int secondaryColor) {
+		EntityRegistry.registerModEntity(entityClass, name, modEntityIndex, ZSSMain.instance, 80, 3, true);
+		CustomEntityList.addMapping(entityClass, name, primaryColor, secondaryColor);
 	}
 
 	private static void addSpawns() {
 		if (spawnFairy > 0) {
 			EntityRegistry.addSpawn(EntityFairy.class, spawnFairy, 1, 3, EnumCreatureType.ambient, BiomeGenBase.swampland);
 		}
-		for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+		for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
 			if (biome != null) {
 				if (spawnChu > 0) {
 					EntityRegistry.addSpawn(EntityChu.class, spawnChu, 4, 4, EnumCreatureType.monster, biome);

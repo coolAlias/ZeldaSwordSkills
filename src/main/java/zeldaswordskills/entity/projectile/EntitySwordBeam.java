@@ -24,10 +24,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SwordBeam;
@@ -139,15 +139,15 @@ public class EntitySwordBeam extends EntityThrowable
 	protected void onImpact(MovingObjectPosition mop) {
 		if (!worldObj.isRemote) {
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
-			SwordBeam skill = (player != null ? (SwordBeam) ZSSPlayerInfo.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
-			if (mop.typeOfHit == EnumMovingObjectType.ENTITY) {
+			SwordBeam skill = (player != null ? (SwordBeam) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
+			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
 				if (player != null) {
 					if (skill != null) {
 						skill.onImpact(player, false);
 					}
 					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage)) {
-						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_HIT, 0.4F, 0.5F);
+						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_SUCCESSFUL_HIT, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
 				}
@@ -155,8 +155,8 @@ public class EntitySwordBeam extends EntityThrowable
 					setDead();
 				}
 			} else {
-				int blockID = worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ);
-				if (Block.blocksList[blockID] != null && Block.blocksList[blockID].blockMaterial.blocksMovement()) {
+				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				if (block.getMaterial().blocksMovement()) {
 					if (player != null && skill != null) {
 						skill.onImpact(player, true);
 					}
