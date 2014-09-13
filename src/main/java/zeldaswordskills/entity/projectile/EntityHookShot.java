@@ -18,6 +18,7 @@
 package zeldaswordskills.entity.projectile;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -104,7 +105,7 @@ public class EntityHookShot extends EntityThrowable
 	 * Return's this entity's hookshot Type
 	 */
 	public HookshotType getType() {
-		return HookshotType.values()[dataWatcher.getWatchableObjectInt(SHOTTYPE_INDEX)];
+		return HookshotType.values()[dataWatcher.getWatchableObjectInt(SHOTTYPE_INDEX)  % HookshotType.values().length];
 	}
 
 	/**
@@ -155,19 +156,20 @@ public class EntityHookShot extends EntityThrowable
 	/**
 	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
 	 */
-	protected boolean canGrabMaterial(int x, int y, int z) {
-		return canGrabMaterial(worldObj.getBlock(x, y, z).getMaterial());
+	protected boolean canGrabBlock(int x, int y, int z) {
+		return canGrabBlock(worldObj.getBlock(x, y, z));
 	}
 
 	/**
 	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
 	 */
-	protected boolean canGrabMaterial(Material material) {
+	protected boolean canGrabBlock(Block block) {
+		Material material = block.getMaterial();
 		int baseType = getType().ordinal() / 2;
 		if (baseType == (HookshotType.WOOD_SHOT.ordinal() / 2)) {
 			return material == Material.wood;
-		} else if (baseType == (HookshotType.STONE_SHOT.ordinal() / 2)) {
-			return material == Material.rock;
+		} else if (baseType == (HookshotType.CLAW_SHOT.ordinal() / 2)) {
+			return material == Material.rock || (block instanceof BlockPane && material == Material.iron);
 		} else if (baseType == (HookshotType.MULTI_SHOT.ordinal() / 2)) {
 			return material == Material.wood || material == Material.rock || material == Material.ground ||
 					material == Material.grass || material == Material.clay;
@@ -191,7 +193,7 @@ public class EntityHookShot extends EntityThrowable
 			if (getThrower() instanceof EntityPlayer) {
 				canPlayerEdit = ((EntityPlayer) getThrower()).capabilities.allowEdit && Config.canHookshotBreakBlocks();
 			}
-			return (isBreakable && canPlayerEdit && (m == Material.glass || (m == Material.wood && getType().ordinal() / 2 == (HookshotType.STONE_SHOT.ordinal() / 2))));
+			return (isBreakable && canPlayerEdit && (m == Material.glass || (m == Material.wood && getType().ordinal() / 2 == (HookshotType.CLAW_SHOT.ordinal() / 2))));
 		default: return result == Result.ALLOW;
 		}
 	}
@@ -213,12 +215,14 @@ public class EntityHookShot extends EntityThrowable
 			if (!block.getMaterial().blocksMovement()) {
 				return;
 			}
-			block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			if (block.getMaterial() != Material.air) {
+				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			}
 			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				motionX = motionY = motionZ = 0.0D;
 				boolean flag = block instanceof IHookable;
 				Material m = flag ? ((IHookable) block).getHookableMaterial(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ) : block.getMaterial();
-				if ((flag && ((IHookable) block).canAlwaysGrab(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ)) || canGrabMaterial(m)) {
+				if ((flag && ((IHookable) block).canAlwaysGrab(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ)) || canGrabBlock(block)) {
 					setInGround(true);
 					dataWatcher.updateObject(HIT_X, (float) mop.blockX + 0.5F);
 					dataWatcher.updateObject(HIT_Y, (float) mop.blockY);

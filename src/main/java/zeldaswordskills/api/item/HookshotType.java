@@ -22,10 +22,10 @@ public enum HookshotType {
 	WOOD_SHOT,
 	/** Extended version of WOOD_SHOT */
 	WOOD_SHOT_EXT,
-	/** Can grapple stone, breaks glass and wood */
-	STONE_SHOT,
-	/** Extended version of STONE_SHOT */
-	STONE_SHOT_EXT,
+	/** Can grapple stone and iron grates, breaks glass and wood */
+	CLAW_SHOT,
+	/** Extended version of CLAW_SHOT */
+	CLAW_SHOT_EXT,
 	/** Can grapple a wide variety of materials, only breaks glass */
 	MULTI_SHOT,
 	/** Extended version of MULTI_SHOT */

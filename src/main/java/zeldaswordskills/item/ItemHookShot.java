@@ -92,10 +92,14 @@ public class ItemHookShot extends Item implements IUnenchantable
 	}
 
 	@Override
-	public int getMaxItemUseDuration(ItemStack stack) { return 16000; }
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return 16000;
+	}
 
 	@Override
-	public boolean isItemTool(ItemStack stack) { return true; }
+	public boolean isItemTool(ItemStack stack) {
+		return true;
+	}
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -174,8 +178,8 @@ public class ItemHookShot extends Item implements IUnenchantable
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.10"));
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.11"));
 			break;
-		case STONE_SHOT:
-		case STONE_SHOT_EXT:
+		case CLAW_SHOT:
+		case CLAW_SHOT_EXT:
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.20"));
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.21"));
 			break;
