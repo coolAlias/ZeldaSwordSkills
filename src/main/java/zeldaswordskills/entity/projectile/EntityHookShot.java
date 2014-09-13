@@ -24,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -41,6 +42,9 @@ import zeldaswordskills.item.ItemHookShot;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.UnpressKeyPacket;
+import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
@@ -71,7 +75,7 @@ public class EntityHookShot extends EntityThrowable
 	 * Watchable objects for hookshot's impact position - prevents client from occasionally trying to go to 0,0,0 (due to client values not being set)
 	 * Used instead of super's integer versions and set to inside the struck block to prevent the player's motion from freaking out
 	 */
-	protected static final int HIT_X = 26, HIT_Y = 27, HIT_Z = 28;
+	public static final int HIT_POS_X = 26, HIT_POS_Y = 27, HIT_POS_Z = 28;
 
 	/** Stops reeling player in when true */
 	protected boolean reachedHook = false;
@@ -96,9 +100,9 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.addObject(TARGET_INDEX, -1);
 		dataWatcher.addObject(SHOTTYPE_INDEX, HookshotType.WOOD_SHOT.ordinal());
 		dataWatcher.addObject(IN_GROUND_INDEX, (byte) 0);
-		dataWatcher.addObject(HIT_X, 0.0F);
-		dataWatcher.addObject(HIT_Y, 0.0F);
-		dataWatcher.addObject(HIT_Z, 0.0F);
+		dataWatcher.addObject(HIT_POS_X, 0.0F);
+		dataWatcher.addObject(HIT_POS_Y, 0.0F);
+		dataWatcher.addObject(HIT_POS_Z, 0.0F);
 	}
 
 	/**
@@ -139,7 +143,7 @@ public class EntityHookShot extends EntityThrowable
 		return (name.equals("") ? null : worldObj.getPlayerEntityByName(name));
 	}
 
-	protected boolean isInGround() {
+	public boolean isInGround() {
 		return (dataWatcher.getWatchableObjectByte(IN_GROUND_INDEX) & 1) == 1;
 	}
 
@@ -224,9 +228,27 @@ public class EntityHookShot extends EntityThrowable
 				Material m = flag ? ((IHookable) block).getHookableMaterial(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ) : block.getMaterial();
 				if ((flag && ((IHookable) block).canAlwaysGrab(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ)) || canGrabBlock(block)) {
 					setInGround(true);
-					dataWatcher.updateObject(HIT_X, (float) mop.blockX + 0.5F);
-					dataWatcher.updateObject(HIT_Y, (float) mop.blockY);
-					dataWatcher.updateObject(HIT_Z, (float) mop.blockZ + 0.5F);
+					// adjusting posX/Y/Z here seems to make no difference to the rendering, even when client side makes same changes
+					posX = (double) mop.blockX + 0.5D;
+					posY = (double) mop.blockY + 0.5D;
+					posZ = (double) mop.blockZ + 0.5D;
+					// side hit documentation is wrong!!! based on printing out mop.sideHit:
+					// 2 = NORTH (face of block), 3 = SOUTH, 4 = WEST, 5 = EAST, 0 = BOTTOM, 1 = TOP
+					switch(mop.sideHit) {
+					case 5: posX += 0.5D; break; // EAST
+					case 4: posX -= 0.515D; break; // WEST (a little extra to compensate for block border, otherwise renders black)
+					case 3: posZ += 0.5D; break; // SOUTH
+					case 2: posZ -= 0.515D; break; // NORTH (a little extra to compensate for block border, otherwise renders black)
+					case SideHit.TOP: posY = mop.blockY + 1.0D; break;
+					case SideHit.BOTTOM: posY = mop.blockY; break;
+					}
+					// however, setting position as watched values and using these on the client works... weird
+					dataWatcher.updateObject(HIT_POS_X, (float) posX);
+					dataWatcher.updateObject(HIT_POS_Y, (float) posY);
+					dataWatcher.updateObject(HIT_POS_Z, (float) posZ);
+					//dataWatcher.updateObject(HIT_POS_X, (float) mop.blockX + 0.5F);
+					//dataWatcher.updateObject(HIT_POS_Y, (float) mop.blockY);
+					//dataWatcher.updateObject(HIT_POS_Z, (float) mop.blockZ + 0.5F);
 				} else if (!worldObj.isRemote) {
 					if (canDestroyBlock(block, m, mop.blockX, mop.blockY, mop.blockZ)) {
 						worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, false);
@@ -289,8 +311,8 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void setDead() {
 		super.setDead();
-		if (getThrower() instanceof EntityPlayer) {
-			((EntityPlayer) getThrower()).clearItemInUse();
+		if (getThrower() instanceof EntityPlayerMP && !worldObj.isRemote) {
+			PacketDispatcher.sendTo(new UnpressKeyPacket(UnpressKeyPacket.RMB), (EntityPlayerMP) getThrower());
 		}
 	}
 
@@ -315,7 +337,7 @@ public class EntityHookShot extends EntityThrowable
 		EntityLivingBase thrower = getThrower();
 		if (thrower != null && isInGround()) {
 			thrower.fallDistance = 0.0F;
-			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_X), dataWatcher.getWatchableObjectFloat(HIT_Y), dataWatcher.getWatchableObjectFloat(HIT_Z));
+			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_POS_X), dataWatcher.getWatchableObjectFloat(HIT_POS_Y), dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
 
 			if (!reachedHook) {
 				reachedHook = d < 1.0D;
@@ -326,9 +348,9 @@ public class EntityHookShot extends EntityThrowable
 			} else if (reachedHook && d < 1.0D) {
 				thrower.motionX = thrower.motionY = thrower.motionZ = 0.0D;
 			} else {
-				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_X) - thrower.posX);
-				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_Y) + (this.height / 3.0F) - thrower.posY);
-				double dz = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_Z) - thrower.posZ);
+				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_X) - thrower.posX);
+				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Y) + (this.height / 3.0F) - thrower.posY);
+				double dz = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Z) - thrower.posZ);
 				TargetUtils.setEntityHeading(thrower, dx, dy, dz, 1.0F, 1.0F, true);
 			}
 		}
@@ -369,9 +391,9 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setFloat("hitX", dataWatcher.getWatchableObjectFloat(HIT_X));
-		compound.setFloat("hitY", dataWatcher.getWatchableObjectFloat(HIT_Y));
-		compound.setFloat("hitZ", dataWatcher.getWatchableObjectFloat(HIT_Z));
+		compound.setFloat("hitPosX", dataWatcher.getWatchableObjectFloat(HIT_POS_X));
+		compound.setFloat("hitPosY", dataWatcher.getWatchableObjectFloat(HIT_POS_Y));
+		compound.setFloat("hitPosZ", dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
 		compound.setByte("customInGround", (byte)(isInGround() ? 1 : 0));
 		compound.setByte("reachedHook", (byte)(reachedHook ? 1 : 0));
 		compound.setByte("shotType", (byte) getType().ordinal());
@@ -381,9 +403,9 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		dataWatcher.updateObject(HIT_X, compound.getFloat("hitX"));
-		dataWatcher.updateObject(HIT_Y, compound.getFloat("hitY"));
-		dataWatcher.updateObject(HIT_Z, compound.getFloat("hitZ"));
+		dataWatcher.updateObject(HIT_POS_X, compound.getFloat("hitPosX"));
+		dataWatcher.updateObject(HIT_POS_Y, compound.getFloat("hitPosY"));
+		dataWatcher.updateObject(HIT_POS_Z, compound.getFloat("hitPosZ"));
 		reachedHook = (compound.getByte("reachedHook") == 1);
 		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
 		dataWatcher.updateObject(SHOTTYPE_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);
