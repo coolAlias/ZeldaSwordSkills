@@ -27,6 +27,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.inventory.IInventory;
@@ -87,6 +88,29 @@ public class WorldUtils
 		boolean flag = Config.enableFireArrowMelt() ? (meta & ~8) == 5 : meta == 5;
 		return (block.getMaterial() == Material.ice || block.getMaterial() == Material.snow ||
 				(block == ZSSBlocks.secretStone && flag));
+	}
+
+	/**
+	 * Drops the entity's currently held item into the world
+	 */
+	public static void dropHeldItem(EntityLivingBase entity) {
+		if (!entity.worldObj.isRemote && entity.getHeldItem() != null) {
+			EntityItem drop = new EntityItem(entity.worldObj, entity.posX,
+					entity.posY - 0.30000001192092896D + (double) entity.getEyeHeight(),
+					entity.posZ, entity.getHeldItem().copy());
+			float f = 0.3F;
+			float f1 = entity.worldObj.rand.nextFloat() * (float) Math.PI * 2.0F;
+			drop.motionX = (double)(-MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
+			drop.motionZ = (double)(MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
+			drop.motionY = (double)(-MathHelper.sin(entity.rotationPitch / 180.0F * (float) Math.PI) * f + 0.1F);
+			f = 0.02F * entity.worldObj.rand.nextFloat();
+			drop.motionX += Math.cos((double) f1) * (double) f;
+			drop.motionY += (double)((entity.worldObj.rand.nextFloat() - entity.worldObj.rand.nextFloat()) * 0.1F);
+			drop.motionZ += Math.sin((double) f1) * (double) f;
+			drop.delayBeforeCanPickup = 40;
+			entity.worldObj.spawnEntityInWorld(drop);
+			entity.setCurrentItemOrArmor(0, (ItemStack) null);
+		}
 	}
 
 	/**
