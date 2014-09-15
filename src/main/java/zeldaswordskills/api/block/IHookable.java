@@ -90,7 +90,7 @@ public interface IHookable
 	 * 			Result.DENY will prevent the hookshot from attaching to the block
 	 */
 	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z);
-	
+
 	/**
 	 * Returns the Material type that should be used to determine which, if
 	 * any, hookshots can attach to this block or, if it can't attach, whether
