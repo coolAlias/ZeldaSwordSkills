@@ -34,7 +34,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;

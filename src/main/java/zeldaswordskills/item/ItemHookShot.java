@@ -34,7 +34,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
-import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityHookShot;
@@ -78,12 +78,7 @@ public class ItemHookShot extends Item implements IUnenchantable
 
 	/** Returns this hookshot's enum Type from stack damage value */
 	public HookshotType getType(int damage) {
-		return (damage < HookshotType.values().length ? HookshotType.values()[damage] : HookshotType.WOOD_SHOT);
-	}
-
-	/** Returns true if this hookshot is the extended version */
-	public boolean isExtended(int damage) {
-		return getType(damage).ordinal() % 2 == 1;
+		return (damage > -1 ? HookshotType.values()[damage % HookshotType.values().length] : HookshotType.WOOD_SHOT);
 	}
 
 	@Override

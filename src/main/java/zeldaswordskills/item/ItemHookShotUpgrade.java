@@ -68,7 +68,7 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 
 	/** Returns this addon's enum Type from stack damage value */
 	public AddonType getType(int damage) {
-		return (damage < AddonType.values().length ? AddonType.values()[damage] : AddonType.EXTENSION);
+		return (damage > -1 ? AddonType.values()[damage % AddonType.values().length] : AddonType.EXTENSION);
 	}
 
 	@Override

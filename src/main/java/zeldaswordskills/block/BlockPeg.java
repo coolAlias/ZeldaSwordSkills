@@ -34,7 +34,6 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
-import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
@@ -83,9 +82,13 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	private String getHitSound() {
 		return blockMaterial == Material.iron ? Sounds.HIT_RUSTY : Sounds.HIT_PEG;
 	}
+
 	@Override
-	public boolean canAlwaysGrab(HookshotType type, World world, int x, int y, int z) {
-		return type == HookshotType.MULTI_SHOT || type == HookshotType.MULTI_SHOT_EXT;
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z) {
+		if (world.getBlockMetadata(x, y, z) > 0) {
+			return Result.DENY;
+		}
+		return (type.getBaseType() == HookshotType.MULTI_SHOT ? Result.ALLOW : Result.DEFAULT);
 	}
 
 	@Override
