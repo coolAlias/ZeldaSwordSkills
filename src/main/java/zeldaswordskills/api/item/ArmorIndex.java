@@ -17,6 +17,10 @@
 
 package zeldaswordskills.api.item;
 
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemArmor;
+
 /**
  * 
  * Defined armor indices, because they are all f-ed up in Minecraft
@@ -24,29 +28,29 @@ package zeldaswordskills.api.item;
  */
 public class ArmorIndex {
 
-	/** Armor type for boots, used only in ItemArmor's constructor */
+	/** Armor type for boots, used only in ItemArmor's {@link ItemArmor#ItemArmor constructor} */
 	public static final int TYPE_BOOTS = 3;
-	/** Armor type for leg armor, used only in ItemArmor's constructor */
+	/** Armor type for leg armor, used only in ItemArmor's {@link ItemArmor#ItemArmor constructor} */
 	public static final int TYPE_LEGS = 2;
-	/** Armor type for chest armor, used only in ItemArmor's constructor */
+	/** Armor type for chest armor, used only in ItemArmor's {@link ItemArmor#ItemArmor constructor} */
 	public static final int TYPE_CHEST = 1;
-	/** Armor type for helms, used only in ItemArmor's constructor */
+	/** Armor type for helms, used only in ItemArmor's {@link ItemArmor#ItemArmor constructor} */
 	public static final int TYPE_HELM = 0;
-	/** Index for boots when using EntityPlayer.getCurrentItemOrArmor(int) */
+	/** Index for boots when using {@link EntityLivingBase#getEquipmentInSlot} */
 	public static final int EQUIPPED_BOOTS = 1;
-	/** Index for legs when using EntityPlayer.getCurrentItemOrArmor(int) */
+	/** Index for legs when using {@link EntityLivingBase#getEquipmentInSlot} */
 	public static final int EQUIPPED_LEGS = 2;
-	/** Index for chest when using EntityPlayer.getCurrentItemOrArmor(int) */
+	/** Index for chest when using {@link EntityLivingBase#getEquipmentInSlot} */
 	public static final int EQUIPPED_CHEST = 3;
-	/** Index for helm when using EntityPlayer.getCurrentItemOrArmor(int) */
+	/** Index for helm when using {@link EntityLivingBase#getEquipmentInSlot} */
 	public static final int EQUIPPED_HELM = 4;
-	/** Index for boots when using EntityPlayer.getCurrentArmor(int) */
+	/** Index for boots when using {@link EntityPlayer#getCurrentArmor} */
 	public static final int WORN_BOOTS = 0;
-	/** Index for legs when using EntityPlayer.getCurrentArmor(int) */
+	/** Index for legs when using {@link EntityPlayer#getCurrentArmor} */
 	public static final int WORN_LEGS = 1;
-	/** Index for chest when using EntityPlayer.getCurrentArmor(int) */
+	/** Index for chest when using {@link EntityPlayer#getCurrentArmor} */
 	public static final int WORN_CHEST = 2;
-	/** Index for helm when using EntityPlayer.getCurrentArmor(int) */
+	/** Index for helm when using {@link EntityPlayer#getCurrentArmor} */
 	public static final int WORN_HELM = 3;
 
 }
