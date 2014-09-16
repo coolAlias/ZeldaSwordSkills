@@ -88,7 +88,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
-		if (world.getBlockMetadata(x, y, z) > 0) {
+		if (side == 0 || side == 1 || world.getBlockMetadata(x, y, z) > 0) {
 			return Result.DENY;
 		}
 		return (type.getBaseType() == HookshotType.MULTI_SHOT ? Result.ALLOW : Result.DEFAULT);
@@ -145,7 +145,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
-		return (world.getBlockMetadata(x, y, z) < MAX_STATE);
+		return (side != 0 && side != 1 && world.getBlockMetadata(x, y, z) < MAX_STATE);
 	}
 
 	@Override
