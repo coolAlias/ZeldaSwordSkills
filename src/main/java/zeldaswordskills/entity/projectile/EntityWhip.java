@@ -175,10 +175,10 @@ public class EntityWhip extends EntityThrowable
 	/**
 	 * Returns true if the whip can destroy the material type
 	 */
-	protected boolean canBreakBlock(Block block, Material m, int x, int y, int z) {
+	protected boolean canBreakBlock(Block block, Material m, int x, int y, int z, int side) {
 		EntityLivingBase thrower = getThrower();
 		if (block instanceof IWhipBlock) {
-			return ((IWhipBlock) block).canBreakBlock(getType(), thrower, worldObj, x, y, z);
+			return ((IWhipBlock) block).canBreakBlock(getType(), thrower, worldObj, x, y, z, side);
 		}
 		boolean isBreakable = block.getBlockHardness(worldObj, x, y, z) >= 0.0F;
 		boolean canPlayerEdit = false;
@@ -192,9 +192,9 @@ public class EntityWhip extends EntityThrowable
 	/**
 	 * Returns true if the whip can grapple the block at x/y/z
 	 */
-	protected boolean canGrabBlock(Block block, int x, int y, int z) {
+	protected boolean canGrabBlock(Block block, int x, int y, int z, int side) {
 		if (block instanceof IWhipBlock) {
-			return ((IWhipBlock) block).canGrabBlock(getType(), getThrower(), worldObj, x, y, z);
+			return ((IWhipBlock) block).canGrabBlock(getType(), getThrower(), worldObj, x, y, z, side);
 		}
 		switch (getType()) {
 		case WHIP_MAGIC:
@@ -232,7 +232,7 @@ public class EntityWhip extends EntityThrowable
 			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				WorldUtils.playSoundAtEntity(this, Sounds.WHIP_CRACK, 1.0F, 0.2F);
 				motionX = motionY = motionZ = 0.0D;
-				if (canGrabBlock(block, mop.blockX, mop.blockY, mop.blockZ)) {
+				if (canGrabBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
 					setInGround(true);
 					AxisAlignedBB box = block.getCollisionBoundingBoxFromPool(worldObj, mop.blockX, mop.blockY, mop.blockZ);
 					// bounding box may be null, depending on the block
@@ -273,7 +273,7 @@ public class EntityWhip extends EntityThrowable
 					hitX = mop.blockX;
 					hitY = mop.blockY;
 					hitZ = mop.blockZ;
-				}  else if (canBreakBlock(block, block.getMaterial(), mop.blockX, mop.blockY, mop.blockZ)) {
+				}  else if (canBreakBlock(block, block.getMaterial(), mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
 					if (!worldObj.isRemote) {
 						// don't drop items for players in creative mode
 						boolean drop = (getThrower() instanceof EntityPlayer ? !(((EntityPlayer) getThrower()).capabilities.isCreativeMode) : true);

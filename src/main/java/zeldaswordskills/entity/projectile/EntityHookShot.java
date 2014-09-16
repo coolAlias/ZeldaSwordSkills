@@ -160,11 +160,11 @@ public class EntityHookShot extends EntityThrowable
 	/**
 	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
 	 */
-	protected boolean canGrabBlock(Block block, int x, int y, int z) {
+	protected boolean canGrabBlock(Block block, int x, int y, int z, int side) {
 		Material material = block.getMaterial();
 		Result result = Result.DEFAULT;
 		if (block instanceof IHookable) {
-			result = ((IHookable) block).canGrabBlock(getType(), worldObj, x, y, z);
+			result = ((IHookable) block).canGrabBlock(getType(), worldObj, x, y, z, side);
 			material = ((IHookable) block).getHookableMaterial(getType(), worldObj, x, y, z);
 		}
 		switch(result) {
@@ -188,10 +188,10 @@ public class EntityHookShot extends EntityThrowable
 	/**
 	 * Returns true if the hookshot can destroy the material type
 	 */
-	protected boolean canDestroyBlock(Block block, int x, int y, int z) {
+	protected boolean canDestroyBlock(Block block, int x, int y, int z, int side) {
 		Result result = Result.DEFAULT;
 		if (block instanceof IHookable) {
-			result = ((IHookable) block).canDestroyBlock(getType(), worldObj, x, y, z);
+			result = ((IHookable) block).canDestroyBlock(getType(), worldObj, x, y, z, side);
 		}
 		switch(result) {
 		case DEFAULT:
@@ -228,7 +228,7 @@ public class EntityHookShot extends EntityThrowable
 			}
 			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				motionX = motionY = motionZ = 0.0D;
-				if (canGrabBlock(block, mop.blockX, mop.blockY, mop.blockZ)) {
+				if (canGrabBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
 					setInGround(true);
 					// adjusting posX/Y/Z here seems to make no difference to the rendering, even when client side makes same changes
 					posX = (double) mop.blockX + 0.5D;
@@ -249,7 +249,7 @@ public class EntityHookShot extends EntityThrowable
 					dataWatcher.updateObject(HIT_POS_Y, (float) posY);
 					dataWatcher.updateObject(HIT_POS_Z, (float) posZ);
 				} else if (!worldObj.isRemote) {
-					if (canDestroyBlock(block, mop.blockX, mop.blockY, mop.blockZ)) {
+					if (canDestroyBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
 						worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, false);
 					}
 					setDead();

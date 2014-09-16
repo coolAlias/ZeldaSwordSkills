@@ -50,13 +50,18 @@ public class BlockBar extends Block implements IWhipBlock
 	}
 
 	@Override
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z) {
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
 		return false;
 	}
 
 	@Override
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z) {
-		return true;
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+		switch(world.getBlockMetadata(x, y, z) % 3) {
+		case 0:	return (side != 4 && side != 5); // east/west
+		case 1:	return (side != 2 && side != 3); // north/south
+		case 2:	return (side != 0 && side != 1); // up/down
+		}
+		return false;
 	}
 
 	@Override

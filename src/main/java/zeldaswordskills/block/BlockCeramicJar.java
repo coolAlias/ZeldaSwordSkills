@@ -65,12 +65,12 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	}
 
 	@Override
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z) {
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
 		return Result.ALLOW;
 	}
 
 	@Override
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z) {
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
 		return Result.DENY;
 	}
 

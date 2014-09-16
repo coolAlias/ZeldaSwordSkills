@@ -87,7 +87,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z) {
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
 		if (world.getBlockMetadata(x, y, z) > 0) {
 			return Result.DENY;
 		}
@@ -95,7 +95,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z) {
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
 		return Result.DENY;
 	}
 
@@ -139,12 +139,12 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z) {
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
 		return false;
 	}
 
 	@Override
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z) {
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
 		return (world.getBlockMetadata(x, y, z) < MAX_STATE);
 	}
 

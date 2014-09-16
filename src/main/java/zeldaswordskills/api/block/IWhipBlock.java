@@ -53,14 +53,16 @@ public interface IWhipBlock
 	 * This method is never called if canGrabBlock returns true, as the whip
 	 * can not both attach to and break a block at the same time.
 	 * @param thrower Not likely to be null, but it is conceivable
+	 * @param side	The side of the block that was hit
 	 */
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z);
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
 
 	/**
 	 * Return true if the type of whip is able to attach to this specific block.
 	 * @param thrower Not likely to be null, but it is conceivable
+	 * @param side	The side of the block that was hit
 	 */
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z);
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
 
 	/**
 	 * Allows for special interactions, such as pulling levers, rather than swinging.

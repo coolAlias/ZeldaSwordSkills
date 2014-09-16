@@ -75,21 +75,23 @@ public interface IHookable
 	 * 
 	 * Note that blocks destroyed by hookshots do NOT drop any items.
 	 * 
-	 * @param type the type of hookshot attempting to destroy the block
+	 * @param type	The type of hookshot attempting to destroy the block
+	 * @param side	The side of the block that was hit
 	 * @return	Result.DEFAULT to use the standard hookshot mechanics
 	 * 			Result.ALLOW will allow the block to be destroyed
 	 * 			Result.DENY will prevent the block from being destroyed
 	 */
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z);
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side);
 
 	/**
 	 * Return true if the type of hookshot is able to attach to this specific block.
-	 * @param type the type of hookshot attempting to grapple the block
+	 * @param type	The type of hookshot attempting to grapple the block
+	 * @param side	The side of the block that was hit
 	 * @return	Result.DEFAULT to use the standard hookshot mechanics
 	 * 			Result.ALLOW will allow the hookshot to attach to the block
 	 * 			Result.DENY will prevent the hookshot from attaching to the block
 	 */
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z);
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side);
 
 	/**
 	 * Returns the Material type that should be used to determine which, if
