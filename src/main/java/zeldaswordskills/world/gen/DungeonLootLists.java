@@ -29,6 +29,7 @@ import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.api.block.IHookable.HookshotType;
+import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemKeyBig;
@@ -210,6 +211,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.shieldHylian, 1, 1, 1),
 			getLoot(ZSSItems.slingshot, 1, 1, 1),
 			getLoot(ZSSItems.treasure, Treasures.ZELDAS_LETTER.ordinal(), 1, 1, 1),
+			getLoot(ZSSItems.whip, IWhipBlock.WhipType.WHIP_SHORT.ordinal(), 1, 1, 1)
 		});
 	}
 

@@ -21,26 +21,36 @@ import java.util.List;
 
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
+import net.minecraft.village.MerchantRecipe;
+import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
+import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityWhip;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-// TODO Maybe make some whip enchantments?
 // TODO BG2 dual-wielding compatibility
-// TODO add means of upgrading
-public class ItemWhip extends Item
+public class ItemWhip extends Item implements IFairyUpgrade
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -89,6 +99,53 @@ public class ItemWhip extends Item
 			player.worldObj.playSoundAtEntity(player, Sounds.WHIP, 0.4F, 1.0F);
 		}
 		return stack;
+	}
+
+	@Override
+	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
+			EntityVillager villager = (EntityVillager) entity;
+			MerchantRecipeList trades = villager.getRecipes(player);
+			if (villager.getProfession() == EnumVillager.BUTCHER.ordinal() && trades != null) {
+				switch(getType(stack)) {
+				case WHIP_SHORT:
+					MerchantRecipe trade = new MerchantRecipe(new ItemStack(this, 1, WhipType.WHIP_SHORT.ordinal()), new ItemStack(Items.emerald, 64), new ItemStack(this, 1, WhipType.WHIP_LONG.ordinal()));
+					if (MerchantRecipeHelper.addUniqueTrade(trades, trade)) {
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.upgrade.new"));
+					} else {
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.upgrade.old"));
+					}
+					break;
+				case WHIP_LONG:
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.long"));
+					break;
+				case WHIP_MAGIC:
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.magic"));
+					break;
+				}
+			} else {
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.sorry"));
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
+		if (getType(item.getEntityItem()) == WhipType.WHIP_LONG && core.consumeRupees(320)) {
+			item.setDead();
+			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_MAGIC.ordinal()), core.xCoord, core.yCoord + 2, core.zCoord);
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			//player.triggerAchievement(ZSSAchievements.magicWhip);
+		} else {
+			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+		}
+	}
+
+	@Override
+	public boolean hasFairyUpgrade(ItemStack stack) {
+		return (getType(stack) != WhipType.WHIP_MAGIC);
 	}
 
 	@Override
