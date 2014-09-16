@@ -564,6 +564,7 @@ public class ZSSItems
 			FurnaceRecipes.smelting().func_151396_a(Items.golden_sword, new ItemStack(Items.gold_ingot), 0.0F);
 		}
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
+		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
 		GameRegistry.addRecipe(new ItemStack(arrowBomb), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 'a', Items.arrow);
 		GameRegistry.addRecipe(new ItemStack(arrowBombFire), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), 'a', Items.arrow);
 		GameRegistry.addRecipe(new ItemStack(arrowBombWater), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), 'a', Items.arrow);

@@ -59,6 +59,7 @@ public class ZSSBlocks
 	pedestal,
 	pegWooden,
 	pegRusty,
+	beamWooden,
 	secretStone,
 	sacredFlame,
 	// the following have a real Item, not an ItemBlock:
@@ -82,6 +83,7 @@ public class ZSSBlocks
 		secretStone = new BlockSecretStone(Material.rock).setBlockName("zss.secretstone");
 		dungeonCore = new BlockDungeonCore(Material.rock).setBlockName("zss.dungeoncore");
 		dungeonStone = new BlockDungeonStone(Material.rock).setBlockName("zss.dungeonstone");
+		beamWooden = new BlockBar(Material.wood).setBlockName("zss.beam_wooden");
 		register();
 	}
 
@@ -112,6 +114,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(secretStone, ItemSecretStone.class, secretStone.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonCore, ItemDungeonBlock.class, dungeonCore.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName());
+		GameRegistry.registerBlock(beamWooden, beamWooden.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");

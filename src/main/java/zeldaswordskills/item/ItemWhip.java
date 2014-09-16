@@ -64,7 +64,7 @@ public class ItemWhip extends Item
 	}
 
 	@Override
-	public EnumAction getItemUseAction(ItemStack par1ItemStack) {
+	public EnumAction getItemUseAction(ItemStack stack) {
 		return EnumAction.block;
 	}
 

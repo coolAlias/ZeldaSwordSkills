@@ -665,6 +665,7 @@ skill.zss.swordbreak.desc.tooltip.1=Damage or destroy an opponent's weapon
 
 tile.zss.barrier_light.name=Barrier, Light
 tile.zss.barrier_heavy.name=Barrier, Heavy
+tile.zss.beam_wooden.name=Wooden Beam
 tile.zss.ceramic_jar.name=Ceramic Jar
 tile.zss.chest_locked.name=Locked chest
 tile.zss.dungeoncore.name=Dungeon Core
