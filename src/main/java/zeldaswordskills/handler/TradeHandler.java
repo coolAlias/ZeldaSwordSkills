@@ -88,7 +88,6 @@ public class TradeHandler implements IVillageTradeHandler
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.STONECLAW.ordinal()),
 						new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal())));
 
-
 		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()), 
 				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.MULTI.ordinal()),
