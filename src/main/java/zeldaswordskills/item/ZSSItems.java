@@ -157,6 +157,7 @@ public class ZSSItems
 	gauntletsGolden,
 	hookshot,
 	hookshotAddon,
+	whip,
 	rodFire,
 	rodIce,
 	rodTornado,
@@ -484,6 +485,7 @@ public class ZSSItems
 		rodFire = new ItemMagicRod(MagicType.FIRE, 8.0F, 8.0F).setUnlocalizedName("zss.rod_fire");
 		rodIce = new ItemMagicRod(MagicType.ICE, 6.0F, 8.0F).setUnlocalizedName("zss.rod_ice");
 		rodTornado = new ItemMagicRod(MagicType.WIND, 4.0F, 4.0F).setUnlocalizedName("zss.rod_tornado");
+		whip = new ItemWhip().setUnlocalizedName("zss.whip");
 
 		// MASK TAB ITEMS
 		maskBlast = new ItemMask(ArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_blast");

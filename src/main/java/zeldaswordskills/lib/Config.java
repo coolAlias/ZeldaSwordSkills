@@ -131,6 +131,8 @@ public class Config
 	private static int slingshotUpgradeOne;
 	/** [Slingshot] Cost (in emeralds) for second upgrade */
 	private static int slingshotUpgradeTwo;
+	/** [Whip] Range, in blocks, of the standard whip [2-8] */
+	private static int whipRange;
 	/*================== STARTING GEAR =====================*/
 	/** Whether starting gear will be granted */
 	public static boolean enableStartingGear;
@@ -307,6 +309,7 @@ public class Config
 		temperedRequiredKills = config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt();
 		slingshotUpgradeOne = config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt();
 		slingshotUpgradeTwo = config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt();
+		whipRange = config.get("Item", "[Whip] Range, in blocks, of the standard whip [2-8]", 4).getInt();
 		/*================== STARTING GEAR =====================*/
 		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", false).getBoolean(false);
 		enableAutoEquip = config.get("Bonus Gear", "Automatically equip starting equipment", true).getBoolean(true);
@@ -439,6 +442,7 @@ public class Config
 	public static int getRequiredKills() { return MathHelper.clamp_int(temperedRequiredKills, 100, 1000) - 1; }
 	public static int getSlingshotCostOne() { return MathHelper.clamp_int(slingshotUpgradeOne, 64, 320); }
 	public static int getSlingshotCostTwo() { return MathHelper.clamp_int(slingshotUpgradeTwo, 128, 640); }
+	public static int getWhipRange() { return MathHelper.clamp_int(whipRange, 2, 8); }
 	/*================== SKILLS =====================*/
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return doubleTap; }

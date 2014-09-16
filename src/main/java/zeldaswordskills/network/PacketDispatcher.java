@@ -45,6 +45,7 @@ import zeldaswordskills.network.packet.server.BombTickPacket;
 import zeldaswordskills.network.packet.server.BorrowMaskPacket;
 import zeldaswordskills.network.packet.server.DashImpactPacket;
 import zeldaswordskills.network.packet.server.EndComboPacket;
+import zeldaswordskills.network.packet.server.FallDistancePacket;
 import zeldaswordskills.network.packet.server.GetBombPacket;
 import zeldaswordskills.network.packet.server.OpenGuiPacket;
 import zeldaswordskills.network.packet.server.RefreshSpinPacket;
@@ -98,6 +99,7 @@ public class PacketDispatcher
 		registerMessage(BorrowMaskPacket.Handler.class, BorrowMaskPacket.class);
 		registerMessage(DashImpactPacket.Handler.class, DashImpactPacket.class);
 		registerMessage(EndComboPacket.Handler.class, EndComboPacket.class);
+		registerMessage(FallDistancePacket.Handler.class, FallDistancePacket.class);
 		registerMessage(GetBombPacket.Handler.class, GetBombPacket.class);
 		registerMessage(OpenGuiPacket.Handler.class, OpenGuiPacket.class);
 		registerMessage(RefreshSpinPacket.Handler.class, RefreshSpinPacket.class);

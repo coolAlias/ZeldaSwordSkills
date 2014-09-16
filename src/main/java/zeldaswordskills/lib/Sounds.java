@@ -61,6 +61,7 @@ public class Sounds {
 	public static final String FAIRY_LIVING = ModInfo.ID + ":fairy_living";
 	public static final String FAIRY_SKILL = ModInfo.ID + ":fairy_skill";
 	public static final String SHOCK = ModInfo.ID + ":shock";
+	public static final String WHIP_CRACK = ModInfo.ID + ":whip_crack";
 	public static final String WHIRLWIND = ModInfo.ID + ":whirlwind";
 
 	// ITEM SOUNDS
@@ -70,6 +71,7 @@ public class Sounds {
 	public static final String MAGIC_FAIL = ModInfo.ID + ":magic_failure";
 	public static final String MAGIC_FIRE = ModInfo.ID + ":magic_fire";
 	public static final String MAGIC_ICE = ModInfo.ID + ":magic_ice";
+	public static final String WHIP = ModInfo.ID + ":whip";
 	public static final String WHOOSH = ModInfo.ID + ":whoosh";
 
 	// PLAYER SOUNDS

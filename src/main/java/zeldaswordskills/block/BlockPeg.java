@@ -24,6 +24,7 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
@@ -34,8 +35,10 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
+import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.common.eventhandler.Event.Result;
@@ -51,7 +54,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * If not destroyed, the peg will eventually pop back up.
  *
  */
-public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmashable
+public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmashable, IWhipBlock
 {
 	/** The weight of this block, i.e. the difficulty of smashing this block */
 	private final BlockWeight weight;
@@ -133,6 +136,25 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 			}
 		}
 		return Result.DENY;
+	}
+
+	@Override
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z) {
+		return false;
+	}
+
+	@Override
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z) {
+		return (world.getBlockMetadata(x, y, z) < MAX_STATE);
+	}
+
+	@Override
+	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
+		if (world.getBlockMetadata(x, y, z) >= MAX_STATE) {
+			whip.setDead();
+			return Result.DENY;
+		}
+		return Result.DEFAULT;
 	}
 
 	@Override
