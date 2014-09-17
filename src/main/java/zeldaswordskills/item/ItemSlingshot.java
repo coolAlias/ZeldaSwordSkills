@@ -21,8 +21,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -42,7 +40,6 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -59,8 +56,6 @@ import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -72,8 +67,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * require a special type of slingshot (upgraded) to shoot properly.
  *
  */
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable, IZoom, IBattlegearWeapon
+public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable, IZoom
 {
 	/** The number of seeds this slingshot will fire per shot */
 	protected final int seedsFired;
@@ -338,45 +332,5 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
 		}
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean sheatheOnBack(ItemStack stack) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean isOffhandHandDual(ItemStack stack) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
-		return false;
 	}
 }

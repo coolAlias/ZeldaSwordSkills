@@ -19,8 +19,6 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -30,7 +28,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -44,13 +41,10 @@ import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable, IBattlegearWeapon
+public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable
 {
 	/** The amount of damage this boomerang will cause */
 	private final float damage;
@@ -130,45 +124,5 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable
 	@Override
 	public boolean hasFairyUpgrade(ItemStack stack) {
 		return this == ZSSItems.boomerang;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean sheatheOnBack(ItemStack stack) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean isOffhandHandDual(ItemStack stack) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
-		return false;
 	}
 }
