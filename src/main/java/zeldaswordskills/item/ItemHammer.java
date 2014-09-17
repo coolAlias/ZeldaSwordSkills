@@ -19,8 +19,8 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
+import mods.battlegear2.api.IAllowItem;
+import mods.battlegear2.api.ISheathed;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
 import net.minecraft.block.material.Material;
@@ -38,7 +38,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStun;
@@ -61,8 +60,11 @@ import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IBattlegearWeapon
+@Optional.InterfaceList(value={
+		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
+		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true)
+})
+public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IAllowItem, ISheathed
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -232,41 +234,13 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 
 	@Method(modid="battlegear2")
 	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return offhand == null;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
 	public boolean sheatheOnBack(ItemStack stack) {
 		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean isOffhandHandDual(ItemStack stack) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
-		return false;
 	}
 }

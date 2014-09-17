@@ -18,16 +18,20 @@
 package zeldaswordskills.item;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mods.battlegear2.api.IAllowItem;
+import mods.battlegear2.api.ISheathed;
 import mods.battlegear2.api.PlayerEventChild;
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
 import mods.battlegear2.api.quiver.IArrowContainer2;
 import mods.battlegear2.api.quiver.IArrowFireHandler;
+import mods.battlegear2.api.quiver.ISpecialBow;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
+import mods.battlegear2.enchantments.BaseEnchantment;
+import mods.battlegear2.items.ItemQuiver;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -51,7 +55,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
@@ -66,6 +69,7 @@ import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityArrowElemental.ElementType;
+import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
@@ -78,6 +82,7 @@ import com.google.common.collect.ImmutableBiMap;
 
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -89,8 +94,12 @@ import cpw.mods.fml.relauncher.SideOnly;
  * ice arrows; level 3 can shoot all arrow types
  *
  */
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantable, IZoom, IBattlegearWeapon
+@Optional.InterfaceList(value={
+		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
+		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
+		@Optional.Interface(iface="mods.battlegear2.api.quiver.ISpecialBow", modid="battlegear2", striprefs=true)
+})
+public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantable, IZoom, IAllowItem, ISheathed, ISpecialBow
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -103,6 +112,9 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 
 	/** Maps arrow IDs to elemental arrow Element Type */
 	private static final Map<Item, ElementType> elementalArrowMap = new HashMap<Item, ElementType>();
+
+	/** Static list to store fire handlers; can't set type without requiring BG2 */
+	private static final List fireHandlers = new ArrayList();
 
 	public ItemHeroBow() {
 		super();
@@ -192,16 +204,15 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		ArrowNockEvent event = new ArrowNockEvent(player, stack);
 		MinecraftForge.EVENT_BUS.post(event);
 		if (event.isCanceled()) {
-			// May not be needed: make sure bow does not have an arrow 'nocked' in NBT if no longer in use
-			if (player.getItemInUse() == null && getArrow(player) != null) {
-				//LogHelper.warning("Removing arrow from bow when not in use after nock event");
-				setArrow(player, null);
-			}
 			return event.result;
 		}
-		// This can only be reached if BG2 is not installed
+		// This can only be reached if BG2 is not installed or no arrow was found in the quiver
 		if (nockArrowFromInventory(stack, player)) {
-			player.setItemInUse(stack, getMaxItemUseDuration(stack));
+			int duration = getMaxItemUseDuration(stack);
+			if (ZSSMain.isBG2Enabled) {
+				duration -= (EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, stack) * 20000);
+			}
+			player.setItemInUse(stack, duration);
 		}
 		return stack;
 	}
@@ -210,7 +221,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	public void onPlayerStoppedUsing(ItemStack bow, World world, EntityPlayer player, int ticksRemaining) {
 		ZSSPlayerInfo.get(player).hasAutoBombArrow = false;
 		int ticksInUse = getMaxItemUseDuration(bow) - ticksRemaining;
-
 		ArrowLooseEvent event = new ArrowLooseEvent(player, bow, ticksInUse);
 		MinecraftForge.EVENT_BUS.post(event);
 		if (event.isCanceled()) {
@@ -220,7 +230,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 			return;
 		}
 
-		// If not using a quiver, the arrow must be retrieved from the bow's NBT
+		// Default behavior found usable arrow in standard player inventory
 		ItemStack arrowStack = getArrow(player);
 		if (arrowStack != null) { // can be null when hot-swapping to an empty quiver slot
 			if (canShootArrow(player, bow, arrowStack)) {
@@ -487,42 +497,27 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 
 	@Method(modid="battlegear2")
 	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return offhand == null || offhand.getItem() instanceof ItemQuiver;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
 	public boolean sheatheOnBack(ItemStack stack) {
 		return true;
 	}
 
 	@Method(modid="battlegear2")
 	@Override
-	public boolean isOffhandHandDual(ItemStack stack) {
-		return false;
+	public List<IArrowFireHandler> getFireHandlers(ItemStack arrow, ItemStack bow, EntityPlayer player) {
+		return (List<IArrowFireHandler>) fireHandlers;
 	}
 
 	@Method(modid="battlegear2")
 	@Override
-	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
-		return false;
+	public Result canDrawBow(ItemStack bow, EntityPlayer player) {
+		ItemStack arrow = BattlegearEvents.getQuiverArrow(bow, player);
+		return (canShootArrow(player, bow, arrow) ? Result.ALLOW : Result.DENY);
 	}
 
 	/**
@@ -629,6 +624,8 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	 */
 	@Method(modid="battlegear2")
 	public static void registerBG2() {
+		fireHandlers.add(new HeroBowFireHandler());
+		// fireHandlers.add(new DefaultArrowFire());
 		QuiverArrowRegistry.addArrowFireHandler(new HeroBowFireHandler());
 		// registering as null prevents default fire handler from handling these arrows:
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowBomb, null);
@@ -640,14 +637,10 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	}
 
 	/** 
-	 * Handler for building arrows shot with Hero's Bow from Battlegear2 quivers.
-	 * With the current API, however, this gets called after the default handler,
-	 * meaning it will not work for customizing vanilla arrows; thus, the Hero
-	 * Bow requires handling the ArrowNock and ArrowLooseEvents, only allowing BG2's
-	 * listeners to handle BG2 arrows and Zelda arrows for the vanilla bow.
+	 * Handler for building ZSS arrows fired from a Battlegear2 quiver, including
+	 * customized versions of the vanilla arrow.
 	 * 
-	 * This fire handler is still used by the vanilla bow, though, for firing Zelda
-	 * arrows (or preventing them from being fired, as the case may  be).
+	 * ZSS arrows require an appropriately-leveled ItemHeroBow, or creative mode.
 	 *
 	 */
 	@Optional.Interface(iface="mods.battlegear2.api.quiver.IArrowFireHandler", modid="battlegear2", striprefs=true)
