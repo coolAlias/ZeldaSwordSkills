@@ -63,7 +63,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemHookShot extends Item implements IUnenchantable
 {
-	protected static final String[] shotNames = {"Hookshot","Stoneshot","Multishot"};
+	protected static final String[] shotNames = {"Hookshot","Clawshot","Multishot"};
 
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;

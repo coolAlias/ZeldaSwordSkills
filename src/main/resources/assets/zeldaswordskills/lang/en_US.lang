@@ -677,13 +677,14 @@ tile.zss.dungeoncore.name=Dungeon Core
 tile.zss.dungeoncore.name.unbreakable=Dungeon Core (unbreakable)
 tile.zss.dungeonstone.name=Dungeon Stone
 tile.zss.dungeonstone.name.unbreakable=Dungeon Stone (unbreakable)
+tile.zss.lever_giant.name=Giant Lever
+tile.zss.hook_target.name=Hookshot Target
 tile.zss.pedestal.name=Sword Pedestal
 tile.zss.peg_rusty.name=Rusty Peg
 tile.zss.peg_wooden.name=Wooden Peg
 tile.zss.sacredflame.name=Sacred Flame of
 tile.zss.secretstone.name=Secret Stone
 tile.zss.secretstone.name.unbreakable=Secret Stone (unbreakable)
-tile.zss.target.name=Hookshot Target
 
 tooltip.zss.damage=%s%s Damage
 tooltip.zss.area=%s Block Radius

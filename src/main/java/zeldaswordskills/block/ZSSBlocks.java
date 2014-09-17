@@ -31,6 +31,7 @@ import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
 import zeldaswordskills.client.render.block.RenderCeramicJar;
 import zeldaswordskills.client.render.block.RenderChestLocked;
+import zeldaswordskills.client.render.block.RenderGiantLever;
 import zeldaswordskills.client.render.block.RenderSacredFlame;
 import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
@@ -59,8 +60,9 @@ public class ZSSBlocks
 	pedestal,
 	pegWooden,
 	pegRusty,
+	leverGiant,
 	beamWooden,
-	target,
+	hookTarget,
 	secretStone,
 	sacredFlame,
 	// the following have a real Item, not an ItemBlock:
@@ -85,7 +87,8 @@ public class ZSSBlocks
 		dungeonCore = new BlockDungeonCore(Material.rock).setBlockName("zss.dungeoncore");
 		dungeonStone = new BlockDungeonStone(Material.rock).setBlockName("zss.dungeonstone");
 		beamWooden = new BlockBar(Material.wood).setBlockName("zss.beam_wooden");
-		target = new BlockTarget(Material.rock).setBlockName("zss.target");
+		hookTarget = new BlockTarget(Material.rock).setBlockName("zss.hook_target");
+		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
 		register();
 	}
 
@@ -100,6 +103,7 @@ public class ZSSBlocks
 		RenderingRegistry.registerBlockHandler(new RenderTileDungeonBlock());
 		RenderingRegistry.registerBlockHandler(new RenderCeramicJar());
 		RenderingRegistry.registerBlockHandler(new RenderChestLocked());
+		RenderingRegistry.registerBlockHandler(new RenderGiantLever());
 		RenderingRegistry.registerBlockHandler(new RenderSacredFlame());
 	}
 
@@ -117,7 +121,8 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(dungeonCore, ItemDungeonBlock.class, dungeonCore.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName());
 		GameRegistry.registerBlock(beamWooden, beamWooden.getUnlocalizedName());
-		GameRegistry.registerBlock(target, target.getUnlocalizedName());
+		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
+		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
@@ -142,5 +147,6 @@ public class ZSSBlocks
 
 		// Register rotation types for custom blocks
 		BlockRotationData.registerCustomBlockRotation(chestLocked, BlockRotationData.Rotation.PISTON_CONTAINER);
+		BlockRotationData.registerCustomBlockRotation(leverGiant, BlockRotationData.Rotation.LEVER);
 	}
 }
