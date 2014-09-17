@@ -75,8 +75,6 @@ public class EntityCyclone extends EntityMobThrowable
 	public EntityCyclone(World world, EntityLivingBase entity) {
 		super(world, entity);
 		setSize(1.0F, 2.0F);
-		posX -= motionX * 2;
-		posZ -= motionZ * 2;
 	}
 
 	public EntityCyclone(World world, double x, double y, double z) {

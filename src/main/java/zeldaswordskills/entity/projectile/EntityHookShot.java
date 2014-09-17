@@ -18,11 +18,13 @@
 package zeldaswordskills.entity.projectile;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -31,15 +33,18 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IHookable;
+import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemHookShot;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.UnpressKeyPacket;
+import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
@@ -70,7 +75,7 @@ public class EntityHookShot extends EntityThrowable
 	 * Watchable objects for hookshot's impact position - prevents client from occasionally trying to go to 0,0,0 (due to client values not being set)
 	 * Used instead of super's integer versions and set to inside the struck block to prevent the player's motion from freaking out
 	 */
-	protected static final int HIT_X = 26, HIT_Y = 27, HIT_Z = 28;
+	public static final int HIT_POS_X = 26, HIT_POS_Y = 27, HIT_POS_Z = 28;
 
 	/** Stops reeling player in when true */
 	protected boolean reachedHook = false;
@@ -95,16 +100,16 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.addObject(TARGET_INDEX, -1);
 		dataWatcher.addObject(SHOTTYPE_INDEX, HookshotType.WOOD_SHOT.ordinal());
 		dataWatcher.addObject(IN_GROUND_INDEX, (byte) 0);
-		dataWatcher.addObject(HIT_X, 0.0F);
-		dataWatcher.addObject(HIT_Y, 0.0F);
-		dataWatcher.addObject(HIT_Z, 0.0F);
+		dataWatcher.addObject(HIT_POS_X, 0.0F);
+		dataWatcher.addObject(HIT_POS_Y, 0.0F);
+		dataWatcher.addObject(HIT_POS_Z, 0.0F);
 	}
 
 	/**
 	 * Return's this entity's hookshot Type
 	 */
 	public HookshotType getType() {
-		return HookshotType.values()[dataWatcher.getWatchableObjectInt(SHOTTYPE_INDEX)];
+		return HookshotType.values()[dataWatcher.getWatchableObjectInt(SHOTTYPE_INDEX)  % HookshotType.values().length];
 	}
 
 	/**
@@ -116,7 +121,7 @@ public class EntityHookShot extends EntityThrowable
 	}
 
 	public int getMaxDistance() {
-		return Config.getHookshotRange() * (getType().ordinal() % 2 == 1 ? 2 : 1);
+		return Config.getHookshotRange() * (getType().isExtended() ? 2 : 1);
 	}
 
 	public void setThrower(EntityPlayer player) {
@@ -138,7 +143,7 @@ public class EntityHookShot extends EntityThrowable
 		return (name.equals("") ? null : worldObj.getPlayerEntityByName(name));
 	}
 
-	protected boolean isInGround() {
+	public boolean isInGround() {
 		return (dataWatcher.getWatchableObjectByte(IN_GROUND_INDEX) & 1) == 1;
 	}
 
@@ -155,34 +160,38 @@ public class EntityHookShot extends EntityThrowable
 	/**
 	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
 	 */
-	protected boolean canGrabMaterial(int x, int y, int z) {
-		return canGrabMaterial(worldObj.getBlock(x, y, z).getMaterial());
-	}
-
-	/**
-	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
-	 */
-	protected boolean canGrabMaterial(Material material) {
-		int baseType = getType().ordinal() / 2;
-		if (baseType == (HookshotType.WOOD_SHOT.ordinal() / 2)) {
-			return material == Material.wood;
-		} else if (baseType == (HookshotType.STONE_SHOT.ordinal() / 2)) {
-			return material == Material.rock;
-		} else if (baseType == (HookshotType.MULTI_SHOT.ordinal() / 2)) {
-			return material == Material.wood || material == Material.rock || material == Material.ground ||
-					material == Material.grass || material == Material.clay;
-		} else {
-			return false;
+	protected boolean canGrabBlock(Block block, int x, int y, int z, int side) {
+		Material material = block.getMaterial();
+		Result result = Result.DEFAULT;
+		if (block instanceof IHookable) {
+			result = ((IHookable) block).canGrabBlock(getType(), worldObj, x, y, z, side);
+			material = ((IHookable) block).getHookableMaterial(getType(), worldObj, x, y, z);
+		}
+		switch(result) {
+		case DEFAULT:
+			switch(getType()) {
+			case WOOD_SHOT:
+			case WOOD_SHOT_EXT:
+				return material == Material.wood;
+			case CLAW_SHOT:
+			case CLAW_SHOT_EXT:
+				return material == Material.rock || (block instanceof BlockPane && material == Material.iron);
+			case MULTI_SHOT:
+			case MULTI_SHOT_EXT:
+				return material == Material.wood || material == Material.rock || material == Material.ground ||
+				material == Material.grass || material == Material.clay;
+			}
+		default: return (result == Result.ALLOW);
 		}
 	}
 
 	/**
 	 * Returns true if the hookshot can destroy the material type
 	 */
-	protected boolean canDestroyBlock(Block block, Material m, int x, int y, int z) {
+	protected boolean canDestroyBlock(Block block, int x, int y, int z, int side) {
 		Result result = Result.DEFAULT;
 		if (block instanceof IHookable) {
-			result = ((IHookable) block).canDestroyBlock(getType(), worldObj, x, y, z);
+			result = ((IHookable) block).canDestroyBlock(getType(), worldObj, x, y, z, side);
 		}
 		switch(result) {
 		case DEFAULT:
@@ -191,7 +200,8 @@ public class EntityHookShot extends EntityThrowable
 			if (getThrower() instanceof EntityPlayer) {
 				canPlayerEdit = ((EntityPlayer) getThrower()).capabilities.allowEdit && Config.canHookshotBreakBlocks();
 			}
-			return (isBreakable && canPlayerEdit && (m == Material.glass || (m == Material.wood && getType().ordinal() / 2 == (HookshotType.STONE_SHOT.ordinal() / 2))));
+			Material m = block.getMaterial();
+			return (isBreakable && canPlayerEdit && (m == Material.glass || (m == Material.wood && getType().ordinal() / 2 == (HookshotType.CLAW_SHOT.ordinal() / 2))));
 		default: return result == Result.ALLOW;
 		}
 	}
@@ -213,18 +223,33 @@ public class EntityHookShot extends EntityThrowable
 			if (!block.getMaterial().blocksMovement()) {
 				return;
 			}
-			block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			if (block.getMaterial() != Material.air) {
+				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			}
 			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				motionX = motionY = motionZ = 0.0D;
-				boolean flag = block instanceof IHookable;
-				Material m = flag ? ((IHookable) block).getHookableMaterial(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ) : block.getMaterial();
-				if ((flag && ((IHookable) block).canAlwaysGrab(getType(), worldObj, mop.blockX, mop.blockY, mop.blockZ)) || canGrabMaterial(m)) {
+				if (canGrabBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
 					setInGround(true);
-					dataWatcher.updateObject(HIT_X, (float) mop.blockX + 0.5F);
-					dataWatcher.updateObject(HIT_Y, (float) mop.blockY);
-					dataWatcher.updateObject(HIT_Z, (float) mop.blockZ + 0.5F);
+					// adjusting posX/Y/Z here seems to make no difference to the rendering, even when client side makes same changes
+					posX = (double) mop.blockX + 0.5D;
+					posY = (double) mop.blockY + 0.5D;
+					posZ = (double) mop.blockZ + 0.5D;
+					// side hit documentation is wrong!!! based on printing out mop.sideHit:
+					// 2 = NORTH (face of block), 3 = SOUTH, 4 = WEST, 5 = EAST, 0 = BOTTOM, 1 = TOP
+					switch(mop.sideHit) {
+					case 5: posX += 0.5D; break; // EAST
+					case 4: posX -= 0.515D; break; // WEST (a little extra to compensate for block border, otherwise renders black)
+					case 3: posZ += 0.5D; break; // SOUTH
+					case 2: posZ -= 0.515D; break; // NORTH (a little extra to compensate for block border, otherwise renders black)
+					case SideHit.TOP: posY = mop.blockY + 1.0D; break;
+					case SideHit.BOTTOM: posY = mop.blockY; break;
+					}
+					// however, setting position as watched values and using these on the client works... weird
+					dataWatcher.updateObject(HIT_POS_X, (float) posX);
+					dataWatcher.updateObject(HIT_POS_Y, (float) posY);
+					dataWatcher.updateObject(HIT_POS_Z, (float) posZ);
 				} else if (!worldObj.isRemote) {
-					if (canDestroyBlock(block, m, mop.blockX, mop.blockY, mop.blockZ)) {
+					if (canDestroyBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
 						worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, false);
 					}
 					setDead();
@@ -285,8 +310,8 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void setDead() {
 		super.setDead();
-		if (getThrower() instanceof EntityPlayer) {
-			((EntityPlayer) getThrower()).clearItemInUse();
+		if (getThrower() instanceof EntityPlayerMP && !worldObj.isRemote) {
+			PacketDispatcher.sendTo(new UnpressKeyPacket(UnpressKeyPacket.RMB), (EntityPlayerMP) getThrower());
 		}
 	}
 
@@ -311,7 +336,7 @@ public class EntityHookShot extends EntityThrowable
 		EntityLivingBase thrower = getThrower();
 		if (thrower != null && isInGround()) {
 			thrower.fallDistance = 0.0F;
-			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_X), dataWatcher.getWatchableObjectFloat(HIT_Y), dataWatcher.getWatchableObjectFloat(HIT_Z));
+			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_POS_X), dataWatcher.getWatchableObjectFloat(HIT_POS_Y), dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
 
 			if (!reachedHook) {
 				reachedHook = d < 1.0D;
@@ -322,9 +347,9 @@ public class EntityHookShot extends EntityThrowable
 			} else if (reachedHook && d < 1.0D) {
 				thrower.motionX = thrower.motionY = thrower.motionZ = 0.0D;
 			} else {
-				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_X) - thrower.posX);
-				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_Y) + (this.height / 3.0F) - thrower.posY);
-				double dz = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_Z) - thrower.posZ);
+				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_X) - thrower.posX);
+				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Y) + (this.height / 3.0F) - thrower.posY);
+				double dz = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Z) - thrower.posZ);
 				TargetUtils.setEntityHeading(thrower, dx, dy, dz, 1.0F, 1.0F, true);
 			}
 		}
@@ -365,9 +390,9 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setFloat("hitX", dataWatcher.getWatchableObjectFloat(HIT_X));
-		compound.setFloat("hitY", dataWatcher.getWatchableObjectFloat(HIT_Y));
-		compound.setFloat("hitZ", dataWatcher.getWatchableObjectFloat(HIT_Z));
+		compound.setFloat("hitPosX", dataWatcher.getWatchableObjectFloat(HIT_POS_X));
+		compound.setFloat("hitPosY", dataWatcher.getWatchableObjectFloat(HIT_POS_Y));
+		compound.setFloat("hitPosZ", dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
 		compound.setByte("customInGround", (byte)(isInGround() ? 1 : 0));
 		compound.setByte("reachedHook", (byte)(reachedHook ? 1 : 0));
 		compound.setByte("shotType", (byte) getType().ordinal());
@@ -377,9 +402,9 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		dataWatcher.updateObject(HIT_X, compound.getFloat("hitX"));
-		dataWatcher.updateObject(HIT_Y, compound.getFloat("hitY"));
-		dataWatcher.updateObject(HIT_Z, compound.getFloat("hitZ"));
+		dataWatcher.updateObject(HIT_POS_X, compound.getFloat("hitPosX"));
+		dataWatcher.updateObject(HIT_POS_Y, compound.getFloat("hitPosY"));
+		dataWatcher.updateObject(HIT_POS_Z, compound.getFloat("hitPosZ"));
 		reachedHook = (compound.getByte("reachedHook") == 1);
 		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
 		dataWatcher.updateObject(SHOTTYPE_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);

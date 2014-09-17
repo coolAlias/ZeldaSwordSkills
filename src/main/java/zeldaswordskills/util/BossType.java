@@ -34,7 +34,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.api.block.IHookable.HookshotType;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
@@ -229,7 +230,8 @@ public enum BossType
 		new ItemStack(ZSSItems.dekuLeaf),
 		new ItemStack(ZSSItems.heroBow),
 		new ItemStack(ZSSItems.hookshot, 1, HookshotType.WOOD_SHOT.ordinal()),
-		new ItemStack(ZSSItems.maskHawkeye)
+		new ItemStack(ZSSItems.maskHawkeye),
+		new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_SHORT.ordinal())
 	};
 	private static final ItemStack[] mountainItems = {
 		new ItemStack(ZSSItems.bootsPegasus),

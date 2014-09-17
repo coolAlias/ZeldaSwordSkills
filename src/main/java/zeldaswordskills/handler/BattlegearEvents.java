@@ -19,9 +19,8 @@ package zeldaswordskills.handler;
 
 import mods.battlegear2.api.PlayerEventChild.ShieldBlockEvent;
 import mods.battlegear2.api.quiver.IArrowContainer2;
+import mods.battlegear2.api.quiver.ISpecialBow;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
-import mods.battlegear2.enchantments.BaseEnchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
@@ -68,38 +67,24 @@ public class BattlegearEvents {
 	}
 
 	/**
-	 * Required to prevent unshootable arrows from being nocked and drawn (merely cosmetic, as
-	 * they could not be fired by the fire handler), as well as for the Hero Bow to be able to
-	 * nock arrows from inventory.
-	 * Canceling will prevent BG2 processing
+	 * Required to prevent nocking unusable ZSS arrows in vanilla and other bows
+	 * (merely cosmetic, as they can not be fired by the default fire handler)
 	 */
 	@SubscribeEvent(priority=EventPriority.HIGH)
 	public void preArrowNock(ArrowNockEvent event) {
-		// For quivers: prevent nocking of unusable arrows, so player does not think it is usable
-		// No quiver: allow custom bow to determine if it can be nocked, e.g. look for valid arrow in inventory
-		ItemStack arrow = getQuiverArrow(event.result, event.entityPlayer);
-		if (arrow != null) { // cancel event if arrow can not be nocked:
-			if (event.result.getItem() instanceof ItemHeroBow) {
-				if (((ItemHeroBow) event.result.getItem()).canShootArrow(event.entityPlayer, event.result, arrow)) {
-					event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result) - EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, event.result) * 20000);
-				}
-				event.setCanceled(true);
-			} else if (arrow.getItem() instanceof ItemZeldaArrow && !event.entityPlayer.capabilities.isCreativeMode) {
-				// Does this ever happen???
-				//LogHelper.info("Attempted to nock Zelda Arrow from quiver with vanilla bow - canceling");
-				event.setCanceled(true); // allow API for other bows to shoot zelda arrows?
+		// ISpecialBows should determine nocking result on their own
+		if (!(event.result.getItem() instanceof ISpecialBow)) {
+			ItemStack arrow = getQuiverArrow(event.result, event.entityPlayer);
+			if (arrow != null && arrow.getItem() instanceof ItemZeldaArrow) {
+				event.setCanceled(!event.entityPlayer.capabilities.isCreativeMode);
 			}
-		} else if (event.result.getItem() instanceof ItemHeroBow) {
-			if (((ItemHeroBow) event.result.getItem()).nockArrowFromInventory(event.result, event.entityPlayer)) {
-				event.entityPlayer.setItemInUse(event.result, event.result.getItem().getMaxItemUseDuration(event.result) - EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, event.result) * 20000);
-			}
-			event.setCanceled(true);
 		}
 	}
 
 	/**
 	 * Only required to allow custom fire handler to handle vanilla arrow; once API
 	 * changes to allow ordered fire handler lists, this will be redundant.
+	 * TODO still need DefaultArrowFire to be public in order to remove this entirely
 	 */
 	@SubscribeEvent(priority=EventPriority.HIGH)
 	public void preArrowLoose(ArrowLooseEvent event) {

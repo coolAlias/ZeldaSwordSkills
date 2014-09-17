@@ -50,6 +50,7 @@ public class MerchantRecipeHelper {
 
 	/**
 	 * Adds a trade to the merchant's list only if a similar trade does not already exist
+	 * @return	True if the trade was added, false if the trade was already present
 	 */
 	public static boolean addUniqueTrade(MerchantRecipeList list, MerchantRecipe trade) {
 		if (!doesListContain(list, trade)) {

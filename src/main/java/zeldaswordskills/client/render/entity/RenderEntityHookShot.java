@@ -53,11 +53,10 @@ public class RenderEntityHookShot extends Render
 		return arrowTexture;
 	}
 
-	public void renderArrow(EntityHookShot hookshot, double x, double y, double z, float yaw, float partialTick)
-	{
+	public void renderArrow(EntityHookShot hookshot, double x, double y, double z, float yaw, float partialTick) {
 		bindEntityTexture(hookshot);
 		GL11.glPushMatrix();
-		GL11.glTranslatef((float) x, (float) y, (float) z);
+		GL11.glTranslated(x, y, z);
 		GL11.glRotatef(hookshot.prevRotationYaw + (hookshot.rotationYaw - hookshot.prevRotationYaw) * partialTick - 90.0F, 0.0F, 1.0F, 0.0F);
 		GL11.glRotatef(hookshot.prevRotationPitch + (hookshot.rotationPitch - hookshot.prevRotationPitch) * partialTick, 0.0F, 0.0F, 1.0F);
 		Tessellator tessellator = Tessellator.instance;
@@ -114,11 +113,9 @@ public class RenderEntityHookShot extends Render
 
 	protected void renderLeash(EntityHookShot hookshot, double x, double y, double z, float yaw, float partialTick) {
 		Entity entity = hookshot.getThrower();
-		if (entity != null)
-		{
+		if (entity != null) {
 			// TODO mess with this to get it looking right with the models
 			y -= (3.0D - (double) hookshot.height) * 0.5D;
-			//y -= (1.6D - (double) entity.height) * 0.5D;
 			Tessellator tessellator = Tessellator.instance;
 			double d3 = func_110828_a((double) entity.prevRotationYaw, (double) entity.rotationYaw, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
 			double d4 = func_110828_a((double) entity.prevRotationPitch, (double) entity.rotationPitch, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
@@ -132,6 +129,14 @@ public class RenderEntityHookShot extends Render
 			double d12 = func_110828_a((double) hookshot.prevRotationYaw, (double) hookshot.prevRotationPitch, (double) partialTick) * 0.01745329238474369D + (Math.PI / 2D);
 			d5 = Math.cos(d12) * (double) hookshot.width * 0.4D;
 			d6 = Math.sin(d12) * (double) hookshot.width * 0.4D;
+			if (hookshot.isInGround()) {
+				hookshot.posX = hookshot.getDataWatcher().getWatchableObjectFloat(EntityHookShot.HIT_POS_X);
+				hookshot.posY = hookshot.getDataWatcher().getWatchableObjectFloat(EntityHookShot.HIT_POS_Y);
+				hookshot.posZ = hookshot.getDataWatcher().getWatchableObjectFloat(EntityHookShot.HIT_POS_Z);
+				hookshot.prevPosX = hookshot.posX;
+				hookshot.prevPosY = hookshot.posY;
+				hookshot.prevPosZ = hookshot.posZ;
+			}
 			double d13 = func_110828_a(hookshot.prevPosX, hookshot.posX, (double) partialTick) + d5;
 			double d14 = func_110828_a(hookshot.prevPosY, hookshot.posY, (double) partialTick);
 			double d15 = func_110828_a(hookshot.prevPosZ, hookshot.posZ, (double) partialTick) + d6;

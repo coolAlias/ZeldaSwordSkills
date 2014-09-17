@@ -19,7 +19,6 @@ package zeldaswordskills.api.block;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
-import zeldaswordskills.api.item.HookshotType;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
@@ -28,28 +27,77 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
  * than its own for purposes of determining which hookshots can attach to it
  *
  */
-public interface IHookable {
+public interface IHookable
+{
+	public enum HookshotType {
+		/** Can grapple wood and break glass */
+		WOOD_SHOT(false),
+		/** Extended version of WOOD_SHOT */
+		WOOD_SHOT_EXT(true),
+		/** Can grapple stone and iron grates, breaks glass and wood */
+		CLAW_SHOT(false),
+		/** Extended version of CLAW_SHOT */
+		CLAW_SHOT_EXT(true),
+		/** Can grapple a wide variety of materials, only breaks glass */
+		MULTI_SHOT(false),
+		/** Extended version of MULTI_SHOT */
+		MULTI_SHOT_EXT(true);
+
+		private final boolean isExtended;
+
+		private HookshotType(boolean isExtended) {
+			this.isExtended = isExtended;
+		}
+
+		public boolean isExtended() {
+			return isExtended;
+		}
+
+		/**
+		 * Returns the base hookshot type: e.g. 'MULTI_SHOT' for both
+		 * regular and extended multi-shot type hookshots
+		 */
+		public HookshotType getBaseType() {
+			switch(this) {
+			case WOOD_SHOT_EXT: return WOOD_SHOT;
+			case CLAW_SHOT_EXT: return CLAW_SHOT;
+			case MULTI_SHOT_EXT: return MULTI_SHOT;
+			default: return this;
+			}
+		}
+	}
 
 	/**
-	 * Return true to always allow hookshots to attach, regardless of block material
-	 * @param type the type of hookshot attempting to grapple the block
-	 */
-	public boolean canAlwaysGrab(HookshotType type, World world, int x, int y, int z);
-
-	/**
-	 * Return true to allow hookshots to destroy the block, regardless of block material or
-	 * configuration settings; passes x, y, z in case tile entity will affect the outcome
-	 * @param type the type of hookshot attempting to destroy the block
+	 * Return true if the type of hookshot is able to break this specific block,
+	 * regardless of block material and/or configuaration settings.
+	 * This method is never called if canGrabBlock returns true, as the hookshot
+	 * can not both attach to and break a block at the same time.
+	 * 
+	 * Note that blocks destroyed by hookshots do NOT drop any items.
+	 * 
+	 * @param type	The type of hookshot attempting to destroy the block
+	 * @param side	The side of the block that was hit
 	 * @return	Result.DEFAULT to use the standard hookshot mechanics
 	 * 			Result.ALLOW will allow the block to be destroyed
 	 * 			Result.DENY will prevent the block from being destroyed
 	 */
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z);
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side);
+
+	/**
+	 * Return true if the type of hookshot is able to attach to this specific block.
+	 * @param type	The type of hookshot attempting to grapple the block
+	 * @param side	The side of the block that was hit
+	 * @return	Result.DEFAULT to use the standard hookshot mechanics
+	 * 			Result.ALLOW will allow the hookshot to attach to the block
+	 * 			Result.DENY will prevent the hookshot from attaching to the block
+	 */
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side);
 
 	/**
 	 * Returns the Material type that should be used to determine which, if
 	 * any, hookshots can attach to this block or, if it can't attach, whether
-	 * this block will be destroyed by the hookshot upon impact
+	 * this block will be destroyed by the hookshot upon impact. Only used when
+	 * {@link #canDestroyBlock} and {@link #canGrabBlock} return {@link Result#DEFAULT}
 	 * @param type the type of hookshot attempting to grapple the block
 	 */
 	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z);

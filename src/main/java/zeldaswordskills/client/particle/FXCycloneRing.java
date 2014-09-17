@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import zeldaswordskills.util.SideHit;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -64,7 +63,7 @@ public class FXCycloneRing extends EntityFX {
 					int metadata = world.getBlockMetadata(xInt, yInt, zInt);
 					// The "y + 0.1" below is a workaround for the bug that digging
 					// particles stayed on the ground and didn't fly up for some reason.
-					puffs[i] = new EntityDiggingFX(world, x, y+0.1, z, velX, velY, velZ, block, SideHit.TOP, metadata).applyColourMultiplier(xInt, yInt, zInt).multipleParticleScaleBy(0.5f);
+					puffs[i] = new EntityDiggingFX(world, x, y+0.1, z, velX, velY, velZ, block, metadata).applyColourMultiplier(xInt, yInt, zInt).multipleParticleScaleBy(0.5f);
 					renderer.addEffect(puffs[i]);
 					continue;
 				}

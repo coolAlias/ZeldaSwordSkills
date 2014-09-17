@@ -34,7 +34,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
-import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityHookShot;
@@ -63,7 +63,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemHookShot extends Item implements IUnenchantable
 {
-	protected static final String[] shotNames = {"Hookshot","Stoneshot","Multishot"};
+	protected static final String[] shotNames = {"Hookshot","Clawshot","Multishot"};
 
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -78,12 +78,7 @@ public class ItemHookShot extends Item implements IUnenchantable
 
 	/** Returns this hookshot's enum Type from stack damage value */
 	public HookshotType getType(int damage) {
-		return (damage < HookshotType.values().length ? HookshotType.values()[damage] : HookshotType.WOOD_SHOT);
-	}
-
-	/** Returns true if this hookshot is the extended version */
-	public boolean isExtended(int damage) {
-		return getType(damage).ordinal() % 2 == 1;
+		return (damage > -1 ? HookshotType.values()[damage % HookshotType.values().length] : HookshotType.WOOD_SHOT);
 	}
 
 	@Override
@@ -92,10 +87,14 @@ public class ItemHookShot extends Item implements IUnenchantable
 	}
 
 	@Override
-	public int getMaxItemUseDuration(ItemStack stack) { return 16000; }
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return 16000;
+	}
 
 	@Override
-	public boolean isItemTool(ItemStack stack) { return true; }
+	public boolean isItemTool(ItemStack stack) {
+		return true;
+	}
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -174,8 +173,8 @@ public class ItemHookShot extends Item implements IUnenchantable
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.10"));
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.11"));
 			break;
-		case STONE_SHOT:
-		case STONE_SHOT_EXT:
+		case CLAW_SHOT:
+		case CLAW_SHOT_EXT:
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.20"));
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.21"));
 			break;

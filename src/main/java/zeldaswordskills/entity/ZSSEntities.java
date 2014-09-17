@@ -38,6 +38,7 @@ import zeldaswordskills.client.render.entity.RenderEntityMagicSpell;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
 import zeldaswordskills.client.render.entity.RenderGenericLiving;
 import zeldaswordskills.client.render.entity.RenderOctorok;
+import zeldaswordskills.client.render.entity.RenderWhip;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
@@ -51,6 +52,7 @@ import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
+import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.client.registry.RenderingRegistry;
@@ -100,6 +102,7 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrowcustom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowElemental.class, "arrowelemental", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityMagicSpell.class, "magicspell", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityWhip.class, "whip", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 
 		// MOBS
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 0xADFF2F, 0xFFFF00);
@@ -136,6 +139,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
 		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(ZSSItems.throwingRock));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderWhip());
 	}
 
 	public static void registerEntity(Class entityClass, String name, int modEntityIndex, int primaryColor, int secondaryColor) {

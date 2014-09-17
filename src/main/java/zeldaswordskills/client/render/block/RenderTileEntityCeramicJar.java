@@ -27,12 +27,15 @@ import org.lwjgl.opengl.GL12;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.client.model.ModelCeramicJar;
 import zeldaswordskills.lib.ModInfo;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
  * Because I'm lazy and can't figure out how to render a model from ISimpleBlockRenderingHandler... derp.
  *
  */
+@SideOnly(Side.CLIENT)
 public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 {
 	/** Ceramic jar model texture */

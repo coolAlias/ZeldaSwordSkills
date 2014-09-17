@@ -351,6 +351,6 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	@Method(modid="battlegear2")
 	@Override
 	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
-		return !twoHanded;// && (offhand == null || offhand.getItem() instanceof IShield);
+		return !twoHanded;
 	}
 }

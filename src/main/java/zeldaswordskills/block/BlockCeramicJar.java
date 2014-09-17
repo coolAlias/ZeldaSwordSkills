@@ -37,6 +37,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
+import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderCeramicJar;
@@ -49,7 +50,7 @@ import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class BlockCeramicJar extends BlockContainer implements IExplodable, ISmashable
+public class BlockCeramicJar extends BlockContainer implements IExplodable, IHookable, ISmashable
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;
@@ -61,6 +62,21 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, ISma
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.285F, 0.0F, 0.285F, 0.715F, 0.665F, 0.715F);
+	}
+
+	@Override
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
+		return Result.ALLOW;
+	}
+
+	@Override
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
+		return Result.DENY;
+	}
+
+	@Override
+	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
+		return blockMaterial;
 	}
 
 	@Override

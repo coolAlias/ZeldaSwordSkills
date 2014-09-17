@@ -22,11 +22,8 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
@@ -131,7 +128,7 @@ public class Parry extends SkillActive
 	 * @param attacker if the attacker is an EntityPlayer, their Parry score will decrease their chance
 	 * of being disarmed
 	 */
-	private float getDisarmChance(EntityPlayer player, EntityLivingBase attacker) {
+	public float getDisarmChance(EntityPlayer player, EntityLivingBase attacker) {
 		float penalty = (0.15F * attacksParried);
 		float bonus = Config.getDisarmTimingBonus() * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
 		if (attacker instanceof EntityPlayer) {
@@ -212,7 +209,7 @@ public class Parry extends SkillActive
 			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
 			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItem() != null && PlayerUtils.isHoldingSkillItem(player)) {
 				if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
-					disarm(attacker);
+					WorldUtils.dropHeldItem(attacker);
 				}
 				++attacksParried; // increment after disarm
 				WorldUtils.playSoundAtEntity(player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
@@ -222,28 +219,5 @@ public class Parry extends SkillActive
 			} // don't deactivate early, as there is a delay between uses
 		}
 		return false;
-	}
-
-	/**
-	 * Drops attacker's held item into the world
-	 */
-	private void disarm(EntityLivingBase attacker) {
-		if (attacker.getHeldItem() != null && !attacker.worldObj.isRemote) {
-			EntityItem drop = new EntityItem(attacker.worldObj, attacker.posX,
-					attacker.posY - 0.30000001192092896D + (double) attacker.getEyeHeight(),
-					attacker.posZ, attacker.getHeldItem().copy());
-			float f = 0.3F;
-			float f1 = attacker.worldObj.rand.nextFloat() * (float) Math.PI * 2.0F;
-			drop.motionX = (double)(-MathHelper.sin(attacker.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(attacker.rotationPitch / 180.0F * (float) Math.PI) * f);
-			drop.motionZ = (double)(MathHelper.cos(attacker.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(attacker.rotationPitch / 180.0F * (float) Math.PI) * f);
-			drop.motionY = (double)(-MathHelper.sin(attacker.rotationPitch / 180.0F * (float) Math.PI) * f + 0.1F);
-			f = 0.02F * attacker.worldObj.rand.nextFloat();
-			drop.motionX += Math.cos((double) f1) * (double) f;
-			drop.motionY += (double)((attacker.worldObj.rand.nextFloat() - attacker.worldObj.rand.nextFloat()) * 0.1F);
-			drop.motionZ += Math.sin((double) f1) * (double) f;
-			drop.delayBeforeCanPickup = 40;
-			attacker.worldObj.spawnEntityInWorld(drop);
-			attacker.setCurrentItemOrArmor(0, (ItemStack) null);
-		}
 	}
 }
