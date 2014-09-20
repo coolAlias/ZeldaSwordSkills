@@ -95,6 +95,8 @@ public class DamageUtils
 
 		/**
 		 * Creates a direct SHOCK damage source, causing stun and damaging hunger
+		 * @param duration	Maximum stun time; will also be modified by total damage inflicted
+		 * @param hunger	Amount of hunger to drain
 		 */
 		public DamageSourceShock(String name, Entity entity, int duration, float hunger) {
 			super(name, entity);
@@ -150,6 +152,8 @@ public class DamageUtils
 
 		/**
 		 * Creates indirect source of SHOCK damage, causing stun and damaging hunger
+		 * @param duration	Maximum stun time; will also be modified by total damage inflicted
+		 * @param hunger	Amount of hunger to drain
 		 */
 		public DamageSourceShockIndirect(String name, Entity direct, Entity indirect, int duration, float hunger) {
 			super(name, direct, indirect);
