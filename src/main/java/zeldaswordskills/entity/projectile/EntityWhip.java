@@ -205,11 +205,30 @@ public class EntityWhip extends EntityThrowable
 			} // otherwise, fall through to standard case:
 		case WHIP_SHORT:
 		case WHIP_LONG:
-			return (block instanceof BlockFence || block instanceof BlockLog ||
+			int clear = 0;
+			if (isSideClear(x + 1, y, z) && isSideClear(x - 1, y, z)) {
+				++clear;
+			}
+			if (isSideClear(x, y + 1, z) && isSideClear(x, y - 1, z)) {
+				++clear;
+			}
+			if (isSideClear(x, y, z + 1) && isSideClear(x, y, z - 1)) {
+				++clear;
+			}
+			return (clear > 1 && (block instanceof BlockFence || block instanceof BlockLog ||
 					block instanceof BlockLever || block instanceof BlockSign ||
-					block instanceof BlockLadder);
+					block instanceof BlockLadder));
 		}
 		return false;
+	}
+
+	/**
+	 * Returns true if the coordinates given are clear of obstacles, such that the
+	 * whip would be able to freely move through the space and latch on
+	 */
+	protected boolean isSideClear(int x, int y, int z) {
+		Material m = worldObj.getBlock(x, y, z).getMaterial();
+		return (!m.blocksMovement() || m == Material.leaves);
 	}
 
 	@Override // getVelocity
