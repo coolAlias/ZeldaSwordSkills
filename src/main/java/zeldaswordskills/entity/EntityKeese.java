@@ -77,7 +77,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 
 	/** Returns this Keese's type */
 	public KeeseType getType() {
-		return KeeseType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX)];
+		return KeeseType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX) % KeeseType.values().length];
 	}
 
 	/** Sets this Keese's type */
