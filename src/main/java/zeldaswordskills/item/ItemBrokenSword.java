@@ -80,8 +80,8 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			Item brokenItem = Item.getItemById(stack.getItemDamage());
-			if (!(brokenItem instanceof ItemSword)) {
-				LogHelper.warning("Broken sword contained a non-sword item: " + brokenItem + "; defaulting to Ordon Sword");
+			if (!(brokenItem instanceof ItemSword) || (brokenItem instanceof ItemZeldaSword && !((ItemZeldaSword) brokenItem).givesBrokenItem)) {
+				LogHelper.warning("Broken sword contained an invalid item: " + brokenItem + "; defaulting to Ordon Sword");
 				brokenItem = ZSSItems.swordOrdon;
 			}
 			if (villager.getProfession() == 3 || isGoron) {
@@ -114,8 +114,9 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIconFromDamage(int damage) {
-		if (Item.getItemById(damage) instanceof ItemZeldaSword) {
-			return Item.getItemById(damage).getIconFromDamage(-1); // -1 returns brokenIcon for ItemZeldaSword
+		Item sword = Item.getItemById(damage);
+		if (sword instanceof ItemZeldaSword && ((ItemZeldaSword) sword).givesBrokenItem) {
+			return sword.getIconFromDamage(-1); // -1 returns brokenIcon for ItemZeldaSword
 		} else {
 			return itemIcon;
 		}
@@ -124,7 +125,7 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		Item sword = Item.getItemById(stack.getItemDamage());
-		String name = sword instanceof ItemSword ? sword.getUnlocalizedName() : ZSSItems.swordOrdon.getUnlocalizedName();
+		String name = (sword instanceof ItemZeldaSword && ((ItemZeldaSword) sword).givesBrokenItem) ? sword.getUnlocalizedName() : ZSSItems.swordOrdon.getUnlocalizedName();
 		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal(name + ".name");
 	}
 
