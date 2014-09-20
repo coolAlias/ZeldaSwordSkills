@@ -20,7 +20,6 @@ package zeldaswordskills.entity.projectile;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -34,15 +33,29 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
-public class EntitySeedShot extends EntityThrowable
+public class EntitySeedShot extends EntityMobThrowable
 {
-	public static enum SeedType {NONE,COCOA,DEKU,GRASS,MELON,NETHERWART,PUMPKIN};
+	public static enum SeedType {
+		NONE(0.0F),
+		COCOA(1.25F),
+		DEKU(1.5F),
+		GRASS(1.0F),
+		MELON(1.25F),
+		NETHERWART(1.5F),
+		PUMPKIN(1.25F);
+
+		private final float damage;
+		private SeedType(float damage) {
+			this.damage = damage;
+		}
+		/** Returns the base damage for this seed type */
+		public float getDamage() {
+			return damage;
+		}
+	};
 
 	/** Watchable object index for critical and seed's type */
 	protected static final int CRITICAL_INDEX = 22, SEEDTYPE_INDEX = 23;
-
-	/** Damage this seed will cause on impact */
-	private float damage = 2.0F;
 
 	/** Knockback strength, if any */
 	private int knockback = 0;
@@ -53,6 +66,10 @@ public class EntitySeedShot extends EntityThrowable
 
 	public EntitySeedShot(World world, EntityLivingBase entity, float velocity) {
 		this(world, entity, velocity, 1, 0F);
+	}
+
+	public EntitySeedShot(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
+		super(world, shooter, target, velocity, wobble);
 	}
 
 	/**
@@ -109,17 +126,7 @@ public class EntitySeedShot extends EntityThrowable
 
 	/** Get the seed's type */
 	public SeedType getType() {
-		return SeedType.values()[dataWatcher.getWatchableObjectInt(SEEDTYPE_INDEX)];
-	}
-
-	/** Sets the amount of damage the arrow will inflict when it hits a mob */
-	public void setDamage(float value) {
-		damage = value;
-	}
-
-	/** Returns the amount of damage the arrow will inflict when it hits a mob */
-	public float getDamage() {
-		return damage;
+		return SeedType.values()[dataWatcher.getWatchableObjectInt(SEEDTYPE_INDEX) % SeedType.values().length];
 	}
 
 	/**
@@ -220,9 +227,9 @@ public class EntitySeedShot extends EntityThrowable
 	 */
 	protected float calculateDamage() {
 		float f = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-		float dmg = f * damage;
+		float dmg = f * getDamage();
 		if (getIsCritical()) {
-			dmg += (rand.nextFloat() * (damage / 4.0F)) + 0.25F;
+			dmg += (rand.nextFloat() * (getDamage() / 4.0F)) + 0.25F;
 		}
 		return dmg;
 	}
@@ -232,7 +239,6 @@ public class EntitySeedShot extends EntityThrowable
 		super.writeEntityToNBT(compound);
 		compound.setBoolean("isCritical", getIsCritical());
 		compound.setByte("seedType", (byte) getType().ordinal());
-		compound.setFloat("damage", damage);
 		compound.setInteger("knockback", knockback);
 	}
 
@@ -240,8 +246,7 @@ public class EntitySeedShot extends EntityThrowable
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		setIsCritical(compound.getBoolean("isCritical"));
-		setType(SeedType.values()[compound.getByte("seedType")]);
-		damage = compound.getFloat("damage");
+		setType(SeedType.values()[compound.getByte("seedType") % SeedType.values().length]);
 		knockback = compound.getInteger("knockback");
 	}
 }
