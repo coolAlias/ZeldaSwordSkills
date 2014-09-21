@@ -66,20 +66,32 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	/** The spell's effect radius also affects the render scale */
 	private float radius = 2.0F;
 
+	/** If true, the damage source will be set to ignore armor */
+	private boolean bypassesArmor;
+
 	public EntityMagicSpell(World world) {
 		super(world);
 	}
 
 	public EntityMagicSpell(World world, EntityLivingBase entity) {
 		super(world, entity);
+		resetSize();
 	}
 
 	public EntityMagicSpell(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		resetSize();
 	}
 
 	public EntityMagicSpell(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
+		resetSize();
+	}
+
+	/** Re-sets the entity size based on the current radius */
+	private void resetSize() {
+		float f = (float)(radius / 4.0D);
+		setSize(f, f);
 	}
 
 	public MagicType getType() {
@@ -91,6 +103,12 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		return this;
 	}
 
+	/** Makes this spell's damage source ignore armor */
+	public EntityMagicSpell setDamageBypassesArmor() {
+		bypassesArmor = true;
+		return this;
+	}
+
 	/** Returns the spell's effect radius */
 	public float getArea() {
 		return radius;
@@ -99,6 +117,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	/** Sets the spell's area of effect radius */
 	public EntityMagicSpell setArea(float radius) {
 		this.radius = radius;
+		resetSize();
 		return this;
 	}
 
@@ -111,12 +130,17 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	 * Returns a damage source corresponding to the magic type (e.g. fire for fire, etc.)
 	 */
 	protected DamageSource getDamageSource() {
+		DamageSource source = new EntityDamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
 		switch(getType()) {
-		case ICE: return new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
-		case LIGHTNING: return new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
-		case WIND: return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
-		default: return new EntityDamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
+		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1).setProjectile().setMagicDamage(); break;
+		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1).setProjectile().setMagicDamage(); break;
+		case WIND: source = new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage(); break;
+		default: break; // fire
 		}
+		if (bypassesArmor) {
+			source.setDamageBypassesArmor();
+		}
+		return source;
 	}
 
 	@Override
@@ -210,6 +234,16 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		case FIRE:
 			if (!entity.isImmuneToFire()) {
 				entity.setFire((int) Math.ceil(getDamage()));
+			}
+			break;
+		case WIND:
+			double power = (getDamage() / 4.0D);
+			if (power > 0) {
+				float f3 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+				if (f3 > 0.0F) {
+					double knockback = power * 0.6000000238418579D / (double) f3;
+					entity.addVelocity(motionX * knockback, 0.1D, motionZ * knockback);
+				}
 			}
 			break;
 		default:
