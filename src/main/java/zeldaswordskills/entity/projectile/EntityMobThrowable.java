@@ -53,7 +53,7 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		super(world, shooter);
 		this.posY = shooter.posY + (double) shooter.getEyeHeight() - 0.10000000149011612D;
 		double d0 = target.posX - shooter.posX;
-		double d1 = target.boundingBox.minY + (double) target.height - this.posY;
+		double d1 = target.boundingBox.minY + (double)(target.height / 3.0F) - this.posY;
 		double d2 = target.posZ - shooter.posZ;
 		double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d2 * d2);
 		if (d3 >= 1.0E-7D) {
