@@ -42,9 +42,9 @@ import net.minecraft.world.World;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.client.particle.FXCycloneRing;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -151,8 +151,8 @@ public class EntityCyclone extends EntityMobThrowable
 			if (ticksExisted > 40) {
 				setDead();
 				releaseDrops();
-			} else if (ticksExisted % 6 == 5) {
-				worldObj.playSoundAtEntity(this, Sounds.WHIRLWIND, 0.6F, 1.0F);
+			} else if (ticksExisted % MagicType.WIND.getSoundFrequency() == (MagicType.WIND.getSoundFrequency() - 1)) {
+				worldObj.playSoundAtEntity(this, MagicType.WIND.getMovingSound(), MagicType.WIND.getSoundPitch(rand), MagicType.WIND.getSoundVolume(rand));
 			}
 		} else {
 			spawnParticleRing();

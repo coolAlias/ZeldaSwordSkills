@@ -44,6 +44,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -53,7 +54,6 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityCyclone;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
-import zeldaswordskills.entity.projectile.EntityMagicSpell.MagicType;
 import zeldaswordskills.entity.projectile.EntityMobThrowable;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
@@ -224,16 +224,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 				}
 			}
 		}
-		switch(magicType) {
-		case ICE:
-			if (ticksInUse % 4 == 0) {
-				world.playSoundAtEntity(player, Sounds.MAGIC_ICE, 0.5F + world.rand.nextFloat(), world.rand.nextFloat() * 0.4F + 0.8F);
-			}
-			break;
-		default:
-			if (ticksInUse % 12 == 0) {
-				world.playSoundAtEntity(player, Sounds.MAGIC_FIRE, 1.0F + world.rand.nextFloat(), world.rand.nextFloat() * 0.7F + 0.3F);
-			}
+		if (ticksInUse % magicType.getSoundFrequency() == 0) {
+			world.playSoundAtEntity(player, magicType.getMovingSound(), magicType.getSoundVolume(world.rand), magicType.getSoundPitch(world.rand));
 		}
 	}
 
@@ -320,14 +312,13 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector) {
-		String particle = (magicType == MagicType.FIRE ? "flame" : "snowshovel");
 		y += 1.62D;
 		for (float f = 0; f < r; f += 0.5F) {
 			x += lookVector.xCoord;
 			y += lookVector.yCoord;
 			z += lookVector.zCoord;
 			for (int i = 0; i < 4; ++i) {
-				world.spawnParticle(particle,
+				world.spawnParticle(magicType.getTrailingParticle(),
 						x + 0.5F - world.rand.nextFloat(),
 						y + 0.5F - world.rand.nextFloat(),
 						z + 0.5F - world.rand.nextFloat(),
@@ -384,6 +375,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 				case FIRE: canAbsorb = type == BlockSacredFlame.DIN; break;
 				case ICE: canAbsorb = type == BlockSacredFlame.NAYRU; break;
 				case WIND: canAbsorb = type == BlockSacredFlame.FARORE; break;
+				default: break;
 				}
 				if (canAbsorb) {
 					if (!stack.hasTagCompound()) {

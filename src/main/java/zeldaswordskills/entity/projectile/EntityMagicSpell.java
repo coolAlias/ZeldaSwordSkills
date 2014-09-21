@@ -17,6 +17,8 @@
 
 package zeldaswordskills.entity.projectile;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,10 +37,13 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -49,24 +54,17 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * Upon impact, the spell will 'explode', damaging all entities within the area of
  * effect for the full damage amount.
+ * 
+ * Set the MagicType and AoE before spawning the entity or the client side will not know about it.
  *
  */
-public class EntityMagicSpell extends EntityMobThrowable
+public class EntityMagicSpell extends EntityMobThrowable implements IEntityAdditionalSpawnData
 {
-	public static enum MagicType {
-		/** Causes fire damage, melts ice, ignites blocks */
-		FIRE,
-		/** Causes cold damage, freezes targets, extinguishes flames and lava */
-		ICE,
-		/** Currently no special effects; used only to give Tornado Rod a dummy magic type */
-		WIND
-	}
+	/** The spell's magic type */
+	private MagicType type = MagicType.FIRE;
 
-	/** Watchable object index for spell's magic type */
-	private static final int SPELL_TYPE_INDEX = 22;
-
-	/** Watchable object index for spell's area of effect */
-	private static final int AREA_INDEX = 23;
+	/** The spell's effect radius also affects the render scale */
+	private float radius = 2.0F;
 
 	public EntityMagicSpell(World world) {
 		super(world);
@@ -84,31 +82,29 @@ public class EntityMagicSpell extends EntityMobThrowable
 		super(world, shooter, target, velocity, wobble);
 	}
 
-	@Override
-	public void entityInit() {
-		super.entityInit();
-		dataWatcher.addObject(SPELL_TYPE_INDEX, MagicType.FIRE.ordinal());
-		dataWatcher.addObject(AREA_INDEX, 2.0F);
-	}
-
 	public MagicType getType() {
-		return MagicType.values()[dataWatcher.getWatchableObjectInt(SPELL_TYPE_INDEX) % MagicType.values().length];
+		return type;
 	}
 
 	public EntityMagicSpell setType(MagicType type) {
-		dataWatcher.updateObject(SPELL_TYPE_INDEX, type.ordinal());
+		this.type = type;
 		return this;
 	}
 
-	/** Returns the spell's area of effect */
+	/** Returns the spell's effect radius */
 	public float getArea() {
-		return dataWatcher.getWatchableObjectFloat(AREA_INDEX);
+		return radius;
 	}
 
 	/** Sets the spell's area of effect radius */
 	public EntityMagicSpell setArea(float radius) {
-		dataWatcher.updateObject(AREA_INDEX, radius);
+		this.radius = radius;
 		return this;
+	}
+
+	/** Render scale is based on the effect radius */
+	public float getRenderScale() {
+		return radius / 2.0F;
 	}
 
 	/**
@@ -117,6 +113,7 @@ public class EntityMagicSpell extends EntityMobThrowable
 	protected DamageSource getDamageSource() {
 		switch(getType()) {
 		case ICE: return new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
+		case LIGHTNING: return new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
 		case WIND: return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
 		default: return new EntityDamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
 		}
@@ -132,20 +129,13 @@ public class EntityMagicSpell extends EntityMobThrowable
 		return 0.02F;
 	}
 
-	private String getParticle() {
-		switch(getType()) {
-		case ICE: return "snowshovel";
-		case WIND: return "cloud";
-		default: return "flame";
-		}
-	}
-
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		MagicType type = getType();
 		if (worldObj.isRemote) {
-			String particle = getParticle();
-			boolean flag = getType() != MagicType.FIRE;
+			String particle = type.getTrailingParticle();
+			boolean flag = type != MagicType.FIRE;
 			for (int i = 0; i < 4; ++i) {
 				worldObj.spawnParticle(particle,
 						posX + motionX * (double) i / 4.0D,
@@ -153,6 +143,8 @@ public class EntityMagicSpell extends EntityMobThrowable
 						posZ + motionZ * (double) i / 4.0D,
 						-motionX * 0.25D, -motionY + (flag ? 0.1D : 0.0D), -motionZ * 0.25D);
 			}
+		} else if (ticksExisted % type.getSoundFrequency() == 0) {
+			worldObj.playSoundAtEntity(this, type.getMovingSound(), type.getSoundVolume(rand), type.getSoundPitch(rand));
 		}
 	}
 
@@ -180,11 +172,13 @@ public class EntityMagicSpell extends EntityMobThrowable
 		}
 		if (worldObj.isRemote) {
 			spawnImpactParticles("largeexplode", 4, -0.1F);
-			spawnImpactParticles(getParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
+			spawnImpactParticles(getType().getTrailingParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
 		} else {
 			worldObj.playSoundAtEntity(this, "random.explode", 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
-			Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
-			ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
+			if (getType().affectsBlocks(worldObj, getThrower())) {
+				Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
+				ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
+			}
 			setDead();
 		}
 	}
@@ -234,5 +228,17 @@ public class EntityMagicSpell extends EntityMobThrowable
 		super.readEntityFromNBT(compound);
 		setType(MagicType.values()[compound.getInteger("magicType") % MagicType.values().length]);
 		setArea(compound.getFloat("areaOfEffect"));
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		buffer.writeInt(type.ordinal());
+		buffer.writeFloat(radius);
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		type = (MagicType.values()[buffer.readInt() % MagicType.values().length]);
+		radius = buffer.readFloat();
 	}
 }

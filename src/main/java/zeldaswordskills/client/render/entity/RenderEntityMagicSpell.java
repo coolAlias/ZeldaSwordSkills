@@ -34,8 +34,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderEntityMagicSpell extends Render
 {
-	private static final ResourceLocation fireTexture = new ResourceLocation("textures/blocks/lava_still.png");
-	private static final ResourceLocation iceTexture = new ResourceLocation("textures/blocks/ice.png");
 	private final ModelCube box1 = new ModelCube(4);
 	private final ModelCube box2 = new ModelCube(4);
 
@@ -49,10 +47,12 @@ public class RenderEntityMagicSpell extends Render
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
-		GL11.glTranslated(dx, dy, dz);
-		GL11.glRotatef(yaw, 0, 1, 0);
+		float scale = ((EntityMagicSpell) entity).getRenderScale();
 		float roll = ((float) entity.ticksExisted + partialTick) * 40;
 		while (roll > 360) roll -= 360;
+		GL11.glTranslated(dx, dy, dz);
+		GL11.glScalef(scale, scale, scale);
+		GL11.glRotatef(yaw, 0, 1, 0);
 		GL11.glRotatef(roll, 0.8F, 0F, -0.6F);
 		bindEntityTexture(entity);
 		Tessellator.instance.setBrightness(0xf000f0);
@@ -67,9 +67,6 @@ public class RenderEntityMagicSpell extends Render
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		switch(((EntityMagicSpell) entity).getType()) {
-		case ICE: return iceTexture;
-		default: return fireTexture;
-		}
+		return ((EntityMagicSpell) entity).getType().getEntityTexture();
 	}
 }
