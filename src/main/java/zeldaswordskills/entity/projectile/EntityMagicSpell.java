@@ -25,6 +25,7 @@ import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -119,11 +120,6 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		this.radius = radius;
 		resetSize();
 		return this;
-	}
-
-	/** Render scale is based on the effect radius */
-	public float getRenderScale() {
-		return radius / 2.0F;
 	}
 
 	/**
@@ -227,8 +223,10 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
-			worldObj.setBlock(i, j, k, Blocks.ice);
-			worldObj.setBlock(i, j + 1, k, Blocks.ice);
+			if (getThrower() instanceof EntityPlayer) {
+				worldObj.setBlock(i, j, k, Blocks.ice);
+				worldObj.setBlock(i, j + 1, k, Blocks.ice);
+			}
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 			break;
 		case FIRE:
@@ -237,7 +235,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 			}
 			break;
 		case WIND:
-			double power = (getDamage() / 4.0D);
+			double power = Math.max(3.0D, (getDamage() / 6.0D));
 			if (power > 0) {
 				float f3 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
 				if (f3 > 0.0F) {

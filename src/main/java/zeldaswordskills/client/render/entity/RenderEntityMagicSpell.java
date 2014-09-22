@@ -47,7 +47,7 @@ public class RenderEntityMagicSpell extends Render
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
-		float scale = ((EntityMagicSpell) entity).getRenderScale();
+		float scale = ((EntityMagicSpell) entity).getArea();
 		float roll = ((float) entity.ticksExisted + partialTick) * 40;
 		while (roll > 360) roll -= 360;
 		GL11.glTranslated(dx, dy, dz);
