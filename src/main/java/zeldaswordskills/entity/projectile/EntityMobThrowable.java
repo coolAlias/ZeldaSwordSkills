@@ -30,6 +30,9 @@ import net.minecraft.world.World;
  */
 public abstract class EntityMobThrowable extends EntityThrowable
 {
+	/** The throwing entity's ID, in case it is not a player. Only used after loading from NBT */
+	private int throwerId;
+
 	/** Usually the damage this entity will cause upon impact */
 	private float damage;
 
@@ -68,6 +71,15 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		}
 	}
 
+	@Override
+	public EntityLivingBase getThrower() {
+		EntityLivingBase thrower = super.getThrower();
+		if (thrower == null) {
+			return (EntityLivingBase) worldObj.getEntityByID(throwerId);
+		}
+		return thrower;
+	}
+
 	/** Returns the amount of damage this entity will cause upon impact */
 	public float getDamage() {
 		return damage;
@@ -84,12 +96,14 @@ public abstract class EntityMobThrowable extends EntityThrowable
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
+		compound.setInteger("throwerId", (getThrower() == null ? -1 : getThrower().getEntityId()));
 		compound.setFloat("damage", damage);
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
+		throwerId = compound.getInteger("throwerId");
 		damage = compound.getFloat("damage");
 	}
 }
