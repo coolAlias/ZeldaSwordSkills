@@ -30,13 +30,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
 import zeldaswordskills.api.entity.MagicType;
@@ -126,11 +127,11 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	 * Returns a damage source corresponding to the magic type (e.g. fire for fire, etc.)
 	 */
 	protected DamageSource getDamageSource() {
-		DamageSource source = new EntityDamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
+		DamageSource source = new DamageSourceFireIndirect("blast.fire", this, getThrower(), true).setProjectile().setMagicDamage();
 		switch(getType()) {
-		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1).setProjectile().setMagicDamage(); break;
-		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1).setProjectile().setMagicDamage(); break;
-		case WIND: source = new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage(); break;
+		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1, true).setProjectile().setMagicDamage(); break;
+		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1, true).setProjectile().setMagicDamage(); break;
+		case WIND: source = new DamageSourceBaseIndirect("blast.wind", this, getThrower(), true).setProjectile().setMagicDamage(); break;
 		default: break; // fire
 		}
 		if (bypassesArmor) {

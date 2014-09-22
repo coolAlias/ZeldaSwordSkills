@@ -41,6 +41,7 @@ public class BattlegearEvents {
 	@SubscribeEvent
 	public void onBlocked(ShieldBlockEvent event) {
 		if (event.shield.getItem() instanceof ItemZeldaShield) {
+			// TODO event.ammountRemaining = ...
 			((ItemZeldaShield) event.shield.getItem()).onBlock(event.entityPlayer, event.shield, event.source, event.ammount);
 			event.performAnimation = false;
 			event.damageShield = false;

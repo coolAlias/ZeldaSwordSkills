@@ -34,7 +34,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -43,6 +42,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFire;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -303,9 +303,9 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 
 	/** Only used for Fire and Ice Rods */
 	private DamageSource getDamageSource(EntityPlayer player) {
-		switch(magicType) {
-		case ICE: return new DamageSourceIce("blast.ice", player, 60, 1);
-		default: return new EntityDamageSource("blast.fire", player).setFireDamage();
+		switch(magicType) { // causing AoE damage
+		case ICE: return new DamageSourceIce("blast.ice", player, 60, 1, true);
+		default: return new DamageSourceFire("blast.fire", player, true);
 		}
 	}
 

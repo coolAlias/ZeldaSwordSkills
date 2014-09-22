@@ -42,6 +42,8 @@ import zeldaswordskills.entity.buff.Buff;
 public enum EnumDamageType {
 	/** Cold damage inflicts a slow effect on the target, modified by total damage */
 	COLD,
+	/** Fire damage has no special effect beyond what vanilla does, but is useful for flagging AoE damage */
+	FIRE,
 	/** Holy damage is especially potent against undead creatures */
 	HOLY,
 	/** Shock damage may be resisted with the RESIST_SHOCK buff */
@@ -78,6 +80,7 @@ public enum EnumDamageType {
 	public static final Map<EnumDamageType, Buff> damageWeaknessMap = new EnumMap<EnumDamageType, Buff>(EnumDamageType.class);
 	
 	static {
+		// do not include FIRE, since it is handled by isFireDamage()
 		damageResistMap.put(COLD, Buff.RESIST_COLD);
 		damageResistMap.put(HOLY, Buff.RESIST_HOLY);
 		damageResistMap.put(SHOCK, Buff.RESIST_SHOCK);

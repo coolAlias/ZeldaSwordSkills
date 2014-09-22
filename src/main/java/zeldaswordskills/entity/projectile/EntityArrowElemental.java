@@ -30,11 +30,11 @@ import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHoly;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
@@ -45,8 +45,6 @@ import zeldaswordskills.util.WorldUtils;
 
 /**
  * 
- * All magical arrows cause armor-piercing magical damage, possibly with other effects.
- * 
  * Fire Arrow
  * Ignites nearby blocks and enemies, and melts even the coldest of ice
  * 
@@ -56,6 +54,7 @@ import zeldaswordskills.util.WorldUtils;
  * not prevent them from exploding.
  * 
  * Light Arrow
+ * Ignores armor.
  * Double damage against undead, quad damage against the Wither
  * Slays non-boss Endermen and Wither Skeletons instantly, regardless of health
  * Can also dispel certain magical barriers and pierce through any block,
@@ -120,7 +119,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected DamageSource getDamageSource(Entity entity) {
 		switch(getType()) {
-		case FIRE: return new EntityDamageSourceIndirect("arrow.fire", this, shootingEntity).setFireDamage().setProjectile().setMagicDamage();
+		case FIRE: return new DamageSourceFireIndirect("arrow.fire", this, shootingEntity).setProjectile().setMagicDamage();
 		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, shootingEntity, 50, 1).setProjectile().setMagicDamage();
 		case LIGHT: return (entity instanceof EntityEnderman
 				? new DamageSourceHoly("arrow.light", (shootingEntity != null ? shootingEntity : this)).setProjectile().setMagicDamage().setDamageBypassesArmor()

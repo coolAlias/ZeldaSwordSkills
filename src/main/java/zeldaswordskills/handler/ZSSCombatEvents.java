@@ -173,8 +173,8 @@ public class ZSSCombatEvents
 						shouldBlock = yaw < 60 && yaw > -60; // all Zelda shields use default block angles
 					}
 					if (shouldBlock) {
-						shield.onBlock(player, stack, event.source, event.ammount);
-						event.setCanceled(true);
+						event.ammount = shield.onBlock(player, stack, event.source, event.ammount);
+						event.setCanceled(event.ammount < 0.1F);
 					}
 				}
 			}
