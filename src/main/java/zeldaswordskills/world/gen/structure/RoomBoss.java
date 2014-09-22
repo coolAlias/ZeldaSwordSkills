@@ -62,7 +62,9 @@ public class RoomBoss extends RoomBase
 	}
 
 	/** Returns the BossType for this Boss Room */
-	public BossType getBossType() { return type; }
+	public BossType getBossType() {
+		return type;
+	}
 
 	@Override
 	public boolean generate(ZSSMapGenBase mapGen, World world, Random rand, int x, int y, int z) {
@@ -298,13 +300,21 @@ public class RoomBoss extends RoomBase
 			int x = bBox.getCenterX();
 			int y = bBox.maxY - 1;
 			int z = bBox.getCenterZ();
-			if (type == BossType.OCEAN) {
+			switch(type) {
+			case OCEAN:
 				world.setBlock(x + 1, y, z + 1, Blocks.glowstone, 0, 2);
 				world.setBlock(x + 1, y, z - 1, Blocks.glowstone, 0, 2);
 				world.setBlock(x - 1, y, z + 1, Blocks.glowstone, 0, 2);
 				world.setBlock(x - 1, y, z - 1, Blocks.glowstone, 0, 2);
 				world.setBlock(x, y, z, Blocks.glowstone, 0, 2);
-			} else {
+				break;
+			case SWAMP:
+				world.setBlock(bBox.minX + 1, y, bBox.minZ + 1, Blocks.glowstone, 0, 2);
+				world.setBlock(bBox.minX + 1, y, bBox.maxZ - 1, Blocks.glowstone, 0, 2);
+				world.setBlock(bBox.maxX - 1, y, bBox.minZ + 1, Blocks.glowstone, 0, 2);
+				world.setBlock(bBox.maxX - 1, y, bBox.maxZ - 1, Blocks.glowstone, 0, 2);
+				break;
+			default:
 				world.setBlock(x, y, z, Blocks.fence, 0, 2);
 				world.setBlock(x + 1, y, z, Blocks.fence, 0, 2);
 				world.setBlock(x + 1, y, z, Blocks.fence, 0, 2);
@@ -450,7 +460,10 @@ public class RoomBoss extends RoomBase
 	 * Places pillars in the four corners of the dungeon with chance based on room size
 	 */
 	protected void placePillars(World world, int meta) {
-		if (type != BossType.DESERT && world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
+		if (type == BossType.DESERT || type == BossType.SWAMP) {
+			return;
+		}
+		if (world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
 			int offset = (bBox.getXSize() < 11 ? 2 : 3);
 			int x1 = (bBox.getXSize() < 11 ? bBox.getCenterX() : bBox.minX) + offset;
 			int x2 = (bBox.getXSize() < 11 ? bBox.getCenterX() : bBox.maxX) - offset;
@@ -505,18 +518,49 @@ public class RoomBoss extends RoomBase
 		if (Config.areWindowsEnabled() && world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
 			int interval = (bBox.getXSize() % 2 == 1 ? 2 : 3);
 			int j = bBox.getCenterY() + 1;
+			Block window = (world.rand.nextFloat() < 0.25F ? Blocks.iron_bars : Blocks.air);
+			boolean hasVines = (type == BossType.FOREST || type == BossType.SWAMP);
 			for (int i = bBox.minX + 1; i < bBox.maxX; ++i) {
 				if (i % interval == 0) {
-					world.setBlockToAir(i, j, bBox.minZ);
-					world.setBlockToAir(i, j, bBox.maxZ);
+					world.setBlock(i, j, bBox.minZ, window, 0, 2);
+					world.setBlock(i, j, bBox.maxZ, window, 0, 2);
+					if (hasVines) {
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, i, j - 1, bBox.minZ - 1, 1);
+						}
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, i, j - 1, bBox.maxZ + 1, 4);
+						}
+					}
 				}
 			}
 			for (int k = bBox.minZ + 1; k < bBox.maxZ; ++k) {
 				if (k % interval == 0) {
-					world.setBlockToAir(bBox.minX, j, k);
-					world.setBlockToAir(bBox.maxX, j, k);
+					world.setBlock(bBox.minX, j, k, window, 0, 2);
+					world.setBlock(bBox.maxX, j, k, window, 0, 2);
+					if (hasVines) {
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, bBox.minX - 1, j - 1, k, 8);
+						}
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, bBox.maxX + 1, j - 1, k, 2);
+						}
+					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Places a random number of vines with the given metadata facing starting from y and moving downward
+	 */
+	protected void placeVines(World world, int x, int y, int z, int meta) {
+		int n = world.rand.nextInt(5) + 1;
+		for (int i = 0; i < n; ++i) {
+			if (!world.isAirBlock(x, y - i, z)) {
+				break;
+			}
+			world.setBlock(x, y - i, z, Blocks.vine, meta, 2);
 		}
 	}
 
