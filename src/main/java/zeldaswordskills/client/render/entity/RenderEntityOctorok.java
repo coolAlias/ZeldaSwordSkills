@@ -27,7 +27,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.client.model.ModelOctorok;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

@@ -33,7 +33,7 @@ import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.ZSSAchievements;
-import zeldaswordskills.entity.EntityChu.ChuType;
+import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;

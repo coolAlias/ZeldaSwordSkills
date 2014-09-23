@@ -43,7 +43,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
