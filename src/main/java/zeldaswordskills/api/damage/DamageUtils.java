@@ -83,13 +83,29 @@ public class DamageUtils
 		return new EntityDamageSourceIndirect(INDIRECT_SWORD, direct, indirect);
 	}
 
-	public static class DamageSourceBaseDirect extends EntityDamageSource implements IDamageAoE, IDamageType
+	public static class DamageSourceBaseDirect extends EntityDamageSource implements IDamageAoE, IDamageType, IDamageSourceStun
 	{
 		/** Whether this particular damage source will result in AoE damage */
 		protected final boolean isAoE;
 
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
+
+		/** Maximum base stun time; will also be modified by total damage inflicted */
+		private int stunDuration;
+
+		/** Factor by which stun time will be modified, multiplied by total damage inflicted */
+		private int stunAmplifier;
+
+		/** If true, this damage source is capable of stunning players unless disabled in the config */
+		private boolean canStunPlayers;
+
+		/**
+		 * Creates a non-AoE direct damage source
+		 */
+		public DamageSourceBaseDirect(String name, Entity entity) {
+			this(name, entity, false);
+		}
 
 		/**
 		 * Creates a direct damage source with the given AoE flag
@@ -100,6 +116,25 @@ public class DamageUtils
 			enumDamageTypes = new HashSet<EnumDamageType>();
 		}
 
+		/**
+		 * Creates a non-AoE direct damage source with the specified damage type
+		 * @param type	Only damage types with no special effects should be added this way
+		 */
+		public DamageSourceBaseDirect(String name, Entity entity, EnumDamageType type) {
+			this(name, entity, false, type);
+		}
+
+		/**
+		 * Creates a direct damage source with the given AoE flag and specified damage type
+		 * @param type	Only damage types with no special effects should be added this way
+		 */
+		public DamageSourceBaseDirect(String name, Entity entity, boolean isAoE, EnumDamageType type) {
+			super(name, entity);
+			this.isAoE = isAoE;
+			enumDamageTypes = new HashSet<EnumDamageType>();
+			addDamageType(type);
+		}
+
 		@Override
 		public final boolean isAoEDamage() {
 			return isAoE;
@@ -113,9 +148,49 @@ public class DamageUtils
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return Collections.unmodifiableSet(enumDamageTypes);
 		}
+
+		/**
+		 * Adds stun effect to this damage source
+		 * @param duration			Maximum base stun time; will also be modified by total damage inflicted
+		 * @param amplifier			Factor by which stun time will be modified, multiplied by total damage inflicted
+		 * @param canStunPlayers	If true, this damage source is capable of stunning players unless disabled in the config
+		 */
+		public DamageSourceBaseDirect setStunDamage(int duration, int amplifier, boolean canStunPlayers) {
+			addDamageType(EnumDamageType.STUN);
+			this.stunDuration = duration;
+			this.stunAmplifier = amplifier;
+			this.canStunPlayers = canStunPlayers;
+			return this;
+		}
+
+		@Override
+		public int getDuration(EnumDamageType type) {
+			return stunDuration;
+		}
+
+		@Override
+		public int getAmplifier(EnumDamageType type) {
+			return stunAmplifier;
+		}
+
+		/** Allows this damage source to stun players if allowed in the config */
+		public DamageSourceBaseDirect setCanStunPlayers() {
+			canStunPlayers = true;
+			return this;
+		}
+
+		@Override
+		public boolean canStunPlayers() {
+			return canStunPlayers;
+		}
+
+		@Override
+		public boolean alwaysStuns() {
+			return false;
+		}
 	}
 
-	public static class DamageSourceBaseIndirect extends EntityDamageSourceIndirect implements IDamageAoE, IDamageType
+	public static class DamageSourceBaseIndirect extends EntityDamageSourceIndirect implements IDamageAoE, IDamageType, IDamageSourceStun
 	{
 		/** Whether this particular damage source will result in AoE damage */
 		protected final boolean isAoE;
@@ -123,10 +198,48 @@ public class DamageUtils
 		/** EnumDamageTypes associated with this DamageSource */
 		private Set<EnumDamageType> enumDamageTypes;
 
+		/** Maximum base stun time; will also be modified by total damage inflicted */
+		private int stunDuration;
+
+		/** Factor by which stun time will be modified, multiplied by total damage inflicted */
+		private int stunAmplifier;
+
+		/** If true, this damage source is capable of stunning players unless disabled in the config */
+		private boolean canStunPlayers;
+
+		/**
+		 * Creates a non-AoE indirect damage source
+		 */
+		public DamageSourceBaseIndirect(String name, Entity direct, Entity indirect) {
+			this(name, direct, indirect, false);
+		}
+
+		/**
+		 * Creates an indirect damage source with the given AoE flag
+		 */
 		public DamageSourceBaseIndirect(String name, Entity direct, Entity indirect, boolean isAoE) {
 			super(name, direct, indirect);
 			this.isAoE = isAoE;
 			enumDamageTypes = new HashSet<EnumDamageType>();
+		}
+
+		/**
+		 * Creates a non-AoE indirect damage source with the specified damage type
+		 * @param type	Only damage types with no special effects should be added this way
+		 */
+		public DamageSourceBaseIndirect(String name, Entity direct, Entity indirect, EnumDamageType type) {
+			this(name, direct, indirect, false, type);
+		}
+
+		/**
+		 * Creates an indirect damage source with the given AoE flag and specified damage type
+		 * @param type	Only damage types with no special effects should be added this way
+		 */
+		public DamageSourceBaseIndirect(String name, Entity direct, Entity indirect, boolean isAoE, EnumDamageType type) {
+			super(name, direct, indirect);
+			this.isAoE = isAoE;
+			enumDamageTypes = new HashSet<EnumDamageType>();
+			addDamageType(type);
 		}
 
 		@Override
@@ -142,13 +255,50 @@ public class DamageUtils
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return Collections.unmodifiableSet(enumDamageTypes);
 		}
+
+		/**
+		 * Adds stun effect to this damage source
+		 * @param duration			Maximum base stun time; will also be modified by total damage inflicted
+		 * @param amplifier			Factor by which stun time will be modified, multiplied by total damage inflicted
+		 * @param canStunPlayers	If true, this damage source is capable of stunning players unless disabled in the config
+		 */
+		public DamageSourceBaseIndirect setStunDamage(int duration, int amplifier, boolean canStunPlayers) {
+			addDamageType(EnumDamageType.STUN);
+			this.stunDuration = duration;
+			this.stunAmplifier = amplifier;
+			this.canStunPlayers = canStunPlayers;
+			return this;
+		}
+
+		@Override
+		public int getDuration(EnumDamageType type) {
+			return stunDuration;
+		}
+
+		@Override
+		public int getAmplifier(EnumDamageType type) {
+			return stunAmplifier;
+		}
+
+		/** Allows this damage source to stun players if allowed in the config */
+		public DamageSourceBaseIndirect setCanStunPlayers() {
+			canStunPlayers = true;
+			return this;
+		}
+
+		@Override
+		public boolean canStunPlayers() {
+			return canStunPlayers;
+		}
+
+		@Override
+		public boolean alwaysStuns() {
+			return false;
+		}
 	}
 
-	public static class DamageSourceShock extends DamageSourceBaseDirect implements IDamageSourceStun
+	public static class DamageSourceShock extends DamageSourceBaseDirect
 	{
-		/** Maximum stun time; will also be modified by total damage inflicted */
-		private final int duration;
-
 		/** Amount of hunger to drain */
 		private final float hunger;
 
@@ -169,26 +319,10 @@ public class DamageUtils
 		 */
 		public DamageSourceShock(String name, Entity entity, int duration, float hunger, boolean isAoE) {
 			super(name, entity, isAoE);
-			this.duration = duration;
 			this.hunger = hunger;
 			setDamageBypassesArmor();
 			addDamageType(EnumDamageType.SHOCK);
-			addDamageType(EnumDamageType.STUN);
-		}
-
-		@Override
-		public int getDuration() {
-			return duration;
-		}
-
-		@Override
-		public int getAmplifier() {
-			return 5;
-		}
-
-		@Override
-		public boolean canStunPlayers() {
-			return true;
+			setStunDamage(duration, 5, true);
 		}
 
 		@Override
@@ -202,11 +336,8 @@ public class DamageUtils
 		}
 	}
 
-	public static class DamageSourceShockIndirect extends DamageSourceBaseIndirect implements IDamageSourceStun
+	public static class DamageSourceShockIndirect extends DamageSourceBaseIndirect
 	{
-		/** Maximum stun time; will also be modified by total damage inflicted */
-		private final int duration;
-
 		/** Amount of hunger to drain */
 		private final float hunger;
 
@@ -227,26 +358,10 @@ public class DamageUtils
 		 */
 		public DamageSourceShockIndirect(String name, Entity direct, Entity indirect, int duration, float hunger, boolean isAoE) {
 			super(name, direct, indirect, isAoE);
-			this.duration = duration;
 			this.hunger = hunger;
 			setDamageBypassesArmor(); // TODO set on a case-by-case basis
 			addDamageType(EnumDamageType.SHOCK);
-			addDamageType(EnumDamageType.STUN);
-		}
-
-		@Override
-		public int getDuration() {
-			return duration;
-		}
-
-		@Override
-		public int getAmplifier() {
-			return 5;
-		}
-
-		@Override
-		public boolean canStunPlayers() {
-			return true;
+			setStunDamage(duration, 5, true);
 		}
 
 		@Override
@@ -257,126 +372,6 @@ public class DamageUtils
 		@Override
 		public float getHungerDamage() {
 			return hunger;
-		}
-	}
-
-	public static class DamageSourceStun extends DamageSourceBaseDirect implements IDamageSourceStun
-	{
-		/** Maximum stun time; will also be modified by total damage inflicted */
-		private final int duration;
-
-		/** Factor by which stun time will be modified, multiplied by total damage inflicted */
-		private final int amplifier;
-
-		/** If true, this damage source is capable of stunning players unless disabled in the config */
-		private boolean canStunPlayers = false;
-
-		/**
-		 * Creates a non-AoE direct stun damage source
-		 * @param duration	base stun duration, modified by amplifier and -rand.nextInt(duration / 2)
-		 * @param amplifier	amount, multiplied by damage received, that may be added to the duration
-		 */
-		public DamageSourceStun(String name, Entity entity, int duration, int amplifier) {
-			this(name, entity, duration, amplifier, false);
-		}
-
-		/**
-		 * Creates a direct stun damage source
-		 * @param duration	base stun duration, modified by amplifier and -rand.nextInt(duration / 2)
-		 * @param amplifier	amount, multiplied by damage received, that may be added to the duration
-		 * @param isAoE		True if this damage is an AoE attack
-		 */
-		public DamageSourceStun(String name, Entity entity, int duration, int amplifier, boolean isAoE) {
-			super(name, entity, isAoE);
-			this.duration = duration;
-			this.amplifier = amplifier;
-			addDamageType(EnumDamageType.STUN);
-		}
-
-		@Override
-		public int getDuration() {
-			return duration;
-		}
-
-		@Override
-		public int getAmplifier() {
-			return amplifier;
-		}
-
-		/** Allows this damage source to stun players if allowed in the config */
-		public DamageSourceStun setCanStunPlayers() {
-			canStunPlayers = true;
-			return this;
-		}
-
-		@Override
-		public boolean canStunPlayers() {
-			return canStunPlayers;
-		}
-
-		@Override
-		public boolean alwaysStuns() {
-			return false;
-		}
-	}
-
-	public static class DamageSourceStunIndirect extends DamageSourceBaseIndirect implements IDamageSourceStun
-	{
-		/** Maximum stun time; will also be modified by total damage inflicted */
-		private final int duration;
-
-		/** Factor by which stun time will be modified, multiplied by total damage inflicted */
-		private final int amplifier;
-
-		/** If true, this damage source is capable of stunning players unless disabled in the config */
-		private boolean canStunPlayers = false;
-
-		/**
-		 * Creates a non-AoE indirect stun damage source
-		 * @param duration	base stun duration, modified by amplifier and -rand.nextInt(duration / 2)
-		 * @param amplifier	amount, multiplied by damage received, that may be added to the duration
-		 */
-		public DamageSourceStunIndirect(String name, Entity direct, Entity indirect, int duration, int amplifier) {
-			this(name, direct, indirect, duration, amplifier, false);
-		}
-
-		/**
-		 * Creates an indirect stun damage source
-		 * @param duration	base stun duration, modified by amplifier and -rand.nextInt(duration / 2)
-		 * @param amplifier	amount, multiplied by damage received, that may be added to the duration
-		 * @param isAoE		True if this damage is an AoE attack
-		 */
-		public DamageSourceStunIndirect(String name, Entity direct, Entity indirect, int duration, int amplifier, boolean isAoE) {
-			super(name, direct, indirect, isAoE);
-			this.duration = duration;
-			this.amplifier = amplifier;
-			addDamageType(EnumDamageType.STUN);
-		}
-
-		@Override
-		public int getDuration() {
-			return duration;
-		}
-
-		@Override
-		public int getAmplifier() {
-			return amplifier;
-		}
-
-		/** Allows this damage source to stun players if allowed in the config */
-		public DamageSourceStunIndirect setCanStunPlayers() {
-			canStunPlayers = true;
-			return this;
-		}
-
-		@Override
-		public boolean canStunPlayers() {
-			return canStunPlayers; }
-
-		@Override
-		public boolean alwaysStuns() {
-			return false;
-
 		}
 	}
 
@@ -416,41 +411,7 @@ public class DamageUtils
 		}
 	}
 
-	public static class DamageSourceHoly extends DamageSourceBaseDirect
-	{
-		/** Creates a non-AoE HOLY type EntityDamageSource */
-		public DamageSourceHoly(String name, Entity entity) {
-			this(name, entity, false);
-		}
-
-		/**
-		 * Creates a HOLY type EntityDamageSource
-		 * @param isAoE	True if this damage is an AoE attack
-		 */
-		public DamageSourceHoly(String name, Entity entity, boolean isAoE) {
-			super(name, entity, isAoE);
-			addDamageType(EnumDamageType.HOLY);
-		}
-	}
-
-	public static class DamageSourceHolyIndirect extends DamageSourceBaseIndirect
-	{
-		/** Creates a non-AoE HOLY type indirect entity DamageSource */
-		public DamageSourceHolyIndirect(String name, Entity direct, Entity indirect) {
-			this(name, direct, indirect, false);
-		}
-
-		/**
-		 * Creates a HOLY type indirect entity DamageSource
-		 * @param isAoE	True if this damage is an AoE attack
-		 */
-		public DamageSourceHolyIndirect(String name, Entity direct, Entity indirect, boolean isAoE) {
-			super(name, direct, indirect, isAoE);
-			addDamageType(EnumDamageType.HOLY);
-		}
-	}
-
-	public static class DamageSourceIce extends DamageSourceBaseDirect implements IPostDamageEffect
+	public static class DamageSourceIce extends DamageSourceBaseDirect implements IDamageSourceStun
 	{
 		/** Slow effect duration and amplifier */
 		private final int duration, amplifier;
@@ -472,17 +433,17 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() {
-			return duration;
+		public int getDuration(EnumDamageType type) {
+			return (type == EnumDamageType.COLD ? duration : super.getDuration(type));
 		}
 
 		@Override
-		public int getAmplifier() {
-			return amplifier;
+		public int getAmplifier(EnumDamageType type) {
+			return (type == EnumDamageType.COLD ? amplifier : super.getAmplifier(type));
 		}
 	}
 
-	public static class DamageSourceIceIndirect extends DamageSourceBaseIndirect implements IPostDamageEffect
+	public static class DamageSourceIceIndirect extends DamageSourceBaseIndirect
 	{
 		/** Slow effect duration and amplifier */
 		private final int duration, amplifier;
@@ -504,13 +465,13 @@ public class DamageUtils
 		}
 
 		@Override
-		public int getDuration() {
-			return duration;
+		public int getDuration(EnumDamageType type) {
+			return (type == EnumDamageType.COLD ? duration : super.getDuration(type));
 		}
 
 		@Override
-		public int getAmplifier() {
-			return amplifier;
+		public int getAmplifier(EnumDamageType type) {
+			return (type == EnumDamageType.COLD ? amplifier : super.getAmplifier(type));
 		}
 	}
 }

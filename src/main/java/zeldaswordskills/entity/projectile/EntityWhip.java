@@ -41,7 +41,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemWhip;
@@ -52,7 +52,6 @@ import zeldaswordskills.network.packet.client.UnpressKeyPacket;
 import zeldaswordskills.network.packet.server.FallDistancePacket;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -169,7 +168,7 @@ public class EntityWhip extends EntityThrowable
 
 	/** Returns a whip damage source */
 	protected DamageSource getDamageSource() {
-		return new DamageSourceStunIndirect("whip", this, getThrower(), 40, 10).setCanStunPlayers();
+		return new DamageSourceBaseIndirect("whip", this, getThrower()).setStunDamage(40, 10, true);
 	}
 
 	/**

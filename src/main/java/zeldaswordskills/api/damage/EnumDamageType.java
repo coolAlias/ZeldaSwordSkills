@@ -57,13 +57,13 @@ public enum EnumDamageType {
 	public void handleSecondaryEffects(IPostDamageEffect source, EntityLivingBase entity, float damage) {
 		switch(this) {
 		case COLD:
-			entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, (int)(damage * source.getDuration()), source.getAmplifier()));
+			entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, (int)(damage * source.getDuration(this)), source.getAmplifier(this)));
 			break;
 		case STUN:
 			if (source instanceof IDamageSourceStun) {
 				IDamageSourceStun stunSource = (IDamageSourceStun) source;
-				int stunTime = Math.max(source.getDuration(), 2);
-				int modifier = Math.max(source.getAmplifier(), 1);
+				int stunTime = Math.max(source.getDuration(this), 2);
+				int modifier = Math.max(source.getAmplifier(this), 1);
 				stunTime += entity.worldObj.rand.nextInt((int)(Math.max(damage, 1.0F) * modifier)) - entity.worldObj.rand.nextInt(stunTime / 2);
 				if (!(entity instanceof EntityPlayer) || stunSource.canStunPlayers()) {
 					ZSSEntityInfo.get(entity).stun(stunTime, stunSource.alwaysStuns());

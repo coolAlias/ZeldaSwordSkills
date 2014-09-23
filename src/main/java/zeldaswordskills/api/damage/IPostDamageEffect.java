@@ -25,10 +25,10 @@ package zeldaswordskills.api.damage;
  */
 public interface IPostDamageEffect {
 
-	/** Returns the maximum duration of the effect */
-	public int getDuration();
+	/** Returns the maximum duration of the effect for the given damage type */
+	public int getDuration(EnumDamageType type);
 	
-	/** Returns the amplitude of this effect */
-	public int getAmplifier();
+	/** Returns the amplitude of this effect for the given damage type */
+	public int getAmplifier(EnumDamageType type);
 	
 }

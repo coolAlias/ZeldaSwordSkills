@@ -34,7 +34,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.IHookable.HookshotType;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -154,7 +154,7 @@ public class EntityHookShot extends EntityThrowable
 
 	/** Returns a hookshot damage source */
 	protected DamageSource getDamageSource() {
-		return new DamageSourceStunIndirect("hookshot", this, getThrower(), 50, 1).setCanStunPlayers().setProjectile();
+		return new DamageSourceBaseIndirect("hookshot", this, getThrower()).setStunDamage(50, 1, true).setProjectile();
 	}
 
 	/**

@@ -41,7 +41,6 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
 import zeldaswordskills.api.entity.MagicType;
-import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
@@ -129,7 +128,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	protected DamageSource getDamageSource() {
 		DamageSource source = new DamageSourceFireIndirect("blast.fire", this, getThrower(), true).setProjectile().setMagicDamage();
 		switch(getType()) {
-		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1, true).setProjectile().setMagicDamage(); break;
+		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1, true).setStunDamage(60, 10, true).setProjectile().setMagicDamage(); break;
 		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1, true).setProjectile().setMagicDamage(); break;
 		case WIND: source = new DamageSourceBaseIndirect("blast.wind", this, getThrower(), true).setProjectile().setMagicDamage(); break;
 		default: break; // fire
@@ -220,7 +219,6 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	protected void handlePostDamageEffects(EntityLivingBase entity) {
 		switch(getType()) {
 		case ICE:
-			ZSSEntityInfo.get(entity).stun((int) Math.ceil(getDamage()) * 10, true);
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);

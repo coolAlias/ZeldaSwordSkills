@@ -34,10 +34,11 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceHoly;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
+import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
@@ -122,8 +123,8 @@ public class EntityArrowElemental extends EntityArrowCustom
 		case FIRE: return new DamageSourceFireIndirect("arrow.fire", this, shootingEntity).setProjectile().setMagicDamage();
 		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, shootingEntity, 50, 1).setProjectile().setMagicDamage();
 		case LIGHT: return (entity instanceof EntityEnderman
-				? new DamageSourceHoly("arrow.light", (shootingEntity != null ? shootingEntity : this)).setProjectile().setMagicDamage().setDamageBypassesArmor()
-						: new DamageSourceHolyIndirect("arrow.light", this, shootingEntity).setProjectile().setMagicDamage().setDamageBypassesArmor());
+				? new DamageSourceBaseDirect("arrow.light", (shootingEntity != null ? shootingEntity : this), EnumDamageType.HOLY).setProjectile().setMagicDamage().setDamageBypassesArmor()
+						: new DamageSourceBaseIndirect("arrow.light", this, shootingEntity, EnumDamageType.HOLY).setProjectile().setMagicDamage().setDamageBypassesArmor());
 		}
 		return super.getDamageSource(entity);
 	}
