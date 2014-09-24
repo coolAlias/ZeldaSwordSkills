@@ -23,9 +23,7 @@ import mods.battlegear2.api.quiver.ISpecialBow;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
-import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ItemZeldaArrow;
 import zeldaswordskills.item.ItemZeldaShield;
 import cpw.mods.fml.common.eventhandler.EventPriority;
@@ -78,23 +76,6 @@ public class BattlegearEvents {
 			ItemStack arrow = getQuiverArrow(event.result, event.entityPlayer);
 			if (arrow != null && arrow.getItem() instanceof ItemZeldaArrow) {
 				event.setCanceled(!event.entityPlayer.capabilities.isCreativeMode);
-			}
-		}
-	}
-
-	/**
-	 * Only required to allow custom fire handler to handle vanilla arrow; once API
-	 * changes to allow ordered fire handler lists, this will be redundant.
-	 * TODO still need DefaultArrowFire to be public in order to remove this entirely
-	 */
-	@SubscribeEvent(priority=EventPriority.HIGH)
-	public void preArrowLoose(ArrowLooseEvent event) {
-		ItemStack quiverStack = QuiverArrowRegistry.getArrowContainer(event.bow, event.entityPlayer);
-		ItemStack arrowStack = getQuiverArrow(event.bow, quiverStack, event.entityPlayer);
-		if (arrowStack != null) { // quiverStack implicitly checked by getQuiverArrow
-			if (event.bow.getItem() instanceof ItemHeroBow) {
-				((ItemHeroBow) event.bow.getItem()).bg2FireArrow(event, quiverStack, arrowStack);
-				event.setCanceled(true);
 			}
 		}
 	}
