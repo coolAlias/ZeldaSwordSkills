@@ -134,8 +134,8 @@ public class EntityWhip extends EntityThrowable
 		return this;
 	}
 
-	public int getMaxDistance() {
-		return Config.getWhipRange() * (getType().isExtended() ? 2 : 1);
+	public float getMaxDistance() {
+		return (float) Config.getWhipRange() * (getType().isExtended() ? 1.5F : 1.0F);
 	}
 
 	public void setThrower(EntityPlayer player) {
