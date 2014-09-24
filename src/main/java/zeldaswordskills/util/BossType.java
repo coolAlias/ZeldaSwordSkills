@@ -26,7 +26,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.item.Item;
@@ -37,7 +36,8 @@ import net.minecraft.world.biome.BiomeGenBase;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
+import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
@@ -47,6 +47,7 @@ import zeldaswordskills.world.crisis.EarthBattle;
 import zeldaswordskills.world.crisis.FireBattle;
 import zeldaswordskills.world.crisis.ForestBattle;
 import zeldaswordskills.world.crisis.OceanBattle;
+import zeldaswordskills.world.crisis.SwampBattle;
 
 /**
  * 
@@ -60,7 +61,7 @@ public enum BossType
 	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, "forest", "foresthills"),
 	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, "coldtaiga", "coldtaigahills", "iceplains"),
 	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, "ocean", "frozenocean", "deepocean"),
-	SWAMP("temple_wind", BossBattle.class, EntityWitch.class, 4, "swampland"),
+	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, "swampland"),
 	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");
 	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
@@ -87,12 +88,12 @@ public enum BossType
 	/** Mapping of biome names to boss types */
 	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
 
-	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int block, String... defaultBiomes) {
+	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, String... defaultBiomes) {
 		this.unlocalizedName = name;
 		this.defaultBiomes = defaultBiomes;
 		this.bossBattle = bossBattle;
 		this.bossMob = bossMob;
-		this.metadata = block;
+		this.metadata = meta;
 	}
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
@@ -112,8 +113,7 @@ public enum BossType
 
 	@Override
 	public String toString() {
-		return String.format("Name: %s BossMob: %s Block: %s", getUnlocalizedName(),
-				(bossMob != null ? bossMob.toString() : "NULL"), metadata);
+		return ("Name: " + getUnlocalizedName() + " BossMob: " + (bossMob != null ? bossMob.toString() : "NULL") + " Block: " + metadata);
 	}
 
 	/**
@@ -126,8 +126,7 @@ public enum BossType
 			}
 			biome = biome.toLowerCase().replace(" ", "");
 			if (bossBiomeList.containsKey(biome)) {
-				LogHelper.warning(String.format("Error while adding %s for %s: biome already mapped to %s",
-						biome, type.getDisplayName(), bossBiomeList.get(biome).getDisplayName()));
+				LogHelper.warning("Error while adding " + biome + " for " + type.getDisplayName() + ": biome already mapped to " + bossBiomeList.get(biome).getDisplayName());
 			} else {
 				bossBiomeList.put(biome, type);
 			}
@@ -235,6 +234,7 @@ public enum BossType
 	};
 	private static final ItemStack[] mountainItems = {
 		new ItemStack(ZSSItems.bootsPegasus),
+		new ItemStack(ZSSItems.hammer),
 		new ItemStack(ZSSItems.maskBlast),
 		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.STONECLAW.ordinal()),
 		new ItemStack(ZSSItems.swordBroken, 1, Item.getIdFromItem(ZSSItems.swordGiant))
@@ -250,7 +250,8 @@ public enum BossType
 		new ItemStack(ZSSItems.bootsHeavy),
 		new ItemStack(ZSSItems.maskStone),
 		new ItemStack(ZSSItems.slingshot),
-		new ItemStack(ZSSItems.tunicZoraChest)
+		new ItemStack(ZSSItems.tunicZoraChest),
+		new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_SHORT.ordinal())
 	};
 	private static final ItemStack[] swampItems = {
 		new ItemStack(ZSSItems.bootsRubber),

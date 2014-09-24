@@ -25,6 +25,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.client.model.ModelGoron;
+import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.client.render.RenderNothing;
 import zeldaswordskills.client.render.entity.RenderCustomArrow;
 import zeldaswordskills.client.render.entity.RenderEntityBomb;
@@ -35,10 +36,16 @@ import zeldaswordskills.client.render.entity.RenderEntityHookShot;
 import zeldaswordskills.client.render.entity.RenderEntityJar;
 import zeldaswordskills.client.render.entity.RenderEntityKeese;
 import zeldaswordskills.client.render.entity.RenderEntityMagicSpell;
+import zeldaswordskills.client.render.entity.RenderEntityOctorok;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
+import zeldaswordskills.client.render.entity.RenderEntityWhip;
+import zeldaswordskills.client.render.entity.RenderEntityWizzrobe;
 import zeldaswordskills.client.render.entity.RenderGenericLiving;
-import zeldaswordskills.client.render.entity.RenderOctorok;
-import zeldaswordskills.client.render.entity.RenderWhip;
+import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
+import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
@@ -63,7 +70,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ZSSEntities
 {
 	/** Spawn rates */
-	private static int spawnChu, spawnFairy, spawnGoron, spawnKeese, spawnOctorok;
+	private static int spawnChu, spawnFairy, spawnGoron, spawnKeese, spawnOctorok, spawnWizzrobe;
 
 	public static int getGoronRatio() { return spawnGoron; }
 
@@ -77,6 +84,7 @@ public class ZSSEntities
 		spawnGoron = config.get("Spawn Rates", "Goron spawn rate, as a ratio of regular villagers to Gorons (0 to disable)[0+]", 4).getInt();
 		spawnKeese = config.get("Spawn Rates", "Keese spawn rate (0 to disable)[0+]", 1).getInt();
 		spawnOctorok = config.get("Spawn Rates", "Octorok spawn rate (0 to disable)[0+]", 8).getInt();
+		spawnWizzrobe = config.get("Spawn Rates", "Wizzrobe spawn rate (0 to disable)[0+]", 5).getInt();
 	}
 
 	/**
@@ -105,14 +113,17 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityWhip.class, "whip", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 
 		// MOBS
-		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 0xADFF2F, 0xFFFF00);
+		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 80, 0xADFF2F, 0xFFFF00);
 		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
 		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityKeese.class, "keese", 0x000000, 0x555555, 0x000000, 0xFF4500, 0x000000, 0x40E0D0, 0x000000, 0xFFD700, 0x000000, 0x800080);
 		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 64, 3, true);
 		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
-		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 0xB8860B, 0x8B5A00);
+		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 80, 0xB8860B, 0x8B5A00);
+		EntityRegistry.registerModEntity(EntityWizzrobe.class, "wizzrobe", ++modEntityIndex, ZSSMain.instance, 64, 3, true);
+		CustomEntityList.addMapping(EntityWizzrobe.class, "wizzrobe", 0x8B2500, 0xFF0000, 0x8B2500, 0x00B2EE, 0x8B2500, 0xEEEE00, 0x8B2500, 0x00EE76);
+		registerEntity(EntityGrandWizzrobe.class, "wizzrobe_grand", ++modEntityIndex, 64, 0x8B2500, 0x1E1E1E);
 
 		// NPCS
 		EntityRegistry.registerModEntity(EntityMaskTrader.class, "npc.mask_trader", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
@@ -135,15 +146,20 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell());
 		RenderingRegistry.registerEntityRenderingHandler(EntityMaskTrader.class, new RenderGenericLiving(
 				new ModelVillager(0.0F), 0.5F, 1.0F, "textures/entity/villager/villager.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderOctorok(new ModelSquid(), 0.7F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(new ModelSquid(), 0.7F));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
 		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(ZSSItems.throwingRock));
-		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderWhip());
+		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderEntityWhip());
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobe.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.5F));
 	}
 
-	public static void registerEntity(Class entityClass, String name, int modEntityIndex, int primaryColor, int secondaryColor) {
-		EntityRegistry.registerModEntity(entityClass, name, modEntityIndex, ZSSMain.instance, 80, 3, true);
+	/**
+	 * Registers a tracked entity with only one variety using the given colors for the spawn egg
+	 */
+	public static void registerEntity(Class entityClass, String name, int modEntityIndex, int trackingRange, int primaryColor, int secondaryColor) {
+		EntityRegistry.registerModEntity(entityClass, name, modEntityIndex, ZSSMain.instance, trackingRange, 3, true);
 		CustomEntityList.addMapping(entityClass, name, primaryColor, secondaryColor);
 	}
 
@@ -158,6 +174,13 @@ public class ZSSEntities
 				}
 				if (spawnKeese > 0) {
 					EntityRegistry.addSpawn(EntityKeese.class, spawnKeese, 4, 4, EnumCreatureType.ambient, biome);
+				}
+				if (spawnWizzrobe > 0) {
+					if (biome == BiomeGenBase.roofedForest) {
+						EntityRegistry.addSpawn(EntityWizzrobe.class, spawnWizzrobe + 5, 1, 1, EnumCreatureType.monster, biome);
+					} else {
+						EntityRegistry.addSpawn(EntityWizzrobe.class, spawnWizzrobe, 1, 1, EnumCreatureType.monster, biome);
+					}
 				}
 			}
 		}

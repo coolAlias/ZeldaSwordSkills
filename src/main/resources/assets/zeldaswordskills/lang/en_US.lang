@@ -434,6 +434,11 @@ entity.keese.name.4=Dark Keese
 entity.octorok.name=Octorok
 entity.octorok.name.0=Octorok
 entity.octorok.name.1=Octorok
+entity.wizzrobe.name.0=Fire Wizzrobe
+entity.wizzrobe.name.1=Ice Wizzrobe
+entity.wizzrobe.name.2=Thunder Wizzrobe
+entity.wizzrobe.name.3=Gale Wizzrobe
+entity.wizzrobe_grand.name=Grand Wizzrobe
 
 entity.zeldaswordskills.npc.mask_trader.name=Mask Salesman
 
@@ -673,8 +678,8 @@ tile.zss.barrier_heavy.name=Barrier, Heavy
 tile.zss.beam_wooden.name=Wooden Beam
 tile.zss.ceramic_jar.name=Ceramic Jar
 tile.zss.chest_locked.name=Locked chest
-tile.zss.dungeoncore.name=Dungeon Core
-tile.zss.dungeoncore.name.unbreakable=Dungeon Core (unbreakable)
+tile.zss.dungeoncore.name=Fairy Spawner
+tile.zss.dungeoncore.name.unbreakable=Fairy Spawner (unbreakable)
 tile.zss.dungeonstone.name=Dungeon Stone
 tile.zss.dungeonstone.name.unbreakable=Dungeon Stone (unbreakable)
 tile.zss.lever_giant.name=Giant Lever

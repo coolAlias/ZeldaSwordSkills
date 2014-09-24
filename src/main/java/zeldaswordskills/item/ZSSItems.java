@@ -45,6 +45,7 @@ import net.minecraftforge.common.util.EnumHelper;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
@@ -56,11 +57,11 @@ import zeldaswordskills.client.render.item.RenderItemCustomBow;
 import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityChu;
-import zeldaswordskills.entity.EntityKeese;
-import zeldaswordskills.entity.EntityOctorok;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.projectile.EntityMagicSpell.MagicType;
+import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.lib.Config;
@@ -84,7 +85,7 @@ public class ZSSItems
 			if (itemList.containsKey(a) && itemList.containsKey(b)) {
 				return itemList.get(a) - itemList.get(b);
 			} else {
-				LogHelper.warning(String.format("A mod item %s or %s is missing a comparator mapping", a.getUnlocalizedName(), b.getUnlocalizedName()));
+				LogHelper.warning("A mod item " + a.getUnlocalizedName() + " or " + b.getUnlocalizedName() + " is missing a comparator mapping");
 				return GameData.getItemRegistry().getId(a) - GameData.getItemRegistry().getId(b);
 			}
 		}
@@ -277,7 +278,8 @@ public class ZSSItems
 	eggSpawner, // for all Entities with only one type
 	eggChu,
 	eggKeese,
-	eggOctorok;
+	eggOctorok,
+	eggWizzrobe;
 
 	/**
 	 * Initializes mod item indices from configuration file
@@ -529,6 +531,7 @@ public class ZSSItems
 		eggChu = new ItemCustomVariantEgg(EntityChu.class, "chu").setUnlocalizedName("zss.eggChu");
 		eggKeese = new ItemCustomVariantEgg(EntityKeese.class, "keese").setUnlocalizedName("zss.eggKeese");
 		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
+		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("zss.eggWizzrobe");
 	}
 
 	/**
