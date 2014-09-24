@@ -254,7 +254,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 			}
 			break;
 		case WIND:
-			double power = Math.max(3.0D, (getDamage() / 8.0D));
+			double power = Math.min(3.0D, (getDamage() / 6.0D));
 			if (power > 0) {
 				float f3 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
 				if (f3 > 0.0F) {
