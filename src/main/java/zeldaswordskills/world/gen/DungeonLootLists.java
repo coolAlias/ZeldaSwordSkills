@@ -179,7 +179,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.keySmall, 1, 1, Config.getSmallKeyWeight()),
 			getLoot(ZSSItems.potionRed, 1, 1, 3),
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
-			getLoot(ZSSItems.shieldDeku, 1, 1, 1),
+			getLoot(ZSSItems.shieldDeku, 1, 1, 2),
 			getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordKokiri), 1, 1, 1)
 		});
 	}
@@ -190,16 +190,16 @@ public class DungeonLootLists
 			getLoot(ZSSItems.arrowIce, 7, 15, 1),
 			getLoot(ZSSItems.arrowLight, 3, 7, 1),
 			getLoot(ZSSItems.bombBag, 1, 1, 1),
-			getLoot(ZSSItems.boomerang, 1, 1, 1),
+			getLoot(ZSSItems.boomerang, 1, 1, 2),
 			getLoot(ZSSItems.bootsHeavy, 1, 1, 1),
 			getLoot(ZSSItems.bootsHover, 1, 1, 1),
 			getLoot(ZSSItems.bootsPegasus, 1, 1, 1),
 			getLoot(ZSSItems.bootsRubber, 1, 1, 1),
 			getLoot(ZSSItems.crystalSpirit, 1, 1, 1),
 			getLoot(ZSSItems.dekuLeaf, 1, 1, 1),
-			getLoot(ZSSItems.hammer, 1, 1, 1),
-			getLoot(ZSSItems.heroBow, 1, 1, 1),
-			getLoot(ZSSItems.hookshot, HookshotType.WOOD_SHOT.ordinal(), 1, 1, 1),
+			getLoot(ZSSItems.hammer, 1, 1, 2),
+			getLoot(ZSSItems.heroBow, 1, 1, 2),
+			getLoot(ZSSItems.hookshot, HookshotType.WOOD_SHOT.ordinal(), 1, 1, 2),
 			getLoot(ZSSItems.hookshotAddon, AddonType.EXTENSION.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.STONECLAW.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.MULTI.ordinal(), 1, 1, 1),
@@ -208,10 +208,10 @@ public class DungeonLootLists
 			getLoot(ZSSItems.masterOre, 1, 1, 1),
 			getLoot(ZSSItems.potionBlue, 1, 1, 1),
 			getLoot(ZSSItems.rocsFeather, 1, 1, 1),
-			getLoot(ZSSItems.shieldHylian, 1, 1, 1),
-			getLoot(ZSSItems.slingshot, 1, 1, 1),
+			getLoot(ZSSItems.shieldHylian, 1, 1, 2),
+			getLoot(ZSSItems.slingshot, 1, 1, 2),
 			getLoot(ZSSItems.treasure, Treasures.ZELDAS_LETTER.ordinal(), 1, 1, 1),
-			getLoot(ZSSItems.whip, IWhipBlock.WhipType.WHIP_SHORT.ordinal(), 1, 1, 1)
+			getLoot(ZSSItems.whip, IWhipBlock.WhipType.WHIP_SHORT.ordinal(), 1, 1, 2)
 		});
 	}
 
