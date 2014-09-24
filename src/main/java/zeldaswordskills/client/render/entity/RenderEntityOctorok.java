@@ -27,19 +27,19 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.client.model.ModelOctorok;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class RenderOctorok extends RenderLiving
+public class RenderEntityOctorok extends RenderLiving
 {
 	private static final ResourceLocation texture1 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok1.png");
 	private static final ResourceLocation texture2 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok2.png");
 
-	public RenderOctorok(ModelBase model, float size) {
-		super(new ModelOctorok(), size);
+	public RenderEntityOctorok(ModelBase model, float shadowSize) {
+		super(new ModelOctorok(), shadowSize);
 	}
 
 	public void renderLivingSquid(EntityOctorok entity, double dx, double dy, double dz, float f, float f1) {

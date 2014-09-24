@@ -57,10 +57,13 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 {
 	/** The Goron's village, since EntityVillager.villageObj cannot be accessed */
 	protected Village village;
+
 	/** Flag for handling attack timer during client-side health update */
 	private static final Byte ATTACK_FLAG = (byte) 4;
+
 	/** Timer for health regeneration, similar to players when satiated */
 	private int regenTimer;
+
 	/** Flag to allow attributes to update to adult status */
 	private boolean wasChild;
 
@@ -92,7 +95,6 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 		tasks.addTask(9, new EntityAIWatchClosest2(this, EntityVillager.class, 5.0F, 0.02F));
 		tasks.addTask(9, new EntityAIWander(this, 0.6D));
 		tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
-
 		targetTasks.addTask(1, new GenericAIDefendVillage(this));
 		targetTasks.addTask(2, new EntityAIHurtByTarget(this, true));
 		targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));

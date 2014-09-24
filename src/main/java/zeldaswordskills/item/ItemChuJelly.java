@@ -36,7 +36,7 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityChu.ChuType;
+import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;

@@ -48,6 +48,8 @@ import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
+import zeldaswordskills.api.damage.IDamageAoE;
+import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
@@ -119,17 +121,21 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	/**
 	 * Called when the shield blocks an attack when held in the normal fashion (i.e. non-BG2)
 	 * used by Deku Shield to damage / destroy the stack and by Mirror Shield to reflect projectiles
+	 * @return	Return the amount of damage remaining, if any; 0 cancels the hurt event
 	 */
-	public void onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
+	public float onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
 		ZSSPlayerInfo.get(player).onAttackBlocked(shield, damage);
 		WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
+		float damageBlocked = damage;
 		if (this == ZSSItems.shieldDeku) {
-			if (source.isProjectile() && source.getSourceOfDamage() instanceof IProjectile) {
+			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
 				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
 					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
 						((InventoryPlayerBattle) player.inventory).hasChanged = true;
 					}
 				}
+			} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
+				damageBlocked *= 0.25F;
 			}
 			int dmg = Math.round(source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
 			if (dmg > 0) {
@@ -140,7 +146,11 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 			}
 		} else if (this == ZSSItems.shieldMirror) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
-				if (player.worldObj.rand.nextFloat() < (source.isMagicDamage() ? (1F / 3F) : 1.0F)) {
+				float chance = (source.isMagicDamage() ? (1F / 3F) : 1.0F);
+				if (source.getSourceOfDamage() instanceof IReflectable) {
+					((IReflectable) source.getSourceOfDamage()).getReflectChance(shield, player, source.getEntity());
+				}
+				if (player.worldObj.rand.nextFloat() < chance) {
 					Entity projectile = null;
 					try {
 						projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj); 
@@ -151,6 +161,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 						NBTTagCompound data = new NBTTagCompound();
 						source.getSourceOfDamage().writeToNBT(data);
 						projectile.readFromNBT(data);
+						projectile.getEntityData().setBoolean("isReflected", true);
 						projectile.posX -= projectile.motionX;
 						projectile.posY -= projectile.motionY;
 						projectile.posZ -= projectile.motionZ;
@@ -158,11 +169,19 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 						double motionZ = (double)(MathHelper.cos(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
 						double motionY = (double)(-MathHelper.sin(player.rotationPitch / 180.0F * (float) Math.PI));
 						TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, 2.0F + (20.0F * player.worldObj.rand.nextFloat()), false);
+						if (projectile instanceof IReflectable) {
+							((IReflectable) projectile).onReflected(shield, player, source.getEntity(), source.getSourceOfDamage());
+						}
 						player.worldObj.spawnEntityInWorld(projectile);
 					}
+				} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) { // failed to reflect projectile
+					damageBlocked *= 0.75F;
 				}
 			}
+		} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
+			damageBlocked *= 0.5F; // default shield behavior blocks half damage from AoE magic attacks
 		}
+		return (damage - damageBlocked);
 	}
 
 	@Override
@@ -215,6 +234,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 				for (EntityFireball fireball : list) {
 					DamageSource source = DamageSource.causeFireballDamage(fireball, fireball.shootingEntity);
 					if (canBlockDamage(stack, source) && fireball.attackEntityFrom(DamageSource.causePlayerDamage(player), 1.0F)) {
+						fireball.getEntityData().setBoolean("isReflected", true);
 						ZSSPlayerInfo.get(player).onAttackBlocked(stack, 1.0F);
 						WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 						break;

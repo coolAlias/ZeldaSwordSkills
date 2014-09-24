@@ -43,7 +43,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
@@ -93,7 +93,7 @@ public class BossBattle extends AbstractCrisis
 		// TODO play boss battle music
 		difficulty = world.difficultySetting.ordinal();
 		fillAllGaps(world);
-		generateBossMobs(world, Config.getNumBosses());
+		generateBossMobs(world, getNumBosses());
 		core.removeHinderBlock();
 	}
 
@@ -212,13 +212,20 @@ public class BossBattle extends AbstractCrisis
 	 * Spawns the dungeon's boss or mini-boss
 	 * @param number the number of boss entities to spawn
 	 */
-	public final void generateBossMobs(World world, int number) {
+	protected void generateBossMobs(World world, int number) {
 		for (int i = 0; i < number; ++i) {
 			Entity mob = core.getBossType().getNewMob(world);
 			if (mob != null) {
 				spawnMobInCorner(world, mob, i, true, true);
 			}
 		}
+	}
+
+	/**
+	 * Return the number of bosses to spawn; default returns Config setting
+	 */
+	protected int getNumBosses() {
+		return Config.getNumBosses();
 	}
 
 	/**

@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.entity.mobs;
 
 import java.util.List;
 
@@ -41,6 +41,8 @@ import net.minecraft.world.chunk.Chunk;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
+import zeldaswordskills.entity.IEntityVariant;
+import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;

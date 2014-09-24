@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.entity.mobs;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -34,6 +34,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.item.ItemTreasure.Treasures;

@@ -39,18 +39,23 @@ import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
+import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderCeramicJar;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
+import zeldaswordskills.entity.projectile.EntityCeramicJar;
 import zeldaswordskills.entity.projectile.EntityHookShot;
+import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.SideHit;
+import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class BlockCeramicJar extends BlockContainer implements IExplodable, IHookable, ISmashable
+public class BlockCeramicJar extends BlockContainer implements IExplodable, IHookable, ISmashable, IWhipBlock
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;
@@ -89,6 +94,43 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 		world.func_147480_a(x, y, z, false);
 		return Result.ALLOW;
+	}
+
+	@Override
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+		return false;
+	}
+
+	@Override
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+		return (side != SideHit.BOTTOM && side != SideHit.TOP);
+	}
+
+	@Override
+	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
+		if (ticksInGround > 30) {
+			EntityLivingBase thrower = whip.getThrower();
+			EntityCeramicJar jar = new EntityCeramicJar(world, whip.posX, whip.posY + 1, whip.posZ);
+			double dx = thrower.posX - jar.posX;
+			double dy = thrower.posY - jar.posY;
+			double dz = thrower.posZ - jar.posZ;
+			TargetUtils.setEntityHeading(jar, dx, dy, dz, 1.0F, 1.0F, true);
+			TileEntity te = world.getTileEntity(x, y, z);
+			if (te instanceof IInventory) {
+				ItemStack stack = ((IInventory) te).getStackInSlot(0);
+				if (stack != null) {
+					jar.setStack(stack);
+				}
+			}
+			if (!world.isRemote) {
+				world.spawnEntityInWorld(jar);
+			}
+			keepInventory = true; // don't drop items from breakBlock
+			world.setBlockToAir(x, y, z);
+			keepInventory = false;
+			whip.setDead();
+		}
+		return Result.DENY;
 	}
 
 	@Override

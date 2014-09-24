@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.entity.mobs;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
@@ -40,6 +40,8 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.entity.IEntityVariant;
+import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
@@ -77,7 +79,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 
 	/** Returns this Keese's type */
 	public KeeseType getType() {
-		return KeeseType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX)];
+		return KeeseType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX) % KeeseType.values().length];
 	}
 
 	/** Sets this Keese's type */

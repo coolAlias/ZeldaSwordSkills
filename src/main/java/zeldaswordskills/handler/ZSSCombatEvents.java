@@ -173,8 +173,8 @@ public class ZSSCombatEvents
 						shouldBlock = yaw < 60 && yaw > -60; // all Zelda shields use default block angles
 					}
 					if (shouldBlock) {
-						shield.onBlock(player, stack, event.source, event.ammount);
-						event.setCanceled(true);
+						event.ammount = shield.onBlock(player, stack, event.source, event.ammount);
+						event.setCanceled(event.ammount < 0.1F);
 					}
 				}
 			}
@@ -324,7 +324,7 @@ public class ZSSCombatEvents
 	 * Applies any secondary effects that may occur when a living entity is injured
 	 */
 	private void handleSecondaryEffects(LivingHurtEvent event) {
-		if (event.ammount > 0.0F && event.source instanceof IDamageType && event.source instanceof IPostDamageEffect) {
+		if (event.ammount >= 1.0F && event.source instanceof IDamageType && event.source instanceof IPostDamageEffect) {
 			Set<EnumDamageType> damageTypes = ((IDamageType) event.source).getEnumDamageTypes();
 			if (damageTypes != null) {
 				for (EnumDamageType type : damageTypes) {

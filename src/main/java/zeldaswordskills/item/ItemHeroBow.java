@@ -25,11 +25,10 @@ import java.util.Map;
 
 import mods.battlegear2.api.IAllowItem;
 import mods.battlegear2.api.ISheathed;
-import mods.battlegear2.api.PlayerEventChild;
-import mods.battlegear2.api.quiver.IArrowContainer2;
 import mods.battlegear2.api.quiver.IArrowFireHandler;
 import mods.battlegear2.api.quiver.ISpecialBow;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
+import mods.battlegear2.api.quiver.QuiverArrowRegistry.DefaultArrowFire;
 import mods.battlegear2.enchantments.BaseEnchantment;
 import mods.battlegear2.items.ItemQuiver;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -237,59 +236,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 				fireArrow(event, arrowStack, bow, player);
 			}
 			setArrow(player, null);
-		}
-	}
-
-	/**
-	 * Call from ArrowLooseEvent when using Battlegear2's quiver system to allow vanilla
-	 * arrow to be handled by the custom fire handler, otherwise it will always use the
-	 * default BG2 handler.
-	 * 
-	 * This will not be necessary if pull request to quiver API is accepted.
-	 * 
-	 * @param quiverStack	The IArrowContainer2-containing stack, i.e. a quiver; must not be NULL
-	 * @param arrowStack	The arrow stack as retrieved from the quiver; must not be NULL
-	 */
-	@Method(modid="battlegear2")
-	public void bg2FireArrow(ArrowLooseEvent event, ItemStack quiverStack, ItemStack arrowStack) {
-		if (!canShootArrow(event.entityPlayer, event.bow, arrowStack)) {
-			return; // prevents hot-swap firing, since we are bypassing the fire handlers
-		}
-		float charge = new PlayerEventChild.QuiverArrowEvent.ChargeCalculations(event).getCharge();
-		if (charge < 0.1F) {
-			return;
-		}
-		World world = event.entityPlayer.worldObj;
-		IArrowContainer2 quiver = (IArrowContainer2) quiverStack.getItem();
-		EntityArrow arrowEntity = getArrowEntity(arrowStack, world, event.entityPlayer, charge * 2.0F);
-		if (arrowEntity == null) { // try to construct BG2 arrow
-			arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, world, event.entityPlayer, charge * 2.0F);
-		}
-		if (arrowEntity != null) {
-			if (arrowEntity instanceof EntityArrowCustom) {
-				applyCustomArrowSettings(event.entityPlayer, event.bow, arrowStack, (EntityArrowCustom) arrowEntity, charge);
-			}
-			// replicate BG2's ArrowLooseEvent handling here:
-			PlayerEventChild.QuiverArrowEvent.Firing arrowEvent = new PlayerEventChild.QuiverArrowEvent.Firing(event, quiverStack, arrowEntity);
-			quiver.onPreArrowFired(arrowEvent);
-			if (!MinecraftForge.EVENT_BUS.post(arrowEvent)) {
-				if (arrowEvent.isCritical || charge == 1.0F) {
-					arrowEntity.setIsCritical(true);
-				}
-				if (arrowEvent.addEnchantments) { // applyArrowSettings also sets critical
-					applyArrowSettings(arrowEntity, event.bow, charge);
-				}
-				if (event.entityPlayer.capabilities.isCreativeMode || EnchantmentHelper.getEnchantmentLevel(Enchantment.infinity.effectId, event.bow) > 0) {
-					arrowEntity.canBePickedUp = 2;
-				}
-				if (arrowEvent.bowSoundVolume > 0) {
-					world.playSoundAtEntity(event.entityPlayer, Sounds.BOW_RELEASE, arrowEvent.bowSoundVolume, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + charge * 0.5F);
-				}
-				if (!world.isRemote) {
-					world.spawnEntityInWorld(arrowEntity);
-				}
-				quiver.onArrowFired(world, event.entityPlayer, quiverStack, event.bow, arrowEntity);
-			}
 		}
 	}
 
@@ -625,7 +571,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	@Method(modid="battlegear2")
 	public static void registerBG2() {
 		fireHandlers.add(new HeroBowFireHandler());
-		// fireHandlers.add(new DefaultArrowFire());
+		fireHandlers.add(new DefaultArrowFire());
 		QuiverArrowRegistry.addArrowFireHandler(new HeroBowFireHandler());
 		// registering as null prevents default fire handler from handling these arrows:
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowBomb, null);

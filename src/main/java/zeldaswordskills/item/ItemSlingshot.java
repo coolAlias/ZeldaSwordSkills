@@ -156,7 +156,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 			}
 
 			float factor = (seedsFired == 1 ? 2.2F : seedsFired < 4 ? 1.4F : 1.0F); 
-			float damage = (type == SeedType.GRASS ? 1.0F : type == SeedType.NETHERWART || type == SeedType.DEKU ? 1.5F : 1.25F);
+			float damage = type.getDamage();
 
 			int k = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, stack);
 			if (k > 0) {

@@ -41,7 +41,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemWhip;
@@ -52,7 +52,6 @@ import zeldaswordskills.network.packet.client.UnpressKeyPacket;
 import zeldaswordskills.network.packet.server.FallDistancePacket;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -135,8 +134,8 @@ public class EntityWhip extends EntityThrowable
 		return this;
 	}
 
-	public int getMaxDistance() {
-		return Config.getWhipRange() * (getType().isExtended() ? 2 : 1);
+	public float getMaxDistance() {
+		return (float) Config.getWhipRange() * (getType().isExtended() ? 1.5F : 1.0F);
 	}
 
 	public void setThrower(EntityPlayer player) {
@@ -169,7 +168,7 @@ public class EntityWhip extends EntityThrowable
 
 	/** Returns a whip damage source */
 	protected DamageSource getDamageSource() {
-		return new DamageSourceStunIndirect("whip", this, getThrower(), 40, 10).setCanStunPlayers();
+		return new DamageSourceBaseIndirect("whip", this, getThrower()).setStunDamage(40, 10, true);
 	}
 
 	/**
@@ -205,11 +204,30 @@ public class EntityWhip extends EntityThrowable
 			} // otherwise, fall through to standard case:
 		case WHIP_SHORT:
 		case WHIP_LONG:
-			return (block instanceof BlockFence || block instanceof BlockLog ||
+			int clear = 0;
+			if (isSideClear(x + 1, y, z) && isSideClear(x - 1, y, z)) {
+				++clear;
+			}
+			if (isSideClear(x, y + 1, z) && isSideClear(x, y - 1, z)) {
+				++clear;
+			}
+			if (isSideClear(x, y, z + 1) && isSideClear(x, y, z - 1)) {
+				++clear;
+			}
+			return (clear > 1 && (block instanceof BlockFence || block instanceof BlockLog ||
 					block instanceof BlockLever || block instanceof BlockSign ||
-					block instanceof BlockLadder);
+					block instanceof BlockLadder));
 		}
 		return false;
+	}
+
+	/**
+	 * Returns true if the coordinates given are clear of obstacles, such that the
+	 * whip would be able to freely move through the space and latch on
+	 */
+	protected boolean isSideClear(int x, int y, int z) {
+		Material m = worldObj.getBlock(x, y, z).getMaterial();
+		return (!m.blocksMovement() || m == Material.leaves);
 	}
 
 	@Override // getVelocity

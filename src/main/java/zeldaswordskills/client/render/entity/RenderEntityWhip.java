@@ -35,9 +35,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @SideOnly(Side.CLIENT)
-public class RenderWhip extends Render
+public class RenderEntityWhip extends Render
 {
-	public RenderWhip() {}
+	public RenderEntityWhip() {}
 
 	@Override
 	public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick) {

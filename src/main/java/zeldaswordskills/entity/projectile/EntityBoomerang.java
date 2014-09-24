@@ -37,7 +37,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -131,7 +131,7 @@ public class EntityBoomerang extends EntityMobThrowable
 
 	/** Returns a boomerang damage source */
 	protected DamageSource getDamageSource() {
-		return new DamageSourceStunIndirect("boomerang", this, getThrower(), 200, 5).setCanStunPlayers().setProjectile();
+		return new DamageSourceBaseIndirect("boomerang", this, getThrower()).setStunDamage(200, 5, true).setProjectile();
 	}
 
 	@Override

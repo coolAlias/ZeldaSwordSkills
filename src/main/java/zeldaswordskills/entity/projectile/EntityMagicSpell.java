@@ -17,28 +17,37 @@
 
 package zeldaswordskills.entity.projectile;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
-import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
+import zeldaswordskills.api.entity.IReflectable;
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -49,24 +58,23 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * Upon impact, the spell will 'explode', damaging all entities within the area of
  * effect for the full damage amount.
+ * 
+ * Set the MagicType and AoE before spawning the entity or the client side will not know about it.
  *
  */
-public class EntityMagicSpell extends EntityMobThrowable
+public class EntityMagicSpell extends EntityMobThrowable implements IEntityAdditionalSpawnData, IReflectable
 {
-	public static enum MagicType {
-		/** Causes fire damage, melts ice, ignites blocks */
-		FIRE,
-		/** Causes cold damage, freezes targets, extinguishes flames and lava */
-		ICE,
-		/** Currently no special effects; used only to give Tornado Rod a dummy magic type */
-		WIND
-	}
+	/** The spell's magic type */
+	private MagicType type = MagicType.FIRE;
 
-	/** Watchable object index for spell's magic type */
-	private static final int SPELL_TYPE_INDEX = 22;
+	/** The spell's effect radius also affects the render scale */
+	private float radius = 2.0F;
 
-	/** Watchable object index for spell's area of effect */
-	private static final int AREA_INDEX = 23;
+	/** If true, the damage source will be set to ignore armor */
+	private boolean bypassesArmor;
+
+	/** If not set to positive value, default will return (1.0F - (getArea() / 4.0F)) */
+	private float reflectChance = -1.0F;
 
 	public EntityMagicSpell(World world) {
 		super(world);
@@ -74,40 +82,55 @@ public class EntityMagicSpell extends EntityMobThrowable
 
 	public EntityMagicSpell(World world, EntityLivingBase entity) {
 		super(world, entity);
+		resetSize();
 	}
 
 	public EntityMagicSpell(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		resetSize();
 	}
 
 	public EntityMagicSpell(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
+		resetSize();
 	}
 
-	@Override
-	public void entityInit() {
-		super.entityInit();
-		dataWatcher.addObject(SPELL_TYPE_INDEX, MagicType.FIRE.ordinal());
-		dataWatcher.addObject(AREA_INDEX, 2.0F);
+	/** Re-sets the entity size based on the current radius */
+	private void resetSize() {
+		float f = (float)(radius / 4.0D);
+		setSize(f, f);
 	}
 
 	public MagicType getType() {
-		return MagicType.values()[dataWatcher.getWatchableObjectInt(SPELL_TYPE_INDEX) % MagicType.values().length];
+		return type;
 	}
 
 	public EntityMagicSpell setType(MagicType type) {
-		dataWatcher.updateObject(SPELL_TYPE_INDEX, type.ordinal());
+		this.type = type;
 		return this;
 	}
 
-	/** Returns the spell's area of effect */
+	/** Makes this spell's damage source ignore armor */
+	public EntityMagicSpell setDamageBypassesArmor() {
+		bypassesArmor = true;
+		return this;
+	}
+
+	/** Returns the spell's effect radius */
 	public float getArea() {
-		return dataWatcher.getWatchableObjectFloat(AREA_INDEX);
+		return radius;
 	}
 
 	/** Sets the spell's area of effect radius */
 	public EntityMagicSpell setArea(float radius) {
-		dataWatcher.updateObject(AREA_INDEX, radius);
+		this.radius = radius;
+		resetSize();
+		return this;
+	}
+
+	/** Sets the chance of the spell being reflected when blocked with the Mirror Shield */
+	public EntityMagicSpell setReflectChance(float chance) {
+		this.reflectChance = chance;
 		return this;
 	}
 
@@ -115,12 +138,26 @@ public class EntityMagicSpell extends EntityMobThrowable
 	 * Returns a damage source corresponding to the magic type (e.g. fire for fire, etc.)
 	 */
 	protected DamageSource getDamageSource() {
+		DamageSource source = new DamageSourceFireIndirect("blast.fire", this, getThrower(), true).setProjectile().setMagicDamage();
 		switch(getType()) {
-		case ICE: return new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1).setProjectile().setMagicDamage();
-		case WIND: return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
-		default: return new EntityDamageSourceIndirect("blast.fire", this, getThrower()).setFireDamage().setProjectile().setMagicDamage();
+		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1, true).setStunDamage(60, 10, true).setProjectile().setMagicDamage(); break;
+		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1, true).setProjectile().setMagicDamage(); break;
+		case WIND: source = new DamageSourceBaseIndirect("blast.wind", this, getThrower(), true).setProjectile().setMagicDamage(); break;
+		default: break; // fire
 		}
+		if (bypassesArmor) {
+			source.setDamageBypassesArmor();
+		}
+		return source;
 	}
+
+	@Override
+	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, Entity shooter) {
+		return (reflectChance < 0 ? 1.0F - (getArea() / 4.0F) : reflectChance);
+	}
+
+	@Override
+	public void onReflected(ItemStack mirrorShield, EntityPlayer player, Entity shooter, Entity oldEntity) {}
 
 	@Override
 	protected float func_70182_d() {
@@ -132,20 +169,13 @@ public class EntityMagicSpell extends EntityMobThrowable
 		return 0.02F;
 	}
 
-	private String getParticle() {
-		switch(getType()) {
-		case ICE: return "snowshovel";
-		case WIND: return "cloud";
-		default: return "flame";
-		}
-	}
-
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		MagicType type = getType();
 		if (worldObj.isRemote) {
-			String particle = getParticle();
-			boolean flag = getType() != MagicType.FIRE;
+			String particle = type.getTrailingParticle();
+			boolean flag = type != MagicType.FIRE;
 			for (int i = 0; i < 4; ++i) {
 				worldObj.spawnParticle(particle,
 						posX + motionX * (double) i / 4.0D,
@@ -153,6 +183,8 @@ public class EntityMagicSpell extends EntityMobThrowable
 						posZ + motionZ * (double) i / 4.0D,
 						-motionX * 0.25D, -motionY + (flag ? 0.1D : 0.0D), -motionZ * 0.25D);
 			}
+		} else if (ticksExisted % type.getSoundFrequency() == 0) {
+			worldObj.playSoundAtEntity(this, type.getMovingSound(), type.getSoundVolume(rand), type.getSoundPitch(rand));
 		}
 	}
 
@@ -180,11 +212,13 @@ public class EntityMagicSpell extends EntityMobThrowable
 		}
 		if (worldObj.isRemote) {
 			spawnImpactParticles("largeexplode", 4, -0.1F);
-			spawnImpactParticles(getParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
+			spawnImpactParticles(getType().getTrailingParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
 		} else {
 			worldObj.playSoundAtEntity(this, "random.explode", 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
-			Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
-			ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
+			if (getType().affectsBlocks(worldObj, getThrower())) {
+				Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
+				ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
+			}
 			setDead();
 		}
 	}
@@ -205,17 +239,28 @@ public class EntityMagicSpell extends EntityMobThrowable
 	protected void handlePostDamageEffects(EntityLivingBase entity) {
 		switch(getType()) {
 		case ICE:
-			ZSSEntityInfo.get(entity).stun((int) Math.ceil(getDamage()) * 10, true);
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
-			worldObj.setBlock(i, j, k, Blocks.ice);
-			worldObj.setBlock(i, j + 1, k, Blocks.ice);
+			if (getThrower() instanceof EntityPlayer) {
+				worldObj.setBlock(i, j, k, Blocks.ice);
+				worldObj.setBlock(i, j + 1, k, Blocks.ice);
+			}
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 			break;
 		case FIRE:
 			if (!entity.isImmuneToFire()) {
 				entity.setFire((int) Math.ceil(getDamage()));
+			}
+			break;
+		case WIND:
+			double power = Math.min(3.0D, (getDamage() / 6.0D));
+			if (power > 0) {
+				float f3 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+				if (f3 > 0.0F) {
+					double knockback = power * 0.6000000238418579D / (double) f3;
+					entity.addVelocity(motionX * knockback, 0.1D, motionZ * knockback);
+				}
 			}
 			break;
 		default:
@@ -227,6 +272,7 @@ public class EntityMagicSpell extends EntityMobThrowable
 		super.writeEntityToNBT(compound);
 		compound.setInteger("magicType", getType().ordinal());
 		compound.setFloat("areaOfEffect", getArea());
+		compound.setFloat("reflectChance", reflectChance);
 	}
 
 	@Override
@@ -234,5 +280,18 @@ public class EntityMagicSpell extends EntityMobThrowable
 		super.readEntityFromNBT(compound);
 		setType(MagicType.values()[compound.getInteger("magicType") % MagicType.values().length]);
 		setArea(compound.getFloat("areaOfEffect"));
+		reflectChance = compound.getFloat("reflectChance");
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		buffer.writeInt(type.ordinal());
+		buffer.writeFloat(radius);
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		type = (MagicType.values()[buffer.readInt() % MagicType.values().length]);
+		radius = buffer.readFloat();
 	}
 }

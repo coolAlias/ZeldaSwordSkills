@@ -30,6 +30,9 @@ import net.minecraft.world.World;
  */
 public abstract class EntityMobThrowable extends EntityThrowable
 {
+	/** The throwing entity's ID, in case it is not a player. Only used after loading from NBT */
+	private int throwerId;
+
 	/** Usually the damage this entity will cause upon impact */
 	private float damage;
 
@@ -53,7 +56,7 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		super(world, shooter);
 		this.posY = shooter.posY + (double) shooter.getEyeHeight() - 0.10000000149011612D;
 		double d0 = target.posX - shooter.posX;
-		double d1 = target.boundingBox.minY + (double) target.height - this.posY;
+		double d1 = target.boundingBox.minY + (double)(target.height / 3.0F) - this.posY;
 		double d2 = target.posZ - shooter.posZ;
 		double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d2 * d2);
 		if (d3 >= 1.0E-7D) {
@@ -66,6 +69,15 @@ public abstract class EntityMobThrowable extends EntityThrowable
 			float f4 = (float) d3 * 0.2F;
 			setThrowableHeading(d0, d1 + (double) f4, d2, velocity, wobble);
 		}
+	}
+
+	@Override
+	public EntityLivingBase getThrower() {
+		EntityLivingBase thrower = super.getThrower();
+		if (thrower == null) {
+			return (EntityLivingBase) worldObj.getEntityByID(throwerId);
+		}
+		return thrower;
 	}
 
 	/** Returns the amount of damage this entity will cause upon impact */
@@ -84,12 +96,14 @@ public abstract class EntityMobThrowable extends EntityThrowable
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
+		compound.setInteger("throwerId", (getThrower() == null ? -1 : getThrower().getEntityId()));
 		compound.setFloat("damage", damage);
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
+		throwerId = compound.getInteger("throwerId");
 		damage = compound.getFloat("damage");
 	}
 }

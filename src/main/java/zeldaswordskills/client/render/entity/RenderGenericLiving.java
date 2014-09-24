@@ -30,11 +30,13 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Renderer for generic living entities whose animations are handled via the model
- * class methods {@link ModelBase#setRotationAngles(float, float, float, float, float, float, Entity) setRotationAngles}
- * and {@link ModelBase#setLivingAnimations(EntityLivingBase, float, float, float) setLivingAnimations}.
+ * Renderer for generic {@link EntityLivingBase} entities with a single texture and set scale.
  * 
- * If the entity has a child version, it will be rendered at half the adult scale.
+ * Animations are handled via the model methods:
+ * {@link ModelBase#setRotationAngles(float, float, float, float, float, float, Entity) setRotationAngles}
+ * {@link ModelBase#setLivingAnimations(EntityLivingBase, float, float, float) setLivingAnimations}.
+ * 
+ * Child versions of the entity are rendered at half scale.
  *
  */
 @SideOnly(Side.CLIENT)

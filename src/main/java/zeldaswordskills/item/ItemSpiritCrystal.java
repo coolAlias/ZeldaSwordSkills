@@ -33,13 +33,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -264,7 +264,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 					amount *= 0.25F;
 				}
 
-				if (entity.attackEntityFrom(new EntityDamageSourceIndirect("magic.din", player, player).setFireDamage().setMagicDamage(), amount) && !entity.isImmuneToFire()) {
+				if (entity.attackEntityFrom(new DamageSourceFireIndirect("magic.din", player, player, true).setMagicDamage(), amount) && !entity.isImmuneToFire()) {
 					if (world.rand.nextFloat() < d10) {
 						entity.setFire(10);
 					}

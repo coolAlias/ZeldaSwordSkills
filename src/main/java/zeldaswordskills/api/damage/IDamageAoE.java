@@ -19,16 +19,14 @@ package zeldaswordskills.api.damage;
 
 /**
  * 
- * Interface for DamageSources with secondary effects; the effects of the damage
- * source are determined by the EnumDamageType.
+ * Simple interface to distinguish damage types that cause damage in a wide area
+ * instead of against a single target. Note that the actual AoE effect is not
+ * handled by the DamageSource, but must be implemented in the entity or attack
+ * resulting in the AoE damage.
  *
  */
-public interface IPostDamageEffect {
+public interface IDamageAoE {
 
-	/** Returns the maximum duration of the effect for the given damage type */
-	public int getDuration(EnumDamageType type);
-	
-	/** Returns the amplitude of this effect for the given damage type */
-	public int getAmplifier(EnumDamageType type);
-	
+	/** Return true if this damage source is considered to have an Area of Effect */
+	public boolean isAoEDamage();
 }
