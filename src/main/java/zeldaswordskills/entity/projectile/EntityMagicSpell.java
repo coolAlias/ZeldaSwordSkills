@@ -24,9 +24,11 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -40,6 +42,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
+import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.lib.Sounds;
@@ -59,7 +62,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Set the MagicType and AoE before spawning the entity or the client side will not know about it.
  *
  */
-public class EntityMagicSpell extends EntityMobThrowable implements IEntityAdditionalSpawnData
+public class EntityMagicSpell extends EntityMobThrowable implements IEntityAdditionalSpawnData, IReflectable
 {
 	/** The spell's magic type */
 	private MagicType type = MagicType.FIRE;
@@ -69,6 +72,9 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 
 	/** If true, the damage source will be set to ignore armor */
 	private boolean bypassesArmor;
+
+	/** If not set to positive value, default will return (1.0F - (getArea() / 4.0F)) */
+	private float reflectChance = -1.0F;
 
 	public EntityMagicSpell(World world) {
 		super(world);
@@ -122,6 +128,12 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		return this;
 	}
 
+	/** Sets the chance of the spell being reflected when blocked with the Mirror Shield */
+	public EntityMagicSpell setReflectChance(float chance) {
+		this.reflectChance = chance;
+		return this;
+	}
+
 	/**
 	 * Returns a damage source corresponding to the magic type (e.g. fire for fire, etc.)
 	 */
@@ -138,6 +150,14 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		}
 		return source;
 	}
+
+	@Override
+	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, Entity shooter) {
+		return (reflectChance < 0 ? 1.0F - (getArea() / 4.0F) : reflectChance);
+	}
+
+	@Override
+	public void onReflected(ItemStack mirrorShield, EntityPlayer player, Entity shooter, Entity oldEntity) {}
 
 	@Override
 	protected float func_70182_d() {
@@ -234,7 +254,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 			}
 			break;
 		case WIND:
-			double power = Math.max(3.0D, (getDamage() / 6.0D));
+			double power = Math.max(3.0D, (getDamage() / 8.0D));
 			if (power > 0) {
 				float f3 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
 				if (f3 > 0.0F) {
@@ -252,6 +272,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		super.writeEntityToNBT(compound);
 		compound.setInteger("magicType", getType().ordinal());
 		compound.setFloat("areaOfEffect", getArea());
+		compound.setFloat("reflectChance", reflectChance);
 	}
 
 	@Override
@@ -259,6 +280,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		super.readEntityFromNBT(compound);
 		setType(MagicType.values()[compound.getInteger("magicType") % MagicType.values().length]);
 		setArea(compound.getFloat("areaOfEffect"));
+		reflectChance = compound.getFloat("reflectChance");
 	}
 
 	@Override
