@@ -17,17 +17,22 @@
 
 package zeldaswordskills.entity.ai;
 
+import java.util.Set;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
@@ -356,8 +361,24 @@ public class EntityAITeleport extends EntityAIBase
 
 			entity.worldObj.playSoundEffect(d3, d4, d5, "mob.endermen.portal", 1.0F, 1.0F);
 			entity.playSound("mob.endermen.portal", 1.0F, 1.0F);
-			MinecraftForge.EVENT_BUS.post(new PostEnderTeleport(entity, entity.posX, entity.posY, entity.posZ, 0));
+			disruptTargeting(entity);
+			MinecraftForge.EVENT_BUS.post(new PostEnderTeleport(entity, d3, d4, d5, 0));
 			return true;
+		}
+	}
+
+	/**
+	 * Call to disengage any ILockOnTargets tracking the entity
+	 */
+	public static void disruptTargeting(EntityLivingBase entity) {
+		if (entity.worldObj instanceof WorldServer) {
+			Set<EntityPlayer> players = ((WorldServer) entity.worldObj).getEntityTracker().getTrackingPlayers(entity);
+			for (EntityPlayer player : players) {
+				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
+				if (skills.getTargetingSkill() != null && skills.getTargetingSkill().getCurrentTarget() == entity) {
+					skills.getTargetingSkill().setCurrentTarget(player, null);
+				}
+			}
 		}
 	}
 
@@ -365,8 +386,11 @@ public class EntityAITeleport extends EntityAIBase
 	 * Event posted after a successful ender teleport; not cancelable and changing fields has no effect
 	 */
 	public static class PostEnderTeleport extends EnderTeleportEvent {
-		public PostEnderTeleport(EntityLivingBase entity, double targetX, double targetY, double targetZ, float damage) {
-			super(entity, targetX, targetY, targetZ, damage);
+		/**
+		 * Post teleport event with the original position of the entity; the entity has already been set to its new position.
+		 */
+		public PostEnderTeleport(EntityLivingBase entity, double originX, double originY, double originZ, float damage) {
+			super(entity, originX, originY, originZ, damage);
 		}
 	}
 }
