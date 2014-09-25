@@ -20,6 +20,7 @@ package zeldaswordskills.lib;
 public class Sounds {
 
 	// VANILLA SOUNDS
+	public static final String BAT_HURT = "mob.bat.hurt";
 	public static final String BOW_RELEASE = "random.bow";
 	public static final String BOW_HIT = "random.bowhit";
 	public static final String CLICK = "random.click";
@@ -33,8 +34,8 @@ public class Sounds {
 	public static final String FIRE_IGNITE = "fire.ignite";
 	public static final String ITEM_BREAK = "random.break";
 	public static final String GLASS_BREAK = "dig.glass"; // changed from 'random.glass'
-	public static final String MOB_ATTACK = "mob.attack";
 	public static final String POP = "random.pop";
+	public static final String SLIME_ATTACK = "mob.slime.attack";
 	public static final String VILLAGER_DEATH = "mob.villager.death";
 	public static final String VILLAGER_HAGGLE = "mob.villager.haggle";
 	public static final String VILLAGER_HIT = "mob.villager.hit";
