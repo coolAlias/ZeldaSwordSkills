@@ -33,7 +33,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
@@ -109,7 +108,6 @@ public class EntityAITeleport extends EntityAIBase
 		this.fleeTele = flee;
 		this.hurtTele = hurt;
 		this.setMutexBits(8); // compatible with all vanilla AI tasks, but not EntityAIUseMagic
-		MinecraftForge.EVENT_BUS.register(this); // this is probably a bad idea...
 	}
 
 	/**
@@ -229,13 +227,13 @@ public class EntityAITeleport extends EntityAIBase
 		return delayTimer > teleportDelay;
 	}
 
-	@SubscribeEvent
-	public void postTeleport(PostEnderTeleport event) {
-		if (event.entityLiving == this.entity) {
-			teleportDelay = minTeleportDelay + entity.worldObj.rand.nextInt(minTeleportDelay * 2) - entity.worldObj.rand.nextInt((minTeleportDelay / 2) + 1);
-			delayTimer = 0;
-			triggerTimer = 0;
-		}
+	/**
+	 * Called when the parent entity posts {@link PostEnderTeleport} event
+	 */
+	public void onPostTeleport(double originX, double originY, double originZ) {
+		teleportDelay = minTeleportDelay + entity.worldObj.rand.nextInt(minTeleportDelay * 2) - entity.worldObj.rand.nextInt((minTeleportDelay / 2) + 1);
+		delayTimer = 0;
+		triggerTimer = 0;
 	}
 
 	/**
@@ -361,7 +359,6 @@ public class EntityAITeleport extends EntityAIBase
 
 			entity.worldObj.playSoundEffect(d3, d4, d5, "mob.endermen.portal", 1.0F, 1.0F);
 			entity.playSound("mob.endermen.portal", 1.0F, 1.0F);
-			disruptTargeting(entity);
 			MinecraftForge.EVENT_BUS.post(new PostEnderTeleport(entity, d3, d4, d5, 0));
 			return true;
 		}

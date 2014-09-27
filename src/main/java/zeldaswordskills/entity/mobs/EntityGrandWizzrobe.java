@@ -50,7 +50,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	}
 
 	@Override
-	protected EntityAITeleport getTeleportAI() {
+	protected EntityAITeleport getNewTeleportAI() {
 		return new EntityAITeleport(this, 16.0D, 60, false, true, true, true, true);
 	}
 

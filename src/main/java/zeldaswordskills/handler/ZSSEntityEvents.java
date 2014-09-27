@@ -35,6 +35,7 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.EntityMaskTrader;
@@ -42,6 +43,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
+import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemCustomEgg;
 import zeldaswordskills.item.ItemMask;
@@ -193,6 +195,14 @@ public class ZSSEntityEvents
 		}
 		if (event.entity instanceof EntityPlayer && ZSSPlayerInfo.get((EntityPlayer) event.entity) == null) {
 			ZSSPlayerInfo.register((EntityPlayer) event.entity);
+		}
+	}
+
+	@SubscribeEvent
+	public void postTeleport(EntityAITeleport.PostEnderTeleport event) {
+		EntityAITeleport.disruptTargeting(event.entityLiving);
+		if (event.entity instanceof IEntityTeleport) {
+			((IEntityTeleport) event.entity).getTeleportAI().onPostTeleport(event.targetX, event.targetY, event.targetZ);
 		}
 	}
 

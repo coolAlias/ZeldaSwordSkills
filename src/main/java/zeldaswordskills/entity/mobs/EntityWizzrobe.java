@@ -37,6 +37,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -50,7 +51,7 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
-public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicUser
+public class EntityWizzrobe extends EntityMob implements IEntityTeleport, IEntityVariant, IMagicUser
 {
 	/** Data watcher index for this Wizzrobe's type */
 	protected static final int TYPE_INDEX = 16;
@@ -73,7 +74,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 	public EntityWizzrobe(World world) {
 		super(world);
 		magicAI = getMagicAI();
-		teleportAI = getTeleportAI();
+		teleportAI = getNewTeleportAI();
 		tasks.addTask(1, new EntityAISwimming(this));
 		tasks.addTask(2, magicAI);
 		tasks.addTask(3, teleportAI);
@@ -87,10 +88,15 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 		setType(MagicType.WIND);
 	}
 
+	@Override
+	public EntityAITeleport getTeleportAI() {
+		return teleportAI;
+	}
+
 	/**
-	 * Returns the teleportation AI this Wizzrobe should use
+	 * Returns the teleportation AI this Wizzrobe should use when being constructed
 	 */
-	protected EntityAITeleport getTeleportAI() {
+	protected EntityAITeleport getNewTeleportAI() {
 		return new EntityAITeleport(this, 16.0D, 60, true, true, true, true, true);
 	}
 
