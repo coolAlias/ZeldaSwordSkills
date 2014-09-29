@@ -83,7 +83,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 
 	@Override
 	protected float getTelevadeChance() {
-		return 0.65F;
+		return 1.0F;
 	}
 
 	@Override

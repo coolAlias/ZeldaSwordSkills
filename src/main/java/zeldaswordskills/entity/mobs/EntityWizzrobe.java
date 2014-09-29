@@ -316,7 +316,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityTeleport, IEntit
 	 * Chance that Wizzrobe can teleport out of harm's way even if teleport AI cannot teleport
 	 */
 	protected float getTelevadeChance() {
-		return 0.35F;
+		return 0.5F;
 	}
 
 	@Override
