@@ -135,7 +135,7 @@ public class EntityAITeleport extends EntityAIBase
 	 * the entity may teleport sooner if other conditions are met first.
 	 */
 	public void scheduleNextTeleport(int ticks) {
-		triggerTimer = Math.max(0, ticks);
+		triggerTimer = (triggerTimer > 0 ? Math.min(triggerTimer, Math.max(0, ticks)) : Math.max(0, ticks));
 	}
 
 	/**
