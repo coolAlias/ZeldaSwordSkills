@@ -22,17 +22,16 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.PacketDispatcher;
@@ -119,7 +118,8 @@ public class Dodge extends SkillActive
 	private float getBaseDodgeChance(EntityPlayer player) {
 		float evadeUp = ZSSEntityInfo.get(player).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
 		float evadeDown = ZSSEntityInfo.get(player).getBuffAmplifier(Buff.EVADE_DOWN) * 0.01F;
-		return ((level * 0.1F) + evadeUp - evadeDown);
+		float speedBonus = 2.0F * (float)(player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
+		return ((level * 0.1F) + (evadeUp - evadeDown) + speedBonus);
 	}
 
 	/** Returns full chance to dodge an attack, including all bonuses */
@@ -208,10 +208,11 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
-		double d = 0.15;
-		if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
-			d = 0.025D;
+		double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
+		if (speed > 1.0D) {
+			speed = 1.0D;
 		}
+		double d = 0.15D * speed * speed;
 		Vec3 vec3 = player.getLookVec();
 		if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
 			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
