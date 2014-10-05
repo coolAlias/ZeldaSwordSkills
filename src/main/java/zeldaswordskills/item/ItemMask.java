@@ -43,7 +43,7 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityMaskTrader;
+import zeldaswordskills.entity.EntityNpcMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
@@ -222,7 +222,7 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 				} else {
 					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
 				}
-			} else if (entity instanceof EntityMaskTrader) {
+			} else if (entity instanceof EntityNpcMaskTrader) {
 				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
 			} else {
 				return false;
