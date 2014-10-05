@@ -42,6 +42,8 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.CustomEntityList;
 import zeldaswordskills.entity.IEntityVariant;
+import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -70,7 +72,7 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 		String s = ("" + StatCollector.translateToLocal("item.zss.spawn_egg.name")).trim();
 		String entityName = CustomEntityList.getStringFromID(stack.getItemDamage());
 		if (entityName != null) {
-			s = s + " " + StatCollector.translateToLocal("entity." + entityName + ".name");
+			s = s + " " + StatCollector.translateToLocal("entity." + ModInfo.ID + "." + entityName + ".name");
 		}
 		return s;
 	}
