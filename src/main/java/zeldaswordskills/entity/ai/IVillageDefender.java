@@ -15,10 +15,9 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.entity.ai;
 
 import net.minecraft.village.Village;
-import zeldaswordskills.entity.ai.GenericAIDefendVillage;
 
 /**
  * 

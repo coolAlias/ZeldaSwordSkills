@@ -48,6 +48,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ai.GenericAIDefendVillage;
+import zeldaswordskills.entity.ai.IVillageDefender;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;

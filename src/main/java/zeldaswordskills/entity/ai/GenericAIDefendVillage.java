@@ -21,7 +21,6 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.village.Village;
-import zeldaswordskills.entity.IVillageDefender;
 
 /**
  * 
