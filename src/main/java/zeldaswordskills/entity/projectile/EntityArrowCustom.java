@@ -468,28 +468,30 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		if (mop.entityHit != null) {
 			// make sure shootingEntity is correct, e.g. if loaded from NBT
 			shootingEntity = getShooter();
-			int dmg = calculateDamage(mop.entityHit);
-			if (isBurning() && canTargetEntity(mop.entityHit)) {
-				mop.entityHit.setFire(5);
-			}
-			if (mop.entityHit.attackEntityFrom(getDamageSource(mop.entityHit), (float) dmg)) {
-				if (mop.entityHit instanceof EntityLivingBase) {
-					handlePostDamageEffects((EntityLivingBase) mop.entityHit);
-					if (shootingEntity instanceof EntityPlayerMP && mop.entityHit != shootingEntity && mop.entityHit instanceof EntityPlayer) {
-						((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
+			float dmg = calculateDamage(mop.entityHit);
+			if (dmg > 0) {
+				if (isBurning() && canTargetEntity(mop.entityHit)) {
+					mop.entityHit.setFire(5);
+				}
+				if (mop.entityHit.attackEntityFrom(getDamageSource(mop.entityHit), dmg)) {
+					if (mop.entityHit instanceof EntityLivingBase) {
+						handlePostDamageEffects((EntityLivingBase) mop.entityHit);
+						if (shootingEntity instanceof EntityPlayerMP && mop.entityHit != shootingEntity && mop.entityHit instanceof EntityPlayer) {
+							((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
+						}
 					}
+					playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+					if (canTargetEntity(mop.entityHit)) {
+						setDead();
+					}
+				} else {
+					motionX *= -0.10000000149011612D;
+					motionY *= -0.10000000149011612D;
+					motionZ *= -0.10000000149011612D;
+					rotationYaw += 180.0F;
+					prevRotationYaw += 180.0F;
+					ticksInAir = 0;
 				}
-				playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-				if (canTargetEntity(mop.entityHit)) {
-					setDead();
-				}
-			} else {
-				motionX *= -0.10000000149011612D;
-				motionY *= -0.10000000149011612D;
-				motionZ *= -0.10000000149011612D;
-				rotationYaw += 180.0F;
-				prevRotationYaw += 180.0F;
-				ticksInAir = 0;
 			}
 		}
 	}
@@ -522,11 +524,11 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	/**
 	 * Returns amount of damage arrow will inflict to entity impacted
 	 */
-	protected int calculateDamage(Entity entityHit) {
+	protected float calculateDamage(Entity entityHit) {
 		float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-		int dmg = MathHelper.ceiling_double_int((double) velocity * getDamage());
+		float dmg = (float)(velocity * getDamage());
 		if (getIsCritical()) {
-			dmg += rand.nextInt(dmg / 2 + 2);
+			dmg += rand.nextInt(MathHelper.ceiling_double_int(dmg) / 2 + 2);
 		}
 		return dmg;
 	}
