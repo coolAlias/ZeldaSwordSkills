@@ -228,11 +228,14 @@ public class TargetUtils
 	 * @param fov seeker's field of view; a wider angle returns true more often
 	 */
 	public static final boolean isTargetInFrontOf(Entity seeker, Entity target, float fov) {
+		// thanks again to Battlegear2 for the following code snippet
 		double dx = target.posX - seeker.posX;
 		double dz;
 		for (dz = target.posZ - seeker.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D) {
 			dx = (Math.random() - Math.random()) * 0.01D;
 		}
+		while (seeker.rotationYaw > 360) { seeker.rotationYaw -= 360; }
+		while (seeker.rotationYaw < -360) { seeker.rotationYaw += 360; }
 		float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - seeker.rotationYaw;
 		yaw = yaw - 90;
 		while (yaw < -180) { yaw += 360; }
