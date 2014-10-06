@@ -33,6 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -106,14 +107,18 @@ public enum BossType
 		return StatCollector.translateToLocal("dungeon.zss." + unlocalizedName + ".name");
 	}
 
-	/** Default biomes in which this dungeon can generate */
-	public String[] getDefaultBiomes() {
-		return defaultBiomes;
-	}
-
 	@Override
 	public String toString() {
 		return ("Name: " + getUnlocalizedName() + " BossMob: " + (bossMob != null ? bossMob.toString() : "NULL") + " Block: " + metadata);
+	}
+
+	/**
+	 * Loads biome lists from config file during post initialization
+	 */
+	public static void postInit(Configuration config) {
+		for (BossType type : BossType.values()) {
+			addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.defaultBiomes).getStringList());
+		}
 	}
 
 	/**
@@ -125,7 +130,9 @@ public enum BossType
 				continue;
 			}
 			biome = biome.toLowerCase().replace(" ", "");
-			if (bossBiomeList.containsKey(biome)) {
+			if (!BiomeType.isRealBiome(biome)) {
+				LogHelper.warning(biome + " is not a recognized biome! This entry will be ignored for BossType " + type.getDisplayName());
+			} else if (bossBiomeList.containsKey(biome)) {
 				LogHelper.warning("Error while adding " + biome + " for " + type.getDisplayName() + ": biome already mapped to " + bossBiomeList.get(biome).getDisplayName());
 			} else {
 				bossBiomeList.put(biome, type);
@@ -154,33 +161,6 @@ public enum BossType
 			LogHelper.warning("Null biome at " + x + "/" + z + " while getting Boss Type");
 			return null;
 		}
-		/*
-		String name = biome.biomeName.toLowerCase().replace(" ", "");
-		if (bossBiomeList.isEmpty()) {
-			String[][] list = Config.getBossBiomeLists();
-			if (list.length != BossType.values().length) {
-				LogHelper.warning("List of Boss Dungeon biomes has incorrect number of entries");
-			} else {
-				for (BossType type : BossType.values()) {
-					addBiomes(type, list[type.ordinal()]);
-				}
-			}
-			// prevent list from getting initialized again if all config values were empty
-			bossBiomeList.put("InitializedBossBiomeList", null);
-		}
-		if (bossBiomeList.containsKey(name)) {
-			return bossBiomeList.get(name);
-		} else if (!unusedBiomes.contains(name)) {
-			for (BossType type : BossType.values()) {
-				for (String s : type.getDefaultBiomes()) {
-					if (name.equals(s)) {
-						return type;
-					}
-				}
-			}
-			unusedBiomes.add(name);
-		}
-		 */
 		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
 	}
 

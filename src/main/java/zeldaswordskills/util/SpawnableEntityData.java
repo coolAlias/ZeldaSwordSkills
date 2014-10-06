@@ -15,19 +15,33 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.util;
+
+import net.minecraft.entity.EnumCreatureType;
 
 /**
  * 
- * For Entities with variants that can be set upon spawning with a custom spawn egg.
+ * Helper class containing data needed to add spawn rates for an entity
  *
  */
-public interface IEntityVariant {
+public class SpawnableEntityData
+{
+	/** The creature type used to determine spawning behavior */
+	public final EnumCreatureType creatureType;
 
-	/**
-	 * Sets the Entity's sub-type, where type is often the ordinal value of an Enum set;
-	 * in such cases, it's best to get the Enum type and pass that to another setter method.
-	 * @param type	The damage value of the ItemStack, denoting the mob's type
-	 */
-	public void setType(int type);
+	/** Minimum number of entities to spawn in a group */
+	public final int min;
+
+	/** Maximum number of entities that may spawn in a group */
+	public final int max;
+
+	/** Spawn rate for this entity */
+	public final int spawnRate;
+
+	public SpawnableEntityData(EnumCreatureType creatureType, int min, int max, int defaultSpawnRate) {
+		this.creatureType = creatureType;
+		this.min = min;
+		this.max = max;
+		this.spawnRate = defaultSpawnRate;
+	}
 }

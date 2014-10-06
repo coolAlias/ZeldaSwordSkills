@@ -87,6 +87,19 @@ achievement.sword.flame.desc=Infuse the sword with a sacred flame
 achievement.sword.true=Hero of Time
 achievement.sword.true.desc=Obtain the True Master Sword
 
+biometype.arid.name=Arid
+biometype.beach.name=Beach
+biometype.cold.name=Cold
+biometype.fiery.name=Fiery
+biometype.forest.name=Forest
+biometype.jungle.name=Jungle
+biometype.mountain.name=Mountain
+biometype.ocean.name=Ocean
+biometype.plains.name=Plains
+biometype.river.name=River
+biometype.shroom.name=Mushroom Island
+biometype.taiga.name=Taiga
+
 buff.zss.attack_down.name=Attack Down
 buff.zss.attack_up.name=Attack Up
 buff.zss.defense_down.name=Defense Down
@@ -418,29 +431,28 @@ entity.zeldaswordskills.arrowcustom.name=Arrow
 entity.zeldaswordskills.arrowelemental.name=Magic Arrow
 entity.zeldaswordskills.magicspell.name=Spell
 
-entity.chu.name=Chu
-entity.chu.name.0=Red Chu
-entity.chu.name.1=Green Chu
-entity.chu.name.2=Blue Chu
-entity.chu.name.3=Yellow Chu
-entity.fairy.name=Fairy
-entity.goron.name=Goron
-entity.keese.name=Keese
-entity.keese.name.0=Keese
-entity.keese.name.1=Fire Keese
-entity.keese.name.2=Ice Keese
-entity.keese.name.3=Thunder Keese
-entity.keese.name.4=Dark Keese
-entity.octorok.name=Octorok
-entity.octorok.name.0=Octorok
-entity.octorok.name.1=Octorok
-entity.wizzrobe.name.0=Fire Wizzrobe
-entity.wizzrobe.name.1=Ice Wizzrobe
-entity.wizzrobe.name.2=Thunder Wizzrobe
-entity.wizzrobe.name.3=Gale Wizzrobe
-entity.wizzrobe_grand.name=Grand Wizzrobe
-
+entity.zeldaswordskills.chu.name=Chu
+entity.zeldaswordskills.chu.name.0=Red Chu
+entity.zeldaswordskills.chu.name.1=Green Chu
+entity.zeldaswordskills.chu.name.2=Blue Chu
+entity.zeldaswordskills.chu.name.3=Yellow Chu
+entity.zeldaswordskills.fairy.name=Fairy
+entity.zeldaswordskills.goron.name=Goron
+entity.zeldaswordskills.keese.name=Keese
+entity.zeldaswordskills.keese.name.0=Keese
+entity.zeldaswordskills.keese.name.1=Fire Keese
+entity.zeldaswordskills.keese.name.2=Ice Keese
+entity.zeldaswordskills.keese.name.3=Thunder Keese
+entity.zeldaswordskills.keese.name.4=Dark Keese
 entity.zeldaswordskills.npc.mask_trader.name=Mask Salesman
+entity.zeldaswordskills.octorok.name=Octorok
+entity.zeldaswordskills.octorok.name.0=Octorok
+entity.zeldaswordskills.octorok.name.1=Octorok
+entity.zeldaswordskills.wizzrobe.name.0=Fire Wizzrobe
+entity.zeldaswordskills.wizzrobe.name.1=Ice Wizzrobe
+entity.zeldaswordskills.wizzrobe.name.2=Thunder Wizzrobe
+entity.zeldaswordskills.wizzrobe.name.3=Gale Wizzrobe
+entity.zeldaswordskills.wizzrobe_grand.name=Grand Wizzrobe
 
 gui.zss.mask_trader.name=Welcome to the Happy Mask Shop!
 
@@ -584,6 +596,12 @@ key.zss.bomb.desc=Retrieve Bomb
 key.zss.skills_gui.desc=View Skills
 key.zss.toggleat.desc=Toggle Auto-Targeting
 key.zss.togglebuff.desc=Toggle Buff Bar
+
+magic.fire.name=Fire Magic
+magic.ice.name=Ice Magic
+magic.lightning.name=Lightning Magic
+magic.water.name=Water Magic
+magic.wind.name=Wind Magic
 
 misc.zss.sacred_flame.name.1=Din
 misc.zss.sacred_flame.name.2=Farore

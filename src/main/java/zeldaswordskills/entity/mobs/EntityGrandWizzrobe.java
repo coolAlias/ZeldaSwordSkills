@@ -22,7 +22,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ai.EntityAILevitate;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
@@ -44,7 +43,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		super(world);
 		tasks.addTask(0, new EntityAILevitate(this, 2.5D));
 		func_110163_bv(); // sets persistence required to true, meaning will not despawn
-		setType(rand.nextInt(MagicType.values().length));
+		setType(rand.nextInt(WizzrobeType.values().length));
 		setSize(1.0F, 3.0F);
 		experienceValue = 50;
 	}
@@ -133,7 +132,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		super.onUpdate();
 		if (transformTimer > 0) {
 			if (--transformTimer == 0 && !worldObj.isRemote) {
-				setType(rand.nextInt(MagicType.values().length));
+				setType(rand.nextInt(WizzrobeType.values().length));
 			}
 		}
 	}

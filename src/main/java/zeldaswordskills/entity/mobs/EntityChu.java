@@ -17,12 +17,15 @@
 
 package zeldaswordskills.entity.mobs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.particle.EntityBreakingFX;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -46,7 +49,9 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -83,11 +88,44 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 {
 	/** Chuchu types, in order of rarity and strength */
-	public static enum ChuType {RED,GREEN,BLUE,YELLOW};
+	public static enum ChuType {
+		RED(BiomeType.RIVER, BiomeType.FIERY),
+		GREEN(BiomeType.PLAINS, BiomeType.FOREST),
+		BLUE(BiomeType.TAIGA, BiomeType.COLD),
+		YELLOW(BiomeType.ARID, BiomeType.JUNGLE);
+
+		/** Biome in which this type spawns most frequently (or possibly exclusively) */
+		public final BiomeType favoredBiome;
+
+		/** Secondary biome in which this type spawns most frequently (or possibly exclusively) */
+		public final BiomeType secondBiome;
+
+		private ChuType(BiomeType favoredBiome, BiomeType secondBiome) {
+			this.favoredBiome = favoredBiome;
+			this.secondBiome = secondBiome;
+		}
+	}
+
+	/**
+	 * Returns array of default biomes in which this entity may spawn naturally
+	 */
+	public static String[] getDefaultBiomes() {
+		List<String> biomes = new ArrayList<String>();
+		for (ChuType type : ChuType.values()) {
+			biomes.addAll(Arrays.asList(type.favoredBiome.defaultBiomes));
+			biomes.addAll(Arrays.asList(type.secondBiome.defaultBiomes));
+		}
+		biomes.addAll(Arrays.asList(BiomeType.BEACH.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.MOUNTAIN.defaultBiomes));
+		return biomes.toArray(new String[biomes.size()]);
+	}
+
 	/** Data watcher index for this Chu's size */
 	private static final int CHU_SIZE_INDEX = 16;
+
 	/** Data watcher index for this Chu's type */
 	private static final int CHU_TYPE_INDEX = 17;
+
 	/** Data watcher index for shock time so entity can render appropriately */
 	private static final int SHOCK_INDEX = 18;
 
@@ -103,7 +141,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 		super(world);
 		yOffset = 0.0F;
 		slimeJumpDelay = rand.nextInt(20) + 10;
-		setType(getInitialType());
+		setType(ChuType.RED);
 		setSize((1 << rand.nextInt(3)));
 	}
 
@@ -117,24 +155,6 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 
 	protected EntityChu createInstance() {
 		return new EntityChu(worldObj);
-	}
-
-	/**
-	 * Returns a randomized type to set for this Chu during construction
-	 */
-	private ChuType getInitialType() {
-		if (rand.nextInt(4) == 0) {
-			if (rand.nextInt(4) == 0) {
-				if (rand.nextInt(4) == 0) {
-					return ChuType.BLUE;
-				} else {
-					return ChuType.YELLOW;
-				}
-			} else {
-				return ChuType.GREEN;
-			}
-		}
-		return ChuType.RED;
 	}
 
 	/** Returns this Chu's type */
@@ -151,6 +171,21 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	@Override
 	public void setType(int type) {
 		setType(ChuType.values()[type % ChuType.values().length]);
+	}
+
+	private void setTypeOnSpawn() {
+		if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
+			setType(rand.nextInt(ChuType.values().length));
+		} else {
+			BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
+			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
+			for (ChuType t : ChuType.values()) {
+				if (t.favoredBiome == biomeType || t.secondBiome == biomeType) {
+					setType(t);
+					return;
+				}
+			}
+		}
 	}
 
 	/**
@@ -302,16 +337,8 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 			return false;
 		} else {
 			if (worldObj.difficultySetting != EnumDifficulty.PEACEFUL) {
-				BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
-				BiomeGenBase targetBiome = null;
-				switch(getType()) {
-				case RED: targetBiome = BiomeGenBase.swampland; break;
-				case GREEN: targetBiome = BiomeGenBase.plains; break;
-				case BLUE: targetBiome = BiomeGenBase.taiga; break;
-				case YELLOW: targetBiome = BiomeGenBase.desert; break;
-				}
-				if (targetBiome != null && biome == targetBiome && posY > 50.0D && posY < 70.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor()
-						&& worldObj.getBlockLightValue(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)) <= rand.nextInt(8)) {
+				if (posY > 50.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor() &&
+						worldObj.getBlockLightValue(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)) <= rand.nextInt(8)) {
 					return super.getCanSpawnHere();
 				}
 				Chunk chunk = worldObj.getChunkFromBlockCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
@@ -542,6 +569,13 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 				}
 			}
 		}
+	}
+
+	@Override
+	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
+		data = super.onSpawnWithEgg(data);
+		setTypeOnSpawn();
+		return data;
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.BonusHeart;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.BossType;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
@@ -73,6 +74,8 @@ public class Config
 	private static int jarsPerClusterNether;
 	/** [Ceramic Jars][Nether] Max number of jar clusters per chunk */
 	private static int jarClustersPerChunkNether;
+	/** [Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100] */
+	private static int keeseCursedChance;
 	/** [Mobs][Keese] Chance of Keese spawning in a swarm */
 	private static int keeseSwarmChance;
 	/** [Mobs][Keese] Maximum number of Keese that can spawn in a swarm */
@@ -83,6 +86,8 @@ public class Config
 	private static boolean showSecretMessage;
 	/** [Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs */
 	private static boolean disableVanillaBuffs;
+	/** [NPC] Sets whether Zelda NPCs are invulnerable or not */
+	private static boolean npcsAreInvulnerable;
 	/*================== Buff Bar HUD =====================*/
 	/** [Buff HUD] Whether the buff bar should be displayed by default */
 	private static boolean isBuffBarEnabled;
@@ -251,11 +256,13 @@ public class Config
 	private static int maskBuyChance;
 	/** Number of trades required before a villager offers other services */
 	private static int friendTradesRequired;
+	/*================== MOB SPAWNING =====================*/
+	/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
+	private static int mobVariantChance;
 
 	public static void init(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
 		config.load();
-		ZSSEntities.init(config);
 		ZSSItems.init(config);
 
 		/*================== MOD INTER-COMPATIBILITY =====================*/
@@ -279,11 +286,13 @@ public class Config
 		jarGenChanceNether = config.get("General", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt();
 		jarsPerClusterNether = config.get("General", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt();
 		jarClustersPerChunkNether = config.get("General", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt();
+		keeseCursedChance = config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmChance = config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmSize = config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt();
 		sacredRefreshRate = config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt();
 		showSecretMessage = config.get("General", "Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
+		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
 		/*================== Buff Bar HUD =====================*/
 		isBuffBarEnabled = config.get("General", "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
 		isBuffBarHorizontal = config.get("General", "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
@@ -379,12 +388,17 @@ public class Config
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt();
+		/*================== MOB SPAWNING =====================*/
+		/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
+		mobVariantChance = config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt();
 	}
 
 	public static void postInit() {
-		for (BossType type : BossType.values()) {
-			BossType.addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.getDefaultBiomes()).getStringList());
-		}
+		// load boss types last because they rely on blocks, mobs, etc. to already have been initialized
+		// other biome-related stuff just so all biomes can be sure to have loaded
+		BiomeType.postInit(config);
+		BossType.postInit(config);
+		ZSSEntities.postInit(config);
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -414,7 +428,9 @@ public class Config
 	public static int getSacredFlameRefreshRate() { return MathHelper.clamp_int(sacredRefreshRate, 0, 30); }
 	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
+	public static boolean areNpcsInvulnerable() { return npcsAreInvulnerable; }
 	/*================== MOBS =====================*/
+	public static float getKeeseCursedChance() { return (float) MathHelper.clamp_int(keeseCursedChance, 0, 100) * 0.01F; }
 	public static float getKeeseSwarmChance() { return (float) MathHelper.clamp_int(keeseSwarmChance, 0, 100) * 0.01F; }
 	public static int getKeeseSwarmSize() { return MathHelper.clamp_int(keeseSwarmSize, 4, 16); }
 	/*================== BUFF BAR HUD =====================*/
@@ -507,5 +523,8 @@ public class Config
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.15F); }
 	public static int getFriendTradesRequired() { return Math.max(friendTradesRequired, 3); }
+	/*================== MOB SPAWNING =====================*/
+	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
+	public static float getMobVariantChance() { return MathHelper.clamp_float(mobVariantChance * 0.01F, 0.0F, 1.0F); }
 
 }

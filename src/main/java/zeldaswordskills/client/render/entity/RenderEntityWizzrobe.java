@@ -100,7 +100,7 @@ public class RenderEntityWizzrobe extends RenderLiving
 		while (roll > 360) roll -= 360;
 		GL11.glRotatef(yaw, 0, 1, 0);
 		GL11.glRotatef(roll, 0.8F, 0F, -0.6F);
-		bindTexture(wizzrobe.getType().getEntityTexture());
+		bindTexture(wizzrobe.getMagicType().getEntityTexture());
 		Tessellator.instance.setBrightness(0xf000f0);
 		box1.render(spell);
 		GL11.glRotatef(45, 1, 0, 1);
@@ -114,7 +114,7 @@ public class RenderEntityWizzrobe extends RenderLiving
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		boolean grand = (entity instanceof EntityGrandWizzrobe);
-		switch(((EntityWizzrobe) entity).getType()) {
+		switch(((EntityWizzrobe) entity).getMagicType()) {
 		case FIRE: return (grand ? grandFireWizTexture : fireWizTexture);
 		case ICE: return (grand ? grandIceWizTexture : iceWizTexture);
 		case LIGHTNING: return (grand ? grandLightningWizTexture : lightningWizTexture);

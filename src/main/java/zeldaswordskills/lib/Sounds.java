@@ -36,6 +36,7 @@ public class Sounds {
 	public static final String GLASS_BREAK = "dig.glass"; // changed from 'random.glass'
 	public static final String POP = "random.pop";
 	public static final String SLIME_ATTACK = "mob.slime.attack";
+	public static final String SPLASH = "random.splash";
 	public static final String VILLAGER_DEATH = "mob.villager.death";
 	public static final String VILLAGER_HAGGLE = "mob.villager.haggle";
 	public static final String VILLAGER_HIT = "mob.villager.hit";

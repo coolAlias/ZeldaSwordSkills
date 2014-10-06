@@ -38,7 +38,7 @@ import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.EntityGoron;
-import zeldaswordskills.entity.EntityMaskTrader;
+import zeldaswordskills.entity.EntityNpcMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
@@ -133,7 +133,7 @@ public class ZSSEntityEvents
 			}
 			event.setCanceled(flag2);
 		}
-		if (!event.isCanceled() && (event.target instanceof EntityVillager || event.target instanceof EntityMaskTrader)) {
+		if (!event.isCanceled() && (event.target instanceof EntityVillager || event.target instanceof EntityNpcMaskTrader)) {
 			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (helm != null && helm.getItem() instanceof ItemMask) {
 				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
