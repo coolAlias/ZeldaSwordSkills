@@ -21,32 +21,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.INpc;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAvoidEntity;
-import net.minecraft.entity.ai.EntityAIMoveIndoors;
-import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
-import net.minecraft.entity.ai.EntityAIOpenDoor;
-import net.minecraft.entity.ai.EntityAIRestrictOpenDoor;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWander;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
-import net.minecraft.entity.ai.EntityAIWatchClosest2;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.entity.npc.EntityNpcBase;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
@@ -55,10 +40,8 @@ import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
 
-public class EntityNpcMaskTrader extends EntityCreature implements INpc
+public class EntityNpcMaskTrader extends EntityNpcBase
 {
-	private int randomTickDivider;
-	public Village villageObj;
 	private EntityPlayer customer;
 
 	/** Mapping of masks to give for each quest stage */
@@ -68,64 +51,22 @@ public class EntityNpcMaskTrader extends EntityCreature implements INpc
 
 	public EntityNpcMaskTrader(World world) {
 		super(world);
-		this.setSize(0.6F, 1.8F);
-		this.func_110163_bv(); // sets persistence required to true, meaning will not despawn
-		this.getNavigator().setBreakDoors(true);
-		this.getNavigator().setAvoidsWater(true);
-		this.tasks.addTask(0, new EntityAISwimming(this));
-		this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityZombie.class, 8.0F, 0.6D, 0.6D));
-		this.tasks.addTask(2, new EntityAIMoveIndoors(this));
-		this.tasks.addTask(3, new EntityAIRestrictOpenDoor(this));
-		this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
-		this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
-		this.tasks.addTask(6, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 1.0F));
-		this.tasks.addTask(6, new EntityAIWander(this, 0.6D));
-		this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
 	}
 
 	@Override
-	protected void applyEntityAttributes() {
-		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.5D);
+	protected String getNameTagOnSpawn() {
+		return "Happy Mask Salesman";
 	}
 
 	@Override
-	public boolean isEntityInvulnerable() {
-		// TODO return Config setting
-		return true;
-	}
-
-	@Override
-	public boolean isAIEnabled() {
-		return true;
-	}
-
-	@Override
-	protected void updateAITick() {
-		if (--randomTickDivider <= 0) {
-			worldObj.villageCollectionObj.addVillagerPosition(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
-			randomTickDivider = 70 + rand.nextInt(50);
-			villageObj = worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ), 32);
-			if (villageObj == null) {
-				detachHome();
+	protected void randomUpdateTick() {
+		if (customer != null) {
+			if (customer.openContainer instanceof Container && this.getDistanceSqToEntity(customer) > 16.0D) {
+				getNavigator().clearPathEntity();
 			} else {
-				ChunkCoordinates chunkcoordinates = villageObj.getCenter();
-				setHomeArea(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ, (int)(villageObj.getVillageRadius() * 0.6F));
-			}
-			if (customer != null) {
-				if (customer.openContainer instanceof Container && this.getDistanceSqToEntity(customer) > 16.0D) {
-					this.getNavigator().clearPathEntity();
-				} else {
-					customer = null;
-				}
+				customer = null;
 			}
 		}
-		super.updateAITick();
-	}
-
-	@Override
-	protected boolean canDespawn() {
-		return false;
 	}
 
 	@Override
@@ -141,11 +82,6 @@ public class EntityNpcMaskTrader extends EntityCreature implements INpc
 	@Override
 	protected String getDeathSound() {
 		return Sounds.VILLAGER_DEATH;
-	}
-
-	@Override
-	public boolean allowLeashing() {
-		return false;
 	}
 
 	@Override
