@@ -135,7 +135,7 @@ public class ModelWizzrobe extends ModelBase
 	private void setLivingAnimations(EntityWizzrobe entity, float par2, float par3, float par4) {
 		int castTime = entity.getCurrentCastingTime();
 		if (castTime > 0) {
-			maxCastTick = entity.getMaxCastingTime();
+			maxCastTick = entity.getMaxCastingTime() - 1;
 			int i = 0;
 			// 3 ticks up, 3 ticks down, rest held even
 			if (castTime == 1 || castTime == maxCastTick) {
@@ -167,27 +167,6 @@ public class ModelWizzrobe extends ModelBase
 			rightArm.rotateAngleX = MathHelper.cos(f1 * 0.6662F + (float) Math.PI) * 2.0F * f2 * 0.5F;
 			leftArm.rotateAngleX = MathHelper.cos(f1 * 0.6662F) * 2.0F * f2 * 0.5F;
 			atPeak = false;
-		}
-		// from ModelBiped:
-		if (onGround > -9990.0F) {
-			f6 = onGround;
-			body.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float) Math.PI * 2.0F) * 0.2F;
-			rightArm.rotationPointZ = MathHelper.sin(body.rotateAngleY) * 5.0F;
-			rightArm.rotationPointX = -MathHelper.cos(body.rotateAngleY) * 5.0F;
-			leftArm.rotationPointZ = -MathHelper.sin(body.rotateAngleY) * 5.0F;
-			leftArm.rotationPointX = MathHelper.cos(body.rotateAngleY) * 5.0F;
-			rightArm.rotateAngleY += body.rotateAngleY;
-			leftArm.rotateAngleY += body.rotateAngleY;
-			leftArm.rotateAngleX += body.rotateAngleY;
-			f6 = 1.0F - onGround;
-			f6 *= f6;
-			f6 *= f6;
-			f6 = 1.0F - f6;
-			float f7 = MathHelper.sin(f6 * (float) Math.PI);
-			float f8 = MathHelper.sin(onGround * (float) Math.PI) * -(head.rotateAngleX - 0.7F) * 0.75F;
-			rightArm.rotateAngleX = (float)((double) rightArm.rotateAngleX - ((double) f7 * 1.2D + (double) f8));
-			rightArm.rotateAngleY += body.rotateAngleY * 2.0F;
-			rightArm.rotateAngleZ = MathHelper.sin(onGround * (float) Math.PI) * -0.4F;
 		}
 	}
 }
