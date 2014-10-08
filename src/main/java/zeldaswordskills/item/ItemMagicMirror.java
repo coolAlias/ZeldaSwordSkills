@@ -39,7 +39,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;

@@ -20,7 +20,7 @@ package zeldaswordskills.world.crisis;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.StructureGenUtils;
 
 public class OceanBattle extends BossBattle {

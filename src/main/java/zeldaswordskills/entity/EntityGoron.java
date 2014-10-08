@@ -50,7 +50,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.entity.ai.GenericAIDefendVillage;
 import zeldaswordskills.entity.ai.IVillageDefender;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

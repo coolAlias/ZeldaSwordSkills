@@ -28,7 +28,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.block.BlockChestLocked;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.world.gen.structure.RoomBase;
 
 /**

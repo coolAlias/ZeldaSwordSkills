@@ -32,7 +32,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

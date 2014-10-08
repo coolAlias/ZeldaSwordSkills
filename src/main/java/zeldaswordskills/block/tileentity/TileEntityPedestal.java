@@ -28,7 +28,7 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

@@ -43,8 +43,8 @@ import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityFairy;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

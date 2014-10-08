@@ -29,7 +29,7 @@ import org.lwjgl.opengl.GL12;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

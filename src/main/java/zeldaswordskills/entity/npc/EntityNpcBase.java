@@ -37,7 +37,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 
 /**
  * 

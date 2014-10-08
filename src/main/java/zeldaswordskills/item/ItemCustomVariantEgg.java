@@ -30,7 +30,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.CustomEntityList;
 import zeldaswordskills.entity.IEntityVariant;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

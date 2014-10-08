@@ -27,8 +27,8 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.block.ZSSBlocks;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 

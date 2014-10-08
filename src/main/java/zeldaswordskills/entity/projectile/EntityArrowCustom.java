@@ -39,7 +39,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;

@@ -39,7 +39,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 

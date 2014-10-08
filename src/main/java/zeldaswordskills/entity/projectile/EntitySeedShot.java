@@ -30,7 +30,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 public class EntitySeedShot extends EntityMobThrowable

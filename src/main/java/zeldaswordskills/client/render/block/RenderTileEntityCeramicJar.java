@@ -26,7 +26,7 @@ import org.lwjgl.opengl.GL12;
 
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.client.model.ModelCeramicJar;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

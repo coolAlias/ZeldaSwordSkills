@@ -43,7 +43,7 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.MerchantRecipeHelper;

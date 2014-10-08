@@ -23,7 +23,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import zeldaswordskills.block.ZSSBlocks;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 
 public class WorldGenJars extends WorldGenerator {
 

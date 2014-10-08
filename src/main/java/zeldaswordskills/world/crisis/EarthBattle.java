@@ -20,7 +20,7 @@ package zeldaswordskills.world.crisis;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.projectile.EntityBomb;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 
 public class EarthBattle extends BossBattle {
 

@@ -30,8 +30,8 @@ import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.BuffBase;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

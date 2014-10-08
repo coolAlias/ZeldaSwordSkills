@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.entity.RenderBat;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import zeldaswordskills.entity.mobs.EntityKeese;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

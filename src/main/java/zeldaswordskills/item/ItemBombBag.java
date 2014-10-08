@@ -37,7 +37,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBomb;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;

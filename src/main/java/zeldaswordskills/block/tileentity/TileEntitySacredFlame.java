@@ -20,7 +20,7 @@ package zeldaswordskills.block.tileentity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.Constants;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 
 public class TileEntitySacredFlame extends TileEntity
 {

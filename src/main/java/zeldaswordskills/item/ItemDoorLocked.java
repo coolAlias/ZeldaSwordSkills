@@ -30,7 +30,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

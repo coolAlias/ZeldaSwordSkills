@@ -26,7 +26,7 @@ import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.inventory.ContainerPedestal;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

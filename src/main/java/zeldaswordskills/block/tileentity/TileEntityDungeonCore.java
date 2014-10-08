@@ -30,7 +30,7 @@ import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo.Stats;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;

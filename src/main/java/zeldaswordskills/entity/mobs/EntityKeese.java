@@ -51,8 +51,8 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BiomeType;
 
 public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEntityVariant

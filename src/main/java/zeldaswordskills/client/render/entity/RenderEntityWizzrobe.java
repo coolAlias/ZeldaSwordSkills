@@ -36,7 +36,7 @@ import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

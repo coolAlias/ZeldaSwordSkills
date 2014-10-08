@@ -23,8 +23,8 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
 
 /**
  * 

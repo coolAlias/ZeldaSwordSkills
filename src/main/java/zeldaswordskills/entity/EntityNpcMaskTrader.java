@@ -35,7 +35,7 @@ import zeldaswordskills.entity.npc.EntityNpcBase;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;

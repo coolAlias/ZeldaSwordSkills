@@ -29,7 +29,7 @@ import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;

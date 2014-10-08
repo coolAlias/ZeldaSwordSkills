@@ -27,7 +27,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.api.gen.ISeedStructure;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

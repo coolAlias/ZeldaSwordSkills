@@ -24,7 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 
 public enum MagicType {
 	/** Causes fire damage, melts ice, ignites blocks */

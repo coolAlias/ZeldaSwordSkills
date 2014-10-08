@@ -32,7 +32,7 @@ import zeldaswordskills.block.BlockPeg;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
 import zeldaswordskills.util.WorldUtils;

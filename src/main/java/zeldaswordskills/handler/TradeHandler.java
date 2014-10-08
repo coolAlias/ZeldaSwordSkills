@@ -35,7 +35,7 @@ import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import cpw.mods.fml.common.registry.VillagerRegistry;
 import cpw.mods.fml.common.registry.VillagerRegistry.IVillageTradeHandler;
 

@@ -49,9 +49,9 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 

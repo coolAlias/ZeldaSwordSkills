@@ -35,7 +35,7 @@ import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

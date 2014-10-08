@@ -41,7 +41,7 @@ import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.TargetUtils;
 
 public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootable, IEntityVariant

@@ -41,8 +41,8 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 /**

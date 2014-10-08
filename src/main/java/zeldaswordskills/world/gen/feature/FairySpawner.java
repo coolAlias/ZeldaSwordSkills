@@ -32,7 +32,7 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityFairy;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.WorldUtils;
 
 public class FairySpawner

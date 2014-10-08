@@ -31,7 +31,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
