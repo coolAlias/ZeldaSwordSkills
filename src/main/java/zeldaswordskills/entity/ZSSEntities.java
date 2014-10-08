@@ -25,9 +25,26 @@ import net.minecraft.client.model.ModelVillager;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.monster.EntityCaveSpider;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.monster.EntityMagmaCube;
+import net.minecraft.entity.monster.EntityPigZombie;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.monster.EntitySnowman;
+import net.minecraft.entity.monster.EntitySpider;
+import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.client.model.ModelGoron;
 import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.client.render.RenderNothing;
@@ -66,6 +83,8 @@ import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.Config;
+import zeldaswordskills.lib.LibPotionID;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.LogHelper;
@@ -116,6 +135,26 @@ public class ZSSEntities
 					addSpawns(entity, biomes, spawnData);
 				}
 			}
+		}
+
+		// VANILLA LOOTABLE ENTITIES
+		float f = Config.getVanillaWhipLootChance();
+		if (f > 0) {
+			// won't override entries if added elsewhere first, which gives other mods a chance to register special loot for vanilla mobs
+			LootableEntityRegistry.addLootableEntity(EntityBlaze.class, f, new ItemStack(Items.blaze_rod));
+			LootableEntityRegistry.addLootableEntity(EntityCaveSpider.class, f, new ItemStack(Items.spider_eye), new ItemStack(Items.string));
+			LootableEntityRegistry.addLootableEntity(EntityCreeper.class, f, new ItemStack(Items.gunpowder));
+			LootableEntityRegistry.addLootableEntity(EntityEnderman.class, f, new ItemStack(Items.ender_pearl));
+			LootableEntityRegistry.addLootableEntity(EntityGhast.class, f, new ItemStack(Items.ghast_tear), new ItemStack(Items.gunpowder), new ItemStack(Items.gunpowder));
+			LootableEntityRegistry.addLootableEntity(EntityIronGolem.class, f, new ItemStack(Items.iron_ingot));
+			LootableEntityRegistry.addLootableEntity(EntityMagmaCube.class, f, new ItemStack(Items.magma_cream));
+			LootableEntityRegistry.addLootableEntity(EntityPigZombie.class, f, new ItemStack(Items.gold_nugget), new ItemStack(Items.gold_nugget), new ItemStack(Items.gold_ingot));
+			LootableEntityRegistry.addLootableEntity(EntitySkeleton.class, f, new ItemStack(Items.arrow), new ItemStack(Items.bone), new ItemStack(Items.flint));
+			LootableEntityRegistry.addLootableEntity(EntitySlime.class, f, new ItemStack(Items.slime_ball));
+			LootableEntityRegistry.addLootableEntity(EntitySnowman.class, f, new ItemStack(Items.snowball));
+			LootableEntityRegistry.addLootableEntity(EntitySpider.class, f, new ItemStack(Items.spider_eye), new ItemStack(Items.string));
+			LootableEntityRegistry.addLootableEntity(EntityWitch.class, f, new ItemStack(Items.potionitem,1,LibPotionID.HEALING.id), new ItemStack(Items.potionitem,1,LibPotionID.SWIFTNESS.id), new ItemStack(Items.potionitem,1,LibPotionID.FIRERESIST.id), new ItemStack(Items.potionitem,1,LibPotionID.WATER_BREATHING.id));
+			LootableEntityRegistry.addLootableEntity(EntityZombie.class, f, new ItemStack(Items.iron_ingot), new ItemStack(Items.carrot), new ItemStack(Items.potato));
 		}
 	}
 

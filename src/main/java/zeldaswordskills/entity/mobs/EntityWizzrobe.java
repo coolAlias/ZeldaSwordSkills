@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
@@ -34,6 +35,7 @@ import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -41,6 +43,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
+import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.IEntityVariant;
@@ -57,7 +61,7 @@ import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
 
-public class EntityWizzrobe extends EntityMob implements IEntityTeleport, IEntityVariant, IMagicUser
+public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntityTeleport, IEntityVariant, IMagicUser
 {
 	/** Separate Wizzrobe enum to allow more magic types without screwing up Wizzrobe spawn eggs and such */
 	public static enum WizzrobeType {
@@ -463,19 +467,51 @@ public class EntityWizzrobe extends EntityMob implements IEntityTeleport, IEntit
 	protected void fall(float distance) {}
 
 	@Override
-	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
-		int n = rand.nextInt(2 + lootingLevel) + 1;
-		for (int i = 0; i < n; ++i) {
-			entityDropItem(new ItemStack(Items.ender_pearl), 0.0F);
-		}
+	protected Item getDropItem() {
+		return Items.ender_pearl;
 	}
 
 	@Override
 	protected void dropRareDrop(int rarity) {
-		switch(rarity) {
-		case 1: entityDropItem(new ItemStack(ZSSItems.heartPiece), 0.0F); break;
-		default: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal()), 0.0F);
+		entityDropItem(getRareDrop(rarity, 4), 0.0F);
+	}
+
+	/**
+	 * @param rarity	Typically 0 or 1
+	 * @param modifier	Applied to book enchantment level
+	 */
+	private ItemStack getRareDrop(int rarity, int modifier) {
+		if (rarity > 0) {
+			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
 		}
+		if (rand.nextInt(8) == 0) {
+			ItemStack book = new ItemStack(Items.book);
+			EnchantmentHelper.addRandomEnchantment(rand, book, rand.nextInt(8) + rand.nextInt(8) + modifier);
+			return book;
+		}
+		switch(getWizzrobeType()) {
+		case FIRE_WIZ: return new ItemStack(ZSSItems.arrowFire);
+		case ICE_WIZ: return new ItemStack(ZSSItems.arrowIce);
+		default: return new ItemStack(ZSSItems.arrowLight);
+		}
+	}
+
+	@Override
+	public float getLootableChance(EntityPlayer player, WhipType whip) {
+		return 0.2F;
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		if (rand.nextInt(10 - whip.ordinal()) == 0) {
+			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+		}
+		return getRareDrop(0, (3 * (whip.ordinal() + 1)));
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return true;
 	}
 
 	@Override

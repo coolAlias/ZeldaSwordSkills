@@ -30,7 +30,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -41,9 +40,11 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
+import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -85,7 +86,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Drops yellow chu jelly. These are most often found in deserts.
  *
  */
-public class EntityChu extends EntityLiving implements IMob, IEntityVariant
+public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IEntityVariant
 {
 	/** Chuchu types, in order of rarity and strength */
 	public static enum ChuType {
@@ -264,20 +265,14 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	}
 
 	@Override
-	protected Item getDropItem() {
-		return ZSSItems.jellyChu;
-	}
-
-	@Override
 	protected void dropFewItems(boolean recentlyHit, int looting) {
-		Item item = getDropItem();
-		if (item != null && getSize() > 1) {
+		if (getSize() > 1) {
 			int k = rand.nextInt(4) - 2;
 			if (looting > 0) {
 				k += rand.nextInt(looting + 1);
 			}
 			for (int l = 0; l < k; ++l) {
-				entityDropItem(new ItemStack(item, 1, getType().ordinal()), 0.0F);
+				entityDropItem(new ItemStack(ZSSItems.jellyChu, 1, getType().ordinal()), 0.0F);
 			}
 		}
 	}
@@ -288,6 +283,24 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 		case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal()), 0.0F); break;
 		default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 		}
+	}
+
+	@Override
+	public float getLootableChance(EntityPlayer player, WhipType whip) {
+		return 0.2F;
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
+			return new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal());
+		}
+		return new ItemStack(ZSSItems.jellyChu, 1, getType().ordinal());
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return true;
 	}
 
 	@Override

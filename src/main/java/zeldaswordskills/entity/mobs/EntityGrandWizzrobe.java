@@ -20,13 +20,16 @@ package zeldaswordskills.entity.mobs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.IBossDisplayData;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ai.EntityAILevitate;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 
 /**
@@ -141,5 +144,15 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		super.dropFewItems(recentlyHit, lootingLevel);
 		entityDropItem(new ItemStack(ZSSItems.heartPiece), 0.0F);
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return wasItemStolen;
 	}
 }

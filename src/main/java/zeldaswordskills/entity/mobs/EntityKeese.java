@@ -40,9 +40,11 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
+import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -53,7 +55,7 @@ import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BiomeType;
 
-public class EntityKeese extends EntityBat implements IMob, IEntityVariant
+public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEntityVariant
 {
 	/** The different varieties of Keese */
 	public static enum KeeseType {
@@ -244,6 +246,24 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 			default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
+	}
+
+	@Override
+	public float getLootableChance(EntityPlayer player, WhipType whip) {
+		return 0.2F;
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
+			return new ItemStack(ZSSItems.treasure,1, (getType() == KeeseType.CURSED ? Treasures.EVIL_CRYSTAL.ordinal() : Treasures.MONSTER_CLAW.ordinal()));
+		}
+		return new ItemStack(rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart);
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return true;
 	}
 
 	@Override

@@ -33,7 +33,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
@@ -41,7 +43,7 @@ import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.util.TargetUtils;
 
-public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVariant
+public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootable, IEntityVariant
 {
 	/** Squid type data watcher index (skeleton's use 13) */
 	private static final int OCTOROK_TYPE_INDEX = 13;
@@ -352,6 +354,26 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityVarian
 				entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
+	}
+
+	@Override
+	public float getLootableChance(EntityPlayer player, WhipType whip) {
+		return 0.2F;
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
+			return new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal());
+		} else if (getType() == 1 && rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
+			return new ItemStack(ZSSItems.bomb,1,BombType.BOMB_WATER.ordinal());
+		}
+		return new ItemStack(Items.dye, 1, 0);
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return true;
 	}
 
 	@Override
