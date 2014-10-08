@@ -19,7 +19,6 @@ package zeldaswordskills.network;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.packet.AbstractMessageHandler;
 import zeldaswordskills.network.packet.bidirectional.AbstractBiMessageHandler;
 import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
@@ -50,6 +49,8 @@ import zeldaswordskills.network.packet.server.GetBombPacket;
 import zeldaswordskills.network.packet.server.OpenGuiPacket;
 import zeldaswordskills.network.packet.server.RefreshSpinPacket;
 import zeldaswordskills.network.packet.server.TargetIdPacket;
+import zeldaswordskills.network.packet.server.ZeldaSongPacket;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -104,6 +105,7 @@ public class PacketDispatcher
 		registerMessage(OpenGuiPacket.Handler.class, OpenGuiPacket.class);
 		registerMessage(RefreshSpinPacket.Handler.class, RefreshSpinPacket.class);
 		registerMessage(TargetIdPacket.Handler.class, TargetIdPacket.class);
+		registerMessage(ZeldaSongPacket.Handler.class, ZeldaSongPacket.class);
 	}
 
 	/**
