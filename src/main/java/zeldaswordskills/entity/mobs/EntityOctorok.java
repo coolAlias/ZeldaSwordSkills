@@ -41,6 +41,7 @@ import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.Config;
 import zeldaswordskills.util.TargetUtils;
 
 public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootable, IEntityVariant
@@ -374,6 +375,11 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	@Override
 	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
 		return true;
+	}
+
+	@Override
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
+		return Config.getHurtOnSteal();
 	}
 
 	@Override

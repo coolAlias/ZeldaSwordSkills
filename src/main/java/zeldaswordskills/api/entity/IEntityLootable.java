@@ -50,4 +50,11 @@ public interface IEntityLootable {
 	 */
 	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen);
 
+	/**
+	 * Whether the entity should take damage from the whip after having an item stolen
+	 * @param player	The whip-wielding thief that stole an item
+	 * @param whip		Type of whip used to steal the item
+	 */
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip);
+
 }

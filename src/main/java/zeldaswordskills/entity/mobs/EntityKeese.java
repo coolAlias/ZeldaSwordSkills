@@ -267,6 +267,11 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	}
 
 	@Override
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
+		return true;
+	}
+
+	@Override
 	public void onCollideWithPlayer(EntityPlayer player) {
 		if (attackTime == 0 && canEntityBeSeen(player) && getDistanceSqToEntity(player) < 1.5D
 				&& (player.getCurrentArmor(ArmorIndex.WORN_HELM) == null || player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != ZSSItems.maskSkull)

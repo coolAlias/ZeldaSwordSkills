@@ -247,6 +247,8 @@ public class Config
 	private static int vanillaWhipLootChance;
 	/** [Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500] */
 	private static int globalWhipLootChance;
+	/** [Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately) */
+	private static boolean hurtOnSteal;
 	/*================== TRADES =====================*/
 	/** [Bomb Bag] Enable random villager trades for bomb bags */
 	private static boolean enableTradeBombBag;
@@ -388,6 +390,7 @@ public class Config
 		// TODO playerWhipLootChance = config.get("Drops", "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)[0-100]", 15).getInt();
 		vanillaWhipLootChance = config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt();
 		globalWhipLootChance = config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt();
+		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
 		/*================== TRADES =====================*/
 		friendTradesRequired = config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt();
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
@@ -525,6 +528,7 @@ public class Config
 	public static int getPowerDropRate() { return Math.max(powerDropRate, 20); }
 	public static float getVanillaWhipLootChance() { return MathHelper.clamp_float(vanillaWhipLootChance * 0.01F, 0F, 1.0F); }
 	public static float getWhipLootMultiplier() { return MathHelper.clamp_float(globalWhipLootChance * 0.01F, 0F, 5.0F); }
+	public static boolean getHurtOnSteal() { return hurtOnSteal; }
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }

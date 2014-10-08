@@ -515,6 +515,11 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	}
 
 	@Override
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
+		return true;
+	}
+
+	@Override
 	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
 		data = super.onSpawnWithEgg(data);
 		setTypeOnSpawn();

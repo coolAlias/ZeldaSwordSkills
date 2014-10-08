@@ -314,7 +314,7 @@ public class EntityWhip extends EntityThrowable
 				if (getThrower() instanceof EntityPlayer) {
 					EntityPlayer player = (EntityPlayer) getThrower();
 					if (lootTarget(player, target)) {
-						inflictDamage = false;
+						inflictDamage = (target instanceof IEntityLootable ? ((IEntityLootable) target).isHurtOnTheft(player, getType()) : Config.getHurtOnSteal());
 					} else if (target.getHeldItem() != null && ZSSPlayerSkills.get(player).hasSkill(SkillBase.parry)) {
 						float chance = ((Parry) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.parry)).getDisarmChance(player, target);
 						float yaw = (target.rotationYaw - player.rotationYaw);

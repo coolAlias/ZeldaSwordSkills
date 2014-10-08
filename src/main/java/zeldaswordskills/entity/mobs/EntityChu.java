@@ -304,6 +304,11 @@ public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IE
 	}
 
 	@Override
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
+		return Config.getHurtOnSteal();
+	}
+
+	@Override
 	protected String getHurtSound() {
 		return "mob.slime." + (getSize() > 1 ? "big" : "small");
 	}
