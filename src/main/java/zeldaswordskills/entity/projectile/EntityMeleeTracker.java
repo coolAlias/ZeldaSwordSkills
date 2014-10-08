@@ -67,6 +67,11 @@ public class EntityMeleeTracker extends EntityMobThrowable implements IEntityAdd
 		super(world, shooter, target, velocity, wobble);
 	}
 
+	@Override
+	public void setSize(float width, float height) {
+		super.setSize(width, height);
+	}
+
 	/**
 	 * Sets the amount by which this entity is affected by gravity
 	 */
