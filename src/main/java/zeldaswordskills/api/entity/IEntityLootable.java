@@ -43,11 +43,10 @@ public interface IEntityLootable {
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip);
 
 	/**
-	 * Called after the thief has tried to steal an item to determine if
-	 * the entity's stolen item NBT flag should be set.
+	 * Called after each attempt to steal an item from this entity.
 	 * @param player			The thief that stole the item!
 	 * @param wasItemStolen		Whether an item was truly stolen or not
-	 * @return					True to set the NBT flag, preventing any further stealing attempts
+	 * @return					True to prevent any further stealing attempts against this entity
 	 */
 	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen);
 
