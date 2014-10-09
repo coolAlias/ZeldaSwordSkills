@@ -21,133 +21,168 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.block.Block;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.WorldInfo;
 import scala.actors.threadpool.Arrays;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.api.block.ISongBlock;
+import zeldaswordskills.api.entity.ISongEntity;
+import zeldaswordskills.util.SongNote;
 
 public enum ZeldaSong {
-	SONG_OF_TIME("song_time"),
-	ZELDAS_LULLABY("song_lullaby");
+	EPONAS_SONG("epona"),
+	SARIAS_SONG("saria"),
+	SONG_OF_STORMS("storms"),
+	SONG_OF_TIME("time"),
+	SUN_SONG("sun"),
+	ZELDAS_LULLABY("lullaby");
 
-	private final String soundFile;
+	private final String unlocalizedName;
 
-	private ZeldaSong(String soundFile) {
-		this.soundFile = ModInfo.ID + ":" + soundFile;
+	/** Whether the song's main effect is enabled */
+	private boolean isEnabled;
+
+	private ZeldaSong(String unlocalizedName) {
+		this.unlocalizedName = unlocalizedName;
+		this.isEnabled = true;
 	}
 
-	/** Map of key combos used to trigger each song */
-	// Must be client-side only due to KeyBindings, so cannot be initialized here
-	@SideOnly(Side.CLIENT)
-	private static Map<ZeldaSong, List<KeyBinding>> songKeys;
+	@Override
+	public String toString() {
+		return StatCollector.translateToLocal("song.zss." + unlocalizedName + ".name");
+	}
 
-	/**
-	 * Call from ClientProxy during mod startup to initialize the song keys
-	 * @param mc	Pass in Minecraft instance for easy access to vanilla keybindings, if needed
-	 */
-	// i.e. in a ClientProxy method: ZeldaSong.init(Minecraft.getMinecraft());
-	@SideOnly(Side.CLIENT)
-	public static void init(Minecraft mc) {
-		songKeys = new EnumMap<ZeldaSong, List<KeyBinding>>(ZeldaSong.class);
-		// use simple combos at first for testing
-		SONG_OF_TIME.addKeyMapping(mc.gameSettings.keyBindRight, mc.gameSettings.keyBindJump, mc.gameSettings.keyBindBack);
-		ZELDAS_LULLABY.addKeyMapping(mc.gameSettings.keyBindLeft, mc.gameSettings.keyBindForward, mc.gameSettings.keyBindRight);
+	/** Returns the sound file to play for this song */
+	public String getSoundString() {
+		return ModInfo.ID + ":song_" + unlocalizedName;
+	}
+
+	/** Enables or disables this song's main effect, but not notification of {@link ISoundBlock}s */
+	public void setIsEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
+
+	/** Map of notes required to play each song */
+	private static final Map<ZeldaSong, List<SongNote>> melodies = new EnumMap<ZeldaSong, List<SongNote>>(ZeldaSong.class);
+
+	/** Adds all of the notes listed as the required melody for the song */
+	private static void addMelody(ZeldaSong song, SongNote... notes) {
+		melodies.put(song, Arrays.asList(notes));
+	}
+
+	static {
+		addMelody(EPONAS_SONG, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.D2, SongNote.B2, SongNote.A2);
+		addMelody(SARIAS_SONG, SongNote.F1, SongNote.A2, SongNote.B2, SongNote.F1, SongNote.A2, SongNote.B2);
+		addMelody(SONG_OF_STORMS, SongNote.D1, SongNote.F1, SongNote.D2, SongNote.D1, SongNote.F1, SongNote.D2);
+		addMelody(SONG_OF_TIME, SongNote.A2, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D1, SongNote.F1);
+		addMelody(SUN_SONG, SongNote.A2, SongNote.F1, SongNote.D2, SongNote.A2, SongNote.F1, SongNote.D2);
+		addMelody(ZELDAS_LULLABY, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2);
 	}
 
 	/**
-	 * Helper method to more easily add key mappings
+	 * If the notes played make up a valid melody, that song will be returned.
+	 * @return	Null if the notes are not a valid song
 	 */
-	@SideOnly(Side.CLIENT)
-	private void addKeyMapping(KeyBinding... keys) {
-		songKeys.put(this, Arrays.asList(keys));
-	}
-
-	/**
-	 * Returns a song if the keys pressed match, or null if they don't
-	 */
-	@SideOnly(Side.CLIENT)
-	public static ZeldaSong getSongFromKeys(List<KeyBinding> keys) {
+	public static ZeldaSong getSongFromNotes(List<SongNote> notesPlayed) {
 		for (ZeldaSong song : ZeldaSong.values()) {
-			List<KeyBinding> combo = songKeys.get(song);
-			// quick size comparison saves time and is also a 'safety' check
-			if (combo != null && combo.size() == keys.size()) {
-				for (int i = 0; i < keys.size(); ++i) {
-					if (keys.get(i) != combo.get(i)) {
-						break;
-					}
+			List<SongNote> notes = melodies.get(song);
+			if (notes != null && notes.size() == notesPlayed.size()) {
+				boolean isIdentical = true;
+				for (int i = 0; i < notes.size() && isIdentical; ++i) {
+					isIdentical = (notes.get(i) != notesPlayed.get(i));
 				}
-				// made it through the loop without breaking, which means we found our song!
-				return song;
+				if (isIdentical) {
+					return song;
+				}
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Plays the song and performs any effects
+	 * Plays the song and performs any effects; only called on the server
 	 */
 	public void playSong(EntityPlayer player) {
-		if (player.worldObj.isRemote) {
-			// client side style:
-			player.playSound(soundFile, 1.0F, 1.0F);
-			// TODO perform client-side effects, such as adding sparkles...
-		} else {
-			// server side style:
-			player.worldObj.playSoundAtEntity(player, soundFile, 1.0F, 1.0F);
-
-			// perform server-side effects:
+		if (!player.worldObj.isRemote) {
+			player.worldObj.playSoundAtEntity(player, getSoundString(), 1.0F, 1.0F);
+			// notify all ISongBlocks within an 8 block radius (radius could be determined by song?)
+			notifySongBlocks(player.worldObj, player, 8);
+			// notify all ISongEntities within 8 block radius
+			notifySongEntities(player.worldObj, player, 8);
+			if (!isEnabled) {
+				return;
+			}
+			// perform main effect
 			switch(this) {
-			case SONG_OF_TIME:
-				// copied from CommandTime :P
+			case EPONAS_SONG:
+				List<EntityHorse> horses = player.worldObj.getEntitiesWithinAABB(EntityHorse.class, player.boundingBox.expand(8.0D, 4.0D, 8.0D));
+				for (EntityHorse horse : horses) {
+					// TODO check random chance?
+					if (!horse.isTame()) {
+						horse.setTamedBy(player);
+					}
+				}
+				break;
+			case SONG_OF_STORMS:
+				WorldInfo worldinfo = MinecraftServer.getServer().worldServers[0].getWorldInfo();
+				if (worldinfo.isRaining()) {
+					worldinfo.setRainTime(0);
+					worldinfo.setRaining(false);
+				} else {
+					worldinfo.setRainTime(2000);
+					worldinfo.setRaining(true);
+				}
+				if (worldinfo.isThundering()) {
+					worldinfo.setThunderTime(0);
+					worldinfo.setThundering(false);
+				} else {
+					worldinfo.setThunderTime(2000);
+					worldinfo.setThundering(true);
+				}
+				break;
+			case SUN_SONG:
 				for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
 					WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
 					worldserver.setWorldTime(worldserver.getWorldTime() + (long) 12000); // adds half a day
 				}
 				break;
-			case ZELDAS_LULLABY:
-				// TODO activate nearby special blocks
-				break;
+			default: // activating nearby ISongBlocks only, no other effect
 			}
 		}
 	}
 
-	/*
-	// In the GUI
-	/** Stores the key combination pressed
-	private final List<KeyBinding> pressedKeys = new ArrayList<KeyBinding>();
-
-	@Override
-	protected void keyTyped(char c, int key) {
-		// Change to use your own KeyBindings, of course
-		if (key == mc.gameSettings.keyBindForward.getKeyCode()) {
-			pressedKeys.add(mc.gameSettings.keyBindForward);
-		} else if (key == mc.gameSettings.keyBindBack.getKeyCode()) {
-			pressedKeys.add(mc.gameSettings.keyBindBack);
-		} else if (key == mc.gameSettings.keyBindLeft.getKeyCode()) {
-			pressedKeys.add(mc.gameSettings.keyBindLeft);
-		} else if (key == mc.gameSettings.keyBindRight.getKeyCode()) {
-			pressedKeys.add(mc.gameSettings.keyBindRight);
-		} else if (key == mc.gameSettings.keyBindJump.getKeyCode()) {
-			pressedKeys.add(mc.gameSettings.keyBindJump);
-		} else if (key == ??? ) { 
-			pressedKeys.clear(); // clears current song
-		} else {
-			super.keyTyped(c, key);
-		}
-		// Now check if the current list of pressed keys is a valid song
-		ZeldaSongs song = ZeldaSongs.getSongFromKeys(pressedKeys);
-		if (song != null) {
-			// send a packet to the server with the song to play
-			PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
-			// play here if you just want the song to be heard by the player only
-			// or play on the server if everyone should hear it
-			song.play(mc.thePlayer);
+	/**
+	 * Notifies all {@link ISongBlock}s within the given radius of the song played
+	 */
+	private void notifySongBlocks(World world, EntityPlayer player, int radius) {
+		int x = MathHelper.floor_double(player.posX);
+		int y = MathHelper.floor_double(player.boundingBox.minY);
+		int z = MathHelper.floor_double(player.posZ);
+		for (int i = (x - radius); i <= (x + radius); ++i) {
+			for (int j = (y - (radius / 2)); j <= (y + (radius / 2)); ++ j) {
+				for (int k = (z - radius); k <= (z + radius); ++k) {
+					Block block = world.getBlock(i, j, k);
+					if (block instanceof ISongBlock) {
+						((ISongBlock) block).onSongPlayed(world, i, j, k, player, this);
+					}
+				}
+			}
 		}
 	}
 
+	/**
+	 * Notifies all {ISongEntity}s within the given radius of the song played
 	 */
+	private void notifySongEntities(World world, EntityPlayer player, int radius) {
+		List<ISongEntity> entities = world.getEntitiesWithinAABB(ISongEntity.class, player.boundingBox.expand(radius, (double) radius / 2.0D, radius));
+		for (ISongEntity entity : entities) {
+			entity.onSongPlayed(player, this);
+		}
+	}
 }
