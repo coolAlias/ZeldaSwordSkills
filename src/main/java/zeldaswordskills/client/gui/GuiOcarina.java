@@ -22,9 +22,16 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.ResourceLocation;
+
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+
+import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.server.ZeldaSongPacket;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.SongNote.PlayableNote;
@@ -36,14 +43,64 @@ public class GuiOcarina extends GuiScreen
 {
 	private final Minecraft mc;
 
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_ocarina.png");
+
+	/** Note texture height and width */
+	private static final int NOTE_SIZE = 6;
+	
+	/** The X size of the window in pixels */
+	private int xSize = 176;
+
+	/** The Y size of the window in pixels */
+	private int ySize = 90;
+
+	/** Full width of texture file, in pixels */
+	private int fullX = 200;
+	
+	/** Full height of texture file, in pixels */
+	private int fullY = 100;
+
+	/** Starting X position for the Gui */
+	private int guiLeft;
+
+	/** Starting Y position for the Gui */
+	private int guiTop;
+
 	/** Stores the notes played so far */
 	private final List<SongNote> melody = new ArrayList<SongNote>();
+
+	/** Currently playing song, if any */
+	private ZeldaSong song;
 
 	/** Number of ticks since last note played; after a certain threshold, current melody clears */
 	private int ticksSinceLastNote;
 
 	public GuiOcarina() {
 		mc = Minecraft.getMinecraft();
+	}
+
+	@Override
+	public void initGui() {
+		super.initGui();
+		guiLeft = (width - xSize) / 2;
+		guiTop = (height - ySize) / 2; // TODO adjust downward on screen
+	}
+
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float f) {
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		mc.getTextureManager().bindTexture(texture);
+		RenderHelperQ.drawTexturedRect(guiLeft, guiTop + 50, 0, 0, xSize, ySize, fullX, fullY);
+		//drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+		for (int i = 0; i < melody.size(); ++i) {
+			SongNote note = melody.get(i);
+			// increasing y moves further down the screen, so last note is highest
+			int dy = NOTE_SIZE * (SongNote.values().length - note.ordinal());
+			int dx = 4 + (NOTE_SIZE + 4) * i;
+			// assuming note textures are vertically aligned on the right side of the texture
+			RenderHelperQ.drawTexturedRect(guiLeft + dx, guiTop + dy, xSize, 0, NOTE_SIZE, NOTE_SIZE, fullX, fullY);
+		}
+		super.drawScreen(mouseX, mouseY, f);
 	}
 
 	@Override
@@ -57,6 +114,11 @@ public class GuiOcarina extends GuiScreen
 
 	@Override
 	protected void keyTyped(char c, int key) {
+		// don't let more notes be added while a song is playing
+		if (song != null) {
+			super.keyTyped(c, key);
+			return;
+		}
 		PlayableNote playedNote = null;
 		// Change to use your own KeyBindings, of course
 		if (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].getKeyCode()) {
@@ -77,15 +139,15 @@ public class GuiOcarina extends GuiScreen
 		} else {
 			int modifier = 0;
 			// Half-step modifier keys
-			if (mc.gameSettings.keyBindSprint.getIsKeyPressed()) {
+			if (Keyboard.isKeyDown(mc.gameSettings.keyBindSprint.getKeyCode())) {
 				++modifier;
-			} else if (mc.gameSettings.keyBindSneak.getIsKeyPressed()) {
+			} else if (Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode())) {
 				--modifier;
 			}
 			// Whole step modifier keys are in addition to half-step modifiers
-			if (mc.gameSettings.keyBindForward.getIsKeyPressed()) {
+			if (Keyboard.isKeyDown(mc.gameSettings.keyBindForward.getKeyCode())) {
 				modifier += 2;
-			} else if (mc.gameSettings.keyBindBack.getIsKeyPressed()) {
+			} else if (Keyboard.isKeyDown(mc.gameSettings.keyBindBack.getKeyCode())) {
 				modifier -= 2;
 			}
 
@@ -95,7 +157,7 @@ public class GuiOcarina extends GuiScreen
 				ticksSinceLastNote = 0;
 				// play note on client side:
 				mc.thePlayer.playSound(note.getSoundString(), 1.0F, 1.0F);
-				ZeldaSong song = ZeldaSong.getSongFromNotes(melody);
+				song = ZeldaSong.getSongFromNotes(melody);
 				if (song != null) {
 					// TODO close Gui ???
 					PacketDispatcher.sendToServer(new ZeldaSongPacket(song));

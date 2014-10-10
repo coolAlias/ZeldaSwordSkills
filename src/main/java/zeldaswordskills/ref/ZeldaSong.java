@@ -91,11 +91,11 @@ public enum ZeldaSong {
 	 */
 	public static ZeldaSong getSongFromNotes(List<SongNote> notesPlayed) {
 		for (ZeldaSong song : ZeldaSong.values()) {
-			List<SongNote> notes = melodies.get(song);
-			if (notes != null && notes.size() == notesPlayed.size()) {
+			List<SongNote> melody = melodies.get(song);
+			if (melody != null && melody.size() == notesPlayed.size()) {
 				boolean isIdentical = true;
-				for (int i = 0; i < notes.size() && isIdentical; ++i) {
-					isIdentical = (notes.get(i) != notesPlayed.get(i));
+				for (int i = 0; i < melody.size() && isIdentical; ++i) {
+					isIdentical = (melody.get(i) == notesPlayed.get(i));
 				}
 				if (isIdentical) {
 					return song;
