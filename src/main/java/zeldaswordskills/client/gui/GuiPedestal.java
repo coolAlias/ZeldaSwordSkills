@@ -33,7 +33,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiPedestal extends GuiContainer
 {
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/gui/gui_pedestal.png");
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_pedestal.png");
 
 	private final TileEntityPedestal pedestal;
 

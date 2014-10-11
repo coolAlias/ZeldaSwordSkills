@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiMaskTrader extends GuiContainer
 {
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/gui/gui_mask_trader.png");
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_mask_trader.png");
 
 	private GuiButton borrow;
 
