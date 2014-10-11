@@ -53,7 +53,9 @@ public enum SongNote
 	G2(Note.G, Pitch.NATURAL),
 	G2_SHARP(Note.G, Pitch.SHARP);
 
+	/** The corresponding musical note, e.g. C, G, etc. */
 	public final Note note;
+	/** The pitch of the note, i.e. flat, sharp, or natural */
 	public final Pitch pitch;
 
 	private SongNote(Note note, Pitch pitch) {
@@ -73,6 +75,14 @@ public enum SongNote
 	 */
 	public int getOctave() {
 		return ((ordinal() - 1) / 12) + 1;
+	}
+
+	public boolean isFlat() {
+		return pitch == Pitch.FLAT;
+	}
+
+	public boolean isSharp() {
+		return pitch == Pitch.SHARP;
 	}
 
 	/** Returns the name of the sound file to play for this note */
