@@ -118,7 +118,13 @@ public class RenderHelperQ {
 		tessellator.draw();
 	}
 
-	/** Draws textured rectangle for texture already bound to Minecraft render engine */
+	/**
+	 * Draws textured rectangle for texture already bound to Minecraft render engine
+	 * @param x				Starting x position on the screen at which to draw
+	 * @param u				Starting x position in the texture file from which to draw
+	 * @param width			Width of the section of texture to draw
+	 * @param imageWidth	Full width of the texture file
+	 */
 	public static void drawTexturedRect(double x, double y, int u, int v, int width, int height, int imageWidth, int imageHeight) {
 		drawTexturedRect(x, y, u, v, width, height, imageWidth, imageHeight, 1);
 	}
