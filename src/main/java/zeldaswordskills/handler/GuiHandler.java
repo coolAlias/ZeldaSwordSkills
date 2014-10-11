@@ -22,6 +22,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.client.gui.GuiMaskTrader;
+import zeldaswordskills.client.gui.GuiOcarina;
 import zeldaswordskills.client.gui.GuiPedestal;
 import zeldaswordskills.client.gui.GuiSkills;
 import zeldaswordskills.inventory.ContainerMaskTrader;
@@ -31,13 +32,13 @@ import cpw.mods.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler
 {
-	public static final int GUI_PEDESTAL = 0, GUI_MASK_TRADER = 1, GUI_SKILLS = 2;
+	public static final int GUI_PEDESTAL = 0, GUI_MASK_TRADER = 1, GUI_SKILLS = 2, GUI_OCARINA = 3;
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-		TileEntity te = world.getTileEntity(x, y, z);
 		switch(id) {
 		case GUI_PEDESTAL:
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				return new ContainerPedestal(player.inventory, (TileEntityPedestal) te);
 			}
@@ -46,15 +47,17 @@ public class GuiHandler implements IGuiHandler
 			return new ContainerMaskTrader();
 		case GUI_SKILLS:
 			return new ContainerSkills(player);
+		case GUI_OCARINA:
+			return null; // client-side only gui
 		}
 		return null;
 	}
 
 	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-		TileEntity te = world.getTileEntity(x, y, z);
 		switch(id) {
 		case GUI_PEDESTAL:
+			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				return new GuiPedestal(player.inventory, (TileEntityPedestal) te);
 			}
@@ -63,8 +66,9 @@ public class GuiHandler implements IGuiHandler
 			return new GuiMaskTrader();
 		case GUI_SKILLS:
 			return new GuiSkills(player);
+		case GUI_OCARINA:
+			return new GuiOcarina();
 		}
 		return null;
 	}
-
 }
