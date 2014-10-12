@@ -89,6 +89,7 @@ public class Sounds {
 	public static final String SECRET_MEDLEY = ModInfo.ID + ":secret_medley";
 	public static final String SPECIAL_DROP = ModInfo.ID + ":special_drop";
 	public static final String SUCCESS = ModInfo.ID + ":success";
+	public static final String SUCCESS_MAGIC = ModInfo.ID + ":success_magic";
 
 	// SWORD SKILL SOUNDS
 	public static final String ARMOR_BREAK = ModInfo.ID + ":armorbreak";

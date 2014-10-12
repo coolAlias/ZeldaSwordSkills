@@ -33,7 +33,9 @@ public interface ISongBlock {
 	 * Note that it is only called on the server side.
 	 * @param player	Player who played the song
 	 * @param song		Song that was played
+	 * @param affected	Number of blocks already affected by the song
+	 * @return			True if the block was affected
 	 */
-	public void onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song);
+	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int affected);
 
 }

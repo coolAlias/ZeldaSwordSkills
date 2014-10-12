@@ -37,7 +37,7 @@ import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.MerchantRecipeHelper;
 
 /**

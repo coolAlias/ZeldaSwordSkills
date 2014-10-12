@@ -17,7 +17,6 @@
 
 package zeldaswordskills.util;
 
-import zeldaswordskills.ref.ModInfo;
 
 /**
  * 
@@ -85,11 +84,6 @@ public enum SongNote
 		return pitch == Pitch.SHARP;
 	}
 
-	/** Returns the name of the sound file to play for this note */
-	public String getSoundString() {
-		return ModInfo.ID + ":songnote" + ordinal();
-	}
-
 	/**
 	 * Returns a SongNote from a PlayableNote and a modifier
 	 * @param note		Any {@link PlayableNote}
@@ -122,6 +116,20 @@ public enum SongNote
 		@Override
 		public String toString() {
 			return this.name();
+		}
+
+		/**
+		 * Returns the ordinal position of PlayableNote corresponding to the note,
+		 * or PlayableNote.values().length if the note is not a PlayableNote.
+		 * Used for getting the texture y position.
+		 */
+		public static int getOrdinalFromNote(SongNote note) {
+			for (PlayableNote playable : PlayableNote.values()) {
+				if (playable.note == note) {
+					return playable.ordinal();
+				}
+			}
+			return PlayableNote.values().length;
 		}
 	}
 

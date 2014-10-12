@@ -24,6 +24,7 @@ import zeldaswordskills.network.packet.bidirectional.AbstractBiMessageHandler;
 import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.packet.bidirectional.AttackTimePacket;
 import zeldaswordskills.network.packet.bidirectional.DeactivateSkillPacket;
+import zeldaswordskills.network.packet.bidirectional.PlayRecordPacket;
 import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
 import zeldaswordskills.network.packet.client.AbstractClientMessageHandler;
 import zeldaswordskills.network.packet.client.AttackBlockedPacket;
@@ -73,6 +74,7 @@ public class PacketDispatcher
 	 */
 	public static final void initialize() {
 		// Bi-directional packets (with side-specific handlers)
+		registerMessage(PlayRecordPacket.Handler.class, PlayRecordPacket.class);
 		registerMessage(PlaySoundPacket.Handler.class, PlaySoundPacket.class);
 
 		// Bi-directional packets using standard IMessageHandler implementation (handled identically on both sides)
@@ -115,7 +117,7 @@ public class PacketDispatcher
 	private static final <REQ extends IMessage, REPLY extends IMessage> void registerMessage(Class<? extends IMessageHandler<REQ, REPLY>> handlerClass, Class<REQ> messageClass, Side side) {
 		PacketDispatcher.dispatcher.registerMessage(handlerClass, messageClass, packetId++, side);
 	}
-	
+
 	/**
 	 * Registers a message and message handler on both sides; used mainly
 	 * for standard IMessage + IMessageHandler implementations and ideal

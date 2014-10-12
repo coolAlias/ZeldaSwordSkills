@@ -41,5 +41,21 @@
     "master_sword": {"category": "ambient","sounds":["special/master_sword"]},
     "secret_medley": {"category": "ambient","sounds":["special/secret_medley"]},
     "special_drop": {"category": "player","sounds":["special/special_drop"]},
-    "success": {"category": "player","sounds":["special/success"]}
+    "success": {"category": "player","sounds":["special/success"]},
+    "success_magic": {"category": "player","sounds":["special/success_magic"]},
+    "note.ocarina": {"category": "player","sounds":["note/ocarina"]},
+    "song.bolero": {"category": "record","sounds": [{"name": "song/bolero","stream": true}]},
+    "song.epona": {"category": "record","sounds": [{"name": "song/epona","stream": true}]},
+    "song.healing": {"category": "record","sounds": [{"name": "song/healing","stream": true}]},
+    "song.lullaby": {"category": "record","sounds": [{"name": "song/lullaby","stream": true}]},
+    "song.minuet": {"category": "record","sounds": [{"name": "song/minuet","stream": true}]},
+    "song.nocturne": {"category": "record","sounds": [{"name": "song/nocturne","stream": true}]},
+    "song.prelude": {"category": "record","sounds": [{"name": "song/prelude","stream": true}]},
+    "song.requiem": {"category": "record","sounds": [{"name": "song/requiem","stream": true}]},
+    "song.saria": {"category": "record","sounds": [{"name": "song/saria","stream": true}]},
+    "song.scarecrow": {"category": "record","sounds": [{"name": "song/scarecrow","stream": true}]},
+    "song.serenade": {"category": "record","sounds": [{"name": "song/serenade","stream": true}]},
+    "song.storms": {"category": "record","sounds": [{"name": "song/storms","stream": true}]},
+    "song.sun": {"category": "record","sounds": [{"name": "song/sun","stream": true}]},
+    "song.time": {"category": "record","sounds": [{"name": "song/time","stream": true}]}
 }

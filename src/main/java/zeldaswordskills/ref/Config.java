@@ -172,6 +172,9 @@ public class Config
 	private static int disarmPenalty;
 	/** [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
 	private static boolean requireFullHealth;
+	/*================== SONGS =====================*/
+	/** Number of ticks allowed between notes before played notes are cleared [5-100] */
+	private static int resetNotesInterval;
 	/*================== DUNGEON GEN =====================*/
 	/** Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected */
 	private static boolean avoidModBlocks;
@@ -344,6 +347,7 @@ public class Config
 		disarmPenalty = config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		/*================== SONGS =====================*/
+		resetNotesInterval = config.get("Songs", "Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt();
 		for (ZeldaSong song : ZeldaSong.values()) {
 			if (!config.get("Songs", "Whether " + song.toString() + "'s main effect is enabled (does not affect notification of Song Blocks)", true).getBoolean(true)) {
 				song.setIsEnabled(false);
@@ -490,6 +494,8 @@ public class Config
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
 	}
+	/*================== SONGS =====================*/
+	public static int getNoteResetInterval() { return MathHelper.clamp_int(resetNotesInterval, 5, 100); }
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }

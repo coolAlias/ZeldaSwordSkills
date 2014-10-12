@@ -114,7 +114,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 				cost = handleNayru(stack, world, player);
 			} else {
 				player.setItemInUse(stack, getMaxItemUseDuration(stack));
-				String sound = (spiritType == BlockSacredFlame.DIN ? Sounds.SUCCESS : Sounds.FLAME_ABSORB);
+				String sound = (spiritType == BlockSacredFlame.DIN ? Sounds.SUCCESS_MAGIC : Sounds.FLAME_ABSORB);
 				player.playSound(sound, 1.0F, 1.0F);
 			}
 
@@ -159,7 +159,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 			if (spiritType == type) {
 				int originalDamage = stack.getItemDamage();
 				stack.setItemDamage(0);
-				world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
+				world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 				return (world.rand.nextInt(stack.getMaxDamage()) < originalDamage);
 			} else {
 				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.mismatch"));
@@ -318,7 +318,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 			if (coordinates != null) {
 				if (getDimension(stack) == player.worldObj.provider.dimensionId) {
 					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
-					player.playSound(Sounds.SUCCESS, 1.0F, 1.0F);
+					player.playSound(Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 					return costToUse;
 				} else {
 					player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
@@ -344,7 +344,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	private int handleNayru(ItemStack stack, World world, EntityPlayer player) {
 		if (canUse(stack)) {
 			ZSSPlayerInfo.get(player).activateNayru();
-			world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
+			world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 			return costToUse;
 		}
 		return 0;
@@ -359,7 +359,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		stack.getTagCompound().setDouble("zssFWposX", player.posX);
 		stack.getTagCompound().setDouble("zssFWposY", player.posY);
 		stack.getTagCompound().setDouble("zssFWposZ", player.posZ);
-		world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
+		world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 	}
 
 	/**

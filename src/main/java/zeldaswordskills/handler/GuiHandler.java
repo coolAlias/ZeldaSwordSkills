@@ -67,7 +67,7 @@ public class GuiHandler implements IGuiHandler
 		case GUI_SKILLS:
 			return new GuiSkills(player);
 		case GUI_OCARINA:
-			return new GuiOcarina();
+			return new GuiOcarina(x, y, z);
 		}
 		return null;
 	}

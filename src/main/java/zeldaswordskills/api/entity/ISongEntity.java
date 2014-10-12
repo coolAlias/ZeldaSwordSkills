@@ -32,7 +32,9 @@ public interface ISongEntity {
 	 * Note that it is only called on the server side.
 	 * @param player	Player who played the song
 	 * @param song		Song that was played
+	 * @param affected	Number of entities already affected by the song
+	 * @return			True if the entity was affected
 	 */
-	public void onSongPlayed(EntityPlayer player, ZeldaSong song);
+	public boolean onSongPlayed(EntityPlayer player, ZeldaSong song, int affected);
 
 }

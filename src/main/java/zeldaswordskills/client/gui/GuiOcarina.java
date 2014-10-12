@@ -23,6 +23,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -30,8 +31,11 @@ import org.lwjgl.opengl.GL11;
 import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.PlayRecordPacket;
 import zeldaswordskills.network.packet.server.ZeldaSongPacket;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.SongNote.PlayableNote;
@@ -45,12 +49,15 @@ public class GuiOcarina extends GuiScreen
 
 	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_ocarina.png");
 
+	/** Maximum number of notes that can display on the GUI at any given time */
+	private static final int MAX_NOTES = 8;
+
 	/** Note texture height and width */
 	private static final int NOTE_SIZE = 12;
 
 	/** Y interval between lines */
 	private static final int INT_Y = 5;
-	
+
 	/** The X size of the window in pixels */
 	private int xSize = 213;
 
@@ -59,7 +66,7 @@ public class GuiOcarina extends GuiScreen
 
 	/** Full width of texture file, in pixels */
 	private int fullX = 256;
-	
+
 	/** Full height of texture file, in pixels */
 	private int fullY = 128;
 
@@ -78,15 +85,21 @@ public class GuiOcarina extends GuiScreen
 	/** Number of ticks since last note played; after a certain threshold, current melody clears */
 	private int ticksSinceLastNote;
 
-	public GuiOcarina() {
+	/** Location of the player when the gui is opened, makes it easier to handle sounds */
+	private int x, y, z;
+
+	public GuiOcarina(int x, int y, int z) {
 		mc = Minecraft.getMinecraft();
+		this.x = x;
+		this.y = y;
+		this.z = z;
 	}
 
 	@Override
 	public void initGui() {
 		super.initGui();
 		guiLeft = (width - xSize) / 2;
-		guiTop = (height - ySize) / 2; // TODO adjust downward on screen
+		guiTop = (height - ySize) / 2 + 50;
 	}
 
 	@Override
@@ -98,38 +111,62 @@ public class GuiOcarina extends GuiScreen
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.getTextureManager().bindTexture(texture);
-		RenderHelperQ.drawTexturedRect(guiLeft, guiTop + 50, 0, 0, xSize, ySize, fullX, fullY);
-		//drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-		for (int i = 0; i < melody.size(); ++i) {
-			SongNote note = melody.get(i);
+		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+		GL11.glDisable(GL11.GL_LIGHTING);
+		GL11.glEnable(GL11.GL_ALPHA_TEST);
+		GL11.glEnable(GL11.GL_BLEND);
+		RenderHelperQ.drawTexturedRect(guiLeft, guiTop, 0, 0, xSize, ySize, fullX, fullY);
+		GL11.glPopAttrib();
+		int i1 = (melody.size() > MAX_NOTES ? ((melody.size() - 1) / MAX_NOTES) * MAX_NOTES : 0);
+		for (int i = 0; (i + i1) < melody.size(); ++i) {
+			SongNote note = melody.get(i + i1);
 			// j is factor of how far down the screen note should be drawn
 			int j = SongNote.Note.values().length - (note.note.ordinal() + 1) + (SongNote.Note.values().length * (2 - note.getOctave()));
-			int dy = 56 + (INT_Y * j);
-			int dx = 18 + (NOTE_SIZE + 3) * i;
+			int dy = 6 + (INT_Y * j);
+			int dx = 40 + (NOTE_SIZE + 8) * i;
 			// draw supplementary line(s) under staff and behind note
 			if (j > 10) { // j goes from 0-13, not 1-14
-				int dy2 = (60 + INT_Y * 11);
+				int dy2 = (10 + INT_Y * 11);
 				// given the control scheme, this loop is not really necessary as it's not possible to reach the low A note
 				for (int n = 0; n < ((j - 9) / 2); ++n) {
 					// each line segment is 16x5 pixels, using first line in .png file at 8,15
 					RenderHelperQ.drawTexturedRect(guiLeft + (dx - 2), guiTop + dy2 + (n * 2 * INT_Y), 8, 15, 16, 5, fullX, fullY);
 				}
 			}
-			RenderHelperQ.drawTexturedRect(guiLeft + dx, guiTop + dy, xSize, 0, NOTE_SIZE, NOTE_SIZE, fullX, fullY);
+			RenderHelperQ.drawTexturedRect(guiLeft + dx, guiTop + dy, xSize, PlayableNote.getOrdinalFromNote(note) * NOTE_SIZE, NOTE_SIZE, NOTE_SIZE, fullX, fullY);
 			// draw additional sharp / flat if applicable
 			if (note.isSharp() || note.isFlat()) {
 				RenderHelperQ.drawTexturedRect(guiLeft + dx + NOTE_SIZE - 2, guiTop + dy, xSize + NOTE_SIZE, (note.isSharp() ? 0 : 5), 5, 5, fullX, fullY);
 			}
+		}
+		if (song != null) {
+			String s = song.toString();
+			fontRendererObj.drawString(s, guiLeft + (xSize / 2) - (fontRendererObj.getStringWidth(s) / 2), guiTop + 3, 0xFFFFFF);
 		}
 		super.drawScreen(mouseX, mouseY, f);
 	}
 
 	@Override
 	public void updateScreen() {
-		// how long until it clears? should it be configurable?
-		if (++ticksSinceLastNote > 30) {
+		++ticksSinceLastNote;
+		if (song != null) {
+			if (ticksSinceLastNote > song.getMinDuration()) {
+				mc.thePlayer.closeScreen();
+			}
+		} else if (ticksSinceLastNote > Config.getNoteResetInterval()) {
 			ticksSinceLastNote = 0;
 			melody.clear();
+		}
+	}
+
+	@Override
+	public void onGuiClosed() {
+		if (song != null) {
+			if (ticksSinceLastNote > song.getMinDuration()) {
+				PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
+			} else {
+				PacketDispatcher.sendToServer(new PlayRecordPacket(null, x, y, z));
+			}
 		}
 	}
 
@@ -177,11 +214,18 @@ public class GuiOcarina extends GuiScreen
 				melody.add(note);
 				ticksSinceLastNote = 0;
 				// play note on client side:
-				mc.thePlayer.playSound(note.getSoundString(), 1.0F, 1.0F);
+				float f = (float) Math.pow(2.0D, (double)(note.ordinal() - 12) / 12.0D);
+				mc.thePlayer.playSound(ModInfo.ID + ":note.ocarina", 3.0F, f);
+				Vec3 look = mc.thePlayer.getLookVec();
+				mc.theWorld.spawnParticle("note",
+						mc.thePlayer.posX + look.xCoord + mc.theWorld.rand.nextDouble() - 0.5D,
+						mc.thePlayer.posY + mc.thePlayer.getEyeHeight() + mc.theWorld.rand.nextDouble() - 0.5D,
+						mc.thePlayer.posZ + look.zCoord + mc.theWorld.rand.nextDouble() - 0.5D,
+						(double) note.ordinal() / 24.0D, 0.0D, 0.0D);
 				song = ZeldaSong.getSongFromNotes(melody);
 				if (song != null) {
-					// TODO close Gui ???
-					PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
+					mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
+					PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
 				}
 			}
 		}

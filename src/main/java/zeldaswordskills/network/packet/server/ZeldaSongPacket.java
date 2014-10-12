@@ -23,6 +23,12 @@ import zeldaswordskills.ref.ZeldaSong;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
+/**
+ * 
+ * Sent to the server after a song has successfully completed playing to
+ * perform the actual effects of the song.
+ *
+ */
 public class ZeldaSongPacket implements IMessage
 {
 	private ZeldaSong song;
@@ -46,13 +52,7 @@ public class ZeldaSongPacket implements IMessage
 	public static class Handler extends AbstractServerMessageHandler<ZeldaSongPacket> {
 		@Override
 		public IMessage handleServerMessage(EntityPlayer player, ZeldaSongPacket message, MessageContext ctx) {
-			// make sure player is holding an instrument to play a song
-			// maybe also check if the GUI is open or not
-			// ItemStack held = player.getHeldItem();
-			//if (held != null && held.getItem() instanceof ItemInstrument) {
-			// maybe do something with the instrument here
-			message.song.playSong(player);
-			//}
+			message.song.performSongEffects(player);
 			return null;
 		}
 	}

@@ -144,7 +144,7 @@ public class BlockSacredFlame extends BlockContainer
 				int n = stack.stackSize;
 				player.setCurrentItemOrArmor(0, new ItemStack(meta == DIN ? ZSSItems.arrowFire :
 					meta == NAYRU ? ZSSItems.arrowIce : ZSSItems.arrowLight, n));
-				world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
+				world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 				if (Config.getArrowsConsumeFlame() && world.rand.nextInt(80) < n) {
 					extinguishFlame(world, x, y, z);
 				}

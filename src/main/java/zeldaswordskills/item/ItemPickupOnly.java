@@ -54,7 +54,7 @@ public class ItemPickupOnly extends Item implements IHandlePickup, IUnenchantabl
 				return false;
 			}
 		} else if (this == ZSSItems.powerPiece) {
-			PlayerUtils.playSound(player, Sounds.SUCCESS, 0.6F, 1.0F);
+			PlayerUtils.playSound(player, Sounds.SUCCESS_MAGIC, 0.6F, 1.0F);
 			ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_UP, 600, 100);
 			ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_UP, 600, 25);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, 600, 25);

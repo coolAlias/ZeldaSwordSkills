@@ -17,72 +17,77 @@
 
 package zeldaswordskills.ref;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
-import scala.actors.threadpool.Arrays;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.api.entity.ISongEntity;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 
 public enum ZeldaSong {
-	EPONAS_SONG("epona"),
-	SARIAS_SONG("saria"),
-	SONG_OF_STORMS("storms"),
-	SONG_OF_TIME("time"),
-	SUN_SONG("sun"),
-	ZELDAS_LULLABY("lullaby");
+	ZELDAS_LULLABY("lullaby", 100, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2),
+	TIME_SONG("time", 100, SongNote.A2, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D1, SongNote.F1),
+	EPONAS_SONG("epona", 100, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.D2, SongNote.B2, SongNote.A2),
+	STORMS_SONG("storms", 100, SongNote.D1, SongNote.F1, SongNote.D2, SongNote.D1, SongNote.F1, SongNote.D2),
+	SUN_SONG("sun", 100, SongNote.A2, SongNote.F1, SongNote.D2, SongNote.A2, SongNote.F1, SongNote.D2),
+	SARIAS_SONG("saria", 100, SongNote.F1, SongNote.A2, SongNote.B2, SongNote.F1, SongNote.A2, SongNote.B2),
+	SCARECROW_SONG("scarecrow", 100), // user-defined song?
+	FOREST_MINUET("minuet", 100, SongNote.D1, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.B2, SongNote.A2),
+	FIRE_BOLERO("bolero", 100, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.A2, SongNote.F1),
+	WATER_SERENADE("serenade", 100, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.A2, SongNote.B2),
+	SPIRIT_REQUIEM("requiem", 100, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1),
+	SHADOW_NOCTURNE("nocturne", 100, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
+	LIGHT_PRELUDE("prelude", 100, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
+	HEALING_SONG("healing", 100, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1);
 
 	private final String unlocalizedName;
+
+	/** Minimum duration song required to play before any effect occurs, in ticks */
+	private final int minDuration;
+
+	/** Notes required to play the song */
+	private final SongNote[] notes;
 
 	/** Whether the song's main effect is enabled */
 	private boolean isEnabled;
 
-	private ZeldaSong(String unlocalizedName) {
+	private ZeldaSong(String unlocalizedName, int minDuration, SongNote... notes) {
 		this.unlocalizedName = unlocalizedName;
+		this.minDuration = minDuration;
+		this.notes = notes;
 		this.isEnabled = true;
 	}
 
+	/** Returns the translated name of this song */
 	@Override
 	public String toString() {
 		return StatCollector.translateToLocal("song.zss." + unlocalizedName + ".name");
 	}
 
+	/** Returns the minimum number of ticks the song must be allowed to play before any effects will occur */
+	public int getMinDuration() {
+		return minDuration;
+	}
+
 	/** Returns the sound file to play for this song */
 	public String getSoundString() {
-		return ModInfo.ID + ":song_" + unlocalizedName;
+		return ModInfo.ID + ":song." + unlocalizedName;
 	}
 
 	/** Enables or disables this song's main effect, but not notification of {@link ISoundBlock}s */
 	public void setIsEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
-	}
-
-	/** Map of notes required to play each song */
-	private static final Map<ZeldaSong, List<SongNote>> melodies = new EnumMap<ZeldaSong, List<SongNote>>(ZeldaSong.class);
-
-	/** Adds all of the notes listed as the required melody for the song */
-	private static void addMelody(ZeldaSong song, SongNote... notes) {
-		melodies.put(song, Arrays.asList(notes));
-	}
-
-	static {
-		addMelody(EPONAS_SONG, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.D2, SongNote.B2, SongNote.A2);
-		addMelody(SARIAS_SONG, SongNote.F1, SongNote.A2, SongNote.B2, SongNote.F1, SongNote.A2, SongNote.B2);
-		addMelody(SONG_OF_STORMS, SongNote.D1, SongNote.F1, SongNote.D2, SongNote.D1, SongNote.F1, SongNote.D2);
-		addMelody(SONG_OF_TIME, SongNote.A2, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D1, SongNote.F1);
-		addMelody(SUN_SONG, SongNote.A2, SongNote.F1, SongNote.D2, SongNote.A2, SongNote.F1, SongNote.D2);
-		addMelody(ZELDAS_LULLABY, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2);
 	}
 
 	/**
@@ -91,11 +96,11 @@ public enum ZeldaSong {
 	 */
 	public static ZeldaSong getSongFromNotes(List<SongNote> notesPlayed) {
 		for (ZeldaSong song : ZeldaSong.values()) {
-			List<SongNote> melody = melodies.get(song);
-			if (melody != null && melody.size() == notesPlayed.size()) {
+			// TODO special case for Scarecrow Song? Would then need a player instance
+			if (song.notes != null && song.notes.length == notesPlayed.size()) {
 				boolean isIdentical = true;
-				for (int i = 0; i < melody.size() && isIdentical; ++i) {
-					isIdentical = (melody.get(i) == notesPlayed.get(i));
+				for (int i = 0; i < song.notes.length && isIdentical; ++i) {
+					isIdentical = (song.notes[i] == notesPlayed.get(i));
 				}
 				if (isIdentical) {
 					return song;
@@ -106,16 +111,16 @@ public enum ZeldaSong {
 	}
 
 	/**
-	 * Plays the song and performs any effects; only called on the server
+	 * Performs any effects of the song when played; only called on the server
 	 */
-	public void playSong(EntityPlayer player) {
+	public void performSongEffects(EntityPlayer player) {
 		if (!player.worldObj.isRemote) {
-			player.worldObj.playSoundAtEntity(player, getSoundString(), 1.0F, 1.0F);
 			// notify all ISongBlocks within an 8 block radius (radius could be determined by song?)
 			notifySongBlocks(player.worldObj, player, 8);
 			// notify all ISongEntities within 8 block radius
 			notifySongEntities(player.worldObj, player, 8);
 			if (!isEnabled) {
+				PlayerUtils.sendChat(player, "This song's main effect has been disabled.");
 				return;
 			}
 			// perform main effect
@@ -126,24 +131,33 @@ public enum ZeldaSong {
 					// TODO check random chance?
 					if (!horse.isTame()) {
 						horse.setTamedBy(player);
+						// flag for heart particles
+						player.worldObj.setEntityState(horse, (byte) 18);
 					}
 				}
 				break;
-			case SONG_OF_STORMS:
-				WorldInfo worldinfo = MinecraftServer.getServer().worldServers[0].getWorldInfo();
-				if (worldinfo.isRaining()) {
-					worldinfo.setRainTime(0);
-					worldinfo.setRaining(false);
-				} else {
-					worldinfo.setRainTime(2000);
-					worldinfo.setRaining(true);
-				}
-				if (worldinfo.isThundering()) {
-					worldinfo.setThunderTime(0);
-					worldinfo.setThundering(false);
-				} else {
-					worldinfo.setThunderTime(2000);
-					worldinfo.setThundering(true);
+			case HEALING_SONG:
+				// TODO only allow once per day
+				player.curePotionEffects(new ItemStack(Items.milk_bucket));
+				player.heal(player.getMaxHealth());
+				break;
+			case STORMS_SONG:
+				if (player.worldObj instanceof WorldServer) {
+					WorldInfo worldinfo = ((WorldServer) player.worldObj).getWorldInfo();
+					if (worldinfo.isRaining()) {
+						worldinfo.setRainTime(0);
+						worldinfo.setRaining(false);
+					} else {
+						worldinfo.setRainTime(2000);
+						worldinfo.setRaining(true);
+					}
+					if (worldinfo.isThundering()) {
+						worldinfo.setThunderTime(0);
+						worldinfo.setThundering(false);
+					} else {
+						worldinfo.setThunderTime(2000);
+						worldinfo.setThundering(true);
+					}
 				}
 				break;
 			case SUN_SONG:
@@ -164,12 +178,15 @@ public enum ZeldaSong {
 		int x = MathHelper.floor_double(player.posX);
 		int y = MathHelper.floor_double(player.boundingBox.minY);
 		int z = MathHelper.floor_double(player.posZ);
+		int affected = 0;
 		for (int i = (x - radius); i <= (x + radius); ++i) {
 			for (int j = (y - (radius / 2)); j <= (y + (radius / 2)); ++ j) {
 				for (int k = (z - radius); k <= (z + radius); ++k) {
 					Block block = world.getBlock(i, j, k);
 					if (block instanceof ISongBlock) {
-						((ISongBlock) block).onSongPlayed(world, i, j, k, player, this);
+						if (((ISongBlock) block).onSongPlayed(world, i, j, k, player, this, affected)) {
+							++affected;
+						}
 					}
 				}
 			}
@@ -180,9 +197,12 @@ public enum ZeldaSong {
 	 * Notifies all {ISongEntity}s within the given radius of the song played
 	 */
 	private void notifySongEntities(World world, EntityPlayer player, int radius) {
+		int affected = 0;
 		List<ISongEntity> entities = world.getEntitiesWithinAABB(ISongEntity.class, player.boundingBox.expand(radius, (double) radius / 2.0D, radius));
 		for (ISongEntity entity : entities) {
-			entity.onSongPlayed(player, this);
+			if (entity.onSongPlayed(player, this, affected)) {
+				++affected;
+			}
 		}
 	}
 }
