@@ -177,6 +177,7 @@ public class RoomBoss extends RoomBase
 		placeParapet(world, meta);
 		placeLedge(world, rand, meta);
 		placeChestOnRoof(world, rand);
+		placeInvisibleChest(world, rand, rand.nextInt(3)); // very rarely may get 2 invisible chests
 		placeJars(world, rand, rand.nextInt(5), false);
 		placeJars(world, rand, rand.nextInt(5) + 3, true);
 		placeWindows(world);
@@ -362,10 +363,36 @@ public class RoomBoss extends RoomBase
 			int x = (rand.nextFloat() < 0.5F ? bBox.minX : bBox.maxX);
 			int y = bBox.maxY + 1;
 			int z = (rand.nextFloat() < 0.5F ? bBox.minZ : bBox.maxZ);
-			world.setBlock(x, y, z, Blocks.chest);
+			placeChestAt(world, x, y, z, Blocks.chest, rand, true);
+		}
+	}
+
+	/**
+	 * Attempts to place n invisible chests, either on the roof or in the main room
+	 */
+	protected void placeInvisibleChest(World world, Random rand, int n) {
+		for (int i = 0; i < n; ++i) {
+			if (rand.nextFloat() < Config.getDoubleChestChance()) {
+				int x = bBox.minX + rand.nextInt(bBox.getXSize());
+				int y = (rand.nextFloat() < 0.5F ? bBox.minY + 1 : bBox.maxY + 1);
+				int z = bBox.minZ + rand.nextInt(bBox.getZSize());
+				if (bBox.isVecInside(x, y, z)) {
+					placeChestAt(world, x, y, z, ZSSBlocks.chestInvisible, rand, true);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Places the chest block at the given coordinates provided no other block exists,
+	 * and populates the chest with loot (locked level loot if goodLoot is true)
+	 */
+	protected void placeChestAt(World world, int x, int y, int z, Block chest, Random rand, boolean goodLoot) {
+		if (world.isAirBlock(x, y, z)) {
+			world.setBlock(x, y, z, chest);
 			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof IInventory) {
-				DungeonLootLists.generateChestContents(world, rand, (IInventory) te, this, true);
+				DungeonLootLists.generateChestContents(world, rand, (IInventory) te, this, goodLoot);
 			}
 		}
 	}

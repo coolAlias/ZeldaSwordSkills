@@ -196,12 +196,15 @@ public class RoomSecret extends RoomBase
 		int k1 = StructureGenUtils.getZWithOffset(bBox, x, z);
 		if (bBox.isVecInside(i1, j1, k1) && !StructureGenUtils.isBlockChest(world, i1, j1, k1)) {
 			Block chestBlock = (rand.nextFloat() < Config.getLockedChestChance() ? ZSSBlocks.chestLocked : Blocks.chest);
+			if (!first && rand.nextFloat() < Config.getLockedChestChance()) {
+				chestBlock = ZSSBlocks.chestInvisible;
+			}
 			world.setBlock(i1, j1, k1, chestBlock, 0, 2);
 			TileEntity te = world.getTileEntity(i1, j1, k1);
 			if (te instanceof IInventory) {
 				IInventory chest = (IInventory) te;
-				DungeonLootLists.generateChestContents(world, rand, chest, this, chestBlock == ZSSBlocks.chestLocked);
-				if (first && rand.nextFloat() < Config.getHeartPieceChance()) {
+				DungeonLootLists.generateChestContents(world, rand, chest, this, chestBlock != Blocks.chest);
+				if ((first || chestBlock == ZSSBlocks.chestInvisible) && rand.nextFloat() < Config.getHeartPieceChance()) {
 					WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
 				}
 				if (door != null) {

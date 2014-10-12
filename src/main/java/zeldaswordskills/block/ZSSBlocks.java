@@ -23,6 +23,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.block.BlockChestInvisible.TileEntityChestInvisible;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
@@ -57,6 +58,7 @@ public class ZSSBlocks
 	barrierHeavy,
 	ceramicJar,
 	chestLocked,
+	chestInvisible,
 	pedestal,
 	pegWooden,
 	pegRusty,
@@ -89,6 +91,7 @@ public class ZSSBlocks
 		beamWooden = new BlockBar(Material.wood).setBlockName("zss.beam_wooden");
 		hookTarget = new BlockTarget(Material.rock).setBlockName("zss.hook_target");
 		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
+		chestInvisible = new BlockChestInvisible().setBlockName("zss.chest_invisible");
 		register();
 	}
 
@@ -114,6 +117,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(pegRusty, pegRusty.getUnlocalizedName());
 		GameRegistry.registerBlock(ceramicJar, ItemCeramicJar.class, ceramicJar.getUnlocalizedName());
 		GameRegistry.registerBlock(chestLocked, chestLocked.getUnlocalizedName());
+		GameRegistry.registerBlock(chestInvisible, chestInvisible.getUnlocalizedName());
 		GameRegistry.registerBlock(pedestal, ItemMetadataBlock.class, pedestal.getUnlocalizedName());
 		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName());
 		GameRegistry.registerBlock(doorLocked, doorLocked.getUnlocalizedName());
@@ -126,6 +130,7 @@ public class ZSSBlocks
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
+		GameRegistry.registerTileEntity(TileEntityChestInvisible.class, "tileEntityChestInvisible");
 		GameRegistry.registerTileEntity(TileEntityDungeonBlock.class, "tileEntityDungeonBlock");
 		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, "tileEntityDungeonCore");
 		GameRegistry.registerTileEntity(TileEntityPedestal.class, "tileEntityPedestal");
@@ -147,6 +152,7 @@ public class ZSSBlocks
 
 		// Register rotation types for custom blocks
 		BlockRotationData.registerCustomBlockRotation(chestLocked, BlockRotationData.Rotation.PISTON_CONTAINER);
+		BlockRotationData.registerCustomBlockRotation(chestInvisible, BlockRotationData.Rotation.PISTON_CONTAINER);
 		BlockRotationData.registerCustomBlockRotation(leverGiant, BlockRotationData.Rotation.LEVER);
 	}
 }
