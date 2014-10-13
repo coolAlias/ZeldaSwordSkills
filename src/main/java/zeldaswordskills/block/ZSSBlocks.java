@@ -56,6 +56,7 @@ public class ZSSBlocks
 	public static Block
 	barrierLight,
 	barrierHeavy,
+	timeBlock,
 	ceramicJar,
 	chestLocked,
 	chestInvisible,
@@ -92,6 +93,7 @@ public class ZSSBlocks
 		hookTarget = new BlockTarget(Material.rock).setBlockName("zss.hook_target");
 		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
 		chestInvisible = new BlockChestInvisible().setBlockName("zss.chest_invisible");
+		timeBlock = new BlockTime().setBlockName("zss.time_block");
 		register();
 	}
 
@@ -127,6 +129,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(beamWooden, beamWooden.getUnlocalizedName());
 		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
 		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
+		GameRegistry.registerBlock(timeBlock, timeBlock.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
