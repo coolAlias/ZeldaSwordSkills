@@ -18,11 +18,13 @@
 package zeldaswordskills.client.gui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 
 import org.lwjgl.input.Keyboard;
@@ -30,15 +32,19 @@ import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
+import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.bidirectional.PlayRecordPacket;
+import zeldaswordskills.network.packet.client.AddSongPacket;
 import zeldaswordskills.network.packet.server.ZeldaSongPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.SongNote.PlayableNote;
+import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -79,6 +85,12 @@ public class GuiOcarina extends GuiScreen
 	/** Stores the notes played so far */
 	private final List<SongNote> melody = new ArrayList<SongNote>();
 
+	/** Notes played when learning the Scarecrow's Song */
+	private List<SongNote> scarecrowNotes;
+
+	/** Whether this is the first time the Scarecrow Song is being played */
+	private boolean scarecrowFirst;
+
 	/** Currently playing song, if any */
 	private ZeldaSong song;
 
@@ -89,17 +101,37 @@ public class GuiOcarina extends GuiScreen
 	private int x, y, z;
 
 	public GuiOcarina(int x, int y, int z) {
+		this(x, y, z, false);
+	}
+
+	public GuiOcarina(int x, int y, int z, boolean isScarecrow) {
 		mc = Minecraft.getMinecraft();
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		if (isScarecrow) {
+			scarecrowNotes = ZSSPlayerSongs.get(mc.thePlayer).getScarecrowNotes();
+			if (scarecrowNotes == null || scarecrowNotes.isEmpty()) {
+				scarecrowFirst = true;
+				scarecrowNotes = new ArrayList<SongNote>();
+			}
+		}
 	}
 
 	@Override
 	public void initGui() {
 		super.initGui();
 		guiLeft = (width - xSize) / 2;
-		guiTop = (height - ySize) / 2 + 50;
+		guiTop = (height - ySize) / 2 + 25;
+		if (scarecrowFirst) {
+			new TimedChatDialogue(mc.thePlayer, Arrays.asList(
+					StatCollector.translateToLocal("chat.zss.song.scarecrow.greet.0"),
+					StatCollector.translateToLocal("chat.zss.song.scarecrow.greet.1")));
+		} else if (scarecrowNotes != null && !scarecrowNotes.isEmpty()) {
+			new TimedChatDialogue(mc.thePlayer, Arrays.asList(
+					StatCollector.translateToLocal("chat.zss.song.scarecrow.last.0"),
+					StatCollector.translateToLocal("chat.zss.song.scarecrow.last.1")));
+		}
 	}
 
 	@Override
@@ -222,10 +254,59 @@ public class GuiOcarina extends GuiScreen
 						mc.thePlayer.posY + mc.thePlayer.getEyeHeight() + mc.theWorld.rand.nextDouble() - 0.5D,
 						mc.thePlayer.posZ + look.zCoord + mc.theWorld.rand.nextDouble() - 0.5D,
 						(double) note.ordinal() / 24.0D, 0.0D, 0.0D);
-				song = ZeldaSong.getSongFromNotes(melody);
-				if (song != null) {
-					mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
-					PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
+				// For learning Scarecrow's Song, enter 8 notes once, then same notes again to send AddSongPacket to server
+				if (scarecrowNotes != null) {
+					if (melody.size() == 8) {
+						if (!ZeldaSong.areNotesUnique(melody)) {
+							melody.clear();
+							PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.copycat"));
+						} else if (scarecrowNotes.isEmpty()) {
+							boolean flag = true;
+							for (int i = 0; i < (melody.size() - 1) && flag; ++i) {
+								flag = (melody.get(i) == melody.get(i + 1));
+							}
+							if (flag) {
+								melody.clear();
+								PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.boring"));
+							} else {
+								scarecrowNotes.addAll(melody);
+								PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.again"));
+							}
+						} else {
+							boolean flag = true;
+							for (int i = 0; i < melody.size() && flag; ++i) {
+								flag = (scarecrowNotes.get(i) == melody.get(i));
+							}
+							if (flag) {
+								if (scarecrowFirst) {
+									new TimedChatDialogue(mc.thePlayer, Arrays.asList(
+											StatCollector.translateToLocal("chat.zss.song.scarecrow.first.0"),
+											StatCollector.translateToLocal("chat.zss.song.scarecrow.first.1")));
+								} else {
+									new TimedChatDialogue(mc.thePlayer, Arrays.asList(
+											StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.0"),
+											StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.1")));
+								}
+								song = ZeldaSong.SCARECROW_SONG;
+								mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
+								PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
+								PacketDispatcher.sendToServer(new AddSongPacket(song, scarecrowNotes));
+							} else {
+								melody.clear();
+								PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.forgot"));
+							}
+						}
+					}
+				} else if (melody.size() < 9) { // no songs are longer than 8 notes
+					song = ZSSPlayerSongs.get(mc.thePlayer).getKnownSongFromNotes(melody);
+					// TODO remove following check after implementing song-learning mechanism for all songs
+					if (song == null) {
+						song = ZeldaSong.getSongFromNotes(melody);
+					}
+					if (song != null) { // indicates player knows the song
+						mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
+						PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
+					}
 				}
 			}
 		}

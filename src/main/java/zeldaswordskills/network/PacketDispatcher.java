@@ -27,6 +27,7 @@ import zeldaswordskills.network.packet.bidirectional.DeactivateSkillPacket;
 import zeldaswordskills.network.packet.bidirectional.PlayRecordPacket;
 import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
 import zeldaswordskills.network.packet.client.AbstractClientMessageHandler;
+import zeldaswordskills.network.packet.client.AddSongPacket;
 import zeldaswordskills.network.packet.client.AttackBlockedPacket;
 import zeldaswordskills.network.packet.client.InLiquidPacket;
 import zeldaswordskills.network.packet.client.MortalDrawPacket;
@@ -79,6 +80,7 @@ public class PacketDispatcher
 
 		// Bi-directional packets using standard IMessageHandler implementation (handled identically on both sides)
 		registerBiMessage(ActivateSkillPacket.Handler.class, ActivateSkillPacket.class);
+		registerBiMessage(AddSongPacket.Handler.class, AddSongPacket.class);
 		registerBiMessage(AttackTimePacket.Handler.class, AttackTimePacket.class);
 		registerBiMessage(DeactivateSkillPacket.Handler.class, DeactivateSkillPacket.class);
 

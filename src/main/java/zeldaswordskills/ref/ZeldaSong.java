@@ -32,6 +32,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.api.entity.ISongEntity;
+import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 
@@ -75,14 +77,18 @@ public enum ZeldaSong {
 		return StatCollector.translateToLocal("song.zss." + unlocalizedName + ".name");
 	}
 
-	/** Returns the minimum number of ticks the song must be allowed to play before any effects will occur */
-	public int getMinDuration() {
-		return minDuration;
+	public String getUnlocalizedName() {
+		return unlocalizedName;
 	}
 
 	/** Returns the sound file to play for this song */
 	public String getSoundString() {
 		return ModInfo.ID + ":song." + unlocalizedName;
+	}
+
+	/** Returns the minimum number of ticks the song must be allowed to play before any effects will occur */
+	public int getMinDuration() {
+		return minDuration;
 	}
 
 	/** Enables or disables this song's main effect, but not notification of {@link ISoundBlock}s */
@@ -91,18 +97,12 @@ public enum ZeldaSong {
 	}
 
 	/**
-	 * If the notes played make up a valid melody, that song will be returned.
-	 * @return	Null if the notes are not a valid song
+	 * Returns the ZeldaSong matching the unlocalized name given, or null
 	 */
-	public static ZeldaSong getSongFromNotes(List<SongNote> notesPlayed) {
-		for (ZeldaSong song : ZeldaSong.values()) {
-			// TODO special case for Scarecrow Song? Would then need a player instance
-			if (song.notes != null && song.notes.length == notesPlayed.size()) {
-				boolean isIdentical = true;
-				for (int i = 0; i < song.notes.length && isIdentical; ++i) {
-					isIdentical = (song.notes[i] == notesPlayed.get(i));
-				}
-				if (isIdentical) {
+	public static ZeldaSong getSongFromUnlocalizedName(String name) {
+		if (name != null && name.length() > 0) {
+			for (ZeldaSong song : ZeldaSong.values()) {
+				if (song.getUnlocalizedName().equalsIgnoreCase(name)) {
 					return song;
 				}
 			}
@@ -110,20 +110,82 @@ public enum ZeldaSong {
 		return null;
 	}
 
+	/** Returns true if the notes played are the correct notes to play this song */
+	public boolean areCorrectNotes(List<SongNote> notesPlayed) {
+		if (notes == null || notes.length < 1 || notesPlayed == null || notesPlayed.size() != notes.length) {
+			return false;
+		}
+		for (int i = 0; i < notes.length; ++i) {
+			if (notes[i] != notesPlayed.get(i)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * If the notes played make up a valid melody, that song will be returned.
+	 * @return	Null if the notes are not a valid song
+	 */
+	public static ZeldaSong getSongFromNotes(List<SongNote> notesPlayed) {
+		for (ZeldaSong song : ZeldaSong.values()) {
+			if (song.areCorrectNotes(notesPlayed)) {
+				return song;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Checks if song's notes are contained within the notesPlayed, starting from the first note
+	 * @param notesPlayed	May have the same number or more notes than the song
+	 */
+	public boolean isSongPartOfNotes(List<SongNote> notesPlayed) {
+		if (notes == null || notes.length < 1 || notesPlayed == null || notesPlayed.size() < notes.length) {
+			return false;
+		}
+		for (int i = 0; i < notes.length; ++i) {
+			if (notes[i] != notesPlayed.get(i)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Returns true if the notes played are unique enough to form a new song
+	 */
+	public static boolean areNotesUnique(List<SongNote> notesPlayed) {
+		for (ZeldaSong song : ZeldaSong.values()) {
+			if (song.isSongPartOfNotes(notesPlayed)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Performs any effects of the song when played; only called on the server
 	 */
 	public void performSongEffects(EntityPlayer player) {
 		if (!player.worldObj.isRemote) {
+			ItemStack instrument = player.getHeldItem();
+			if (instrument == null || !(instrument.getItem() instanceof ItemInstrument)) {
+				return;
+			} else if (!((ItemInstrument) instrument.getItem()).doSongsHaveEffect(instrument)) {
+				// TODO what about Fairy Ocarina being able to tame horses?
+				// Should be a flag in each song for requisite instrument potency 
+				return;
+			}
 			// notify all ISongBlocks within an 8 block radius (radius could be determined by song?)
 			notifySongBlocks(player.worldObj, player, 8);
 			// notify all ISongEntities within 8 block radius
 			notifySongEntities(player.worldObj, player, 8);
 			if (!isEnabled) {
-				PlayerUtils.sendChat(player, "This song's main effect has been disabled.");
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.disabled"));
 				return;
 			}
-			// perform main effect
+
 			switch(this) {
 			case EPONAS_SONG:
 				List<EntityHorse> horses = player.worldObj.getEntitiesWithinAABB(EntityHorse.class, player.boundingBox.expand(8.0D, 4.0D, 8.0D));
@@ -137,9 +199,11 @@ public enum ZeldaSong {
 				}
 				break;
 			case HEALING_SONG:
-				// TODO only allow once per day
-				player.curePotionEffects(new ItemStack(Items.milk_bucket));
-				player.heal(player.getMaxHealth());
+				if (ZSSPlayerSongs.get(player).canHealFromSong()) {
+					player.curePotionEffects(new ItemStack(Items.milk_bucket));
+					player.heal(player.getMaxHealth());
+					ZSSPlayerSongs.get(player).setNextHealTime();
+				}
 				break;
 			case STORMS_SONG:
 				if (player.worldObj instanceof WorldServer) {

@@ -32,7 +32,11 @@ import cpw.mods.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler
 {
-	public static final int GUI_PEDESTAL = 0, GUI_MASK_TRADER = 1, GUI_SKILLS = 2, GUI_OCARINA = 3;
+	public static final int GUI_PEDESTAL = 0, GUI_MASK_TRADER = 1, GUI_SKILLS = 2,
+			/** Gui for playing musical intstruments with the same control scheme as Ocarina of Time */
+			GUI_OCARINA = 3,
+			/** Same as GUI_OCARINA but with a flag set for learning the Scarecrow Song */
+			GUI_SCARECROW = 4;
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
@@ -68,6 +72,8 @@ public class GuiHandler implements IGuiHandler
 			return new GuiSkills(player);
 		case GUI_OCARINA:
 			return new GuiOcarina(x, y, z);
+		case GUI_SCARECROW:
+			return new GuiOcarina(x, y, z, true);
 		}
 		return null;
 	}

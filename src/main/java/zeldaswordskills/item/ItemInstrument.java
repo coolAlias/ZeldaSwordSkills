@@ -20,9 +20,12 @@ package zeldaswordskills.item;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockPumpkin;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -32,23 +35,30 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.ZeldaSong;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemInstrument extends Item
 {
 	public static enum Instrument {
-		OCARINA("ocarina", GuiHandler.GUI_OCARINA);
+		OCARINA_FAIRY("ocarina_fairy", GuiHandler.GUI_OCARINA, false),
+		OCARINA_TIME("ocarina_time", GuiHandler.GUI_OCARINA, true);
 
 		private final String unlocalizedName;
 
 		private final int guiId;
 
-		private Instrument(String name, int guiId) {
+		/** Whether songs performed with this instrument are capable of having a real effect */
+		private final boolean isPotent;
+
+		private Instrument(String name, int guiId, boolean isPotent) {
 			this.unlocalizedName = name;
 			this.guiId = guiId;
+			this.isPotent = isPotent;
 		}
 
 		public String getUnlocalizedName() {
@@ -57,6 +67,11 @@ public class ItemInstrument extends Item
 
 		public int getGuiId() {
 			return guiId;
+		}
+
+		/** Whether songs performed with this instrument are capable of having a real effect */
+		public boolean doSongsHaveEffect() {
+			return isPotent;
 		}
 	}
 
@@ -75,12 +90,58 @@ public class ItemInstrument extends Item
 		return Instrument.values()[stack.getItemDamage() % Instrument.values().length];
 	}
 
+	/**
+	 * Returns true if a {@link ZeldaSong} played by this stack is capable of having a real effect
+	 */
+	public boolean doSongsHaveEffect(ItemStack stack) {
+		return getInstrument(stack).doSongsHaveEffect();
+	}
+
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (world.isRemote) { // instruments have client-side only Guis
 			player.openGui(ZSSMain.instance, getInstrument(stack).getGuiId(), world, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 		}
 		return stack;
+	}
+
+	@Override
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+		if (world.isRemote) {
+			if (isScarecrowAt(world, x, y, z) && ZSSPlayerSongs.get(player).canOpenScarecrowGui(true)) {
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_SCARECROW, world, x, y, z);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Returns true if the blocks around x/y/z form a scarecrow figure,
+	 * assuming that x/y/z is one of the central blocks (not the 'arms')
+	 */
+	private boolean isScarecrowAt(World world, int x, int y, int z) {
+		int i = 0;
+		while (i < 2 && world.getBlock(x, y, z) == Blocks.hay_block) {
+			++i;
+			++y;
+		}
+		// should now always have the head
+		Block block = world.getBlock(x, y, z);
+		if (block instanceof BlockPumpkin) {
+			--y;
+			for (int dy = i; dy < 2; ++dy) {
+				if (world.getBlock(x, y - dy, z) != Blocks.hay_block) {
+					return false;
+				}
+			}
+			if (world.getBlock(x + 1, y, z) == Blocks.hay_block && world.getBlock(x - 1, y, z) == Blocks.hay_block) {
+				return true;
+			}
+			if (world.getBlock(x, y, z + 1) == Blocks.hay_block && world.getBlock(x, y, z - 1) == Blocks.hay_block) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
