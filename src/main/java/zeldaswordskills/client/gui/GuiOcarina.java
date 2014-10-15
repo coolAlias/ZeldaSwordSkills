@@ -126,11 +126,13 @@ public class GuiOcarina extends GuiScreen
 		if (scarecrowFirst) {
 			new TimedChatDialogue(mc.thePlayer, Arrays.asList(
 					StatCollector.translateToLocal("chat.zss.song.scarecrow.greet.0"),
-					StatCollector.translateToLocal("chat.zss.song.scarecrow.greet.1")));
+					StatCollector.translateToLocal("chat.zss.song.scarecrow.greet.1")),
+					0, 1600);
 		} else if (scarecrowNotes != null && !scarecrowNotes.isEmpty()) {
 			new TimedChatDialogue(mc.thePlayer, Arrays.asList(
 					StatCollector.translateToLocal("chat.zss.song.scarecrow.last.0"),
-					StatCollector.translateToLocal("chat.zss.song.scarecrow.last.1")));
+					StatCollector.translateToLocal("chat.zss.song.scarecrow.last.1")),
+					0, 1600);
 		}
 	}
 
@@ -281,11 +283,13 @@ public class GuiOcarina extends GuiScreen
 								if (scarecrowFirst) {
 									new TimedChatDialogue(mc.thePlayer, Arrays.asList(
 											StatCollector.translateToLocal("chat.zss.song.scarecrow.first.0"),
-											StatCollector.translateToLocal("chat.zss.song.scarecrow.first.1")));
+											StatCollector.translateToLocal("chat.zss.song.scarecrow.first.1")),
+											0, 1600);
 								} else {
 									new TimedChatDialogue(mc.thePlayer, Arrays.asList(
 											StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.0"),
-											StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.1")));
+											StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.1")),
+											0, 1600);
 								}
 								song = ZeldaSong.SCARECROW_SONG;
 								mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);

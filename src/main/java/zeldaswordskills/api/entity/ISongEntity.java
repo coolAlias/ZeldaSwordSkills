@@ -18,6 +18,7 @@
 package zeldaswordskills.api.entity;
 
 import net.minecraft.entity.player.EntityPlayer;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.ref.ZeldaSong;
 
 /**
@@ -32,9 +33,10 @@ public interface ISongEntity {
 	 * Note that it is only called on the server side.
 	 * @param player	Player who played the song
 	 * @param song		Song that was played
+	 * @param power		Potency level of the {@link ItemInstrument.Instrument} used to play the song; always at least 1
 	 * @param affected	Number of entities already affected by the song
 	 * @return			True if the entity was affected
 	 */
-	public boolean onSongPlayed(EntityPlayer player, ZeldaSong song, int affected);
+	public boolean onSongPlayed(EntityPlayer player, ZeldaSong song, int power, int affected);
 
 }

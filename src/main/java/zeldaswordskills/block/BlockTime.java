@@ -92,7 +92,7 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 	}
 
 	@Override
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int affected) {
+	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int power, int affected) {
 		if (song == ZeldaSong.TIME_SONG) {
 			int meta = world.getBlockMetadata(x, y, z);
 			world.setBlockMetadataWithNotify(x, y, z, (meta == 0 ? 8 : 0), 2);

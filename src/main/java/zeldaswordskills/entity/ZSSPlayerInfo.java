@@ -21,6 +21,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -294,6 +295,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		}
 		if (hasAutoBombArrow && (player.getItemInUse() == null || !(player.getItemInUse().getItem() instanceof ItemHeroBow))) {
 			hasAutoBombArrow = false;
+		}
+		// Check for currently ridden horse, used for Epona's Song
+		if (player.ridingEntity instanceof EntityHorse) {
+			playerSongs.setHorseRidden((EntityHorse) player.ridingEntity);
 		}
 	}
 

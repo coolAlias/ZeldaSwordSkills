@@ -45,20 +45,20 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ItemInstrument extends Item
 {
 	public static enum Instrument {
-		OCARINA_FAIRY("ocarina_fairy", GuiHandler.GUI_OCARINA, false),
-		OCARINA_TIME("ocarina_time", GuiHandler.GUI_OCARINA, true);
+		OCARINA_FAIRY("ocarina_fairy", GuiHandler.GUI_OCARINA, 1),
+		OCARINA_TIME("ocarina_time", GuiHandler.GUI_OCARINA, 5);
 
 		private final String unlocalizedName;
 
 		private final int guiId;
 
-		/** Whether songs performed with this instrument are capable of having a real effect */
-		private final boolean isPotent;
+		/** Power level of songs performed with this instrument, 0 having no effect and 5 having maximum effect */
+		private final int power;
 
-		private Instrument(String name, int guiId, boolean isPotent) {
+		private Instrument(String name, int guiId, int power) {
 			this.unlocalizedName = name;
 			this.guiId = guiId;
-			this.isPotent = isPotent;
+			this.power = Math.min(power, 5);
 		}
 
 		public String getUnlocalizedName() {
@@ -69,9 +69,9 @@ public class ItemInstrument extends Item
 			return guiId;
 		}
 
-		/** Whether songs performed with this instrument are capable of having a real effect */
-		public boolean doSongsHaveEffect() {
-			return isPotent;
+		/** Returns power level of songs performed with this instrument, from 0 to 10 */
+		public int getPower() {
+			return power;
 		}
 	}
 
@@ -91,10 +91,10 @@ public class ItemInstrument extends Item
 	}
 
 	/**
-	 * Returns true if a {@link ZeldaSong} played by this stack is capable of having a real effect
+	 * Returns {@link Instrument#getPower} for determining effects of a {@link ZeldaSong}
 	 */
-	public boolean doSongsHaveEffect(ItemStack stack) {
-		return getInstrument(stack).doSongsHaveEffect();
+	public int getSongStrength(ItemStack stack) {
+		return getInstrument(stack).getPower();
 	}
 
 	@Override

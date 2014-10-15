@@ -21,7 +21,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,12 +32,14 @@ import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.Constants;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.AddSongPacket;
 import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
+import zeldaswordskills.util.WorldUtils;
 
 public class ZSSPlayerSongs
 {
@@ -51,6 +56,12 @@ public class ZSSPlayerSongs
 	/** World time at which this player will next be able to use the Song of Healing */
 	private long nextSongHealTime;
 
+	/** UUID of last horse ridden, for playing Epona's Song (persistent across world saves) */
+	private UUID horseUUID = null;
+
+	/** Entity ID of last horse ridden, should be more efficient when getting entity */
+	private int horseId = -1;
+
 	public ZSSPlayerSongs(EntityPlayer player) {
 		this.player = player;
 	}
@@ -59,7 +70,9 @@ public class ZSSPlayerSongs
 		return ZSSPlayerInfo.get(player).getPlayerSongs();
 	}
 
-	/** Returns true if the player knows the song */
+	/**
+	 * Returns true if the player knows the song
+	 */
 	public boolean isSongKnown(ZeldaSong song) {
 		return knownSongs.contains(song);
 	}
@@ -93,8 +106,14 @@ public class ZSSPlayerSongs
 			}
 		}
 		if (addSong) {
-			LogHelper.info("Adding " + song.toString() + " to known songs; is client? " + player.worldObj.isRemote);
 			knownSongs.add(song);
+			player.triggerAchievement(ZSSAchievements.ocarinaSong);
+			if (song == ZeldaSong.SCARECROW_SONG) {
+				player.triggerAchievement(ZSSAchievements.ocarinaScarecrow);
+			}
+			if (knownSongs.size() == ZeldaSong.values().length) {
+				player.triggerAchievement(ZSSAchievements.ocarinaMaestro);
+			}
 		}
 		if (!player.worldObj.isRemote) {
 			PacketDispatcher.sendTo(new AddSongPacket(song, notes), (EntityPlayerMP) player);
@@ -161,9 +180,39 @@ public class ZSSPlayerSongs
 		nextSongHealTime = player.worldObj.getWorldTime() + 24000;
 	}
 
-	/** Returns a copy of the notes set for the Scarecrow song, if any */
+	/**
+	 * Returns a copy of the notes set for the Scarecrow song, if any
+	 */
 	public List<SongNote> getScarecrowNotes() {
 		return new ArrayList<SongNote>(scarecrowNotes);
+	}
+
+	/**
+	 * Returns last horse ridden or null if unavailable for some reason
+	 */
+	public EntityHorse getLastHorseRidden() {
+		Entity entity = (horseId < 0 ? null : player.worldObj.getEntityByID(horseId));
+		if (entity == null && horseUUID != null) {
+			entity = WorldUtils.getEntityByUUID(player.worldObj, horseUUID);
+			if (entity != null) {
+				horseId = entity.getEntityId();
+			}
+		}
+		if (entity instanceof EntityHorse && entity.isEntityAlive()) {
+			return (EntityHorse) entity;
+		}
+		// don't reset id fields, as horse may simply be in an unloaded chunk
+		return null;
+	}
+
+	/**
+	 * Sets the horse as this player's last horse ridden, for Epona's Song
+	 */
+	public void setHorseRidden(EntityHorse horse) {
+		if (horse.getEntityId() != horseId && horse.isTame() && horse.func_152119_ch().equals(player.getUniqueID().toString())) {
+			this.horseId = horse.getEntityId();
+			this.horseUUID = horse.getPersistentID();
+		}
 	}
 
 	public void saveNBTData(NBTTagCompound compound) {
@@ -186,6 +235,10 @@ public class ZSSPlayerSongs
 
 		compound.setLong("ScarecrowTime", scarecrowTime);
 		compound.setLong("NextSongHealTime", nextSongHealTime);
+		if (horseUUID != null) {
+			compound.setLong("HorseUUIDMost", horseUUID.getMostSignificantBits());
+			compound.setLong("HorseUUIDLeast", horseUUID.getLeastSignificantBits());
+		}
 	}
 
 	public void loadNBTData(NBTTagCompound compound) {
@@ -211,5 +264,8 @@ public class ZSSPlayerSongs
 
 		scarecrowTime = compound.getLong("ScarecrowTime");
 		nextSongHealTime = compound.getLong("NextHealSongTime");
+		if (compound.hasKey("HorseUUIDMost") && compound.hasKey("HorseUUIDLeast")) {
+			horseUUID = new UUID(compound.getLong("HorseUUIDMost"), compound.getLong("HorseUUIDLeast"));
+		}
 	}
 }

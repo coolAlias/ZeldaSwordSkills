@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
@@ -172,15 +173,15 @@ public enum ZeldaSong {
 			ItemStack instrument = player.getHeldItem();
 			if (instrument == null || !(instrument.getItem() instanceof ItemInstrument)) {
 				return;
-			} else if (!((ItemInstrument) instrument.getItem()).doSongsHaveEffect(instrument)) {
-				// TODO what about Fairy Ocarina being able to tame horses?
-				// Should be a flag in each song for requisite instrument potency 
+			}
+			int power = ((ItemInstrument) instrument.getItem()).getSongStrength(instrument);
+			if (power < 1) {
 				return;
 			}
 			// notify all ISongBlocks within an 8 block radius (radius could be determined by song?)
-			notifySongBlocks(player.worldObj, player, 8);
+			notifySongBlocks(player.worldObj, player, power, 8);
 			// notify all ISongEntities within 8 block radius
-			notifySongEntities(player.worldObj, player, 8);
+			notifySongEntities(player.worldObj, player, power, 8);
 			if (!isEnabled) {
 				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.disabled"));
 				return;
@@ -188,25 +189,39 @@ public enum ZeldaSong {
 
 			switch(this) {
 			case EPONAS_SONG:
+				// Only max power instruments can teleport a horse
+				if (power > 4 && player.worldObj.provider.dimensionId == 0) {
+					EntityHorse epona = ZSSPlayerSongs.get(player).getLastHorseRidden();
+					if (epona != null) {
+						// TODO check for clear space where horse should spawn?
+						if (epona.riddenByEntity != null) {
+							epona.riddenByEntity.mountEntity(null);
+						}
+						if (epona.getLeashed()) {
+							epona.clearLeashed(true, true);
+						}
+						Vec3 vec3 = player.getLookVec();
+						epona.setPosition(player.posX + (vec3.xCoord * 2.0D), player.posY + 1, player.posZ + (vec3.zCoord * 2.0D));
+					}
+				}
 				List<EntityHorse> horses = player.worldObj.getEntitiesWithinAABB(EntityHorse.class, player.boundingBox.expand(8.0D, 4.0D, 8.0D));
 				for (EntityHorse horse : horses) {
-					// TODO check random chance?
 					if (!horse.isTame()) {
 						horse.setTamedBy(player);
-						// flag for heart particles
+						// 18 is flag for heart particles
 						player.worldObj.setEntityState(horse, (byte) 18);
 					}
 				}
 				break;
 			case HEALING_SONG:
-				if (ZSSPlayerSongs.get(player).canHealFromSong()) {
+				if (power > 4 && ZSSPlayerSongs.get(player).canHealFromSong()) {
 					player.curePotionEffects(new ItemStack(Items.milk_bucket));
 					player.heal(player.getMaxHealth());
 					ZSSPlayerSongs.get(player).setNextHealTime();
 				}
 				break;
 			case STORMS_SONG:
-				if (player.worldObj instanceof WorldServer) {
+				if (power > 4 && player.worldObj instanceof WorldServer) {
 					WorldInfo worldinfo = ((WorldServer) player.worldObj).getWorldInfo();
 					if (worldinfo.isRaining()) {
 						worldinfo.setRainTime(0);
@@ -225,9 +240,11 @@ public enum ZeldaSong {
 				}
 				break;
 			case SUN_SONG:
-				for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
-					WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
-					worldserver.setWorldTime(worldserver.getWorldTime() + (long) 12000); // adds half a day
+				if (power > 4) {
+					for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
+						WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
+						worldserver.setWorldTime(worldserver.getWorldTime() + (long) 12000); // adds half a day
+					}
 				}
 				break;
 			default: // activating nearby ISongBlocks only, no other effect
@@ -238,7 +255,7 @@ public enum ZeldaSong {
 	/**
 	 * Notifies all {@link ISongBlock}s within the given radius of the song played
 	 */
-	private void notifySongBlocks(World world, EntityPlayer player, int radius) {
+	private void notifySongBlocks(World world, EntityPlayer player, int power, int radius) {
 		int x = MathHelper.floor_double(player.posX);
 		int y = MathHelper.floor_double(player.boundingBox.minY);
 		int z = MathHelper.floor_double(player.posZ);
@@ -248,7 +265,7 @@ public enum ZeldaSong {
 				for (int k = (z - radius); k <= (z + radius); ++k) {
 					Block block = world.getBlock(i, j, k);
 					if (block instanceof ISongBlock) {
-						if (((ISongBlock) block).onSongPlayed(world, i, j, k, player, this, affected)) {
+						if (((ISongBlock) block).onSongPlayed(world, i, j, k, player, this, power, affected)) {
 							++affected;
 						}
 					}
@@ -260,11 +277,11 @@ public enum ZeldaSong {
 	/**
 	 * Notifies all {ISongEntity}s within the given radius of the song played
 	 */
-	private void notifySongEntities(World world, EntityPlayer player, int radius) {
+	private void notifySongEntities(World world, EntityPlayer player, int power, int radius) {
 		int affected = 0;
 		List<ISongEntity> entities = world.getEntitiesWithinAABB(ISongEntity.class, player.boundingBox.expand(radius, (double) radius / 2.0D, radius));
 		for (ISongEntity entity : entities) {
-			if (entity.onSongPlayed(player, this, affected)) {
+			if (entity.onSongPlayed(player, this, power, affected)) {
 				++affected;
 			}
 		}

@@ -19,6 +19,7 @@ package zeldaswordskills.api.block;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.ref.ZeldaSong;
 
 /**
@@ -33,9 +34,10 @@ public interface ISongBlock {
 	 * Note that it is only called on the server side.
 	 * @param player	Player who played the song
 	 * @param song		Song that was played
+	 * @param power		Potency level of the {@link ItemInstrument.Instrument} used to play the song; always at least 1
 	 * @param affected	Number of blocks already affected by the song
 	 * @return			True if the block was affected
 	 */
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int affected);
+	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int power, int affected);
 
 }
