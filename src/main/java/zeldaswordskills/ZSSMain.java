@@ -24,6 +24,7 @@ import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.handler.ZSSEntityEvents;
+import zeldaswordskills.handler.ZSSEventsFML;
 import zeldaswordskills.handler.ZSSItemEvents;
 import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ZSSItems;
@@ -34,6 +35,7 @@ import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -97,6 +99,7 @@ public class ZSSMain
 		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
+		FMLCommonHandler.instance().bus().register(new ZSSEventsFML());
 		ZSSItemEvents.load();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 	}
