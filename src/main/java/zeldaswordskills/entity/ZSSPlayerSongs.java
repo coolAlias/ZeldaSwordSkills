@@ -34,12 +34,14 @@ import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.AddSongPacket;
+import zeldaswordskills.network.packet.client.LearnSongPacket;
 import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSPlayerSongs
 {
@@ -47,6 +49,10 @@ public class ZSSPlayerSongs
 
 	private final Set<ZeldaSong> knownSongs = EnumSet.noneOf(ZeldaSong.class);
 
+	/** Song to be learned from the learning GUI is set by the block or entity triggering the GUI */
+	@SideOnly(Side.CLIENT)
+	public ZeldaSong songToLearn;
+	
 	/** Notes set by the player to play the Scarecrow's Song */
 	private final List<SongNote> scarecrowNotes = new ArrayList<SongNote>();
 
@@ -82,7 +88,7 @@ public class ZSSPlayerSongs
 	 * When called on the server, sends a packet to update the client.
 	 * @param notes	Only used when learning the Scarecrow Song, otherwise null
 	 */
-	public boolean addNewSong(ZeldaSong song, List<SongNote> notes) {
+	public boolean learnSong(ZeldaSong song, List<SongNote> notes) {
 		boolean addSong = true;
 		if (isSongKnown(song)) {
 			return false;
@@ -114,9 +120,10 @@ public class ZSSPlayerSongs
 			if (knownSongs.size() == ZeldaSong.values().length) {
 				player.triggerAchievement(ZSSAchievements.ocarinaMaestro);
 			}
-		}
-		if (!player.worldObj.isRemote) {
-			PacketDispatcher.sendTo(new AddSongPacket(song, notes), (EntityPlayerMP) player);
+			if (!player.worldObj.isRemote) {
+				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.song.learned", song.toString()));
+				PacketDispatcher.sendTo(new LearnSongPacket(song, notes), (EntityPlayerMP) player);
+			}
 		}
 		return true;
 	}

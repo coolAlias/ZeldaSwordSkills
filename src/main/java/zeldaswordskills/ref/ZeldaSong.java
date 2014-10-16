@@ -17,6 +17,8 @@
 
 package zeldaswordskills.ref;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -60,7 +62,7 @@ public enum ZeldaSong {
 	private final int minDuration;
 
 	/** Notes required to play the song */
-	private final SongNote[] notes;
+	private final List<SongNote> notes;
 
 	/** Whether the song's main effect is enabled */
 	private boolean isEnabled;
@@ -68,7 +70,7 @@ public enum ZeldaSong {
 	private ZeldaSong(String unlocalizedName, int minDuration, SongNote... notes) {
 		this.unlocalizedName = unlocalizedName;
 		this.minDuration = minDuration;
-		this.notes = notes;
+		this.notes = Collections.unmodifiableList(Arrays.asList(notes));
 		this.isEnabled = true;
 	}
 
@@ -92,6 +94,11 @@ public enum ZeldaSong {
 		return minDuration;
 	}
 
+	/** Returns unmodifiable list of notes required to play this song */
+	public List<SongNote> getNotes() {
+		return notes;
+	}
+
 	/** Enables or disables this song's main effect, but not notification of {@link ISoundBlock}s */
 	public void setIsEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
@@ -113,11 +120,11 @@ public enum ZeldaSong {
 
 	/** Returns true if the notes played are the correct notes to play this song */
 	public boolean areCorrectNotes(List<SongNote> notesPlayed) {
-		if (notes == null || notes.length < 1 || notesPlayed == null || notesPlayed.size() != notes.length) {
+		if (notes == null || notes.size() < 1 || notesPlayed == null || notesPlayed.size() != notes.size()) {
 			return false;
 		}
-		for (int i = 0; i < notes.length; ++i) {
-			if (notes[i] != notesPlayed.get(i)) {
+		for (int i = 0; i < notes.size(); ++i) {
+			if (notes.get(i) != notesPlayed.get(i)) {
 				return false;
 			}
 		}
@@ -142,11 +149,11 @@ public enum ZeldaSong {
 	 * @param notesPlayed	May have the same number or more notes than the song
 	 */
 	public boolean isSongPartOfNotes(List<SongNote> notesPlayed) {
-		if (notes == null || notes.length < 1 || notesPlayed == null || notesPlayed.size() < notes.length) {
+		if (notes == null || notes.size() < 1 || notesPlayed == null || notesPlayed.size() < notes.size()) {
 			return false;
 		}
-		for (int i = 0; i < notes.length; ++i) {
-			if (notes[i] != notesPlayed.get(i)) {
+		for (int i = 0; i < notes.size(); ++i) {
+			if (notes.get(i) != notesPlayed.get(i)) {
 				return false;
 			}
 		}
@@ -190,7 +197,11 @@ public enum ZeldaSong {
 			switch(this) {
 			case EPONAS_SONG:
 				// Only max power instruments can teleport a horse
-				if (power > 4 && player.worldObj.provider.dimensionId == 0) {
+				if (power > 4 && player.worldObj.provider.dimensionId == 0 &&
+						player.worldObj.canBlockSeeTheSky(MathHelper.floor_double(player.posX),
+								MathHelper.floor_double(player.boundingBox.maxY),
+								MathHelper.floor_double(player.posZ)))
+				{
 					EntityHorse epona = ZSSPlayerSongs.get(player).getLastHorseRidden();
 					if (epona != null) {
 						// TODO check for clear space where horse should spawn?
