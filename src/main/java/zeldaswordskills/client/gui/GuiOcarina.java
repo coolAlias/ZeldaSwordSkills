@@ -144,10 +144,6 @@ public class GuiOcarina extends GuiMusicBase
 			}
 		} else if (melody.size() < 9) { // no songs are longer than 8 notes
 			song = ZSSPlayerSongs.get(mc.thePlayer).getKnownSongFromNotes(melody);
-			// TODO remove following check after implementing song-learning mechanism for all songs
-			if (song == null) {
-				song = ZeldaSong.getSongFromNotes(melody);
-			}
 			if (song != null) { // indicates player knows the song
 				mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
 				PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));

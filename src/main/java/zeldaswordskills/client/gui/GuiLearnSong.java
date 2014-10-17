@@ -18,6 +18,7 @@
 package zeldaswordskills.client.gui;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.bidirectional.PlayRecordPacket;
@@ -55,8 +56,25 @@ public class GuiLearnSong extends GuiMusicBase
 	}
 
 	@Override
+	public void initGui() {
+		super.initGui();
+		if (ZSSPlayerSongs.get(mc.thePlayer).isSongKnown(songToLearn)) {
+			PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.forgot"));
+		}
+	}
+
+	@Override
 	protected ResourceLocation getTexture() {
 		return texture;
+	}
+
+	@Override
+	public void drawScreen(int mouseX, int mouseY, float f) {
+		super.drawScreen(mouseX, mouseY, f);
+		if (!demoPlayed && song == null) {
+			String s = songToLearn.toString();
+			fontRendererObj.drawString(s, guiLeft + (xSize / 2) - (fontRendererObj.getStringWidth(s) / 2), guiTop + 3, 0xFFFFFF);
+		}
 	}
 
 	@Override
@@ -64,7 +82,7 @@ public class GuiLearnSong extends GuiMusicBase
 		if (!demoPlayed) {
 			if (++ticksSinceLastNote == 20) {
 				if (currentNoteIndex == songToLearn.getNotes().size()) {
-					PlayerUtils.sendChat(mc.thePlayer, "chat.zss.song.mimic");
+					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.mimic"));
 					demoPlayed = true;
 					melody.clear();
 					ticksSinceLastNote = 0;
@@ -89,7 +107,7 @@ public class GuiLearnSong extends GuiMusicBase
 				PacketDispatcher.sendToServer(new LearnSongPacket(song));
 			} else {
 				PacketDispatcher.sendToServer(new PlayRecordPacket(null, x, y, z));
-				PlayerUtils.sendChat(mc.thePlayer, "chat.zss.song.premature");
+				PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.premature"));
 			}
 		}
 	}
@@ -98,13 +116,13 @@ public class GuiLearnSong extends GuiMusicBase
 	protected void onNoteAdded() {
 		int i = melody.size() - 1;
 		if (melody.get(i) != songToLearn.getNotes().get(i)) {
-			PlayerUtils.sendChat(mc.thePlayer, "chat.zss.song.incorrect." + mc.theWorld.rand.nextInt(4));
+			PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.incorrect." + mc.theWorld.rand.nextInt(4)));
 			melody.clear();
 		} else if (songToLearn.areCorrectNotes(melody)) {
 			song = songToLearn;
 			mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
 			PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
-			PlayerUtils.sendChat(mc.thePlayer, "chat.zss.song.correct." + mc.theWorld.rand.nextInt(4));
+			PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.correct." + mc.theWorld.rand.nextInt(4)));
 		}
 	}
 }

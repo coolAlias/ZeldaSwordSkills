@@ -19,8 +19,10 @@ package zeldaswordskills.handler;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
+import zeldaswordskills.client.gui.GuiLearnSong;
 import zeldaswordskills.client.gui.GuiMaskTrader;
 import zeldaswordskills.client.gui.GuiOcarina;
 import zeldaswordskills.client.gui.GuiPedestal;
@@ -28,6 +30,7 @@ import zeldaswordskills.client.gui.GuiSkills;
 import zeldaswordskills.inventory.ContainerMaskTrader;
 import zeldaswordskills.inventory.ContainerPedestal;
 import zeldaswordskills.inventory.ContainerSkills;
+import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler
@@ -36,7 +39,9 @@ public class GuiHandler implements IGuiHandler
 			/** Gui for playing musical intstruments with the same control scheme as Ocarina of Time */
 			GUI_OCARINA = 3,
 			/** Same as GUI_OCARINA but with a flag set for learning the Scarecrow Song */
-			GUI_SCARECROW = 4;
+			GUI_SCARECROW = 4,
+			/** Gui to open for learning all songs but the Scarecrow Song */
+			GUI_LEARN_SONG = 5;
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
@@ -51,8 +56,6 @@ public class GuiHandler implements IGuiHandler
 			return new ContainerMaskTrader();
 		case GUI_SKILLS:
 			return new ContainerSkills(player);
-		case GUI_OCARINA:
-			return null; // client-side only gui
 		}
 		return null;
 	}
@@ -71,9 +74,16 @@ public class GuiHandler implements IGuiHandler
 		case GUI_SKILLS:
 			return new GuiSkills(player);
 		case GUI_OCARINA:
-			return new GuiOcarina(x, y, z);
+			return new GuiOcarina(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 		case GUI_SCARECROW:
-			return new GuiOcarina(x, y, z, true);
+			return new GuiOcarina(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ), true);
+		case GUI_LEARN_SONG:
+			try {
+				return new GuiLearnSong(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
+			} catch (IllegalArgumentException e) {
+				LogHelper.warning(e.getMessage());
+				return null;
+			}
 		}
 		return null;
 	}

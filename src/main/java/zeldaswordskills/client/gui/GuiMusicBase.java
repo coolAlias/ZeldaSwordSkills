@@ -226,13 +226,12 @@ public abstract class GuiMusicBase extends GuiScreen
 	protected void onNotePlayed(SongNote note) {
 		melody.add(note);
 		ticksSinceLastNote = 0;
-		// play note on client side:
 		float f = (float) Math.pow(2.0D, (double)(note.ordinal() - 12) / 12.0D);
 		mc.thePlayer.playSound(ModInfo.ID + ":note.ocarina", 3.0F, f);
 		Vec3 look = mc.thePlayer.getLookVec();
 		mc.theWorld.spawnParticle("note",
 				mc.thePlayer.posX + look.xCoord + mc.theWorld.rand.nextDouble() - 0.5D,
-				mc.thePlayer.posY + mc.thePlayer.getEyeHeight() + mc.theWorld.rand.nextDouble() - 0.5D,
+				mc.thePlayer.posY + look.yCoord + mc.thePlayer.getEyeHeight() + mc.theWorld.rand.nextDouble() - 0.5D,
 				mc.thePlayer.posZ + look.zCoord + mc.theWorld.rand.nextDouble() - 0.5D,
 				(double) note.ordinal() / 24.0D, 0.0D, 0.0D);
 	}
