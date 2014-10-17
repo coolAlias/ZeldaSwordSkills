@@ -304,7 +304,7 @@ public class EntityAITeleport extends EntityAIBase
 	 */
 	public static boolean teleportTo(World world, EntityLivingBase entity, double x, double y, double z, AxisAlignedBB restriction, boolean grounded) {
 		EnderTeleportEvent event = new EnderTeleportEvent(entity, x, y, z, 0);
-		if (MinecraftForge.EVENT_BUS.post(event)){
+		if (MinecraftForge.EVENT_BUS.post(event)) {
 			return false;
 		}
 		double d3 = entity.posX;
@@ -346,6 +346,9 @@ public class EntityAITeleport extends EntityAIBase
 			entity.setPosition(d3, d4, d5);
 			return false;
 		} else {
+			if (entity instanceof EntityPlayer) {
+				entity.setPositionAndUpdate(entity.posX, entity.posY, entity.posZ);
+			}
 			for (int l = 0; l < 128; ++l) {
 				double d6 = (double) l / 127.0D;
 				float f = (world.rand.nextFloat() - 0.5F) * 0.2F;
