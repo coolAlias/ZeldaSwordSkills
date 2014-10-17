@@ -24,6 +24,7 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
@@ -35,10 +36,14 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.api.entity.ISongEntity;
+import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
+import zeldaswordskills.util.WarpPoint;
+import zeldaswordskills.world.TeleporterNoPortal;
 
 public enum ZeldaSong {
 	ZELDAS_LULLABY("lullaby", 100, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2),
@@ -198,9 +203,9 @@ public enum ZeldaSong {
 			case EPONAS_SONG:
 				// Only max power instruments can teleport a horse
 				if (power > 4 && player.worldObj.provider.dimensionId == 0 &&
-						player.worldObj.canBlockSeeTheSky(MathHelper.floor_double(player.posX),
-								MathHelper.floor_double(player.boundingBox.maxY),
-								MathHelper.floor_double(player.posZ)))
+				player.worldObj.canBlockSeeTheSky(MathHelper.floor_double(player.posX),
+						MathHelper.floor_double(player.boundingBox.maxY),
+						MathHelper.floor_double(player.posZ)))
 				{
 					EntityHorse epona = ZSSPlayerSongs.get(player).getLastHorseRidden();
 					if (epona != null) {
@@ -255,6 +260,47 @@ public enum ZeldaSong {
 					for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
 						WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
 						worldserver.setWorldTime(worldserver.getWorldTime() + (long) 12000); // adds half a day
+					}
+				}
+				break;
+				// All warping songs
+			case FOREST_MINUET:
+			case FIRE_BOLERO:
+			case WATER_SERENADE:
+			case SPIRIT_REQUIEM:
+			case SHADOW_NOCTURNE:
+			case LIGHT_PRELUDE:
+				WarpPoint warp = ZSSPlayerSongs.get(player).getWarpPoint(this);
+				if (power > 4 && warp != null) {
+					int dimension = player.worldObj.provider.dimensionId;
+					if (dimension == 1 && warp.dimensionId != 1) { // can't teleport from the end to other dimensions
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.warp.end"));
+					} else {
+						double dx = player.posX;
+						double dy = player.posY;
+						double dz = player.posZ;
+						if (dimension != warp.dimensionId) {
+							((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, warp.dimensionId, new TeleporterNoPortal((WorldServer) player.worldObj));
+						}
+						boolean noBlock = false;
+						boolean noAir = false;
+						Block block = player.worldObj.getBlock(warp.x, warp.y, warp.z);
+						int meta = player.worldObj.getBlockMetadata(warp.x, warp.y, warp.z);
+						if (block instanceof BlockWarpStone && BlockWarpStone.warpBlockSongs.get(meta) == this) {
+							if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D)) {
+								noBlock = true;
+							}
+						} else {
+							noAir = true;
+						}
+						// set back to original dimension and position if it failed
+						if (noBlock || noAir) {
+							if (dimension != warp.dimensionId) {
+								((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, dimension, new TeleporterNoPortal((WorldServer) player.worldObj));
+							}
+							player.setPositionAndUpdate(dx, dy, dz);
+							PlayerUtils.sendChat(player, StatCollector.translateToLocal(noBlock ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing"));
+						}
 					}
 				}
 				break;

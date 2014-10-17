@@ -19,7 +19,9 @@ package zeldaswordskills.entity;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,12 +35,14 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.LearnSongPacket;
 import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
+import zeldaswordskills.util.WarpPoint;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -49,10 +53,13 @@ public class ZSSPlayerSongs
 
 	private final Set<ZeldaSong> knownSongs = EnumSet.noneOf(ZeldaSong.class);
 
+	/** Coordinates of most recently activated Warp Stones, stored using the block's metadata as key */
+	private final Map<Integer, WarpPoint> warpPoints = new HashMap<Integer, WarpPoint>();
+
 	/** Song to be learned from the learning GUI is set by the block or entity triggering the GUI */
 	@SideOnly(Side.CLIENT)
 	public ZeldaSong songToLearn;
-	
+
 	/** Notes set by the player to play the Scarecrow's Song */
 	private final List<SongNote> scarecrowNotes = new ArrayList<SongNote>();
 
@@ -151,6 +158,24 @@ public class ZSSPlayerSongs
 	}
 
 	/**
+	 * Call each time a warp stone is activated to set the warp coordinates for that block type
+	 */
+	public void onActivatedWarpStone(int x, int y, int z, int meta) {
+		if (warpPoints.containsKey(meta)) {
+			warpPoints.remove(meta);
+		}
+		warpPoints.put(meta, new WarpPoint(player.worldObj.provider.dimensionId, x, y, z));
+	}
+
+	/**
+	 * Returns the chunk coordinates to warp to for the various warp songs, or null if not yet set
+	 */
+	public WarpPoint getWarpPoint(ZeldaSong song) {
+		Integer meta = BlockWarpStone.reverseLookup.get(song);
+		return (meta == null ? null : warpPoints.get(meta));
+	}
+
+	/**
 	 * Returns true if the player can open the Scarecrow Song gui: i.e.,
 	 * notes have not been set or song not yet learned and enough time has passed,
 	 * with appropriate chat messages for failed conditions.
@@ -246,12 +271,27 @@ public class ZSSPlayerSongs
 			compound.setLong("HorseUUIDMost", horseUUID.getMostSignificantBits());
 			compound.setLong("HorseUUIDLeast", horseUUID.getLeastSignificantBits());
 		}
+
+		if (!warpPoints.isEmpty()) {
+			NBTTagList warpList = new NBTTagList();
+			for (Integer i : warpPoints.keySet()) {
+				WarpPoint warp = warpPoints.get(i);
+				if (warp != null) {
+					NBTTagCompound warpTag = warp.writeToNBT();
+					warpTag.setInteger("WarpKey", i);
+					warpList.appendTag(warpTag);
+				} else {
+					LogHelper.warning("NULL warp point stored in map with key " + i);
+				}
+			}
+			compound.setTag("WarpList", warpList);
+		}
 	}
 
 	public void loadNBTData(NBTTagCompound compound) {
-		NBTTagList taglist = compound.getTagList("KnownSongs", Constants.NBT.TAG_COMPOUND);
-		for (int i = 0; i < taglist.tagCount(); ++i) {
-			NBTTagCompound tag = taglist.getCompoundTagAt(i);
+		NBTTagList songs = compound.getTagList("KnownSongs", Constants.NBT.TAG_COMPOUND);
+		for (int i = 0; i < songs.tagCount(); ++i) {
+			NBTTagCompound tag = songs.getCompoundTagAt(i);
 			ZeldaSong song = ZeldaSong.getSongFromUnlocalizedName(tag.getString("song"));
 			if (song != null) {
 				knownSongs.add(song);
@@ -273,6 +313,15 @@ public class ZSSPlayerSongs
 		nextSongHealTime = compound.getLong("NextHealSongTime");
 		if (compound.hasKey("HorseUUIDMost") && compound.hasKey("HorseUUIDLeast")) {
 			horseUUID = new UUID(compound.getLong("HorseUUIDMost"), compound.getLong("HorseUUIDLeast"));
+		}
+
+		if (compound.hasKey("WarpList")) {
+			NBTTagList warpList = compound.getTagList("WarpList", Constants.NBT.TAG_COMPOUND);
+			for (int i = 0; i < warpList.tagCount(); ++i) {
+				NBTTagCompound warpTag = warpList.getCompoundTagAt(i);
+				WarpPoint warp = WarpPoint.readFromNBT(warpTag);
+				warpPoints.put(warpTag.getInteger("WarpKey"), warp);
+			}
 		}
 	}
 }

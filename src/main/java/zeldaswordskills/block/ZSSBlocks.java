@@ -43,6 +43,7 @@ import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.item.ItemMetadataBlock;
 import zeldaswordskills.item.ItemSacredFlame;
 import zeldaswordskills.item.ItemSecretStone;
+import zeldaswordskills.item.ItemWarpStone;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.util.BlockRotationData;
 import cpw.mods.fml.client.registry.ClientRegistry;
@@ -66,6 +67,7 @@ public class ZSSBlocks
 	leverGiant,
 	beamWooden,
 	hookTarget,
+	warpStone,
 	secretStone,
 	sacredFlame,
 	// the following have a real Item, not an ItemBlock:
@@ -94,6 +96,7 @@ public class ZSSBlocks
 		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
 		chestInvisible = new BlockChestInvisible().setBlockName("zss.chest_invisible");
 		timeBlock = new BlockTime().setBlockName("zss.time_block");
+		warpStone = new BlockWarpStone().setBlockName("zss.warp_stone");
 		register();
 	}
 
@@ -130,6 +133,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
 		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
 		GameRegistry.registerBlock(timeBlock, timeBlock.getUnlocalizedName());
+		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
