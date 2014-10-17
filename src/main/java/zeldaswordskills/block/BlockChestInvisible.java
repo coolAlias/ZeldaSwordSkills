@@ -66,7 +66,7 @@ public class BlockChestInvisible extends BlockChestLocked implements ISongBlock 
 
 	@Override
 	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int power, int affected) {
-		if (song == ZeldaSong.ZELDAS_LULLABY && affected == 0) {
+		if (power > 4 && song == ZeldaSong.ZELDAS_LULLABY && affected == 0) {
 			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof IInventory) {
 				convertToChest((IInventory) te, world, x, y, z);
