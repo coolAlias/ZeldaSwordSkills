@@ -42,6 +42,7 @@ import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.world.crisis.BossBattle;
 import zeldaswordskills.world.crisis.DesertBattle;
 import zeldaswordskills.world.crisis.EarthBattle;
@@ -57,13 +58,13 @@ import zeldaswordskills.world.crisis.SwampBattle;
  */
 public enum BossType
 {
-	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, "hell"),
-	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, "desert", "deserthills"),
-	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, "forest", "foresthills"),
-	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, "coldtaiga", "coldtaigahills", "iceplains"),
-	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, "ocean", "frozenocean", "deepocean"),
-	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, "swampland"),
-	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, "extremehills", "extremehillsedge");
+	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, ZeldaSong.FIRE_BOLERO, "hell"),
+	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, ZeldaSong.SPIRIT_REQUIEM, "desert", "deserthills"),
+	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSong.FOREST_MINUET, "forest", "foresthills"),
+	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, ZeldaSong.LIGHT_PRELUDE, "coldtaiga", "coldtaigahills", "iceplains"),
+	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, ZeldaSong.WATER_SERENADE, "ocean", "frozenocean", "deepocean"),
+	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSong.SHADOW_NOCTURNE, "swampland"),
+	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, ZeldaSong.ORDER_OATH, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");
 	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
 	// need to set their target and aggravation state so they attack automatically
@@ -83,18 +84,22 @@ public enum BossType
 	/** Currently stores metadata value used by SecretStone for returning appropriate Block */
 	public final int metadata;
 
+	/** Song that may be used to warp to this dungeon, if any */
+	public final ZeldaSong warpSong;
+
 	/** Unlocalized name to BossType mapping */
 	private static final Map<String, BossType> stringToTypeMap = new HashMap<String, BossType>();
 
 	/** Mapping of biome names to boss types */
 	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
 
-	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, String... defaultBiomes) {
+	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, ZeldaSong warpSong, String... defaultBiomes) {
 		this.unlocalizedName = name;
 		this.defaultBiomes = defaultBiomes;
 		this.bossBattle = bossBattle;
 		this.bossMob = bossMob;
 		this.metadata = meta;
+		this.warpSong = warpSong;
 	}
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */

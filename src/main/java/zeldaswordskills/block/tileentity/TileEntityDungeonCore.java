@@ -19,6 +19,7 @@ package zeldaswordskills.block.tileentity;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -27,6 +28,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo.Stats;
@@ -214,6 +216,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			if (dungeonType != null) {
+				if (dungeonType.warpSong != null) {
+					placeWarpStone();
+				}
 				info.addStat(Stats.STAT_BOSS_ROOMS, 1 << dungeonType.ordinal());
 				player.triggerAchievement(ZSSAchievements.bossBattle);
 				// TODO == 127 (or 255 if the End boss room ever gets made)
@@ -253,6 +258,49 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	}
 
 	/**
+	 * Places the Warp Stone after the boss battle has finished
+	 */
+	private void placeWarpStone() {
+		Integer meta = BlockWarpStone.reverseLookup.get(dungeonType.warpSong);
+		if (meta != null) {
+			int x = box.getCenterX();
+			int z = box.getCenterZ();
+			switch(doorSide) {
+			case RoomBoss.SOUTH: z = box.maxZ - 1; break;
+			case RoomBoss.NORTH: z = box.minZ + 1; break;
+			case RoomBoss.EAST: x = box.maxX - 1; break;
+			case RoomBoss.WEST: x = box.minX + 1; break;
+			}
+			worldObj.setBlock(x, box.minY, z, ZSSBlocks.warpStone, meta, 2);
+			// remove webs blocking door for forest temple
+			if (worldObj.getBlock(x, box.minY + 1, z) == Blocks.web) {
+				worldObj.setBlockToAir(x, box.minY + 1, z);
+			}
+			if (worldObj.getBlock(x, box.minY + 2, z) == Blocks.web) {
+				worldObj.setBlockToAir(x, box.minY + 2, z);
+			}
+			placeOpenDoor((worldObj.getBlock(x, box.minY + 1, z).getMaterial().isLiquid() ? 2 : 1));
+		}
+	}
+
+	/**
+	 * Sets 2 air blocks where door used to be, after dungeon defeated
+	 * @param dy	Amount to adjust y position above box.minY; usually either 1 or 2
+	 */
+	private void placeOpenDoor(int dy) {
+		int x = box.getCenterX();
+		int z = box.getCenterZ();
+		switch(doorSide) {
+		case RoomBoss.SOUTH: z = box.maxZ; break;
+		case RoomBoss.NORTH: z = box.minZ; break;
+		case RoomBoss.EAST: x = box.maxX; break;
+		case RoomBoss.WEST: x = box.minX; break;
+		}
+		worldObj.setBlockToAir(x, box.minY + dy, z);
+		worldObj.setBlockToAir(x, box.minY + dy + 1, z);
+	}
+
+	/**
 	 * Returns false if the structure is locked and the door blocks have been removed.
 	 * This is only called when the door and bounding box fields are not null.
 	 */
@@ -264,7 +312,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		case RoomBoss.NORTH: z = box.minZ; break;
 		case RoomBoss.EAST: x = box.maxX; break;
 		case RoomBoss.WEST: x = box.minX; break;
-		default: LogHelper.warning(String.format("Verifying door in Dungeon Core with invalid door side at %d/%d/%d", xCoord, yCoord, zCoord));
+		default: LogHelper.warning("Verifying door in Dungeon Core with invalid door side at " + xCoord + "/" + yCoord + "/" + zCoord);
 		}
 		for (int y = box.minY; y < box.maxY; ++y) {
 			if (worldObj.getBlock(x, y, z) == door) {

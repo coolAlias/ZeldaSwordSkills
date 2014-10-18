@@ -147,5 +147,6 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 		addSongMapping(i++, ZeldaSong.SPIRIT_REQUIEM);
 		addSongMapping(i++, ZeldaSong.SHADOW_NOCTURNE);
 		addSongMapping(i++, ZeldaSong.LIGHT_PRELUDE);
+		addSongMapping(i++, ZeldaSong.ORDER_OATH);
 	}
 }
