@@ -33,9 +33,11 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.npc.EntityNpcBase;
 import zeldaswordskills.handler.GuiHandler;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -86,12 +88,31 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 
 	@Override
 	public boolean interact(EntityPlayer player) {
-		if (!player.worldObj.isRemote) {
+		ItemStack stack = player.getHeldItem();
+		if (stack != null && stack.getItem() instanceof ItemInstrument) {
+			if (player.worldObj.isRemote) {
+				ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
+				if (songs.isSongKnown(ZeldaSong.HEALING_SONG)) {
+					// instrument doesn't matter when reviewing a known song
+					songs.songToLearn = ZeldaSong.HEALING_SONG;
+					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
+				} else if (stack.getItemDamage() == ItemInstrument.Instrument.OCARINA_TIME.ordinal()) {
+					new TimedChatDialogue(player, Arrays.asList(
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.0"),
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.1")));
+					songs.songToLearn = ZeldaSong.HEALING_SONG;
+					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
+				} else {
+					new TimedChatDialogue(player, Arrays.asList(
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.lost.0"),
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.lost.1")));
+				}
+			}
+		} else if (!player.worldObj.isRemote) {
 			playLivingSound();
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			int maskStage = info.getCurrentMaskStage();
 			if (maskStage >= (maskMap.size() * NUM_STAGES)) {
-				ItemStack stack = player.getHeldItem();
 				Item mask = info.getBorrowedMask();
 				if (stack != null && stack.getItem() == mask) {
 					player.setCurrentItemOrArmor(0, null);

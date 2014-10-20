@@ -18,22 +18,27 @@
 package zeldaswordskills.item;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPumpkin;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
@@ -75,6 +80,9 @@ public class ItemInstrument extends Item
 		}
 	}
 
+	/** Map of teacher name->song taught, retrieved by the teacher's class */
+	private static final Map<Class<? extends EntityLiving>, Map<String, ZeldaSong>> teachersForClass = new HashMap<Class<? extends EntityLiving>, Map<String, ZeldaSong>>();
+
 	@SideOnly(Side.CLIENT)
 	private List<IIcon> icons;
 
@@ -98,9 +106,19 @@ public class ItemInstrument extends Item
 	}
 
 	@Override
+	public boolean doesSneakBypassUse(World world, int x, int y, int z, EntityPlayer player) {
+		return world.getBlock(x, y, z) instanceof BlockWarpStone;
+	}
+
+	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (world.isRemote) { // instruments have client-side only Guis
-			player.openGui(ZSSMain.instance, getInstrument(stack).getGuiId(), world, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
+			// check if song to learn was set from entity interaction
+			if (ZSSPlayerSongs.get(player).songToLearn != null) {
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
+			} else {
+				player.openGui(ZSSMain.instance, getInstrument(stack).getGuiId(), world, 0, 0, 0);
+			}
 		}
 		return stack;
 	}
@@ -113,6 +131,30 @@ public class ItemInstrument extends Item
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		return true;
+	}
+
+	/**
+	 * Called from EntityInteractEvent when the player interacts with an entity while holding an instrument
+	 * @return	True to cancel any further interaction (e.g. villager trading gui)
+	 */
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, EntityLiving entity) {
+		if (entity.hasCustomNameTag() && teachersForClass.containsKey(entity.getClass())) {
+			Map<String, ZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
+			ZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
+			if (toLearn != null) {
+				if (player.worldObj.isRemote) {
+					// onItemRightClick still processes after this, despite canceling the interact event -.-
+					ZSSPlayerSongs.get(player).songToLearn = toLearn;
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -176,5 +218,15 @@ public class ItemInstrument extends Item
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.instrument." + getInstrument(stack).getUnlocalizedName() + ".desc"));
+	}
+
+	static {
+		Map<String, ZeldaSong> teacherSongs = new HashMap<String, ZeldaSong>();
+		teacherSongs.put("Guru-Guru", ZeldaSong.STORMS_SONG);
+		teacherSongs.put("Impa", ZeldaSong.ZELDAS_LULLABY);
+		teacherSongs.put("Malon", ZeldaSong.EPONAS_SONG);
+		teacherSongs.put("Saria", ZeldaSong.SARIAS_SONG);
+		teacherSongs.put("Zelda", ZeldaSong.TIME_SONG);
+		teachersForClass.put(EntityVillager.class, teacherSongs);
 	}
 }

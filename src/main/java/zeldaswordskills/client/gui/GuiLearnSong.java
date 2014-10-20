@@ -102,6 +102,8 @@ public class GuiLearnSong extends GuiMusicBase
 
 	@Override
 	public void onGuiClosed() {
+		// hack for learning songs from entities and onItemRightClick processing
+		ZSSPlayerSongs.get(mc.thePlayer).songToLearn = null;
 		if (song != null) {
 			if (ticksSinceLastNote > song.getMinDuration()) {
 				PacketDispatcher.sendToServer(new LearnSongPacket(song));

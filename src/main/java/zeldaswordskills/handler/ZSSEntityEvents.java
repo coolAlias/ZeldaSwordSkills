@@ -18,6 +18,7 @@
 package zeldaswordskills.handler;
 
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.boss.EntityWither;
@@ -46,6 +47,7 @@ import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemCustomEgg;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
@@ -115,11 +117,11 @@ public class ZSSEntityEvents
 
 	@SubscribeEvent
 	public void onInteract(EntityInteractEvent event) {
+		ItemStack stack = event.entityPlayer.getHeldItem();
 		if (event.target.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) event.target;
 			boolean flag2 = villager.getCustomNameTag().contains("Mask Salesman");
 			if (!event.entityPlayer.worldObj.isRemote) {
-				ItemStack stack = event.entityPlayer.getHeldItem();
 				if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
 					if (flag2) {
 						PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
@@ -139,10 +141,12 @@ public class ZSSEntityEvents
 				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
 			}
 		}
-		// allow custom spawn eggs to create child entities:
-		if (!event.isCanceled() && event.target instanceof EntityAgeable) {
-			ItemStack stack = event.entityPlayer.getHeldItem();
-			if (stack != null && stack.getItem() instanceof ItemCustomEgg) {
+		if (!event.isCanceled() && stack != null) {
+			if (stack.getItem() instanceof ItemInstrument && event.target instanceof EntityLiving) {
+				event.setCanceled(((ItemInstrument) stack.getItem()).onRightClickEntity(stack, event.entityPlayer, (EntityLiving) event.target));
+			}
+			// allow custom spawn eggs to create child entities:
+			else if (stack.getItem() instanceof ItemCustomEgg && event.target instanceof EntityAgeable) {
 				event.setCanceled(ItemCustomEgg.spawnChild(event.entity.worldObj, stack, event.entityPlayer, (EntityAgeable) event.target));
 			}
 		}

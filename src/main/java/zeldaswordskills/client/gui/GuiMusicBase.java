@@ -125,7 +125,7 @@ public abstract class GuiMusicBase extends GuiScreen
 			// j is factor of how far down the screen note should be drawn
 			int j = SongNote.Note.values().length - (note.note.ordinal() + 1) + (SongNote.Note.values().length * (2 - note.getOctave()));
 			int dy = 6 + (INT_Y * j);
-			int dx = 40 + (NOTE_SIZE + 8) * i;
+			int dx = 46 + (NOTE_SIZE + 8) * i;
 			// draw supplementary line(s) under staff and behind note
 			if (j > 10) { // j goes from 0-13, not 1-14
 				int dy2 = (10 + INT_Y * 11);
