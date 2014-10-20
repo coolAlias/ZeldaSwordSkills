@@ -44,6 +44,7 @@ import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -150,6 +151,9 @@ public class ItemInstrument extends Item
 				if (player.worldObj.isRemote) {
 					// onItemRightClick still processes after this, despite canceling the interact event -.-
 					ZSSPlayerSongs.get(player).songToLearn = toLearn;
+					if (!ZSSPlayerSongs.get(player).isSongKnown(toLearn)) {
+						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.npc.ocarina.learn", toLearn.toString()));
+					}
 				}
 				return true;
 			}
