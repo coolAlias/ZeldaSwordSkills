@@ -34,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
