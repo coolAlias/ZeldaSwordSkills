@@ -313,7 +313,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 		if (song == ZeldaSong.SARIAS_SONG) {
 			playLivingSound();
 			if (("Darunia").equals(getCustomNameTag())) {
-				if (power < 5) {
+				if (ZSSPlayerSongs.get(player).hasCuredNpc("Darunia")) {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.darunia.thanks"));
+				} else if (power < 5) {
 					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.darunia.weak"));
 				} else if (ZSSPlayerSongs.get(player).onCuredNpc("Darunia")) {
 					ItemStack gift = new ItemStack(ZSSItems.gauntletsSilver);
