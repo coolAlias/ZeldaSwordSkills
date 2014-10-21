@@ -40,8 +40,7 @@ public class OceanBattle extends BossBattle {
 	@Override
 	protected void endCrisis(World world) {
 		super.endCrisis(world);
-		StructureGenUtils.replaceMaterialWith(world, box.minX + 1, box.maxX, box.minY + 1, box.maxY, box.minZ + 1, box.maxZ, Material.sand, Blocks.air, 0);
-		StructureGenUtils.replaceMaterialWith(world, box.minX + 1, box.maxX, box.minY + 1, box.maxY, box.minZ + 1, box.maxZ, Material.water, Blocks.air, 0);
+		StructureGenUtils.replaceMaterialWith(world, box.minX + 1, box.maxX, box.minY + 1, box.maxY, box.minZ + 1, box.maxZ, Material.sand, Blocks.water, 0);
 	}
 
 	@Override
