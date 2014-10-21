@@ -20,6 +20,7 @@ package zeldaswordskills.entity;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +75,9 @@ public class ZSSPlayerSongs
 
 	/** Entity ID of last horse ridden, should be more efficient when getting entity */
 	private int horseId = -1;
+
+	/** Set of all NPCs this player has cured */
+	private final Set<String> curedNpcs = new HashSet<String>();
 
 	public ZSSPlayerSongs(EntityPlayer player) {
 		this.player = player;
@@ -247,6 +251,21 @@ public class ZSSPlayerSongs
 		}
 	}
 
+	/**
+	 * Returns whether this player has already cured an Npc with the given name
+	 */
+	public boolean hasCuredNpc(String name) {
+		return curedNpcs.contains(name);
+	}
+
+	/**
+	 * Call after curing an Npc to save that information
+	 * @return false if the Npc has already been marked as cured by this player
+	 */
+	public boolean onCuredNpc(String name) {
+		return curedNpcs.add(name);
+	}
+
 	public void saveNBTData(NBTTagCompound compound) {
 		NBTTagList songs = new NBTTagList();
 		for (ZeldaSong song : knownSongs) {
@@ -286,6 +305,16 @@ public class ZSSPlayerSongs
 			}
 			compound.setTag("WarpList", warpList);
 		}
+
+		if (!curedNpcs.isEmpty()) {
+			NBTTagList npcs = new NBTTagList();
+			for (String name : curedNpcs) {
+				NBTTagCompound npc = new NBTTagCompound();
+				npc.setString("NpcName", name);
+				npcs.appendTag(npc);
+			}
+			compound.setTag("CuredNpcs", npcs);
+		}
 	}
 
 	public void loadNBTData(NBTTagCompound compound) {
@@ -321,6 +350,14 @@ public class ZSSPlayerSongs
 				NBTTagCompound warpTag = warpList.getCompoundTagAt(i);
 				WarpPoint warp = WarpPoint.readFromNBT(warpTag);
 				warpPoints.put(warpTag.getInteger("WarpKey"), warp);
+			}
+		}
+
+		if (compound.hasKey("CuredNpcs")) {
+			NBTTagList npcs = compound.getTagList("CuredNpcs", Constants.NBT.TAG_COMPOUND);
+			for (int i = 0; i < npcs.tagCount(); ++i) {
+				NBTTagCompound npc = npcs.getCompoundTagAt(i);
+				curedNpcs.add(npc.getString("NpcName"));
 			}
 		}
 	}

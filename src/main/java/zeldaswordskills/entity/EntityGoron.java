@@ -17,6 +17,8 @@
 
 package zeldaswordskills.entity;
 
+import java.util.Arrays;
+
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -41,20 +43,28 @@ import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
+import zeldaswordskills.api.entity.ISongEntity;
 import zeldaswordskills.entity.ai.GenericAIDefendVillage;
 import zeldaswordskills.entity.ai.IVillageDefender;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TimedAddItem;
+import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class EntityGoron extends EntityVillager implements IVillageDefender
+public class EntityGoron extends EntityVillager implements IVillageDefender, ISongEntity
 {
 	/** The Goron's village, since EntityVillager.villageObj cannot be accessed */
 	protected Village village;
@@ -296,6 +306,31 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	@Override
 	public Village getVillageToDefend() {
 		return village;
+	}
+
+	@Override
+	public boolean onSongPlayed(EntityPlayer player, ZeldaSong song, int power, int affected) {
+		if (song == ZeldaSong.SARIAS_SONG) {
+			playLivingSound();
+			if (("Darunia").equals(getCustomNameTag())) {
+				if (power < 5) {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.darunia.weak"));
+				} else if (ZSSPlayerSongs.get(player).onCuredNpc("Darunia")) {
+					ItemStack gift = new ItemStack(ZSSItems.gauntletsSilver);
+					new TimedChatDialogue(player, Arrays.asList(
+							StatCollector.translateToLocal("chat.zss.song.saria.darunia.0"),
+							StatCollector.translateToLocal("chat.zss.song.saria.darunia.1"),
+							StatCollector.translateToLocalFormatted("chat.zss.song.saria.darunia.2", gift.getDisplayName())), 0, 1500);
+					new TimedAddItem(player, gift, 3000, Sounds.SUCCESS);
+				} else {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.darunia.thanks"));
+				}
+			} else if (affected == 0) {
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.goron"));
+			}
+			return true;
+		}
+		return false;
 	}
 
 	@Override
