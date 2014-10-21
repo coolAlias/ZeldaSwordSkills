@@ -260,7 +260,7 @@ public class EntityAITeleport extends EntityAIBase
 		double x = entity.posX + (world.rand.nextDouble() - 0.5D) * range;
 		double y = entity.posY + (double)(world.rand.nextInt(rangeY) - (rangeY / 2));
 		double z = entity.posZ + (world.rand.nextDouble() - 0.5D) * range;
-		return teleportTo(world, entity, x, y, z, restriction, grounded);
+		return teleportTo(world, entity, x, y, z, restriction, grounded, true);
 	}
 
 	/**
@@ -285,7 +285,7 @@ public class EntityAITeleport extends EntityAIBase
 		double x = entity.posX + (world.rand.nextDouble() - 0.5D) * 8.0D - vec3.xCoord * d0;
 		double y = entity.posY + (double)(world.rand.nextInt(16) - 8) - vec3.yCoord * d0;
 		double z = entity.posZ + (world.rand.nextDouble() - 0.5D) * 8.0D - vec3.zCoord * d0;
-		return teleportTo(world, entity, x, y, z, restriction, grounded);
+		return teleportTo(world, entity, x, y, z, restriction, grounded, true);
 	}
 
 	/**
@@ -293,16 +293,17 @@ public class EntityAITeleport extends EntityAIBase
 	 * @return True if the entity successfully teleported
 	 */
 	public static boolean teleportTo(World world, EntityLivingBase entity, double x, double y, double z) {
-		return teleportTo(world, entity, x, y, z, null, true);
+		return teleportTo(world, entity, x, y, z, null, true, true);
 	}
 
 	/**
 	 * Teleport the entity to the position specified, adjusting y coordinate as necessary
 	 * @param restriction	Optional bounding box defining teleportation borders - entity will not teleport outside these bounds'
 	 * @param grounded		True to require entity to land upon solid ground when teleporting
+	 * @param noLiquid		True to prevent entity from teleporting into liquids
 	 * @return True if the entity successfully teleported
 	 */
-	public static boolean teleportTo(World world, EntityLivingBase entity, double x, double y, double z, AxisAlignedBB restriction, boolean grounded) {
+	public static boolean teleportTo(World world, EntityLivingBase entity, double x, double y, double z, AxisAlignedBB restriction, boolean grounded, boolean noLiquid) {
 		EnderTeleportEvent event = new EnderTeleportEvent(entity, x, y, z, 0);
 		if (MinecraftForge.EVENT_BUS.post(event)) {
 			return false;
@@ -336,7 +337,7 @@ public class EntityAITeleport extends EntityAIBase
 				entity.setPosition(entity.posX, entity.posY, entity.posZ);
 				if (restriction != null && !restriction.isVecInside(Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ))) {
 					flag = false;
-				} else if (world.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty() && !world.isAnyLiquid(entity.boundingBox)) {
+				} else if (world.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty() && (!noLiquid || !world.isAnyLiquid(entity.boundingBox))) {
 					flag = true;
 				}
 			}
