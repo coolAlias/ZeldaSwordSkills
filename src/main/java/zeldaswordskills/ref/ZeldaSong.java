@@ -28,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
@@ -60,7 +61,8 @@ public enum ZeldaSong {
 	SHADOW_NOCTURNE("nocturne", 100, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
 	ORDER_OATH("order", 100, SongNote.A2, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D2),
 	LIGHT_PRELUDE("prelude", 100, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
-	HEALING_SONG("healing", 100, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1);
+	HEALING_SONG("healing", 100, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1),
+	SOARING_SONG("soaring", 100, SongNote.F1, SongNote.B2, SongNote.D2, SongNote.F1, SongNote.B2, SongNote.D2);
 
 	private final String unlocalizedName;
 
@@ -237,6 +239,24 @@ public enum ZeldaSong {
 					ZSSPlayerSongs.get(player).setNextHealTime();
 				}
 				break;
+			case SOARING_SONG:
+				if (power > 4) {
+					ChunkCoordinates cc = player.getBedLocation(player.dimension);
+					if (cc != null) {
+						cc = EntityPlayer.verifyRespawnCoordinates(player.worldObj, cc, player.isSpawnForced(player.dimension));
+					}
+					if (cc == null) {
+						cc = player.worldObj.getSpawnPoint();
+					}
+					if (cc != null) {
+						player.setPosition((double) cc.posX + 0.5D, (double) cc.posY + 0.1D, (double) cc.posZ + 0.5D);
+						while (!player.worldObj.getCollidingBoundingBoxes(player, player.boundingBox).isEmpty()) {
+							player.setPosition(player.posX, player.posY + 1.0D, player.posZ);
+						}
+						player.setPositionAndUpdate(player.posX, player.posY, player.posZ);
+					}
+				}
+				break;
 			case STORMS_SONG:
 				if (power > 4 && player.worldObj instanceof WorldServer) {
 					WorldInfo worldinfo = ((WorldServer) player.worldObj).getWorldInfo();
@@ -288,7 +308,7 @@ public enum ZeldaSong {
 						Block block = player.worldObj.getBlock(warp.x, warp.y, warp.z);
 						int meta = player.worldObj.getBlockMetadata(warp.x, warp.y, warp.z);
 						if (block instanceof BlockWarpStone && BlockWarpStone.warpBlockSongs.get(meta) == this) {
-							if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D)) {
+							if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D, null, true, false)) {
 								noBlock = true;
 							}
 						} else {
