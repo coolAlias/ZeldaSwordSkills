@@ -23,9 +23,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
@@ -124,17 +126,48 @@ public class Parry extends SkillActive
 	}
 
 	/**
-	 * Returns player's chance to disarm an attacker
-	 * @param attacker if the attacker is an EntityPlayer, their Parry score will decrease their chance
-	 * of being disarmed
+	 * Returns player's chance to disarm an attacker, including timing bonus
+	 * @param attacker entity attacking the player; if the attacker is an EntityPlayer,
+	 * 		their Parry score will decrease their chance of being disarmed
 	 */
 	public float getDisarmChance(EntityPlayer player, EntityLivingBase attacker) {
 		float penalty = (0.15F * attacksParried);
 		float bonus = Config.getDisarmTimingBonus() * (parryTimer > 0 ? (parryTimer - getParryDelay()) : 0);
-		if (attacker instanceof EntityPlayer) {
-			penalty += Config.getDisarmPenalty() * ZSSPlayerSkills.get((EntityPlayer) attacker).getSkillLevel(this);
+		float modifier = getDisarmModifier(player, attacker);
+		return (modifier - penalty + bonus);
+	}
+
+	/**
+	 * Returns the total disarm chance modifier based on the two entities and their held items;
+	 * includes all modifiers used by Parry except for the timing bonus and attacks parried.
+	 * @param defender	Entity defending against an attack, possibly disarming the attacker
+	 * @param attacker	Attacking entity who may be disarmed
+	 * @return	Combined total of all entity and item disarm modifiers
+	 */
+	public static float getDisarmModifier(EntityLivingBase defender, EntityLivingBase attacker) {
+		ItemStack defStack = defender.getEquipmentInSlot(0);
+		ItemStack offStack = attacker.getEquipmentInSlot(0);
+		float modifier = 0.0F;
+		if (defender instanceof EntityPlayer) {
+			modifier += 0.1F * ZSSPlayerSkills.get((EntityPlayer) defender).getSkillLevel(parry);
 		}
-		return ((level * 0.1F) - penalty + bonus);
+		if (defender instanceof IParryModifier) {
+			modifier += ((IParryModifier) attacker).getDefensiveModifier(defender, defStack);
+		}
+		if (defStack != null && defStack.getItem() instanceof IParryModifier) {
+			modifier += ((IParryModifier) defStack.getItem()).getDefensiveModifier(defender, defStack);
+		}
+		if (attacker instanceof EntityPlayer) {
+			// only modifier that is subtracted
+			modifier -= Config.getDisarmPenalty() * ZSSPlayerSkills.get((EntityPlayer) attacker).getSkillLevel(parry);
+		}
+		if (attacker instanceof IParryModifier) {
+			modifier += ((IParryModifier) attacker).getOffensiveModifier(attacker, offStack);
+		}
+		if (offStack != null && offStack.getItem() instanceof IParryModifier) {
+			modifier += ((IParryModifier) offStack.getItem()).getOffensiveModifier(attacker, offStack);
+		}
+		return modifier;
 	}
 
 	@Override
