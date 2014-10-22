@@ -38,6 +38,7 @@ import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderTileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
+import zeldaswordskills.item.ItemBlockTime;
 import zeldaswordskills.item.ItemCeramicJar;
 import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.item.ItemMetadataBlock;
@@ -132,7 +133,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(beamWooden, beamWooden.getUnlocalizedName());
 		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
 		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
-		GameRegistry.registerBlock(timeBlock, timeBlock.getUnlocalizedName());
+		GameRegistry.registerBlock(timeBlock, ItemBlockTime.class, timeBlock.getUnlocalizedName());
 		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");

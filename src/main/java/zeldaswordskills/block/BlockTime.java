@@ -17,10 +17,17 @@
 
 package zeldaswordskills.block;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
@@ -35,8 +42,17 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 {
+	/** Unlocalized names of all song blocks */
+	public static final String[] names = {"time_block","royal_block"};
+
+	/** Song required to manipulate each block, based on metadata less bit8 */
+	private static final Map<Integer, ZeldaSong> requiredSongs = new HashMap<Integer, ZeldaSong>();
+
 	@SideOnly(Side.CLIENT)
-	private IIcon iconFace;
+	private IIcon[] iconEnd;
+
+	@SideOnly(Side.CLIENT)
+	private IIcon[] iconFace;
 
 	public BlockTime() {
 		super(Material.rock);
@@ -64,22 +80,22 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 
 	@Override
 	public boolean canCollideCheck(int meta, boolean isHoldingBoat) {
-		return meta != 8;
+		return meta < 0x8;
 	}
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-		return (world.getBlockMetadata(x, y, z) == 8 ? null : super.getCollisionBoundingBoxFromPool(world, x, y, z));
+		return (world.getBlockMetadata(x, y, z) > 0x7 ? null : super.getCollisionBoundingBoxFromPool(world, x, y, z));
 	}
 
 	@Override
 	public boolean isReplaceable(IBlockAccess world, int x, int y, int z) {
-		return (world.getBlockMetadata(x, y, z) == 8 ? true : super.isReplaceable(world, x, y, z));
+		return (world.getBlockMetadata(x, y, z) > 0x7 ? true : super.isReplaceable(world, x, y, z));
 	}
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
-		if (world.getBlockMetadata(x, y, z) == 8) {
+		if (world.getBlockMetadata(x, y, z) > 0x7) {
 			setBlockBounds(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		} else {
 			setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
@@ -93,24 +109,44 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 
 	@Override
 	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int power, int affected) {
-		if (power > 4 && song == ZeldaSong.TIME_SONG) {
+		if (power > 4) {
 			int meta = world.getBlockMetadata(x, y, z);
-			world.setBlockMetadataWithNotify(x, y, z, (meta == 0 ? 8 : 0), 2);
-			return true;
+			if (song == requiredSongs.get((meta & ~0x8))) {
+				world.setBlockMetadataWithNotify(x, y, z, (meta < 0x8 ? (meta | 0x8) : (meta & ~0x8)), 2);
+				return true;
+			}
 		}
 		return false;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
+	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		for (int i = 0; i < names.length; ++i) {
+			list.add(new ItemStack(item, 1, i));
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(int side, int meta) {
-		return (side < 2 ? blockIcon : iconFace);
+		int i = (meta & ~0x8);
+		return (side < 2 ? iconEnd[i] : iconFace[i]);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-		iconFace = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_face");
+		iconFace = new IIcon[names.length];
+		iconEnd = new IIcon[names.length];
+		for (int i = 0; i < names.length; ++i) {
+			iconEnd[i] = register.registerIcon(ModInfo.ID + ":" + names[i]);
+			iconFace[i] = register.registerIcon(ModInfo.ID + ":" + names[i] + "_face");
+		}
+	}
+
+	static {
+		requiredSongs.put(0, ZeldaSong.TIME_SONG);
+		requiredSongs.put(1, ZeldaSong.ZELDAS_LULLABY);
 	}
 }
