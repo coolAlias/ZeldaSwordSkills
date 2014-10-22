@@ -278,9 +278,11 @@ public enum ZeldaSong {
 				break;
 			case SUN_SONG:
 				if (power > 4) {
+					long time = (player.worldObj.getWorldTime() % 24000);
+					long addTime = (time < 12000) ? (12000 - time) : (24000 - time);
 					for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
 						WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
-						worldserver.setWorldTime(worldserver.getWorldTime() + (long) 12000); // adds half a day
+						worldserver.setWorldTime(worldserver.getWorldTime() + addTime);
 					}
 				}
 				break;
