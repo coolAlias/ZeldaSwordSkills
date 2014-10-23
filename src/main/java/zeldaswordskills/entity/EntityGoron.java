@@ -32,7 +32,6 @@ import net.minecraft.entity.ai.EntityAILookAtTradePlayer;
 import net.minecraft.entity.ai.EntityAIMoveThroughVillage;
 import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
 import net.minecraft.entity.ai.EntityAIMoveTowardsTarget;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIPlay;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITradePlayer;
@@ -108,7 +107,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 		tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
 		targetTasks.addTask(1, new GenericAIDefendVillage(this));
 		targetTasks.addTask(2, new EntityAIHurtByTarget(this, true));
-		targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));
+		//targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));
 	}
 
 	@Override
@@ -222,6 +221,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 
 	@Override
 	public boolean attackEntityAsMob(Entity entity) {
+		if (attackTime > 0) {
+			return false;
+		}
 		float amount = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int knockback = 0;
 		attackTime = 20; // set to 20 in EntityMob#attackEntity, but seems to be unnecessary due to AI
