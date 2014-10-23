@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.api.item.ISwingSpeed;
@@ -72,7 +73,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFairyUpgrade, ISacredFlame, ISwingSpeed, IUnenchantable
+public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed, IUnenchantable
 {
 	/** Original ItemSword's field is private, but this has the same functionality */
 	protected final float weaponDamage;
@@ -145,6 +146,16 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	public ItemZeldaSword setNoItemOnBreak() {
 		givesBrokenItem = false;
 		return this;
+	}
+
+	@Override
+	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return (twoHanded ? -0.25F : 0.0F);
+	}
+
+	@Override
+	public float getDefensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return 0;
 	}
 
 	@Override
