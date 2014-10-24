@@ -141,22 +141,24 @@ public class Parry extends SkillActive
 	 * Returns the total disarm chance modifier based on the two entities and their held items;
 	 * includes all modifiers used by Parry except for the timing bonus and attacks parried.
 	 * @param defender	Entity defending against an attack, possibly disarming the attacker
-	 * @param attacker	Attacking entity who may be disarmed
+	 * @param attacker	Attacking entity who may be disarmed, possibly null
 	 * @return	Combined total of all entity and item disarm modifiers
 	 */
 	public static float getDisarmModifier(EntityLivingBase defender, EntityLivingBase attacker) {
 		ItemStack defStack = defender.getEquipmentInSlot(0);
-		ItemStack offStack = attacker.getEquipmentInSlot(0);
+		ItemStack offStack = (attacker != null ? attacker.getEquipmentInSlot(0) : null);
 		float modifier = 0.0F;
+		// DEFENDER
 		if (defender instanceof EntityPlayer) {
 			modifier += 0.1F * ZSSPlayerSkills.get((EntityPlayer) defender).getSkillLevel(parry);
 		}
 		if (defender instanceof IParryModifier) {
-			modifier += ((IParryModifier) attacker).getDefensiveModifier(defender, defStack);
+			modifier += ((IParryModifier) defender).getDefensiveModifier(defender, defStack);
 		}
 		if (defStack != null && defStack.getItem() instanceof IParryModifier) {
 			modifier += ((IParryModifier) defStack.getItem()).getDefensiveModifier(defender, defStack);
 		}
+		// ATTACKER
 		if (attacker instanceof EntityPlayer) {
 			// only modifier that is subtracted
 			modifier -= Config.getDisarmPenalty() * ZSSPlayerSkills.get((EntityPlayer) attacker).getSkillLevel(parry);

@@ -129,6 +129,8 @@ public class ItemInstrument extends Item
 		if (world.isRemote) {
 			if (isScarecrowAt(world, x, y, z) && ZSSPlayerSongs.get(player).canOpenScarecrowGui(true)) {
 				player.openGui(ZSSMain.instance, GuiHandler.GUI_SCARECROW, world, x, y, z);
+			} else {
+				player.openGui(ZSSMain.instance, getInstrument(stack).getGuiId(), world, x, y, z);
 			}
 		}
 		return true;

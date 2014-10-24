@@ -38,7 +38,9 @@ import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
 import zeldaswordskills.network.packet.client.LearnSongPacket;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
@@ -124,6 +126,7 @@ public class ZSSPlayerSongs
 		}
 		if (addSong) {
 			knownSongs.add(song);
+			PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 			player.triggerAchievement(ZSSAchievements.ocarinaSong);
 			if (song == ZeldaSong.SCARECROW_SONG) {
 				player.triggerAchievement(ZSSAchievements.ocarinaScarecrow);

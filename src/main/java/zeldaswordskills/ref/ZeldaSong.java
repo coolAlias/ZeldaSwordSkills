@@ -205,7 +205,7 @@ public enum ZeldaSong {
 			switch(this) {
 			case EPONAS_SONG:
 				// Only max power instruments can teleport a horse
-				if (power > 4 && player.worldObj.provider.dimensionId == 0 &&
+				if (power > 4 && player.worldObj.provider.isSurfaceWorld() &&
 				player.worldObj.canBlockSeeTheSky(MathHelper.floor_double(player.posX),
 						MathHelper.floor_double(player.boundingBox.maxY),
 						MathHelper.floor_double(player.posZ)))
