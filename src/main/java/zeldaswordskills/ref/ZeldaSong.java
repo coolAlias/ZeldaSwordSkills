@@ -240,7 +240,8 @@ public enum ZeldaSong {
 				}
 				break;
 			case SOARING_SONG:
-				if (power > 4) {
+				// Not usable in the Nether or the End, mainly due to unpredictable results
+				if (power > 4 && Math.abs(player.dimension) != 1) {
 					ChunkCoordinates cc = player.getBedLocation(player.dimension);
 					if (cc != null) {
 						cc = EntityPlayer.verifyRespawnCoordinates(player.worldObj, cc, player.isSpawnForced(player.dimension));
