@@ -41,24 +41,26 @@ import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.item.ItemInstrument;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.WarpPoint;
 import zeldaswordskills.world.TeleporterNoPortal;
 
 public enum ZeldaSong {
-	ZELDAS_LULLABY("lullaby", 100, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2),
+	ZELDAS_LULLABY("lullaby", 260, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2),
 	TIME_SONG("time", 100, SongNote.A2, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D1, SongNote.F1),
 	EPONAS_SONG("epona", 100, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.D2, SongNote.B2, SongNote.A2),
 	STORMS_SONG("storms", 100, SongNote.D1, SongNote.F1, SongNote.D2, SongNote.D1, SongNote.F1, SongNote.D2),
 	SUN_SONG("sun", 100, SongNote.A2, SongNote.F1, SongNote.D2, SongNote.A2, SongNote.F1, SongNote.D2),
 	SARIAS_SONG("saria", 100, SongNote.F1, SongNote.A2, SongNote.B2, SongNote.F1, SongNote.A2, SongNote.B2),
 	SCARECROW_SONG("scarecrow", 100), // user-defined song?
-	FOREST_MINUET("minuet", 100, SongNote.D1, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.B2, SongNote.A2),
+	FOREST_MINUET("minuet", 290, SongNote.D1, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.B2, SongNote.A2),
 	FIRE_BOLERO("bolero", 100, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.A2, SongNote.F1),
 	WATER_SERENADE("serenade", 100, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.A2, SongNote.B2),
 	SPIRIT_REQUIEM("requiem", 100, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1),
-	SHADOW_NOCTURNE("nocturne", 100, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
+	SHADOW_NOCTURNE("nocturne", 270, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
 	ORDER_OATH("order", 100, SongNote.A2, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D2),
 	LIGHT_PRELUDE("prelude", 100, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
 	HEALING_SONG("healing", 100, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1),
@@ -219,8 +221,11 @@ public enum ZeldaSong {
 						if (epona.getLeashed()) {
 							epona.clearLeashed(true, true);
 						}
+						((WorldServer) player.worldObj).getEntityTracker().removeEntityFromAllTrackingPlayers(epona);
 						Vec3 vec3 = player.getLookVec();
 						epona.setPosition(player.posX + (vec3.xCoord * 2.0D), player.posY + 1, player.posZ + (vec3.zCoord * 2.0D));
+						((WorldServer) player.worldObj).getEntityTracker().addEntityToTracker(epona);
+						epona.makeHorseRearWithSound();
 					}
 				}
 				List<EntityHorse> horses = player.worldObj.getEntitiesWithinAABB(EntityHorse.class, player.boundingBox.expand(8.0D, 4.0D, 8.0D));
@@ -234,6 +239,7 @@ public enum ZeldaSong {
 				break;
 			case HEALING_SONG:
 				if (power > 4 && ZSSPlayerSongs.get(player).canHealFromSong()) {
+					PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 					player.curePotionEffects(new ItemStack(Items.milk_bucket));
 					player.heal(player.getMaxHealth());
 					ZSSPlayerSongs.get(player).setNextHealTime();
@@ -250,16 +256,21 @@ public enum ZeldaSong {
 						cc = player.worldObj.getSpawnPoint();
 					}
 					if (cc != null) {
+						if (player.ridingEntity != null) {
+							player.mountEntity(null);
+						}
 						player.setPosition((double) cc.posX + 0.5D, (double) cc.posY + 0.1D, (double) cc.posZ + 0.5D);
 						while (!player.worldObj.getCollidingBoundingBoxes(player, player.boundingBox).isEmpty()) {
 							player.setPosition(player.posX, player.posY + 1.0D, player.posZ);
 						}
 						player.setPositionAndUpdate(player.posX, player.posY, player.posZ);
+						PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 					}
 				}
 				break;
 			case STORMS_SONG:
 				if (power > 4 && player.worldObj instanceof WorldServer) {
+					PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 					WorldInfo worldinfo = ((WorldServer) player.worldObj).getWorldInfo();
 					if (worldinfo.isRaining()) {
 						worldinfo.setRainTime(0);
@@ -279,6 +290,7 @@ public enum ZeldaSong {
 				break;
 			case SUN_SONG:
 				if (power > 4) {
+					PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 					long time = (player.worldObj.getWorldTime() % 24000);
 					long addTime = (time < 12000) ? (12000 - time) : (24000 - time);
 					for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
@@ -300,6 +312,9 @@ public enum ZeldaSong {
 					if (dimension == 1 && warp.dimensionId != 1) { // can't teleport from the end to other dimensions
 						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.warp.end"));
 					} else {
+						if (player.ridingEntity != null) {
+							player.mountEntity(null);
+						}
 						double dx = player.posX;
 						double dy = player.posY;
 						double dz = player.posZ;
@@ -324,6 +339,8 @@ public enum ZeldaSong {
 							}
 							player.setPositionAndUpdate(dx, dy, dz);
 							PlayerUtils.sendChat(player, StatCollector.translateToLocal(noBlock ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing"));
+						} else {
+							PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 						}
 					}
 				}

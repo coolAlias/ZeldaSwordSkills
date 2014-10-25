@@ -126,7 +126,6 @@ public class ZSSPlayerSongs
 		}
 		if (addSong) {
 			knownSongs.add(song);
-			PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 			player.triggerAchievement(ZSSAchievements.ocarinaSong);
 			if (song == ZeldaSong.SCARECROW_SONG) {
 				player.triggerAchievement(ZSSAchievements.ocarinaScarecrow);
@@ -135,6 +134,7 @@ public class ZSSPlayerSongs
 				player.triggerAchievement(ZSSAchievements.ocarinaMaestro);
 			}
 			if (!player.worldObj.isRemote) {
+				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.song.learned", song.toString()));
 				PacketDispatcher.sendTo(new LearnSongPacket(song, notes), (EntityPlayerMP) player);
 			}
