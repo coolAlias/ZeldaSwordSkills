@@ -31,6 +31,7 @@ import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.skills.SkillBase;
 
 /**
  * 
@@ -143,7 +144,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		super.dropFewItems(recentlyHit, lootingLevel);
-		entityDropItem(new ItemStack(ZSSItems.heartPiece), 0.0F);
+		entityDropItem(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), 0.0F);
 	}
 
 	@Override

@@ -146,7 +146,7 @@ public class DungeonLootLists
 		generateChestContents(world, rand, chest, room, true);
 		ChestGenHooks info = ChestGenHooks.getInfo(BOSS_LOOT);
 		WeightedRandomChestContent.generateChestContents(rand, info.getItems(rand), chest, info.getCount(rand));
-		WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), chest, 3);
+		WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
 		// special items that always generate, i.e. the Pendants of Virtue
 		ItemStack stack = room.getBossType().getSpecialItem();
 		if (stack != null) {
