@@ -26,6 +26,8 @@ import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.BossStatus;
+import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -71,6 +73,14 @@ public class RenderGenericLiving extends RenderLiving
 		super(model, shadowSize);
 		this.texture = new ResourceLocation(texturePath);
 		this.scale = scale;
+	}
+
+	@Override
+	public void doRender(Entity entity, double dx, double dy, double dz, float yaw, float partialTick) {
+		if (entity instanceof IBossDisplayData) {
+			BossStatus.setBossStatus((IBossDisplayData) entity, true);
+		}
+		super.doRender(entity, dx, dy, dz, yaw, partialTick);
 	}
 
 	@Override
