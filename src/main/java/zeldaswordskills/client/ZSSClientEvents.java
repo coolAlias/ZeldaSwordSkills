@@ -40,7 +40,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
@@ -157,6 +157,9 @@ public class ZSSClientEvents
 				// hack for spin attack: allows key press information to be received while animating
 				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+					event.setCanceled(true);
+				} else if (skills.isSkillActive(SkillBase.backSlice) && skills.getActiveSkill(SkillBase.backSlice).isAnimating()) {
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
 				} else if (!skills.canInteract() || ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN)) {
 					//LogHelper.info("Skills could not interact during left click - canceling");

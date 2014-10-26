@@ -166,6 +166,8 @@ public class Config
 	private static boolean enablePlayerTarget;
 	/** Number of combo hits to display */
 	private static int hitsToDisplay;
+	/** [Back Slice] Allow Back Slice to potentially knock off player armor */
+	private static boolean allowDisarmorPlayer;
 	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
 	private static int disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
@@ -343,6 +345,7 @@ public class Config
 		doubleTap = config.get("Skills", "Require double tap activation (double-tap always required for vanilla movement keys)", true).getBoolean(true);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
+		allowDisarmorPlayer = config.get("Skills", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
 		disarmTimingBonus = config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
 		disarmPenalty = config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
@@ -488,6 +491,7 @@ public class Config
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }
 	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
+	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
 	public static float getDisarmPenalty() { return 0.01F * ((float) MathHelper.clamp_int(disarmPenalty, 0, 20)); }
 	public static float getDisarmTimingBonus() { return 0.001F * ((float) MathHelper.clamp_int(disarmTimingBonus, 0, 50)); }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */

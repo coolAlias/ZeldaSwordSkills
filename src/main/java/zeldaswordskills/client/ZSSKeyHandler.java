@@ -31,11 +31,11 @@ import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemHeldBlock;
-import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.packet.server.GetBombPacket;
 import zeldaswordskills.network.packet.server.OpenGuiPacket;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
@@ -76,7 +76,9 @@ public class ZSSKeyHandler
 
 	@SubscribeEvent
 	public void onKeyInput(KeyInputEvent event) {
-		onKeyPressed(mc, Keyboard.getEventKey());
+		if (Keyboard.getEventKeyState()) {
+			onKeyPressed(mc, Keyboard.getEventKey());
+		}
 	}
 
 	/**
@@ -141,6 +143,9 @@ public class ZSSKeyHandler
 				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, key, mc.thePlayer);
+					return;
+				} else if (skills.isSkillActive(SkillBase.backSlice)) {
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, key, mc.thePlayer);
 					return;
 				}
 			}
