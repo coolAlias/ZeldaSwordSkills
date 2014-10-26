@@ -36,6 +36,7 @@ import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.ref.ZeldaSong;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -113,6 +114,9 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 			int meta = world.getBlockMetadata(x, y, z);
 			if (song == requiredSongs.get((meta & ~0x8))) {
 				world.setBlockMetadataWithNotify(x, y, z, (meta < 0x8 ? (meta | 0x8) : (meta & ~0x8)), 2);
+				if (affected == 0) {
+					world.playSoundAtEntity(player, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+				}
 				return true;
 			}
 		}
