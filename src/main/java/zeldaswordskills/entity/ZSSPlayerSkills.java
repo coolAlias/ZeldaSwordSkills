@@ -17,6 +17,8 @@
 
 package zeldaswordskills.entity;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,20 +33,29 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.item.ItemTreasure.Treasures;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.SyncPlayerInfoPacket;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TimedAddItem;
+import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -76,8 +87,8 @@ public class ZSSPlayerSkills
 	@SideOnly(Side.CLIENT)
 	private SkillActive animatingSkill;
 
-	/** Number of Super Spin Attack orbs received from the Great Fairy: used to prevent exploits */
-	private int fairySpinOrbsReceived = 0;
+	/** Number of crests given to Orca, implying number of Hurrican Spin orbs received */
+	private int crestsGiven = 0;
 
 	public ZSSPlayerSkills(ZSSPlayerInfo playerInfo, EntityPlayer player) {
 		this.playerInfo = playerInfo;
@@ -99,7 +110,7 @@ public class ZSSPlayerSkills
 		}
 		validateSkills();
 		skills.clear();
-		fairySpinOrbsReceived = 0;
+		crestsGiven = 0;
 		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(ZSSPlayerInfo.get(player)), (EntityPlayerMP) player);
 	}
 
@@ -362,23 +373,76 @@ public class ZSSPlayerSkills
 	}
 
 	/**
-	 * Returns true if this player meets the skill requirements to receive a Super
-	 * Spin Attack orb from the Great Fairy
+	 * Returns true if this player has completed the Knight's Crest quest line for Orca
 	 */
-	public boolean canReceiveFairyOrb() {
-		return (getSkillLevel(SkillBase.spinAttack) > getSkillLevel(SkillBase.superSpinAttack) &&
-				getSkillLevel(SkillBase.superSpinAttack) >= fairySpinOrbsReceived &&
-				getSkillLevel(SkillBase.bonusHeart) >= (fairySpinOrbsReceived * Config.getMaxBonusHearts() / 5));
+	public boolean completedCrests() {
+		return crestsGiven >= 100;
 	}
 
-	/** Returns whether the player has already received all 5 Super Spin Attack orbs */
-	public boolean hasReceivedAllOrbs() {
-		return (fairySpinOrbsReceived == SkillBase.MAX_LEVEL);
-	}
+	/**
+	 * If the player has at least 1 level of Spin Attack and the number of crests given
+	 * is less than the max, one Knight's Crest is consumed and the player's progress on
+	 * Orca's quest continues; otherwise no crest is given and a chat message displays instead.
+	 */
+	public void giveCrest() {
+		if (getSkillLevel(SkillBase.spinAttack) < 1) {
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4)));
+		} else if (getSkillLevel(SkillBase.superSpinAttack) < Math.min(crestsGiven / 20, SkillBase.superSpinAttack.getMaxLevel())) {
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4)));
+		} else if (getSkillLevel(SkillBase.backSlice) < Math.min((crestsGiven + 10) / 20, SkillBase.backSlice.getMaxLevel())) {
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4)));
+		} else if (crestsGiven >= 100) {
+			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.master." + player.worldObj.rand.nextInt(4)));
+		} else if (PlayerUtils.consumeInventoryItem(player, ZSSItems.treasure, Treasures.KNIGHTS_CREST.ordinal(), 1)) {
+			++crestsGiven;
+			List<String> chat = new ArrayList<String>();
+			chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.redeem." + player.worldObj.rand.nextInt(4)));
+			if (crestsGiven == 1) {
+				new TimedChatDialogue(player, Arrays.asList(
+						StatCollector.translateToLocal("chat.zss.npc.orca.begin.0"),
+						StatCollector.translateToLocal("chat.zss.npc.orca.begin.1"),
+						StatCollector.translateToLocal("chat.zss.npc.orca.begin.2")));
+				player.triggerAchievement(ZSSAchievements.orcaRequest);
+				return; // prevent other timed chat message
+			} else if (crestsGiven > 19 && (crestsGiven % 20) == 0) {
+				// Every 20 crests Orca will teach one level of Super Spin Attack
+				boolean flag = true; // for timed give item timing
+				if (crestsGiven == 100) {
+					player.triggerAchievement(ZSSAchievements.orcaMaster);
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.final.0"));
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.final.1"));
+				} else if (crestsGiven == 20) {
+					player.triggerAchievement(ZSSAchievements.orcaSecondLesson);
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.first.0"));
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.first.1"));
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.first.2"));
+				} else {
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.train"));
+					flag = false;
+				}
+				new TimedAddItem(player, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.superSpinAttack.getId()), (flag ? 4000 : 3000), Sounds.SUCCESS);
+			} else if (crestsGiven > 9 && (crestsGiven % 10) == 0) {
+				// Every 10 crests Orca will teach one more level of Back Slice
+				boolean flag = true; // for timed give item timing
+				if (crestsGiven == 90) {
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.final.0"));
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.final.1"));
+				} else if (crestsGiven == 10) {
+					player.triggerAchievement(ZSSAchievements.orcaFirstLesson);
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.first.0"));
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.first.1"));
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.first.2"));
+				} else {
+					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.train"));
+					flag = false;
+				}
+				new TimedAddItem(player, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.backSlice.getId()), (flag ? 4000 : 3000), Sounds.SUCCESS);
+			} else {
+				chat.add(StatCollector.translateToLocalFormatted("chat.zss.npc.orca.more." + player.worldObj.rand.nextInt(4), crestsGiven));
+			}
 
-	/** Increments the number of Super Spin Attack orbs received, returning true if it's the last one */
-	public boolean receiveFairyOrb() {
-		return (++fairySpinOrbsReceived == SkillBase.MAX_LEVEL);
+			new TimedChatDialogue(player, chat);
+		}
 	}
 
 	/**
@@ -440,7 +504,7 @@ public class ZSSPlayerSkills
 			taglist.appendTag(skillTag);
 		}
 		compound.setTag("ZeldaSwordSkills", taglist);
-		compound.setInteger("fairySpinOrbsReceived", fairySpinOrbsReceived);
+		compound.setInteger("crestsGiven", crestsGiven);
 	}
 
 	public void loadNBTData(NBTTagCompound compound) {
@@ -451,6 +515,6 @@ public class ZSSPlayerSkills
 			byte id = skill.getByte("id");
 			skills.put(id, SkillBase.getSkill(id).loadFromNBT(skill));
 		}
-		fairySpinOrbsReceived = compound.getInteger("fairySpinOrbsReceived");
+		crestsGiven = compound.getInteger("crestsGiven");
 	}
 }

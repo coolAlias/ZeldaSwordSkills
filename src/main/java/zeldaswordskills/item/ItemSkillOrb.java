@@ -23,7 +23,6 @@ import java.util.List;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -36,20 +35,17 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
-import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IUnenchantable;
-import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemSkillOrb extends Item implements IFairyUpgrade, IUnenchantable
+public class ItemSkillOrb extends Item implements IUnenchantable 
 {
 	@SideOnly(Side.CLIENT)
 	private List<IIcon> icons;
@@ -167,39 +163,5 @@ public class ItemSkillOrb extends Item implements IFairyUpgrade, IUnenchantable
 				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.skillorb.desc.0"));
 			}
 		}
-	}
-
-	@Override
-	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
-		ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
-		if (!skills.hasReceivedAllOrbs()) {
-			if (PlayerUtils.hasMasterSword(player)) {
-				if (skills.canReceiveFairyOrb()) {
-					if (skills.receiveFairyOrb()) {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.finalskill"));
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.memento"));
-						WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.skillOrb,1,SkillBase.superSpinAttack.getId()), core.xCoord, core.yCoord + 2, core.zCoord);
-					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.greeting"));
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.skillorb"));
-					}
-					core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_SKILL, 1.0F, 1.0F);
-					WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.skillOrb,1,SkillBase.superSpinAttack.getId()), core.xCoord, core.yCoord + 2, core.zCoord);
-					item.setDead();
-					player.triggerAchievement(ZSSAchievements.skillSuper);
-				} else {
-					core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
-				}
-			} else {
-				core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.sword"));
-			}
-		}
-	}
-
-	@Override
-	public boolean hasFairyUpgrade(ItemStack stack) {
-		return stack.getItemDamage() == SkillBase.spinAttack.getId();
 	}
 }

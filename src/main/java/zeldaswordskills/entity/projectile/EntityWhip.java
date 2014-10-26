@@ -41,6 +41,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
@@ -49,11 +50,11 @@ import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemWhip;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.UnpressKeyPacket;
 import zeldaswordskills.network.packet.server.FallDistancePacket;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.util.SideHit;
@@ -316,7 +317,7 @@ public class EntityWhip extends EntityThrowable
 					if (lootTarget(player, target)) {
 						inflictDamage = (target instanceof IEntityLootable ? ((IEntityLootable) target).isHurtOnTheft(player, getType()) : Config.getHurtOnSteal());
 					} else if (target.getHeldItem() != null && ZSSPlayerSkills.get(player).hasSkill(SkillBase.parry)) {
-						float chance = ((Parry) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.parry)).getDisarmChance(player, target);
+						float chance = Parry.getDisarmModifier(player, target);
 						float yaw = (target.rotationYaw - player.rotationYaw);
 						while (yaw >= 360.0F) { yaw -= 360.0F; }
 						while (yaw < 0.0F) { yaw += 360.0F; }
@@ -365,6 +366,7 @@ public class EntityWhip extends EntityThrowable
 				if (!worldObj.isRemote) {
 					worldObj.spawnEntityInWorld(item);
 				}
+				player.triggerAchievement(ZSSAchievements.orcaThief);
 				wasItemStolen = true;
 			}
 		}
