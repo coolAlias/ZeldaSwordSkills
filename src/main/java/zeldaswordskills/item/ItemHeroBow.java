@@ -209,7 +209,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		if (nockArrowFromInventory(stack, player)) {
 			int duration = getMaxItemUseDuration(stack);
 			if (ZSSMain.isBG2Enabled) {
-				duration -= (EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, stack) * 20000);
+				duration -= (EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.get().effectId, stack) * 20000);
 			}
 			player.setItemInUse(stack, duration);
 		}
@@ -245,9 +245,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	 * Constructs and fires the arrow, if possible, and may consume the appropriate inventory item.
 	 */
 	private void fireArrow(ArrowLooseEvent event, ItemStack arrowStack, ItemStack bow, EntityPlayer player) {
-		//LogHelper.finer("Called standard fireArrow; no quiver action here.");
 		boolean flag = (player.capabilities.isCreativeMode || EnchantmentHelper.getEnchantmentLevel(Enchantment.infinity.effectId, bow) > 0);
-
 		if (flag || PlayerUtils.hasItem(player, arrowStack)) {
 			float charge = (float) event.charge / 20.0F;
 			charge = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
@@ -594,7 +592,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		@Method(modid="battlegear2")
 		@Override
 		public boolean canFireArrow(ItemStack arrow, World world, EntityPlayer player, float charge) {
-			//LogHelper.finer("Called custom FireHandler#canFireArrow");
 			ItemStack bow = player.getHeldItem();
 			if (bow != null) { // allow creative players to shoot custom Zelda arrows using any bow
 				return (bow.getItem() instanceof ItemHeroBow ? ((ItemHeroBow) bow.getItem()).canShootArrow(player, bow, arrow) : player.capabilities.isCreativeMode);
@@ -605,14 +602,12 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		@Method(modid="battlegear2")
 		@Override
 		public EntityArrow getFiredArrow(ItemStack arrow, World world, EntityPlayer player, float charge) {
-			//LogHelper.finer("Called custom FireHandler#getFiredArrow");
 			ItemStack bow = player.getHeldItem();
 			if (bow != null && (bow.getItem() instanceof ItemHeroBow || player.capabilities.isCreativeMode)) {
 				EntityArrowCustom arrowEntity = ItemHeroBow.getArrowEntity(arrow, world, player, charge);
 				if (arrowEntity != null) {
 					// vanilla arrow settings will be applied by BG2's arrow loose event
 					ItemHeroBow.applyCustomArrowSettings(player, bow, arrow, arrowEntity, charge);
-					//LogHelper.finer("Returning custom arrow entity: " + arrowEntity);
 				}
 				return arrowEntity;
 			}
