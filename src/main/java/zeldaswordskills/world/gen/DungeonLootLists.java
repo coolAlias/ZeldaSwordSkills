@@ -32,11 +32,12 @@ import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
+import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.ItemKeyBig;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.LibPotionID;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.LibPotionID;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.structure.RoomBase;
@@ -145,7 +146,7 @@ public class DungeonLootLists
 		generateChestContents(world, rand, chest, room, true);
 		ChestGenHooks info = ChestGenHooks.getInfo(BOSS_LOOT);
 		WeightedRandomChestContent.generateChestContents(rand, info.getItems(rand), chest, info.getCount(rand));
-		WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), chest, 3);
+		WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
 		// special items that always generate, i.e. the Pendants of Virtue
 		ItemStack stack = room.getBossType().getSpecialItem();
 		if (stack != null) {
@@ -203,6 +204,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.hookshotAddon, AddonType.EXTENSION.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.STONECLAW.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.hookshotAddon, AddonType.MULTI.ordinal(), 1, 1, 1),
+			getLoot(ZSSItems.instrument, Instrument.OCARINA_TIME.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.keySkeleton, 1, 1, 1),
 			getLoot(ZSSItems.magicMirror, 1, 1, 1),
 			getLoot(ZSSItems.masterOre, 1, 1, 1),

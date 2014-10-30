@@ -39,9 +39,10 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.EnumDamageType;
+import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 /**
@@ -203,10 +204,19 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	@Override
+	protected float calculateDamage(Entity entityHit) {
+		float dmg = super.calculateDamage(entityHit);
+		if (getType() == ElementType.LIGHT && entityHit instanceof IEntityEvil) {
+			dmg = ((IEntityEvil) entityHit).getLightArrowDamage(dmg);
+		}
+		return dmg;
+	}
+
+	@Override
 	protected void handlePostDamageEffects(EntityLivingBase entity) {
 		super.handlePostDamageEffects(entity);
 		if (!entity.isDead && getType() == ElementType.ICE) {
-			ZSSEntityInfo.get(entity).stun(calculateDamage(entity) * 10, true);
+			ZSSEntityInfo.get(entity).stun(MathHelper.ceiling_float_int(calculateDamage(entity)) * 10, true);
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
@@ -220,6 +230,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 	 * Returns true if the light arrow can kill this entity in one hit (endermen and wither skeletons)
 	 */
 	private boolean canOneHitKill(Entity entity) {
+		if (entity instanceof IEntityEvil) {
+			return ((IEntityEvil) entity).isLightArrowFatal();
+		}
 		boolean flag = (entity instanceof EntitySkeleton && ((EntitySkeleton) entity).getSkeletonType() == 1);
 		return (!(entity instanceof IBossDisplayData)) && (flag || entity instanceof EntityEnderman);
 	}

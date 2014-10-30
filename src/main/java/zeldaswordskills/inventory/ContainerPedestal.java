@@ -116,11 +116,9 @@ public class ContainerPedestal extends Container
 	protected boolean mergeItemStack(ItemStack stack, int start, int end, boolean backwards)
 	{
 		boolean flag1 = false;
-		int k = start;
+		int k = (backwards ? end - 1 : start);
 		Slot slot;
 		ItemStack itemstack1;
-
-		if (backwards) { k = end - 1; }
 
 		if (stack.isStackable()) {
 			while (stack.stackSize > 0 && (!backwards && k < end || backwards && k >= start))
@@ -129,6 +127,7 @@ public class ContainerPedestal extends Container
 				itemstack1 = slot.getStack();
 
 				if (!slot.isItemValid(stack)) {
+					k += (backwards ? -1 : 1);
 					continue;
 				}
 
@@ -151,29 +150,22 @@ public class ContainerPedestal extends Container
 					}
 				}
 
-				if (backwards) { --k; }
-
-				else { ++k; }
+				k += (backwards ? -1 : 1);
 			}
 		}
 
-		if (stack.stackSize > 0)
-		{
-			if (backwards) { k = end - 1; }
-
-			else { k = start; }
-
+		if (stack.stackSize > 0) {
+			k = (backwards ? end - 1 : start);
 			while (!backwards && k < end || backwards && k >= start) {
 				slot = (Slot) inventorySlots.get(k);
 				itemstack1 = slot.getStack();
-
 				if (!slot.isItemValid(stack)) {
+					k += (backwards ? -1 : 1);
 					continue;
 				}
 
 				if (itemstack1 == null) {
 					int l = stack.stackSize;
-
 					if (l <= slot.getSlotStackLimit()) {
 						slot.putStack(stack.copy());
 						stack.stackSize = 0;
@@ -188,9 +180,7 @@ public class ContainerPedestal extends Container
 					}
 				}
 
-				if (backwards) { --k; }
-
-				else { ++k; }
+				k += (backwards ? -1 : 1);
 			}
 		}
 

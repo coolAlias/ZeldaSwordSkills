@@ -45,7 +45,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
 import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.item.ItemMagicRod;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;

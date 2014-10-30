@@ -27,17 +27,18 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.inventory.ContainerSkills;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
 
 public class GuiSkills extends GuiContainer
 {
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/gui/gui_skills.png");
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_skills.png");
 	/** Number of lines of text that can be drawn on the screen */
 	private static final int MAX_LINES = 11;
 	/** Currently selected skill for displaying a description */
@@ -101,11 +102,14 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
 		if (needsScrollBar()) {
+			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+			GL11.glEnable(GL11.GL_BLEND);
 			mc.renderEngine.bindTexture(texture);
 			RenderHelperQ.drawTexturedRect(259, 55, 282, 0, 3, 5, 285, 180);
 			RenderHelperQ.drawTexturedRect(259, 150, 282, 5, 3, 5, 285, 180);
 			RenderHelperQ.drawTexturedRect(260, 61, 283, 17, 1, 88, 285, 180);
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
+			GL11.glPopAttrib();
 		}
 		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.zss.gui.description"));
 		isUnicode = fontRendererObj.getUnicodeFlag();

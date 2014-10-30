@@ -28,11 +28,11 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.server.EndComboPacket;
 import zeldaswordskills.network.packet.server.TargetIdPacket;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -224,9 +224,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	public void setCurrentTarget(Entity entity) {
-		if (entity == null || entity instanceof EntityLivingBase) {
-			currentTarget = (EntityLivingBase) entity;
+	public void setCurrentTarget(EntityPlayer player, Entity newTarget) {
+		if (newTarget instanceof EntityLivingBase) {
+			currentTarget = (EntityLivingBase) newTarget;
+		} else { // null or invalid target, deactivate skill
+			deactivate(player);
 		}
 	}
 

@@ -22,18 +22,23 @@ import java.util.Random;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 
 public enum MagicType {
 	/** Causes fire damage, melts ice, ignites blocks */
-	FIRE(true, "textures/blocks/lava_still.png", Sounds.MAGIC_FIRE, "flame"),
+	FIRE("fire", true, "textures/blocks/lava_still.png", Sounds.MAGIC_FIRE, "flame"),
 	/** Causes cold damage, freezes targets, extinguishes flames and lava */
-	ICE(true, "textures/blocks/ice.png", Sounds.MAGIC_ICE, "snowshovel"),
+	ICE("ice", true, "textures/blocks/ice.png", Sounds.MAGIC_ICE, "snowshovel"),
 	/** Inflicts shock damage */
-	LIGHTNING(false, "textures/blocks/gold_block.png", Sounds.SHOCK, "cloud"),
+	LIGHTNING("lightning", false, "textures/blocks/gold_block.png", Sounds.SHOCK, "cloud"),
+	/** Not currently used */
+	WATER("water", false, "textures/blocks/water_still.png", Sounds.SPLASH, "splash"),
 	/** Currently no special effects; used only to give Tornado Rod a dummy magic type */
-	WIND(false, "textures/blocks/emerald_block.png", Sounds.WHIRLWIND, "cloud");
+	WIND("wind", false, "textures/blocks/emerald_block.png", Sounds.WHIRLWIND, "cloud");
+
+	private final String unlocalizedName;
 
 	private final boolean affectsBlocks;
 
@@ -44,12 +49,17 @@ public enum MagicType {
 	// TODO what about non-vanilla particle strings?
 	private final String trailingParticle;
 
-	private MagicType(boolean affectsBlocks, String texture, String moveSound, String trailingParticle) {
+	private MagicType(String name, boolean affectsBlocks, String texture, String moveSound, String trailingParticle) {
+		this.unlocalizedName = name;
 		this.affectsBlocks = affectsBlocks;
 		this.texture = new ResourceLocation(texture);
 		this.moveSound = moveSound;
 		this.trailingParticle = trailingParticle;
+	}
 
+	@Override
+	public String toString() {
+		return StatCollector.translateToLocal("magic." + unlocalizedName + ".name");
 	}
 
 	/**

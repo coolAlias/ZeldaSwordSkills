@@ -28,7 +28,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.util.WorldUtils;

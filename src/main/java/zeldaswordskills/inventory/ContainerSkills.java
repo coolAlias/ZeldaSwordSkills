@@ -56,12 +56,15 @@ public class ContainerSkills extends Container
 				continue;
 			}
 
+			int bottom = 3;
+			int sideBar = 5;
+			int rightSide = bottom + sideBar;
 			i1 = (flag ? i - 1 : i);
-			if (i1 > 4) {
-				x = (i1 > 8 ? 108 : 22);
-				y = 99 - (i1 > 8 ? (i1 - 9) : (i1 - 5)) * 21;
+			if (i1 > bottom) {
+				x = (i1 > rightSide ? 108 : 22);
+				y = 120 - (i1 > rightSide ? (i1 - (rightSide + 1)) : (i1 - (sideBar - 1))) * 21;
 			} else {
-				x = 32 + (i1 - 1) * 22;
+				x = 44 + (i1 - 1) * 21;
 				y = 120;
 			}
 

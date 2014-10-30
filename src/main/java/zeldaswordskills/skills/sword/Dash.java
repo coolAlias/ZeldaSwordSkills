@@ -38,11 +38,11 @@ import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.packet.server.DashImpactPacket;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
@@ -59,7 +59,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Range: 4 blocks plus 1 block per additional level
  * Damage: 2 plus 1 per additional level
  * Knockback: 2 blocks, plus 1 per additional level
- * Exhaustion: 1.0F minus 0.1F per level (0.5F at level 5)
+ * Exhaustion: Light [1.0F - (level * 0.05F)]
  * Special: Must be at least 2 blocks away from target when skill is activated to
  * 			inflict damage, minus 0.2F per level (down to 1 block at level 5)
  * 
@@ -67,7 +67,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class Dash extends SkillActive
 {
 	/** Player's base movement speed */
-	private static final double BASE_MOVE = 0.10000000149011612D;
+	public static final double BASE_MOVE = 0.10000000149011612D;
 
 	/** True when Slam is used and while the player is in motion towards the target */
 	private boolean isActive = false;
@@ -122,7 +122,7 @@ public class Dash extends SkillActive
 
 	@Override
 	protected float getExhaustion() {
-		return 1.0F - (0.1F * level);
+		return 1.0F - (0.05F * level);
 	}
 
 	/** Damage is base damage plus one per level */

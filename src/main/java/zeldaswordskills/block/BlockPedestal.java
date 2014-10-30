@@ -41,7 +41,7 @@ import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

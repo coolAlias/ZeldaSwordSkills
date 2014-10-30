@@ -20,15 +20,18 @@ package zeldaswordskills.entity.mobs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.IBossDisplayData;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import zeldaswordskills.api.entity.MagicType;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ai.EntityAILevitate;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.skills.SkillBase;
 
 /**
  * 
@@ -44,13 +47,13 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		super(world);
 		tasks.addTask(0, new EntityAILevitate(this, 2.5D));
 		func_110163_bv(); // sets persistence required to true, meaning will not despawn
-		setType(rand.nextInt(MagicType.values().length));
+		setType(rand.nextInt(WizzrobeType.values().length));
 		setSize(1.0F, 3.0F);
 		experienceValue = 50;
 	}
 
 	@Override
-	protected EntityAITeleport getTeleportAI() {
+	protected EntityAITeleport getNewTeleportAI() {
 		return new EntityAITeleport(this, 16.0D, 60, false, true, true, true, true);
 	}
 
@@ -83,7 +86,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 
 	@Override
 	protected float getTelevadeChance() {
-		return 0.65F;
+		return 1.0F;
 	}
 
 	@Override
@@ -133,7 +136,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		super.onUpdate();
 		if (transformTimer > 0) {
 			if (--transformTimer == 0 && !worldObj.isRemote) {
-				setType(rand.nextInt(MagicType.values().length));
+				setType(rand.nextInt(WizzrobeType.values().length));
 			}
 		}
 	}
@@ -141,6 +144,16 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		super.dropFewItems(recentlyHit, lootingLevel);
-		entityDropItem(new ItemStack(ZSSItems.heartPiece), 0.0F);
+		entityDropItem(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), 0.0F);
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return wasItemStolen;
 	}
 }

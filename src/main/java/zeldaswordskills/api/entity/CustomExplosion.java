@@ -45,8 +45,8 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityBomb;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 
 /**
  * 

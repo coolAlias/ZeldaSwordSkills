@@ -41,16 +41,17 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
+import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.ZSSCombatEvents;
-import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.PacketISpawnParticles;
+import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
@@ -64,7 +65,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true)
 })
-public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IAllowItem, ISheathed
+public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IAllowItem, ISheathed
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -88,6 +89,16 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 	@Override
 	public boolean func_150897_b(Block block) {
 		return block instanceof ISmashable || block instanceof BlockBreakable;
+	}
+
+	@Override
+	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return -0.4F;
+	}
+
+	@Override
+	public float getDefensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return 0;
 	}
 
 	@Override

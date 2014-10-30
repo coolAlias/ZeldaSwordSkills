@@ -25,14 +25,14 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.inventory.ContainerMaskTrader;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiMaskTrader extends GuiContainer
 {
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/gui/gui_mask_trader.png");
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_mask_trader.png");
 
 	private GuiButton borrow;
 

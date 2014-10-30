@@ -17,10 +17,11 @@
 
 package zeldaswordskills.entity.projectile;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockButtonWood;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -30,7 +31,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 public class EntitySeedShot extends EntityMobThrowable
@@ -215,8 +216,9 @@ public class EntitySeedShot extends EntityMobThrowable
 			}
 		} else {
 			playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-			if (worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ) == Blocks.wooden_button) {
-				WorldUtils.activateButton(worldObj, Blocks.wooden_button, mop.blockX, mop.blockY, mop.blockZ);
+			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			if (block instanceof BlockButtonWood) {
+				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
 			}
 			setDead();
 		}

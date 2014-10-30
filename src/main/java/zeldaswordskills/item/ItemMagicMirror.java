@@ -31,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
@@ -39,10 +38,11 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.world.TeleporterNoPortal;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -90,9 +90,8 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 		if (!world.isRemote && ticksRemaining < (getMaxItemUseDuration(stack) / 2)) {
 			switch(player.dimension) {
 			case -1:
-				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, ((WorldServer) world).getDefaultTeleporter());
-				double dy = player.worldObj.getHeightValue(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posZ));
-				player.setPositionAndUpdate(player.posX, dy + 1, player.posZ);
+				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, new TeleporterNoPortal((WorldServer) world));
+				TeleporterNoPortal.adjustPosY(player);
 				break;
 			case 0:
 				double[] coordinates = getLastPosition(stack);

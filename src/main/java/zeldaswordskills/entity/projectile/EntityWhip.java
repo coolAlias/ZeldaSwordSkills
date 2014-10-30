@@ -28,9 +28,11 @@ import net.minecraft.block.BlockSign;
 import net.minecraft.block.BlockTorch;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -39,17 +41,20 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
+import zeldaswordskills.api.entity.IEntityLootable;
+import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemWhip;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.UnpressKeyPacket;
 import zeldaswordskills.network.packet.server.FallDistancePacket;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.util.SideHit;
@@ -309,8 +314,10 @@ public class EntityWhip extends EntityThrowable
 				EntityLivingBase target = (EntityLivingBase) mop.entityHit;
 				if (getThrower() instanceof EntityPlayer) {
 					EntityPlayer player = (EntityPlayer) getThrower();
-					if (target.getHeldItem() != null && ZSSPlayerSkills.get(player).hasSkill(SkillBase.parry)) {
-						float chance = ((Parry) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.parry)).getDisarmChance(player, target);
+					if (lootTarget(player, target)) {
+						inflictDamage = (target instanceof IEntityLootable ? ((IEntityLootable) target).isHurtOnTheft(player, getType()) : Config.getHurtOnSteal());
+					} else if (target.getHeldItem() != null && ZSSPlayerSkills.get(player).hasSkill(SkillBase.parry)) {
+						float chance = Parry.getDisarmModifier(player, target);
 						float yaw = (target.rotationYaw - player.rotationYaw);
 						while (yaw >= 360.0F) { yaw -= 360.0F; }
 						while (yaw < 0.0F) { yaw += 360.0F; }
@@ -336,6 +343,40 @@ public class EntityWhip extends EntityThrowable
 			}
 			setDead();
 		}
+	}
+
+	private boolean lootTarget(EntityPlayer player, EntityLivingBase target) {
+		if (target.getEntityData().getBoolean("LootableEntityFlag")) {
+			return false;
+		}
+		IEntityLootable lootable = (target instanceof IEntityLootable ? (IEntityLootable) target : null);
+		float lootChance = (lootable != null ? lootable.getLootableChance(player, getType())
+				: LootableEntityRegistry.getEntityLootChance(target.getClass()));
+		lootChance *= Config.getWhipLootMultiplier();
+		boolean wasItemStolen = false;
+		if (rand.nextFloat() < lootChance) {
+			ItemStack loot = (lootable != null ? lootable.getEntityLoot(player, getType())
+					: LootableEntityRegistry.getEntityLoot(target.getClass()));
+			if (loot != null) {
+				EntityItem item = new EntityItem(worldObj, posX, posY + 1, posZ, loot);
+				double dx = player.posX - posX;
+				double dy = player.posY - posY;
+				double dz = player.posZ - posZ;
+				TargetUtils.setEntityHeading(item, dx, dy, dz, 1.0F, 1.0F, true);
+				if (!worldObj.isRemote) {
+					worldObj.spawnEntityInWorld(item);
+				}
+				player.triggerAchievement(ZSSAchievements.orcaThief);
+				wasItemStolen = true;
+			}
+		}
+		
+		if (lootable == null || lootable.onLootStolen(player, wasItemStolen)) {
+			if (!worldObj.isRemote) {
+				target.getEntityData().setBoolean("LootableEntityFlag", true);
+			}
+		}
+		return wasItemStolen;
 	}
 
 	@Override

@@ -17,17 +17,19 @@
 
 package zeldaswordskills.entity.mobs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.particle.EntityBreakingFX;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -38,15 +40,19 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
+import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -80,14 +86,47 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Drops yellow chu jelly. These are most often found in deserts.
  *
  */
-public class EntityChu extends EntityLiving implements IMob, IEntityVariant
+public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IEntityVariant
 {
 	/** Chuchu types, in order of rarity and strength */
-	public static enum ChuType {RED,GREEN,BLUE,YELLOW};
+	public static enum ChuType {
+		RED(BiomeType.RIVER, BiomeType.FIERY),
+		GREEN(BiomeType.PLAINS, BiomeType.FOREST),
+		BLUE(BiomeType.TAIGA, BiomeType.COLD),
+		YELLOW(BiomeType.ARID, BiomeType.JUNGLE);
+
+		/** Biome in which this type spawns most frequently (or possibly exclusively) */
+		public final BiomeType favoredBiome;
+
+		/** Secondary biome in which this type spawns most frequently (or possibly exclusively) */
+		public final BiomeType secondBiome;
+
+		private ChuType(BiomeType favoredBiome, BiomeType secondBiome) {
+			this.favoredBiome = favoredBiome;
+			this.secondBiome = secondBiome;
+		}
+	}
+
+	/**
+	 * Returns array of default biomes in which this entity may spawn naturally
+	 */
+	public static String[] getDefaultBiomes() {
+		List<String> biomes = new ArrayList<String>();
+		for (ChuType type : ChuType.values()) {
+			biomes.addAll(Arrays.asList(type.favoredBiome.defaultBiomes));
+			biomes.addAll(Arrays.asList(type.secondBiome.defaultBiomes));
+		}
+		biomes.addAll(Arrays.asList(BiomeType.BEACH.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.MOUNTAIN.defaultBiomes));
+		return biomes.toArray(new String[biomes.size()]);
+	}
+
 	/** Data watcher index for this Chu's size */
 	private static final int CHU_SIZE_INDEX = 16;
+
 	/** Data watcher index for this Chu's type */
 	private static final int CHU_TYPE_INDEX = 17;
+
 	/** Data watcher index for shock time so entity can render appropriately */
 	private static final int SHOCK_INDEX = 18;
 
@@ -103,7 +142,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 		super(world);
 		yOffset = 0.0F;
 		slimeJumpDelay = rand.nextInt(20) + 10;
-		setType(getInitialType());
+		setType(ChuType.RED);
 		setSize((1 << rand.nextInt(3)));
 	}
 
@@ -117,24 +156,6 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 
 	protected EntityChu createInstance() {
 		return new EntityChu(worldObj);
-	}
-
-	/**
-	 * Returns a randomized type to set for this Chu during construction
-	 */
-	private ChuType getInitialType() {
-		if (rand.nextInt(4) == 0) {
-			if (rand.nextInt(4) == 0) {
-				if (rand.nextInt(4) == 0) {
-					return ChuType.BLUE;
-				} else {
-					return ChuType.YELLOW;
-				}
-			} else {
-				return ChuType.GREEN;
-			}
-		}
-		return ChuType.RED;
 	}
 
 	/** Returns this Chu's type */
@@ -151,6 +172,21 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	@Override
 	public void setType(int type) {
 		setType(ChuType.values()[type % ChuType.values().length]);
+	}
+
+	private void setTypeOnSpawn() {
+		if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
+			setType(rand.nextInt(ChuType.values().length));
+		} else {
+			BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
+			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
+			for (ChuType t : ChuType.values()) {
+				if (t.favoredBiome == biomeType || t.secondBiome == biomeType) {
+					setType(t);
+					return;
+				}
+			}
+		}
 	}
 
 	/**
@@ -229,20 +265,14 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	}
 
 	@Override
-	protected Item getDropItem() {
-		return ZSSItems.jellyChu;
-	}
-
-	@Override
 	protected void dropFewItems(boolean recentlyHit, int looting) {
-		Item item = getDropItem();
-		if (item != null && getSize() > 1) {
+		if (getSize() > 1) {
 			int k = rand.nextInt(4) - 2;
 			if (looting > 0) {
 				k += rand.nextInt(looting + 1);
 			}
 			for (int l = 0; l < k; ++l) {
-				entityDropItem(new ItemStack(item, 1, getType().ordinal()), 0.0F);
+				entityDropItem(new ItemStack(ZSSItems.jellyChu, 1, getType().ordinal()), 0.0F);
 			}
 		}
 	}
@@ -253,6 +283,29 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 		case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal()), 0.0F); break;
 		default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 		}
+	}
+
+	@Override
+	public float getLootableChance(EntityPlayer player, WhipType whip) {
+		return 0.2F;
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
+			return new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal());
+		}
+		return new ItemStack(ZSSItems.jellyChu, 1, getType().ordinal());
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return true;
+	}
+
+	@Override
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
+		return Config.getHurtOnSteal();
 	}
 
 	@Override
@@ -302,16 +355,8 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 			return false;
 		} else {
 			if (worldObj.difficultySetting != EnumDifficulty.PEACEFUL) {
-				BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
-				BiomeGenBase targetBiome = null;
-				switch(getType()) {
-				case RED: targetBiome = BiomeGenBase.swampland; break;
-				case GREEN: targetBiome = BiomeGenBase.plains; break;
-				case BLUE: targetBiome = BiomeGenBase.taiga; break;
-				case YELLOW: targetBiome = BiomeGenBase.desert; break;
-				}
-				if (targetBiome != null && biome == targetBiome && posY > 50.0D && posY < 70.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor()
-						&& worldObj.getBlockLightValue(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)) <= rand.nextInt(8)) {
+				if (posY > 50.0D && rand.nextFloat() < 0.5F && rand.nextFloat() < worldObj.getCurrentMoonPhaseFactor() &&
+						worldObj.getBlockLightValue(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)) <= rand.nextInt(8)) {
 					return super.getCanSpawnHere();
 				}
 				Chunk chunk = worldObj.getChunkFromBlockCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
@@ -371,7 +416,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 	public void onCollideWithPlayer(EntityPlayer player) {
 		double d = 0.36D * (getSize() * getSize());
 		if (canEntityBeSeen(player) && getDistanceSqToEntity(player) < d && player.attackEntityFrom(getDamageSource(), getDamage())) {
-			playSound(Sounds.MOB_ATTACK, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
+			playSound(Sounds.SLIME_ATTACK, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
 			if (rand.nextFloat() < (0.25F * getSize())) {
 				applySecondaryEffects(player);
 			}
@@ -542,6 +587,13 @@ public class EntityChu extends EntityLiving implements IMob, IEntityVariant
 				}
 			}
 		}
+	}
+
+	@Override
+	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
+		data = super.onSpawnWithEgg(data);
+		setTypeOnSpawn();
+		return data;
 	}
 
 	@Override

@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.lib;
+package zeldaswordskills.ref;
 
 public enum LibPotionID {
 	/* POTION DATA VALUES from http://www.minecraftwiki.net/wiki/Potions

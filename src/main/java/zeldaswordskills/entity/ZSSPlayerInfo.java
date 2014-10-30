@@ -21,6 +21,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -52,6 +53,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	private final EntityPlayer player;
 
 	private ZSSPlayerSkills playerSkills;
+
+	private ZSSPlayerSongs playerSongs;
 
 	/** Special block timer for shields; player cannot block while this is greater than zero */
 	private int blockTime = 0;
@@ -109,6 +112,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
 		playerSkills = new ZSSPlayerSkills(this, player);
+		playerSongs = new ZSSPlayerSongs(player);
 		initStats();
 	}
 
@@ -137,6 +141,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	public ZSSPlayerSkills getPlayerSkills() {
 		return playerSkills;
+	}
+
+	public ZSSPlayerSongs getPlayerSongs() {
+		return playerSongs;
 	}
 
 	/** Whether the player is able to block at this time (block timer is zero) */
@@ -288,6 +296,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		if (hasAutoBombArrow && (player.getItemInUse() == null || !(player.getItemInUse().getItem() instanceof ItemHeroBow))) {
 			hasAutoBombArrow = false;
 		}
+		// Check for currently ridden horse, used for Epona's Song
+		if (player.ridingEntity instanceof EntityHorse) {
+			playerSongs.setHorseRidden((EntityHorse) player.ridingEntity);
+		}
 	}
 
 	/**
@@ -346,6 +358,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	@Override
 	public void saveNBTData(NBTTagCompound compound) {
 		playerSkills.saveNBTData(compound);
+		playerSongs.saveNBTData(compound);
 		compound.setIntArray("zssStats", ArrayUtils.toPrimitive(playerStats.values().toArray(new Integer[playerStats.size()])));
 		compound.setByte("ZSSGearReceived", receivedGear);
 		compound.setInteger("lastBoots", Item.getIdFromItem(lastBootsWorn));
@@ -356,6 +369,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
 		playerSkills.loadNBTData(compound);
+		playerSongs.loadNBTData(compound);
 		int[] stats = compound.getIntArray("zssStats");
 		for (int i = 0; i < stats.length; ++i) {
 			playerStats.put(Stats.values()[i], stats[i]);

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -43,8 +44,8 @@ import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityFairy;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -309,6 +310,18 @@ public class WorldUtils
 		}
 
 		return list;
+	}
+
+	/**
+	 * Returns an entity by UUID, possibly traversing every single loaded entity
+	 */
+	public static Entity getEntityByUUID(World world, UUID uuid) {
+		for (Object o : world.loadedEntityList) {
+			if (((Entity) o).getUniqueID().compareTo(uuid) == 0) {
+				return (Entity) o;
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -30,7 +30,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 
 public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 {

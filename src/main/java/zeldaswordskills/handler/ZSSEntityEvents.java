@@ -18,6 +18,7 @@
 package zeldaswordskills.handler;
 
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.boss.EntityWither;
@@ -35,21 +36,24 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.EntityGoron;
-import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
+import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.item.ItemCustomEgg;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.util.PlayerUtils;
@@ -113,11 +117,11 @@ public class ZSSEntityEvents
 
 	@SubscribeEvent
 	public void onInteract(EntityInteractEvent event) {
+		ItemStack stack = event.entityPlayer.getHeldItem();
 		if (event.target.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) event.target;
 			boolean flag2 = villager.getCustomNameTag().contains("Mask Salesman");
 			if (!event.entityPlayer.worldObj.isRemote) {
-				ItemStack stack = event.entityPlayer.getHeldItem();
 				if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
 					if (flag2) {
 						PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
@@ -131,16 +135,18 @@ public class ZSSEntityEvents
 			}
 			event.setCanceled(flag2);
 		}
-		if (!event.isCanceled() && (event.target instanceof EntityVillager || event.target instanceof EntityMaskTrader)) {
+		if (!event.isCanceled() && (event.target instanceof EntityVillager || event.target instanceof EntityNpcMaskTrader)) {
 			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (helm != null && helm.getItem() instanceof ItemMask) {
 				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
 			}
 		}
-		// allow custom spawn eggs to create child entities:
-		if (!event.isCanceled() && event.target instanceof EntityAgeable) {
-			ItemStack stack = event.entityPlayer.getHeldItem();
-			if (stack != null && stack.getItem() instanceof ItemCustomEgg) {
+		if (!event.isCanceled() && stack != null) {
+			if (stack.getItem() instanceof ItemInstrument && event.target instanceof EntityLiving) {
+				event.setCanceled(((ItemInstrument) stack.getItem()).onRightClickEntity(stack, event.entityPlayer, (EntityLiving) event.target));
+			}
+			// allow custom spawn eggs to create child entities:
+			else if (stack.getItem() instanceof ItemCustomEgg && event.target instanceof EntityAgeable) {
 				event.setCanceled(ItemCustomEgg.spawnChild(event.entity.worldObj, stack, event.entityPlayer, (EntityAgeable) event.target));
 			}
 		}
@@ -193,6 +199,14 @@ public class ZSSEntityEvents
 		}
 		if (event.entity instanceof EntityPlayer && ZSSPlayerInfo.get((EntityPlayer) event.entity) == null) {
 			ZSSPlayerInfo.register((EntityPlayer) event.entity);
+		}
+	}
+
+	@SubscribeEvent
+	public void postTeleport(EntityAITeleport.PostEnderTeleport event) {
+		EntityAITeleport.disruptTargeting(event.entityLiving);
+		if (event.entity instanceof IEntityTeleport) {
+			((IEntityTeleport) event.entity).getTeleportAI().onPostTeleport(event.targetX, event.targetY, event.targetZ);
 		}
 	}
 

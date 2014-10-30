@@ -29,7 +29,7 @@ import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.client.render.block.RenderGiantLever;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityWhip;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 

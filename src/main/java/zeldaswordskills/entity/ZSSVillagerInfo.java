@@ -34,10 +34,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.MerchantRecipeHelper;
 
 /**
@@ -75,7 +76,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public ZSSVillagerInfo(EntityVillager villager) {
 		this.villager = villager;
 		data = new NBTTagCompound();
-		desiredMask = EntityMaskTrader.getMaskMapSize();
+		desiredMask = EntityNpcMaskTrader.getMaskMapSize();
 	}
 
 	public static final void register(EntityVillager villager) {
@@ -90,14 +91,14 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 * Returns the mask that this villager desires, or null if none
 	 */
 	public Item getMaskDesired() {
-		if (desiredMask == EntityMaskTrader.getMaskMapSize()) {
+		if (desiredMask == EntityNpcMaskTrader.getMaskMapSize()) {
 			if (villager.worldObj.rand.nextFloat() < Config.getMaskBuyChance()) {
-				desiredMask = villager.worldObj.rand.nextInt(EntityMaskTrader.getMaskMapSize());
+				desiredMask = villager.worldObj.rand.nextInt(EntityNpcMaskTrader.getMaskMapSize());
 			} else {
 				desiredMask = NONE;
 			}
 		}
-		return (desiredMask != NONE ? EntityMaskTrader.getMask(desiredMask) : null);
+		return (desiredMask != NONE ? EntityNpcMaskTrader.getMask(desiredMask) : null);
 	}
 
 	/** Completes the mask trade, setting villager to no longer trade for masks */

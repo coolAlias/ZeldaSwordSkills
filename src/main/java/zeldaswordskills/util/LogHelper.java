@@ -27,7 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 
 public class LogHelper
 {

@@ -36,12 +36,13 @@ import net.minecraft.village.MerchantRecipe;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityGoron;
-import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
-import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
+import zeldaswordskills.entity.npc.EntityNpcOrca;
+import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -71,14 +72,26 @@ public class ItemTreasure extends Item implements IUnenchantable
 		POCKET_EGG("pocket_egg"),
 		PRESCRIPTION("prescription"),
 		TENTACLE("tentacle",true,16),
-		ZELDAS_LETTER("zeldas_letter");
+		ZELDAS_LETTER("zeldas_letter"),
+		KNIGHTS_CREST("knights_crest","knights_crest",true,32);
 
 		public final String name;
+		/** Unlocalized string used to retrieve chat comment when an NPC is not interested in trading */
+		public final String uninterested;
 		private final boolean canSell;
 		private final int value;
-		private Treasures(String name) { this(name, false, 0); }
+
+		private Treasures(String name) {
+			this(name, "default", false, 0);
+		}
+
 		private Treasures(String name, boolean canSell, int value) {
+			this(name, "default", canSell, value);
+		}
+
+		private Treasures(String name, String uninterested, boolean canSell, int value) {
 			this.name = name;
+			this.uninterested = uninterested;
 			this.canSell = canSell;
 			// this.value = value;
 			// TODO there is a vanilla bug that prevents distinguishing between subtypes for the items to buy
@@ -104,15 +117,26 @@ public class ItemTreasure extends Item implements IUnenchantable
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote) {
+			Treasures treasure = Treasures.values()[stack.getItemDamage() % Treasures.values().length];
 			if (entity instanceof EntityVillager) {
 				EntityVillager villager = (EntityVillager) entity;
 				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
-				Treasures treasure = Treasures.values()[stack.getItemDamage() % Treasures.values().length];
 				MerchantRecipe trade = ZSSVillagerInfo.getTreasureTrade(treasure);
+				boolean isBaseVillager = entity.getClass().isAssignableFrom(EntityVillager.class);
 				villager.playLivingSound();
-				if (treasure == Treasures.ZELDAS_LETTER) {
-					if (!(entity instanceof EntityGoron) && villager.getCustomNameTag().contains("Mask Salesman")) {
-						EntityMaskTrader trader = new EntityMaskTrader(villager.worldObj);
+				if (treasure == Treasures.KNIGHTS_CREST && isBaseVillager && villager.getCustomNameTag().equals("Orca")) {
+					EntityNpcOrca orca = new EntityNpcOrca(villager.worldObj);
+					orca.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
+					orca.setCustomNameTag(villager.getCustomNameTag());
+					if (!orca.worldObj.isRemote) {
+						orca.worldObj.spawnEntityInWorld(orca);
+					}
+					villager.setDead();
+					PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
+					ZSSPlayerSkills.get(player).giveCrest();
+				} else if (treasure == Treasures.ZELDAS_LETTER) {
+					if (isBaseVillager && villager.getCustomNameTag().contains("Mask Salesman")) {
+						EntityNpcMaskTrader trader = new EntityNpcMaskTrader(villager.worldObj);
 						trader.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 						trader.setCustomNameTag(villager.getCustomNameTag());
 						if (!trader.worldObj.isRemote) {
@@ -160,11 +184,15 @@ public class ItemTreasure extends Item implements IUnenchantable
 					if (villagerInfo.isFinalTrade(treasure, stack)) {
 						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".wait"));
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested"));
+						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested." + treasure.uninterested));
 					}
 				}
 			} else if (entity instanceof INpc) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested"));
+				if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested." + treasure.uninterested + ".orca"));
+				} else {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested." + treasure.uninterested));
+				}
 			}
 		}
 		return true;

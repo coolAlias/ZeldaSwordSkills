@@ -44,7 +44,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.client.particle.FXCycloneRing;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

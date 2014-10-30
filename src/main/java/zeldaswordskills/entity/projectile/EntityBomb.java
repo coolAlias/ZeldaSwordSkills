@@ -33,8 +33,8 @@ import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 {

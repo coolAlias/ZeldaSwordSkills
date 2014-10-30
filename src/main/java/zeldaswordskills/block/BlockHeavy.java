@@ -29,7 +29,7 @@ import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;

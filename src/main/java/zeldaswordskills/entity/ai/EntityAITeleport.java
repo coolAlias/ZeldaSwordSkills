@@ -17,18 +17,22 @@
 
 package zeldaswordskills.entity.ai;
 
+import java.util.Set;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 
 /**
  * 
@@ -104,7 +108,6 @@ public class EntityAITeleport extends EntityAIBase
 		this.fleeTele = flee;
 		this.hurtTele = hurt;
 		this.setMutexBits(8); // compatible with all vanilla AI tasks, but not EntityAIUseMagic
-		MinecraftForge.EVENT_BUS.register(this); // this is probably a bad idea...
 	}
 
 	/**
@@ -132,7 +135,7 @@ public class EntityAITeleport extends EntityAIBase
 	 * the entity may teleport sooner if other conditions are met first.
 	 */
 	public void scheduleNextTeleport(int ticks) {
-		triggerTimer = Math.max(0, ticks);
+		triggerTimer = (triggerTimer > 0 ? Math.min(triggerTimer, Math.max(0, ticks)) : Math.max(0, ticks));
 	}
 
 	/**
@@ -224,13 +227,13 @@ public class EntityAITeleport extends EntityAIBase
 		return delayTimer > teleportDelay;
 	}
 
-	@SubscribeEvent
-	public void postTeleport(PostEnderTeleport event) {
-		if (event.entityLiving == this.entity) {
-			teleportDelay = minTeleportDelay + entity.worldObj.rand.nextInt(minTeleportDelay * 2) - entity.worldObj.rand.nextInt((minTeleportDelay / 2) + 1);
-			delayTimer = 0;
-			triggerTimer = 0;
-		}
+	/**
+	 * Called when the parent entity posts {@link PostEnderTeleport} event
+	 */
+	public void onPostTeleport(double originX, double originY, double originZ) {
+		teleportDelay = minTeleportDelay + entity.worldObj.rand.nextInt(minTeleportDelay * 2) - entity.worldObj.rand.nextInt((minTeleportDelay / 2) + 1);
+		delayTimer = 0;
+		triggerTimer = 0;
 	}
 
 	/**
@@ -257,7 +260,7 @@ public class EntityAITeleport extends EntityAIBase
 		double x = entity.posX + (world.rand.nextDouble() - 0.5D) * range;
 		double y = entity.posY + (double)(world.rand.nextInt(rangeY) - (rangeY / 2));
 		double z = entity.posZ + (world.rand.nextDouble() - 0.5D) * range;
-		return teleportTo(world, entity, x, y, z, restriction, grounded);
+		return teleportTo(world, entity, x, y, z, restriction, grounded, true);
 	}
 
 	/**
@@ -282,7 +285,7 @@ public class EntityAITeleport extends EntityAIBase
 		double x = entity.posX + (world.rand.nextDouble() - 0.5D) * 8.0D - vec3.xCoord * d0;
 		double y = entity.posY + (double)(world.rand.nextInt(16) - 8) - vec3.yCoord * d0;
 		double z = entity.posZ + (world.rand.nextDouble() - 0.5D) * 8.0D - vec3.zCoord * d0;
-		return teleportTo(world, entity, x, y, z, restriction, grounded);
+		return teleportTo(world, entity, x, y, z, restriction, grounded, true);
 	}
 
 	/**
@@ -290,18 +293,19 @@ public class EntityAITeleport extends EntityAIBase
 	 * @return True if the entity successfully teleported
 	 */
 	public static boolean teleportTo(World world, EntityLivingBase entity, double x, double y, double z) {
-		return teleportTo(world, entity, x, y, z, null, true);
+		return teleportTo(world, entity, x, y, z, null, true, true);
 	}
 
 	/**
 	 * Teleport the entity to the position specified, adjusting y coordinate as necessary
 	 * @param restriction	Optional bounding box defining teleportation borders - entity will not teleport outside these bounds'
 	 * @param grounded		True to require entity to land upon solid ground when teleporting
+	 * @param noLiquid		True to prevent entity from teleporting into liquids
 	 * @return True if the entity successfully teleported
 	 */
-	public static boolean teleportTo(World world, EntityLivingBase entity, double x, double y, double z, AxisAlignedBB restriction, boolean grounded) {
+	public static boolean teleportTo(World world, EntityLivingBase entity, double x, double y, double z, AxisAlignedBB restriction, boolean grounded, boolean noLiquid) {
 		EnderTeleportEvent event = new EnderTeleportEvent(entity, x, y, z, 0);
-		if (MinecraftForge.EVENT_BUS.post(event)){
+		if (MinecraftForge.EVENT_BUS.post(event)) {
 			return false;
 		}
 		double d3 = entity.posX;
@@ -333,7 +337,7 @@ public class EntityAITeleport extends EntityAIBase
 				entity.setPosition(entity.posX, entity.posY, entity.posZ);
 				if (restriction != null && !restriction.isVecInside(Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ))) {
 					flag = false;
-				} else if (world.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty() && !world.isAnyLiquid(entity.boundingBox)) {
+				} else if (world.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty() && (!noLiquid || !world.isAnyLiquid(entity.boundingBox))) {
 					flag = true;
 				}
 			}
@@ -343,6 +347,9 @@ public class EntityAITeleport extends EntityAIBase
 			entity.setPosition(d3, d4, d5);
 			return false;
 		} else {
+			if (entity instanceof EntityPlayer) {
+				entity.setPositionAndUpdate(entity.posX, entity.posY, entity.posZ);
+			}
 			for (int l = 0; l < 128; ++l) {
 				double d6 = (double) l / 127.0D;
 				float f = (world.rand.nextFloat() - 0.5F) * 0.2F;
@@ -356,8 +363,23 @@ public class EntityAITeleport extends EntityAIBase
 
 			entity.worldObj.playSoundEffect(d3, d4, d5, "mob.endermen.portal", 1.0F, 1.0F);
 			entity.playSound("mob.endermen.portal", 1.0F, 1.0F);
-			MinecraftForge.EVENT_BUS.post(new PostEnderTeleport(entity, entity.posX, entity.posY, entity.posZ, 0));
+			MinecraftForge.EVENT_BUS.post(new PostEnderTeleport(entity, d3, d4, d5, 0));
 			return true;
+		}
+	}
+
+	/**
+	 * Call to disengage any ILockOnTargets tracking the entity
+	 */
+	public static void disruptTargeting(EntityLivingBase entity) {
+		if (entity.worldObj instanceof WorldServer) {
+			Set<EntityPlayer> players = ((WorldServer) entity.worldObj).getEntityTracker().getTrackingPlayers(entity);
+			for (EntityPlayer player : players) {
+				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
+				if (skills.getTargetingSkill() != null && skills.getTargetingSkill().getCurrentTarget() == entity) {
+					skills.getTargetingSkill().setCurrentTarget(player, null);
+				}
+			}
 		}
 	}
 
@@ -365,8 +387,11 @@ public class EntityAITeleport extends EntityAIBase
 	 * Event posted after a successful ender teleport; not cancelable and changing fields has no effect
 	 */
 	public static class PostEnderTeleport extends EnderTeleportEvent {
-		public PostEnderTeleport(EntityLivingBase entity, double targetX, double targetY, double targetZ, float damage) {
-			super(entity, targetX, targetY, targetZ, damage);
+		/**
+		 * Post teleport event with the original position of the entity; the entity has already been set to its new position.
+		 */
+		public PostEnderTeleport(EntityLivingBase entity, double originX, double originY, double originZ, float damage) {
+			super(entity, originX, originY, originZ, damage);
 		}
 	}
 }

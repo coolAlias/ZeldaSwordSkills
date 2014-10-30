@@ -36,7 +36,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.api.damage.DamageUtils;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 

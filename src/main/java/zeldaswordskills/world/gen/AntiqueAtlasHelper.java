@@ -21,7 +21,7 @@ import hunternif.mc.atlas.api.AtlasAPI;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;

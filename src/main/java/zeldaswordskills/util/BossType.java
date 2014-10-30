@@ -33,6 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -41,6 +42,7 @@ import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.world.crisis.BossBattle;
 import zeldaswordskills.world.crisis.DesertBattle;
 import zeldaswordskills.world.crisis.EarthBattle;
@@ -56,13 +58,13 @@ import zeldaswordskills.world.crisis.SwampBattle;
  */
 public enum BossType
 {
-	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, "hell"),
-	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, "desert", "deserthills"),
-	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, "forest", "foresthills"),
-	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, "coldtaiga", "coldtaigahills", "iceplains"),
-	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, "ocean", "frozenocean", "deepocean"),
-	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, "swampland"),
-	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, "extremehills", "extremehillsedge");
+	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, ZeldaSong.FIRE_BOLERO, "hell"),
+	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, ZeldaSong.SPIRIT_REQUIEM, "desert", "deserthills"),
+	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSong.FOREST_MINUET, "forest", "foresthills"),
+	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, ZeldaSong.LIGHT_PRELUDE, "coldtaiga", "coldtaigahills", "iceplains"),
+	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, ZeldaSong.WATER_SERENADE, "ocean", "frozenocean", "deepocean"),
+	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSong.SHADOW_NOCTURNE, "swampland"),
+	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, ZeldaSong.ORDER_OATH, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");
 	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
 	// need to set their target and aggravation state so they attack automatically
@@ -82,18 +84,22 @@ public enum BossType
 	/** Currently stores metadata value used by SecretStone for returning appropriate Block */
 	public final int metadata;
 
+	/** Song that may be used to warp to this dungeon, if any */
+	public final ZeldaSong warpSong;
+
 	/** Unlocalized name to BossType mapping */
 	private static final Map<String, BossType> stringToTypeMap = new HashMap<String, BossType>();
 
 	/** Mapping of biome names to boss types */
 	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
 
-	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, String... defaultBiomes) {
+	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, ZeldaSong warpSong, String... defaultBiomes) {
 		this.unlocalizedName = name;
 		this.defaultBiomes = defaultBiomes;
 		this.bossBattle = bossBattle;
 		this.bossMob = bossMob;
 		this.metadata = meta;
+		this.warpSong = warpSong;
 	}
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
@@ -106,14 +112,18 @@ public enum BossType
 		return StatCollector.translateToLocal("dungeon.zss." + unlocalizedName + ".name");
 	}
 
-	/** Default biomes in which this dungeon can generate */
-	public String[] getDefaultBiomes() {
-		return defaultBiomes;
-	}
-
 	@Override
 	public String toString() {
 		return ("Name: " + getUnlocalizedName() + " BossMob: " + (bossMob != null ? bossMob.toString() : "NULL") + " Block: " + metadata);
+	}
+
+	/**
+	 * Loads biome lists from config file during post initialization
+	 */
+	public static void postInit(Configuration config) {
+		for (BossType type : BossType.values()) {
+			addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.defaultBiomes).getStringList());
+		}
 	}
 
 	/**
@@ -125,7 +135,9 @@ public enum BossType
 				continue;
 			}
 			biome = biome.toLowerCase().replace(" ", "");
-			if (bossBiomeList.containsKey(biome)) {
+			if (!BiomeType.isRealBiome(biome)) {
+				LogHelper.warning(biome + " is not a recognized biome! This entry will be ignored for BossType " + type.getDisplayName());
+			} else if (bossBiomeList.containsKey(biome)) {
 				LogHelper.warning("Error while adding " + biome + " for " + type.getDisplayName() + ": biome already mapped to " + bossBiomeList.get(biome).getDisplayName());
 			} else {
 				bossBiomeList.put(biome, type);
@@ -154,33 +166,6 @@ public enum BossType
 			LogHelper.warning("Null biome at " + x + "/" + z + " while getting Boss Type");
 			return null;
 		}
-		/*
-		String name = biome.biomeName.toLowerCase().replace(" ", "");
-		if (bossBiomeList.isEmpty()) {
-			String[][] list = Config.getBossBiomeLists();
-			if (list.length != BossType.values().length) {
-				LogHelper.warning("List of Boss Dungeon biomes has incorrect number of entries");
-			} else {
-				for (BossType type : BossType.values()) {
-					addBiomes(type, list[type.ordinal()]);
-				}
-			}
-			// prevent list from getting initialized again if all config values were empty
-			bossBiomeList.put("InitializedBossBiomeList", null);
-		}
-		if (bossBiomeList.containsKey(name)) {
-			return bossBiomeList.get(name);
-		} else if (!unusedBiomes.contains(name)) {
-			for (BossType type : BossType.values()) {
-				for (String s : type.getDefaultBiomes()) {
-					if (name.equals(s)) {
-						return type;
-					}
-				}
-			}
-			unusedBiomes.add(name);
-		}
-		 */
 		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
 	}
 

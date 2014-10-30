@@ -26,14 +26,14 @@ import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.inventory.ContainerPedestal;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiPedestal extends GuiContainer
 {
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/gui/gui_pedestal.png");
+	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_pedestal.png");
 
 	private final TileEntityPedestal pedestal;
 

@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.lib;
+package zeldaswordskills.ref;
 
 import java.io.File;
 import java.util.HashMap;
@@ -27,6 +27,7 @@ import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.BonusHeart;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.BossType;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
@@ -73,6 +74,8 @@ public class Config
 	private static int jarsPerClusterNether;
 	/** [Ceramic Jars][Nether] Max number of jar clusters per chunk */
 	private static int jarClustersPerChunkNether;
+	/** [Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100] */
+	private static int keeseCursedChance;
 	/** [Mobs][Keese] Chance of Keese spawning in a swarm */
 	private static int keeseSwarmChance;
 	/** [Mobs][Keese] Maximum number of Keese that can spawn in a swarm */
@@ -83,6 +86,8 @@ public class Config
 	private static boolean showSecretMessage;
 	/** [Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs */
 	private static boolean disableVanillaBuffs;
+	/** [NPC] Sets whether Zelda NPCs are invulnerable or not */
+	private static boolean npcsAreInvulnerable;
 	/*================== Buff Bar HUD =====================*/
 	/** [Buff HUD] Whether the buff bar should be displayed by default */
 	private static boolean isBuffBarEnabled;
@@ -161,12 +166,17 @@ public class Config
 	private static boolean enablePlayerTarget;
 	/** Number of combo hits to display */
 	private static int hitsToDisplay;
+	/** [Back Slice] Allow Back Slice to potentially knock off player armor */
+	private static boolean allowDisarmorPlayer;
 	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
 	private static int disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
 	private static int disarmPenalty;
 	/** [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
 	private static boolean requireFullHealth;
+	/*================== SONGS =====================*/
+	/** Number of ticks allowed between notes before played notes are cleared [5-100] */
+	private static int resetNotesInterval;
 	/*================== DUNGEON GEN =====================*/
 	/** Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected */
 	private static boolean avoidModBlocks;
@@ -238,6 +248,12 @@ public class Config
 	private static Map<Byte, Integer> orbDropChance;
 	/** [Piece of Power] Approximate number of enemies you need to kill before a piece of power drops */
 	private static int powerDropRate;
+	/** [Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100] */
+	private static int vanillaWhipLootChance;
+	/** [Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500] */
+	private static int globalWhipLootChance;
+	/** [Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately) */
+	private static boolean hurtOnSteal;
 	/*================== TRADES =====================*/
 	/** [Bomb Bag] Enable random villager trades for bomb bags */
 	private static boolean enableTradeBombBag;
@@ -251,11 +267,13 @@ public class Config
 	private static int maskBuyChance;
 	/** Number of trades required before a villager offers other services */
 	private static int friendTradesRequired;
+	/*================== MOB SPAWNING =====================*/
+	/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
+	private static int mobVariantChance;
 
 	public static void init(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
 		config.load();
-		ZSSEntities.init(config);
 		ZSSItems.init(config);
 
 		/*================== MOD INTER-COMPATIBILITY =====================*/
@@ -279,11 +297,13 @@ public class Config
 		jarGenChanceNether = config.get("General", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt();
 		jarsPerClusterNether = config.get("General", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt();
 		jarClustersPerChunkNether = config.get("General", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt();
+		keeseCursedChance = config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmChance = config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmSize = config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt();
 		sacredRefreshRate = config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt();
 		showSecretMessage = config.get("General", "Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
+		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
 		/*================== Buff Bar HUD =====================*/
 		isBuffBarEnabled = config.get("General", "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
 		isBuffBarHorizontal = config.get("General", "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
@@ -325,9 +345,17 @@ public class Config
 		doubleTap = config.get("Skills", "Require double tap activation (double-tap always required for vanilla movement keys)", true).getBoolean(true);
 		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
 		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
+		allowDisarmorPlayer = config.get("Skills", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
 		disarmTimingBonus = config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
 		disarmPenalty = config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
+		/*================== SONGS =====================*/
+		resetNotesInterval = config.get("Songs", "Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt();
+		for (ZeldaSong song : ZeldaSong.values()) {
+			if (!config.get("Songs", "Whether " + song.toString() + "'s main effect is enabled (does not affect notification of Song Blocks)", true).getBoolean(true)) {
+				song.setIsEnabled(false);
+			}
+		}
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
 		enableWindows = config.get("Dungeon Generation", "Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
@@ -372,6 +400,10 @@ public class Config
 			}
 		}
 		powerDropRate = config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt();
+		// TODO playerWhipLootChance = config.get("Drops", "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)[0-100]", 15).getInt();
+		vanillaWhipLootChance = config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt();
+		globalWhipLootChance = config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt();
+		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
 		/*================== TRADES =====================*/
 		friendTradesRequired = config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt();
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
@@ -379,12 +411,17 @@ public class Config
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt();
+		/*================== MOB SPAWNING =====================*/
+		/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
+		mobVariantChance = config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt();
 	}
 
 	public static void postInit() {
-		for (BossType type : BossType.values()) {
-			BossType.addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.getDefaultBiomes()).getStringList());
-		}
+		// load boss types last because they rely on blocks, mobs, etc. to already have been initialized
+		// other biome-related stuff just so all biomes can be sure to have loaded
+		BiomeType.postInit(config);
+		BossType.postInit(config);
+		ZSSEntities.postInit(config);
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -414,7 +451,9 @@ public class Config
 	public static int getSacredFlameRefreshRate() { return MathHelper.clamp_int(sacredRefreshRate, 0, 30); }
 	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
+	public static boolean areNpcsInvulnerable() { return npcsAreInvulnerable; }
 	/*================== MOBS =====================*/
+	public static float getKeeseCursedChance() { return (float) MathHelper.clamp_int(keeseCursedChance, 0, 100) * 0.01F; }
 	public static float getKeeseSwarmChance() { return (float) MathHelper.clamp_int(keeseSwarmChance, 0, 100) * 0.01F; }
 	public static int getKeeseSwarmSize() { return MathHelper.clamp_int(keeseSwarmSize, 4, 16); }
 	/*================== BUFF BAR HUD =====================*/
@@ -452,12 +491,15 @@ public class Config
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }
 	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
 	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
+	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
 	public static float getDisarmPenalty() { return 0.01F * ((float) MathHelper.clamp_int(disarmPenalty, 0, 20)); }
 	public static float getDisarmTimingBonus() { return 0.001F * ((float) MathHelper.clamp_int(disarmTimingBonus, 0, 50)); }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
 	}
+	/*================== SONGS =====================*/
+	public static int getNoteResetInterval() { return MathHelper.clamp_int(resetNotesInterval, 5, 100); }
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }
@@ -494,12 +536,15 @@ public class Config
 	public static float getCreeperDropChance() { return MathHelper.clamp_float(creeperDrop * 0.01F, 0F, 1.0F); }
 	public static boolean areOrbDropsEnabled() { return enableOrbDrops; }
 	public static float getChanceForRandomDrop() { return MathHelper.clamp_float(randomDropChance * 0.01F, 0F, 1.0F); }
-	public static float getRandomMobDropChance() { return MathHelper.clamp_float(genericMobDropChance * 0.0F, 0F, 1.0F); }
+	public static float getRandomMobDropChance() { return MathHelper.clamp_float(genericMobDropChance * 0.01F, 0F, 1.0F); }
 	public static float getDropChance(int orbID) {
 		int i = (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0);
 		return MathHelper.clamp_float(i * 0.001F, 0.0F, 0.01F);
 	}
 	public static int getPowerDropRate() { return Math.max(powerDropRate, 20); }
+	public static float getVanillaWhipLootChance() { return MathHelper.clamp_float(vanillaWhipLootChance * 0.01F, 0F, 1.0F); }
+	public static float getWhipLootMultiplier() { return MathHelper.clamp_float(globalWhipLootChance * 0.01F, 0F, 5.0F); }
+	public static boolean getHurtOnSteal() { return hurtOnSteal; }
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
@@ -507,5 +552,8 @@ public class Config
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.15F); }
 	public static int getFriendTradesRequired() { return Math.max(friendTradesRequired, 3); }
+	/*================== MOB SPAWNING =====================*/
+	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
+	public static float getMobVariantChance() { return MathHelper.clamp_float(mobVariantChance * 0.01F, 0.0F, 1.0F); }
 
 }

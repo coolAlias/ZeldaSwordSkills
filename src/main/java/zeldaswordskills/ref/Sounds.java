@@ -15,11 +15,12 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.lib;
+package zeldaswordskills.ref;
 
 public class Sounds {
 
 	// VANILLA SOUNDS
+	public static final String BAT_HURT = "mob.bat.hurt";
 	public static final String BOW_RELEASE = "random.bow";
 	public static final String BOW_HIT = "random.bowhit";
 	public static final String CLICK = "random.click";
@@ -33,8 +34,9 @@ public class Sounds {
 	public static final String FIRE_IGNITE = "fire.ignite";
 	public static final String ITEM_BREAK = "random.break";
 	public static final String GLASS_BREAK = "dig.glass"; // changed from 'random.glass'
-	public static final String MOB_ATTACK = "mob.attack";
 	public static final String POP = "random.pop";
+	public static final String SLIME_ATTACK = "mob.slime.attack";
+	public static final String SPLASH = "random.splash";
 	public static final String VILLAGER_DEATH = "mob.villager.death";
 	public static final String VILLAGER_HAGGLE = "mob.villager.haggle";
 	public static final String VILLAGER_HIT = "mob.villager.hit";
@@ -87,6 +89,7 @@ public class Sounds {
 	public static final String SECRET_MEDLEY = ModInfo.ID + ":secret_medley";
 	public static final String SPECIAL_DROP = ModInfo.ID + ":special_drop";
 	public static final String SUCCESS = ModInfo.ID + ":success";
+	public static final String SUCCESS_MAGIC = ModInfo.ID + ":success_magic";
 
 	// SWORD SKILL SOUNDS
 	public static final String ARMOR_BREAK = ModInfo.ID + ":armorbreak";

@@ -35,7 +35,7 @@ import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -116,41 +116,46 @@ public class BlockChestLocked extends BlockContainer
 			player.displayGUIChest((IInventory) te);
 			return true;
 		} else if (canUnlock(player)) {
-			IInventory inv = (IInventory) te;
-			int meta = world.getBlockMetadata(x, y, z);
-			keepInventory = true;
-			world.setBlock(x, y, z, Blocks.chest);
-			keepInventory = false;
-
-			boolean isChest = world.getBlock(x + 1, y, z) == Blocks.chest;
-			if (!isChest) {
-				isChest = world.getBlock(x - 1, y, z) == Blocks.chest;
-			}
-			if (!isChest) {
-				isChest = world.getBlock(x, y, z + 1) == Blocks.chest;
-			}
-			if (!isChest) {
-				isChest = world.getBlock(x, y, z - 1) == Blocks.chest;
-			}
-			if (!isChest) {
-				world.setBlockMetadataWithNotify(x, y, z, meta, 3);
-			}
-
+			convertToChest((IInventory) te, world, x, y, z);
 			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_CHEST, 0.4F, 0.5F);
-
-			// copy the old inventory to the new chest
-			TileEntity chest = world.getTileEntity(x, y, z);
-			if (chest instanceof TileEntityChest) {
-				IInventory inv2 = (IInventory) chest;
-				for (int i = 0; i < inv.getSizeInventory() && i < inv2.getSizeInventory(); ++i) {
-					inv2.setInventorySlotContents(i, inv.getStackInSlot(i));
-				}
-			}
 			return true;
 		} else {
 			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.4F, 0.5F);
 		}
 		return false;
+	}
+
+	/**
+	 * Converts this locked chest block into a vanilla chest
+	 */
+	protected void convertToChest(IInventory inv, World world, int x, int y, int z) {
+		int meta = world.getBlockMetadata(x, y, z);
+		keepInventory = true;
+		world.setBlock(x, y, z, Blocks.chest);
+		keepInventory = false;
+
+		boolean isChest = world.getBlock(x + 1, y, z) == Blocks.chest;
+		if (!isChest) {
+			isChest = world.getBlock(x - 1, y, z) == Blocks.chest;
+		}
+		if (!isChest) {
+			isChest = world.getBlock(x, y, z + 1) == Blocks.chest;
+		}
+		if (!isChest) {
+			isChest = world.getBlock(x, y, z - 1) == Blocks.chest;
+		}
+		if (!isChest) {
+			world.setBlockMetadataWithNotify(x, y, z, meta, 3);
+		}
+
+		// copy the old inventory to the new chest
+		TileEntity chest = world.getTileEntity(x, y, z);
+		if (chest instanceof TileEntityChest) {
+			IInventory inv2 = (IInventory) chest;
+			for (int i = 0; i < inv.getSizeInventory() && i < inv2.getSizeInventory(); ++i) {
+				inv2.setInventorySlotContents(i, inv.getStackInSlot(i));
+			}
+		}
 	}
 
 	private boolean canUnlock(EntityPlayer player) {

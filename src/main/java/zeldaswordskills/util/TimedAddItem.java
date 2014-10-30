@@ -27,12 +27,23 @@ public class TimedAddItem {
 	Timer timer;
 	final EntityPlayer player;
 	final ItemStack stack;
+	final String sound;
+
 	/**
 	 * Adds the ItemStack to the player's inventory after the given delay (in milliseconds)
 	 */
 	public TimedAddItem(EntityPlayer player, ItemStack stack, int delay) {
+		this(player, stack, delay, "random.pop");
+	}
+
+	/**
+	 * Adds the ItemStack to the player's inventory after the given delay (in milliseconds)
+	 * and plays the sound file specified
+	 */
+	public TimedAddItem(EntityPlayer player, ItemStack stack, int delay, String sound) {
 		this.player = player;
 		this.stack = stack;
+		this.sound = sound;
 		timer = new Timer();
 		timer.schedule(new AddItemTask(), delay);
 	}
@@ -40,10 +51,12 @@ public class TimedAddItem {
 	class AddItemTask extends TimerTask {
 		@Override
 		public void run() {
+			float pitch = 1.0F;
+			if (("random.pop").equals(sound)) {
+				pitch = ((player.worldObj.rand.nextFloat() - player.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F;
+			}
+			PlayerUtils.playSound(player, sound, 1.0F, pitch);
 			PlayerUtils.addItemToInventory(player, stack);
-			PlayerUtils.playSound(player, "random.pop", 1.0F,
-					((player.worldObj.rand.nextFloat() -
-							player.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 			timer.cancel();
 		}
 	}

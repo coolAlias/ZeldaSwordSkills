@@ -28,10 +28,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
-import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.SyncSkillPacket;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.sword.ArmorBreak;
+import zeldaswordskills.skills.sword.BackSlice;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.EndingBlow;
@@ -81,6 +82,7 @@ public abstract class SkillBase
 	/* NEW SKILLS */
 	public static final SkillBase risingCut = new RisingCut("risingcut").addDescriptions(1);
 	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDescriptions(1);
+	public static final SkillBase backSlice = new BackSlice("backslice").addDescriptions(1);
 
 	/** Unlocalized name for language registry */
 	private final String unlocalizedName;
@@ -101,7 +103,7 @@ public abstract class SkillBase
 	 * 					seems to always be true since skills are declared statically
 	 */
 	protected SkillBase(String name, boolean register) {
-		this.unlocalizedName = name;
+		this.unlocalizedName = name.toLowerCase();
 		this.id = skillIndex++;
 		if (register) {
 			if (skillsMap.containsKey(id)) {

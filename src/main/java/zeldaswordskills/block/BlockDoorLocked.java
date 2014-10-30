@@ -25,8 +25,8 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

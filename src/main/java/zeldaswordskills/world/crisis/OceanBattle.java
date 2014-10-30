@@ -17,10 +17,11 @@
 
 package zeldaswordskills.world.crisis;
 
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.StructureGenUtils;
 
 public class OceanBattle extends BossBattle {
@@ -34,6 +35,12 @@ public class OceanBattle extends BossBattle {
 		super.beginCrisis(world);
 		eventTimer = 6000 - (600 * difficulty);
 		scheduleUpdateTick(-(1200 - eventTimer)); // one minute of falling sand
+	}
+
+	@Override
+	protected void endCrisis(World world) {
+		super.endCrisis(world);
+		StructureGenUtils.replaceMaterialWith(world, box.minX + 1, box.maxX, box.minY + 1, box.maxY, box.minZ + 1, box.maxZ, Material.sand, Blocks.water, 0);
 	}
 
 	@Override

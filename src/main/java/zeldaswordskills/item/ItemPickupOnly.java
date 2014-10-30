@@ -25,9 +25,9 @@ import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -54,7 +54,7 @@ public class ItemPickupOnly extends Item implements IHandlePickup, IUnenchantabl
 				return false;
 			}
 		} else if (this == ZSSItems.powerPiece) {
-			PlayerUtils.playSound(player, Sounds.SUCCESS, 0.6F, 1.0F);
+			PlayerUtils.playSound(player, Sounds.SUCCESS_MAGIC, 0.6F, 1.0F);
 			ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_UP, 600, 100);
 			ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_UP, 600, 25);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, 600, 25);

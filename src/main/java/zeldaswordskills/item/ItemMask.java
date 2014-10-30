@@ -43,14 +43,14 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.projectile.EntityBomb;
-import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
@@ -222,7 +222,7 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 				} else {
 					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
 				}
-			} else if (entity instanceof EntityMaskTrader) {
+			} else if (entity instanceof EntityNpcMaskTrader) {
 				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
 			} else {
 				return false;

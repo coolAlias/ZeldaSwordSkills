@@ -88,10 +88,10 @@ public class TargetIdPacket implements IMessage
 			ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
 			if (skill != null) {
 				if (message.isNull) {
-					skill.setCurrentTarget(null);
+					skill.setCurrentTarget(player, null);
 				} else {
 					Entity entity = player.worldObj.getEntityByID(message.entityId);
-					skill.setCurrentTarget(entity);
+					skill.setCurrentTarget(player, entity);
 					if (entity == null) { // For some reason the target id is sometimes incorrect or out of date
 						LogHelper.warning("Invalid target; entity with id " + message.entityId + " is null");
 					}

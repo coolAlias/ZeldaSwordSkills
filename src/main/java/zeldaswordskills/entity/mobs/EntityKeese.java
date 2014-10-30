@@ -17,6 +17,10 @@
 
 package zeldaswordskills.entity.mobs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -36,30 +40,74 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
+import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.BiomeType;
 
-public class EntityKeese extends EntityBat implements IMob, IEntityVariant
+public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEntityVariant
 {
 	/** The different varieties of Keese */
-	public static enum KeeseType {NORMAL,FIRE,ICE,THUNDER,CURSED};
+	public static enum KeeseType {
+		NORMAL(8.0F, BiomeType.PLAINS, BiomeType.FOREST),
+		FIRE(12.0F, BiomeType.FIERY, BiomeType.JUNGLE),
+		ICE(12.0F, BiomeType.COLD, BiomeType.TAIGA),
+		THUNDER(12.0F, BiomeType.ARID, BiomeType.BEACH),
+		CURSED(16.0F, null, null); // special spawn chance
+
+		/** Default max health for this Keese Type */
+		public final float maxHealth;
+
+		/** Biome in which this type spawns most frequently (or possibly exclusively) */
+		public final BiomeType favoredBiome;
+
+		/** Secondary biome, if any, in which this type spawns most frequently (or possibly exclusively) */
+		public final BiomeType secondBiome;
+
+		private KeeseType(float maxHealth, BiomeType favoredBiome, BiomeType secondBiome) {
+			this.maxHealth = maxHealth;
+			this.favoredBiome = favoredBiome;
+			this.secondBiome = secondBiome;
+		}
+	}
+
+	/**
+	 * Returns array of default biomes in which this entity may spawn naturally
+	 */
+	public static String[] getDefaultBiomes() {
+		List<String> biomes = new ArrayList<String>();
+		for (KeeseType type : KeeseType.values()) {
+			if (type.favoredBiome != null) {
+				biomes.addAll(Arrays.asList(type.favoredBiome.defaultBiomes));
+			}
+			if (type.secondBiome != null) {
+				biomes.addAll(Arrays.asList(type.secondBiome.defaultBiomes));
+			}
+		}
+		biomes.addAll(Arrays.asList(BiomeType.RIVER.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.MOUNTAIN.defaultBiomes));
+		return biomes.toArray(new String[biomes.size()]);
+	}
 
 	/** Chunk coordinates toward which this Keese is currently heading */
 	private ChunkCoordinates currentFlightTarget;
 
 	/** Data watcher index for this Keese's type */
 	private static final int TYPE_INDEX = 17;
+
 	/** Data watcher index for shock time so entity can render appropriately */
 	private static final int SHOCK_INDEX = 18;
+
 	/** Whether this Keese has spawned a swarm already */
 	private boolean swarmSpawned;
 
@@ -86,7 +134,8 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 	public void setType(KeeseType type) {
 		dataWatcher.updateObject(TYPE_INDEX, (byte)(type.ordinal()));
 		applyTypeTraits();
-		updateMaxHealth();
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(getType().maxHealth);
+		setHealth(getMaxHealth());
 	}
 
 	@Override
@@ -98,26 +147,22 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 	 * Sets the Keese's type when spawned
 	 */
 	private void setTypeOnSpawn() {
-		KeeseType type = KeeseType.NORMAL;
-		if (worldObj.provider.isHellWorld) {
-			type = (rand.nextInt(8) > 0 ? KeeseType.FIRE : KeeseType.CURSED);
+		if (worldObj.provider.isHellWorld && rand.nextFloat() < Config.getKeeseCursedChance()) {
+			setType(KeeseType.CURSED);
+		} else if (rand.nextFloat() < Config.getKeeseCursedChance()) { // second chance for both Hell and everywhere else
+			setType(KeeseType.CURSED);
+		} else if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
+			setType(rand.nextInt(KeeseType.values().length));
 		} else {
-			if (rand.nextInt(64) == 0) {
-				type = KeeseType.CURSED;
-			} else {
-				BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
-				if (biome != null) {
-					String name = biome.biomeName.toLowerCase();
-					if (name.contains("frozen") || name.contains("ice") || name.contains("taiga") || name.contains("snow") || name.contains("cold")) {
-						type = KeeseType.ICE;
-					} else if (name.contains("desert") || rand.nextInt(8) == 0) {
-						type = KeeseType.THUNDER;
-					}
+			BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
+			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
+			for (KeeseType t : KeeseType.values()) {
+				if (t.favoredBiome == biomeType || t.secondBiome == biomeType) {
+					setType(t);
+					return;
 				}
 			}
 		}
-
-		setType(type);
 	}
 
 	/**
@@ -149,26 +194,6 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 			break;
 		default: experienceValue = 1;
 		}
-	}
-
-	/**
-	 * Updates max health based on Keese's type
-	 */
-	private void updateMaxHealth() {
-		switch(getType()) {
-		case CURSED:
-			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(16.0D);
-			break;
-		case FIRE:
-		case ICE:
-		case THUNDER:
-			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(12.0D);
-			break;
-		default:
-			getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
-		}
-
-		setHealth(getMaxHealth());
 	}
 
 	/** Whether this Keese type can shock */
@@ -224,13 +249,36 @@ public class EntityKeese extends EntityBat implements IMob, IEntityVariant
 	}
 
 	@Override
+	public float getLootableChance(EntityPlayer player, WhipType whip) {
+		return 0.2F;
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
+			return new ItemStack(ZSSItems.treasure,1, (getType() == KeeseType.CURSED ? Treasures.EVIL_CRYSTAL.ordinal() : Treasures.MONSTER_CLAW.ordinal()));
+		}
+		return new ItemStack(rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart);
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return true;
+	}
+
+	@Override
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
+		return true;
+	}
+
+	@Override
 	public void onCollideWithPlayer(EntityPlayer player) {
 		if (attackTime == 0 && canEntityBeSeen(player) && getDistanceSqToEntity(player) < 1.5D
 				&& (player.getCurrentArmor(ArmorIndex.WORN_HELM) == null || player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != ZSSItems.maskSkull)
 				&& player.attackEntityFrom(getDamageSource(), getDamage()))
 		{
 			attackTime = rand.nextInt(20) + 20;
-			playSound(Sounds.MOB_ATTACK, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
+			playSound(Sounds.BAT_HURT, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
 			switch(getType()) {
 			case CURSED:
 				applyRandomCurse(player);

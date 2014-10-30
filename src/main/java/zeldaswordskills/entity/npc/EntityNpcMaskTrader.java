@@ -15,50 +15,36 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.entity.npc;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.INpc;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAvoidEntity;
-import net.minecraft.entity.ai.EntityAIMoveIndoors;
-import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
-import net.minecraft.entity.ai.EntityAIOpenDoor;
-import net.minecraft.entity.ai.EntityAIRestrictOpenDoor;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWander;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
-import net.minecraft.entity.ai.EntityAIWatchClosest2;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.ref.ZeldaSong;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
 
-public class EntityMaskTrader extends EntityCreature implements INpc
+public class EntityNpcMaskTrader extends EntityNpcBase
 {
-	private int randomTickDivider;
-	public Village villageObj;
 	private EntityPlayer customer;
 
 	/** Mapping of masks to give for each quest stage */
@@ -66,65 +52,24 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 	/** Number of stages per mask */
 	private static final int NUM_STAGES = 3;
 
-	public EntityMaskTrader(World world) {
+	public EntityNpcMaskTrader(World world) {
 		super(world);
-		this.setSize(0.6F, 1.8F);
-		this.getNavigator().setBreakDoors(true);
-		this.getNavigator().setAvoidsWater(true);
-		this.tasks.addTask(0, new EntityAISwimming(this));
-		this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityZombie.class, 8.0F, 0.6D, 0.6D));
-		this.tasks.addTask(2, new EntityAIMoveIndoors(this));
-		this.tasks.addTask(3, new EntityAIRestrictOpenDoor(this));
-		this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
-		this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
-		this.tasks.addTask(6, new EntityAIWatchClosest2(this, EntityPlayer.class, 3.0F, 1.0F));
-		this.tasks.addTask(6, new EntityAIWander(this, 0.6D));
-		this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
 	}
 
 	@Override
-	protected void applyEntityAttributes() {
-		super.applyEntityAttributes();
-		this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.5D);
+	protected String getNameTagOnSpawn() {
+		return "Happy Mask Salesman";
 	}
 
 	@Override
-	public boolean isEntityInvulnerable() {
-		// TODO return Config setting
-		return true;
-	}
-
-	@Override
-	public boolean isAIEnabled() {
-		return true;
-	}
-
-	@Override
-	protected void updateAITick() {
-		if (--randomTickDivider <= 0) {
-			worldObj.villageCollectionObj.addVillagerPosition(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
-			randomTickDivider = 70 + rand.nextInt(50);
-			villageObj = worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ), 32);
-			if (villageObj == null) {
-				detachHome();
+	protected void randomUpdateTick() {
+		if (customer != null) {
+			if (customer.openContainer instanceof Container && this.getDistanceSqToEntity(customer) > 16.0D) {
+				getNavigator().clearPathEntity();
 			} else {
-				ChunkCoordinates chunkcoordinates = villageObj.getCenter();
-				setHomeArea(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ, (int)(villageObj.getVillageRadius() * 0.6F));
-			}
-			if (customer != null) {
-				if (customer.openContainer instanceof Container && this.getDistanceSqToEntity(customer) > 16.0D) {
-					this.getNavigator().clearPathEntity();
-				} else {
-					customer = null;
-				}
+				customer = null;
 			}
 		}
-		super.updateAITick();
-	}
-
-	@Override
-	protected boolean canDespawn() {
-		return false;
 	}
 
 	@Override
@@ -143,18 +88,32 @@ public class EntityMaskTrader extends EntityCreature implements INpc
 	}
 
 	@Override
-	public boolean allowLeashing() {
-		return false;
-	}
-
-	@Override
 	public boolean interact(EntityPlayer player) {
-		if (!player.worldObj.isRemote) {
+		ItemStack stack = player.getHeldItem();
+		if (stack != null && stack.getItem() instanceof ItemInstrument) {
+			if (player.worldObj.isRemote) {
+				ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
+				if (songs.isSongKnown(ZeldaSong.HEALING_SONG)) {
+					// instrument doesn't matter when reviewing a known song
+					songs.songToLearn = ZeldaSong.HEALING_SONG;
+					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
+				} else if (stack.getItemDamage() == ItemInstrument.Instrument.OCARINA_TIME.ordinal()) {
+					new TimedChatDialogue(player, Arrays.asList(
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.0"),
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.1")));
+					songs.songToLearn = ZeldaSong.HEALING_SONG;
+					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
+				} else {
+					new TimedChatDialogue(player, Arrays.asList(
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.lost.0"),
+							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.lost.1")));
+				}
+			}
+		} else if (!player.worldObj.isRemote) {
 			playLivingSound();
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			int maskStage = info.getCurrentMaskStage();
 			if (maskStage >= (maskMap.size() * NUM_STAGES)) {
-				ItemStack stack = player.getHeldItem();
 				Item mask = info.getBorrowedMask();
 				if (stack != null && stack.getItem() == mask) {
 					player.setCurrentItemOrArmor(0, null);

@@ -32,7 +32,7 @@ import zeldaswordskills.block.BlockPeg;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -153,11 +153,15 @@ public class RoomSecret extends RoomBase
 		if (submerged && bBox.getXSize() > 3) {
 			--bBox.minY;
 		}
-		if (!submerged && bBox.getXSize() > 5 && rand.nextFloat() < Config.getBarredRoomChance()) {
-			if (rand.nextInt(4) == 0) {
-				door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
-			} else {
-				door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
+		if (bBox.getXSize() > 5 && rand.nextFloat() < Config.getBarredRoomChance()) {
+			if (rand.nextInt(16) == 0) {
+				door = ZSSBlocks.timeBlock;
+			} else if (!submerged) {
+				if (rand.nextInt(4) == 0) {
+					door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
+				} else {
+					door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
+				}
 			}
 			side = rand.nextInt(4);
 		}
@@ -196,12 +200,15 @@ public class RoomSecret extends RoomBase
 		int k1 = StructureGenUtils.getZWithOffset(bBox, x, z);
 		if (bBox.isVecInside(i1, j1, k1) && !StructureGenUtils.isBlockChest(world, i1, j1, k1)) {
 			Block chestBlock = (rand.nextFloat() < Config.getLockedChestChance() ? ZSSBlocks.chestLocked : Blocks.chest);
+			if (door != ZSSBlocks.timeBlock && !first && rand.nextFloat() < Config.getLockedChestChance()) {
+				chestBlock = ZSSBlocks.chestInvisible;
+			}
 			world.setBlock(i1, j1, k1, chestBlock, 0, 2);
 			TileEntity te = world.getTileEntity(i1, j1, k1);
 			if (te instanceof IInventory) {
 				IInventory chest = (IInventory) te;
-				DungeonLootLists.generateChestContents(world, rand, chest, this, chestBlock == ZSSBlocks.chestLocked);
-				if (first && rand.nextFloat() < Config.getHeartPieceChance()) {
+				DungeonLootLists.generateChestContents(world, rand, chest, this, chestBlock != Blocks.chest);
+				if ((first || chestBlock == ZSSBlocks.chestInvisible) && rand.nextFloat() < Config.getHeartPieceChance()) {
 					WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
 				}
 				if (door != null) {
@@ -215,6 +222,8 @@ public class RoomSecret extends RoomBase
 							loot = new ItemStack(ZSSItems.gauntletsGolden);
 						} else if (door == ZSSBlocks.barrierHeavy) {
 							loot = new ItemStack(ZSSItems.hammerMegaton);
+						} else if (door == ZSSBlocks.timeBlock) {
+							// TODO
 						}
 					}
 					if (loot != null) {

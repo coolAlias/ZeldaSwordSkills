@@ -33,7 +33,7 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.StructureGenUtils;
 
 

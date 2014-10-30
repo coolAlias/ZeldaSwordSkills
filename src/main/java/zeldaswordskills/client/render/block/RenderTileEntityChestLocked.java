@@ -25,8 +25,9 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import zeldaswordskills.block.BlockChestInvisible.TileEntityChestInvisible;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -50,6 +51,9 @@ public class RenderTileEntityChestLocked extends TileEntitySpecialRenderer
 	 * Renders the TileEntity for the chest at a position.
 	 */
 	public void renderTileEntityChestAt(TileEntityChestLocked chest, double dx, double dy, double dz, float partialTick) {
+		if (chest instanceof TileEntityChestInvisible) {
+			return;
+		}
 		int meta = (chest.hasWorldObj() ? chest.getBlockMetadata() : 0);
 		bindTexture(texture);
 		GL11.glPushMatrix();

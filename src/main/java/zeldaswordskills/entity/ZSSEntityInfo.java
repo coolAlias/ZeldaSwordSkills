@@ -32,7 +32,7 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
-import zeldaswordskills.lib.Config;
+import zeldaswordskills.ref.Config;
 
 /**
  * 

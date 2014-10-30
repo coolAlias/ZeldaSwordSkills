@@ -23,6 +23,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.block.BlockChestInvisible.TileEntityChestInvisible;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
@@ -37,11 +38,13 @@ import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderTileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
+import zeldaswordskills.item.ItemBlockTime;
 import zeldaswordskills.item.ItemCeramicJar;
 import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.item.ItemMetadataBlock;
 import zeldaswordskills.item.ItemSacredFlame;
 import zeldaswordskills.item.ItemSecretStone;
+import zeldaswordskills.item.ItemWarpStone;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.util.BlockRotationData;
 import cpw.mods.fml.client.registry.ClientRegistry;
@@ -55,14 +58,17 @@ public class ZSSBlocks
 	public static Block
 	barrierLight,
 	barrierHeavy,
+	timeBlock,
 	ceramicJar,
 	chestLocked,
+	chestInvisible,
 	pedestal,
 	pegWooden,
 	pegRusty,
 	leverGiant,
 	beamWooden,
 	hookTarget,
+	warpStone,
 	secretStone,
 	sacredFlame,
 	// the following have a real Item, not an ItemBlock:
@@ -89,6 +95,9 @@ public class ZSSBlocks
 		beamWooden = new BlockBar(Material.wood).setBlockName("zss.beam_wooden");
 		hookTarget = new BlockTarget(Material.rock).setBlockName("zss.hook_target");
 		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
+		chestInvisible = new BlockChestInvisible().setBlockName("zss.chest_invisible");
+		timeBlock = new BlockTime().setBlockName("zss.time_block");
+		warpStone = new BlockWarpStone().setBlockName("zss.warp_stone");
 		register();
 	}
 
@@ -114,6 +123,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(pegRusty, pegRusty.getUnlocalizedName());
 		GameRegistry.registerBlock(ceramicJar, ItemCeramicJar.class, ceramicJar.getUnlocalizedName());
 		GameRegistry.registerBlock(chestLocked, chestLocked.getUnlocalizedName());
+		GameRegistry.registerBlock(chestInvisible, chestInvisible.getUnlocalizedName());
 		GameRegistry.registerBlock(pedestal, ItemMetadataBlock.class, pedestal.getUnlocalizedName());
 		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName());
 		GameRegistry.registerBlock(doorLocked, doorLocked.getUnlocalizedName());
@@ -123,9 +133,12 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(beamWooden, beamWooden.getUnlocalizedName());
 		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
 		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
+		GameRegistry.registerBlock(timeBlock, ItemBlockTime.class, timeBlock.getUnlocalizedName());
+		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
+		GameRegistry.registerTileEntity(TileEntityChestInvisible.class, "tileEntityChestInvisible");
 		GameRegistry.registerTileEntity(TileEntityDungeonBlock.class, "tileEntityDungeonBlock");
 		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, "tileEntityDungeonCore");
 		GameRegistry.registerTileEntity(TileEntityPedestal.class, "tileEntityPedestal");
@@ -147,6 +160,7 @@ public class ZSSBlocks
 
 		// Register rotation types for custom blocks
 		BlockRotationData.registerCustomBlockRotation(chestLocked, BlockRotationData.Rotation.PISTON_CONTAINER);
+		BlockRotationData.registerCustomBlockRotation(chestInvisible, BlockRotationData.Rotation.PISTON_CONTAINER);
 		BlockRotationData.registerCustomBlockRotation(leverGiant, BlockRotationData.Rotation.LEVER);
 	}
 }

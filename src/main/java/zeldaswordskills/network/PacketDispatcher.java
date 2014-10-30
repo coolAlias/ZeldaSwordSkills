@@ -19,14 +19,15 @@ package zeldaswordskills.network;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.network.packet.AbstractMessageHandler;
 import zeldaswordskills.network.packet.bidirectional.AbstractBiMessageHandler;
 import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.packet.bidirectional.AttackTimePacket;
 import zeldaswordskills.network.packet.bidirectional.DeactivateSkillPacket;
+import zeldaswordskills.network.packet.bidirectional.PlayRecordPacket;
 import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
 import zeldaswordskills.network.packet.client.AbstractClientMessageHandler;
+import zeldaswordskills.network.packet.client.LearnSongPacket;
 import zeldaswordskills.network.packet.client.AttackBlockedPacket;
 import zeldaswordskills.network.packet.client.InLiquidPacket;
 import zeldaswordskills.network.packet.client.MortalDrawPacket;
@@ -50,6 +51,8 @@ import zeldaswordskills.network.packet.server.GetBombPacket;
 import zeldaswordskills.network.packet.server.OpenGuiPacket;
 import zeldaswordskills.network.packet.server.RefreshSpinPacket;
 import zeldaswordskills.network.packet.server.TargetIdPacket;
+import zeldaswordskills.network.packet.server.ZeldaSongPacket;
+import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -72,12 +75,14 @@ public class PacketDispatcher
 	 */
 	public static final void initialize() {
 		// Bi-directional packets (with side-specific handlers)
+		registerMessage(PlayRecordPacket.Handler.class, PlayRecordPacket.class);
 		registerMessage(PlaySoundPacket.Handler.class, PlaySoundPacket.class);
 
 		// Bi-directional packets using standard IMessageHandler implementation (handled identically on both sides)
 		registerBiMessage(ActivateSkillPacket.Handler.class, ActivateSkillPacket.class);
 		registerBiMessage(AttackTimePacket.Handler.class, AttackTimePacket.class);
 		registerBiMessage(DeactivateSkillPacket.Handler.class, DeactivateSkillPacket.class);
+		registerBiMessage(LearnSongPacket.Handler.class, LearnSongPacket.class);
 
 		// Packets handled on CLIENT
 		registerMessage(AttackBlockedPacket.Handler.class, AttackBlockedPacket.class);
@@ -104,6 +109,7 @@ public class PacketDispatcher
 		registerMessage(OpenGuiPacket.Handler.class, OpenGuiPacket.class);
 		registerMessage(RefreshSpinPacket.Handler.class, RefreshSpinPacket.class);
 		registerMessage(TargetIdPacket.Handler.class, TargetIdPacket.class);
+		registerMessage(ZeldaSongPacket.Handler.class, ZeldaSongPacket.class);
 	}
 
 	/**
@@ -113,7 +119,7 @@ public class PacketDispatcher
 	private static final <REQ extends IMessage, REPLY extends IMessage> void registerMessage(Class<? extends IMessageHandler<REQ, REPLY>> handlerClass, Class<REQ> messageClass, Side side) {
 		PacketDispatcher.dispatcher.registerMessage(handlerClass, messageClass, packetId++, side);
 	}
-	
+
 	/**
 	 * Registers a message and message handler on both sides; used mainly
 	 * for standard IMessage + IMessageHandler implementations and ideal

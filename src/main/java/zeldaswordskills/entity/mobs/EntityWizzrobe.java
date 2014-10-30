@@ -17,6 +17,11 @@
 
 package zeldaswordskills.entity.mobs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
@@ -30,6 +35,7 @@ import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -37,6 +43,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
+import zeldaswordskills.api.entity.IEntityLootable;
+import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -47,11 +56,48 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
 
-public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicUser
+public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntityTeleport, IEntityVariant, IMagicUser
 {
+	/** Separate Wizzrobe enum to allow more magic types without screwing up Wizzrobe spawn eggs and such */
+	public static enum WizzrobeType {
+		FIRE_WIZ(MagicType.FIRE, BiomeType.FIERY),
+		ICE_WIZ(MagicType.ICE, BiomeType.COLD),
+		LIGHTNING_WIZ(MagicType.LIGHTNING, BiomeType.MOUNTAIN),
+		WIND_WIZ(MagicType.WIND, BiomeType.FOREST);
+
+		/** The magic type this wizzrobe uses */
+		public final MagicType magicType;
+
+		/** Biome in which this type spawns most frequently (or possibly exclusively) */
+		public final BiomeType favoredBiome;
+
+		private WizzrobeType(MagicType type, BiomeType favoredBiome) {
+			this.magicType = type;
+			this.favoredBiome = favoredBiome;
+		}
+	}
+
+	/**
+	 * Returns array of default biomes in which this entity may spawn naturally
+	 */
+	public static String[] getDefaultBiomes() {
+		List<String> biomes = new ArrayList<String>();
+		for (WizzrobeType type : WizzrobeType.values()) {
+			biomes.addAll(Arrays.asList(type.favoredBiome.defaultBiomes));
+		}
+		biomes.addAll(Arrays.asList(BiomeType.ARID.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.JUNGLE.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.PLAINS.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.RIVER.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.TAIGA.defaultBiomes));
+		return biomes.toArray(new String[biomes.size()]);
+	}
+
 	/** Data watcher index for this Wizzrobe's type */
 	protected static final int TYPE_INDEX = 16;
 
@@ -73,7 +119,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 	public EntityWizzrobe(World world) {
 		super(world);
 		magicAI = getMagicAI();
-		teleportAI = getTeleportAI();
+		teleportAI = getNewTeleportAI();
 		tasks.addTask(1, new EntityAISwimming(this));
 		tasks.addTask(2, magicAI);
 		tasks.addTask(3, teleportAI);
@@ -84,13 +130,18 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
 		experienceValue = 8; // normal mobs are 5
 		setSize(0.6F, 1.8F);
-		setType(MagicType.WIND);
+		setType(WizzrobeType.WIND_WIZ);
+	}
+
+	@Override
+	public EntityAITeleport getTeleportAI() {
+		return teleportAI;
 	}
 
 	/**
-	 * Returns the teleportation AI this Wizzrobe should use
+	 * Returns the teleportation AI this Wizzrobe should use when being constructed
 	 */
-	protected EntityAITeleport getTeleportAI() {
+	protected EntityAITeleport getNewTeleportAI() {
 		return new EntityAITeleport(this, 16.0D, 60, true, true, true, true, true);
 	}
 
@@ -113,54 +164,68 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 	@Override
 	protected void entityInit() {
 		super.entityInit();
-		dataWatcher.addObject(TYPE_INDEX, (byte)(MagicType.FIRE.ordinal()));
+		dataWatcher.addObject(TYPE_INDEX, (byte)(WizzrobeType.WIND_WIZ.ordinal()));
 		dataWatcher.addObject(CASTING_TIME, 0);
 		dataWatcher.addObject(MAX_CAST_TIME, 0);
 	}
 
-	/** Returns the Wizzrobe's type; this determines which spell will be cast */
-	public MagicType getType() {
-		return MagicType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX) % MagicType.values().length];
+	/** Returns the Wizzrobe's Magic Type; this determines which spell will be cast */
+	public MagicType getMagicType() {
+		return getWizzrobeType().magicType;
 	}
 
-	/** Sets the Wizzrobe's type; this determines which spell will be cast */
-	public void setType(MagicType type) {
+	/** Returns this Wizzrobe's type */
+	public WizzrobeType getWizzrobeType() {
+		return WizzrobeType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX) % WizzrobeType.values().length];
+	}
+
+	/** Sets the Wizzrobe's type; this determines the Wizzrobe's Magic Type */
+	public void setType(WizzrobeType type) {
 		dataWatcher.updateObject(TYPE_INDEX, (byte)(type.ordinal()));
 		applyTypeTraits();
 	}
 
 	@Override
 	public void setType(int type) {
-		setType(MagicType.values()[type % MagicType.values().length]);
+		setType(WizzrobeType.values()[type % WizzrobeType.values().length]);
 	}
 
 	private void setTypeOnSpawn() {
-		MagicType type = MagicType.WIND;
-		if (worldObj.provider.isHellWorld) {
-			type = (rand.nextInt(8) > 0 ? MagicType.FIRE : MagicType.LIGHTNING);
+		if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
+			setType(rand.nextInt(WizzrobeType.values().length));
 		} else {
-			if (rand.nextInt(32) == 0) {
-				type = MagicType.FIRE;
-			} else {
-				BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
-				if (biome != null) {
-					String name = biome.biomeName.toLowerCase();
-					if (name.contains("frozen") || name.contains("ice") || name.contains("taiga") || name.contains("snow") || name.contains("cold")) {
-						type = MagicType.ICE;
-					} else if (name.contains("desert") || rand.nextInt(8) == 0) {
-						type = MagicType.LIGHTNING;
-					}
+			BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
+			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
+			for (WizzrobeType t : WizzrobeType.values()) {
+				if (t.favoredBiome == biomeType) {
+					setType(t);
+					return;
+				}
+			}
+			// no favored biome was found, set based on remaining biome types
+			if (biomeType != null) {
+				switch(biomeType) {
+				case ARID:
+					setType(rand.nextFloat() < 0.5F ? WizzrobeType.LIGHTNING_WIZ : WizzrobeType.FIRE_WIZ);
+					break;
+				case RIVER: // swamps and rivers are same as Jungle
+				case JUNGLE:
+					setType(rand.nextFloat() < 0.5F ? WizzrobeType.WIND_WIZ : WizzrobeType.LIGHTNING_WIZ);
+					break;
+				case TAIGA:
+					setType(rand.nextFloat() < 0.5F ? WizzrobeType.WIND_WIZ : WizzrobeType.ICE_WIZ);
+					break;
+				default:
 				}
 			}
 		}
-		setType(type);
 	}
 
 	protected void applyTypeTraits() {
 		ZSSEntityInfo info = ZSSEntityInfo.get(this);
 		info.removeAllBuffs();
 		info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 50);
-		switch(getType()) {
+		switch(getMagicType()) {
 		case FIRE:
 			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 50);
 			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
@@ -174,6 +239,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 			break;
 		case WIND:
 			break;
+		default:
 		}
 	}
 
@@ -310,7 +376,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 	 * Chance that Wizzrobe can teleport out of harm's way even if teleport AI cannot teleport
 	 */
 	protected float getTelevadeChance() {
-		return 0.35F;
+		return 0.5F;
 	}
 
 	@Override
@@ -331,7 +397,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 	public void castRangedSpell(EntityLivingBase target, float range) {
 		float difficulty = (float) worldObj.difficultySetting.getDifficultyId();
 		EntityMagicSpell spell = new EntityMagicSpell(worldObj, this, target, 0.8F + (0.25F * difficulty), (float)(14 - worldObj.difficultySetting.getDifficultyId() * 4));
-		spell.setType(getType());
+		spell.setType(getMagicType());
 		spell.setArea(getSpellAoE());
 		spell.setDamageBypassesArmor();
 		spell.setDamage(getBaseSpellDamage() * difficulty);
@@ -356,7 +422,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 		if (!worldObj.isRemote && castTime > 0) {
 			--castTime;
 			setCurrentCastingTime(castTime);
-			MagicType type = getType();
+			MagicType type = getMagicType();
 			if (castTime % type.getSoundFrequency() == 0) {
 				worldObj.playSoundAtEntity(this, type.getMovingSound(), type.getSoundVolume(rand) * 0.5F, type.getSoundPitch(rand));
 			}
@@ -380,7 +446,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 		if (!onGround && motionY < 0.0D) {
 			motionY *= 0.6D;
 		}
-		if (isBurning() && getType() == MagicType.FIRE) {
+		if (isBurning() && getMagicType() == MagicType.FIRE) {
 			extinguish(); // immune to burning, but not all fire damage
 		}
 		if (teleportAI.getTeleBounds() == null && this.getEntityToAttack() == null && ++noTargetTime > 400) {
@@ -401,19 +467,56 @@ public class EntityWizzrobe extends EntityMob implements IEntityVariant, IMagicU
 	protected void fall(float distance) {}
 
 	@Override
-	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
-		int n = rand.nextInt(2 + lootingLevel) + 1;
-		for (int i = 0; i < n; ++i) {
-			entityDropItem(new ItemStack(Items.ender_pearl), 0.0F);
-		}
+	protected Item getDropItem() {
+		return Items.ender_pearl;
 	}
 
 	@Override
 	protected void dropRareDrop(int rarity) {
-		switch(rarity) {
-		case 1: entityDropItem(new ItemStack(ZSSItems.heartPiece), 0.0F); break;
-		default: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal()), 0.0F);
+		entityDropItem(getRareDrop(rarity, 4), 0.0F);
+	}
+
+	/**
+	 * @param rarity	Typically 0 or 1
+	 * @param modifier	Applied to book enchantment level
+	 */
+	private ItemStack getRareDrop(int rarity, int modifier) {
+		if (rarity > 0) {
+			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
 		}
+		if (rand.nextInt(8) == 0) {
+			ItemStack book = new ItemStack(Items.book);
+			EnchantmentHelper.addRandomEnchantment(rand, book, rand.nextInt(8) + rand.nextInt(8) + modifier);
+			return book;
+		}
+		switch(getWizzrobeType()) {
+		case FIRE_WIZ: return new ItemStack(ZSSItems.arrowFire);
+		case ICE_WIZ: return new ItemStack(ZSSItems.arrowIce);
+		default: return new ItemStack(ZSSItems.arrowLight);
+		}
+	}
+
+	@Override
+	public float getLootableChance(EntityPlayer player, WhipType whip) {
+		return 0.2F;
+	}
+
+	@Override
+	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
+		if (rand.nextInt(10 - whip.ordinal()) == 0) {
+			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+		}
+		return getRareDrop(0, (3 * (whip.ordinal() + 1)));
+	}
+
+	@Override
+	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
+		return true;
+	}
+
+	@Override
+	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
+		return true;
 	}
 
 	@Override

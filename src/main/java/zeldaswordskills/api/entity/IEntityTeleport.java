@@ -15,18 +15,19 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.lib;
+package zeldaswordskills.api.entity;
 
-public class ModInfo {
-	public static final String ID = "zeldaswordskills";
-	public static final String NAME = "Zelda Sword Skills";
-	public static final String VERSION = "1.7.10-beta-0.1.6";
-	public static final String CHANNEL = "zss_channel";
-	public static final String CLIENT_PROXY = "zeldaswordskills.ClientProxy";
-	public static final String COMMON_PROXY = "zeldaswordskills.CommonProxy";
-	public static final String CONFIG_PATH = ("/" + ID + ".cfg");
+import zeldaswordskills.entity.ai.EntityAITeleport;
 
-	/** Identifier for custom tiles added to Antique Atlas */
-	public static final String ATLAS_DUNGEON_ID = "zss_dungeon";
+/**
+ * 
+ * For entities using the {@link EntityAITeleport} AI
+ *
+ */
+public interface IEntityTeleport {
 
+	/**
+	 * Returns the entity's Teleportation AI
+	 */
+	public EntityAITeleport getTeleportAI();
 }
