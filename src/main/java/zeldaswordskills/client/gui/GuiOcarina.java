@@ -48,6 +48,9 @@ public class GuiOcarina extends GuiMusicBase
 	/** Whether this is the first time the Scarecrow Song is being played */
 	private boolean scarecrowFirst;
 
+	/** Index of note currently being played, used for the Scarecrow Song only */
+	private int currentNoteIndex;
+
 	public GuiOcarina(int x, int y, int z) {
 		this(x, y, z, false);
 	}
@@ -85,10 +88,29 @@ public class GuiOcarina extends GuiMusicBase
 	}
 
 	@Override
+	public void updateScreen() {
+		if (song == ZeldaSong.SCARECROW_SONG && scarecrowNotes != null) {
+			if (++ticksSinceLastNote == 20) {
+				if (currentNoteIndex == scarecrowNotes.size()) {
+					mc.thePlayer.closeScreen();
+				} else {
+					onNotePlayed(scarecrowNotes.get(currentNoteIndex++));
+				}
+			}
+		} else {
+			super.updateScreen();
+		}
+	}
+
+	@Override
 	public void onGuiClosed() {
 		if (song != null) {
-			if (ticksSinceLastNote > song.getMinDuration()) {
-				PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
+			if (ticksSinceLastNote > song.getMinDuration() || (scarecrowNotes != null && currentNoteIndex == scarecrowNotes.size())) {
+				if (scarecrowFirst || (scarecrowNotes != null && !ZSSPlayerSongs.get(mc.thePlayer).isSongKnown(ZeldaSong.SCARECROW_SONG))) {
+					PacketDispatcher.sendToServer(new LearnSongPacket(song, scarecrowNotes));
+				} else {
+					PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
+				}
 			} else {
 				PacketDispatcher.sendToServer(new PlayRecordPacket(null, x, y, z));
 			}
@@ -134,8 +156,7 @@ public class GuiOcarina extends GuiMusicBase
 						}
 						song = ZeldaSong.SCARECROW_SONG;
 						mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
-						PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
-						PacketDispatcher.sendToServer(new LearnSongPacket(song, scarecrowNotes));
+						ticksSinceLastNote = 0;
 					} else {
 						melody.clear();
 						PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.forgot"));
@@ -146,7 +167,12 @@ public class GuiOcarina extends GuiMusicBase
 			song = ZSSPlayerSongs.get(mc.thePlayer).getKnownSongFromNotes(melody);
 			if (song != null) { // indicates player knows the song
 				mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
-				PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
+				if (song == ZeldaSong.SCARECROW_SONG) {
+					scarecrowNotes = new ArrayList(melody);
+					ticksSinceLastNote = 0;
+				} else {
+					PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
+				}
 			}
 		}
 	}
