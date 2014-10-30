@@ -38,6 +38,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.block.BlockSongInscription;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerSongs;
@@ -108,7 +109,8 @@ public class ItemInstrument extends Item
 
 	@Override
 	public boolean doesSneakBypassUse(World world, int x, int y, int z, EntityPlayer player) {
-		return world.getBlock(x, y, z) instanceof BlockWarpStone;
+		Block block = world.getBlock(x, y, z);
+		return block instanceof BlockWarpStone || block instanceof BlockSongInscription;
 	}
 
 	@Override
@@ -150,10 +152,16 @@ public class ItemInstrument extends Item
 			Map<String, ZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
 			ZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
 			if (toLearn != null) {
+				if (toLearn == ZeldaSong.TIME_SONG && getInstrument(stack).getPower() < 5) {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.ocarina.toy"));
+					return false;
+				}
 				if (player.worldObj.isRemote) {
 					// onItemRightClick still processes after this, despite canceling the interact event -.-
 					ZSSPlayerSongs.get(player).songToLearn = toLearn;
-					if (!ZSSPlayerSongs.get(player).isSongKnown(toLearn)) {
+					if (ZSSPlayerSongs.get(player).isSongKnown(toLearn)) {
+						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.npc.ocarina.review", toLearn.toString()));
+					} else {
 						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.npc.ocarina.learn", toLearn.toString()));
 					}
 				}
