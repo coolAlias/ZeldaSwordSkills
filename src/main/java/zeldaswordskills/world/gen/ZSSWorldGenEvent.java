@@ -26,6 +26,7 @@ import zeldaswordskills.world.gen.structure.MapGenBossRoom;
 import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoom;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoomNether;
+import zeldaswordskills.world.gen.structure.MapGenSongPillar;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -36,6 +37,8 @@ public class ZSSWorldGenEvent
 	private MapGenSecretRoomNether netherRoomGen = new MapGenSecretRoomNether();
 	private MapGenBossRoom bossRoomGen = new MapGenBossRoom();
 	private MapGenBossRoomNether netherBossGen = new MapGenBossRoomNether();
+	private MapGenSongPillar pillarGen = new MapGenSongPillar();
+	private WorldGenJars jarGen = new WorldGenJars();
 
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
@@ -70,6 +73,7 @@ public class ZSSWorldGenEvent
 			if (Config.getAttemptsPerChunk() > 0) {
 				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
+			pillarGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			break;
 		default: break;
 		}
@@ -82,11 +86,11 @@ public class ZSSWorldGenEvent
 			if (event.world.provider.isHellWorld) {
 				for (int n = 0; n < Config.getJarClustersPerChunkNether(); ++n) {
 					if (event.rand.nextFloat() < Config.getJarGenChanceNether()) {
-						(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerClusterNether(), true);
+						jarGen.doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerClusterNether(), true);
 					}
 				}
 			} else if (event.rand.nextFloat() < Config.getJarGenChance() && event.rand.nextInt(4) == 0) {
-				(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerCluster(), false);
+				jarGen.doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerCluster(), false);
 			}
 		} catch (Exception e) {
 			Throwable cause = e.getCause();
@@ -111,7 +115,7 @@ public class ZSSWorldGenEvent
 						int j = event.rand.nextInt(48) + event.rand.nextInt(48);
 						int k = event.chunkZ + event.rand.nextInt(16) + 8;
 						if (j < 60) {
-							(new WorldGenJars()).generate2(event.world, event.rand, i, j, k, Config.getJarsPerClusterSub(), true);
+							jarGen.generate2(event.world, event.rand, i, j, k, Config.getJarsPerClusterSub(), true);
 						}
 					}
 				}

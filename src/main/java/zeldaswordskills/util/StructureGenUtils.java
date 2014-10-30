@@ -255,6 +255,15 @@ public class StructureGenUtils
 	}
 
 	/**
+	 * Sets the block at this position only if the current block is replaceable
+	 */
+	public static void setBlockIfReplaceable(World world, int x, int y, int z, Block block, int meta) {
+		if (world.getBlock(x, y, z).isReplaceable(world, x, y, z)) {
+			world.setBlock(x, y, z, block, meta, 2);
+		}
+	}
+
+	/**
 	 * Adjusts bounding box up to n blocks up or down if there is any of the given material
 	 * above or below any of the four corners
 	 * @param checkAbove whether to check the blocks above the structure

@@ -56,24 +56,6 @@ public class Config
 	private static int bossHealthFactor;
 	/** [Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8] */
 	private static int bossNumber;
-	/** [Ceramic Jars] Allow ceramic jars to generate in water */
-	private static boolean allowJarsInWater;
-	/** [Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk */
-	private static int jarGenChance;
-	/** [Ceramic Jars][Surface] Max number of jars per cluster */
-	private static int jarsPerCluster;
-	/** [Ceramic Jars][Underground] Chance for each jar cluster to generate */
-	private static int jarGenChanceSub;
-	/** [Ceramic Jars][Underground] Max number of jars per cluster */
-	private static int jarsPerClusterSub;
-	/** [Ceramic Jars][Underground] Max number of jar clusters per chunk */
-	private static int jarClustersPerChunkSub;
-	/** [Ceramic Jars][Nether] Chance for each jar cluster to generate */
-	private static int jarGenChanceNether;
-	/** [Ceramic Jars][Nether] Max number of jars per cluster */
-	private static int jarsPerClusterNether;
-	/** [Ceramic Jars][Nether] Max number of jar clusters per chunk */
-	private static int jarClustersPerChunkNether;
 	/** [Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100] */
 	private static int keeseCursedChance;
 	/** [Mobs][Keese] Chance of Keese spawning in a swarm */
@@ -210,6 +192,31 @@ public class Config
 	private static int fairySpawnerChance;
 	/** Maximum number of days required for fairies to replenish */
 	private static int resetSpawnerTime;
+	/*================== WORLD GEN =====================*/
+	/** [Ceramic Jars] Allow ceramic jars to generate in water */
+	private static boolean allowJarsInWater;
+	/** [Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk */
+	private static int jarGenChance;
+	/** [Ceramic Jars][Surface] Max number of jars per cluster */
+	private static int jarsPerCluster;
+	/** [Ceramic Jars][Underground] Chance for each jar cluster to generate */
+	private static int jarGenChanceSub;
+	/** [Ceramic Jars][Underground] Max number of jars per cluster */
+	private static int jarsPerClusterSub;
+	/** [Ceramic Jars][Underground] Max number of jar clusters per chunk */
+	private static int jarClustersPerChunkSub;
+	/** [Ceramic Jars][Nether] Chance for each jar cluster to generate */
+	private static int jarGenChanceNether;
+	/** [Ceramic Jars][Nether] Max number of jars per cluster */
+	private static int jarsPerClusterNether;
+	/** [Ceramic Jars][Nether] Max number of jar clusters per chunk */
+	private static int jarClustersPerChunkNether;
+	/** [Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64] */
+	private static int maxPillarRange;
+	/** [Song Pillars] Minimum number of chunks between broken pillars [4-64] */
+	private static int minBrokenPillarDistance;
+	/** [Song Pillars] Minimum number of chunks between song pillars [8-64] */
+	private static int minSongPillarDistance;
 	/*================== LOOT =====================*/
 	/** Chance (as a percent) a chest will be locked */
 	private static int lockedChestChance;
@@ -288,15 +295,6 @@ public class Config
 		enableHardcoreZeldaFanMode = config.get("General", "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", false).getBoolean(false);
 		bossHealthFactor = config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (will not apply to real bosses) [100-500]", 250).getInt();
 		bossNumber = config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8]", 4).getInt();
-		allowJarsInWater = config.get("General", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
-		jarGenChance = config.get("General", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt();
-		jarsPerCluster = config.get("General", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt();
-		jarGenChanceSub = config.get("General", "[Ceramic Jars][Underground] Chance for each jar cluster to generate [0-100]", 65).getInt();
-		jarsPerClusterSub = config.get("General", "[Ceramic Jars][Underground] Max number of jars per cluster [2-20]", 8).getInt();
-		jarClustersPerChunkSub = config.get("General", "[Ceramic Jars][Underground] Max number of jar clusters per chunk [1-20]", 10).getInt();
-		jarGenChanceNether = config.get("General", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt();
-		jarsPerClusterNether = config.get("General", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt();
-		jarClustersPerChunkNether = config.get("General", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt();
 		keeseCursedChance = config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmChance = config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmSize = config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt();
@@ -373,6 +371,19 @@ public class Config
 		genAttemptsPerChunkNether = config.get("Dungeon Generation", "[Nether] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt();
 		fairySpawnerChance = config.get("Dungeon Generation", "Chance (as a percent) for certain dungeons to have fairy spawners [0-100]", 10).getInt();
 		resetSpawnerTime = config.get("Dungeon Generation", "Maximum number of days required for fairies to replenish [2-10]", 7).getInt();
+		/*================== WORLD GEN =====================*/
+		allowJarsInWater = config.get("WorldGen", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
+		jarGenChance = config.get("WorldGen", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt();
+		jarsPerCluster = config.get("WorldGen", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt();
+		jarGenChanceSub = config.get("WorldGen", "[Ceramic Jars][Underground] Chance for each jar cluster to generate [0-100]", 65).getInt();
+		jarsPerClusterSub = config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jars per cluster [2-20]", 8).getInt();
+		jarClustersPerChunkSub = config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jar clusters per chunk [1-20]", 10).getInt();
+		jarGenChanceNether = config.get("WorldGen", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt();
+		jarsPerClusterNether = config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt();
+		jarClustersPerChunkNether = config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt();
+		maxPillarRange = config.get("WorldGen", "[Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64]", 64).getInt();
+		minBrokenPillarDistance = config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt();
+		minSongPillarDistance = config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt();
 		/*================== LOOT =====================*/
 		lockedChestChance = config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt();
 		doubleChestChance = config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt();
@@ -439,15 +450,6 @@ public class Config
 	public static boolean isHardcoreZeldaFan() { return enableHardcoreZeldaFanMode; }
 	public static float getBossHealthFactor() { return MathHelper.clamp_float(bossHealthFactor * 0.01F, 1F, 5F); }
 	public static int getNumBosses() { return MathHelper.clamp_int(bossNumber, 1, 8); }
-	public static boolean genJarsInWater() { return allowJarsInWater; }
-	public static float getJarGenChance() { return MathHelper.clamp_float(jarGenChance * 0.01F, 0F, 1F); }
-	public static int getJarsPerCluster() { return MathHelper.clamp_int(jarsPerCluster, 2, 20); }
-	public static float getJarGenChanceSub() { return MathHelper.clamp_float(jarGenChanceSub * 0.01F, 0F, 1F); }
-	public static int getJarClustersPerChunkSub() { return MathHelper.clamp_int(jarClustersPerChunkSub, 1, 20); }
-	public static int getJarsPerClusterSub() { return MathHelper.clamp_int(jarsPerClusterSub, 2, 20); }
-	public static float getJarGenChanceNether() { return MathHelper.clamp_float(jarGenChanceNether * 0.01F, 0F, 1F); }
-	public static int getJarClustersPerChunkNether() { return MathHelper.clamp_int(jarClustersPerChunkNether, 1, 20); }
-	public static int getJarsPerClusterNether() { return MathHelper.clamp_int(jarsPerClusterNether, 2, 20); }
 	public static int getSacredFlameRefreshRate() { return MathHelper.clamp_int(sacredRefreshRate, 0, 30); }
 	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
@@ -517,6 +519,19 @@ public class Config
 	public static int getNetherDungeonDifficulty() { return MathHelper.clamp_int(netherDungeonDifficulty, 1, 3); }
 	public static float getFairySpawnerChance() { return MathHelper.clamp_float(fairySpawnerChance * 0.01F, 0F, 1.0F); }
 	public static int getDaysToRespawn() { return MathHelper.clamp_int(resetSpawnerTime, 2, 10); }
+	/*================== WORLD GEN =====================*/
+	public static boolean genJarsInWater() { return allowJarsInWater; }
+	public static float getJarGenChance() { return MathHelper.clamp_float(jarGenChance * 0.01F, 0F, 1F); }
+	public static int getJarsPerCluster() { return MathHelper.clamp_int(jarsPerCluster, 2, 20); }
+	public static float getJarGenChanceSub() { return MathHelper.clamp_float(jarGenChanceSub * 0.01F, 0F, 1F); }
+	public static int getJarClustersPerChunkSub() { return MathHelper.clamp_int(jarClustersPerChunkSub, 1, 20); }
+	public static int getJarsPerClusterSub() { return MathHelper.clamp_int(jarsPerClusterSub, 2, 20); }
+	public static float getJarGenChanceNether() { return MathHelper.clamp_float(jarGenChanceNether * 0.01F, 0F, 1F); }
+	public static int getJarClustersPerChunkNether() { return MathHelper.clamp_int(jarClustersPerChunkNether, 1, 20); }
+	public static int getJarsPerClusterNether() { return MathHelper.clamp_int(jarsPerClusterNether, 2, 20); }
+	public static int getPillarRange() { return MathHelper.clamp_int(maxPillarRange, 16, 64); }
+	public static int getBrokenPillarMin() { return MathHelper.clamp_int(minBrokenPillarDistance, 4, 128); }
+	public static int getSongPillarMin() { return MathHelper.clamp_int(minSongPillarDistance, 8, 128); }
 	/*================== LOOT =====================*/
 	public static float getLockedChestChance() { return MathHelper.clamp_float(lockedChestChance * 0.01F, 0.1F, 0.5F); }
 	public static float getDoubleChestChance() { return MathHelper.clamp_float(doubleChestChance * 0.01F, 0F, 0.25F); }
