@@ -135,6 +135,7 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordKokiri)));
 		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordOrdon)));
 		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordGiant)));
+		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordDarknut)));
 	}
 
 	@Override

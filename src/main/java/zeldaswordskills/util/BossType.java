@@ -26,7 +26,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -37,6 +36,7 @@ import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.entity.mobs.EntityBlackKnight;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
@@ -64,7 +64,7 @@ public enum BossType
 	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, ZeldaSong.LIGHT_PRELUDE, "coldtaiga", "coldtaigahills", "iceplains"),
 	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, ZeldaSong.WATER_SERENADE, "ocean", "frozenocean", "deepocean"),
 	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSong.SHADOW_NOCTURNE, "swampland"),
-	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, ZeldaSong.ORDER_OATH, "extremehills", "extremehillsedge");
+	MOUNTAIN("temple_earth", EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSong.ORDER_OATH, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");
 	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
 	// need to set their target and aggravation state so they attack automatically
