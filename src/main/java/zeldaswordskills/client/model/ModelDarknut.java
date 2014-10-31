@@ -93,12 +93,13 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		rightArm.setRotationPoint(-5F, 2F, 0F);
 		setRotation(rightArm, 0F, 0F, 0F);
 		leftArm = new ModelRenderer(this, 40, 16);
+		leftArm.mirror = true;
 		leftArm.setTextureSize(textureWidth, textureHeight);
 		leftArm.addBox(-1F, -2F, -2F, 4, 12, 4);
 		leftArm.setRotationPoint(5F, 2F, 0F);
 		setRotation(leftArm, 0F, 0F, 0F);
-		leftArm.mirror = true;
 		rightLeg = new ModelRenderer(this, 0, 16);
+		rightLeg.mirror = true;
 		rightLeg.setTextureSize(textureWidth, textureHeight);
 		rightLeg.addBox(-2F, 0F, -2F, 4, 12, 4);
 		rightLeg.setRotationPoint(-2F, 12F, 0F);
@@ -108,7 +109,6 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		leftLeg.addBox(-2F, 0F, -2F, 4, 12, 4);
 		leftLeg.setRotationPoint(2F, 12F, 0F);
 		setRotation(leftLeg, 0F, 0F, 0F);
-		leftLeg.mirror = true;
 
 		// ARMOR
 		shoulderPlateRight = new ModelRenderer(this, 0, 58);
@@ -118,11 +118,11 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		setRotation(shoulderPlateRight, 0F, 0F, 0F);
 
 		shoulderPlateLeft = new ModelRenderer(this, 0, 58);
+		shoulderPlateLeft.mirror = true;
 		shoulderPlateLeft.setTextureSize(textureWidth, textureHeight);
 		shoulderPlateLeft.addBox(-1F, -2.5F, -2.5F, 6, 1, 5);
 		shoulderPlateLeft.setRotationPoint(5F, 2F, 0F);
 		setRotation(shoulderPlateLeft, 0F, 0F, 0F);
-		shoulderPlateLeft.mirror = true;
 
 		upperArmor = new ModelRenderer(this, 0, 32);
 		upperArmor.setTextureSize(textureWidth, textureHeight);
@@ -158,11 +158,11 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		helmBackPlate.addChild(helmRightPlate);
 
 		helmLeftPlate = new ModelRenderer(this, 32, 0);
+		helmLeftPlate.mirror = true;
 		helmLeftPlate.setTextureSize(textureWidth, textureHeight);
 		helmLeftPlate.addBox(2.5F, -7.6F, -4.5F, 1, 8, 8);
 		helmLeftPlate.setRotationPoint(1F, 0F, 0F);
 		setRotation(helmLeftPlate, 0F, 0F, 0F);
-		helmLeftPlate.mirror = true;
 		helmBackPlate.addChild(helmLeftPlate);
 
 		helmVisor = new ModelRenderer(this, 32, 1);
@@ -187,11 +187,11 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		helmRightPlate.addChild(cheekGuardRight);
 
 		cheekGuardLeft = new ModelRenderer(this, 32, 10);
+		cheekGuardLeft.mirror = true;
 		cheekGuardLeft.setTextureSize(textureWidth, textureHeight);
 		cheekGuardLeft.addBox(0.5F, -4.5F, -4.5F, 2, 5, 1);
 		cheekGuardLeft.setRotationPoint(0F, 0F, 0F);
 		setRotation(cheekGuardLeft, 0F, 0F, 0F);
-		cheekGuardLeft.mirror = true;
 		helmLeftPlate.addChild(cheekGuardLeft);
 
 		hornHolderRight = new ModelRenderer(this, 52, 0);
@@ -202,11 +202,11 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		helmRightPlate.addChild(hornHolderRight);
 
 		hornHolderLeft = new ModelRenderer(this, 52, 0);
+		hornHolderLeft.mirror = true;
 		hornHolderLeft.setTextureSize(textureWidth, textureHeight);
 		hornHolderLeft.addBox(3F, -6F, -1.5F, 2, 3, 3);
 		hornHolderLeft.setRotationPoint(0F, 0F, 0F);
 		setRotation(hornHolderLeft, 0F, 0F, 0F);
-		hornHolderLeft.mirror = true;
 		helmLeftPlate.addChild(hornHolderLeft);
 
 		hornRight = new ModelRenderer(this, 52, 6);
@@ -218,11 +218,11 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		hornHolderRight.addChild(hornRight);
 
 		hornLeft = new ModelRenderer(this, 52, 6);
+		hornLeft.mirror = true;
 		hornLeft.setTextureSize(textureWidth, textureHeight);
 		hornLeft.addBox(5F, -5.5F, -1F, 5, 2, 2);
 		hornLeft.setRotationPoint(1.5F, 1.75F, 0F);
 		setRotation(hornLeft, 0F, 0F, -((float) Math.PI / 8.0F));
-		hornLeft.mirror = true;
 		hornHolderLeft.addChild(hornLeft);
 
 		cape = new ModelRenderer(this, 32, 45);
