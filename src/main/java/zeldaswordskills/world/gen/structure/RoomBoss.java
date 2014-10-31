@@ -434,7 +434,10 @@ public class RoomBoss extends RoomBase
 	 * if certain conditions are met (sufficient y size, random)
 	 */
 	protected void placeLedge(World world, Random rand, int meta) {
-		if (type != BossType.OCEAN && bBox.getYSize() > 7 && rand.nextFloat() < (type == BossType.HELL ? 0.75F : 0.5F)) {
+		if (type == BossType.OCEAN || type == BossType.MOUNTAIN) {
+			return;
+		}
+		if (bBox.getYSize() > 7 && rand.nextFloat() < (type == BossType.HELL ? 0.75F : 0.5F)) {
 			int y = bBox.getCenterY();
 			Block block = BlockSecretStone.getBlockFromMeta(meta);
 			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 1, bBox.minX + 2, y, y + 1, bBox.minZ + 1, bBox.maxZ, block, 0, 3);
@@ -487,7 +490,7 @@ public class RoomBoss extends RoomBase
 	 * Places pillars in the four corners of the dungeon with chance based on room size
 	 */
 	protected void placePillars(World world, int meta) {
-		if (type == BossType.DESERT || type == BossType.SWAMP) {
+		if (type == BossType.DESERT || type == BossType.SWAMP || type == BossType.MOUNTAIN) {
 			return;
 		}
 		if (world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {

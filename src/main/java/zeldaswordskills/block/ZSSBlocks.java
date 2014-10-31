@@ -28,6 +28,7 @@ import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.block.tileentity.TileEntityInscription;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
 import zeldaswordskills.client.render.block.RenderCeramicJar;
@@ -68,6 +69,7 @@ public class ZSSBlocks
 	leverGiant,
 	beamWooden,
 	hookTarget,
+	inscription,
 	warpStone,
 	secretStone,
 	sacredFlame,
@@ -97,6 +99,7 @@ public class ZSSBlocks
 		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
 		chestInvisible = new BlockChestInvisible().setBlockName("zss.chest_invisible");
 		timeBlock = new BlockTime().setBlockName("zss.time_block");
+		inscription = new BlockSongInscription().setBlockName("zss.inscription");
 		warpStone = new BlockWarpStone().setBlockName("zss.warp_stone");
 		register();
 	}
@@ -134,6 +137,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
 		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
 		GameRegistry.registerBlock(timeBlock, ItemBlockTime.class, timeBlock.getUnlocalizedName());
+		GameRegistry.registerBlock(inscription, inscription.getUnlocalizedName());
 		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
@@ -141,6 +145,7 @@ public class ZSSBlocks
 		GameRegistry.registerTileEntity(TileEntityChestInvisible.class, "tileEntityChestInvisible");
 		GameRegistry.registerTileEntity(TileEntityDungeonBlock.class, "tileEntityDungeonBlock");
 		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, "tileEntityDungeonCore");
+		GameRegistry.registerTileEntity(TileEntityInscription.class, "tileEntityInscription");
 		GameRegistry.registerTileEntity(TileEntityPedestal.class, "tileEntityPedestal");
 		GameRegistry.registerTileEntity(TileEntitySacredFlame.class, "tileEntitySacredFlame");
 
@@ -161,6 +166,7 @@ public class ZSSBlocks
 		// Register rotation types for custom blocks
 		BlockRotationData.registerCustomBlockRotation(chestLocked, BlockRotationData.Rotation.PISTON_CONTAINER);
 		BlockRotationData.registerCustomBlockRotation(chestInvisible, BlockRotationData.Rotation.PISTON_CONTAINER);
+		BlockRotationData.registerCustomBlockRotation(inscription, BlockRotationData.Rotation.PISTON_CONTAINER);
 		BlockRotationData.registerCustomBlockRotation(leverGiant, BlockRotationData.Rotation.LEVER);
 	}
 }

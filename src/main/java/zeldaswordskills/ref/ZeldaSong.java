@@ -245,6 +245,10 @@ public enum ZeldaSong {
 					ZSSPlayerSongs.get(player).setNextHealTime();
 				}
 				break;
+			case SCARECROW_SONG:
+				// TODO
+				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
+				break;
 			case SOARING_SONG:
 				// Not usable in the Nether or the End, mainly due to unpredictable results
 				if (power > 4 && Math.abs(player.dimension) != 1) {

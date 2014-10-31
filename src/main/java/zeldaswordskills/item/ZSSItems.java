@@ -59,13 +59,14 @@ import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.world.gen.structure.LinksHouse;
@@ -167,7 +168,8 @@ public class ZSSItems
 	potionGreen,
 	potionBlue,
 	potionYellow,
-	rocsFeather;
+	rocsFeather,
+	instrument;
 
 	//================ TREASURES TAB ================//
 	public static Item
@@ -226,7 +228,8 @@ public class ZSSItems
 	swordMaster,
 	swordTempered,
 	swordGolden,
-	swordMasterTrue;
+	swordMasterTrue,
+	swordDarknut;
 
 	/** Other Melee Weapons */
 	public static Item
@@ -277,6 +280,7 @@ public class ZSSItems
 	public static Item
 	eggSpawner, // for all Entities with only one type
 	eggChu,
+	eggDarknut,
 	eggKeese,
 	eggOctorok,
 	eggWizzrobe;
@@ -329,6 +333,7 @@ public class ZSSItems
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerSkull, new RenderBigItem(1.0F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordBiggoron, new RenderBigItem(0.75F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordGiant, new RenderBigItem(0.75F));
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordDarknut, new RenderBigItem(0.9F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heroBow, new RenderItemCustomBow());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldDeku, new RenderItemShield());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldHylian, new RenderItemShield());
@@ -440,6 +445,7 @@ public class ZSSItems
 		swordGolden = new ItemZeldaSword(ToolMaterial.EMERALD, 6.0F).setMasterSword().setUnlocalizedName("zss.sword_golden").setMaxDamage(0);
 		swordMasterTrue = new ItemZeldaSword(ToolMaterial.EMERALD, 8.0F).setMasterSword().setUnlocalizedName("zss.sword_master_true").setMaxDamage(0);
 		swordBroken = new ItemBrokenSword().setUnlocalizedName("zss.sword_broken");
+		swordDarknut = new ItemZeldaSword(ToolMaterial.IRON, 1.0F, true, 20, 0.5F).setUnlocalizedName("zss.sword_darknut").setMaxDamage(768);
 
 		hammer = new ItemHammer(BlockWeight.VERY_LIGHT, 8.0F, 50.0F).setUnlocalizedName("zss.hammer");
 		hammerSkull = new ItemHammer(BlockWeight.MEDIUM, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
@@ -519,6 +525,7 @@ public class ZSSItems
 		jellyChu = new ItemChuJelly().setUnlocalizedName("zss.jelly_chu");
 		treasure = new ItemTreasure().setUnlocalizedName("zss.treasure");
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "You must first clear this area of debris!", "deku_nut").setUnlocalizedName("zss.links_house");
+		instrument = new ItemInstrument();
 
 		// ITEMS WITH NO TAB
 		heldBlock = new ItemHeldBlock().setUnlocalizedName("zss.held_block");
@@ -529,6 +536,7 @@ public class ZSSItems
 		// Custom Spawn Eggs
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("zss.spawn_egg");
 		eggChu = new ItemCustomVariantEgg(EntityChu.class, "chu").setUnlocalizedName("zss.eggChu");
+		eggDarknut = new ItemCustomVariantEgg(EntityDarknut.class, "darknut").setUnlocalizedName("zss.eggDarknut");
 		eggKeese = new ItemCustomVariantEgg(EntityKeese.class, "keese").setUnlocalizedName("zss.eggKeese");
 		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
 		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("zss.eggWizzrobe");
@@ -574,6 +582,7 @@ public class ZSSItems
 		GameRegistry.addRecipe(new ItemStack(arrowBombWater), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), 'a', Items.arrow);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Items.brick);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument,1,ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Items.clay_ball, 'r', Items.reeds);
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronHelm), tunicHeroHelm, new ItemStack(Items.dye,1,1));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Items.dye,1,1));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraHelm), tunicHeroHelm, new ItemStack(Items.dye,1,4));
@@ -617,7 +626,9 @@ public class ZSSItems
 	private static void addDispenserBehaviors() {
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggSpawner, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggChu, new BehaviorDispenseCustomMobEgg());
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggDarknut, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggKeese, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggOctorok, new BehaviorDispenseCustomMobEgg());
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggWizzrobe, new BehaviorDispenseCustomMobEgg());
 	}
 }
