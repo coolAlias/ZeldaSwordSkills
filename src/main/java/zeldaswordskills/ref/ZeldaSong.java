@@ -49,22 +49,22 @@ import zeldaswordskills.util.WarpPoint;
 import zeldaswordskills.world.TeleporterNoPortal;
 
 public enum ZeldaSong {
-	ZELDAS_LULLABY("lullaby", 260, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2),
-	TIME_SONG("time", 212, SongNote.A2, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D1, SongNote.F1),
-	EPONAS_SONG("epona", 170, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.D2, SongNote.B2, SongNote.A2),
-	STORMS_SONG("storms", 315, SongNote.D1, SongNote.F1, SongNote.D2, SongNote.D1, SongNote.F1, SongNote.D2),
-	SUN_SONG("sun", 110, SongNote.A2, SongNote.F1, SongNote.D2, SongNote.A2, SongNote.F1, SongNote.D2),
-	SARIAS_SONG("saria", 100, SongNote.F1, SongNote.A2, SongNote.B2, SongNote.F1, SongNote.A2, SongNote.B2),
+	ZELDAS_LULLABY("lullaby", 129, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2),
+	TIME_SONG("time", 90, SongNote.A2, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D1, SongNote.F1),
+	EPONAS_SONG("epona", 90, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.D2, SongNote.B2, SongNote.A2),
+	STORMS_SONG("storms", 85, SongNote.D1, SongNote.F1, SongNote.D2, SongNote.D1, SongNote.F1, SongNote.D2),
+	SUN_SONG("sun", 100, SongNote.A2, SongNote.F1, SongNote.D2, SongNote.A2, SongNote.F1, SongNote.D2),
+	SARIAS_SONG("saria", 71, SongNote.F1, SongNote.A2, SongNote.B2, SongNote.F1, SongNote.A2, SongNote.B2),
 	SCARECROW_SONG("scarecrow", 160), // user-defined song, 8 notes long at 20 ticks each
-	FOREST_MINUET("minuet", 290, SongNote.D1, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.B2, SongNote.A2),
-	FIRE_BOLERO("bolero", 100, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.A2, SongNote.F1),
-	WATER_SERENADE("serenade", 100, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.A2, SongNote.B2),
-	SPIRIT_REQUIEM("requiem", 100, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1),
-	SHADOW_NOCTURNE("nocturne", 270, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
-	ORDER_OATH("order", 100, SongNote.A2, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D2),
-	LIGHT_PRELUDE("prelude", 100, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
-	HEALING_SONG("healing", 150, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1),
-	SOARING_SONG("soaring", 100, SongNote.F1, SongNote.B2, SongNote.D2, SongNote.F1, SongNote.B2, SongNote.D2);
+	FOREST_MINUET("minuet", 90, SongNote.D1, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.B2, SongNote.A2),
+	FIRE_BOLERO("bolero", 60, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.A2, SongNote.F1),
+	WATER_SERENADE("serenade", 120, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.A2, SongNote.B2),
+	SPIRIT_REQUIEM("requiem", 120, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1),
+	SHADOW_NOCTURNE("nocturne", 116, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
+	ORDER_OATH("order", 120, SongNote.A2, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D2),
+	LIGHT_PRELUDE("prelude", 120, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
+	HEALING_SONG("healing", 78, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1),
+	SOARING_SONG("soaring", 120, SongNote.F1, SongNote.B2, SongNote.D2, SongNote.F1, SongNote.B2, SongNote.D2);
 
 	private final String unlocalizedName;
 
