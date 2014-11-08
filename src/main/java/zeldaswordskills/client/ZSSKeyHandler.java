@@ -25,6 +25,7 @@ import net.minecraft.util.StatCollector;
 import org.lwjgl.input.Keyboard;
 
 import zeldaswordskills.api.item.ISwingSpeed;
+import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
@@ -111,7 +112,13 @@ public class ZSSKeyHandler
 							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
 				}
 			} else if (kb == keys[KEY_TOGGLE_BUFFBAR].getKeyCode()) {
-				GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+				if (mc.thePlayer.isSneaking()) {
+					ComboOverlay.shouldDisplay = !ComboOverlay.shouldDisplay;
+					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocalFormatted("chat.zss.key.togglehud",
+							(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+				} else {
+					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+				}
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS));
 			} else {

@@ -77,6 +77,8 @@ public class Config
 	private static boolean isBuffBarHorizontal;
 	/** [Buff HUD] Whether the buff bar should be displayed on the left side of the screen */
 	private static boolean isBuffBarLeft;
+	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
+	private static boolean enableComboHud;
 	/*================== ITEMS =====================*/
 	/** [Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame */
 	private static boolean arrowsConsumeFlame;
@@ -293,8 +295,8 @@ public class Config
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
 		enableHardcoreZeldaFanMode = config.get("General", "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", false).getBoolean(false);
-		bossHealthFactor = config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (will not apply to real bosses) [100-500]", 250).getInt();
-		bossNumber = config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (will not apply to real bosses) [1-8]", 4).getInt();
+		bossHealthFactor = config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]", 250).getInt();
+		bossNumber = config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]", 4).getInt();
 		keeseCursedChance = config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmChance = config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt();
 		keeseSwarmSize = config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt();
@@ -306,6 +308,7 @@ public class Config
 		isBuffBarEnabled = config.get("General", "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
 		isBuffBarHorizontal = config.get("General", "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
 		isBuffBarLeft = config.get("General", "[Buff HUD] Whether the buff bar should be displayed on the left side of the screen", false).getBoolean(false);
+		enableComboHud = config.get("General", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
 		/*================== ITEMS =====================*/
 		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
 		bombFuseTime = config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt();
@@ -317,7 +320,7 @@ public class Config
 		disableAllUnenchantables = config.get("Item", "[Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", false).getBoolean(false);
 		heroBowUpgradeCost = config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt();
 		enableFireArrowIgnite = config.get("Item", "[Hero's Bow] Whether the fire arrow can ignite affected blocks", true).getBoolean(true);
-		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", true).getBoolean(true);
+		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", false).getBoolean(false);
 		enableLightArrowNoClip = config.get("Item", "[Hero's Bow] Whether the light arrow can penetrate blocks", true).getBoolean(true);
 		enableAutoBombArrows = config.get("Item", "[Hero's Bow] Whether to automate bomb arrow firing when sneaking", true).getBoolean(true);
 		hookshotRange = config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt();
@@ -329,7 +332,7 @@ public class Config
 		slingshotUpgradeTwo = config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt();
 		whipRange = config.get("Item", "[Whip] Range, in blocks, of the standard whip [4-12]", 6).getInt();
 		/*================== STARTING GEAR =====================*/
-		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", false).getBoolean(false);
+		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", true).getBoolean(true);
 		enableAutoEquip = config.get("Bonus Gear", "Automatically equip starting equipment", true).getBoolean(true);
 		enableLinksHouse = config.get("Bonus Gear", "Begin the game with Link's House - place it anywhere you like!", true).getBoolean(true);
 		enableOrb = config.get("Bonus Gear", "Grants a single Basic Sword skill orb", true).getBoolean(true);
@@ -462,6 +465,7 @@ public class Config
 	public static boolean isBuffBarEnabled() { return isBuffBarEnabled; }
 	public static boolean isBuffBarHorizontal() { return isBuffBarHorizontal; }
 	public static boolean isBuffBarLeft() { return isBuffBarLeft; }
+	public static boolean isComboHudEnabled() { return enableComboHud; }
 	/*================== ITEMS =====================*/
 	public static boolean getArrowsConsumeFlame() { return arrowsConsumeFlame; }
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
