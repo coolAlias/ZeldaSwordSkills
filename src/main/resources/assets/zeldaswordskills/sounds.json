@@ -56,7 +56,6 @@
     "song.prelude": {"category": "record","sounds": [{"name": "song/prelude","stream": true}]},
     "song.requiem": {"category": "record","sounds": [{"name": "song/requiem","stream": true}]},
     "song.saria": {"category": "record","sounds": [{"name": "song/saria","stream": true}]},
-    "song.scarecrow": {"category": "record","sounds": [{"name": "song/scarecrow","stream": true}]},
     "song.serenade": {"category": "record","sounds": [{"name": "song/serenade","stream": true}]},
     "song.storms": {"category": "record","sounds": [{"name": "song/storms","stream": true}]},
     "song.sun": {"category": "record","sounds": [{"name": "song/sun","stream": true}]},
