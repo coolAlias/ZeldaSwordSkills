@@ -67,8 +67,6 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
  * A whip: let's the player swing from certain objects and
  * deals slight damage to entities struck.
  * 
- * TODO: Upgrade increases max length, possibly damage upgrade as well.
- *
  */
 public class EntityWhip extends EntityThrowable
 {
