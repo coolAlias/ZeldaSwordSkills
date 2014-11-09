@@ -25,6 +25,7 @@ import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -82,6 +83,13 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	private final float bg2DecayRate;
 	/** Rate at which BG2 stamina bar will recover per tick; 0.012F takes 5 seconds */
 	private final float bg2RecoveryRate;
+	
+	//Checking if the Shield is a Mirror Shield(Mirror)
+	private boolean isMirrorShield;
+	//Checking if the Shield is a Wooden Shield(Deku)
+	private boolean isWoodenShield;
+	//Checking if the Shield is Electric Resistant(Sacred Shield)
+	private boolean isElectricResistantShield;
 
 	@SideOnly(Side.CLIENT)
 	private IIcon backIcon;
@@ -112,10 +120,10 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	 */
 	public boolean canBlockDamage(ItemStack shield, DamageSource source) {
 		boolean flag = source.isUnblockable() && !(source instanceof DamageSourceArmorBreak);
-		if (this == ZSSItems.shieldDeku) {
+		if (this.isWooden()) {
 			return !flag;
 		}
-		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && this == ZSSItems.shieldMirror);
+		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && this.isMirror());
 	}
 
 	/**
@@ -127,7 +135,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		ZSSPlayerInfo.get(player).onAttackBlocked(shield, damage);
 		WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 		float damageBlocked = damage;
-		if (this == ZSSItems.shieldDeku) {
+		if (this.isWooden()) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
 				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
 					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
@@ -144,7 +152,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 					player.destroyCurrentEquippedItem();
 				}
 			}
-		} else if (this == ZSSItems.shieldMirror) {
+		} else if (this.isMirror()) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
 				float chance = (source.isMagicDamage() ? (1F / 3F) : 1.0F);
 				if (source.getSourceOfDamage() instanceof IReflectable) {
@@ -223,7 +231,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-		if (this == ZSSItems.shieldMirror) {
+		if (this.isMirror()) {
 			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock()) {
 				Vec3 vec3 = player.getLookVec();
 				double dx = player.posX + vec3.xCoord * 2.0D;
@@ -251,7 +259,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return this == ZSSItems.shieldDeku && stack.getItem() == Item.getItemFromBlock(Blocks.planks);
+		return this.isWooden() && stack.getItem() == Item.getItemFromBlock(Blocks.planks);
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -306,7 +314,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	@Method(modid="battlegear2")
 	@Override
 	public boolean catchArrow(ItemStack shield, EntityPlayer player, IProjectile projectile) {
-		if (this == ZSSItems.shieldDeku && projectile instanceof EntityArrow){
+		if (this.isWooden() && projectile instanceof EntityArrow){
 			setArrowCount(shield, getArrowCount(shield) + 1);
 			player.setArrowCountInEntity(player.getArrowCountInEntity() - 1);
 			((EntityArrow) projectile).setDead();
@@ -365,5 +373,40 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	@Override
 	public float getDamageReduction(ItemStack shield, DamageSource source) {
 		return 0.0F;
+	}
+	
+	
+	
+	
+	
+	/**The six methods for setting the Shields and for Getting the Shields.**/
+	public boolean isMirror()
+    {
+		return this.isMirrorShield;
+    }
+	
+	public boolean isWooden()
+    {
+		return this.isWoodenShield;
+    }
+	
+	public boolean isElectricResistant()
+    {
+		return this.isElectricResistantShield;
+    }
+	
+	public ItemZeldaShield setMirror(boolean par1)
+	{
+		this.isMirrorShield = par1;
+	}
+	
+	public ItemZeldaShield setWooden(boolean par1)
+	{
+		this.isWoodenShield = par1
+	}
+	
+	public ItemZeldaShield setElectricResistant(boolean par1)
+	{
+		this.isElectricResistantShield = par1;
 	}
 }
