@@ -250,22 +250,6 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 				}
 			}
 		}
-		if(this.isElectricResistant())
-		{
-			ZSSEntityInfo buffInfo = ZSSEntityInfo.get(player);
-			
-			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock())
-			{
-				buffInfo.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
-			}
-			else
-			{
-				if (buffInfo.isBuffPermanent(Buff.RESIST_SHOCK))
-				{
-				buffInfo.removeBuff(Buff.RESIST_SHOCK);
-				}
-			}
-		}
 	}
 
 	@Override
