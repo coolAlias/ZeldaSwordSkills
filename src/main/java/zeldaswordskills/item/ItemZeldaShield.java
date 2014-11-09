@@ -253,7 +253,18 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		if(this.isElectricResistant())
 		{
 			ZSSEntityInfo buffInfo = ZSSEntityInfo.get(player);
-			buffInfo.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+			
+			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock())
+			{
+				buffInfo.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+			}
+			else
+			{
+				if (buffInfo.isBuffPermanent(Buff.RESIST_SHOCK))
+				{
+				buffInfo.removeBuff(Buff.RESIST_SHOCK);
+				}
+			}
 		}
 	}
 
@@ -400,17 +411,17 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		return this.isElectricResistantShield;
     }
 	
-	public void setMirror(boolean par1)
+	public ItemZeldaShield setMirror(boolean par1)
 	{
 		this.isMirrorShield = par1;
 	}
 	
-	public void setWooden(boolean par1)
+	public ItemZeldaShield setWooden(boolean par1)
 	{
 		this.isWoodenShield = par1
 	}
 	
-	public void setElectricResistant(boolean par1)
+	public ItemZeldaShield setElectricResistant(boolean par1)
 	{
 		this.isElectricResistantShield = par1;
 	}
