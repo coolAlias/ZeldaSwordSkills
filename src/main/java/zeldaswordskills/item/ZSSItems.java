@@ -427,9 +427,9 @@ public class ZSSItems
 		bootsPegasus = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_pegasus");
 		bootsRubber = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_rubber");
 
-		shieldDeku = new ItemZeldaShield(30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
+		shieldDeku = new ItemZeldaShield(30, 3F, 5F).setUnlocalizedName("zss.shield_deku").setWooden(true);
 		shieldHylian = new ItemZeldaShield(18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
-		shieldMirror = new ItemZeldaShield(24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
+		shieldMirror = new ItemZeldaShield(24, 4F, 4F).setUnlocalizedName("zss.shield_mirror").setMirror(true);
 
 		swordKokiri = new ItemZeldaSword(ToolMaterial.IRON, -1.0F).setUnlocalizedName("zss.sword_kokiri").setMaxDamage(256);
 		swordOrdon = new ItemZeldaSword(ToolMaterial.IRON, 1.0F).setUnlocalizedName("zss.sword_ordon").setMaxDamage(512);
