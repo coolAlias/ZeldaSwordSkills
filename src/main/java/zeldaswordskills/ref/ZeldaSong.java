@@ -62,7 +62,7 @@ public enum ZeldaSong {
 	SPIRIT_REQUIEM("requiem", 120, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1),
 	SHADOW_NOCTURNE("nocturne", 116, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
 	ORDER_OATH("order", 120, SongNote.A2, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D2),
-	LIGHT_PRELUDE("prelude", 120, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
+	LIGHT_PRELUDE("prelude", 92, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
 	HEALING_SONG("healing", 78, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1),
 	SOARING_SONG("soaring", 120, SongNote.F1, SongNote.B2, SongNote.D2, SongNote.F1, SongNote.B2, SongNote.D2);
 
