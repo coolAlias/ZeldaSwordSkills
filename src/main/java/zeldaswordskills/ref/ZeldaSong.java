@@ -58,10 +58,10 @@ public enum ZeldaSong {
 	SCARECROW_SONG("scarecrow", 160), // user-defined song, 8 notes long at 20 ticks each
 	FOREST_MINUET("minuet", 90, SongNote.D1, SongNote.D2, SongNote.B2, SongNote.A2, SongNote.B2, SongNote.A2),
 	FIRE_BOLERO("bolero", 60, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.A2, SongNote.F1),
-	WATER_SERENADE("serenade", 120, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.A2, SongNote.B2),
-	SPIRIT_REQUIEM("requiem", 120, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1),
+	WATER_SERENADE("serenade", 83, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.A2, SongNote.B2),
+	SPIRIT_REQUIEM("requiem", 125, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1),
 	SHADOW_NOCTURNE("nocturne", 116, SongNote.B2, SongNote.A2, SongNote.A2, SongNote.D1, SongNote.B2, SongNote.A2, SongNote.F1),
-	ORDER_OATH("order", 120, SongNote.A2, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D2),
+	ORDER_OATH("oath", 110, SongNote.A2, SongNote.F1, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.D2),
 	LIGHT_PRELUDE("prelude", 92, SongNote.D2, SongNote.A2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2),
 	HEALING_SONG("healing", 78, SongNote.B2, SongNote.A2, SongNote.F1, SongNote.B2, SongNote.A2, SongNote.F1),
 	SOARING_SONG("soaring", 120, SongNote.F1, SongNote.B2, SongNote.D2, SongNote.F1, SongNote.B2, SongNote.D2);

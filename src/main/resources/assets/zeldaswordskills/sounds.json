@@ -53,6 +53,7 @@
     "song.lullaby": {"category": "record","sounds": [{"name": "song/lullaby","stream": true}]},
     "song.minuet": {"category": "record","sounds": [{"name": "song/minuet","stream": true}]},
     "song.nocturne": {"category": "record","sounds": [{"name": "song/nocturne","stream": true}]},
+    "song.oath": {"category": "record","sounds": [{"name": "song/oath","stream": true}]},
     "song.prelude": {"category": "record","sounds": [{"name": "song/prelude","stream": true}]},
     "song.requiem": {"category": "record","sounds": [{"name": "song/requiem","stream": true}]},
     "song.saria": {"category": "record","sounds": [{"name": "song/saria","stream": true}]},
