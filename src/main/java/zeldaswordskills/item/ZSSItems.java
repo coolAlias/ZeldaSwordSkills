@@ -432,9 +432,9 @@ public class ZSSItems
 		bootsPegasus = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_pegasus");
 		bootsRubber = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots")).setUnlocalizedName("zss.boots_rubber");
 
-		shieldDeku = new ItemZeldaShield(30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
-		shieldHylian = new ItemZeldaShield(18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
-		shieldMirror = new ItemZeldaShield(24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
+		shieldDeku = new ItemZeldaShield(ToolMaterial.WOOD, 0.25F, 30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
+		shieldHylian = new ItemZeldaShield(ToolMaterial.IRON, 0.5F, 18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
+		shieldMirror = new ItemZeldaShield(ToolMaterial.EMERALD, 0.75F, 24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
 
 		swordKokiri = new ItemZeldaSword(ToolMaterial.IRON, -1.0F).setUnlocalizedName("zss.sword_kokiri").setMaxDamage(256);
 		swordOrdon = new ItemZeldaSword(ToolMaterial.IRON, 1.0F).setUnlocalizedName("zss.sword_ordon").setMaxDamage(512);
@@ -577,9 +577,9 @@ public class ZSSItems
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTarget), " c ","bab"," b ", 'a', Items.redstone, 'b', Blocks.stone, 'c', Blocks.iron_bars);
-		GameRegistry.addRecipe(new ItemStack(arrowBomb), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 'a', Items.arrow);
-		GameRegistry.addRecipe(new ItemStack(arrowBombFire), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), 'a', Items.arrow);
-		GameRegistry.addRecipe(new ItemStack(arrowBombWater), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), 'a', Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBomb), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 'a', Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombFire), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), 'a', Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombWater), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), 'a', Items.arrow);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Items.brick);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument,1,ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Items.clay_ball, 'r', Items.reeds);

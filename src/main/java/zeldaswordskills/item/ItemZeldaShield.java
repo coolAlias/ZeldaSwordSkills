@@ -76,10 +76,21 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ItemZeldaShield extends Item implements IDashItem, IFairyUpgrade,
 ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
+	/**
+	 * Material used in construction determines various properties:
+	 * WOOD: Can catch arrows, vulnerable to fire; EMERALD: Reflects projectiles
+	 */
+	protected final ToolMaterial toolMaterial;
+
+	/** Percent of damage from magical AoE attacks that is blocked, if any */
+	private final float magicReduction;
+	
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;
+	
 	/** Rate at which BG2 stamina bar will decay per tick */
 	private final float bg2DecayRate;
+	
 	/** Rate at which BG2 stamina bar will recover per tick; 0.012F takes 5 seconds */
 	private final float bg2RecoveryRate;
 
@@ -87,12 +98,16 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	private IIcon backIcon;
 
 	/**
+	 * @param material Affects shield's qualities, such as weakness to fire or ability to reflect projectiles
+	 * @param magicReduction Percent of damage from magical AoE attacks that is blocked, if any
 	 * @param recoveryTime time in ticks it takes to recover from a block when held normally
 	 * @param decayRate number of seconds it will take the BG2 stamina bar to deplete
 	 * @param recoveryRate number of seconds until BG2 stamina bar will completely replenish
 	 */
-	public ItemZeldaShield(int recoveryTime, float decayRate, float recoveryRate) {
+	public ItemZeldaShield(ToolMaterial material, float magicReduction, int recoveryTime, float decayRate, float recoveryRate) {
 		super();
+		this.toolMaterial = material;
+		this.magicReduction = magicReduction;
 		this.recoveryTime = recoveryTime;
 		this.bg2DecayRate = 1F / decayRate / 20F;
 		this.bg2RecoveryRate = 1F / recoveryRate / 20F;
@@ -112,10 +127,10 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	 */
 	public boolean canBlockDamage(ItemStack shield, DamageSource source) {
 		boolean flag = source.isUnblockable() && !(source instanceof DamageSourceArmorBreak);
-		if (this == ZSSItems.shieldDeku) {
+		if (toolMaterial == ToolMaterial.WOOD) {
 			return !flag;
 		}
-		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && this == ZSSItems.shieldMirror);
+		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && toolMaterial == ToolMaterial.EMERALD);
 	}
 
 	/**
@@ -127,7 +142,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		ZSSPlayerInfo.get(player).onAttackBlocked(shield, damage);
 		WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 		float damageBlocked = damage;
-		if (this == ZSSItems.shieldDeku) {
+		if (toolMaterial == ToolMaterial.WOOD) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
 				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
 					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
@@ -135,7 +150,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 					}
 				}
 			} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
-				damageBlocked *= 0.25F;
+				damageBlocked *= magicReduction;
 			}
 			int dmg = Math.round(source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
 			if (dmg > 0) {
@@ -144,7 +159,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 					player.destroyCurrentEquippedItem();
 				}
 			}
-		} else if (this == ZSSItems.shieldMirror) {
+		} else if (toolMaterial == ToolMaterial.EMERALD) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
 				float chance = (source.isMagicDamage() ? (1F / 3F) : 1.0F);
 				if (source.getSourceOfDamage() instanceof IReflectable) {
@@ -175,11 +190,11 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 						player.worldObj.spawnEntityInWorld(projectile);
 					}
 				} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) { // failed to reflect projectile
-					damageBlocked *= 0.75F;
+					damageBlocked *= magicReduction;
 				}
 			}
 		} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
-			damageBlocked *= 0.5F; // default shield behavior blocks half damage from AoE magic attacks
+			damageBlocked *= magicReduction; // default shield behavior blocks half damage from AoE magic attacks
 		}
 		return (damage - damageBlocked);
 	}
