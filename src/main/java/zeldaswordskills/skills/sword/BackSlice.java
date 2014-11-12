@@ -62,6 +62,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Activation: Hold left or right arrow key and double-tap forward
  * Exhaustion: Light [1.0F - (level * 0.05F)]
  * Damage: Adds +10% to the damage per level, possibly more against vulnerable enemies
+ * Effective Angle: 40 degrees plus 20 per level
  * Special:
  * 		- Considered 'dodging' against current target for the first 5 + (2 * level) ticks
  * 		- Bonus damage only applies when target is struck in the back
