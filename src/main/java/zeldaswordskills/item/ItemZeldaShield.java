@@ -32,7 +32,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -266,7 +265,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return this == ZSSItems.shieldDeku && stack.getItem() == Item.getItemFromBlock(Blocks.planks);
+		return toRepair.isItemStackDamageable() && stack.getItem() == toolMaterial.func_150995_f();
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -321,7 +320,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	@Method(modid="battlegear2")
 	@Override
 	public boolean catchArrow(ItemStack shield, EntityPlayer player, IProjectile projectile) {
-		if (this == ZSSItems.shieldDeku && projectile instanceof EntityArrow){
+		if (toolMaterial == ToolMaterial.WOOD && projectile instanceof EntityArrow){
 			setArrowCount(shield, getArrowCount(shield) + 1);
 			player.setArrowCountInEntity(player.getArrowCountInEntity() - 1);
 			((EntityArrow) projectile).setDead();
