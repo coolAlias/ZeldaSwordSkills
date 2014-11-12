@@ -577,9 +577,9 @@ public class ZSSItems
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTarget), " c ","bab"," b ", 'a', Items.redstone, 'b', Blocks.stone, 'c', Blocks.iron_bars);
-		GameRegistry.addShapelessRecipe(new ItemStack(arrowBomb), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 'a', Items.arrow);
-		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombFire), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), 'a', Items.arrow);
-		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombWater), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), 'a', Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBomb), new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombFire), new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombWater), new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), Items.arrow);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Items.brick);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument,1,ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Items.clay_ball, 'r', Items.reeds);
