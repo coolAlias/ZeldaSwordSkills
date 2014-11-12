@@ -238,7 +238,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-		if (this == ZSSItems.shieldMirror) {
+		if (toolMaterial == ToolMaterial.EMERALD) {
 			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock()) {
 				Vec3 vec3 = player.getLookVec();
 				double dx = player.posX + vec3.xCoord * 2.0D;
