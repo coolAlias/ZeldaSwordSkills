@@ -40,7 +40,6 @@ import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
@@ -69,8 +68,10 @@ import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
@@ -320,23 +321,24 @@ public class ZSSItemEvents
 	}
 
 	public static void load() {
-		addDrop(EntityZombie.class, SkillBase.swordBasic);
-		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
-		addDrop(EntityEnderman.class, SkillBase.dodge);
-		addDrop(EntityKeese.class, SkillBase.dodge);
+		addDrop(EntityCreeper.class, SkillBase.armorBreak);
+		addDrop(EntityIronGolem.class, SkillBase.armorBreak);
 		addDrop(EntitySilverfish.class, SkillBase.dash);
 		addDrop(EntityHorse.class, SkillBase.dash);
-		addDrop(EntityPigZombie.class, SkillBase.parry);
-		addDrop(EntityOcelot.class, SkillBase.parry);
+		addDrop(EntityEnderman.class, SkillBase.dodge);
+		addDrop(EntityKeese.class, SkillBase.dodge);
 		addDrop(EntitySpider.class, SkillBase.endingBlow);
 		addDrop(EntityCaveSpider.class, SkillBase.leapingBlow);
 		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow);
+		addDrop(EntityPigZombie.class, SkillBase.parry);
+		addDrop(EntityOcelot.class, SkillBase.parry);
+		addDrop(EntityOctorok.class, SkillBase.risingCut);
 		addDrop(EntityBlaze.class, SkillBase.spinAttack);
-		addDrop(EntityBat.class, SkillBase.spinAttack);
-		addDrop(EntityCreeper.class, SkillBase.armorBreak);
-		addDrop(EntityIronGolem.class, SkillBase.armorBreak);
+		addDrop(EntityDarknut.class, SkillBase.spinAttack);
+		addDrop(EntityZombie.class, SkillBase.swordBasic);
+		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
 		addDrop(EntityGhast.class, SkillBase.swordBeam);
 		addDrop(EntityWitch.class, SkillBase.swordBeam);
-		addDrop(EntityOctorok.class, SkillBase.risingCut);
+		addDrop(EntityWizzrobe.class, SkillBase.swordBreak);
 	}
 }
