@@ -137,27 +137,27 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		setRotation(lowerArmor, 0F, 0F, 0F);
 
 		// HELMET
-		helmBackPlate = new ModelRenderer(this, 32, 0);
+		helmBackPlate = new ModelRenderer(this, 0, 55);
 		helmBackPlate.setTextureSize(textureWidth, textureHeight);
 		helmBackPlate.addBox(-4.5F, -7.6F, 3.5F, 9, 8, 1);
 		helmBackPlate.setRotationPoint(0F, 0F, 0F);
 		setRotation(helmBackPlate, 0F, 0F, 0F);
 
-		helmTopPlate = new ModelRenderer(this, 32, 0);
+		helmTopPlate = new ModelRenderer(this, 0, 54);
 		helmTopPlate.setTextureSize(textureWidth, textureHeight);
 		helmTopPlate.addBox(-4.5F, -7.6F, -4.5F, 9, 1, 9);
 		helmTopPlate.setRotationPoint(0F, -1.0F, 0F);
 		setRotation(helmTopPlate, 0F, 0F, 0F);
 		helmBackPlate.addChild(helmTopPlate);
 
-		helmRightPlate = new ModelRenderer(this, 32, 0);
+		helmRightPlate = new ModelRenderer(this, 0, 48);
 		helmRightPlate.setTextureSize(textureWidth, textureHeight);
 		helmRightPlate.addBox(-3.5F, -7.6F, -4.5F, 1, 8, 8);
 		helmRightPlate.setRotationPoint(-1F, 0F, 0F);
 		setRotation(helmRightPlate, 0F, 0F, 0F);
 		helmBackPlate.addChild(helmRightPlate);
 
-		helmLeftPlate = new ModelRenderer(this, 32, 0);
+		helmLeftPlate = new ModelRenderer(this, 0, 48);
 		helmLeftPlate.mirror = true;
 		helmLeftPlate.setTextureSize(textureWidth, textureHeight);
 		helmLeftPlate.addBox(2.5F, -7.6F, -4.5F, 1, 8, 8);
@@ -165,7 +165,7 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		setRotation(helmLeftPlate, 0F, 0F, 0F);
 		helmBackPlate.addChild(helmLeftPlate);
 
-		helmVisor = new ModelRenderer(this, 32, 1);
+		helmVisor = new ModelRenderer(this, 1, 62);
 		helmVisor.setTextureSize(textureWidth, textureHeight);
 		helmVisor.addBox(-3.5F, -6.6F, -4.5F, 7, 1, 1);
 		helmVisor.setRotationPoint(0F, 0F, 0F);
@@ -179,7 +179,7 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		setRotation(noseGuard, 0F, 0F, 0F);
 		helmVisor.addChild(noseGuard);
 
-		cheekGuardRight = new ModelRenderer(this, 38, 10);
+		cheekGuardRight = new ModelRenderer(this, 32, 10);
 		cheekGuardRight.setTextureSize(textureWidth, textureHeight);
 		cheekGuardRight.addBox(-2.5F, -4.5F, -4.5F, 2, 5, 1);
 		cheekGuardRight.setRotationPoint(0F, 0F, 0F);
@@ -194,14 +194,14 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		setRotation(cheekGuardLeft, 0F, 0F, 0F);
 		helmLeftPlate.addChild(cheekGuardLeft);
 
-		hornHolderRight = new ModelRenderer(this, 52, 0);
+		hornHolderRight = new ModelRenderer(this, 53, 0);
 		hornHolderRight.setTextureSize(textureWidth, textureHeight);
 		hornHolderRight.addBox(-5F, -6F, -1.5F, 2, 3, 3);
 		hornHolderRight.setRotationPoint(0F, 0F, 0F);
 		setRotation(hornHolderRight, 0F, 0F, 0F);
 		helmRightPlate.addChild(hornHolderRight);
 
-		hornHolderLeft = new ModelRenderer(this, 52, 0);
+		hornHolderLeft = new ModelRenderer(this, 53, 0);
 		hornHolderLeft.mirror = true;
 		hornHolderLeft.setTextureSize(textureWidth, textureHeight);
 		hornHolderLeft.addBox(3F, -6F, -1.5F, 2, 3, 3);
@@ -209,7 +209,7 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		setRotation(hornHolderLeft, 0F, 0F, 0F);
 		helmLeftPlate.addChild(hornHolderLeft);
 
-		hornRight = new ModelRenderer(this, 52, 6);
+		hornRight = new ModelRenderer(this, 38, 0);
 		hornRight.setTextureSize(textureWidth, textureHeight);
 		hornRight.addBox(-10F, -5.5F, -1F, 5, 2, 2);
 		hornRight.setRotationPoint(0F, 0F, 0F);
@@ -217,7 +217,7 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		setRotation(hornRight, 0F, 0F, ((float) Math.PI / 8.0F));
 		hornHolderRight.addChild(hornRight);
 
-		hornLeft = new ModelRenderer(this, 52, 6);
+		hornLeft = new ModelRenderer(this, 38, 0);
 		hornLeft.mirror = true;
 		hornLeft.setTextureSize(textureWidth, textureHeight);
 		hornLeft.addBox(5F, -5.5F, -1F, 5, 2, 2);
