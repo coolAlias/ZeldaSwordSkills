@@ -61,8 +61,9 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 
 	public ItemMagicMirror() {
 		super();
-		setMaxStackSize(1);
+		setFull3D();
 		setMaxDamage(16);
+		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
