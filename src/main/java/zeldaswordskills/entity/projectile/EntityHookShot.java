@@ -166,6 +166,8 @@ public class EntityHookShot extends EntityThrowable
 		if (block instanceof IHookable) {
 			result = ((IHookable) block).canGrabBlock(getType(), worldObj, x, y, z, side);
 			material = ((IHookable) block).getHookableMaterial(getType(), worldObj, x, y, z);
+		} else if (Config.allowHookableOnly()) {
+			return false;
 		}
 		switch(result) {
 		case DEFAULT:
@@ -192,6 +194,8 @@ public class EntityHookShot extends EntityThrowable
 		Result result = Result.DEFAULT;
 		if (block instanceof IHookable) {
 			result = ((IHookable) block).canDestroyBlock(getType(), worldObj, x, y, z, side);
+		} else if (Config.allowHookableOnly()) {
+			return false;
 		}
 		switch(result) {
 		case DEFAULT:

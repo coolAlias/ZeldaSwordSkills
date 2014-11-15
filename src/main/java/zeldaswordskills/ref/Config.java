@@ -108,6 +108,8 @@ public class Config
 	private static boolean enableAutoBombArrows;
 	/** [Hookshot] Max range of non-extended hookshots */
 	private static int hookshotRange;
+	/** [Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps! */
+	private static boolean enableHookableOnly;
 	/** [Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass */
 	private static boolean enableHookshotBreakBlocks;
 	/** [Hookshot] Whether to play the 'itembreak' sound when the hookshot misses */
@@ -324,6 +326,7 @@ public class Config
 		enableLightArrowNoClip = config.get("Item", "[Hero's Bow] Whether the light arrow can penetrate blocks", true).getBoolean(true);
 		enableAutoBombArrows = config.get("Item", "[Hero's Bow] Whether to automate bomb arrow firing when sneaking", true).getBoolean(true);
 		hookshotRange = config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt();
+		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		enableHookshotSound = config.get("Item", "[Hookshot] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
 		rodUpgradeCost = config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt();
@@ -481,6 +484,7 @@ public class Config
 	public static boolean enableLightArrowNoClip() { return enableLightArrowNoClip; }
 	public static boolean enableAutoBombArrows() { return enableAutoBombArrows; }
 	public static int getHookshotRange() { return MathHelper.clamp_int(hookshotRange, 4, 16); }
+	public static boolean allowHookableOnly() { return enableHookableOnly; }
 	public static boolean canHookshotBreakBlocks() { return enableHookshotBreakBlocks; }
 	public static boolean enableHookshotMissSound() { return enableHookshotSound; }
 	public static int getRodUpgradeCost() { return MathHelper.clamp_int(rodUpgradeCost, 128, 1280); }
