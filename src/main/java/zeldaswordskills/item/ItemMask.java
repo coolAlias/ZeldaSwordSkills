@@ -161,7 +161,9 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 		if (tickingEffect != null && world.getWorldTime() % 50 == 0) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
 		}
-		if (this == ZSSItems.maskCouples) {
+		if (this == ZSSItems.maskZora) {
+			player.setAir(300);
+		} else if (this == ZSSItems.maskCouples) {
 			if (world.getWorldTime() % 64 == 0) {
 				List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.boundingBox.expand(8.0D, 3.0D, 8.0D));
 				for (EntityVillager villager : villagers) {
@@ -260,6 +262,9 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 		if (buffInfo.isBuffPermanent(Buff.ATTACK_UP)) {
 			buffInfo.removeBuff(Buff.ATTACK_UP);
 		}
+		if (buffInfo.isBuffPermanent(Buff.RESIST_FIRE)) {
+			buffInfo.removeBuff(Buff.RESIST_FIRE);
+		}
 		if (player.getEntityData().hasKey("origWidth") && (stack == null || stack.getItem() != ZSSItems.maskGiants)) {
 			DirtyEntityAccessor.restoreOriginalSize(player);
 			if (player.worldObj.isRemote) {
@@ -279,6 +284,8 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 				if (player.worldObj.isRemote) {
 					player.stepHeight += 1.0F;
 				}
+			} else if (stack.getItem() == ZSSItems.maskGoron) {
+				buffInfo.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 			} else if (stack.getItem() == ZSSItems.maskMajora) {
 				buffInfo.applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
 			}

@@ -41,6 +41,8 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityGoron;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
@@ -123,9 +125,14 @@ public class ItemArmorTunic extends ItemArmor
 	public static boolean onFireDamage(EntityLivingBase entity, float damage) {
 		ItemStack stack = entity.getEquipmentInSlot(ArmorIndex.EQUIPPED_CHEST);
 		if (!entity.worldObj.isRemote && stack != null && stack.getItem() == ZSSItems.tunicGoronChest) {
-			PotionEffect resist = entity.getActivePotionEffect(Potion.fireResistance);
-			if (resist != null && resist.getDuration() > 0) {
-				return false;
+			if (entity.isPotionActive(Potion.fireResistance.getId())) {
+				return true;
+			}
+			damage *= 1.0F + (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
+			damage *= 1.0F - (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
+			if (damage < 0.1F) {
+				entity.extinguish();
+				return true;
 			}
 			if (!stack.hasTagCompound()) {
 				stack.setTagCompound(new NBTTagCompound());
@@ -158,6 +165,13 @@ public class ItemArmorTunic extends ItemArmor
 	private boolean shouldDamageArmor(World world, EntityPlayer player, ItemStack stack, int effectID) {
 		Material m = world.getBlock((int) player.posX, (int) player.posY + 1, (int) player.posZ).getMaterial();
 		if (effectID == Potion.waterBreathing.id) {
+			if (player.isPotionActive(Potion.waterBreathing.getId())) {
+				return false;
+			}
+			ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
+			if (helm != null && helm.getItem() == ZSSItems.maskZora) {
+				return false;
+			}
 			return (m == Material.water && world.getWorldTime() % 50 == 0);
 		} else {
 			return false;

@@ -107,10 +107,15 @@ public class ZSSEntityEvents
 				ZSSPlayerInfo.get((EntityPlayer) event.entity).reduceFallAmount += 1.0F;
 			}
 		}
-		if (event.entityLiving.getEquipmentInSlot(ArmorIndex.EQUIPPED_HELM) != null && event.entityLiving.getEquipmentInSlot(ArmorIndex.EQUIPPED_HELM).getItem() == ZSSItems.maskBunny) {
-			event.entityLiving.motionY += 0.30D;
-			if (event.entity instanceof EntityPlayer) {
-				ZSSPlayerInfo.get((EntityPlayer) event.entity).reduceFallAmount += 5.0F;
+		ItemStack helm = event.entityLiving.getEquipmentInSlot(ArmorIndex.EQUIPPED_HELM);
+		if (helm != null) {
+			if (helm.getItem() == ZSSItems.maskBunny) {
+				event.entityLiving.motionY += 0.30D;
+				if (event.entity instanceof EntityPlayer) {
+					ZSSPlayerInfo.get((EntityPlayer) event.entity).reduceFallAmount += 5.0F;
+				}
+			} else if (helm.getItem() == ZSSItems.maskDeku) {
+				event.entityLiving.motionY += 0.30D;
 			}
 		}
 	}
@@ -157,9 +162,12 @@ public class ZSSEntityEvents
 		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ZSSPlayerInfo.get(player).onUpdate();
-			if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.rocsFeather && player.motionY < -0.25D) {
-				player.motionY = -0.25D;
-				player.fallDistance = 0.0F;
+			if (player.motionY < -0.25D) {
+				boolean flag = player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.rocsFeather;
+				if (flag || (player.getCurrentArmor(ArmorIndex.WORN_HELM) != null && player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == ZSSItems.maskDeku)) {
+					player.motionY = -0.25D;
+					player.fallDistance = 0.0F;
+				}
 			}
 		}
 		if (event.entity instanceof EntityLivingBase) {
