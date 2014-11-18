@@ -20,6 +20,7 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import mods.battlegear2.api.ISheathed;
+import mods.battlegear2.api.core.BattlegearUtils;
 import mods.battlegear2.api.core.InventoryPlayerBattle;
 import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
@@ -155,7 +156,11 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
-					player.destroyCurrentEquippedItem();
+					if (ZSSMain.isBG2Enabled && BattlegearUtils.isPlayerInBattlemode(player)) {
+						BattlegearUtils.setPlayerOffhandItem(player, null);
+					} else {
+						player.destroyCurrentEquippedItem();
+					}
 				}
 			}
 		} else if (toolMaterial == ToolMaterial.EMERALD) {
