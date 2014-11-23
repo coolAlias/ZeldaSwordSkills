@@ -58,6 +58,7 @@
     "song.requiem": {"category": "record","sounds": [{"name": "song/requiem","stream": true}]},
     "song.saria": {"category": "record","sounds": [{"name": "song/saria","stream": true}]},
     "song.serenade": {"category": "record","sounds": [{"name": "song/serenade","stream": true}]},
+    "song.soaring": {"category": "record","sounds": [{"name": "song/soaring","stream": true}]},
     "song.storms": {"category": "record","sounds": [{"name": "song/storms","stream": true}]},
     "song.sun": {"category": "record","sounds": [{"name": "song/sun","stream": true}]},
     "song.time": {"category": "record","sounds": [{"name": "song/time","stream": true}]}
