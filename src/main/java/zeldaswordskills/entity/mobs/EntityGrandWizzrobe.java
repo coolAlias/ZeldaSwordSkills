@@ -19,6 +19,8 @@ package zeldaswordskills.entity.mobs;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -46,6 +48,9 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	public EntityGrandWizzrobe(World world) {
 		super(world);
 		tasks.addTask(0, new EntityAILevitate(this, 2.5D));
+		targetTasks.taskEntries.clear();
+		targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
+		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
 		func_110163_bv(); // sets persistence required to true, meaning will not despawn
 		setType(rand.nextInt(WizzrobeType.values().length));
 		setSize(1.0F, 3.0F);

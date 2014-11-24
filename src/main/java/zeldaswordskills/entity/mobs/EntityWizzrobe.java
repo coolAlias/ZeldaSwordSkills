@@ -28,7 +28,6 @@ import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
@@ -49,6 +48,7 @@ import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.ai.EntityAINearestAttackableTargetNight;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.ai.IMagicUser;
@@ -127,7 +127,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
 		tasks.addTask(5, new EntityAILookIdle(this));
 		targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
+		targetTasks.addTask(2, new EntityAINearestAttackableTargetNight(this, EntityPlayer.class, 0, true, 0.5F));
 		experienceValue = 8; // normal mobs are 5
 		setSize(0.6F, 1.8F);
 		setType(WizzrobeType.WIND_WIZ);
@@ -324,6 +324,11 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		super.damageEntity(source, amount);
 	}
 
+	@Override
+	protected Entity findPlayerToAttack() {
+		return (getBrightness(1.0F) < 0.5F ? worldObj.getClosestVulnerablePlayerToEntity(this, 32.0D) : null);
+	}
+
 	/**
 	 * Base spell damage
 	 */
@@ -451,7 +456,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		}
 		if (teleportAI.getTeleBounds() == null && this.getEntityToAttack() == null && ++noTargetTime > 400) {
 			noTargetTime = 0;
-			EntityPlayer player = worldObj.getClosestVulnerablePlayerToEntity(this, 32.0D);
+			Entity player = findPlayerToAttack();
 			if (player != null && canEntityBeSeen(player) && !worldObj.isRemote) {
 				setTarget(player);
 				for (int i = 0; i < 64; ++i) {
