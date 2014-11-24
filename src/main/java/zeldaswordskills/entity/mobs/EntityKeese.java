@@ -382,7 +382,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 				setIsBatHanging(true);
 			} else if (canShock() && getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
 				if (attackingPlayer != null && ((recentlyHit > 0 && rand.nextInt(20) == 0) || rand.nextInt(300) == 0)) {
-					setShockTime(rand.nextInt(100) + (worldObj.difficultySetting.getDifficultyId() * 50));
+					setShockTime(rand.nextInt(50) + (worldObj.difficultySetting.getDifficultyId() * (rand.nextInt(20) + 10)));
 				}
 			}
 		}

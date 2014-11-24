@@ -527,7 +527,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IE
 
 		if (canChuTypeShock() && getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
 			if (player != null && (recentlyHit > 0 || rand.nextInt(getShockInterval()) == 0)) {
-				setShockTime(rand.nextInt(getSize() * 100) + (worldObj.difficultySetting.getDifficultyId() * 100));
+				setShockTime(rand.nextInt(getSize() * 50) + (worldObj.difficultySetting.getDifficultyId() * (rand.nextInt(20) + 10)));
 			}
 		}
 		if (getShockTime() % 8 > 5 && rand.nextInt(4) == 0) {
@@ -579,7 +579,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IE
 					newChu.setSize(i * 2);
 					newChu.setType(this.getType().ordinal() < chu.getType().ordinal() ? chu.getType() : this.getType());
 					newChu.setLocationAndAngles((this.posX + chu.posX) / 2, posY + 0.5D, (this.posZ + chu.posZ) / 2 , rand.nextFloat() * 360.0F, 0.0F);
-					newChu.getEntityData().setInteger("timesMerged", rand.nextInt(3) + this.getEntityData().getInteger("timesMerged"));
+					newChu.getEntityData().setInteger("timesMerged", rand.nextInt(4) + 1 + this.getEntityData().getInteger("timesMerged"));
 					worldObj.spawnEntityInWorld(newChu);
 					chu.isDead = true;
 					this.isDead = true;
