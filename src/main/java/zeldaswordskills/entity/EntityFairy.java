@@ -138,7 +138,11 @@ public class EntityFairy extends EntityAmbientCreature
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() == Items.glass_bottle) {
 			player.triggerAchievement(ZSSAchievements.fairyCatcher);
-			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.fairyBottle));
+			ItemStack fairyBottle = new ItemStack(ZSSItems.fairyBottle);
+			if (hasCustomNameTag()) {
+				fairyBottle.setStackDisplayName(getCustomNameTag());
+			}
+			player.setCurrentItemOrArmor(0, fairyBottle);
 			if (stack.stackSize > 1) {
 				stack.splitStack(1);
 				if (!player.inventory.addItemStackToInventory(stack)) {
@@ -157,7 +161,7 @@ public class EntityFairy extends EntityAmbientCreature
 	public void onUpdate() {
 		super.onUpdate();
 		motionY *= 0.6000000238418579D;
-		if (!worldObj.isRemote) {
+		if (!worldObj.isRemote && canDespawn()) {
 			if (worldObj.provider.dimensionId == -1 && ticksExisted > 60) {
 				// TODO terrible scream sound
 				setDead();
@@ -252,6 +256,7 @@ public class EntityFairy extends EntityAmbientCreature
 		return j | k << 16;
 	}
 
+	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setBoolean("hasHome", home != null);
@@ -260,6 +265,7 @@ public class EntityFairy extends EntityAmbientCreature
 		}
 	}
 
+	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		if (compound.getBoolean("hasHome")) {
