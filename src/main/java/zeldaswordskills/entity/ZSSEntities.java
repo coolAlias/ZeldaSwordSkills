@@ -219,6 +219,7 @@ public class ZSSEntities
 
 		// NATURALLY SPAWNING MOBS
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 80, 0xADFF2F, 0xFFFF00);
+		EntityRegistry.registerModEntity(EntityNavi.class, "navi", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 
 		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
@@ -258,6 +259,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityBlackKnight.class, new RenderGenericLiving(
 				new ModelDarknut(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy());
+		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy());
 		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(
 				new ModelGoron(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/goron.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese());

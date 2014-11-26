@@ -139,6 +139,8 @@ public class Config
 	public static boolean enableTunic;
 	/** Grants the Kokiri sword (a named wooden sword) */
 	public static boolean enableSword;
+	/** Start the game with Navi in a bottle (you can always acquire her later if false) */
+	public static boolean enableNavi;
 	/*================== SKILLS =====================*/
 	/** Whether to use default movement controls to activate skills such as Dodge */
 	private static boolean allowVanillaControls;
@@ -342,6 +344,7 @@ public class Config
 		enableFullSet = config.get("Bonus Gear", "Grants a full set of Kokiri clothing: hat, tunic, trousers, boots", true).getBoolean(true);
 		enableTunic = config.get("Bonus Gear", "Grants only a Kokiri Tunic (if full set is disabled)", true).getBoolean(true);
 		enableSword = config.get("Bonus Gear", "Grants a Kokiri sword", true).getBoolean(true);
+		enableNavi = config.get("Bonus Gear", "Start the game with Navi in a bottle (you can always acquire her later if false)", false).getBoolean(false);
 		/*================== SKILLS =====================*/
 		allowVanillaControls = config.get("Skills", "Allow vanilla controls to activate skills", true).getBoolean(true);
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);

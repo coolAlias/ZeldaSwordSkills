@@ -404,6 +404,12 @@ public class ZSSItems
 				player.inventory.addItemStackToInventory(new ItemStack(tunicHeroChest));
 			}
 		}
+		if (Config.enableNavi) {
+			ItemStack navi = new ItemStack(fairyBottle);
+			navi.setStackDisplayName("Navi");
+			player.inventory.addItemStackToInventory(navi);
+			
+		}
 		return true;
 	}
 

@@ -34,6 +34,7 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityFairy;
+import zeldaswordskills.entity.EntityNavi;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
@@ -62,7 +63,7 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 	public static boolean onDeath(EntityPlayer player) {
 		for (int i = 0; i < InventoryPlayer.getHotbarSize(); ++i) {
 			ItemStack stack = player.inventory.getStackInSlot(i);
-			if (stack != null && stack.getItem() instanceof ItemFairyBottle) {
+			if (stack != null && stack.getItem() instanceof ItemFairyBottle && !stack.hasDisplayName()) {
 				WorldUtils.playSoundAtEntity(player, Sounds.FAIRY_LAUGH, 0.4F, 0.5F);
 				player.setHealth(10F);
 				player.inventory.setInventorySlotContents(i, new ItemStack(Items.glass_bottle));
@@ -75,7 +76,19 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		boolean used = false;
-		if (player.isSneaking()) {
+		if (stack.hasDisplayName()) {
+			if (player.isSneaking()) {
+				used = true;
+				if (!world.isRemote) {
+					Vec3 vec3 = player.getLookVec();
+					EntityNavi navi = new EntityNavi(world);
+					navi.setOwner(player);
+					navi.setCustomNameTag(stack.getDisplayName());
+					navi.setPosition(player.posX + (vec3.xCoord * 2D), player.posY + 1.6D, player.posZ + (vec3.zCoord * 2D));
+					world.spawnEntityInWorld(navi);
+				}
+			}
+		} else if (player.isSneaking()) {
 			used = true;
 			if (!world.isRemote) {
 				Vec3 vec3 = player.getLookVec();
