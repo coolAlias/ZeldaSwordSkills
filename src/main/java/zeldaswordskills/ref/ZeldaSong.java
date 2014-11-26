@@ -310,6 +310,7 @@ public enum ZeldaSong {
 			case SPIRIT_REQUIEM:
 			case SHADOW_NOCTURNE:
 			case LIGHT_PRELUDE:
+			case ORDER_OATH:
 				WarpPoint warp = ZSSPlayerSongs.get(player).getWarpPoint(this);
 				if (power > 4 && warp != null) {
 					int dimension = player.worldObj.provider.dimensionId;
