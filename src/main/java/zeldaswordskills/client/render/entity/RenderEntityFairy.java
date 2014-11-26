@@ -17,10 +17,13 @@
 
 package zeldaswordskills.client.render.entity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
@@ -82,6 +85,9 @@ public class RenderEntityFairy extends Render
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 		GL11.glPopMatrix();
+		if (shouldRenderNametag(fairy)) {
+			renderNameTag(fairy, x, y, z);
+		}
 	}
 
 	@Override
@@ -92,5 +98,18 @@ public class RenderEntityFairy extends Render
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		return texture;
+	}
+
+	protected boolean shouldRenderNametag(EntityLiving entity) {
+		return Minecraft.isGuiEnabled() && entity != renderManager.livingPlayer && 
+				!entity.isInvisibleToPlayer(Minecraft.getMinecraft().thePlayer) && 
+				entity.riddenByEntity == null && 
+				(entity.getAlwaysRenderNameTagForRender() || entity.hasCustomNameTag() && entity == renderManager.field_147941_i);
+	}
+
+	protected void renderNameTag(EntityLiving entity, double x, double y, double z) {
+		int range = (int)(entity.isSneaking() ? RendererLivingEntity.NAME_TAG_RANGE_SNEAK : RendererLivingEntity.NAME_TAG_RANGE);
+		String name = entity.func_145748_c_().getFormattedText();
+		func_147906_a(entity, name, x, y, z, range);
 	}
 }
