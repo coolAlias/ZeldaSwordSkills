@@ -141,16 +141,17 @@ public class EntityNavi extends EntityFairy implements IEntityOwnable
 		int x = MathHelper.floor_double(owner.posX + 0.5D);
 		int y = MathHelper.floor_double(owner.posY + owner.getEyeHeight());
 		int z = MathHelper.floor_double(owner.posZ + 0.5D);
-		for (int i = x - r; i <= x + r; ++i) {
-			for (int j = y - ry; j <= y + ry; ++j) {
-				for (int k = z - r; k <= z + r; ++k) {
+		boolean search = true;
+		for (int i = x - r; i <= x + r && search; ++i) {
+			for (int j = y - ry; j <= y + ry && search; ++j) {
+				for (int k = z - r; k <= z + r && search; ++k) {
 					if (worldObj.getBlock(i, j, k) instanceof IDungeonBlock) {
 						double d = owner.getDistanceSq((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D);
 						if (d <= r2) {
 							float f = (float)(Math.sqrt(d) / (double) r);
 							// play sound only on the client side - not everyone needs to hear each other's annoying fairies
-							PlayerUtils.playSound(owner, Sounds.FAIRY_LAUGH, 0.6F - (f / 2.0F), 0.8F + (rand.nextFloat() * 0.2F));
-							break;
+							PlayerUtils.playSound(owner, Sounds.FAIRY_LAUGH, 0.6F - (f / 2.0F), 1.0F);
+							search = false;
 						}
 					}
 				}
