@@ -26,7 +26,6 @@ import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
@@ -35,6 +34,7 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.item.ArmorIndex;
@@ -51,8 +51,6 @@ import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
@@ -179,18 +177,18 @@ public class ZSSEntityEvents
 	}
 
 	@SubscribeEvent
+	public void onClonePlayer(PlayerEvent.Clone event) {
+		ZSSPlayerInfo.get(event.entityPlayer).copy(ZSSPlayerInfo.get(event.original));
+	}
+
+	@SubscribeEvent
 	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
 		if (!event.entity.worldObj.isRemote) {
 			if (event.entity instanceof EntityPlayer) {
-				EntityPlayer player = (EntityPlayer) event.entity;
-				ZSSPlayerInfo.loadProxyData(player);
-				PacketDispatcher.sendTo(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)), (EntityPlayerMP) player);
-				ZSSPlayerInfo.get(player).verifyStartingGear();
-				ZSSPlayerSkills.get(player).verifyMaxHealth();
+				ZSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
 			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
 				EntityGoron.doVillagerSpawn((EntityVillager) event.entity, event.entity.worldObj);
 			}
-
 			if (!Config.areVanillaBuffsDisabled() && event.entity instanceof EntityLivingBase) {
 				initBuffs((EntityLivingBase) event.entity);
 			}

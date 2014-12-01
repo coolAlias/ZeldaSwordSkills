@@ -238,9 +238,6 @@ public class ZSSCombatEvents
 	public void onLivingDeathEvent(LivingDeathEvent event) {
 		if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer) {
 			event.setCanceled(ItemFairyBottle.onDeath((EntityPlayer) event.entity));
-			if (!event.isCanceled()) {
-				ZSSPlayerInfo.saveProxyData((EntityPlayer) event.entity);
-			}
 		}
 		if (event.source.getEntity() instanceof EntityPlayer && event.entity instanceof IMob) {
 			ItemZeldaSword.onKilledMob((EntityPlayer) event.source.getEntity(), (IMob) event.entity);

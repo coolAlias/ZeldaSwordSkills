@@ -32,7 +32,6 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import zeldaswordskills.CommonProxy;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemArmorBoots;
@@ -44,6 +43,7 @@ import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.AttackBlockedPacket;
 import zeldaswordskills.network.packet.client.SetNockedArrowPacket;
 import zeldaswordskills.network.packet.client.SpawnNayruParticlesPacket;
+import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
 import zeldaswordskills.network.packet.client.SyncPlayerInfoPacket;
 
 public class ZSSPlayerInfo implements IExtendedEntityProperties
@@ -327,32 +327,21 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		return (ZSSPlayerInfo) player.getExtendedProperties(EXT_PROP_NAME);
 	}
 
-	/** Makes it look nicer in the methods save/loadProxyData */
-	private static final String getSaveKey(EntityPlayer player) {
-		return player.getCommandSenderName() + ":" + EXT_PROP_NAME;
+	public void onJoinWorld() {
+		playerSkills.validateSkills();
+		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
+		PacketDispatcher.sendTo(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)), (EntityPlayerMP) player);
+		verifyStartingGear();
+		playerSkills.verifyMaxHealth();
 	}
 
 	/**
-	 * Does everything I did in onLivingDeathEvent and it's static,
-	 * so you now only need to use the following in the above event:
-	 * ExtendedPlayer.saveProxyData((EntityPlayer) event.entity));
+	 * Copies given data to this one
 	 */
-	public static final void saveProxyData(EntityPlayer player) {
-		NBTTagCompound tag = new NBTTagCompound();
-		ZSSPlayerInfo.get(player).saveNBTData(tag);
-		CommonProxy.storeEntityData(getSaveKey(player), tag);
-	}
-
-	/**
-	 * This cleans up the onEntityJoinWorld event by replacing most of the code
-	 * with a single line: ExtendedPlayer.loadProxyData((EntityPlayer) event.entity));
-	 */
-	public static final void loadProxyData(EntityPlayer player) {
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
-		NBTTagCompound tag = CommonProxy.getEntityData(getSaveKey(player));
-		if (tag != null) { info.loadNBTData(tag); }
-		info.playerSkills.validateSkills();
-		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(info), (EntityPlayerMP) player);
+	public void copy(ZSSPlayerInfo info) {
+		NBTTagCompound compound = new NBTTagCompound();
+		info.saveNBTData(compound);
+		this.loadNBTData(compound);
 	}
 
 	@Override
