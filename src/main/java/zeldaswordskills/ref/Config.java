@@ -310,7 +310,7 @@ public class Config
 		showSecretMessage = config.get("General", "Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
 		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
-		naviRange = config.get("General", "[NPC] Range at which Navi will begin notifying the player of secret rooms (0 to disable) [0-10]", 6).getInt();
+		naviRange = config.get("General", "[NPC] Range at which Navi will begin notifying the player of secret rooms (0 to disable) [0-10]", 4).getInt();
 		/*================== Buff Bar HUD =====================*/
 		isBuffBarEnabled = config.get("General", "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
 		isBuffBarHorizontal = config.get("General", "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
