@@ -137,20 +137,22 @@ public class EntityFairy extends EntityAmbientCreature
 	protected boolean interact(EntityPlayer player) {
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() == Items.glass_bottle) {
-			player.triggerAchievement(ZSSAchievements.fairyCatcher);
-			ItemStack fairyBottle = new ItemStack(ZSSItems.fairyBottle);
-			if (hasCustomNameTag()) {
-				fairyBottle.setStackDisplayName(getCustomNameTag());
-			}
-			player.setCurrentItemOrArmor(0, fairyBottle);
-			if (stack.stackSize > 1) {
-				stack.splitStack(1);
-				if (!player.inventory.addItemStackToInventory(stack)) {
-					player.worldObj.spawnEntityInWorld(new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, stack));
+			if (!worldObj.isRemote) { 
+				player.triggerAchievement(ZSSAchievements.fairyCatcher);
+				ItemStack fairyBottle = new ItemStack(ZSSItems.fairyBottle);
+				if (hasCustomNameTag()) {
+					fairyBottle.setStackDisplayName(getCustomNameTag());
 				}
+				player.setCurrentItemOrArmor(0, fairyBottle);
+				if (stack.stackSize > 1) {
+					stack.splitStack(1);
+					if (!player.inventory.addItemStackToInventory(stack)) {
+						player.worldObj.spawnEntityInWorld(new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, stack));
+					}
+				}
+				worldObj.playSoundAtEntity(player, Sounds.CORK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				setDead();
 			}
-			worldObj.playSoundAtEntity(player, Sounds.CORK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
-			setDead();
 			return true;
 		} else {
 			return false;
