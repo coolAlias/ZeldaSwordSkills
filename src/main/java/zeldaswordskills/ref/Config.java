@@ -70,6 +70,8 @@ public class Config
 	private static boolean disableVanillaBuffs;
 	/** [NPC] Sets whether Zelda NPCs are invulnerable or not */
 	private static boolean npcsAreInvulnerable;
+	/** [NPC] Range at which Navi will begin notifying the player of secret rooms (0 to disable) [0-10] */
+	private static int naviRange;
 	/*================== Buff Bar HUD =====================*/
 	/** [Buff HUD] Whether the buff bar should be displayed by default */
 	private static boolean isBuffBarEnabled;
@@ -308,6 +310,7 @@ public class Config
 		showSecretMessage = config.get("General", "Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
 		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
+		naviRange = config.get("General", "[NPC] Range at which Navi will begin notifying the player of secret rooms (0 to disable) [0-10]", 6).getInt();
 		/*================== Buff Bar HUD =====================*/
 		isBuffBarEnabled = config.get("General", "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
 		isBuffBarHorizontal = config.get("General", "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
@@ -463,6 +466,7 @@ public class Config
 	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
 	public static boolean areNpcsInvulnerable() { return npcsAreInvulnerable; }
+	public static int getNaviRange() { return MathHelper.clamp_int(naviRange, 0, 10); }
 	/*================== MOBS =====================*/
 	public static float getKeeseCursedChance() { return (float) MathHelper.clamp_int(keeseCursedChance, 0, 100) * 0.01F; }
 	public static float getKeeseSwarmChance() { return (float) MathHelper.clamp_int(keeseSwarmChance, 0, 100) * 0.01F; }

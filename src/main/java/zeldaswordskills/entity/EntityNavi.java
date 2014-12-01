@@ -28,6 +28,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.block.IDungeonBlock;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -69,7 +70,7 @@ public class EntityNavi extends EntityFairy implements IEntityOwnable
 		if (!worldObj.isRemote) {
 			if (getOwner() == null && ticksExisted > 10) {
 				setDead();
-			} else if (ticksExisted % 50 == 49) {
+			} else if (Config.getNaviRange() > 0 && ticksExisted % 50 == 49) {
 				detectDungeons();
 			}
 		}
@@ -133,17 +134,19 @@ public class EntityNavi extends EntityFairy implements IEntityOwnable
 	 * Checks nearby for any secret rooms; requires owner to be valid
 	 */
 	private void detectDungeons() {
+		int range = Config.getNaviRange();
+		double r2 = (range * range);
+		int r = range + (range / 2);
+		int ry = MathHelper.ceiling_float_int((float) r / 2.0F);
 		int x = MathHelper.floor_double(owner.posX + 0.5D);
 		int y = MathHelper.floor_double(owner.posY + owner.getEyeHeight());
 		int z = MathHelper.floor_double(owner.posZ + 0.5D);
-		int r = 12;
-		int ry = 6;
 		for (int i = x - r; i <= x + r; ++i) {
 			for (int j = y - ry; j <= y + ry; ++j) {
 				for (int k = z - r; k <= z + r; ++k) {
 					if (worldObj.getBlock(i, j, k) instanceof IDungeonBlock) {
 						double d = owner.getDistanceSq((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D);
-						if (d <= 64.0D) {
+						if (d <= r2) {
 							float f = (float)(Math.sqrt(d) / (double) r);
 							// play sound only on the client side - not everyone needs to hear each other's annoying fairies
 							PlayerUtils.playSound(owner, Sounds.FAIRY_LAUGH, 0.6F - (f / 2.0F), 0.8F + (rand.nextFloat() * 0.2F));
