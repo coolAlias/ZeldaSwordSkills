@@ -70,8 +70,10 @@ public class Config
 	private static boolean disableVanillaBuffs;
 	/** [NPC] Sets whether Zelda NPCs are invulnerable or not */
 	private static boolean npcsAreInvulnerable;
-	/** [NPC] Range at which Navi will begin notifying the player of secret rooms (0 to disable) [0-10] */
+	/** [NPC][Navi] Range at which Navi can sense secret rooms, in blocks (0 to disable) [0-10] */
 	private static int naviRange;
+	/** [NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200] */
+	private static int naviFrequency;
 	/*================== Buff Bar HUD =====================*/
 	/** [Buff HUD] Whether the buff bar should be displayed by default */
 	private static boolean isBuffBarEnabled;
@@ -296,21 +298,22 @@ public class Config
 		/*================== GENERAL =====================*/
 		enableStunPlayer = config.get("General", "Whether players can be stunned; if false, item use is still interrupted", false).getBoolean(false);
 		enableSwingSpeed = config.get("General", "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", true).getBoolean(true);
-		baseSwingSpeed = config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt();
+		baseSwingSpeed = MathHelper.clamp_int(config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
 		enableVanillaLift = config.get("General", "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", true).getBoolean(true);
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
 		enableHardcoreZeldaFanMode = config.get("General", "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", false).getBoolean(false);
-		bossHealthFactor = config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]", 250).getInt();
-		bossNumber = config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]", 4).getInt();
-		keeseCursedChance = config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt();
-		keeseSwarmChance = config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt();
-		keeseSwarmSize = config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt();
-		sacredRefreshRate = config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt();
+		bossHealthFactor = MathHelper.clamp_int(config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]", 250).getInt(), 100, 500);
+		bossNumber = MathHelper.clamp_int(config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]", 4).getInt(), 1, 8);
+		keeseCursedChance = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt(), 0, 100);
+		keeseSwarmChance = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt(), 0, 100);
+		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt(), 4, 16);
+		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt(), 0, 30);
 		showSecretMessage = config.get("General", "Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
 		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
-		naviRange = config.get("General", "[NPC] Range at which Navi will begin notifying the player of secret rooms (0 to disable) [0-10]", 4).getInt();
+		naviRange = MathHelper.clamp_int(config.get("General", "Range at which Navi can sense secret rooms, in blocks (0 to disable) [0-10]", 4).getInt(), 0, 10);
+		naviFrequency = MathHelper.clamp_int(config.get("General", "[NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200]", 50).getInt(), 20, 200);
 		/*================== Buff Bar HUD =====================*/
 		isBuffBarEnabled = config.get("General", "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
 		isBuffBarHorizontal = config.get("General", "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
@@ -318,27 +321,27 @@ public class Config
 		enableComboHud = config.get("General", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
 		/*================== ITEMS =====================*/
 		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
-		bombFuseTime = config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt();
+		bombFuseTime = MathHelper.clamp_int(config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt(), 0, 128);
 		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone", false).getBoolean(false);
 		// TODO bombsGriefAdventure = config.get("Item", "[Bombs] Whether bombs can destroy regular blocks in Adventure Mode", false).getBoolean(false);
 		enableDekuDenude = config.get("Item", "[Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves", true).getBoolean(true);
 		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
 		disableAllUnenchantables = config.get("Item", "[Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", false).getBoolean(false);
-		heroBowUpgradeCost = config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt();
+		heroBowUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt(), 128, 640);
 		enableFireArrowIgnite = config.get("Item", "[Hero's Bow] Whether the fire arrow can ignite affected blocks", true).getBoolean(true);
 		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", false).getBoolean(false);
 		enableLightArrowNoClip = config.get("Item", "[Hero's Bow] Whether the light arrow can penetrate blocks", true).getBoolean(true);
 		enableAutoBombArrows = config.get("Item", "[Hero's Bow] Whether to automate bomb arrow firing when sneaking", true).getBoolean(true);
-		hookshotRange = config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt();
+		hookshotRange = MathHelper.clamp_int(config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt(), 4, 16);
 		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		enableHookshotSound = config.get("Item", "[Hookshot] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
-		rodUpgradeCost = config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt();
-		temperedRequiredKills = config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt();
-		slingshotUpgradeOne = config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt();
-		slingshotUpgradeTwo = config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt();
-		whipRange = config.get("Item", "[Whip] Range, in blocks, of the standard whip [4-12]", 6).getInt();
+		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
+		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
+		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt(), 64, 320);
+		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt(), 128, 640);
+		whipRange = MathHelper.clamp_int(config.get("Item", "[Whip] Range, in blocks, of the standard whip [4-12]", 6).getInt(), 4, 12);
 		/*================== STARTING GEAR =====================*/
 		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", true).getBoolean(true);
 		enableAutoEquip = config.get("Bonus Gear", "Automatically equip starting equipment", true).getBoolean(true);
@@ -353,14 +356,14 @@ public class Config
 		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
 		enablePlayerTarget = config.get("Skills", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
 		doubleTap = config.get("Skills", "Require double tap activation (double-tap always required for vanilla movement keys)", true).getBoolean(true);
-		maxBonusHearts = config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt();
-		hitsToDisplay = config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt();
+		maxBonusHearts = MathHelper.clamp_int(config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt(), 0, BonusHeart.MAX_BONUS_HEARTS);
+		hitsToDisplay = MathHelper.clamp_int(config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
 		allowDisarmorPlayer = config.get("Skills", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
-		disarmTimingBonus = config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt();
-		disarmPenalty = config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt();
+		disarmTimingBonus = MathHelper.clamp_int(config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 15);
+		disarmPenalty = MathHelper.clamp_int(config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		/*================== SONGS =====================*/
-		resetNotesInterval = config.get("Songs", "Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt();
+		resetNotesInterval = MathHelper.clamp_int(config.get("Songs", "Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
 		for (ZeldaSong song : ZeldaSong.values()) {
 			if (!config.get("Songs", "Whether " + song.toString() + "'s main effect is enabled (does not affect notification of Song Blocks)", true).getBoolean(true)) {
 				song.setIsEnabled(false);
@@ -370,73 +373,72 @@ public class Config
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
 		enableWindows = config.get("Dungeon Generation", "Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
 		enableBossDungeons = config.get("Dungeon Generation", "Enable Boss Dungeon generation", true).getBoolean(true);
-		mainDungeonDifficulty = config.get("Dungeon Generation", "[Overworld] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt();
-		secretRoomChance = config.get("Dungeon Generation", "[Overworld] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt();
-		minLandDistance = config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt();
-		minOceanDistance = config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between ocean-based secret rooms [2-32]", 6).getInt();
-		minBossDistance = config.get("Dungeon Generation", "[Overworld] Minimum number of chunks between Boss Dungeons [8-128]", 24).getInt();
-		genAttemptsPerChunk = config.get("Dungeon Generation", "[Overworld] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt();
-		netherDungeonDifficulty = config.get("Dungeon Generation", "[Nether] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt();
-		secretRoomChanceNether = config.get("Dungeon Generation", "[Nether] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt();
-		minDistanceNether = config.get("Dungeon Generation", "[Nether] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt();
-		minBossDistanceNether = config.get("Dungeon Generation", "[Nether] Minimum number of chunks between Boss Dungeons [8-64]", 12).getInt();
-		genAttemptsPerChunkNether = config.get("Dungeon Generation", "[Nether] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt();
-		fairySpawnerChance = config.get("Dungeon Generation", "Chance (as a percent) for certain dungeons to have fairy spawners [0-100]", 10).getInt();
-		resetSpawnerTime = config.get("Dungeon Generation", "Maximum number of days required for fairies to replenish [2-10]", 7).getInt();
+		mainDungeonDifficulty = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt(), 1, 3);
+		secretRoomChance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt(), 1, 100);
+		minLandDistance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt(), 2, 16);
+		minOceanDistance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between ocean-based secret rooms [2-32]", 6).getInt(), 2, 32);
+		minBossDistance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Minimum number of chunks between Boss Dungeons [8-128]", 24).getInt(), 8, 128);
+		genAttemptsPerChunk = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt(), 0, 20);
+		netherDungeonDifficulty = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt(), 1, 3);
+		secretRoomChanceNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt(), 1, 100);
+		minDistanceNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt(), 2, 16);
+		minBossDistanceNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Minimum number of chunks between Boss Dungeons [8-64]", 12).getInt(), 8, 64);
+		genAttemptsPerChunkNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt(), 0, 20);
+		fairySpawnerChance = MathHelper.clamp_int(config.get("Dungeon Generation", "Chance (as a percent) for certain dungeons to have fairy spawners [0-100]", 10).getInt(), 0, 100);
+		resetSpawnerTime = MathHelper.clamp_int(config.get("Dungeon Generation", "Maximum number of days required for fairies to replenish [2-10]", 7).getInt(), 2, 10);
 		/*================== WORLD GEN =====================*/
 		allowJarsInWater = config.get("WorldGen", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
-		jarGenChance = config.get("WorldGen", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt();
-		jarsPerCluster = config.get("WorldGen", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt();
-		jarGenChanceSub = config.get("WorldGen", "[Ceramic Jars][Underground] Chance for each jar cluster to generate [0-100]", 65).getInt();
-		jarsPerClusterSub = config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jars per cluster [2-20]", 8).getInt();
-		jarClustersPerChunkSub = config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jar clusters per chunk [1-20]", 10).getInt();
-		jarGenChanceNether = config.get("WorldGen", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt();
-		jarsPerClusterNether = config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt();
-		jarClustersPerChunkNether = config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt();
-		maxPillarRange = config.get("WorldGen", "[Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64]", 64).getInt();
-		minBrokenPillarDistance = config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt();
-		minSongPillarDistance = config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt();
+		jarGenChance = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt(), 0, 100);
+		jarsPerCluster = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt(), 2, 20);
+		jarGenChanceSub = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Underground] Chance for each jar cluster to generate [0-100]", 65).getInt(), 0, 100);
+		jarsPerClusterSub = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jars per cluster [2-20]", 8).getInt(), 2, 20);
+		jarClustersPerChunkSub = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jar clusters per chunk [1-20]", 10).getInt(), 1, 20);
+		jarGenChanceNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt(), 0, 100);
+		jarsPerClusterNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt(), 2, 20);
+		jarClustersPerChunkNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt(), 1, 20);
+		maxPillarRange = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64]", 64).getInt(), 16, 64);
+		minBrokenPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt(), 4, 128);
+		minSongPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt(), 8, 128);
 		/*================== LOOT =====================*/
-		lockedChestChance = config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt();
-		doubleChestChance = config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt();
-		barredRoomChance = config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [1-50]", 25).getInt();
-		heartPieceChance = config.get("Loot", "Chance (as a percent) of a heart piece generating in secret room chests [0-100]", 60).getInt();
-		randomBossItemChance = config.get("Loot", "Chance (as a percent) of a random boss-level item being added to locked chest loot table [0-50]", 25).getInt();
-		minNumChestItems = config.get("Loot", "Minimum number of random chest contents for first chest [1-10]", 4).getInt();
-		bombWeight = config.get("Loot", "Weight: Bomb [1-10]", 5).getInt();
-		bombBagWeight = config.get("Loot", "Weight: Bomb Bag (locked chest weight only) [1-10]", 3).getInt();
-		heartPieceWeight = config.get("Loot", "Weight: Heart Piece (vanilla chests only) [1-10]", 1).getInt();
-		bigKeyWeight = config.get("Loot", "Weight: Key, Big [1-10]", 3).getInt();
-		smallKeyWeight = config.get("Loot", "Weight: Key, Small [1-10]", 4).getInt();
-		lockedLootWeight = config.get("Loot", "Weight: Locked Chest Content [1-10]", 3).getInt();
+		lockedChestChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt(), 10, 50);
+		doubleChestChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt(), 0, 25);
+		barredRoomChance = MathHelper.clamp_int(config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [1-50]", 25).getInt(), 1, 50);
+		heartPieceChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a heart piece generating in secret room chests [0-100]", 60).getInt(), 0, 100);
+		randomBossItemChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a random boss-level item being added to locked chest loot table [0-50]", 25).getInt(), 0, 50);
+		minNumChestItems = MathHelper.clamp_int(config.get("Loot", "Minimum number of random chest contents for first chest [1-10]", 4).getInt(), 1, 10);
+		bombWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb [1-10]", 5).getInt(), 1, 10);
+		bombBagWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb Bag (locked chest weight only) [1-10]", 3).getInt(), 1, 10);
+		heartPieceWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Heart Piece (vanilla chests only) [1-10]", 1).getInt(), 1, 10);
+		bigKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Big [1-10]", 3).getInt(), 1, 10);
+		smallKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Small [1-10]", 4).getInt(), 1, 10);
+		lockedLootWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Locked Chest Content [1-10]", 3).getInt(), 1, 10);
 		/*================== DROPS =====================*/
-		grassDropChance = config.get("Drops", "Chance (as a percent) of loot dropping from grass [0-100]", 15).getInt();
-		jarDropChance = config.get("Drops", "Chance (as a percent) of loot dropping from empty jars when broken [0-100]", 20).getInt();
-		creeperDrop = config.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt();
+		grassDropChance = MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from grass [0-100]", 15).getInt(), 0, 100);
+		jarDropChance = MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from empty jars when broken [0-100]", 20).getInt(), 0, 100);
+		creeperDrop = MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt(), 0, 100);
 		enableOrbDrops = config.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
-		randomDropChance = config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt();
-		genericMobDropChance = config.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt();
+		randomDropChance = MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
+		genericMobDropChance = MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
 		orbDropChance = new HashMap<Byte, Integer>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
 			if (skill.canDrop()) {
-				orbDropChance.put(skill.getId(), config.get("Drops", "[Skill Orbs] Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt());
+				orbDropChance.put(skill.getId(), MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt(), 0, 10));
 			}
 		}
-		powerDropRate = config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt();
+		powerDropRate = Math.max(config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt(), 20);
 		// TODO playerWhipLootChance = config.get("Drops", "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)[0-100]", 15).getInt();
-		vanillaWhipLootChance = config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt();
-		globalWhipLootChance = config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt();
+		vanillaWhipLootChance = MathHelper.clamp_int(config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt(), 0, 100);
+		globalWhipLootChance = MathHelper.clamp_int(config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt(), 0, 500);
 		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
 		/*================== TRADES =====================*/
 		friendTradesRequired = config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt();
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
-		minBombBagPrice = config.get("Trade", "[Bomb Bag] Minimum price (in emeralds) [32-64]", 64).getInt();
+		minBombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Minimum price (in emeralds) [32-64]", 64).getInt(), 32, 64);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
-		maskBuyChance = config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt();
+		maskBuyChance = MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt(), 1, 15);
 		/*================== MOB SPAWNING =====================*/
-		/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
-		mobVariantChance = config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt();
+		mobVariantChance = MathHelper.clamp_int(config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt(), 0, 100);
 	}
 
 	public static void postInit() {
@@ -455,22 +457,23 @@ public class Config
 	/*================== GENERAL =====================*/
 	public static boolean canPlayersBeStunned() { return enableStunPlayer; }
 	public static boolean affectAllSwings() { return enableSwingSpeed; }
-	public static int getBaseSwingSpeed() { return MathHelper.clamp_int(baseSwingSpeed, 0, 20); }
+	public static int getBaseSwingSpeed() { return baseSwingSpeed; }
 	public static boolean canLiftVanilla() { return enableVanillaLift; }
 	public static boolean canSmashVanilla() { return enableVanillaSmash; }
 	public static boolean alwaysPickupHearts() { return alwaysPickupHearts; }
 	public static boolean isHardcoreZeldaFan() { return enableHardcoreZeldaFanMode; }
-	public static float getBossHealthFactor() { return MathHelper.clamp_float(bossHealthFactor * 0.01F, 1F, 5F); }
-	public static int getNumBosses() { return MathHelper.clamp_int(bossNumber, 1, 8); }
-	public static int getSacredFlameRefreshRate() { return MathHelper.clamp_int(sacredRefreshRate, 0, 30); }
+	public static float getBossHealthFactor() { return (float) bossHealthFactor * 0.01F; }
+	public static int getNumBosses() { return bossNumber; }
+	public static int getSacredFlameRefreshRate() { return sacredRefreshRate; }
 	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
 	public static boolean areNpcsInvulnerable() { return npcsAreInvulnerable; }
-	public static int getNaviRange() { return MathHelper.clamp_int(naviRange, 0, 10); }
+	public static int getNaviRange() { return naviRange; }
+	public static int getNaviFrequency() { return naviFrequency; }
 	/*================== MOBS =====================*/
-	public static float getKeeseCursedChance() { return (float) MathHelper.clamp_int(keeseCursedChance, 0, 100) * 0.01F; }
-	public static float getKeeseSwarmChance() { return (float) MathHelper.clamp_int(keeseSwarmChance, 0, 100) * 0.01F; }
-	public static int getKeeseSwarmSize() { return MathHelper.clamp_int(keeseSwarmSize, 4, 16); }
+	public static float getKeeseCursedChance() { return (float) keeseCursedChance * 0.01F; }
+	public static float getKeeseSwarmChance() { return (float) keeseSwarmChance * 0.01F; }
+	public static int getKeeseSwarmSize() { return keeseSwarmSize; }
 	/*================== BUFF BAR HUD =====================*/
 	public static boolean isBuffBarEnabled() { return isBuffBarEnabled; }
 	public static boolean isBuffBarHorizontal() { return isBuffBarHorizontal; }
@@ -480,110 +483,110 @@ public class Config
 	public static boolean getArrowsConsumeFlame() { return arrowsConsumeFlame; }
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
 	public static boolean canGriefAdventure() { return bombsGriefAdventure; }
-	public static int getBombFuseTime() { return MathHelper.clamp_int(bombFuseTime, 0, 128); }
+	public static int getBombFuseTime() { return bombFuseTime; }
 	public static boolean canDekuDenude() { return enableDekuDenude; }
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
 	public static boolean allUnenchantablesAreDisabled() { return disableAllUnenchantables; }
-	public static int getHeroBowUpgradeCost() { return MathHelper.clamp_int(heroBowUpgradeCost, 128, 640); }
+	public static int getHeroBowUpgradeCost() { return heroBowUpgradeCost; }
 	public static boolean enableFireArrowIgnite() { return enableFireArrowIgnite; }
 	public static boolean enableFireArrowMelt() { return enableFireArrowMelt; }
 	public static boolean enableLightArrowNoClip() { return enableLightArrowNoClip; }
 	public static boolean enableAutoBombArrows() { return enableAutoBombArrows; }
-	public static int getHookshotRange() { return MathHelper.clamp_int(hookshotRange, 4, 16); }
+	public static int getHookshotRange() { return hookshotRange; }
 	public static boolean allowHookableOnly() { return enableHookableOnly; }
 	public static boolean canHookshotBreakBlocks() { return enableHookshotBreakBlocks; }
 	public static boolean enableHookshotMissSound() { return enableHookshotSound; }
-	public static int getRodUpgradeCost() { return MathHelper.clamp_int(rodUpgradeCost, 128, 1280); }
-	public static int getRequiredKills() { return MathHelper.clamp_int(temperedRequiredKills, 100, 1000) - 1; }
-	public static int getSlingshotCostOne() { return MathHelper.clamp_int(slingshotUpgradeOne, 64, 320); }
-	public static int getSlingshotCostTwo() { return MathHelper.clamp_int(slingshotUpgradeTwo, 128, 640); }
-	public static int getWhipRange() { return MathHelper.clamp_int(whipRange, 4, 12); }
+	public static int getRodUpgradeCost() { return rodUpgradeCost; }
+	public static int getRequiredKills() { return temperedRequiredKills - 1; }
+	public static int getSlingshotCostOne() { return slingshotUpgradeOne; }
+	public static int getSlingshotCostTwo() { return slingshotUpgradeTwo; }
+	public static int getWhipRange() { return whipRange; }
 	/*================== SKILLS =====================*/
 	public static boolean allowVanillaControls() { return allowVanillaControls; }
 	public static boolean requiresDoubleTap() { return doubleTap; }
-	public static byte getMaxBonusHearts() { return (byte) MathHelper.clamp_int(maxBonusHearts, 0, BonusHeart.MAX_BONUS_HEARTS); }
+	public static byte getMaxBonusHearts() { return (byte) maxBonusHearts; }
 	public static boolean autoTargetEnabled() { return autoTarget; }
 	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
 	public static boolean canTargetPlayers() { return enablePlayerTarget; }
 	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
-	public static int getHitsToDisplay() { return Math.max(hitsToDisplay, 0); }
+	public static int getHitsToDisplay() { return hitsToDisplay; }
 	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
-	public static float getDisarmPenalty() { return 0.01F * ((float) MathHelper.clamp_int(disarmPenalty, 0, 20)); }
-	public static float getDisarmTimingBonus() { return 0.001F * ((float) MathHelper.clamp_int(disarmTimingBonus, 0, 50)); }
+	public static float getDisarmPenalty() { return (float) disarmPenalty * 0.01F; }
+	public static float getDisarmTimingBonus() { return (float) disarmTimingBonus * 0.001F; }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));
 	}
 	/*================== SONGS =====================*/
-	public static int getNoteResetInterval() { return MathHelper.clamp_int(resetNotesInterval, 5, 100); }
+	public static int getNoteResetInterval() { return resetNotesInterval; }
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }
 	public static boolean areBossDungeonsEnabled() { return enableBossDungeons; }
-	public static int getMinBossDistance() { return MathHelper.clamp_int(minBossDistance, 8, 128); }
-	public static int getMinLandDistance() { return MathHelper.clamp_int(minLandDistance, 2, 16); }
-	public static int getMinOceanDistance() { return MathHelper.clamp_int(minOceanDistance, 2, 32); }
-	public static int getAttemptsPerChunk() { return Math.min(genAttemptsPerChunk, 20); }
-	public static float getSecretRoomChance() { return MathHelper.clamp_float(secretRoomChance * 0.01F, 0F, 1F); }
-	public static int getMainDungeonDifficulty() { return MathHelper.clamp_int(mainDungeonDifficulty, 1, 3); }
-	public static int getNetherMinBossDistance() { return MathHelper.clamp_int(minBossDistanceNether, 8, 64); }
-	public static int getNetherMinDistance() { return MathHelper.clamp_int(minDistanceNether, 2, 16); }
-	public static int getNetherAttemptsPerChunk() { return Math.min(genAttemptsPerChunkNether, 20); }
-	public static float getNetherSecretRoomChance() { return MathHelper.clamp_float(secretRoomChanceNether * 0.01F, 0F, 1F); }
-	public static int getNetherDungeonDifficulty() { return MathHelper.clamp_int(netherDungeonDifficulty, 1, 3); }
-	public static float getFairySpawnerChance() { return MathHelper.clamp_float(fairySpawnerChance * 0.01F, 0F, 1.0F); }
-	public static int getDaysToRespawn() { return MathHelper.clamp_int(resetSpawnerTime, 2, 10); }
+	public static int getMinBossDistance() { return minBossDistance; }
+	public static int getMinLandDistance() { return minLandDistance; }
+	public static int getMinOceanDistance() { return minOceanDistance; }
+	public static int getAttemptsPerChunk() { return genAttemptsPerChunk; }
+	public static float getSecretRoomChance() { return (float) secretRoomChance * 0.01F; }
+	public static int getMainDungeonDifficulty() { return mainDungeonDifficulty; }
+	public static int getNetherMinBossDistance() { return minBossDistanceNether; }
+	public static int getNetherMinDistance() { return minDistanceNether; }
+	public static int getNetherAttemptsPerChunk() { return genAttemptsPerChunkNether; }
+	public static float getNetherSecretRoomChance() { return (float) secretRoomChanceNether * 0.01F; }
+	public static int getNetherDungeonDifficulty() { return netherDungeonDifficulty; }
+	public static float getFairySpawnerChance() { return (float) fairySpawnerChance * 0.01F; }
+	public static int getDaysToRespawn() { return resetSpawnerTime; }
 	/*================== WORLD GEN =====================*/
 	public static boolean genJarsInWater() { return allowJarsInWater; }
-	public static float getJarGenChance() { return MathHelper.clamp_float(jarGenChance * 0.01F, 0F, 1F); }
-	public static int getJarsPerCluster() { return MathHelper.clamp_int(jarsPerCluster, 2, 20); }
-	public static float getJarGenChanceSub() { return MathHelper.clamp_float(jarGenChanceSub * 0.01F, 0F, 1F); }
-	public static int getJarClustersPerChunkSub() { return MathHelper.clamp_int(jarClustersPerChunkSub, 1, 20); }
-	public static int getJarsPerClusterSub() { return MathHelper.clamp_int(jarsPerClusterSub, 2, 20); }
-	public static float getJarGenChanceNether() { return MathHelper.clamp_float(jarGenChanceNether * 0.01F, 0F, 1F); }
-	public static int getJarClustersPerChunkNether() { return MathHelper.clamp_int(jarClustersPerChunkNether, 1, 20); }
-	public static int getJarsPerClusterNether() { return MathHelper.clamp_int(jarsPerClusterNether, 2, 20); }
-	public static int getPillarRange() { return MathHelper.clamp_int(maxPillarRange, 16, 64); }
-	public static int getBrokenPillarMin() { return MathHelper.clamp_int(minBrokenPillarDistance, 4, 128); }
-	public static int getSongPillarMin() { return MathHelper.clamp_int(minSongPillarDistance, 8, 128); }
+	public static float getJarGenChance() { return (float) jarGenChance * 0.01F; }
+	public static int getJarsPerCluster() { return jarsPerCluster; }
+	public static float getJarGenChanceSub() { return (float) jarGenChanceSub * 0.01F; }
+	public static int getJarClustersPerChunkSub() { return jarClustersPerChunkSub; }
+	public static int getJarsPerClusterSub() { return jarsPerClusterSub; }
+	public static float getJarGenChanceNether() { return (float) jarGenChanceNether * 0.01F; }
+	public static int getJarClustersPerChunkNether() { return jarClustersPerChunkNether; }
+	public static int getJarsPerClusterNether() { return jarsPerClusterNether; }
+	public static int getPillarRange() { return maxPillarRange; }
+	public static int getBrokenPillarMin() { return minBrokenPillarDistance; }
+	public static int getSongPillarMin() { return minSongPillarDistance; }
 	/*================== LOOT =====================*/
-	public static float getLockedChestChance() { return MathHelper.clamp_float(lockedChestChance * 0.01F, 0.1F, 0.5F); }
-	public static float getDoubleChestChance() { return MathHelper.clamp_float(doubleChestChance * 0.01F, 0F, 0.25F); }
-	public static float getBarredRoomChance() { return MathHelper.clamp_float(barredRoomChance * 0.01F, 0.01F, 0.5F); }
-	public static float getHeartPieceChance() { return MathHelper.clamp_float(heartPieceChance * 0.01F, 0F, 1F); }
-	public static float getRandomBossItemChance() { return MathHelper.clamp_float(randomBossItemChance * 0.01F, 0F, 0.5F); }
-	public static int getMinNumItems() { return MathHelper.clamp_int(minNumChestItems, 1, 10); }
-	public static int getBombWeight() { return MathHelper.clamp_int(bombWeight, 1, 10); }
-	public static int getBombBagWeight() { return MathHelper.clamp_int(bombBagWeight, 1, 10); }
-	public static int getHeartWeight() { return MathHelper.clamp_int(heartPieceWeight, 1, 10); }
-	public static int getBigKeyWeight() { return MathHelper.clamp_int(bigKeyWeight, 1, 10); }
-	public static int getSmallKeyWeight() { return MathHelper.clamp_int(smallKeyWeight, 1, 10); }
-	public static int getLockedLootWeight() { return MathHelper.clamp_int(lockedLootWeight, 1, 10); }
+	public static float getLockedChestChance() { return (float) lockedChestChance * 0.01F; }
+	public static float getDoubleChestChance() { return (float) doubleChestChance * 0.01F; }
+	public static float getBarredRoomChance() { return (float) barredRoomChance * 0.01F; }
+	public static float getHeartPieceChance() { return (float) heartPieceChance * 0.01F; }
+	public static float getRandomBossItemChance() { return (float) randomBossItemChance * 0.01F; }
+	public static int getMinNumItems() { return minNumChestItems; }
+	public static int getBombWeight() { return bombWeight; }
+	public static int getBombBagWeight() { return bombBagWeight; }
+	public static int getHeartWeight() { return heartPieceWeight; }
+	public static int getBigKeyWeight() { return bigKeyWeight; }
+	public static int getSmallKeyWeight() { return smallKeyWeight; }
+	public static int getLockedLootWeight() { return lockedLootWeight; }
 	/*================== DROPS =====================*/
-	public static float getGrassDropChance() { return MathHelper.clamp_float(grassDropChance * 0.01F, 0F, 1.0F); }
-	public static float getJarDropChance() { return MathHelper.clamp_float(jarDropChance * 0.01F, 0F, 1.0F); }
-	public static float getCreeperDropChance() { return MathHelper.clamp_float(creeperDrop * 0.01F, 0F, 1.0F); }
+	public static float getGrassDropChance() { return (float) grassDropChance * 0.01F; }
+	public static float getJarDropChance() { return (float) jarDropChance * 0.01F; }
+	public static float getCreeperDropChance() { return (float) creeperDrop * 0.01F; }
 	public static boolean areOrbDropsEnabled() { return enableOrbDrops; }
-	public static float getChanceForRandomDrop() { return MathHelper.clamp_float(randomDropChance * 0.01F, 0F, 1.0F); }
-	public static float getRandomMobDropChance() { return MathHelper.clamp_float(genericMobDropChance * 0.01F, 0F, 1.0F); }
+	public static float getChanceForRandomDrop() { return (float) randomDropChance * 0.01F; }
+	public static float getRandomMobDropChance() { return (float) genericMobDropChance * 0.01F; }
 	public static float getDropChance(int orbID) {
 		int i = (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0);
-		return MathHelper.clamp_float(i * 0.001F, 0.0F, 0.01F);
+		return (float) i * 0.001F;
 	}
-	public static int getPowerDropRate() { return Math.max(powerDropRate, 20); }
-	public static float getVanillaWhipLootChance() { return MathHelper.clamp_float(vanillaWhipLootChance * 0.01F, 0F, 1.0F); }
-	public static float getWhipLootMultiplier() { return MathHelper.clamp_float(globalWhipLootChance * 0.01F, 0F, 5.0F); }
+	public static int getPowerDropRate() { return powerDropRate; }
+	public static float getVanillaWhipLootChance() { return (float) vanillaWhipLootChance * 0.01F; }
+	public static float getWhipLootMultiplier() { return (float) globalWhipLootChance * 0.01F; }
 	public static boolean getHurtOnSteal() { return hurtOnSteal; }
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
-	public static int getMinBombBagPrice() { return Math.max(minBombBagPrice, 32); }
+	public static int getMinBombBagPrice() { return minBombBagPrice; }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
-	public static float getMaskBuyChance() { return MathHelper.clamp_float(maskBuyChance * 0.01F, 0.01F, 0.15F); }
+	public static float getMaskBuyChance() { return (float) maskBuyChance * 0.01F; }
 	public static int getFriendTradesRequired() { return Math.max(friendTradesRequired, 3); }
 	/*================== MOB SPAWNING =====================*/
 	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
-	public static float getMobVariantChance() { return MathHelper.clamp_float(mobVariantChance * 0.01F, 0.0F, 1.0F); }
+	public static float getMobVariantChance() { return (float) mobVariantChance * 0.01F; }
 
 }

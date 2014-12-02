@@ -70,7 +70,7 @@ public class EntityNavi extends EntityFairy implements IEntityOwnable
 		if (!worldObj.isRemote) {
 			if (getOwner() == null && ticksExisted > 10) {
 				setDead();
-			} else if (Config.getNaviRange() > 0 && ticksExisted % 50 == 49) {
+			} else if (Config.getNaviRange() > 0 && ticksExisted % Config.getNaviFrequency() == 0) {
 				detectDungeons();
 			}
 		}
