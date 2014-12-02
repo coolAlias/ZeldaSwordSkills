@@ -44,6 +44,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 
 /**
@@ -82,7 +83,6 @@ public class ZSSMain
 		ZSSItems.init();
 		ZSSEntities.init();
 		ZSSAchievements.init();
-		DungeonLootLists.init();
 		proxy.initialize();
 
 		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
@@ -111,5 +111,11 @@ public class ZSSMain
 			ItemHeroBow.registerBG2();
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
+	}
+	
+	@EventHandler
+	public void onServerStart(FMLServerStartingEvent event) {
+		DungeonLootLists.init();
+		ZSSItems.onServerStart();
 	}
 }
