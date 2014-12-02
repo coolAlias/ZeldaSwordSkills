@@ -111,11 +111,11 @@ public class ZSSMain
 			ItemHeroBow.registerBG2();
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
+		DungeonLootLists.init();
 	}
 
 	@EventHandler
 	public void onServerStart(FMLServerStartingEvent event) {
-		DungeonLootLists.init();
 		ZSSItems.onServerStart();
 	}
 }
