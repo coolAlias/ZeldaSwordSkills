@@ -306,7 +306,7 @@ public class ZSSItems
 	/**
 	 * Call during FMLPreInitializationEvent to initialize and register all items.
 	 * Also calls various initialization methods for special Items, registers recipes,
-	 * adds loot to vanilla chests, trades, dispenser behavior, and adds drops.
+	 * adds loot to vanilla chests, dispenser behavior, and adds drops.
 	 */
 	public static void init() {
 		ZSSItems.initItems();
@@ -316,9 +316,17 @@ public class ZSSItems
 		ItemSlingshot.initializeSeeds();
 		ZSSItems.registerRecipes();
 		ZSSItems.addVanillaDungeonLoot();
-		TradeHandler.registerTrades();
 		ZSSItems.addGrassDrops();
 		ZSSItems.addDispenserBehaviors();
+	}
+
+	/**
+	 * Call during FMLServerStartingEvent to register trades.
+	 * Delaying this until a world is loaded ensures that any item IDs registered within
+	 * trades match the world in the event that other mod items were added or removed.
+	 */
+	public static void initTradeRegistration() {
+		TradeHandler.registerTrades();
 	}
 
 	/**
