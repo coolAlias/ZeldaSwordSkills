@@ -304,8 +304,8 @@ public class ZSSItems
 	}
 
 	/**
-	* Call during FMLPreInitializationEvent to initialize and register all items.
-	*/
+	 * Call during FMLPreInitializationEvent to initialize and register all items.
+	 */
 	public static void init() {
 		ZSSItems.initItems();
 		ZSSItems.registerItems();
@@ -316,10 +316,10 @@ public class ZSSItems
 	}
 
 	/**
-	* Call during FMLServerStartingEvent to register recipes, trades, and add loot.
-	* Delaying this until server start ensures that any block / item ID conflicts
-	* caused by other mods being added or removed will have been resolved.
-	*/
+	 * Call during FMLServerStartingEvent to register recipes, trades, and add loot.
+	 * Delaying this until server start ensures that any block / item ID conflicts
+	 * caused by other mods being added or removed will have been resolved.
+	 */
 	public static void onServerStart() {
 		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
@@ -414,7 +414,7 @@ public class ZSSItems
 			ItemStack navi = new ItemStack(fairyBottle);
 			navi.setStackDisplayName("Navi");
 			player.inventory.addItemStackToInventory(navi);
-			
+
 		}
 		return true;
 	}

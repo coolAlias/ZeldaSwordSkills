@@ -112,7 +112,7 @@ public class ZSSMain
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
 	}
-	
+
 	@EventHandler
 	public void onServerStart(FMLServerStartingEvent event) {
 		DungeonLootLists.init();
