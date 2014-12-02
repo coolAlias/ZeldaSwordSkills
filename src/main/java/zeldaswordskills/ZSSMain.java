@@ -83,6 +83,7 @@ public class ZSSMain
 		ZSSItems.init();
 		ZSSEntities.init();
 		ZSSAchievements.init();
+		DungeonLootLists.init();
 		proxy.initialize();
 
 		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
@@ -117,5 +118,6 @@ public class ZSSMain
 	@EventHandler
 	public void onServerStart(FMLServerStartingEvent event) {
 		ZSSItems.onServerStart();
+		DungeonLootLists.init();
 	}
 }
