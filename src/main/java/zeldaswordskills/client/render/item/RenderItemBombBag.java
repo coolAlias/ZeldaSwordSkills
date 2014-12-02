@@ -36,7 +36,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class RenderItemBombBag implements IItemRenderer
 {
 	/** Defines the zLevel of rendering of item on GUI. */
-	public float zLevel = 200.0F;
+	private float zLevel;
 
 	public RenderItemBombBag() {}
 
@@ -59,7 +59,11 @@ public class RenderItemBombBag implements IItemRenderer
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
 			GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			zLevel = 50.0F;
 			for (int i = 0; i < 3; ++i) {
+				if (i > 0) {
+					zLevel = 100.0F;
+				}
 				IIcon icon = item.getItem().getIcon(item, i);
 				tessellator.startDrawingQuads();
 				tessellator.addVertexWithUV(0, 16, zLevel, icon.getMinU(), icon.getMaxV());
