@@ -102,23 +102,15 @@ public class TradeHandler implements IVillageTradeHandler
 
 	@Override
 	public void manipulateTradesForVillager(EntityVillager villager, MerchantRecipeList trades, Random rand) {
-		if (villager instanceof EntityGoron) {
+		if (villager instanceof EntityGoron && Config.enableTradeBomb()) {
 			float bombChance = (villager.getProfession() == EnumVillager.BLACKSMITH.ordinal() ? 0.6F : 0.3F);
 			for (BombType bomb : BombType.values()) {
-				addTrade(trades, rand, bombChance, new MerchantRecipe(new ItemStack(Items.emerald, 8 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
+				addTrade(trades, rand, bombChance, new MerchantRecipe(new ItemStack(Items.emerald, 8 + (bomb.ordinal() * 4) + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
 			}
 			return;
 		}
-		if (villager.getCustomNameTag().equalsIgnoreCase("Barnes")) {
-			for (BombType bomb : BombType.values()) {
-				addTrade(trades, rand, 1F, new MerchantRecipe(new ItemStack(Items.emerald, 8 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
-			}
-		}
 		switch(EnumVillager.values()[villager.getProfession()]) {
 		case FARMER:
-			if (Config.enableTradeBomb()) {
-				addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb)));
-			}
 			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroBoots)));
 			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroHelm)));
 			break;
@@ -127,9 +119,6 @@ public class TradeHandler implements IVillageTradeHandler
 		case PRIEST:
 			break;
 		case BLACKSMITH:
-			if (Config.enableTradeBomb()) {
-				addTrade(trades, rand, 0.6F, new MerchantRecipe(new ItemStack(Items.emerald, 5 + rand.nextInt(4)), new ItemStack(Items.gunpowder, 4), new ItemStack(ZSSItems.bomb)));
-			}
 			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.swordKokiri)));
 			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.shieldDeku)));
 			break;
