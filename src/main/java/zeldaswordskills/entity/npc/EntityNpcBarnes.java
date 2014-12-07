@@ -219,6 +219,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 			barnes.setCustomNameTag(villager.getCustomNameTag());
 			barnes.setLocationAndAngles(villager.posX, villager.posY + 1, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 			if (!villager.worldObj.isRemote) {
+				--stack.stackSize;
 				villager.setDead();
 				villager.worldObj.spawnEntityInWorld(barnes);
 			}
