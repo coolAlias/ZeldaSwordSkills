@@ -227,7 +227,7 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 			} else if (entity instanceof EntityNpcMaskTrader) {
 				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
 			} else {
-				return false;
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + itemRand.nextInt(4)));
 			}
 		}
 		return true;

@@ -21,6 +21,7 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
@@ -45,7 +46,6 @@ import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.item.ItemCustomEgg;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
@@ -138,7 +138,7 @@ public class ZSSEntityEvents
 			}
 			event.setCanceled(flag2);
 		}
-		if (!event.isCanceled() && (event.target instanceof EntityVillager || event.target instanceof EntityNpcMaskTrader)) {
+		if (!event.isCanceled() && event.target instanceof INpc) {
 			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (helm != null && helm.getItem() instanceof ItemMask) {
 				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
