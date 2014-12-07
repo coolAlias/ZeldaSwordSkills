@@ -24,10 +24,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,23 +34,20 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
-import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.server.BombTickPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -129,36 +125,22 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (entity instanceof EntityNpcBarnes) {
 			if (!player.worldObj.isRemote) {
-				EntityVillager villager = (EntityVillager) entity;
-				MerchantRecipeList trades = villager.getRecipes(player);
-				BombType bombType = getType(stack);
-				ItemStack chest = player.getCurrentArmor(ArmorIndex.WORN_CHEST);
-				if (villager.getProfession() == 2) {
-					if (chest != null && chest.getItem() == ZSSItems.tunicZoraChest && bombType != BombType.BOMB_FIRE) {
-						MerchantRecipe waterBombTrade = new MerchantRecipe(new ItemStack(ZSSItems.bomb,1,BombType.BOMB_STANDARD.ordinal()), new ItemStack(Items.emerald, 5), new ItemStack(ZSSItems.bomb,1,BombType.BOMB_WATER.ordinal()));
-						MerchantRecipeHelper.addToListWithCheck(trades, waterBombTrade);
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.zora"));
-					} else if (Config.enableTradeBombBag() && trades.size() >= Config.getFriendTradesRequired()) {
-						MerchantRecipe bombBagTrade = new MerchantRecipe(new ItemStack(Items.emerald, Math.min(64, Config.getMinBombBagPrice() + player.worldObj.rand.nextInt(16))), new ItemStack(ZSSItems.bombBag));
-						MerchantRecipeHelper.addToListWithCheck(trades, bombBagTrade);
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.initiate"));
-					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.failure"));
-					}
-				} else if (villager.getProfession() == 3 && chest != null && chest.getItem() == ZSSItems.tunicGoronChest && bombType != BombType.BOMB_WATER) {
-					MerchantRecipe fireBombTrade = new MerchantRecipe(new ItemStack(ZSSItems.bomb,1,BombType.BOMB_STANDARD.ordinal()), new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FIRE.ordinal()));
-					MerchantRecipeHelper.addToListWithCheck(trades, fireBombTrade);
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.goron"));
+				if (((EntityNpcBarnes) entity).addBombBagTrade()) {
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.add"));
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.failure"));
+					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.careful"));
 				}
 			}
 			return true;
-		} else {
-			return (entity instanceof EntityVillager || super.onLeftClickEntity(stack, player, entity));
+		} else if (entity instanceof INpc) {
+			if (!player.worldObj.isRemote) {
+				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.careful"));
+			}
+			return true;
 		}
+		return super.onLeftClickEntity(stack, player, entity);
 	}
 
 	@Override

@@ -272,10 +272,10 @@ public class Config
 	/** [Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately) */
 	private static boolean hurtOnSteal;
 	/*================== TRADES =====================*/
-	/** [Bomb Bag] Enable random villager trades for bomb bags */
+	/** [Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb) */
 	private static boolean enableTradeBombBag;
-	/** [Bomb Bag] Minimum price (in emeralds) for a bomb bag */
-	private static int minBombBagPrice;
+	/** [Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) */
+	private static int bombBagPrice;
 	/** [Bombs] Enable random villager trades for bombs */
 	private static boolean enableTradeBomb;
 	/** [Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased */
@@ -432,8 +432,8 @@ public class Config
 		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
 		/*================== TRADES =====================*/
 		friendTradesRequired = config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt();
-		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Enable random villager trades for bomb bags", true).getBoolean(true);
-		minBombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Minimum price (in emeralds) [32-64]", 64).getInt(), 32, 64);
+		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
+		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [32-64]", 64).getInt(), 32, 64);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt(), 1, 15);
@@ -581,7 +581,7 @@ public class Config
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
-	public static int getMinBombBagPrice() { return minBombBagPrice; }
+	public static int getBombBagPrice() { return bombBagPrice; }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return (float) maskBuyChance * 0.01F; }
 	public static int getFriendTradesRequired() { return Math.max(friendTradesRequired, 3); }

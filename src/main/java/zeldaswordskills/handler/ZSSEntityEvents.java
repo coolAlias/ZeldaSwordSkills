@@ -46,6 +46,7 @@ import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.item.ItemCustomEgg;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
@@ -125,7 +126,9 @@ public class ZSSEntityEvents
 			EntityVillager villager = (EntityVillager) event.target;
 			boolean flag2 = villager.getCustomNameTag().contains("Mask Salesman");
 			if (!event.entityPlayer.worldObj.isRemote) {
-				if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
+				if (("Barnes").equals(villager.getCustomNameTag())) {
+					flag2 = EntityNpcBarnes.convertFromVillager(villager, event.entityPlayer, stack);
+				} else if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
 					if (flag2) {
 						PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
 					} else {
