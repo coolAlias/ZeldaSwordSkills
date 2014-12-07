@@ -19,6 +19,7 @@ package zeldaswordskills.entity.npc;
 
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -38,6 +39,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.ref.Config;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -134,6 +137,52 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 	 * Update that occurs every 70-120 ticks, after the NPC has searched for a village object
 	 */
 	protected void randomUpdateTick() {}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void handleHealthUpdate(byte flag) {
+		switch(flag) {
+		case 12:
+			generateRandomParticles("heart");
+			break;
+		case 13:
+			generateRandomParticles("angryVillager");
+			break;
+		case 14:
+			generateRandomParticles("happyVillager");
+			break;
+		default:
+			super.handleHealthUpdate(flag);
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void generateRandomParticles(String particle) {
+		for (int i = 0; i < 5; ++i) {
+			double d0 = rand.nextGaussian() * 0.02D;
+			double d1 = rand.nextGaussian() * 0.02D;
+			double d2 = rand.nextGaussian() * 0.02D;
+			worldObj.spawnParticle(particle,
+					posX + (double)(rand.nextFloat() * width * 2.0F) - (double) width,
+					posY + 1.0D + (double)(rand.nextFloat() * height),
+					posZ + (double)(rand.nextFloat() * width * 2.0F) - (double) width, d0, d1, d2);
+		}
+	}
+
+	@Override
+	public void setRevengeTarget(EntityLivingBase entity) {
+		super.setRevengeTarget(entity);
+		if (villageObj != null && entity != null) {
+			villageObj.addOrRenewAgressor(entity);
+			if (entity instanceof EntityPlayer) {
+				int rep = (isChild() ? -3 : -1);
+				villageObj.setReputationForPlayer(entity.getCommandSenderName(), rep);
+				if (isEntityAlive()) {
+					worldObj.setEntityState(this, (byte) 13);
+				}
+			}
+		}
+	}
 
 	@Override
 	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
