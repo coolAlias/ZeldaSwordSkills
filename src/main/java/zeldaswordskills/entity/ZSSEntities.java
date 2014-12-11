@@ -22,7 +22,6 @@ import java.util.Map;
 
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelSquid;
-import net.minecraft.client.model.ModelVillager;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
@@ -48,6 +47,7 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.client.model.ModelDarknut;
 import zeldaswordskills.client.model.ModelGoron;
+import zeldaswordskills.client.model.ModelMaskSalesman;
 import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.client.render.RenderNothing;
 import zeldaswordskills.client.render.entity.RenderCustomArrow;
@@ -271,7 +271,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityNpcBarnes.class, new RenderGenericLiving(
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_barnes.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityNpcMaskTrader.class, new RenderGenericLiving(
-				new ModelVillager(0.0F), 0.5F, 1.0F, "textures/entity/villager/villager.png"));
+				new ModelMaskSalesman(), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_mask_salesman.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityNpcOrca.class, new RenderGenericLiving(
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_orca.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(new ModelSquid(), 0.7F));
