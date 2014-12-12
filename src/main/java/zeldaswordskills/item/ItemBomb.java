@@ -115,9 +115,10 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
-			int extraTime = Config.getBombFuseTime();
-			if (extraTime == 0) { extraTime = 56; }
-			world.spawnEntityInWorld(new EntityBomb(world, player).setType(getType(stack)).addTime(extraTime - stack.getTagCompound().getInteger("time")));
+			int fuseTime = (Config.getBombFuseTime() > 0 ? Config.getBombFuseTime() : 56);
+			// subtract any ticks which passed while held
+			fuseTime -= (stack.hasTagCompound() ? stack.getTagCompound().getInteger("time") : 0);
+			world.spawnEntityInWorld(new EntityBomb(world, player).setType(getType(stack)).addTime(fuseTime));
 		}
 		player.destroyCurrentEquippedItem();
 		return stack;
