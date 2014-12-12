@@ -248,7 +248,7 @@ public class ItemBombBag extends Item implements IUnenchantable
 	 * Returns either the true NBT capacity for this bag, or the adjusted max capacity
 	 */
 	private int getCapacity(ItemStack stack, boolean trueCapacity) {
-		int capacity = (stack.hasTagCompound() ? stack.getTagCompound().getInteger("capacity") : 0);
+		int capacity = (stack.hasTagCompound() ? Math.max(BASE_CAPACITY, stack.getTagCompound().getInteger("capacity")) : BASE_CAPACITY);
 		int type = getBagBombType(stack);
 		return (trueCapacity || type == -1 || type == BombType.BOMB_STANDARD.ordinal()) ? capacity : capacity / 2;
 	}
