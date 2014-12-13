@@ -107,7 +107,7 @@ public class BuffBase
 	public void onAdded(EntityLivingBase entity) {
 		if (!entity.worldObj.isRemote) {
 			buff.onAdded(entity, amplifier);
-			if (entity instanceof EntityPlayer) {
+			if (entity instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateBuffPacket(this, false), (EntityPlayerMP) entity);
 			}
 		}

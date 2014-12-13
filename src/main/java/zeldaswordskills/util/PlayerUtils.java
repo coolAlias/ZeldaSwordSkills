@@ -198,7 +198,7 @@ public class PlayerUtils
 	public static void playSound(EntityPlayer player, String sound, float volume, float pitch) {
 		if (player.worldObj.isRemote) {
 			PacketDispatcher.sendToServer(new PlaySoundPacket(sound, volume, pitch, player));
-		} else {
+		} else if (player instanceof EntityPlayerMP) {
 			PacketDispatcher.sendTo(new PlaySoundPacket(sound, volume, pitch), (EntityPlayerMP) player);
 		}
 	}
