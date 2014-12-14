@@ -152,7 +152,8 @@ public class EntityBoomerang extends EntityMobThrowable
 
 	@Override
 	public void onUpdate() {
-		if (--distance < -LIFESPAN && !worldObj.isRemote) {
+		--distance;
+		if (shouldDrop() && !worldObj.isRemote) {
 			worldObj.spawnEntityInWorld(new EntityItem(worldObj, posX, posY, posZ, getBoomerang()));
 			dropXpOrbs();
 			releaseDrops(null);
@@ -167,6 +168,13 @@ public class EntityBoomerang extends EntityMobThrowable
 			updateMotion();
 			super.onUpdate();
 		}
+	}
+
+	/**
+	 * Whether the boomerang should drop as an item this tick
+	 */
+	private boolean shouldDrop() {
+		return distance < -LIFESPAN || getThrower() == null || !getThrower().isEntityAlive();
 	}
 
 	/**
