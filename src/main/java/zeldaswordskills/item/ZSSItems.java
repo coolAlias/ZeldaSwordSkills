@@ -123,6 +123,8 @@ public class ZSSItems
 	/*================== RECIPES =====================*/
 	/** Whether smelting gold swords into ingots is allowed */
 	private static boolean allowGoldSmelting;
+	/** Enable crafting of the Wooden Hammer used to bypass wooden pegs */
+	private static boolean enableCraftingHammer;
 
 	/** List of potential extra drops from tall grass when cut with a sword */
 	private static final List<ItemStack> grassDrops = new ArrayList<ItemStack>();
@@ -301,6 +303,7 @@ public class ZSSItems
 
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
+		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
 	}
 
 	/**
@@ -585,6 +588,10 @@ public class ZSSItems
 		if (allowGoldSmelting) {
 			// func_151396_a is addSmelting()
 			FurnaceRecipes.smelting().func_151396_a(Items.golden_sword, new ItemStack(Items.gold_ingot), 0.0F);
+		}
+		if (enableCraftingHammer) {
+			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log, 's', Items.stick);
+			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log2, 's', Items.stick);
 		}
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
