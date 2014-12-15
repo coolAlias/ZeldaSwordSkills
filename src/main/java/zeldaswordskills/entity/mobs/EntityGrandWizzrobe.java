@@ -95,6 +95,11 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	}
 
 	@Override
+	protected int getBaseCastingTime() {
+		return 60;
+	}
+
+	@Override
 	protected float getBaseSpellDamage() {
 		return 8.0F;
 	}

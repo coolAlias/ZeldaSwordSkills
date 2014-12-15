@@ -243,6 +243,11 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		}
 	}
 
+	/** The base time required to cast a spell */
+	protected int getBaseCastingTime() {
+		return 80;
+	}
+
 	/** Returns the current casting time for entity animations */
 	public int getCurrentCastingTime() {
 		return dataWatcher.getWatchableObjectInt(CASTING_TIME);
@@ -389,7 +394,8 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (target == null) {
 			return 0;
 		}
-		int castTime = 50 - (worldObj.difficultySetting.getDifficultyId() * 10);
+		int castTime = getBaseCastingTime() - (worldObj.difficultySetting.getDifficultyId() * 10);
+		castTime += (rand.nextInt(castTime) - rand.nextInt(castTime)) / 2;
 		setMaxCastingTime(castTime);
 		setCurrentCastingTime(castTime);
 		return castTime;
