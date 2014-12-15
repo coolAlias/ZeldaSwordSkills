@@ -123,7 +123,7 @@ public class ItemHookShot extends Item implements IUnenchantable
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (villager.getProfession() == 3) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
-				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
+				if (MerchantRecipeHelper.addToListWithCheck(trades, trade) || player.worldObj.rand.nextFloat() < 0.5F) {
 					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
 				} else {
 					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
