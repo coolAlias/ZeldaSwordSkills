@@ -279,6 +279,10 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 		{
 			attackTime = rand.nextInt(20) + 20;
 			playSound(Sounds.BAT_HURT, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
+			int t = getShockTime();
+			if (t > 0) {
+				setShockTime(Math.max(0, t - rand.nextInt(50) - 25));
+			}
 			switch(getType()) {
 			case CURSED:
 				applyRandomCurse(player);

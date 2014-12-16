@@ -395,8 +395,8 @@ public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IE
 	}
 
 	/** The amount of damage this chu will cause when attacking */
-	protected int getDamage() {
-		return getSize() + getType().ordinal();
+	protected float getDamage() {
+		return (getSize() + getType().ordinal());
 	}
 
 	/**
@@ -419,6 +419,10 @@ public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IE
 			playSound(Sounds.SLIME_ATTACK, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
 			if (rand.nextFloat() < (0.25F * getSize())) {
 				applySecondaryEffects(player);
+			}
+			int t = getShockTime();
+			if (t > 0) {
+				setShockTime(Math.max(0, t - rand.nextInt(100) - 50));
 			}
 		}
 	}
