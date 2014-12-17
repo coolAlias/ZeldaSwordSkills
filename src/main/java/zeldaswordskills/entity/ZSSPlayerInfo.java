@@ -293,7 +293,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			player.motionX *= 1.15D;
 			player.motionZ *= 1.15D;
 		}
-		if (hasAutoBombArrow && (player.getItemInUse() == null || !(player.getItemInUse().getItem() instanceof ItemHeroBow))) {
+		if (hasAutoBombArrow && (player.inventory.getCurrentItem() == null || !(player.inventory.getCurrentItem().getItem() instanceof ItemHeroBow))) {
 			hasAutoBombArrow = false;
 		}
 		// Check for currently ridden horse, used for Epona's Song
