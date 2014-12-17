@@ -316,17 +316,17 @@ public class ZSSItems
 		ItemHeroBow.initializeArrows();
 		ItemSlingshot.initializeSeeds();
 		ZSSItems.addDispenserBehaviors();
+		ZSSItems.registerRecipes();
 	}
 
 	/**
-	 * Call during FMLServerStartingEvent to register recipes, trades, and add loot.
+	 * Call during FMLServerStartingEvent to register trades and add loot.
 	 * Delaying this until server start ensures that any block / item ID conflicts
 	 * caused by other mods being added or removed will have been resolved.
 	 */
 	public static void onServerStart() {
 		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
-		ZSSItems.registerRecipes();
 		TradeHandler.registerTrades();
 	}
 
