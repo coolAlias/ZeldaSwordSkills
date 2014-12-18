@@ -160,7 +160,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		ZSSCombatEvents.setPlayerAttackTime(player);
 		blockTime = (shield.getItem() instanceof ItemZeldaShield ? ((ItemZeldaShield) shield.getItem()).getRecoveryTime() : 20);
 		player.clearItemInUse();
-		if (!player.worldObj.isRemote) {
+		if (player instanceof EntityPlayerMP) {
 			PacketDispatcher.sendTo(new AttackBlockedPacket(shield), (EntityPlayerMP) player);
 			player.addExhaustion(0.3F * damage);
 		}
@@ -264,7 +264,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void setNockedArrow(ItemStack stack) {
 		arrowStack = stack;
-		if (!player.worldObj.isRemote) {
+		if (player instanceof EntityPlayerMP) {
 			PacketDispatcher.sendTo(new SetNockedArrowPacket(stack), (EntityPlayerMP) player);
 		}
 	}
@@ -293,7 +293,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			player.motionX *= 1.15D;
 			player.motionZ *= 1.15D;
 		}
-		if (hasAutoBombArrow && (player.getItemInUse() == null || !(player.getItemInUse().getItem() instanceof ItemHeroBow))) {
+		if (hasAutoBombArrow && (player.getHeldItem() == null || !(player.getHeldItem().getItem() instanceof ItemHeroBow))) {
 			hasAutoBombArrow = false;
 		}
 		// Check for currently ridden horse, used for Epona's Song
@@ -329,8 +329,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	public void onJoinWorld() {
 		playerSkills.validateSkills();
-		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
-		PacketDispatcher.sendTo(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)), (EntityPlayerMP) player);
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
+			PacketDispatcher.sendTo(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)), (EntityPlayerMP) player);
+		}
 		verifyStartingGear();
 		playerSkills.verifyMaxHealth();
 	}

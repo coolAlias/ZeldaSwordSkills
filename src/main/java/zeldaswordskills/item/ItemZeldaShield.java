@@ -243,7 +243,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	@Override
 	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 		if (toolMaterial == ToolMaterial.EMERALD) {
-			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock()) {
+			if (player.getHeldItem() != null && ZSSPlayerInfo.get(player).canBlock()) {
 				Vec3 vec3 = player.getLookVec();
 				double dx = player.posX + vec3.xCoord * 2.0D;
 				double dy = player.posY + player.getEyeHeight() + vec3.yCoord * 2.0D;
