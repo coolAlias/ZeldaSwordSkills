@@ -127,6 +127,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
+	public boolean canUse(EntityPlayer player) {
+		return level > 0;
+	}
+
+	@Override
 	public boolean isActive() {
 		return isActive;
 	}
