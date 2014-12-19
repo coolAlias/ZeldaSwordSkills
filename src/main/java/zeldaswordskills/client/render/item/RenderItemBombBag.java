@@ -57,7 +57,7 @@ public class RenderItemBombBag implements IItemRenderer
 			GL11.glPushMatrix();
 			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			GL11.glEnable(GL11.GL_LIGHTING);
+			//GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			zLevel = 50.0F;
 			for (int i = 0; i < 3; ++i) {
