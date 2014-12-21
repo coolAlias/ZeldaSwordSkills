@@ -73,7 +73,7 @@ public class PacketDispatcher
 	/**
 	 *  Registers all packets and handlers - call this during {@code FMLPreInitializationEvent}
 	 */
-	public static final void initialize() {
+	public static final void preInit() {
 		// Bi-directional packets (with side-specific handlers)
 		registerMessage(PlayRecordPacket.Handler.class, PlayRecordPacket.class);
 		registerMessage(PlaySoundPacket.Handler.class, PlaySoundPacket.class);

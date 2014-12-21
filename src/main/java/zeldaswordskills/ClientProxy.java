@@ -37,8 +37,8 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 public class ClientProxy extends CommonProxy {
 
 	@Override
-	public void initialize() {
-		super.initialize();
+	public void preInit() {
+		super.preInit();
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new GuiBuffBar());
 		MinecraftForge.EVENT_BUS.register(new ZSSClientEvents());

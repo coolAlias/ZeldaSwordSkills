@@ -22,7 +22,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class CommonProxy
 {
-	public void initialize() {}
+	public void preInit() {}
 	
 	public void registerRenderers() {}
 	

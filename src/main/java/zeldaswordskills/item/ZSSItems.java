@@ -290,7 +290,7 @@ public class ZSSItems
 	/**
 	 * Initializes mod item indices from configuration file
 	 */
-	public static void init(Configuration config) {
+	public static void initConfig(Configuration config) {
 		/*================== GRASS DROPS =====================*/
 		enableGrassArrowDrop = config.get("Drops", "Enable arrow drops from grass (must use sword)", true).getBoolean(true);
 		enableGrassBombDrop = config.get("Drops", "Enable bomb drops from grass (must use sword)", false).getBoolean(false);
@@ -309,7 +309,7 @@ public class ZSSItems
 	/**
 	 * Call during FMLPreInitializationEvent to initialize and register all items.
 	 */
-	public static void init() {
+	public static void preInit() {
 		ZSSItems.initItems();
 		ZSSItems.registerItems();
 		ItemChuJelly.initializeJellies();
@@ -319,14 +319,20 @@ public class ZSSItems
 	}
 
 	/**
-	 * Call during FMLServerStartingEvent to register recipes, trades, and add loot.
+	 * Call during FMLInitializationEvent to register all crafting recipes.
+	 */
+	public static void init() {
+		ZSSItems.registerRecipes();
+	}
+
+	/**
+	 * Call during FMLServerStartingEvent to register trades and add loot.
 	 * Delaying this until server start ensures that any block / item ID conflicts
 	 * caused by other mods being added or removed will have been resolved.
 	 */
 	public static void onServerStart() {
 		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
-		ZSSItems.registerRecipes();
 		TradeHandler.registerTrades();
 	}
 

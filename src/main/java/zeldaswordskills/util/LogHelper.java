@@ -38,7 +38,7 @@ public class LogHelper
 	/**
 	 * Calls {@link #init(Level)} with level of Level.INFO
 	 */
-	public static void init() {
+	public static void preInit() {
 		init(Level.INFO);
 	}
 

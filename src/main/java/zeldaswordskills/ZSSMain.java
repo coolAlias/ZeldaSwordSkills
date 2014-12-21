@@ -75,22 +75,16 @@ public class ZSSMain
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		LogHelper.init();
-		Config.init(event);
+		LogHelper.preInit();
+		Config.preInit(event);
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
-		ZSSBlocks.init();
-		ZSSItems.init();
-		ZSSEntities.init();
-		ZSSAchievements.init();
-		proxy.initialize();
-
-		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
-		MinecraftForge.EVENT_BUS.register(dungeonGen);
-		if (Config.areBossDungeonsEnabled()) {
-			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
-		}
-		PacketDispatcher.initialize();
+		ZSSBlocks.preInit();
+		ZSSItems.preInit();
+		ZSSEntities.preInit();
+		ZSSAchievements.preInit();
+		proxy.preInit();
+		PacketDispatcher.preInit();
 	}
 
 	@EventHandler
@@ -100,8 +94,12 @@ public class ZSSMain
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
 		FMLCommonHandler.instance().bus().register(new ZSSEventsFML());
-		ZSSItemEvents.load();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
+		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
+		MinecraftForge.EVENT_BUS.register(dungeonGen);
+		if (Config.areBossDungeonsEnabled()) {
+			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
+		}
 	}
 
 	@EventHandler
@@ -112,6 +110,7 @@ public class ZSSMain
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
 		DungeonLootLists.init();
+		ZSSEntities.postInit();
 	}
 
 	@EventHandler

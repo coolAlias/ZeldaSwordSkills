@@ -190,10 +190,16 @@ public class ZSSEntities
 	}
 
 	/**
-	 * Registers all entities, entity eggs, and default spawn biomes
+	 * Registers all entities and entity eggs
 	 */
-	public static void init() {
+	public static void preInit() {
 		registerEntities();
+	}
+
+	/**
+	 * Adds spawn locations; requires config's postInit to be completed
+	 */
+	public static void postInit() {
 		addSpawnLocations(EntityChu.class, EntityChu.getDefaultBiomes());
 		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
 		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);

@@ -89,7 +89,7 @@ public class ZSSAchievements
 	ocarinaScarecrow,
 	ocarinaMaestro;
 
-	public static void init() {
+	public static void preInit() {
 		int dx = -3, dy = 1;
 		// BOMB TREE
 		bombsAway = new Achievement("zss.bombs_away", "bombs_away", dx, dy, ZSSItems.bomb, null).registerStat();

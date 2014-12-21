@@ -81,7 +81,7 @@ public class ZSSBlocks
 	/**
 	 * Call during FMLPreInitializationEvent to initialize and register all blocks
 	 */
-	public static void init() {
+	public static void preInit() {
 		barrierLight = new BlockHeavy(Material.rock, BlockWeight.MEDIUM).setBlockName("zss.barrier_light");
 		barrierHeavy = new BlockHeavy(Material.rock, BlockWeight.VERY_HEAVY).setBlockName("zss.barrier_heavy");
 		pegWooden = new BlockPeg(BlockPeg.pegWoodMaterial, BlockWeight.VERY_LIGHT).setBlockName("zss.peg_wooden");

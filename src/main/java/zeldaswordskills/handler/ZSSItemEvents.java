@@ -95,6 +95,12 @@ public class ZSSItemEvents
 	/** Mapping of mobs to skill orb drops */
 	private static final Map<Class<? extends EntityLivingBase>, ItemStack> dropsList = new HashMap<Class<? extends EntityLivingBase>, ItemStack>();
 
+	public ZSSItemEvents() {
+		if (dropsList.isEmpty()) {
+			ZSSItemEvents.init();
+		}
+	}
+	
 	/** Adds a mob-class to skill orb mapping */
 	private static void addDrop(Class<? extends EntityLivingBase> mobClass, SkillBase skill) {
 		ItemStack stack = new ItemStack(ZSSItems.skillOrb, 1, skill.getId());
@@ -320,7 +326,7 @@ public class ZSSItemEvents
 		return block.getMaterial() == Material.glass || block.getMaterial() == Material.ice;
 	}
 
-	public static void load() {
+	private static void init() {
 		addDrop(EntityCreeper.class, SkillBase.armorBreak);
 		addDrop(EntityIronGolem.class, SkillBase.armorBreak);
 		addDrop(EntitySilverfish.class, SkillBase.dash);

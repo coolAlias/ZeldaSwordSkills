@@ -288,10 +288,10 @@ public class Config
 	/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
 	private static int mobVariantChance;
 
-	public static void init(FMLPreInitializationEvent event) {
+	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
 		config.load();
-		ZSSItems.init(config);
+		ZSSItems.initConfig(config);
 
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
@@ -403,13 +403,13 @@ public class Config
 		lockedChestChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt(), 10, 50);
 		doubleChestChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt(), 0, 25);
 		barredRoomChance = MathHelper.clamp_int(config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [1-50]", 25).getInt(), 1, 50);
-		heartPieceChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a heart piece generating in secret room chests [0-100]", 60).getInt(), 0, 100);
+		heartPieceChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a heart piece generating in secret room chests [0-100]", 15).getInt(), 0, 100);
 		randomBossItemChance = MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a random boss-level item being added to locked chest loot table [0-50]", 25).getInt(), 0, 50);
 		minNumChestItems = MathHelper.clamp_int(config.get("Loot", "Minimum number of random chest contents for first chest [1-10]", 4).getInt(), 1, 10);
 		bombWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb [1-10]", 5).getInt(), 1, 10);
 		bombBagWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb Bag (locked chest weight only) [1-10]", 3).getInt(), 1, 10);
 		heartPieceWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Heart Piece (vanilla chests only) [1-10]", 1).getInt(), 1, 10);
-		bigKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Big [1-10]", 3).getInt(), 1, 10);
+		bigKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Big [1-10]", 5).getInt(), 1, 10);
 		smallKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Small [1-10]", 4).getInt(), 1, 10);
 		lockedLootWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Locked Chest Content [1-10]", 3).getInt(), 1, 10);
 		/*================== DROPS =====================*/
