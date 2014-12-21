@@ -47,9 +47,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  * all enemies within 360 arc (like Link's spin attack in Zelda). With the Super Spin
  * Attack, most attributes are doubled, but it may only be used at full health.
  * 
- * Note that spinning is handled client side only, so the skill doesn't need to be activated on
- * the server. The server only needs to be notified of any entities attacked.
- * 
  * Activation: Hold left or right arrow key to charge up until spin attack commences
  * Vanilla: Begin moving either left or right, then press the other direction to
  * 			commence charging; both keys must be held to continue charging
