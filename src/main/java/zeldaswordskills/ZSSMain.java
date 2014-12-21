@@ -110,7 +110,6 @@ public class ZSSMain
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
 		DungeonLootLists.init();
-		ZSSEntities.postInit();
 	}
 
 	@EventHandler
