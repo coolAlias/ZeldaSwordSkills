@@ -168,12 +168,8 @@ public class ZSSPlayerSkills
 	 * Returns true if the player has the skill and the skill is currently active
 	 */
 	public boolean isSkillActive(SkillBase skill) {
-		for (SkillActive active : activeSkills) {
-			if (active.getId() == skill.getId()) {
-				return active.isActive();
-			}
-		}
-		return false;
+		SkillBase active = getPlayerSkill(skill);
+		return (active instanceof SkillActive && ((SkillActive) active).isActive());
 	}
 
 	/**
@@ -322,15 +318,15 @@ public class ZSSPlayerSkills
 	}
 
 	/**
-	 * Call after activating any skill to ensure it is added to the list of 
-	 * current active skills and set as the currently animating skill
+	 * Called after {@link SkillActive#onActivated} returns true to add the skill to the
+	 * list of currently active skills, as well as set the currently animating skill
 	 */
 	private void onSkillActivated(World world, SkillActive skill) {
 		if (skill.isActive()) {
 			activeSkills.add(skill);
-		}
-		if (world.isRemote) {
-			setCurrentlyAnimatingSkill(skill);
+			if (world.isRemote) {
+				setCurrentlyAnimatingSkill(skill);
+			}
 		}
 	}
 

@@ -188,7 +188,9 @@ public class ArmorBreak extends SkillActive
 		if (skill != null && skill.isLockedOn()) {
 			player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 		}
-		return isActive();
+		// Armor Break is never added to the list of active skills, since the skill is
+		// typically on longer active after attacking; luckily, it doesn't need to be
+		return false;
 	}
 
 	@Override
