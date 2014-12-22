@@ -92,6 +92,7 @@ public class ItemInstrument extends Item
 		super();
 		setMaxDamage(0);
 		setHasSubtypes(true);
+		setMaxStackSize(1);
 		setUnlocalizedName("zss.instrument");
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
