@@ -219,8 +219,10 @@ public class EntityCyclone extends EntityMobThrowable
 			double d = Math.max(0.5D, getArea() - 1.0D);
 			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(d, d, d));
 			for (EntityItem item : items) {
-				capturedItems.add(item.getEntityItem());
-				item.setDead();
+				if (item.isEntityAlive()) {
+					capturedItems.add(item.getEntityItem());
+					item.setDead();
+				}
 			}
 		}
 	}
