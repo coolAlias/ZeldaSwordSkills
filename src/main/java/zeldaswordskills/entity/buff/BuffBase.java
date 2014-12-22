@@ -18,7 +18,6 @@
 package zeldaswordskills.entity.buff;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import zeldaswordskills.network.PacketDispatcher;
@@ -129,10 +128,10 @@ public class BuffBase
 	 * Removes any effects that may have been applied when the buff is removed,
 	 * updating the client player if needsUpdate is true
 	 */
-	private void onRemoved(EntityLivingBase entity, boolean needsUpdate) {
+	public void onRemoved(EntityLivingBase entity, boolean needsUpdate) {
 		if (!entity.worldObj.isRemote) {
 			buff.onRemoved(entity, amplifier);
-			if (needsUpdate && entity instanceof EntityPlayer) {
+			if (needsUpdate && entity instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateBuffPacket(this, true), (EntityPlayerMP) entity);
 			}
 		}

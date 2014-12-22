@@ -1,10 +1,12 @@
 package zeldaswordskills.handler;
 
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ZSSItems;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 
 /**
  * 
@@ -20,5 +22,10 @@ public class ZSSEventsFML {
 		{
 			event.player.triggerAchievement(ZSSAchievements.ocarinaCraft);
 		}
+	}
+
+	@SubscribeEvent
+	public void onPlayerLoggedIn(PlayerLoggedInEvent event) {
+		ZSSPlayerInfo.get(event.player).onPlayerLoggedIn();
 	}
 }

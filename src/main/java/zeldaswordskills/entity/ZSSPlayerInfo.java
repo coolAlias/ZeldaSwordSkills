@@ -43,7 +43,6 @@ import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.AttackBlockedPacket;
 import zeldaswordskills.network.packet.client.SetNockedArrowPacket;
 import zeldaswordskills.network.packet.client.SpawnNayruParticlesPacket;
-import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
 import zeldaswordskills.network.packet.client.SyncPlayerInfoPacket;
 
 public class ZSSPlayerInfo implements IExtendedEntityProperties
@@ -327,18 +326,30 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		return (ZSSPlayerInfo) player.getExtendedProperties(EXT_PROP_NAME);
 	}
 
-	public void onJoinWorld() {
-		playerSkills.validateSkills();
+	/**
+	 * Called when a player logs in for the first time
+	 */
+	public void onPlayerLoggedIn() {
 		if (player instanceof EntityPlayerMP) {
-			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
-			PacketDispatcher.sendTo(new SyncEntityInfoPacket(ZSSEntityInfo.get(player)), (EntityPlayerMP) player);
+			verifyStartingGear();
+			playerSkills.verifyMaxHealth();
 		}
-		verifyStartingGear();
-		playerSkills.verifyMaxHealth();
 	}
 
 	/**
-	 * Copies given data to this one
+	 * Call each time the player joins the world to sync data to the client
+	 */
+	public void onJoinWorld() {
+		if (player instanceof EntityPlayerMP) {
+			playerSkills.validateSkills();
+			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
+		}
+	}
+
+	/**
+	 * Copies given data to this one when a player is cloned
+	 * If the client also needs the data, the packet must be sent from
+	 * EntityJoinWorldEvent to ensure it is sent to the new client player
 	 */
 	public void copy(ZSSPlayerInfo info) {
 		NBTTagCompound compound = new NBTTagCompound();

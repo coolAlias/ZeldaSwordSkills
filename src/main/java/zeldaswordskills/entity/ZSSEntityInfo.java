@@ -25,6 +25,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -32,6 +33,8 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
 import zeldaswordskills.ref.Config;
 
 /**
@@ -84,7 +87,12 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 		return activeBuffs;
 	}
 
-	/** Shortcut method for applying a new buff */
+	/**
+	 * Shortcut method for applying a new buff
+	 * @param buff		The type of buff
+	 * @param duration	Number of ticks; a duration equal to Integer.MAX_VALUE is 'permanent'
+	 * @param amplifier	How powerful the effect is: see individual {@link Buff buffs} for valid values
+	 */
 	public void applyBuff(Buff buff, int duration, int amplifier) {
 		applyBuff(new BuffBase(buff, duration, amplifier));
 	}
@@ -106,12 +114,23 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 * Removes all buffs from this entity
 	 */
 	public void removeAllBuffs() {
+		removeAllBuffs(true, false);
+	}
+
+	/**
+	 * Removes all temporary buffs from this entity
+	 * @param removeAll		If true, permanent buffs will also be removed
+	 * @param sendUpdate	True will send a packet for each buff removed
+	 */
+	public void removeAllBuffs(boolean removeAll, boolean sendUpdate) {
 		if (!entity.worldObj.isRemote) {
 			Iterator<Buff> iterator = activeBuffs.keySet().iterator();
 			while (iterator.hasNext()) {
 				Buff buff = iterator.next();
-				activeBuffs.get(buff).onRemoved(entity);
-				iterator.remove();
+				if (removeAll || !activeBuffs.get(buff).isPermanent()) {
+					activeBuffs.get(buff).onRemoved(entity, sendUpdate);
+					iterator.remove();
+				}
 			}
 		}
 	}
@@ -188,6 +207,26 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 */
 	public static final ZSSEntityInfo get(EntityLivingBase entity) {
 		return (ZSSEntityInfo) entity.getExtendedProperties(EXT_PROP_NAME);
+	}
+
+	/**
+	 * Call each time the player joins the world to sync data to the client
+	 */
+	public void onJoinWorld() {
+		if (entity instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncEntityInfoPacket(this), (EntityPlayerMP) entity);
+		}
+	}
+
+	/**
+	 * Copies given data to this one when a player is cloned
+	 * If the client also needs the data, the packet must be sent from
+	 * EntityJoinWorldEvent to ensure it is sent to the new client player
+	 */
+	public void copy(ZSSEntityInfo info) {
+		NBTTagCompound compound = new NBTTagCompound();
+		info.saveNBTData(compound);
+		this.loadNBTData(compound);
 	}
 
 	@Override

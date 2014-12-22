@@ -180,6 +180,8 @@ public class ZSSEntityEvents
 
 	@SubscribeEvent
 	public void onClonePlayer(PlayerEvent.Clone event) {
+		// Can't send update packets from here - use EntityJoinWorldEvent
+		ZSSEntityInfo.get(event.entityPlayer).copy(ZSSEntityInfo.get(event.original));
 		ZSSPlayerInfo.get(event.entityPlayer).copy(ZSSPlayerInfo.get(event.original));
 	}
 
@@ -187,6 +189,7 @@ public class ZSSEntityEvents
 	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
 		if (!event.entity.worldObj.isRemote) {
 			if (event.entity instanceof EntityPlayer) {
+				ZSSEntityInfo.get((EntityPlayer) event.entity).onJoinWorld();
 				ZSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
 			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
 				EntityGoron.doVillagerSpawn((EntityVillager) event.entity, event.entity.worldObj);

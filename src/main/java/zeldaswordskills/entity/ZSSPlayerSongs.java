@@ -321,6 +321,7 @@ public class ZSSPlayerSongs
 
 	public void loadNBTData(NBTTagCompound compound) {
 		NBTTagList songs = compound.getTagList("KnownSongs", Constants.NBT.TAG_COMPOUND);
+		knownSongs.clear();
 		for (int i = 0; i < songs.tagCount(); ++i) {
 			NBTTagCompound tag = songs.getCompoundTagAt(i);
 			ZeldaSong song = ZeldaSong.getSongFromUnlocalizedName(tag.getString("song"));
