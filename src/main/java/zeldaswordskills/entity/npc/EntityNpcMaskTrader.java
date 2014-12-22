@@ -119,7 +119,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 					player.setCurrentItemOrArmor(0, null);
 					info.setBorrowedMask(null);
 					PlayerUtils.playSound(player, Sounds.POP, 1.0F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.mask_trader.returned"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.returned");
 				} else if (mask != null) {
 					new TimedChatDialogue(player, Arrays.asList(
 							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
@@ -156,7 +156,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 					info.completeCurrentMaskStage();
 					break;
 				case 1: // still need to sell mask
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.mask_trader.selling." + rand.nextInt(4)));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.selling." + rand.nextInt(4));
 					break;
 				case 2: // need to pay for mask
 					int price = (mask instanceof ItemMask ? ((ItemMask) mask).getBuyPrice() : 16);
@@ -172,7 +172,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 							info.setBorrowedMask(ZSSItems.maskTruth);
 							player.triggerAchievement(ZSSAchievements.maskShop);
 						} else {
-							PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.mask_trader.sold"));
+							PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.sold");
 						}
 					} else {
 						new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.npc.mask_trader.penniless.0"),

@@ -111,20 +111,20 @@ public class ItemWhip extends Item implements IFairyUpgrade
 				case WHIP_SHORT:
 					MerchantRecipe trade = new MerchantRecipe(new ItemStack(this, 1, WhipType.WHIP_SHORT.ordinal()), new ItemStack(Items.emerald, 64), new ItemStack(this, 1, WhipType.WHIP_LONG.ordinal()));
 					if (MerchantRecipeHelper.addUniqueTrade(trades, trade)) {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.upgrade.new"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.upgrade.new");
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.upgrade.old"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.upgrade.old");
 					}
 					break;
 				case WHIP_LONG:
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.long"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.long");
 					break;
 				case WHIP_MAGIC:
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.magic"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.magic");
 					break;
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.whip.sorry"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.sorry");
 			}
 		}
 		return true;
@@ -139,7 +139,7 @@ public class ItemWhip extends Item implements IFairyUpgrade
 			//player.triggerAchievement(ZSSAchievements.magicWhip);
 		} else {
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 

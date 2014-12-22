@@ -28,7 +28,6 @@ import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
@@ -130,13 +129,13 @@ public class ZSSEntityEvents
 					flag2 = EntityNpcBarnes.convertFromVillager(villager, event.entityPlayer, stack);
 				} else if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
 					if (flag2) {
-						PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me"));
+						PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me");
 					} else {
-						PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".fail"));
+						PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".fail");
 					}
 					flag2 = true;
 				} else if (flag2) {
-					PlayerUtils.sendChat(event.entityPlayer, StatCollector.translateToLocal("chat.zss.npc.mask_trader.closed." + event.entity.worldObj.rand.nextInt(4)));
+					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.mask_trader.closed." + event.entity.worldObj.rand.nextInt(4));
 				}
 			}
 			event.setCanceled(flag2);

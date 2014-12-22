@@ -24,7 +24,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.StatCollector;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
@@ -88,10 +87,10 @@ public class TileEntityInscription extends TileEntity
 			if (player.isSneaking()) {
 				if (!worldObj.isRemote) {
 					setNextSong();
-					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.song.inscription.new", song.toString()));
+					PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.new", song.toString());
 				}
 			} else if (!worldObj.isRemote) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.song.inscription.current", song.toString()));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.current", song.toString());
 			}
 			return true;
 		} else if (stack != null && stack.getItem() instanceof ItemInstrument) {
@@ -101,7 +100,7 @@ public class TileEntityInscription extends TileEntity
 			}
 			return true;
 		} else if (worldObj.isRemote) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.inscription.fail"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.inscription.fail");
 		}
 		return false;
 	}

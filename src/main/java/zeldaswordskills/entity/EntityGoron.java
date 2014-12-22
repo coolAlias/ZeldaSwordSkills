@@ -316,9 +316,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 			playLivingSound();
 			if (("Darunia").equals(getCustomNameTag())) {
 				if (ZSSPlayerSongs.get(player).hasCuredNpc("Darunia")) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.darunia.thanks"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");
 				} else if (power < 5) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.darunia.weak"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.weak");
 				} else if (ZSSPlayerSongs.get(player).onCuredNpc("Darunia")) {
 					ItemStack gift = new ItemStack(ZSSItems.gauntletsSilver);
 					new TimedChatDialogue(player, Arrays.asList(
@@ -327,10 +327,10 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 							StatCollector.translateToLocalFormatted("chat.zss.song.saria.darunia.2", gift.getDisplayName())), 0, 1500);
 					new TimedAddItem(player, gift, 3000, Sounds.SUCCESS);
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.darunia.thanks"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");
 				}
 			} else if (affected == 0) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.saria.goron"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.goron");
 			}
 			return true;
 		}

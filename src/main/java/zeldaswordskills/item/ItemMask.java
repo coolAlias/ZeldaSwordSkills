@@ -202,7 +202,7 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 				ZSSPlayerInfo.get(player).completeCurrentMaskStage();
 				player.setCurrentItemOrArmor(0, new ItemStack(Items.emerald, getSellPrice()));
 				PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.mask.sold." + player.worldObj.rand.nextInt(4)));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.mask.sold." + player.worldObj.rand.nextInt(4));
 				player.triggerAchievement(ZSSAchievements.maskSold);
 			}
 		}
@@ -222,12 +222,12 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 					new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.mask.desired.0"),
 							StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
+					PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession());
 				}
 			} else if (entity instanceof EntityNpcMaskTrader) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".salesman");
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + itemRand.nextInt(4)));
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + itemRand.nextInt(4));
 			}
 		}
 		return true;

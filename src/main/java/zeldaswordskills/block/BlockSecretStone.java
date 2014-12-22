@@ -32,7 +32,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -118,7 +117,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
 			if (Config.showSecretMessage()) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.block.secret"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.secret");
 			}
 			world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}

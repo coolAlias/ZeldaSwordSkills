@@ -153,16 +153,16 @@ public class ItemInstrument extends Item
 			ZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
 			if (toLearn != null) {
 				if (toLearn == ZeldaSong.TIME_SONG && getInstrument(stack).getPower() < 5) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.ocarina.toy"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.ocarina.toy");
 					return false;
 				}
 				if (player.worldObj.isRemote) {
 					// onItemRightClick still processes after this, despite canceling the interact event -.-
 					ZSSPlayerSongs.get(player).songToLearn = toLearn;
 					if (ZSSPlayerSongs.get(player).isSongKnown(toLearn)) {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.npc.ocarina.review", toLearn.toString()));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", toLearn.toString());
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.npc.ocarina.learn", toLearn.toString()));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", toLearn.toString());
 					}
 				}
 				return true;

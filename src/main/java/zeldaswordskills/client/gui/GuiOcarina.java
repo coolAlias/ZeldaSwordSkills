@@ -124,7 +124,7 @@ public class GuiOcarina extends GuiMusicBase
 			if (melody.size() == 8) {
 				if (!ZeldaSong.areNotesUnique(melody)) {
 					melody.clear();
-					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.copycat"));
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.song.scarecrow.copycat");
 				} else if (scarecrowNotes.isEmpty()) {
 					boolean flag = true;
 					for (int i = 0; i < (melody.size() - 1) && flag; ++i) {
@@ -132,10 +132,10 @@ public class GuiOcarina extends GuiMusicBase
 					}
 					if (flag) {
 						melody.clear();
-						PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.boring"));
+						PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.song.scarecrow.boring");
 					} else {
 						scarecrowNotes.addAll(melody);
-						PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.again"));
+						PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.song.scarecrow.again");
 					}
 				} else {
 					boolean flag = true;
@@ -159,7 +159,7 @@ public class GuiOcarina extends GuiMusicBase
 						ticksSinceLastNote = 0;
 					} else {
 						melody.clear();
-						PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocal("chat.zss.song.scarecrow.forgot"));
+						PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.song.scarecrow.forgot");
 					}
 				}
 			}

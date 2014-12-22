@@ -74,7 +74,7 @@ public class ItemChuJelly extends Item implements IUnenchantable
 			entityVillager.playLivingSound();
 			if (villager != null && villager.isChuTrader() && jellyMap.containsKey(type)) {
 				if (villager.getJelliesReceived(type) == 0) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.jelly.first"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.first");
 					villager.addJelly(type, 1);
 					--stack.stackSize;
 				} else if (villager.canSellType(type, stack)) {
@@ -82,20 +82,20 @@ public class ItemChuJelly extends Item implements IUnenchantable
 							new ItemStack(Items.emerald, (type.ordinal() + 1) * 8), new ItemStack(jellyMap.get(type)));
 					if (MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 						player.worldObj.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.jelly.new_stock"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.new_stock");
 						PlayerUtils.addItemToInventory(player, new ItemStack(jellyMap.get(type)));
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.jelly.in_stock"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.in_stock");
 					}
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.jelly.need_more"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.need_more");
 				}
 
 				if (stack.stackSize == 0) {
 					player.setCurrentItemOrArmor(0, null);
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.jelly.gross"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.gross");
 			}
 		}
 		return true;

@@ -86,23 +86,23 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 			}
 			if (villager.getProfession() == 3 || isGoron) {
 				if (brokenItem != ZSSItems.swordGiant) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.broken"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.broken");
 					MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 5), new ItemStack(brokenItem)));
 				} else if (isGoron && villager.getCustomNameTag().equals("Medigoron")) {
 					if (ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart) > 9) {
 						player.triggerAchievement(ZSSAchievements.swordBroken);
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.1"));
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.2"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.broken.giant.1");
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.broken.giant.2");
 						MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 5), new ItemStack(brokenItem)));
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.big"));
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.later"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.big");
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.later");
 					}
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.sorry");
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.sorry");
 			}
 
 			return true;

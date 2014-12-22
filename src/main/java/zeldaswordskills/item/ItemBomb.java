@@ -129,15 +129,15 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 		if (entity instanceof EntityNpcBarnes) {
 			if (!player.worldObj.isRemote) {
 				if (((EntityNpcBarnes) entity).addBombBagTrade()) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.add"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.add");
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.careful"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.careful");
 				}
 			}
 			return true;
 		} else if (entity instanceof INpc) {
 			if (!player.worldObj.isRemote) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.bomb.careful"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.careful");
 			}
 			return true;
 		}

@@ -250,11 +250,11 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 			item.setDead();
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.swordGolden), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sword.blessing"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.sword.blessing");
 			player.triggerAchievement(ZSSAchievements.swordGolden);
 		} else {
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 
@@ -296,19 +296,19 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 				tag.setInteger("SacredFlames", tag.getInteger("SacredFlames") | type);
 				stack.setTagCompound(tag);
 				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
-				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.new",
-						getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type)));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.new",
+						getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type));
 				player.triggerAchievement(ZSSAchievements.swordFlame);
 				addSacredFlameEnchantments(stack, type);
 				return true;
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.old.same", getItemStackDisplayName(stack)));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.old.same", getItemStackDisplayName(stack));
 			}
 		} else {
 			if (isActive) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.incorrect.sword"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.incorrect.sword");
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.inactive");
 			}
 		}
 		WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);

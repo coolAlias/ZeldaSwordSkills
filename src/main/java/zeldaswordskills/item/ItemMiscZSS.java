@@ -74,7 +74,7 @@ public class ItemMiscZSS extends Item implements IUnenchantable
 			}
 		} else if (this == ZSSItems.skillWiper) {
 			if (!world.isRemote) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.skill.reset"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.skill.reset");
 				ZSSPlayerSkills.get(player).resetSkills();
 			}
 		}
@@ -108,19 +108,19 @@ public class ItemMiscZSS extends Item implements IUnenchantable
 	private void handleMasterOre(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
 		if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.smith"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.smith");
 			if (player.inventory.hasItem(ZSSItems.swordMaster)) {
 				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.new"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.new");
 					player.triggerAchievement(ZSSAchievements.swordTempered);
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.old"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.old");
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.unworthy"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.unworthy");
 			}
 		} else {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.masterore.villager"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.villager");
 		}
 	}
 
@@ -129,12 +129,12 @@ public class ItemMiscZSS extends Item implements IUnenchantable
 		if (trades != null && sell_price > 0) {
 			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sell_price));
 			if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 			}
 		} else {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 		}
 	}
 }

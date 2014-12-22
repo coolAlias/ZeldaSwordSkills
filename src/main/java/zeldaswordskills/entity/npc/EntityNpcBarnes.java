@@ -6,7 +6,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
@@ -144,7 +143,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 				}
 			}
 			if (!worldObj.isRemote) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal(chat));
+				PlayerUtils.sendTranslatedChat(player, chat);
 				if (openGui) {
 					setCustomer(player);
 					player.displayGUIMerchant(this, getCustomNameTag());
@@ -223,10 +222,10 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 				villager.setDead();
 				villager.worldObj.spawnEntityInWorld(barnes);
 			}
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.barnes.open"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.open");
 			return true;
 		} else {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.barnes.hmph"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.hmph");
 		}
 		return false;
 	}

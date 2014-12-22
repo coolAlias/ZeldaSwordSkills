@@ -163,14 +163,14 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		}
 		if (isBossRoom && bossBattle == null) {
 			if (box == null) {
-				LogHelper.warning(String.format("Boss room at %d/%d/%d missing structure bounding box - dungeon is being disabled", xCoord, yCoord, zCoord));
+				LogHelper.warning("Boss room at " + xCoord + "/" + yCoord + "/" + zCoord + " missing structure bounding box - dungeon is being disabled");
 				verifyStructure(true);
 				removeCoreBlock();
 			} else {
 				EntityPlayer closestPlayer = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, (double)(box.getXSize() - 2) / 2.0D);
 				if (closestPlayer != null && box.isVecInside(MathHelper.floor_double(closestPlayer.posX), MathHelper.floor_double(closestPlayer.posY), MathHelper.floor_double(closestPlayer.posZ))) {
 					if (!isOpened) { // player got in somehow other than the door
-						PlayerUtils.sendChat(closestPlayer, "Ganon: Thought you could sneak in, eh? Mwa ha ha ha!");
+						PlayerUtils.sendTranslatedChat(closestPlayer, "chat.zss.dungeon.sneak_in");
 						verifyStructure(true);
 						alreadyVerified = true;
 					}

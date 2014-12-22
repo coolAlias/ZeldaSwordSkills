@@ -68,10 +68,10 @@ public class ItemPendant extends Item implements IUnenchantable
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) entity;
 			if (villager.getProfession() == 2) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.pendant.priest.0"));
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.pendant.priest.1"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.priest.0");
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.priest.1");
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.pendant.villager"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.villager");
 			}
 		}
 		return true;

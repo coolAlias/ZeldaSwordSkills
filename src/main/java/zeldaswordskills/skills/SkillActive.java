@@ -24,7 +24,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.network.PacketDispatcher;
@@ -241,7 +240,7 @@ public abstract class SkillActive extends SkillBase
 			return onActivated(world, player);
 		} else {
 			if (level > 0) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.skill.use.fail", getDisplayName()));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.skill.use.fail", getDisplayName());
 			}
 			return false;
 		}

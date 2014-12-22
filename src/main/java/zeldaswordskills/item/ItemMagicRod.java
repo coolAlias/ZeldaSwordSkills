@@ -368,7 +368,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
 		if (!world.isRemote) {
 			if (hasAbsorbedFlame(stack)) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.old.any", getItemStackDisplayName(stack)));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.old.any", getItemStackDisplayName(stack));
 			} else if (isActive) {
 				boolean canAbsorb = false;
 				switch(magicType) {
@@ -383,14 +383,14 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 					}
 					stack.getTagCompound().setBoolean("absorbedFlame", true);
 					world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
-					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.new",
-							getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type)));
+					PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.new",
+							getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type));
 					return true;
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.random");
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.inactive");
 			}
 			WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 		}
@@ -408,7 +408,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 

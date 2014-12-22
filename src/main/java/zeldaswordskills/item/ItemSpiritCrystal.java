@@ -154,7 +154,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		if (world.isRemote) {
 			return false;
 		} else if (stack.getItemDamage() == 0) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.full"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.sacred_flame.full");
 		} else if (isActive) {
 			if (spiritType == type) {
 				int originalDamage = stack.getItemDamage();
@@ -162,10 +162,10 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 				world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 				return (world.rand.nextInt(stack.getMaxDamage()) < originalDamage);
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.mismatch"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.sacred_flame.mismatch");
 			}
 		} else {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.inactive");
 		}
 		return false;
 	}
@@ -323,14 +323,14 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 				} else {
 					player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 					if (world.isRemote) {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.spirit_crystal.farore.fail.dimension",
-								new Object[]{StatCollector.translateToLocal(getUnlocalizedName() + ".name")}));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.spirit_crystal.farore.fail.dimension",
+								StatCollector.translateToLocal(getUnlocalizedName() + ".name"));
 					}
 				}
 			} else {
 				player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 				if (world.isRemote) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.spirit_crystal.farore.fail.mark"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.farore.fail.mark");
 				}
 			}
 		}

@@ -99,9 +99,9 @@ public class ItemArmorTunic extends ItemArmor
 			if (stack.getItemDamage() > 0) {
 				MerchantRecipe trade = new MerchantRecipe(new ItemStack(ZSSItems.tunicGoronChest), new ItemStack(Items.emerald, 8), new ItemStack(ZSSItems.tunicGoronChest));
 				MerchantRecipeHelper.addToListWithCheck(((EntityVillager) entity).getRecipes(player), trade);
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.goron.tunic.repair"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.goron.tunic.repair");
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.goron.tunic.undamaged"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.goron.tunic.undamaged");
 			}
 		}
 		return true;

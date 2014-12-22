@@ -186,12 +186,12 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 					}
 				}
 				if (trade != null && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.arrow"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.arrow");
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 
@@ -430,7 +430,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 			}
 		} else {
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 

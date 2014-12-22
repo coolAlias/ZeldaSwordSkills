@@ -200,7 +200,7 @@ public enum ZeldaSong {
 			// notify all ISongEntities within 8 block radius
 			notifySongEntities(player.worldObj, player, power, 8);
 			if (!isEnabled) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.disabled"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.disabled");
 				return;
 			}
 
@@ -315,7 +315,7 @@ public enum ZeldaSong {
 				if (power > 4 && warp != null) {
 					int dimension = player.worldObj.provider.dimensionId;
 					if (dimension == 1 && warp.dimensionId != 1) { // can't teleport from the end to other dimensions
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.warp.end"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.song.warp.end");
 					} else {
 						if (player.ridingEntity != null) {
 							player.mountEntity(null);
@@ -343,7 +343,7 @@ public enum ZeldaSong {
 								((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, dimension, new TeleporterNoPortal((WorldServer) player.worldObj));
 							}
 							player.setPositionAndUpdate(dx, dy, dz);
-							PlayerUtils.sendChat(player, StatCollector.translateToLocal(noBlock ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing"));
+							PlayerUtils.sendTranslatedChat(player, noBlock ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing");
 						} else {
 							PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 						}

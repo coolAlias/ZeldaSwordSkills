@@ -32,7 +32,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
@@ -123,7 +122,7 @@ public class BlockSacredFlame extends BlockContainer
 				return true;
 			}
 		} else if (!world.isRemote) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.random");
 		}
 		return false;
 	}
@@ -157,9 +156,9 @@ public class BlockSacredFlame extends BlockContainer
 				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
 				extinguishFlame(world, x, y, z);
 			} else if (isActive) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.random");
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.inactive");
 			}
 		}
 	}

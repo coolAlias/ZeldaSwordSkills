@@ -33,7 +33,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.block.BlockWarpStone;
@@ -121,7 +120,7 @@ public class ZSSPlayerSongs
 					addSong = (scarecrowNotes.get(i) == notes.get(i));
 				}
 			} else if (!player.worldObj.isRemote) { // only play chat once
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.scarecrow.later"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.scarecrow.later");
 			}
 		}
 		if (addSong) {
@@ -135,7 +134,7 @@ public class ZSSPlayerSongs
 			}
 			if (!player.worldObj.isRemote) {
 				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-				PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.song.learned", song.toString()));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.learned", song.toString());
 				PacketDispatcher.sendTo(new LearnSongPacket(song, notes), (EntityPlayerMP) player);
 			}
 		}
@@ -192,12 +191,12 @@ public class ZSSPlayerSongs
 			return true;
 		} else if (isSongKnown(ZeldaSong.SCARECROW_SONG)) {
 			if (addChat) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.scarecrow.known"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.scarecrow.known");
 			}
 			return false;
 		} else if (player.worldObj.getWorldTime() < scarecrowTime) {
 			if (addChat) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.song.scarecrow.later"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.scarecrow.later");
 			}
 			return false;
 		} else {

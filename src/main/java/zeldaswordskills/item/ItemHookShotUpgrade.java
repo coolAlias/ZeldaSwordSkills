@@ -74,7 +74,7 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.use.fail.0"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.use.fail.0");
 		}
 		return stack;
 	}
@@ -140,17 +140,17 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 				MerchantRecipe trade = getHookShotTradeFromInventory(stack, player, trades);
 				if (trade != null && trades.size() >= Config.getFriendTradesRequired()) {
 					MerchantRecipeHelper.addUniqueTrade(trades, trade);
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.new.0"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.new.0");
 				} else {
 					trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 					if (MerchantRecipeHelper.addToListWithCheck(trades, trade) || player.worldObj.rand.nextFloat() < 0.5F) {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 					}
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 	}

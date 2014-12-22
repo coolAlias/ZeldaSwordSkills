@@ -19,7 +19,6 @@ package zeldaswordskills.entity.npc;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemTreasure;
@@ -65,11 +64,11 @@ public class EntityNpcOrca extends EntityNpcBase
 		if (!player.worldObj.isRemote) {
 			ItemStack stack = player.getHeldItem();
 			if (ZSSPlayerSkills.get(player).completedCrests()) {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.master." + player.worldObj.rand.nextInt(4)));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.orca.master." + player.worldObj.rand.nextInt(4));
 			} else if (stack != null && stack.getItem() instanceof ItemTreasure && stack.getItemDamage() == Treasures.KNIGHTS_CREST.ordinal()) {
 				ZSSPlayerSkills.get(player).giveCrest();
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.idle." + rand.nextInt(4)));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.orca.idle." + rand.nextInt(4));
 			}
 		}
 		return true;

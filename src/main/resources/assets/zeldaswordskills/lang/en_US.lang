@@ -141,6 +141,7 @@ buff.zss.weakness_stun.name=Weakness to Stun
 
 chat.zss.block.secret=This tool doesn't seem to be very effective...
 chat.zss.block.warp_stone.activate=Warp coordinates for %s set to %d/%d/%d.
+chat.zss.dungeon.sneak_in=Ganondorf: Thought you could sneak in, eh? Mwa ha ha ha!
 chat.zss.fairy.greeting=Behold, young hero, I'm the Great Fairy of Power!
 chat.zss.fairy.skillorb=Receive this secret sword technique, and use it well!
 chat.zss.fairy.finalskill=This is the final level I can teach you.

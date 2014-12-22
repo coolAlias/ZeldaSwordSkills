@@ -65,8 +65,8 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 				if (skills.grantSkill(skill)) {
 					world.playSoundAtEntity(player, Sounds.LEVELUP, 1.0F, 1.0F);
-					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.skill.levelup",
-							skill.getDisplayName(), skills.getSkillLevel(skill)));
+					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.levelup",
+							skill.getDisplayName(), skills.getSkillLevel(skill));
 					if (skill == SkillBase.bonusHeart) {
 						player.triggerAchievement(ZSSAchievements.skillHeart);
 						if (skills.getSkillLevel(skill) > 19) {
@@ -93,7 +93,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 						--stack.stackSize;
 					}
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.skill.maxlevel", skill.getDisplayName()));
+					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.maxlevel", skill.getDisplayName());
 				}
 			}
 		}
@@ -109,12 +109,12 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 			if (villager.getProfession() == 1 && trades != null) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
 			} else {
-				PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;

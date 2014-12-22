@@ -25,6 +25,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.StatCollector;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.ISkillItem;
 import zeldaswordskills.api.item.ISword;
@@ -185,9 +186,19 @@ public class PlayerUtils
 		return consumed == 0;
 	}
 
-	/** Sends the pre-translated message to the player as a chat message */
+	/** Sends a pre-translated chat message to the player */
 	public static void sendChat(EntityPlayer player, String message) {
 		player.addChatMessage(new ChatComponentText(message));
+	}
+
+	/** Sends a translated chat message to the player */
+	public static void sendTranslatedChat(EntityPlayer player, String message) {
+		sendChat(player, StatCollector.translateToLocal(message));
+	}
+
+	/** Sends a formatted, translated chat message to the player */
+	public static void sendFormattedChat(EntityPlayer player, String message, Object... args) {
+		sendChat(player, StatCollector.translateToLocalFormatted(message, args));
 	}
 
 	/**

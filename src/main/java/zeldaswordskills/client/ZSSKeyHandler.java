@@ -105,17 +105,20 @@ public class ZSSKeyHandler
 				PacketDispatcher.sendToServer(new GetBombPacket());
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocalFormatted("chat.zss.key.toggletp",
-							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.toggletp",
+							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable")
+									: StatCollector.translateToLocal("chat.zss.key.disable")));
 				} else {
-					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
-							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.toggleat",
+							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable")
+									: StatCollector.translateToLocal("chat.zss.key.disable")));
 				}
 			} else if (kb == keys[KEY_TOGGLE_BUFFBAR].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
 					ComboOverlay.shouldDisplay = !ComboOverlay.shouldDisplay;
-					PlayerUtils.sendChat(mc.thePlayer, StatCollector.translateToLocalFormatted("chat.zss.key.togglehud",
-							(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+					PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.togglehud",
+							(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("chat.zss.key.enable")
+									: StatCollector.translateToLocal("chat.zss.key.disable")));
 				} else {
 					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
 				}

@@ -152,46 +152,46 @@ public class ItemTreasure extends Item implements IUnenchantable
 							}
 							new TimedChatDialogue(player, chat);
 						} else {
-							PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".already_open"));
+							PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.name + ".already_open");
 						}
 						player.setCurrentItemOrArmor(0, null);
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".fail"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.name + ".fail");
 					}
 				} else if (trade != null && villagerInfo.isInterested(treasure, stack)) {
 					ItemStack required = trade.getSecondItemToBuy();
 					if (required == null || PlayerUtils.consumeInventoryItem(player, required, required.stackSize)) {
 						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.setCurrentItemOrArmor(0, trade.getItemToSell());
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));
-						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.treasure.received", trade.getItemToSell().getDisplayName()));
+						PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".give");
+						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.received", trade.getItemToSell().getDisplayName());
 						if (villagerInfo.onTradedTreasure(player, treasure, player.getHeldItem())) {
-							PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".next"));
+							PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".next");
 						}
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : "")));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : ""));
 					}
 				} else if (treasure.canSell() && villagerInfo.isHunter()) {
 					ItemStack treasureStack = new ItemStack(ZSSItems.treasure,1,treasure.ordinal());
 					int price = villagerInfo.isMonsterHunter() ? treasure.getValue() + treasure.getValue() / 2 : treasure.getValue();
 					if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(treasureStack, new ItemStack(Items.emerald, price)))) {
 						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.new", treasureStack.getDisplayName()));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.new", treasureStack.getDisplayName());
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.old", treasureStack.getDisplayName()));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.old", treasureStack.getDisplayName());
 					}
 				} else {
 					if (villagerInfo.isFinalTrade(treasure, stack)) {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".wait"));
+						PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".wait");
 					} else {
-						PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested." + treasure.uninterested));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested);
 					}
 				}
 			} else if (entity instanceof INpc) {
 				if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested." + treasure.uninterested + ".orca"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested + ".orca");
 				} else {
-					PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.treasure.uninterested." + treasure.uninterested));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested);
 				}
 			}
 		}
