@@ -280,6 +280,9 @@ public class EntityBoomerang extends EntityMobThrowable
 		if (riddenByEntity == null || captureAll) {
 			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : items) {
+				if (!item.isEntityAlive()) {
+					continue;
+				}
 				if (riddenByEntity == null) {
 					item.mountEntity(this);
 				} else if (captureAll && item != riddenByEntity) {
