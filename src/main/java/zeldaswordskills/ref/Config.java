@@ -262,7 +262,7 @@ public class Config
 	/** [Skill Orbs] Chance for unmapped mob to drop an orb */
 	private static int genericMobDropChance;
 	/** [Skill Orbs] Individual drop chances for skill orbs and heart pieces */
-	private static Map<Byte, Integer> orbDropChance;
+	private static Map<Byte, Float> orbDropChance;
 	/** [Piece of Power] Approximate number of enemies you need to kill before a piece of power drops */
 	private static int powerDropRate;
 	/** [Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100] */
@@ -419,10 +419,11 @@ public class Config
 		enableOrbDrops = config.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
 		randomDropChance = MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
 		genericMobDropChance = MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
-		orbDropChance = new HashMap<Byte, Integer>(SkillBase.getNumSkills());
+		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
 			if (skill.canDrop()) {
-				orbDropChance.put(skill.getId(), MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (in tenths of a percent) for " + skill.getDisplayName() + " [0-10]", 5).getInt(), 0, 10));
+				int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
+				orbDropChance.put(skill.getId(), (0.001F * (float) i));
 			}
 		}
 		powerDropRate = Math.max(config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt(), 20);
@@ -571,8 +572,7 @@ public class Config
 	public static float getChanceForRandomDrop() { return (float) randomDropChance * 0.01F; }
 	public static float getRandomMobDropChance() { return (float) genericMobDropChance * 0.01F; }
 	public static float getDropChance(int orbID) {
-		int i = (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0);
-		return (float) i * 0.001F;
+		return (orbDropChance.containsKey((byte) orbID) ? orbDropChance.get((byte) orbID) : 0.0F);
 	}
 	public static int getPowerDropRate() { return powerDropRate; }
 	public static float getVanillaWhipLootChance() { return (float) vanillaWhipLootChance * 0.01F; }
