@@ -47,6 +47,7 @@ import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.client.SyncPlayerInfoPacket;
+import zeldaswordskills.network.packet.client.SyncSkillPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.ICombo;
@@ -101,6 +102,42 @@ public class ZSSPlayerSkills
 	}
 
 	/**
+	 * Removes the skill with the given name, or "all" skills
+	 * @param name	Unlocalized skill name or "all" to remove all skills
+	 * @return		False if no skill was removed
+	 */
+	public boolean removeSkill(String name) {
+		if (("all").equals(name)) {
+			resetSkills();
+			return true;
+		} else {
+			// TODO change skill storage to use unlocalized name instead of id
+			SkillBase dummy = null;
+			for (SkillBase skill : skills.values()) {
+				if (skill.getUnlocalizedName().equals(name)) {
+					dummy = skill;
+					break;
+				}
+			}
+			if (dummy != null) {
+				removeSkill(dummy);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void removeSkill(SkillBase skill) {
+		SkillBase dummy = skill.newInstance();
+		skills.put(dummy.getId(), dummy);
+		validateSkills();
+		skills.remove(dummy.getId());
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncSkillPacket(dummy), (EntityPlayerMP) player);
+		}
+	}
+
+	/**
 	 * Resets all data related to skills
 	 */
 	public void resetSkills() {
@@ -111,7 +148,9 @@ public class ZSSPlayerSkills
 		validateSkills();
 		skills.clear();
 		crestsGiven = 0;
-		PacketDispatcher.sendTo(new SyncPlayerInfoPacket(ZSSPlayerInfo.get(player)), (EntityPlayerMP) player);
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(ZSSPlayerInfo.get(player)), (EntityPlayerMP) player);
+		}
 	}
 
 	/**
@@ -382,13 +421,13 @@ public class ZSSPlayerSkills
 	 */
 	public void giveCrest() {
 		if (getSkillLevel(SkillBase.spinAttack) < 1) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4)));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4));
 		} else if (getSkillLevel(SkillBase.superSpinAttack) < Math.min(crestsGiven / 20, SkillBase.superSpinAttack.getMaxLevel())) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4)));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4));
 		} else if (getSkillLevel(SkillBase.backSlice) < Math.min((crestsGiven + 10) / 20, SkillBase.backSlice.getMaxLevel())) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4)));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.orca.unfit." + player.worldObj.rand.nextInt(4));
 		} else if (crestsGiven >= 100) {
-			PlayerUtils.sendChat(player, StatCollector.translateToLocal("chat.zss.npc.orca.master." + player.worldObj.rand.nextInt(4)));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.orca.master." + player.worldObj.rand.nextInt(4));
 		} else if (PlayerUtils.consumeInventoryItem(player, ZSSItems.treasure, Treasures.KNIGHTS_CREST.ordinal(), 1)) {
 			++crestsGiven;
 			List<String> chat = new ArrayList<String>();
@@ -442,13 +481,19 @@ public class ZSSPlayerSkills
 	}
 
 	/**
-	 * Reads a SkillBase from stream and updates the local skills map
+	 * Reads a SkillBase from stream and updates the local skills map; if the skill
+	 * loaded from NBT is level 0, that skill will be removed.
 	 * Called client side only for synchronizing a skill with the server version.
 	 */
 	@SideOnly(Side.CLIENT)
 	public void syncClientSideSkill(byte id, NBTTagCompound compound) {
 		if (SkillBase.doesSkillExist(id)) {
-			skills.put(id, SkillBase.getNewSkillInstance(id).loadFromNBT(compound));
+			SkillBase skill = SkillBase.getNewSkillInstance(id).loadFromNBT(compound);
+			if (skill.getLevel() > 0) {
+				skills.put(id, skill);
+			} else {
+				skills.remove(id);
+			}
 		}
 	}
 

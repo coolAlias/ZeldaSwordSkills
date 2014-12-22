@@ -479,6 +479,22 @@ combo.label.11=Masterful
 combo.label.12=Legendary
 combo.ending=FINISH HIM!!!
 
+commands.skill.generic.unknown=%1$s is not a recognized skill
+commands.grantskill.failure.disabled=%1$s is disabled
+commands.grantskill.failure.low=%1$s already has %2$s level %3$d 
+commands.grantskill.failure.player=%1$s was unable to learn %2$s
+commands.grantskill.notify.one=You have been granted %1$s level %2$d!
+commands.grantskill.notify.all=You have been granted max level in all skills!
+commands.grantskill.success.one=%1$s has been granted %2$s level %3$d
+commands.grantskill.success.all=%1$s has been granted max level in all skills
+commands.grantskill.success.partial=%1$s was unable to master all skills
+commands.grantskill.usage=/grantskill <player> <skill> <level> OR /grantskill <player> all
+commands.removeskill.failure.all=You did not have any skills to remove
+commands.removeskill.failure.one=You did not have any levels in %2$s
+commands.removeskill.success.all=Removed all skills
+commands.removeskill.success.one=Removed all levels of %2$s
+commands.removeskill.usage=/removeskill <skill> OR /removeskill all
+
 creativetab.zss.block=Zelda Blocks
 creativetab.zss.combat=Zelda Combat
 creativetab.zss.eggs=Zelda Spawn Eggs

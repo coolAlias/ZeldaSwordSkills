@@ -19,6 +19,7 @@ package zeldaswordskills;
 
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.command.ZSSCommands;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.handler.GuiHandler;
@@ -115,5 +116,6 @@ public class ZSSMain
 	@EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
 		ZSSItems.onServerStarting();
+		ZSSCommands.registerCommands(event);
 	}
 }
