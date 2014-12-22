@@ -137,7 +137,7 @@ public class ZSSItemEvents
 			if (orb != null && Config.areOrbDropsEnabled()) {
 				ItemStack helm = (player).getCurrentArmor(ArmorIndex.WORN_HELM);
 				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
-				float baseChance = Config.getDropChance(orb.getItemDamage());
+				float baseChance = Config.getDropChance(orb.getItem() == ZSSItems.heartPiece ? SkillBase.bonusHeart.getId() : orb.getItemDamage());
 				if (baseChance > 0.0F && (isBoss || mob.worldObj.rand.nextFloat() < (baseChance + f + (0.005F * event.lootingLevel)))) {
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
 					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, Sounds.SPECIAL_DROP, 1.0F, 1.0F);
