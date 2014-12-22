@@ -330,7 +330,7 @@ public class ZSSItems
 	 * Delaying this until server start ensures that any block / item ID conflicts
 	 * caused by other mods being added or removed will have been resolved.
 	 */
-	public static void onServerStart() {
+	public static void onServerStarting() {
 		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
 		TradeHandler.registerTrades();

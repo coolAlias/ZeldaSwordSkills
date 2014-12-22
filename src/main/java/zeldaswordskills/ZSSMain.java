@@ -113,7 +113,7 @@ public class ZSSMain
 	}
 
 	@EventHandler
-	public void onServerStart(FMLServerStartingEvent event) {
-		ZSSItems.onServerStart();
+	public void onServerStarting(FMLServerStartingEvent event) {
+		ZSSItems.onServerStarting();
 	}
 }
