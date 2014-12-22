@@ -36,6 +36,11 @@ public class BuffBase
 	private int duration;
 	private int amplifier;
 
+	/**
+	 * @param buff		The type of buff
+	 * @param duration	Number of ticks; a duration equal to Integer.MAX_VALUE is 'permanent'
+	 * @param amplifier	How powerful the effect is: see individual {@link Buff buffs} for valid values
+	 */
 	public BuffBase(Buff buff, int duration, int amplifier) {
 		this.buff = buff;
 		this.duration = duration;
@@ -50,7 +55,7 @@ public class BuffBase
 
 	/** The type of Buff that this effect is */
 	public Buff getBuff() { return buff; }
-	/** The duration remaining for this buff's effect */
+	/** The duration remaining for this buff's effect, in ticks */
 	public int getDuration() { return duration; }
 	/** Returns the amplitude of this buff's effect */
 	public int getAmplifier() { return amplifier; }
