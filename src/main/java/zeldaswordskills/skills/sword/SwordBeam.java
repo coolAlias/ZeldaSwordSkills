@@ -23,12 +23,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.ref.Config;
@@ -113,7 +116,9 @@ public class SwordBeam extends SkillActive
 
 	/** The percent of base sword damage that should be inflicted, as an integer */
 	private int getDamageFactor(EntityPlayer player) {
-		return 30 + (level * 10);
+		ItemStack mask = player.getEquipmentInSlot(ArmorIndex.EQUIPPED_HELM);
+		int base = (mask != null && mask.getItem() == ZSSItems.maskFierce) ? 55 : 30;
+		return base + (level * 10);
 	}
 
 	/** Returns player's base damage (with sword) plus 1.0F per level */
