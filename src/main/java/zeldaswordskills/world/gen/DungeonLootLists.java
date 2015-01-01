@@ -133,6 +133,8 @@ public class DungeonLootLists
 					ItemStack key = ItemKeyBig.getKeyForBiome(world, room.getBoundingBox().getCenterX(), room.getBoundingBox().getCenterZ());
 					if (key != null) {
 						WorldUtils.addItemToInventoryAtRandom(rand, key, chest, 3);
+					} else { // non-temple biomes should still give something nice
+						WorldUtils.addItemToInventoryAtRandom(rand, ChestGenHooks.getInfo(BOSS_LOOT).getOneItem(rand), chest, 3);
 					}
 				}
 			}
@@ -163,24 +165,30 @@ public class DungeonLootLists
 
 	private static void initBasicConsumables() {
 		setCategoryStats(ChestGenHooks.getInfo(BASIC_LOOT), Config.getMinNumItems(), Config.getMinNumItems() + 4, new WeightedRandomChestContent[] {
-			getLoot(Items.apple, 1, 2, 5),
-			getLoot(Items.bread, 1, 2, 5),
-			getLoot(Items.compass, 1, 2, 4),
-			getLoot(Items.map, 1, 3, 4),
-			getLoot(Items.experience_bottle, 1, 5, 5),
-			getLoot(Items.name_tag, 1, 2, 5),
-			getLoot(Items.diamond, 1, 2, 2),
-			getLoot(Items.gold_ingot, 1, 2, 3),
-			getLoot(Items.iron_ingot, 1, 2, 4),
-			getLoot(Items.glass_bottle, 1, 3, 5),
-			getLoot(Items.emerald, 2, 5, 7),
-			getLoot(Items.arrow, 3, 7, 7),
-			getLoot(Items.melon_seeds, 1, 2, 3),
-			getLoot(ZSSItems.bombBag, 1, 1, Config.getBombBagWeight() / 2),
+			getLoot(Items.apple, 1, 2, 3),
+			getLoot(Items.golden_apple, 1, 1, 1),
+			getLoot(Items.bread, 1, 2, 3),
+			getLoot(Items.bucket, 1, 1, 1),
+			getLoot(Items.compass, 1, 1, 2),
+			getLoot(Items.map, 1, 2, 2),
+			getLoot(Items.experience_bottle, 1, 5, 2),
+			getLoot(Items.name_tag, 1, 2, 2),
+			getLoot(Items.diamond, 1, 2, 1),
+			getLoot(Items.gold_ingot, 1, 2, 2),
+			getLoot(Items.iron_ingot, 1, 2, 3),
+			getLoot(Items.leather, 1, 3, 3),
+			getLoot(Items.glass_bottle, 1, 2, 3),
+			getLoot(Items.emerald, 2, 5, 5),
+			getLoot(Items.arrow, 3, 7, 5),
+			getLoot(Items.melon_seeds, 1, 3, 2),
+			getLoot(Items.pumpkin_seeds, 1, 3, 2),
+			getLoot(ZSSItems.dekuNut, 1, 3, 2),
+			getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight()),
+			getLoot(ZSSItems.bombBag, 1, 1, (Config.getBombBagWeight() > 5 ? 2 : 1)),
 			getLoot(ZSSItems.keySmall, 1, 1, Config.getSmallKeyWeight()),
 			getLoot(ZSSItems.potionRed, 1, 1, 3),
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
-			getLoot(ZSSItems.shieldDeku, 1, 1, 2),
+			getLoot(ZSSItems.shieldDeku, 1, 1, 1),
 			getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordKokiri), 1, 1, 1)
 		});
 	}
@@ -198,6 +206,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.bootsRubber, 1, 1, 1),
 			getLoot(ZSSItems.crystalSpirit, 1, 1, 1),
 			getLoot(ZSSItems.dekuLeaf, 1, 1, 1),
+			getLoot(Items.golden_apple, 1, 1, 1, 1), // enchanted golden apple
 			getLoot(ZSSItems.hammer, 1, 1, 2),
 			getLoot(ZSSItems.heroBow, 1, 1, 2),
 			getLoot(ZSSItems.hookshot, HookshotType.WOOD_SHOT.ordinal(), 1, 1, 2),
@@ -220,9 +229,9 @@ public class DungeonLootLists
 	private static void initJarDrops() {
 		setCategoryStats(ChestGenHooks.getInfo(JAR_DROPS), 1, 1, new WeightedRandomChestContent[] {
 			getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 1, 1),
-			getLoot(ZSSItems.potionRed, 1, 1, 3),
+			getLoot(ZSSItems.potionRed, 1, 1, 2),
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
-			getLoot(ZSSItems.smallHeart, 1, 1, 5),
+			getLoot(ZSSItems.smallHeart, 1, 1, 6),
 			getLoot(ZSSItems.dekuNut, 1, 1, 4),
 			getLoot(Items.arrow, 1, 1, 5),
 			getLoot(Items.emerald, 1, 1, 10)
@@ -264,7 +273,7 @@ public class DungeonLootLists
 		getLoot(Items.potionitem, LibPotionID.STRENGTH.id, 1, 1, 3),
 		getLoot(Items.diamond, 1, 3, 3),
 		getLoot(ZSSItems.arrowBomb, 2, 5, 3),
-		getLoot(ZSSItems.bomb,BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight() * 2),
+		getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight() * 2),
 		getLoot(ZSSItems.rocsFeather, 1, 1, 1),
 		getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1)
 	};
@@ -287,7 +296,7 @@ public class DungeonLootLists
 		getLoot(Items.fish, 1, 2, 4),
 		getLoot(Items.potionitem, LibPotionID.WATER_BREATHING.id, 1, 1, 3),
 		getLoot(ZSSItems.arrowBombWater, 2, 5, 3),
-		getLoot(ZSSItems.bomb,BombType.BOMB_WATER.ordinal(), 1, 2, Config.getBombWeight() * 2),
+		getLoot(ZSSItems.bomb, BombType.BOMB_WATER.ordinal(), 1, 2, Config.getBombWeight() * 2),
 		getLoot(ZSSItems.tunicZoraHelm, 1, 1, 1),
 		getLoot(ZSSItems.tunicZoraChest, 1, 1, 1),
 		getLoot(ZSSItems.tunicZoraLegs, 1, 1, 1)
@@ -299,7 +308,7 @@ public class DungeonLootLists
 		getLoot(Items.iron_horse_armor, 1, 1, 2),
 		getLoot(Items.saddle, 1, 1, 3),
 		getLoot(ZSSItems.arrowBomb, 2, 5, 3),
-		getLoot(ZSSItems.bomb,BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight() * 2),
+		getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 3, Config.getBombWeight()),
 		getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1),
 		getLoot(ZSSItems.swordKokiri, 1, 1, 1)
 	};
