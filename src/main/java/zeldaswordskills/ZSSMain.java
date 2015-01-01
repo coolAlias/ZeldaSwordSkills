@@ -91,6 +91,7 @@ public class ZSSMain
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		proxy.registerRenderers();
+		ZSSItems.init();
 		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
