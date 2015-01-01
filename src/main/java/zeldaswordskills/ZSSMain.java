@@ -39,8 +39,6 @@ import zeldaswordskills.world.gen.ZSSWorldGenEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -61,7 +59,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 @Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION)
 public class ZSSMain
 {
-	@Instance(ModInfo.ID)
+	@Mod.Instance(ModInfo.ID)
 	public static ZSSMain instance;
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
@@ -74,7 +72,7 @@ public class ZSSMain
 	/** Whether Battlegear2 mod is loaded */
 	public static boolean isBG2Enabled;
 
-	@EventHandler
+	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		LogHelper.preInit();
 		Config.preInit(event);
@@ -88,7 +86,7 @@ public class ZSSMain
 		PacketDispatcher.preInit();
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public void load(FMLInitializationEvent event) {
 		proxy.registerRenderers();
 		ZSSItems.init();
@@ -104,7 +102,7 @@ public class ZSSMain
 		}
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
 		if (isBG2Enabled) {
@@ -114,7 +112,7 @@ public class ZSSMain
 		DungeonLootLists.init();
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event) {
 		ZSSItems.onServerStarting();
 		ZSSCommands.registerCommands(event);
