@@ -17,9 +17,9 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-beta-0.1.7.1"
+version = "0.2.0"
 group = "com.google.coolalias.zeldaswordskills" 
-archivesBaseName = "zeldaswordskills"
+archivesBaseName = "1.7.10-zeldaswordskills"
 
 dependencies {
 	compile files (
