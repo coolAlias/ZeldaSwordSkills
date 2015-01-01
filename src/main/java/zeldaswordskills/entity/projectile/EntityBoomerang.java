@@ -286,12 +286,8 @@ public class EntityBoomerang extends EntityMobThrowable
 				if (riddenByEntity == null) {
 					item.mountEntity(this);
 				} else if (captureAll && item != riddenByEntity) {
-					ItemStack stack = item.getEntityItem();
-					// check for items that aren't supposed to be picked up
-					if (stack.getItem() != ZSSItems.powerPiece && stack.getItem() != ZSSItems.smallHeart) {
-						capturedItems.add(item.getEntityItem());
-						item.setDead();
-					}
+					capturedItems.add(item.getEntityItem());
+					item.setDead();
 				}
 			}
 		}
