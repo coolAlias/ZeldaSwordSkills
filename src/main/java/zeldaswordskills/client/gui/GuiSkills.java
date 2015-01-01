@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
@@ -132,7 +133,8 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		RenderHelperQ.drawTexturedRect(texture, guiLeft, guiTop, 0, 0, xSize, ySize, 284, 180);
-		RenderHelperQ.drawPlayerModel(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
+		// func_147046_a is drawEntityOnScreen
+		GuiInventory.func_147046_a(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
 	}
 
 	/**
