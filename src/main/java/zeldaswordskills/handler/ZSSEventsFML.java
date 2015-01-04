@@ -1,9 +1,9 @@
 package zeldaswordskills.handler;
 
+import net.minecraft.item.Item;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemInstrument;
-import zeldaswordskills.item.ZSSItems;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
@@ -17,9 +17,8 @@ public class ZSSEventsFML {
 
 	@SubscribeEvent
 	public void onItemCrafted(ItemCraftedEvent event) {
-		if (event.crafting != null && event.crafting.getItem() == ZSSItems.instrument
-				&& ((ItemInstrument) event.crafting.getItem()).getInstrument(event.crafting) == ItemInstrument.Instrument.OCARINA_FAIRY)
-		{
+		Item item = (event.crafting == null ? null : event.crafting.getItem());
+		if (item instanceof ItemInstrument && ((ItemInstrument) item).getInstrument(event.crafting) == ItemInstrument.Instrument.OCARINA_FAIRY) {
 			event.player.triggerAchievement(ZSSAchievements.ocarinaCraft);
 		}
 	}
