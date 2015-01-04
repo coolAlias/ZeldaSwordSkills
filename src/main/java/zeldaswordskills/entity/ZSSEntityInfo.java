@@ -190,6 +190,10 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 */
 	public void onUpdate() {
 		updateBuffs();
+		// Use a number higher than 100 otherwise it is nearly instantaneous even at low resists
+		if (entity.isBurning() && entity.worldObj.rand.nextInt(500) < getBuffAmplifier(Buff.RESIST_FIRE)) {
+			entity.extinguish();
+		}
 		if (stunResistTime > 0 && !isBuffActive(Buff.STUN)) {
 			--stunResistTime;
 		}

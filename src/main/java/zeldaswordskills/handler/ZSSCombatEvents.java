@@ -27,6 +27,7 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -127,13 +128,18 @@ public class ZSSCombatEvents
 		if (event.source.getEntity() instanceof EntityLivingBase) {
 			event.setCanceled(ZSSEntityInfo.get((EntityLivingBase) event.source.getEntity()).isBuffActive(Buff.STUN));
 		}
+		// Possible for damage to be negated by resistances, in which case we don't want the hurt animation to play
+		float amount = applyDamageModifiers(event.entityLiving, event.source, event.ammount);
 		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ZSSPlayerSkills.get(player).onBeingAttacked(event);
-			// prevent non-entity sources of fire damage here to avoid hurt animation while in fire / lava
-			if (!event.isCanceled() && event.source.isFireDamage() && event.source.getSourceOfDamage() == null) {
+			if (amount < 0.1F) {
+				event.setCanceled(true);
+			} else if (!event.isCanceled() && event.source.isFireDamage() && event.source.getSourceOfDamage() == null) {
 				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
 			}
+		} else if (amount < 0.1F) {
+			event.setCanceled(true);
 		} else if (!event.isCanceled() && event.source.getEntity() != null) {
 			EntityLivingBase entity = event.entityLiving;
 			float evade = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
@@ -199,7 +205,7 @@ public class ZSSCombatEvents
 			}
 		}
 
-		applyDamageModifiers(event);
+		event.ammount = applyDamageModifiers(event.entityLiving, event.source, event.ammount);
 
 		// apply magic armor and combo onHurt last, after other resistances
 		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
@@ -212,9 +218,6 @@ public class ZSSCombatEvents
 					event.setCanceled(event.ammount < 0.1F);
 				}
 			 */
-			if (event.source.isFireDamage() && !event.isCanceled()) {
-				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
-			}
 			if (event.isCanceled()) {
 				return;
 			}
@@ -256,69 +259,74 @@ public class ZSSCombatEvents
 	}
 
 	/**
-	 * Applies all damage modifiers
+	 * Returns the damage amount modified by both the attacker's and the defender's relevant buffs
 	 */
-	private void applyDamageModifiers(LivingHurtEvent event) {
-		if (event.source.getEntity() instanceof EntityLivingBase) {
-			EntityLivingBase entity = (EntityLivingBase) event.source.getEntity();
-			event.ammount *= 1.0F - (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.ATTACK_DOWN) * 0.01F);
-			event.ammount *= 1.0F + (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.ATTACK_UP) * 0.01F);
+	public static float applyDamageModifiers(EntityLivingBase defender, DamageSource source, float amount) {
+		if (source.getEntity() instanceof EntityLivingBase) {
+			EntityLivingBase entity = (EntityLivingBase) source.getEntity();
+			amount *= 1.0F - (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.ATTACK_DOWN) * 0.01F);
+			amount *= 1.0F + (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.ATTACK_UP) * 0.01F);
 		}
-		applyDamageWeaknesses(event);
-		applyDamageResistances(event);
+		amount = applyDamageWeaknesses(defender, source, amount);
+		amount = applyDamageResistances(defender, source, amount);
+		return amount;
 	}
 
 	/**
-	 * Modifies damage of LivingHurtEvent based on entity resistances
+	 * Returns modified damage amount based on the defender's resistances vs. the damage source
 	 */
-	private void applyDamageResistances(LivingHurtEvent event) {
-		float defenseUp = (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.DEFENSE_UP) * 0.01F);
-		float defenseDown = (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.DEFENSE_DOWN) * 0.01F);
-		event.ammount *= (1.0F + defenseDown - defenseUp);
-		if (event.source instanceof IDamageType && event.ammount > 0.0F) {
-			Set<EnumDamageType> damageTypes = ((IDamageType) event.source).getEnumDamageTypes();
+	private static float applyDamageResistances(EntityLivingBase defender, DamageSource source, float amount) {
+		ZSSEntityInfo info = ZSSEntityInfo.get(defender);
+		float defenseUp = info.getBuffAmplifier(Buff.DEFENSE_UP) * 0.01F;
+		float defenseDown = info.getBuffAmplifier(Buff.DEFENSE_DOWN) * 0.01F;
+		amount *= (1.0F + defenseDown - defenseUp);
+		if (source instanceof IDamageType && amount > 0.0F) {
+			Set<EnumDamageType> damageTypes = ((IDamageType) source).getEnumDamageTypes();
 			if (damageTypes != null) {
 				for (EnumDamageType type : damageTypes) {
 					if (EnumDamageType.damageResistMap.get(type) != null) {
-						event.ammount *= 1.0F - (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(EnumDamageType.damageResistMap.get(type)) * 0.01F);
+						amount *= 1.0F - (info.getBuffAmplifier(EnumDamageType.damageResistMap.get(type)) * 0.01F);
 					}
 				}
 			}
 		}
-		if (event.source.isFireDamage()) {
-			event.ammount *= 1.0F - (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
+		if (source.isFireDamage()) {
+			amount *= 1.0F - (info.getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
 		}
-		if (event.source.isMagicDamage()) {
-			event.ammount *= 1.0F - (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.RESIST_MAGIC) * 0.01F);
+		if (source.isMagicDamage()) {
+			amount *= 1.0F - (info.getBuffAmplifier(Buff.RESIST_MAGIC) * 0.01F);
 		}
+		return amount;
 	}
 
 	/**
-	 * Modifies damage of LivingHurtEvent based on entity weaknesses
+	 * Returns modified damage amount based on the defender's weaknesses to the damage source
 	 */
-	private void applyDamageWeaknesses(LivingHurtEvent event) {
-		if (event.source instanceof IDamageType) {
-			Set<EnumDamageType> damageTypes = ((IDamageType) event.source).getEnumDamageTypes();
+	private static float applyDamageWeaknesses(EntityLivingBase defender, DamageSource source, float amount) {
+		ZSSEntityInfo info = ZSSEntityInfo.get(defender);
+		if (source instanceof IDamageType) {
+			Set<EnumDamageType> damageTypes = ((IDamageType) source).getEnumDamageTypes();
 			if (damageTypes != null) {
 				for (EnumDamageType type : damageTypes) {
 					if (EnumDamageType.damageWeaknessMap.get(type) != null) {
-						event.ammount *= 1.0F + (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(EnumDamageType.damageWeaknessMap.get(type)) * 0.01F);
+						amount *= 1.0F + (info.getBuffAmplifier(EnumDamageType.damageWeaknessMap.get(type)) * 0.01F);
 					}
 				}
 			}
 		}
-		if (event.source.isFireDamage()) {
-			event.ammount *= 1.0F + (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
+		if (source.isFireDamage()) {
+			amount *= 1.0F + (info.getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
 		}
-		if (event.source.isMagicDamage()) {
-			event.ammount *= 1.0F + (ZSSEntityInfo.get(event.entityLiving).getBuffAmplifier(Buff.WEAKNESS_MAGIC) * 0.01F);
+		if (source.isMagicDamage()) {
+			amount *= 1.0F + (info.getBuffAmplifier(Buff.WEAKNESS_MAGIC) * 0.01F);
 		}
+		return amount;
 	}
 
 	/**
 	 * Applies any secondary effects that may occur when a living entity is injured
 	 */
-	private void handleSecondaryEffects(LivingHurtEvent event) {
+	private static void handleSecondaryEffects(LivingHurtEvent event) {
 		if (event.ammount >= 1.0F && event.source instanceof IDamageType && event.source instanceof IPostDamageEffect) {
 			Set<EnumDamageType> damageTypes = ((IDamageType) event.source).getEnumDamageTypes();
 			if (damageTypes != null) {
