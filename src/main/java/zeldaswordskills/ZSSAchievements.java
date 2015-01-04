@@ -171,10 +171,10 @@ public class ZSSAchievements
 		// OCARINA TREE
 		dx = 3;
 		dy = 0;
-		ocarinaCraft = new Achievement("zss.ocarina.craft", "ocarina.craft", dx, dy, new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_FAIRY.ordinal()), null);
-		ocarinaSong = new Achievement("zss.ocarina.song", "ocarina.song", dx, dy - 2, Items.writable_book, ocarinaCraft);
-		ocarinaScarecrow = new Achievement("zss.ocarina.scarecrow", "ocarina.scarecrow", dx - 1, dy - 4, Item.getItemFromBlock(Blocks.pumpkin), ocarinaSong).setSpecial();
-		ocarinaMaestro = new Achievement("zss.ocarina.maestro", "ocarina.maestro", dx, dy - 6, new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_TIME.ordinal()), ocarinaSong).setSpecial();
+		ocarinaCraft = new Achievement("zss.ocarina.craft", "ocarina.craft", dx, dy, new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_FAIRY.ordinal()), null).registerStat();
+		ocarinaSong = new Achievement("zss.ocarina.song", "ocarina.song", dx, dy - 2, Items.writable_book, ocarinaCraft).registerStat();
+		ocarinaScarecrow = new Achievement("zss.ocarina.scarecrow", "ocarina.scarecrow", dx - 1, dy - 4, Item.getItemFromBlock(Blocks.pumpkin), ocarinaSong).registerStat().setSpecial();
+		ocarinaMaestro = new Achievement("zss.ocarina.maestro", "ocarina.maestro", dx, dy - 6, new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_TIME.ordinal()), ocarinaSong).registerStat().setSpecial();
 
 		page = new AchievementPage("Zelda",
 				bombsAway,
