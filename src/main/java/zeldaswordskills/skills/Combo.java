@@ -96,7 +96,7 @@ public class Combo
 		this.skillId = skill.getId();
 		this.maxComboSize = maxComboSize;
 		this.timeLimit = timeLimit;
-		if (!player.worldObj.isRemote) {
+		if (player instanceof EntityPlayerMP) {
 			PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 		}
 	}
@@ -180,7 +180,7 @@ public class Combo
 			case 12: player.triggerAchievement(ZSSAchievements.comboLegend); break;
 			}
 			comboDamage += damage;
-			if (!player.worldObj.isRemote) {
+			if (player instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			}
 			if (getSize() == maxComboSize) {
@@ -207,7 +207,7 @@ public class Combo
 			if (getSize() == 0) {
 				comboTimer = timeLimit;
 			}
-			if (!player.worldObj.isRemote) {
+			if (player instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			}
 		}
@@ -221,7 +221,7 @@ public class Combo
 			isFinished = true;
 			lastEntityHit = null;
 			consecutiveHits = 0;
-			if (!player.worldObj.isRemote) {
+			if (player instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			}
 		}
