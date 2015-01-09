@@ -56,6 +56,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemMagicMirror extends Item implements IUnenchantable
 {
+	/** Ticks required to be in use before effect will occur */
+	private static final int USE_TIME = 140;
+
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
 
@@ -72,7 +75,7 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 	 */
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
-		return 140;
+		return 32000;
 	}
 
 	@Override
@@ -88,7 +91,8 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		if (!world.isRemote && ticksRemaining < (getMaxItemUseDuration(stack) / 2)) {
+		int minTicks = (getMaxItemUseDuration(stack) - (USE_TIME / 2));
+		if (!world.isRemote && ticksRemaining < minTicks) {
 			switch(player.dimension) {
 			case -1:
 				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, new TeleporterNoPortal((WorldServer) world));
@@ -131,8 +135,9 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (!world.isRemote && entity.dimension == 0 && world.getTotalWorldTime() % 10 == 0) {
-			if (TargetUtils.canEntitySeeSky(world, entity)) {
+		if (!world.isRemote && world.provider.isSurfaceWorld() && world.getTotalWorldTime() % 10 == 0) {
+			boolean flag = (entity instanceof EntityPlayer && !((EntityPlayer) entity).isUsingItem());
+			if (flag && TargetUtils.canEntitySeeSky(world, entity)) {
 				setLastPosition(stack, entity);
 			}
 		}
@@ -150,11 +155,11 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 		if (usingItem == null) { return iconArray[0]; }
 		int ticksInUse = stack.getMaxItemUseDuration() - useRemaining;
 
-		if (ticksInUse > getMaxItemUseDuration(stack) / 2) {
+		if ((ticksInUse * 2) > USE_TIME) {
 			return iconArray[3];
-		} else if (ticksInUse > getMaxItemUseDuration(stack) / 3) {
+		} else if ((ticksInUse * 3) > USE_TIME) {
 			return iconArray[2];
-		} else if (ticksInUse > getMaxItemUseDuration(stack) / 7) {
+		} else if ((ticksInUse * 7) > USE_TIME) {
 			return iconArray[1];
 		} else {
 			return iconArray[0];
