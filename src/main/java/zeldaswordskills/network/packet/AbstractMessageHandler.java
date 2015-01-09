@@ -19,6 +19,7 @@ package zeldaswordskills.network.packet;
 
 import net.minecraft.entity.player.EntityPlayer;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
@@ -38,20 +39,25 @@ public abstract class AbstractMessageHandler<T extends IMessage> implements IMes
 	 * @return a message to send back to the Server, or null if no reply is necessary
 	 */
 	@SideOnly(Side.CLIENT)
-	public abstract IMessage handleClientMessage(EntityPlayer player, T message, MessageContext ctx);
+	public abstract IMessage handleClientMessage(EntityPlayer player, T msg, MessageContext ctx);
 
 	/**
 	 * Handle a message received on the server side
 	 * @return a message to send back to the Client, or null if no reply is necessary
 	 */
-	public abstract IMessage handleServerMessage(EntityPlayer player, T message, MessageContext ctx);
+	public abstract IMessage handleServerMessage(EntityPlayer player, T msg, MessageContext ctx);
 
 	@Override
-	public IMessage onMessage(T message, MessageContext ctx) {
+	public IMessage onMessage(T msg, MessageContext ctx) {
+		EntityPlayer player = ZSSMain.proxy.getPlayerEntity(ctx);
+		if (player == null) {
+			LogHelper.severe("Unable to process " + msg.getClass().getSimpleName() + " on " + ctx.side.name() + ": player was NULL");
+			return null;
+		}
 		if (ctx.side.isClient()) {
-			return handleClientMessage(ZSSMain.proxy.getPlayerEntity(ctx), message, ctx);
+			return handleClientMessage(player, msg, ctx);
 		} else {
-			return handleServerMessage(ZSSMain.proxy.getPlayerEntity(ctx), message, ctx);
+			return handleServerMessage(player, msg, ctx);
 		}
 	}
 }
