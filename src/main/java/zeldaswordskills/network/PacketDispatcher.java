@@ -71,7 +71,7 @@ public class PacketDispatcher
 	private static final SimpleNetworkWrapper dispatcher = NetworkRegistry.INSTANCE.newSimpleChannel(ModInfo.CHANNEL);
 
 	/**
-	 *  Registers all packets and handlers - call this during {@code FMLPreInitializationEvent}
+	 *  Registers all packets and handlers - call this during {link FMLPreInitializationEvent}
 	 */
 	public static final void preInit() {
 		// Bi-directional packets (with side-specific handlers)
@@ -122,8 +122,7 @@ public class PacketDispatcher
 
 	/**
 	 * Registers a message and message handler on both sides; used mainly
-	 * for standard IMessage + IMessageHandler implementations and ideal
-	 * for messages that are handled identically on either side
+	 * for standard IMessage + IMessageHandler implementations
 	 */
 	private static final <REQ extends IMessage, REPLY extends IMessage> void registerBiMessage(Class<? extends IMessageHandler<REQ, REPLY>> handlerClass, Class<REQ> messageClass) {
 		PacketDispatcher.dispatcher.registerMessage(handlerClass, messageClass, packetId, Side.CLIENT);
@@ -152,6 +151,14 @@ public class PacketDispatcher
 	 */
 	public static final void sendTo(IMessage message, EntityPlayerMP player) {
 		PacketDispatcher.dispatcher.sendTo(message, player);
+	}
+
+	/**
+	 * Send this message to everyone.
+	 * See {@link SimpleNetworkWrapper#sendToAll(IMessage)}
+	 */
+	public static void sendToAll(IMessage message) {
+		PacketDispatcher.dispatcher.sendToAll(message);
 	}
 
 	/**
