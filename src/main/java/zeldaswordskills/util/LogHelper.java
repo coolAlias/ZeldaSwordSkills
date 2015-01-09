@@ -58,27 +58,27 @@ public class LogHelper
 	}
 
 	public static void severe(String message) {
-		logger.log(Level.SEVERE, message);
+		logger.severe(message);
 	}
 
 	public static void warning(String message) {
-		logger.log(Level.WARNING, message);
+		logger.warning(message);
 	}
 
 	public static void info(String message) {
-		logger.log(Level.INFO, message);
+		logger.info(message);
 	}
 
 	public static void fine(String message) {
-		logger.log(Level.FINE, message);
+		logger.fine(message);
 	}
 
 	public static void finer(String message) {
-		logger.log(Level.FINER, message);
+		logger.finer(message);
 	}
 
 	public static void finest(String message) {
-		logger.log(Level.FINEST, message);
+		logger.finest(message);
 	}
 }
 
