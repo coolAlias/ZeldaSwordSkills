@@ -70,9 +70,6 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/**
-	 * Returns time required before mirror's effect occurs
-	 */
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
 		return 32000;
