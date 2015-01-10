@@ -332,7 +332,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void onPlayerLoggedIn() {
 		if (player instanceof EntityPlayerMP) {
 			verifyStartingGear();
-			playerSkills.verifyMaxHealth();
 		}
 	}
 
@@ -342,6 +341,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void onJoinWorld() {
 		if (player instanceof EntityPlayerMP) {
 			playerSkills.validateSkills();
+			playerSkills.verifyMaxHealth();
 			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
 		}
 	}
