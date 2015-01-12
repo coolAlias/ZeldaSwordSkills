@@ -252,6 +252,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
+		charge = 0;
 		currentSpin = 0.0F;
 		arc = 0.0F;
 	}
@@ -260,7 +261,7 @@ public class SpinAttack extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (player.worldObj.isRemote && isKeyPressed()) {
+			if (PlayerUtils.isHoldingSkillItem(player) && player.worldObj.isRemote && isKeyPressed()) {
 				if (charge < (getChargeTime() - 1)) {
 					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 				}
