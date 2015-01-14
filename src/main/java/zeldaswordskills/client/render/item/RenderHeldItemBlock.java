@@ -25,8 +25,11 @@ import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import zeldaswordskills.item.ItemHeldBlock;
 
+@SideOnly(Side.CLIENT)
 public class RenderHeldItemBlock implements IItemRenderer
 {
 	private RenderBlocks blockRenderer;

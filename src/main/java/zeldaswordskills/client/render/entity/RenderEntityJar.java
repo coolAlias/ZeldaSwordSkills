@@ -27,7 +27,10 @@ import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityCeramicJar;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class RenderEntityJar extends Render
 {
 	private final RenderBlocks blockRenderer = new RenderBlocks();

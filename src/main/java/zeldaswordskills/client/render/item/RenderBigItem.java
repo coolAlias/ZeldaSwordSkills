@@ -27,8 +27,13 @@ import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
+@SideOnly(Side.CLIENT)
 public class RenderBigItem implements IItemRenderer
 {
+	/** Standard item scale value is 0.5F */
 	private final float scale;
 
 	public RenderBigItem(float scale) {

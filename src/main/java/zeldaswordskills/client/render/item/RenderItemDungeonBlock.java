@@ -26,9 +26,12 @@ import net.minecraftforge.client.IItemRenderer;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.item.ItemDungeonBlock;
 
+@SideOnly(Side.CLIENT)
 public class RenderItemDungeonBlock implements IItemRenderer
 {
 	private RenderBlocks blockRenderer;
