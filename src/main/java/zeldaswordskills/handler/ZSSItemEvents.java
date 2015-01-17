@@ -75,7 +75,7 @@ import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.UnpressKeyPacket;
+import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;

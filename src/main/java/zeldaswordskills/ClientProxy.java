@@ -28,7 +28,7 @@ import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.network.packet.client.UnpressKeyPacket;
+import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;

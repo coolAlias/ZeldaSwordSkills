@@ -52,7 +52,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.InLiquidPacket;
+import zeldaswordskills.network.client.InLiquidPacket;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;

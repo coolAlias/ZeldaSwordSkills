@@ -45,7 +45,7 @@ import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.PacketISpawnParticles;
+import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;

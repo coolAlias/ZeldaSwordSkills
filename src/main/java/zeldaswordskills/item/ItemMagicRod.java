@@ -56,7 +56,7 @@ import zeldaswordskills.entity.projectile.EntityCyclone;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.entity.projectile.EntityMobThrowable;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.PacketISpawnParticles;
+import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;

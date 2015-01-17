@@ -31,7 +31,7 @@ import zeldaswordskills.api.item.ISkillItem;
 import zeldaswordskills.api.item.ISword;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
+import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 
 /**
  * 

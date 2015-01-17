@@ -28,7 +28,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.server.EndComboPacket;
+import zeldaswordskills.network.server.EndComboPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;

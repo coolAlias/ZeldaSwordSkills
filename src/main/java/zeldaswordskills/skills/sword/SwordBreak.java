@@ -29,7 +29,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillActive;

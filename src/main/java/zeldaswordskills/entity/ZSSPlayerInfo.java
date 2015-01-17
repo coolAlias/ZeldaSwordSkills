@@ -40,10 +40,10 @@ import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.AttackBlockedPacket;
-import zeldaswordskills.network.packet.client.SetNockedArrowPacket;
-import zeldaswordskills.network.packet.client.SpawnNayruParticlesPacket;
-import zeldaswordskills.network.packet.client.SyncPlayerInfoPacket;
+import zeldaswordskills.network.client.AttackBlockedPacket;
+import zeldaswordskills.network.client.SetNockedArrowPacket;
+import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
+import zeldaswordskills.network.client.SyncPlayerInfoPacket;
 
 public class ZSSPlayerInfo implements IExtendedEntityProperties
 {

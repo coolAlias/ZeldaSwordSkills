@@ -30,7 +30,7 @@ import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;

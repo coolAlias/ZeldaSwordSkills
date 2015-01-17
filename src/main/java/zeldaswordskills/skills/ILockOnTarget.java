@@ -19,7 +19,7 @@ package zeldaswordskills.skills;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import zeldaswordskills.network.packet.server.TargetIdPacket;
+import zeldaswordskills.network.server.TargetIdPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

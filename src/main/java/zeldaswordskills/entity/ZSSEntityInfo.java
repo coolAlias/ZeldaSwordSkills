@@ -34,7 +34,7 @@ import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
+import zeldaswordskills.network.client.SyncEntityInfoPacket;
 import zeldaswordskills.ref.Config;
 
 /**

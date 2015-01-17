@@ -41,7 +41,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemHookShot;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.UnpressKeyPacket;
+import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.SideHit;

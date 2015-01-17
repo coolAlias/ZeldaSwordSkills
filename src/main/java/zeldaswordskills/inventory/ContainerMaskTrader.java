@@ -23,7 +23,7 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.server.BorrowMaskPacket;
+import zeldaswordskills.network.server.BorrowMaskPacket;
 
 public class ContainerMaskTrader extends Container
 {

@@ -29,7 +29,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.SyncSkillPacket;
+import zeldaswordskills.network.client.SyncSkillPacket;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.BackSlice;

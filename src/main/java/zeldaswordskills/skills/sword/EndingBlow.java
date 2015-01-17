@@ -33,7 +33,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.ICombo;

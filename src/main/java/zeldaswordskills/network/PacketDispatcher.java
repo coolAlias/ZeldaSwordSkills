@@ -19,39 +19,35 @@ package zeldaswordskills.network;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import zeldaswordskills.network.packet.AbstractMessageHandler;
-import zeldaswordskills.network.packet.bidirectional.AbstractBiMessageHandler;
-import zeldaswordskills.network.packet.bidirectional.ActivateSkillPacket;
-import zeldaswordskills.network.packet.bidirectional.AttackTimePacket;
-import zeldaswordskills.network.packet.bidirectional.DeactivateSkillPacket;
-import zeldaswordskills.network.packet.bidirectional.PlayRecordPacket;
-import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
-import zeldaswordskills.network.packet.client.AbstractClientMessageHandler;
-import zeldaswordskills.network.packet.client.LearnSongPacket;
-import zeldaswordskills.network.packet.client.AttackBlockedPacket;
-import zeldaswordskills.network.packet.client.InLiquidPacket;
-import zeldaswordskills.network.packet.client.MortalDrawPacket;
-import zeldaswordskills.network.packet.client.PacketISpawnParticles;
-import zeldaswordskills.network.packet.client.SetNockedArrowPacket;
-import zeldaswordskills.network.packet.client.SpawnNayruParticlesPacket;
-import zeldaswordskills.network.packet.client.SyncEntityInfoPacket;
-import zeldaswordskills.network.packet.client.SyncPlayerInfoPacket;
-import zeldaswordskills.network.packet.client.SyncSkillPacket;
-import zeldaswordskills.network.packet.client.UnpressKeyPacket;
-import zeldaswordskills.network.packet.client.UpdateBuffPacket;
-import zeldaswordskills.network.packet.client.UpdateComboPacket;
-import zeldaswordskills.network.packet.server.AbstractServerMessageHandler;
-import zeldaswordskills.network.packet.server.AddExhaustionPacket;
-import zeldaswordskills.network.packet.server.BombTickPacket;
-import zeldaswordskills.network.packet.server.BorrowMaskPacket;
-import zeldaswordskills.network.packet.server.DashImpactPacket;
-import zeldaswordskills.network.packet.server.EndComboPacket;
-import zeldaswordskills.network.packet.server.FallDistancePacket;
-import zeldaswordskills.network.packet.server.GetBombPacket;
-import zeldaswordskills.network.packet.server.OpenGuiPacket;
-import zeldaswordskills.network.packet.server.RefreshSpinPacket;
-import zeldaswordskills.network.packet.server.TargetIdPacket;
-import zeldaswordskills.network.packet.server.ZeldaSongPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.AttackTimePacket;
+import zeldaswordskills.network.bidirectional.DeactivateSkillPacket;
+import zeldaswordskills.network.bidirectional.LearnSongPacket;
+import zeldaswordskills.network.bidirectional.PlayRecordPacket;
+import zeldaswordskills.network.bidirectional.PlaySoundPacket;
+import zeldaswordskills.network.client.AttackBlockedPacket;
+import zeldaswordskills.network.client.InLiquidPacket;
+import zeldaswordskills.network.client.MortalDrawPacket;
+import zeldaswordskills.network.client.PacketISpawnParticles;
+import zeldaswordskills.network.client.SetNockedArrowPacket;
+import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
+import zeldaswordskills.network.client.SyncEntityInfoPacket;
+import zeldaswordskills.network.client.SyncPlayerInfoPacket;
+import zeldaswordskills.network.client.SyncSkillPacket;
+import zeldaswordskills.network.client.UnpressKeyPacket;
+import zeldaswordskills.network.client.UpdateBuffPacket;
+import zeldaswordskills.network.client.UpdateComboPacket;
+import zeldaswordskills.network.server.AddExhaustionPacket;
+import zeldaswordskills.network.server.BombTickPacket;
+import zeldaswordskills.network.server.BorrowMaskPacket;
+import zeldaswordskills.network.server.DashImpactPacket;
+import zeldaswordskills.network.server.EndComboPacket;
+import zeldaswordskills.network.server.FallDistancePacket;
+import zeldaswordskills.network.server.GetBombPacket;
+import zeldaswordskills.network.server.OpenGuiPacket;
+import zeldaswordskills.network.server.RefreshSpinPacket;
+import zeldaswordskills.network.server.TargetIdPacket;
+import zeldaswordskills.network.server.ZeldaSongPacket;
 import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -74,75 +70,55 @@ public class PacketDispatcher
 	 *  Registers all packets and handlers - call this during {link FMLPreInitializationEvent}
 	 */
 	public static final void preInit() {
-		// Bi-directional packets (with side-specific handlers)
-		registerMessage(PlayRecordPacket.Handler.class, PlayRecordPacket.class);
-		registerMessage(PlaySoundPacket.Handler.class, PlaySoundPacket.class);
-
-		// Bi-directional packets using standard IMessageHandler implementation (handled identically on both sides)
-		registerBiMessage(ActivateSkillPacket.Handler.class, ActivateSkillPacket.class);
-		registerBiMessage(AttackTimePacket.Handler.class, AttackTimePacket.class);
-		registerBiMessage(DeactivateSkillPacket.Handler.class, DeactivateSkillPacket.class);
-		registerBiMessage(LearnSongPacket.Handler.class, LearnSongPacket.class);
+		// Bidirectional packets
+		registerMessage(ActivateSkillPacket.class);
+		registerMessage(AttackTimePacket.class);
+		registerMessage(DeactivateSkillPacket.class);
+		registerMessage(LearnSongPacket.class);
+		registerMessage(PlayRecordPacket.class);
+		registerMessage(PlaySoundPacket.class);
 
 		// Packets handled on CLIENT
-		registerMessage(AttackBlockedPacket.Handler.class, AttackBlockedPacket.class);
-		registerMessage(InLiquidPacket.Handler.class, InLiquidPacket.class);
-		registerMessage(MortalDrawPacket.Handler.class, MortalDrawPacket.class);
-		registerMessage(PacketISpawnParticles.Handler.class, PacketISpawnParticles.class);
-		registerMessage(SetNockedArrowPacket.Handler.class, SetNockedArrowPacket.class);
-		registerMessage(SpawnNayruParticlesPacket.Handler.class, SpawnNayruParticlesPacket.class);
-		registerMessage(SyncEntityInfoPacket.Handler.class, SyncEntityInfoPacket.class);
-		registerMessage(SyncPlayerInfoPacket.Handler.class, SyncPlayerInfoPacket.class);
-		registerMessage(SyncSkillPacket.Handler.class, SyncSkillPacket.class);
-		registerMessage(UnpressKeyPacket.Handler.class, UnpressKeyPacket.class);
-		registerMessage(UpdateBuffPacket.Handler.class, UpdateBuffPacket.class);
-		registerMessage(UpdateComboPacket.Handler.class, UpdateComboPacket.class);
+		registerMessage(AttackBlockedPacket.class, Side.CLIENT);
+		registerMessage(InLiquidPacket.class, Side.CLIENT);
+		registerMessage(MortalDrawPacket.class, Side.CLIENT);
+		registerMessage(PacketISpawnParticles.class, Side.CLIENT);
+		registerMessage(SetNockedArrowPacket.class, Side.CLIENT);
+		registerMessage(SpawnNayruParticlesPacket.class, Side.CLIENT);
+		registerMessage(SyncEntityInfoPacket.class, Side.CLIENT);
+		registerMessage(SyncPlayerInfoPacket.class, Side.CLIENT);
+		registerMessage(SyncSkillPacket.class, Side.CLIENT);
+		registerMessage(UnpressKeyPacket.class, Side.CLIENT);
+		registerMessage(UpdateBuffPacket.class, Side.CLIENT);
+		registerMessage(UpdateComboPacket.class, Side.CLIENT);
 
 		// Packets handled on SERVER
-		registerMessage(AddExhaustionPacket.Handler.class, AddExhaustionPacket.class);
-		registerMessage(BombTickPacket.Handler.class, BombTickPacket.class);
-		registerMessage(BorrowMaskPacket.Handler.class, BorrowMaskPacket.class);
-		registerMessage(DashImpactPacket.Handler.class, DashImpactPacket.class);
-		registerMessage(EndComboPacket.Handler.class, EndComboPacket.class);
-		registerMessage(FallDistancePacket.Handler.class, FallDistancePacket.class);
-		registerMessage(GetBombPacket.Handler.class, GetBombPacket.class);
-		registerMessage(OpenGuiPacket.Handler.class, OpenGuiPacket.class);
-		registerMessage(RefreshSpinPacket.Handler.class, RefreshSpinPacket.class);
-		registerMessage(TargetIdPacket.Handler.class, TargetIdPacket.class);
-		registerMessage(ZeldaSongPacket.Handler.class, ZeldaSongPacket.class);
+		registerMessage(AddExhaustionPacket.class, Side.SERVER);
+		registerMessage(BombTickPacket.class, Side.SERVER);
+		registerMessage(BorrowMaskPacket.class, Side.SERVER);
+		registerMessage(DashImpactPacket.class, Side.SERVER);
+		registerMessage(EndComboPacket.class, Side.SERVER);
+		registerMessage(FallDistancePacket.class, Side.SERVER);
+		registerMessage(GetBombPacket.class, Side.SERVER);
+		registerMessage(OpenGuiPacket.class, Side.SERVER);
+		registerMessage(RefreshSpinPacket.class, Side.SERVER);
+		registerMessage(TargetIdPacket.class, Side.SERVER);
+		registerMessage(ZeldaSongPacket.class, Side.SERVER);
 	}
 
 	/**
-	 * Registers a message and message handler on the designated side;
-	 * used for standard IMessage + IMessageHandler implementations
+	 * Registers an AbstractMessage to one side
 	 */
-	private static final <REQ extends IMessage, REPLY extends IMessage> void registerMessage(Class<? extends IMessageHandler<REQ, REPLY>> handlerClass, Class<REQ> messageClass, Side side) {
-		PacketDispatcher.dispatcher.registerMessage(handlerClass, messageClass, packetId++, side);
+	private static final <T extends AbstractMessage<T> & IMessageHandler<T, IMessage>> void registerMessage(Class<T> clazz, Side side) {
+		PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId++, side);
 	}
 
 	/**
-	 * Registers a message and message handler on both sides; used mainly
-	 * for standard IMessage + IMessageHandler implementations
+	 * Registers an AbstractMessage to both sides (bidirectional message)
 	 */
-	private static final <REQ extends IMessage, REPLY extends IMessage> void registerBiMessage(Class<? extends IMessageHandler<REQ, REPLY>> handlerClass, Class<REQ> messageClass) {
-		PacketDispatcher.dispatcher.registerMessage(handlerClass, messageClass, packetId, Side.CLIENT);
-		PacketDispatcher.dispatcher.registerMessage(handlerClass, messageClass, packetId++, Side.SERVER);
-	}
-
-	/**
-	 * Registers a message and message handler, automatically determining Side(s) based on the handler class
-	 * @param handlerClass	Must extend one of {@link AbstractClientMessageHandler}, {@link AbstractServerMessageHandler}, or {@link AbstractBiMessageHandler}
-	 */
-	private static final <REQ extends IMessage> void registerMessage(Class<? extends AbstractMessageHandler<REQ>> handlerClass, Class<REQ> messageClass) {
-		if (AbstractClientMessageHandler.class.isAssignableFrom(handlerClass)) {
-			registerMessage(handlerClass, messageClass, Side.CLIENT);
-		} else if (AbstractServerMessageHandler.class.isAssignableFrom(handlerClass)) {
-			registerMessage(handlerClass, messageClass, Side.SERVER);
-		} else if (AbstractBiMessageHandler.class.isAssignableFrom(handlerClass)) {
-			registerBiMessage(handlerClass, messageClass);
-		} else {
-			throw new IllegalArgumentException("Cannot determine on which Side(s) to register " + handlerClass.getName() + " - unrecognized handler class!");
-		}
+	private static final <T extends AbstractMessage<T> & IMessageHandler<T, IMessage>> void registerMessage(Class<T> clazz) {
+		PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId, Side.CLIENT);
+		PacketDispatcher.dispatcher.registerMessage(clazz, clazz, packetId++, Side.SERVER);
 	}
 
 	/**

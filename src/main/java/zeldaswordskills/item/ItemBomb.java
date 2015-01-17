@@ -44,7 +44,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.server.BombTickPacket;
+import zeldaswordskills.network.server.BombTickPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;

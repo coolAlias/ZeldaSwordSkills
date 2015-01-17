@@ -42,7 +42,7 @@ import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.bidirectional.PlaySoundPacket;
+import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.WarpPoint;

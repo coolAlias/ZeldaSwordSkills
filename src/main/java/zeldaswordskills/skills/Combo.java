@@ -28,7 +28,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.UpdateComboPacket;
+import zeldaswordskills.network.client.UpdateComboPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 

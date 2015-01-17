@@ -49,7 +49,7 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.PacketISpawnParticles;
+import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;

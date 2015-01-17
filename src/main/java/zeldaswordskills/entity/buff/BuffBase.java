@@ -21,7 +21,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.packet.client.UpdateBuffPacket;
+import zeldaswordskills.network.client.UpdateBuffPacket;
 import zeldaswordskills.util.LogHelper;
 
 /**
