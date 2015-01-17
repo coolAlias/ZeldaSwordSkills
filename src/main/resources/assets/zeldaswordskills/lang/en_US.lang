@@ -495,15 +495,6 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.zss.block=Zelda Blocks
-creativetab.zss.combat=Zelda Combat
-creativetab.zss.eggs=Zelda Spawn Eggs
-creativetab.zss.keys=Zelda Keys
-creativetab.zss.masks=Zelda Masks
-creativetab.zss.misc=Zelda Treasures
-creativetab.zss.skill=Zelda Skills
-creativetab.zss.tools=Zelda Items
-
 death.attack.armorBreak=%1$s's armor was pierced by %2$s
 death.attack.armorBreak.item=%1$s's armor was pierced by %2$s using %3$s
 death.attack.arrow.fire=%1$s was shot by %2$s's fire arrow
@@ -591,6 +582,15 @@ entity.zeldaswordskills.wizzrobe.name.3=Gale Wizzrobe
 entity.zeldaswordskills.wizzrobe_grand.name=Grand Wizzrobe
 
 gui.zss.mask_trader.name=Welcome to the Happy Mask Shop!
+
+itemGroup.zss.blocks=Zelda Blocks
+itemGroup.zss.combat=Zelda Combat
+itemGroup.zss.eggs=Zelda Spawn Eggs
+itemGroup.zss.keys=Zelda Keys
+itemGroup.zss.masks=Zelda Masks
+itemGroup.zss.misc=Zelda Treasures
+itemGroup.zss.skills=Zelda Skills
+itemGroup.zss.tools=Zelda Items
 
 item.zss.arrow_bomb.name=Bomb Arrow
 item.zss.arrow_bomb_fire.name=Fire Bomb Arrow

@@ -22,7 +22,6 @@ import java.util.List;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import net.minecraft.util.StatCollector;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.item.ZSSItems;
 import cpw.mods.fml.relauncher.Side;
@@ -49,107 +48,67 @@ public class ZSSCreativeTabs
 		}
 	}
 
-	public static CreativeTabs tabBlocks = new ZSSCreativeTab("zssTabBlocks") {
+	public static CreativeTabs tabBlocks = new ZSSCreativeTab("zss.blocks") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return Item.getItemFromBlock(ZSSBlocks.pedestal);
 		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.block");
-		}
 	};
 
-	public static CreativeTabs tabCombat = new ZSSCreativeTab("zssTabCombat") {
+	public static CreativeTabs tabCombat = new ZSSCreativeTab("zss.combat") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return ZSSItems.swordMasterTrue;
 		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.combat");
-		}
 	};
 
-	public static CreativeTabs tabTools = new ZSSCreativeTab("zssTabTools") {
+	public static CreativeTabs tabTools = new ZSSCreativeTab("zss.tools") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return ZSSItems.bombBag;
 		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.tools");
-		}
 	};
 
-	public static CreativeTabs tabSkills = new ZSSCreativeTab("zssTabSkills") {
+	public static CreativeTabs tabSkills = new ZSSCreativeTab("zss.skills") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return ZSSItems.skillOrb;
 		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.skill");
-		}
 	};
 
-	public static CreativeTabs tabMasks = new ZSSCreativeTab("zssTabMasks") {
+	public static CreativeTabs tabMasks = new ZSSCreativeTab("zss.masks") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return ZSSItems.maskHawkeye;
 		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.masks");
-		}
 	};
 
-	public static CreativeTabs tabMisc = new ZSSCreativeTab("zssTabMisc") {
+	public static CreativeTabs tabMisc = new ZSSCreativeTab("zss.misc") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return ZSSItems.pendant;
 		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.misc");
-		}
 	};
 
-	public static CreativeTabs tabKeys = new ZSSCreativeTab("zssTabKeys") {
+	public static CreativeTabs tabKeys = new ZSSCreativeTab("zss.keys") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return ZSSItems.keySmall;
 		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.keys");
-		}
 	};
 
-	public static CreativeTabs tabEggs = new ZSSCreativeTab("zssTabEggs") {
+	public static CreativeTabs tabEggs = new ZSSCreativeTab("zss.eggs") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
 			return ZSSItems.eggSpawner;
-		}
-
-		@Override
-		public String getTranslatedTabLabel() {
-			return StatCollector.translateToLocal("creativetab.zss.eggs");
 		}
 	};
 }

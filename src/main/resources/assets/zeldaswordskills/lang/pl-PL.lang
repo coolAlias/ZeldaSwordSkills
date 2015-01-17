@@ -368,15 +368,6 @@ commands.removeskill.success.all=Removed all skills
 commands.removeskill.success.one=Removed all levels of %2$s
 commands.removeskill.usage=/removeskill <skill> OR /removeskill all
 
-creativetab.zss.block=Zelda - bloki
-creativetab.zss.combat=Zelda - walka
-creativetab.zss.eggs=Zelda - spawnery
-creativetab.zss.keys=Zelda - klucze
-creativetab.zss.masks=Zelda - maski
-creativetab.zss.misc=Zelda - zdobycze
-creativetab.zss.skill=Zelda - umiejÄ™tnoÅ›ci
-creativetab.zss.tools=Zelda - przedmioty
-
 death.attack.armorBreak=Zbroja gracza %1$s zostaÅ‚a przebita przez %2$s
 death.attack.armorBreak.item=Zbroja gracza %1$s zostaÅ‚a przebita przez %2$s uÅ¼ywajÄ…c %3$s
 death.attack.arrow.fire=%1$s zostaÅ‚ pokonany ognistÄ… strzaÅ‚Ä… gracza %2$s
@@ -451,6 +442,15 @@ entity.octorok.name.1=Octorok
 entity.zeldaswordskills.npc.mask_trader.name=Sprzedawca masek
 
 gui.zss.mask_trader.name=Welcome to the Happy Mask Shop!
+
+itemGroup.zss.blocks=Zelda - bloki
+itemGroup.zss.combat=Zelda - walka
+itemGroup.zss.eggs=Zelda - spawnery
+itemGroup.zss.keys=Zelda - klucze
+itemGroup.zss.masks=Zelda - maski
+itemGroup.zss.misc=Zelda - zdobycze
+itemGroup.zss.skills=Zelda - umiejÄ™tnoÅ›ci
+itemGroup.zss.tools=Zelda - przedmioty
 
 item.zss.arrow_bomb.name=Bomb Arrow
 item.zss.arrow_bomb_fire.name=Fire Bomb Arrow
