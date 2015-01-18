@@ -86,7 +86,7 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 
 	@Override
 	public final IMessage onMessage(T msg, MessageContext ctx) {
-		if (!isValidOnSide(ctx.side)) {
+		if (!msg.isValidOnSide(ctx.side)) {
 			throw new RuntimeException("Invalid side " + ctx.side.name() + " for " + msg.getClass().getSimpleName());
 		}
 		msg.process(ZSSMain.proxy.getPlayerEntity(ctx), ctx.side);
