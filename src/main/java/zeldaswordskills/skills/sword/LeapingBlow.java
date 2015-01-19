@@ -34,6 +34,7 @@ import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -116,14 +117,14 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
 		// changed from !onGround now that jump key handled immediately from KeyInputEvent
-		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player);
+		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
@@ -156,8 +157,16 @@ public class LeapingBlow extends SkillActive
 		isActive = false;
 	}
 
+	@Override
+	public void onUpdate(EntityPlayer player) {
+		// Handle on client because onGround is always true on the server
+		if (player.worldObj.isRemote && isActive() && (player.onGround || TargetUtils.isInLiquid(player))) {
+			deactivate(player);
+		}
+	}
+
 	/**
-	 * Called from Forge fall Events
+	 * Called from Forge fall Events (note that these are not fired if player lands in liquid!)
 	 * @param distance distance fallen, passed from Forge fall Event
 	 */
 	public void onImpact(EntityPlayer player, float distance) {
