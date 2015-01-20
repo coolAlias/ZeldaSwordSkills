@@ -37,11 +37,8 @@ public interface ILockOnTarget
 	/** Returns entity currently locked on to, or null if not locked on */
 	public Entity getCurrentTarget();
 
-	/**
-	 * Called on the server side when receiving a {@link TargetIdPacket}
-	 * May also be used to set the target to null and deactivate the skill
-	 */
-	public void setCurrentTarget(EntityPlayer player, Entity newTarget);
+	/** Called on the server side when {@link TargetIdPacket} is received */
+	public void setCurrentTarget(EntityPlayer player, Entity target);
 
 	/** Should find and return the next valid target or null */
 	@SideOnly(Side.CLIENT)

@@ -40,7 +40,7 @@ public class TargetIdPacket extends AbstractMessage
 	private byte skillId;
 
 	/** Current target from ILockOnTarget skill */
-	private Entity entity;
+	private Entity targetEntity;
 
 	/** Entity Id of above entity */
 	private int entityId;
@@ -52,15 +52,10 @@ public class TargetIdPacket extends AbstractMessage
 
 	/**
 	 * Constructs packet that will update the provided skill's current target on the server
-	 * @throws IllegalArgumentException if SkillBase is not an instance of ILockOnTarget
 	 */
-	public TargetIdPacket(SkillBase skill) throws IllegalArgumentException {
-		if (skill instanceof ILockOnTarget) {
-			this.skillId = skill.getId();
-			this.entity = ((ILockOnTarget) skill).getCurrentTarget();
-		} else {
-			throw new IllegalArgumentException("Parameter 'skill' must be an instance of ILockOnTarget while constructing TargetIdPacket");
-		}
+	public <T extends SkillBase & ILockOnTarget> TargetIdPacket(T skill) {
+		this.skillId = skill.getId();
+		this.targetEntity = ((ILockOnTarget) skill).getCurrentTarget();
 	}
 
 	@Override
@@ -75,10 +70,10 @@ public class TargetIdPacket extends AbstractMessage
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		if (entity != null) {
+		if (targetEntity != null) {
 			buffer.writeByte((byte) 1);
 			buffer.writeByte(skillId);
-			buffer.writeInt(entity.getEntityId());
+			buffer.writeInt(targetEntity.getEntityId());
 		} else {
 			buffer.writeByte((byte) 0);
 		}
@@ -96,9 +91,9 @@ public class TargetIdPacket extends AbstractMessage
 			if (isNull) {
 				skill.setCurrentTarget(player, null);
 			} else {
-				Entity entity = player.worldObj.getEntityByID(entityId);
-				skill.setCurrentTarget(player, entity);
-				if (entity == null) { // For some reason the target id is sometimes incorrect or out of date
+				targetEntity = player.worldObj.getEntityByID(entityId);
+				skill.setCurrentTarget(player, targetEntity);
+				if (targetEntity == null) { // For some reason the target id is sometimes incorrect or out of date
 					LogHelper.warning("Invalid target; entity with id " + entityId + " is null");
 				}
 			}
