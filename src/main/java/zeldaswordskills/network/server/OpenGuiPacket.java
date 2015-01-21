@@ -23,10 +23,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.handler.GuiHandler;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import cpw.mods.fml.relauncher.Side;
 
-public class OpenGuiPacket extends AbstractMessage
+public class OpenGuiPacket extends AbstractServerMessage
 {
 	/** ID of the gui to open; see {@link GuiHandler} for list of valid IDs */
 	private int id;
@@ -45,11 +45,6 @@ public class OpenGuiPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeInt(id);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

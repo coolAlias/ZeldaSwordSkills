@@ -23,7 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.LogHelper;
@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * This packet updates the server with the current target for currently active ILockOnTarget skill.
  *
  */
-public class TargetIdPacket extends AbstractMessage
+public class TargetIdPacket extends AbstractServerMessage
 {
 	/** Id of ILockOnTarget skill */
 	private byte skillId;
@@ -77,11 +77,6 @@ public class TargetIdPacket extends AbstractMessage
 		} else {
 			buffer.writeByte((byte) 0);
 		}
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

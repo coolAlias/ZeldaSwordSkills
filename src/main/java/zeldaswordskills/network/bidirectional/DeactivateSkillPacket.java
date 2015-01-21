@@ -55,11 +55,6 @@ public class DeactivateSkillPacket extends AbstractMessage
 	}
 
 	@Override
-	protected boolean isValidOnSide(Side side) {
-		return true;
-	}
-
-	@Override
 	protected void process(EntityPlayer player, Side side) {
 		SkillBase skill = ZSSPlayerSkills.get(player).getPlayerSkill(skillId);
 		if (skill instanceof SkillActive) {

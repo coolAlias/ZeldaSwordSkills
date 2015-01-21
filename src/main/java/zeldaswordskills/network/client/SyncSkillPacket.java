@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.skills.SkillBase;
 import cpw.mods.fml.relauncher.Side;
 
@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Synchronizes the client-side version of a skill with the server-side data.
  *
  */
-public class SyncSkillPacket extends AbstractMessage
+public class SyncSkillPacket extends AbstractClientMessage
 {
 	/** The ID of the skill to update */
 	private byte id;
@@ -62,11 +62,6 @@ public class SyncSkillPacket extends AbstractMessage
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(id);
 		buffer.writeNBTTagCompoundToBuffer(compound);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -35,7 +35,7 @@ import cpw.mods.fml.relauncher.Side;
  * caused by writing to NBT.
  *
  */
-public class SetNockedArrowPacket extends AbstractMessage
+public class SetNockedArrowPacket extends AbstractClientMessage
 {
 	private ItemStack arrowStack;
 
@@ -53,11 +53,6 @@ public class SetNockedArrowPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeItemStackToBuffer(arrowStack);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

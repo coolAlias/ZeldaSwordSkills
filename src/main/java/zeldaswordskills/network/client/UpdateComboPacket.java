@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.util.LogHelper;
@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * Packet responsible for keeping attack Combos synchronized between server and client.
  *
  */
-public class UpdateComboPacket extends AbstractMessage
+public class UpdateComboPacket extends AbstractClientMessage
 {
 	/** Stores data of combo to be updated */
 	private NBTTagCompound compound;
@@ -53,11 +53,6 @@ public class UpdateComboPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeNBTTagCompoundToBuffer(compound);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

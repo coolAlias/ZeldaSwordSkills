@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Used for ISwingSpeed items to add exhaustion from ZSSCombatEvents#setPlayerAttackTime.
  * 
  */
-public class AddExhaustionPacket extends AbstractMessage
+public class AddExhaustionPacket extends AbstractServerMessage
 {
 	private float amount;
 
@@ -50,11 +50,6 @@ public class AddExhaustionPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeFloat(amount);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

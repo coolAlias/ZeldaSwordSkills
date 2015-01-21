@@ -22,7 +22,7 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SpinAttack;
@@ -35,7 +35,7 @@ import cpw.mods.fml.relauncher.Side;
  * It does not require any data to be sent other than the packet itself.
  *
  */
-public class RefreshSpinPacket extends AbstractMessage
+public class RefreshSpinPacket extends AbstractServerMessage
 {
 	public RefreshSpinPacket() {}
 
@@ -44,11 +44,6 @@ public class RefreshSpinPacket extends AbstractMessage
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
-	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {

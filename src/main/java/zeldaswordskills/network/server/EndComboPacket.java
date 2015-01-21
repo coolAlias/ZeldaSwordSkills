@@ -22,7 +22,7 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillBase;
 import cpw.mods.fml.relauncher.Side;
@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * directly instead of sending a packet.
  *
  */
-public class EndComboPacket extends AbstractMessage
+public class EndComboPacket extends AbstractServerMessage
 {
 	/** Id of skill that implements ICombo */
 	private byte id;
@@ -53,11 +53,6 @@ public class EndComboPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeByte(id);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

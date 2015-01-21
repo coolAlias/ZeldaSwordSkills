@@ -22,7 +22,7 @@ import java.io.IOException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -30,7 +30,7 @@ import cpw.mods.fml.relauncher.Side;
  * Updates fall distance from client side, such as while swinging with the whip.
  *
  */
-public class FallDistancePacket extends AbstractMessage
+public class FallDistancePacket extends AbstractServerMessage
 {
 	/** This entity's fall distance will be modified */
 	private int entityId;
@@ -55,11 +55,6 @@ public class FallDistancePacket extends AbstractMessage
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeInt(entityId);
 		buffer.writeFloat(fallMod);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

@@ -83,11 +83,6 @@ public class PlayRecordPacket extends AbstractMessage
 	}
 
 	@Override
-	protected boolean isValidOnSide(Side side) {
-		return true;
-	}
-
-	@Override
 	protected void process(EntityPlayer player, Side side) {
 		if (side.isClient()) {
 			player.worldObj.playRecord(record, x, y, z);

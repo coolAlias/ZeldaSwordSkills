@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 
@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Sent from the Mask Trader's GUI with the mask the player borrowed.
  *
  */
-public class BorrowMaskPacket extends AbstractMessage
+public class BorrowMaskPacket extends AbstractServerMessage
 {
 	private ItemStack mask;
 
@@ -50,11 +50,6 @@ public class BorrowMaskPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeItemStackToBuffer(mask); // can handle NULL
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

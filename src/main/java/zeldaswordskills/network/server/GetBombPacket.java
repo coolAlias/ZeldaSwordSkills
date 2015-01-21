@@ -26,10 +26,10 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import cpw.mods.fml.relauncher.Side;
 
-public class GetBombPacket extends AbstractMessage {
+public class GetBombPacket extends AbstractServerMessage {
 
 	public GetBombPacket() {}
 
@@ -38,11 +38,6 @@ public class GetBombPacket extends AbstractMessage {
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
-	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {

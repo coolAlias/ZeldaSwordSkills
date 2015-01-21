@@ -25,7 +25,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.util.LogHelper;
@@ -46,7 +46,7 @@ import cpw.mods.fml.relauncher.Side;
  * Also need to send the player's motionX and motionZ, as the server values are typically zero.
  *
  */
-public class DashImpactPacket extends AbstractMessage
+public class DashImpactPacket extends AbstractServerMessage
 {
 	/** Stores the type of hit, as a byte (0: None 1: BLOCK 2: ENTITY) */
 	private byte hitType;
@@ -81,11 +81,6 @@ public class DashImpactPacket extends AbstractMessage
 		if (hitType == MovingObjectType.ENTITY.ordinal()) {
 			buffer.writeInt(entityId);
 		}
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

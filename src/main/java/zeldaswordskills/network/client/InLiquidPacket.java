@@ -24,7 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -37,7 +37,7 @@ import cpw.mods.fml.relauncher.Side;
  * in liquid wearing Heavy Boots; use to increase velocity.
  *
  */
-public class InLiquidPacket extends AbstractMessage
+public class InLiquidPacket extends AbstractClientMessage
 {
 	/** If this is true, the magnitude of velocity increase will be higher*/
 	private boolean inLava;
@@ -56,11 +56,6 @@ public class InLiquidPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeBoolean(inLava);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

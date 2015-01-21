@@ -89,11 +89,6 @@ public class PlaySoundPacket extends AbstractMessage
 	}
 
 	@Override
-	protected boolean isValidOnSide(Side side) {
-		return true;
-	}
-
-	@Override
 	protected void process(EntityPlayer player, Side side) {
 		if (side.isClient()) {
 			player.playSound(sound, volume, pitch);

@@ -25,7 +25,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -35,7 +35,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Send from the server to unpress a key (or all keys) on the client
  *
  */
-public class UnpressKeyPacket extends AbstractMessage
+public class UnpressKeyPacket extends AbstractClientMessage
 {
 	@SideOnly(Side.CLIENT)
 	private static Map<Integer, KeyBinding> keyMap;
@@ -96,11 +96,6 @@ public class UnpressKeyPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeInt(keyCode);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

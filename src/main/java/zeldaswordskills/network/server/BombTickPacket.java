@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.item.ItemBomb;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -33,7 +33,7 @@ import cpw.mods.fml.relauncher.Side;
  * knows if a gui is open, but server does not).
  *
  */
-public class BombTickPacket extends AbstractMessage {
+public class BombTickPacket extends AbstractServerMessage {
 
 	public BombTickPacket() {}
 
@@ -42,11 +42,6 @@ public class BombTickPacket extends AbstractMessage {
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
-	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {

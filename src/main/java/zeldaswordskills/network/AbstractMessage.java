@@ -55,16 +55,18 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 	protected abstract void write(PacketBuffer buffer) throws IOException;
 
 	/**
-	 * If message is sent to the wrong side, an exception will be thrown during handling
-	 * @return True if the message is allowed to be handled on the given side
-	 */
-	protected abstract boolean isValidOnSide(Side side);
-
-	/**
 	 * Called on whichever side the message is received;
 	 * for bidirectional packets, be sure to check side
 	 */
 	protected abstract void process(EntityPlayer player, Side side);
+
+	/**
+	 * If message is sent to the wrong side, an exception will be thrown during handling
+	 * @return True if the message is allowed to be handled on the given side
+	 */
+	protected boolean isValidOnSide(Side side) {
+		return true;
+	}
 
 	@Override
 	public void fromBytes(ByteBuf buffer) {
@@ -91,5 +93,25 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 		}
 		msg.process(ZSSMain.proxy.getPlayerEntity(ctx), ctx.side);
 		return null;
+	}
+
+	/**
+	 * Messages that can only be sent from the server to the client should use this class
+	 */
+	public static abstract class AbstractClientMessage extends AbstractMessage {
+		@Override
+		protected final boolean isValidOnSide(Side side) {
+			return side.isClient();
+		}
+	}
+
+	/**
+	 * Messages that can only be sent from the client to the server should use this class
+	 */
+	public static abstract class AbstractServerMessage extends AbstractMessage {
+		@Override
+		protected final boolean isValidOnSide(Side side) {
+			return side.isServer();
+		}
 	}
 }

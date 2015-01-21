@@ -24,7 +24,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.BuffBase;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Updates a buff on the client side, either adding or removing it from the activeBuffs map
  *
  */
-public class UpdateBuffPacket extends AbstractMessage
+public class UpdateBuffPacket extends AbstractClientMessage
 {
 	/** The buff to be applied or removed */
 	private BuffBase buff;
@@ -57,11 +57,6 @@ public class UpdateBuffPacket extends AbstractMessage
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeNBTTagCompoundToBuffer(buff.writeToNBT(new NBTTagCompound()));
 		buffer.writeBoolean(remove);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

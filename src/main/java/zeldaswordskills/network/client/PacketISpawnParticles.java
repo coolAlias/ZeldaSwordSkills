@@ -24,7 +24,7 @@ import net.minecraft.item.Item;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Vec3;
 import zeldaswordskills.item.ISpawnParticles;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * all client worlds
  *
  */
-public class PacketISpawnParticles extends AbstractMessage
+public class PacketISpawnParticles extends AbstractClientMessage
 {
 	/** The Item class which will spawn the particles; must implement ISpawnParticles */
 	private Item item;
@@ -83,11 +83,6 @@ public class PacketISpawnParticles extends AbstractMessage
 		buffer.writeDouble(lookX);
 		buffer.writeDouble(lookY);
 		buffer.writeDouble(lookZ);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

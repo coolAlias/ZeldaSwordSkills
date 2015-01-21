@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.ref.ZeldaSong;
 import cpw.mods.fml.relauncher.Side;
 
@@ -31,7 +31,7 @@ import cpw.mods.fml.relauncher.Side;
  * perform the actual effects of the song.
  *
  */
-public class ZeldaSongPacket extends AbstractMessage
+public class ZeldaSongPacket extends AbstractServerMessage
 {
 	private ZeldaSong song;
 
@@ -49,11 +49,6 @@ public class ZeldaSongPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeInt(song.ordinal());
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isServer();
 	}
 
 	@Override

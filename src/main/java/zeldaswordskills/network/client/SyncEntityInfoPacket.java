@@ -23,10 +23,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
-public class SyncEntityInfoPacket extends AbstractMessage
+public class SyncEntityInfoPacket extends AbstractClientMessage
 {
 	/** NBTTagCompound used to store and transfer the Entity's Info */
 	private NBTTagCompound compound;
@@ -46,11 +46,6 @@ public class SyncEntityInfoPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeNBTTagCompoundToBuffer(compound);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

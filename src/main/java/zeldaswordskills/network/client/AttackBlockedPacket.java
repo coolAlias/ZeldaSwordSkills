@@ -23,11 +23,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 
-public class AttackBlockedPacket extends AbstractMessage
+public class AttackBlockedPacket extends AbstractClientMessage
 {
 	/** Stores the shield ItemStack that was used to block */
 	private ItemStack shield;
@@ -46,11 +46,6 @@ public class AttackBlockedPacket extends AbstractMessage
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeItemStackToBuffer(shield);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

@@ -80,11 +80,6 @@ public class LearnSongPacket extends AbstractMessage
 	}
 
 	@Override
-	protected boolean isValidOnSide(Side side) {
-		return true;
-	}
-
-	@Override
 	protected void process(EntityPlayer player, Side side) {
 		ZSSPlayerSongs.get(player).learnSong(song, notes);
 	}

@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -31,7 +31,7 @@ import cpw.mods.fml.relauncher.Side;
  * Spawns the particles for Naryu's Love on client worlds
  *
  */
-public class SpawnNayruParticlesPacket extends AbstractMessage
+public class SpawnNayruParticlesPacket extends AbstractClientMessage
 {
 	/** Affected player's position */
 	private double x, y, z;
@@ -65,11 +65,6 @@ public class SpawnNayruParticlesPacket extends AbstractMessage
 		buffer.writeDouble(z);
 		buffer.writeFloat(h);
 		buffer.writeFloat(w);
-	}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
 	}
 
 	@Override

@@ -24,7 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.entity.ZSSPlayerSkills;
-import zeldaswordskills.network.AbstractMessage;
+import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
@@ -36,7 +36,7 @@ import cpw.mods.fml.relauncher.Side;
  * Sent to client upon successful draw, notifying player to attack current target
  *
  */
-public class MortalDrawPacket extends AbstractMessage {
+public class MortalDrawPacket extends AbstractClientMessage {
 
 	public MortalDrawPacket() {}
 
@@ -45,11 +45,6 @@ public class MortalDrawPacket extends AbstractMessage {
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {}
-
-	@Override
-	protected boolean isValidOnSide(Side side) {
-		return side.isClient();
-	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
