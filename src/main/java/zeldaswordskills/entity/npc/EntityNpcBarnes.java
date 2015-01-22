@@ -79,20 +79,8 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 
 	@Override
 	public void useRecipe(MerchantRecipe trade) {
-		trade.incrementToolUses();
 		livingSoundTime = -getTalkInterval();
 		playSound("mob.villager.yes", getSoundVolume(), getSoundPitch());
-		/*
-		if (trade.hasSameIDsAs((MerchantRecipe) trades.get(trades.size() - 1))) {
-			this.timeUntilReset = 40;
-			this.needsInitilization = true;
-			if (getCustomer() != null) {
-				this.lastBuyingPlayer = getCustomer().getCommandSenderName();
-			} else {
-				this.lastBuyingPlayer = null;
-			}
-		}
-		 */
 	}
 
 	private void addDefaultTrades() {
