@@ -37,7 +37,7 @@ import cpw.mods.fml.relauncher.Side;
  * When received on the client, it begins or stops the record playing at the position given.
  *
  */
-public class PlayRecordPacket extends AbstractMessage
+public class PlayRecordPacket extends AbstractMessage<PlayRecordPacket>
 {
 	private String record;
 	private int x, y, z;

@@ -27,7 +27,7 @@ import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 
-public class AttackBlockedPacket extends AbstractClientMessage
+public class AttackBlockedPacket extends AbstractClientMessage<AttackBlockedPacket>
 {
 	/** Stores the shield ItemStack that was used to block */
 	private ItemStack shield;

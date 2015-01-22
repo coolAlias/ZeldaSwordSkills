@@ -30,7 +30,7 @@ import cpw.mods.fml.relauncher.Side;
  * Updates fall distance from client side, such as while swinging with the whip.
  *
  */
-public class FallDistancePacket extends AbstractServerMessage
+public class FallDistancePacket extends AbstractServerMessage<FallDistancePacket>
 {
 	/** This entity's fall distance will be modified */
 	private int entityId;

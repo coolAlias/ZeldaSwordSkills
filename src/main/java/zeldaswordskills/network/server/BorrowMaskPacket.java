@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Sent from the Mask Trader's GUI with the mask the player borrowed.
  *
  */
-public class BorrowMaskPacket extends AbstractServerMessage
+public class BorrowMaskPacket extends AbstractServerMessage<BorrowMaskPacket>
 {
 	private ItemStack mask;
 

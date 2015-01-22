@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * This packet updates the server with the current target for currently active ILockOnTarget skill.
  *
  */
-public class TargetIdPacket extends AbstractServerMessage
+public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 {
 	/** Id of ILockOnTarget skill */
 	private byte skillId;

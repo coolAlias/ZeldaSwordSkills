@@ -31,7 +31,7 @@ import cpw.mods.fml.relauncher.Side;
  * Synchronizes all PlayerInfo data on the client
  *
  */
-public class SyncPlayerInfoPacket extends AbstractClientMessage
+public class SyncPlayerInfoPacket extends AbstractClientMessage<SyncPlayerInfoPacket>
 {
 	/** NBTTagCompound used to store and transfer the Player's Info */
 	private NBTTagCompound compound;

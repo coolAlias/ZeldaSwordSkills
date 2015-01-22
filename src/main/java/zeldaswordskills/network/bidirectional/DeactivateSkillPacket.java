@@ -33,7 +33,7 @@ import cpw.mods.fml.relauncher.Side;
  * Send to either side to {@link SkillActive#deactivate deactivate} a skill.
  *
  */
-public class DeactivateSkillPacket extends AbstractMessage
+public class DeactivateSkillPacket extends AbstractMessage<DeactivateSkillPacket>
 {
 	/** Skill to deactivate */
 	private byte skillId;

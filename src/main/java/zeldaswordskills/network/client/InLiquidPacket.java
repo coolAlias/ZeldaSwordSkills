@@ -37,7 +37,7 @@ import cpw.mods.fml.relauncher.Side;
  * in liquid wearing Heavy Boots; use to increase velocity.
  *
  */
-public class InLiquidPacket extends AbstractClientMessage
+public class InLiquidPacket extends AbstractClientMessage<InLiquidPacket>
 {
 	/** If this is true, the magnitude of velocity increase will be higher*/
 	private boolean inLava;

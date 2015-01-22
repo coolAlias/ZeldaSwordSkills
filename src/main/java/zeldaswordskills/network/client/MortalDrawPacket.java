@@ -36,8 +36,8 @@ import cpw.mods.fml.relauncher.Side;
  * Sent to client upon successful draw, notifying player to attack current target
  *
  */
-public class MortalDrawPacket extends AbstractClientMessage {
-
+public class MortalDrawPacket extends AbstractClientMessage<MortalDrawPacket>
+{
 	public MortalDrawPacket() {}
 
 	@Override

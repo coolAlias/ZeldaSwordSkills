@@ -36,7 +36,7 @@ import cpw.mods.fml.relauncher.Side;
  * See {@link SkillActive#activate} and {@link SkillActive#trigger}.
  * 
  */
-public class ActivateSkillPacket extends AbstractMessage
+public class ActivateSkillPacket extends AbstractMessage<ActivateSkillPacket>
 {
 	/** If true, calls {@link ZSSPlayerSkills#triggerSkill}, otherwise uses {@link ZSSPlayerSkills#activateSkill} */
 	private boolean wasTriggered = false;

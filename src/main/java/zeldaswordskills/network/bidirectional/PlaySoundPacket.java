@@ -31,7 +31,7 @@ import cpw.mods.fml.relauncher.Side;
  * Plays a sound on the client or server side
  *
  */
-public class PlaySoundPacket extends AbstractMessage
+public class PlaySoundPacket extends AbstractMessage<PlaySoundPacket>
 {
 	private String sound;
 

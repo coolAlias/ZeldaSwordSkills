@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Used for ISwingSpeed items to add exhaustion from ZSSCombatEvents#setPlayerAttackTime.
  * 
  */
-public class AddExhaustionPacket extends AbstractServerMessage
+public class AddExhaustionPacket extends AbstractServerMessage<AddExhaustionPacket>
 {
 	private float amount;
 

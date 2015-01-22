@@ -26,7 +26,7 @@ import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import cpw.mods.fml.relauncher.Side;
 
-public class OpenGuiPacket extends AbstractServerMessage
+public class OpenGuiPacket extends AbstractServerMessage<OpenGuiPacket>
 {
 	/** ID of the gui to open; see {@link GuiHandler} for list of valid IDs */
 	private int id;

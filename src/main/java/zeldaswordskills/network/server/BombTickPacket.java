@@ -33,8 +33,8 @@ import cpw.mods.fml.relauncher.Side;
  * knows if a gui is open, but server does not).
  *
  */
-public class BombTickPacket extends AbstractServerMessage {
-
+public class BombTickPacket extends AbstractServerMessage<BombTickPacket>
+{
 	public BombTickPacket() {}
 
 	@Override

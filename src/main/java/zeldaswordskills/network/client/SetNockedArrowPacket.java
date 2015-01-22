@@ -35,7 +35,7 @@ import cpw.mods.fml.relauncher.Side;
  * caused by writing to NBT.
  *
  */
-public class SetNockedArrowPacket extends AbstractClientMessage
+public class SetNockedArrowPacket extends AbstractClientMessage<SetNockedArrowPacket>
 {
 	private ItemStack arrowStack;
 

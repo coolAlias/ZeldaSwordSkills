@@ -35,7 +35,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Send from the server to unpress a key (or all keys) on the client
  *
  */
-public class UnpressKeyPacket extends AbstractClientMessage
+public class UnpressKeyPacket extends AbstractClientMessage<UnpressKeyPacket>
 {
 	@SideOnly(Side.CLIENT)
 	private static Map<Integer, KeyBinding> keyMap;

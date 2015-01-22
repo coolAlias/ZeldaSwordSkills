@@ -36,7 +36,7 @@ import cpw.mods.fml.relauncher.Side;
  * Sent to server when song learned from GUI; for Scarecrow's Song, notes are also sent
  *
  */
-public class LearnSongPacket extends AbstractMessage
+public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 {
 	private ZeldaSong song;
 

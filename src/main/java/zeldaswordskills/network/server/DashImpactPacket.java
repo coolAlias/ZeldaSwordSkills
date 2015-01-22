@@ -46,7 +46,7 @@ import cpw.mods.fml.relauncher.Side;
  * Also need to send the player's motionX and motionZ, as the server values are typically zero.
  *
  */
-public class DashImpactPacket extends AbstractServerMessage
+public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 {
 	/** Stores the type of hit, as a byte (0: None 1: BLOCK 2: ENTITY) */
 	private byte hitType;

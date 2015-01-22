@@ -26,7 +26,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
-public class SyncEntityInfoPacket extends AbstractClientMessage
+public class SyncEntityInfoPacket extends AbstractClientMessage<SyncEntityInfoPacket>
 {
 	/** NBTTagCompound used to store and transfer the Entity's Info */
 	private NBTTagCompound compound;

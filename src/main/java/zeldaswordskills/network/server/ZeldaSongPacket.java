@@ -31,7 +31,7 @@ import cpw.mods.fml.relauncher.Side;
  * perform the actual effects of the song.
  *
  */
-public class ZeldaSongPacket extends AbstractServerMessage
+public class ZeldaSongPacket extends AbstractServerMessage<ZeldaSongPacket>
 {
 	private ZeldaSong song;
 

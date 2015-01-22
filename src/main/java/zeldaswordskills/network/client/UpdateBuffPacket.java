@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Updates a buff on the client side, either adding or removing it from the activeBuffs map
  *
  */
-public class UpdateBuffPacket extends AbstractClientMessage
+public class UpdateBuffPacket extends AbstractClientMessage<UpdateBuffPacket>
 {
 	/** The buff to be applied or removed */
 	private BuffBase buff;

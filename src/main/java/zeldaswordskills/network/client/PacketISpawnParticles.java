@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * all client worlds
  *
  */
-public class PacketISpawnParticles extends AbstractClientMessage
+public class PacketISpawnParticles extends AbstractClientMessage<PacketISpawnParticles>
 {
 	/** The Item class which will spawn the particles; must implement ISpawnParticles */
 	private Item item;

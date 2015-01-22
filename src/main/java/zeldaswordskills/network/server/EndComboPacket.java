@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * directly instead of sending a packet.
  *
  */
-public class EndComboPacket extends AbstractServerMessage
+public class EndComboPacket extends AbstractServerMessage<EndComboPacket>
 {
 	/** Id of skill that implements ICombo */
 	private byte id;

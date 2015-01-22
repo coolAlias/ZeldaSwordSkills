@@ -31,7 +31,7 @@ import cpw.mods.fml.relauncher.Side;
  * Spawns the particles for Naryu's Love on client worlds
  *
  */
-public class SpawnNayruParticlesPacket extends AbstractClientMessage
+public class SpawnNayruParticlesPacket extends AbstractClientMessage<SpawnNayruParticlesPacket>
 {
 	/** Affected player's position */
 	private double x, y, z;

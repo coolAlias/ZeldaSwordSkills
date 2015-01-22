@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.Side;
  * Packet responsible for keeping attack Combos synchronized between server and client.
  *
  */
-public class UpdateComboPacket extends AbstractClientMessage
+public class UpdateComboPacket extends AbstractClientMessage<UpdateComboPacket>
 {
 	/** Stores data of combo to be updated */
 	private NBTTagCompound compound;

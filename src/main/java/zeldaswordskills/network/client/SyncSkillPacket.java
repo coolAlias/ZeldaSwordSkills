@@ -32,7 +32,7 @@ import cpw.mods.fml.relauncher.Side;
  * Synchronizes the client-side version of a skill with the server-side data.
  *
  */
-public class SyncSkillPacket extends AbstractClientMessage
+public class SyncSkillPacket extends AbstractClientMessage<SyncSkillPacket>
 {
 	/** The ID of the skill to update */
 	private byte id;

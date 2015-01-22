@@ -29,8 +29,8 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import cpw.mods.fml.relauncher.Side;
 
-public class GetBombPacket extends AbstractServerMessage {
-
+public class GetBombPacket extends AbstractServerMessage<GetBombPacket>
+{
 	public GetBombPacket() {}
 
 	@Override
