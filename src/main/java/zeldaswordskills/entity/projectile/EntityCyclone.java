@@ -20,6 +20,7 @@ package zeldaswordskills.entity.projectile;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -240,13 +241,12 @@ public class EntityCyclone extends EntityMobThrowable
 	 * Checks for and destroys leaves each update tick
 	 */
 	private void destroyLeaves() {
-		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(worldObj, rand, getArea(), posX, posY, posZ, null));
-		Iterator iterator;
-		ChunkPosition chunkposition;
 		int i, j, k;
-		iterator = affectedBlockPositions.iterator();
+		ChunkPosition chunkposition;
+		Set<ChunkPosition> affectedBlockPositions = WorldUtils.getAffectedBlocksList(worldObj, rand, getArea(), posX, posY, posZ, null);
+		Iterator<ChunkPosition> iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
-			chunkposition = (ChunkPosition)iterator.next();
+			chunkposition = iterator.next();
 			i = chunkposition.chunkPosX;
 			j = chunkposition.chunkPosY;
 			k = chunkposition.chunkPosZ;

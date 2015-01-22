@@ -168,7 +168,7 @@ public class CustomEntityList
 	 * Finds the class using IDtoClassMapping and classToStringMapping
 	 */
 	public static String getStringFromID(int entityID) {
-		Class oclass = getClassFromID(entityID);
+		Class<? extends Entity> oclass = getClassFromID(entityID);
 		return oclass != null ? classToStringMapping.get(oclass) : null;
 	}
 }

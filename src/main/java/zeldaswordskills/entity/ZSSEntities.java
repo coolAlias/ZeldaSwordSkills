@@ -23,7 +23,7 @@ import java.util.Map;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelSquid;
 import net.minecraft.client.renderer.entity.RenderSnowball;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
@@ -108,10 +108,10 @@ public class ZSSEntities
 	public static int getGoronRatio() { return spawnGoron; }
 
 	/** Array of default biomes each mob is allowed to spawn in */
-	private static final Map<Class<? extends Entity>, String[]> defaultSpawnLists = new HashMap<Class<? extends Entity>, String[]>();
+	private static final Map<Class<? extends EntityLiving>, String[]> defaultSpawnLists = new HashMap<Class<? extends EntityLiving>, String[]>();
 
 	/** Map of SpawnableEntityData for each entity class that can spawn naturally */
-	private static final Map<Class<? extends Entity>, SpawnableEntityData> spawnableEntityData = new HashMap<Class<? extends Entity>, SpawnableEntityData>();
+	private static final Map<Class<? extends EntityLiving>, SpawnableEntityData> spawnableEntityData = new HashMap<Class<? extends EntityLiving>, SpawnableEntityData>();
 
 	/**
 	 * Initializes entity spawn rates, spawn locations, and adds spawns.
@@ -134,7 +134,7 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityWizzrobe.class, EnumCreatureType.monster, 1, 1, rate);
 
 		// ALLOWED BIOMES
-		for (Class<? extends Entity> entity : defaultSpawnLists.keySet()) {
+		for (Class<? extends EntityLiving> entity : defaultSpawnLists.keySet()) {
 			String[] defaultBiomes = defaultSpawnLists.get(entity);
 			SpawnableEntityData spawnData = spawnableEntityData.get(entity);
 			if (defaultBiomes != null && spawnData != null && spawnData.spawnRate > 0) {
@@ -166,7 +166,7 @@ public class ZSSEntities
 		}
 	}
 
-	private static void addSpawns(Class entity, String[] biomes, SpawnableEntityData spawnData) {
+	private static void addSpawns(Class<? extends EntityLiving> entity, String[] biomes, SpawnableEntityData spawnData) {
 		for (String name : biomes) {
 			BiomeGenBase biome = getBiomeByName(name);
 			if (biome != null) {
@@ -287,7 +287,7 @@ public class ZSSEntities
 	/**
 	 * Registers a tracked entity with only one variety using the given colors for the spawn egg
 	 */
-	public static void registerEntity(Class entityClass, String name, int modEntityIndex, int trackingRange, int primaryColor, int secondaryColor) {
+	public static void registerEntity(Class<? extends EntityLiving> entityClass, String name, int modEntityIndex, int trackingRange, int primaryColor, int secondaryColor) {
 		EntityRegistry.registerModEntity(entityClass, name, modEntityIndex, ZSSMain.instance, trackingRange, 3, true);
 		CustomEntityList.addMapping(entityClass, name, primaryColor, secondaryColor);
 	}
@@ -295,7 +295,7 @@ public class ZSSEntities
 	/**
 	 * Register an entity as a spawnable entity
 	 */
-	private static void addSpawnableEntityData(Class<? extends Entity> entity, EnumCreatureType creatureType, int min, int max, int spawnRate) {
+	private static void addSpawnableEntityData(Class<? extends EntityLiving> entity, EnumCreatureType creatureType, int min, int max, int spawnRate) {
 		if (spawnableEntityData.containsKey(entity)) {
 			LogHelper.warning("Spawnable entity " + entity.getName().substring(entity.getName().lastIndexOf(".") + 1) + " has already been registered!");
 		} else {
@@ -306,7 +306,7 @@ public class ZSSEntities
 	/**
 	 * Adds default biomes in which the entity is allowed to spawn, if any
 	 */
-	private static void addSpawnLocations(Class<? extends Entity> entity, String... biomes) {
+	private static void addSpawnLocations(Class<? extends EntityLiving> entity, String... biomes) {
 		if (biomes != null && biomes.length > 0) {
 			if (defaultSpawnLists.containsKey(entity)) {
 				LogHelper.warning(entity.getName().substring(entity.getName().lastIndexOf(".") + 1) + " already has an array of default spawn locations!");

@@ -18,6 +18,7 @@
 package zeldaswordskills.skills;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.entity.Entity;
@@ -126,7 +127,7 @@ public class Combo
 	public float getDamage() { return comboDamage; }
 
 	/** Returns a copy of the current damage list */
-	public List<Float> getDamageList() { return new ArrayList(damageList); }
+	public List<Float> getDamageList() { return Collections.unmodifiableList(damageList); }
 
 	/** Returns the last entity directly hit during the combo */
 	public Entity getLastEntityHit() { return lastEntityHit; }

@@ -39,7 +39,7 @@ public abstract class ZSSMapGenBase
 	 * generation, the structure generator can avoid generating structures that intersect ones that have already been
 	 * placed. Each chunk coordinate pair key returns a list of bounding boxes.
 	 */
-	protected Map structureMap = new HashMap();
+	protected Map<Long, Object> structureMap = new HashMap<Long, Object>();
 
 	/** This world object. */
 	protected World worldObj;
@@ -86,7 +86,6 @@ public abstract class ZSSMapGenBase
 				NBTTagCompound compound = roomData.getRoomData();
 				// func_150296_c is getTags()
 				Iterator iterator = compound.func_150296_c().iterator();
-
 				while (iterator.hasNext()) {
 					String s = (String) iterator.next();
 					NBTBase nbtbase = compound.getTag(s);

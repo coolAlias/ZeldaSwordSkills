@@ -18,6 +18,7 @@
 package zeldaswordskills.entity.ai;
 
 import net.minecraft.command.IEntitySelector;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 
@@ -32,15 +33,15 @@ public class EntityAINearestAttackableTargetNight extends EntityAINearestAttacka
 	/** Light level below which task owner will search for targets */
 	private final float minLightLevel;
 
-	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class targetClass, int targetChance, boolean shouldCheckSight, float minLightLevel) {
+	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, float minLightLevel) {
 		this(taskOwner, targetClass, targetChance, shouldCheckSight, false, minLightLevel);
 	}
 
-	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, float minLightLevel) {
+	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, float minLightLevel) {
 		this(taskOwner, targetClass, targetChance, shouldCheckSight, nearbyOnly, null, minLightLevel);
 	}
 
-	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, IEntitySelector targetEntitySelector, float minLightLevel) {
+	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, IEntitySelector targetEntitySelector, float minLightLevel) {
 		super(taskOwner, targetClass, targetChance, shouldCheckSight, nearbyOnly, targetEntitySelector);
 		this.minLightLevel = minLightLevel;
 	}

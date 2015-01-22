@@ -286,8 +286,8 @@ public class WorldUtils
 	/**
 	 * Returns a list of all Tile Entities matching the class given within the bounding box
 	 */
-	public static List getTileEntitiesWithinAABB(World world, Class clazz, AxisAlignedBB aabb) {
-		ArrayList list = new ArrayList();
+	public static <T extends TileEntity> List<T> getTileEntitiesWithinAABB(World world, Class<T> clazz, AxisAlignedBB aabb) {
+		List<T> list = new ArrayList<T>();
 		int minX = MathHelper.floor_double(aabb.minX - World.MAX_ENTITY_RADIUS);
 		int maxX = MathHelper.floor_double(aabb.maxX + World.MAX_ENTITY_RADIUS);
 		int minY = MathHelper.floor_double(aabb.minY - World.MAX_ENTITY_RADIUS);
@@ -297,13 +297,12 @@ public class WorldUtils
 		if (!world.checkChunksExist(minX, minY, minZ, maxX, maxY, maxZ)) {
 			return list;
 		}
-
 		for (int i = minX; i <= maxX; ++i) {
 			for (int j = minY; j <= maxY; ++j) {
 				for (int k = minZ; k <= maxZ; ++k) {
 					TileEntity te = world.getTileEntity(i, j, k);
 					if (te != null && clazz.isAssignableFrom(te.getClass())) {
-						list.add(te);
+						list.add((T) te);
 					}
 				}
 			}

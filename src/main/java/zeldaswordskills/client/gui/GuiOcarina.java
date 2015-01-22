@@ -168,7 +168,7 @@ public class GuiOcarina extends GuiMusicBase
 			if (song != null) { // indicates player knows the song
 				mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
 				if (song == ZeldaSong.SCARECROW_SONG) {
-					scarecrowNotes = new ArrayList(melody);
+					scarecrowNotes = new ArrayList<SongNote>(melody);
 					ticksSinceLastNote = 0;
 				} else {
 					PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
