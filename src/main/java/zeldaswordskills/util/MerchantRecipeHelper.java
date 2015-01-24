@@ -33,9 +33,9 @@ public class MerchantRecipeHelper {
 	 * This method uses vanilla ItemStack.areItemStacksEqual, so it should be NBT sensitive as well
 	 * @return always returns true if the recipe is null
 	 */
-	public static boolean doesListContain(MerchantRecipeList list, MerchantRecipe recipe) {
-		for (int i = 0; i < list.size() && recipe != null; ++i) {
-			MerchantRecipe recipe1 = (MerchantRecipe) list.get(i);
+	public static boolean doesListContain(MerchantRecipeList trades, MerchantRecipe recipe) {
+		for (int i = 0; i < trades.size() && recipe != null; ++i) {
+			MerchantRecipe recipe1 = (MerchantRecipe) trades.get(i);
 			if (ItemStack.areItemStacksEqual(recipe.getItemToBuy(), recipe1.getItemToBuy())) {
 				if (ItemStack.areItemStacksEqual(recipe.getSecondItemToBuy(), recipe1.getSecondItemToBuy())) {
 					if (ItemStack.areItemStacksEqual(recipe.getItemToSell(), recipe1.getItemToSell())) {
@@ -70,9 +70,9 @@ public class MerchantRecipeHelper {
 	 * Adds a trade to the merchant's list only if a similar trade does not already exist
 	 * @return	True if the trade was added, false if the trade was already present
 	 */
-	public static boolean addUniqueTrade(MerchantRecipeList list, MerchantRecipe trade) {
-		if (!doesListContain(list, trade)) {
-			list.add(trade);
+	public static boolean addUniqueTrade(MerchantRecipeList trades, MerchantRecipe trade) {
+		if (!doesListContain(trades, trade)) {
+			trades.add(trade);
 			return true;
 		}
 		return false;
@@ -82,8 +82,8 @@ public class MerchantRecipeHelper {
 	 * Shortcut method to attempt adding a trade without replacing a currently existing trade
 	 * @return returns true if the new trade was added
 	 */
-	public static boolean addToListWithCheck(MerchantRecipeList list, MerchantRecipe trade) {
-		return addToListWithCheck(list, trade, false);
+	public static boolean addToListWithCheck(MerchantRecipeList trades, MerchantRecipe trade) {
+		return addToListWithCheck(trades, trade, false);
 	}
 
 	/**
@@ -91,19 +91,18 @@ public class MerchantRecipeHelper {
 	 * stack sizes) doesn't already exist, or if 'replaceExistingTrade' is true.
 	 * @return returns true if the new trade was added or replaced a current trade
 	 */
-	public static boolean addToListWithCheck(MerchantRecipeList list, MerchantRecipe trade, boolean replaceExistingTrade) {
-		for (int i = 0; i < list.size(); ++i) {
-			MerchantRecipe merchantrecipe1 = (MerchantRecipe) list.get(i);
+	public static boolean addToListWithCheck(MerchantRecipeList trades, MerchantRecipe trade, boolean replaceExistingTrade) {
+		for (int i = 0; i < trades.size(); ++i) {
+			MerchantRecipe merchantrecipe1 = (MerchantRecipe) trades.get(i);
 			if (haveSameTradeItems(trade, merchantrecipe1)) {
 				if (replaceExistingTrade) {
-					list.set(i, trade);
+					trades.set(i, trade);
 					return true;
 				}
 				return false;
 			}
 		}
-
-		list.add(trade);
+		trades.add(trade);
 		return true;
 	}
 
