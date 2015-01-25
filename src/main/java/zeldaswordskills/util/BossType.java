@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.config.Configuration;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -137,9 +138,9 @@ public enum BossType
 			}
 			biome = biome.toLowerCase().replace(" ", "");
 			if (!BiomeType.isRealBiome(biome)) {
-				LogHelper.warning(biome + " is not a recognized biome! This entry will be ignored for BossType " + type.getDisplayName());
+				ZSSMain.logger.warn(String.format("%s is not a recognized biome! This entry will be ignored for BossType %s", biome, type.getDisplayName()));
 			} else if (bossBiomeList.containsKey(biome)) {
-				LogHelper.warning("Error while adding " + biome + " for " + type.getDisplayName() + ": biome already mapped to " + bossBiomeList.get(biome).getDisplayName());
+				ZSSMain.logger.warn(String.format("Error while adding %s for %s: biome already mapped to %s", biome, type.getDisplayName(), bossBiomeList.get(biome).getDisplayName()));
 			} else {
 				bossBiomeList.put(biome, type);
 			}
@@ -164,7 +165,7 @@ public enum BossType
 	public static BossType getBossType(World world, int x, int z) {
 		BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
 		if (biome == null) {
-			LogHelper.warning("Null biome at " + x + "/" + z + " while getting Boss Type");
+			ZSSMain.logger.warn(String.format("Null biome at %d/%d while getting Boss Type", x, z));
 			return null;
 		}
 		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
@@ -260,7 +261,7 @@ public enum BossType
 	@SuppressWarnings("finally")
 	public final BossBattle getBossBattle(TileEntityDungeonCore core) {
 		if (bossBattle == null) {
-			LogHelper.warning("Error retrieving boss battle event for " + toString());
+			ZSSMain.logger.error("Error retrieving boss battle event for " + toString());
 			return null;
 		}
 		BossBattle battle = null;
@@ -289,7 +290,7 @@ public enum BossType
 	@SuppressWarnings("finally")
 	public final Entity getNewMob(World world) {
 		if (bossMob == null) {
-			LogHelper.warning("Error retrieving boss mob for " + toString());
+			ZSSMain.logger.error("Error retrieving boss mob for " + toString());
 			return null;
 		}
 		Entity entity = null;

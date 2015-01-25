@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BossType;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -49,7 +48,7 @@ public class AntiqueAtlasHelper
 			try {
 				AtlasAPI.getTileAPI().putCustomTile(world, world.provider.dimensionId, tileName, chunkX, chunkZ);
 			} catch (Exception e) {
-				LogHelper.warning("Unable to add Atlas data: " + e.getLocalizedMessage());
+				ZSSMain.logger.error("Unable to add Atlas data: " + e.getLocalizedMessage());
 			}
 		}
 	}
@@ -67,7 +66,7 @@ public class AntiqueAtlasHelper
 					AtlasAPI.getTileAPI().setTextureIfNone(name + "_fin", new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + "_fin.png"));
 				}
 			} catch (Exception e) {
-				LogHelper.warning(e.getLocalizedMessage());
+				ZSSMain.logger.error(e.getLocalizedMessage());
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,8 +26,8 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;
 
 /**
@@ -65,7 +65,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		}
 
 		if (roomList.tagCount() > 0) {
-			LogHelper.finer("roomList for chunk " + chunkX + "/" + chunkZ + " contains " + roomList.tagCount() + " elements");
+			ZSSMain.logger.trace(String.format("roomList for chunk %d/%d contains %d elements", chunkX, chunkZ, roomList.tagCount()));
 			NBTTagCompound compound = new NBTTagCompound();
 			compound.setTag("roomList", roomList);
 			addRoomTag(compound, chunkX, chunkZ);
@@ -101,7 +101,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 			NBTTagList roomList = compound.getTagList("roomList", compound.getId());
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), roomList);
 		} else {
-			LogHelper.warning("Failed to translate NBT compound into structure map");
+			ZSSMain.logger.warn("Failed to translate NBT compound into structure map");
 		}
 	}
 
@@ -181,7 +181,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 					}
 				}
 			} else {
-				LogHelper.warning("Invalid tag while checking for structures in chunk " + chunkX + "/" + chunkZ);
+				ZSSMain.logger.warn("Invalid tag while checking for structures in chunk " + chunkX + "/" + chunkZ);
 			}
 		}
 

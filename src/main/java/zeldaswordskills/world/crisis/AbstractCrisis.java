@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package zeldaswordskills.world.crisis;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import zeldaswordskills.util.LogHelper;
+import zeldaswordskills.ZSSMain;
 
 /**
  * 
@@ -34,6 +34,7 @@ public abstract class AbstractCrisis
 {
 	/** Event timer; when it reaches zero, the crisis is finished */
 	protected int eventTimer = 0;
+
 	/** Crisis update tick will be called when eventTimer reaches this value */
 	protected int nextTick = 0;
 
@@ -49,7 +50,7 @@ public abstract class AbstractCrisis
 	 */
 	protected final void scheduleUpdateTick(int n) {
 		if (n < 0) {
-			LogHelper.warning("Oops! Scheduling a crisis tick with n less than zero.");
+			ZSSMain.logger.warn("Oops! Scheduling a crisis tick with n less than zero.");
 		}
 		nextTick = (n > 0 ? eventTimer - n : 0);
 	}
@@ -61,20 +62,18 @@ public abstract class AbstractCrisis
 		if (eventTimer > 0) {
 			--eventTimer;
 			if (eventTimer % 20 == 0 && canCrisisConclude(world)) {
-				//LogHelper.log(Level.INFO, "Crisis can conclude before time is up! Currently on " + (world.isRemote ? "client" : "server"));
 				eventTimer = 0;
 			} else if (eventTimer < 40) {
 				eventTimer += 40;
 			}
 			if (eventTimer == 0) {
-				//LogHelper.log(Level.INFO, "Crisis timed out: ending crisis on " + (world.isRemote ? "client" : "server"));
 				endCrisis(world);
 				eventTimer = -1;
 			} else if (eventTimer == nextTick) {
 				onUpdateTick(world);
 			}
 		} else {
-			LogHelper.warning("Unexpected timer value: crisis terminated but not handled");
+			ZSSMain.logger.warn("Unexpected timer value: crisis terminated but not handled");
 			eventTimer = -1;
 		}
 	}

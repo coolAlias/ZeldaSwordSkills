@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,11 +21,11 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -60,7 +60,7 @@ public class DeactivateSkillPacket extends AbstractMessage<DeactivateSkillPacket
 		if (skill instanceof SkillActive) {
 			((SkillActive) skill).deactivate(player);
 		} else {
-			LogHelper.warning("Error processing DeactivateSkillPacket for " + player + "; skill with ID " + skillId + " was not valid for this player.");
+			ZSSMain.logger.error(String.format("Skill with ID %d was not valid for %s while processing DeactivateSkillPacket", skillId, player));
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.block.ZSSBlocks;
@@ -34,7 +35,6 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo.Stats;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BossType;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.world.crisis.BossBattle;
 import zeldaswordskills.world.gen.feature.FairySpawner;
@@ -163,7 +163,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		}
 		if (isBossRoom && bossBattle == null) {
 			if (box == null) {
-				LogHelper.warning("Boss room at " + xCoord + "/" + yCoord + "/" + zCoord + " missing structure bounding box - dungeon is being disabled");
+				ZSSMain.logger.warn(String.format("Boss room at %d/%d/%d missing structure bounding box - dungeon is being disabled", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				removeCoreBlock();
 			} else {
@@ -312,7 +312,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		case RoomBoss.NORTH: z = box.minZ; break;
 		case RoomBoss.EAST: x = box.maxX; break;
 		case RoomBoss.WEST: x = box.minX; break;
-		default: LogHelper.warning("Verifying door in Dungeon Core with invalid door side at " + xCoord + "/" + yCoord + "/" + zCoord);
+		default: ZSSMain.logger.warn(String.format("Verifying door in Dungeon Core with invalid door side at %d/%d/%d", xCoord, yCoord, zCoord));
 		}
 		for (int y = box.minY; y < box.maxY; ++y) {
 			if (worldObj.getBlock(x, y, z) == door) {
@@ -433,7 +433,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				dungeonType = BossType.getBossType(tag.getString("dungeonName"));
 			} else {
 				// TODO remove after all previous worlds update to String storage:
-				LogHelper.warning(String.format("Detected old boss dungeon save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
+				ZSSMain.logger.warn(String.format("Detected old boss dungeon save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
 				dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
 			}
 			isOpened = tag.getBoolean("isOpened");
@@ -442,7 +442,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				if (bossBattle != null) {
 					bossBattle.readFromNBT(tag);
 				} else {
-					LogHelper.warning(String.format("Error retrieving Boss Battle while loading Dungeon Core from NBT at %d/%d/%d - returned NULL", xCoord, yCoord, zCoord));
+					ZSSMain.logger.warn(String.format("Error retrieving Boss Battle while loading Dungeon Core from NBT at %d/%d/%d - returned NULL", xCoord, yCoord, zCoord));
 				}
 			}
 		}
@@ -453,7 +453,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		}
 		// TODO workaround for backwards compatibility:
 		if (tag.getBoolean("isSpawner")) {
-			LogHelper.info(String.format("Detected old fairy spawner save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
+			ZSSMain.logger.warn(String.format("Detected old fairy spawner save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
 			NBTTagCompound spawnerData = new NBTTagCompound();
 			spawnerData.setInteger("maxFairies", tag.getInteger("maxFairies"));
 			spawnerData.setInteger("spawned", tag.getInteger("spawned"));

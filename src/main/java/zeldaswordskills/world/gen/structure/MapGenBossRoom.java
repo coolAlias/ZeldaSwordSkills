@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,10 +25,10 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BossType;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
@@ -128,7 +128,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), bossType);
 			//LogHelper.finer("Loaded roomList data for chunk " + i + "/" + j);
 		} else {
-			LogHelper.warning("Failed to translate Boss Room NBT compound into structure map");
+			ZSSMain.logger.warn("Failed to translate Boss Room NBT compound into structure map");
 		}
 	}
 

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.config.Configuration;
+import zeldaswordskills.ZSSMain;
 
 /**
  * 
@@ -81,9 +82,9 @@ public enum BiomeType {
 			}
 			biome = biome.toLowerCase().replace(" ", "");
 			if (!isRealBiome(biome)) {
-				LogHelper.warning(biome + " is not a recognized biome! This entry will be ignored for BiomeType " + type.toString());
+				ZSSMain.logger.warn(String.format("%s is not a recognized biome! This entry will be ignored for BiomeType %s", biome, type.toString()));
 			} else if (biomeTypeList.containsKey(biome)) {
-				LogHelper.warning("Error while adding " + biome + " for " + type.toString() + ": biome already mapped to " + biomeTypeList.get(biome).toString());
+				ZSSMain.logger.warn(String.format("Error while adding %s for %s: biome already mapped to %s", biome, type.toString(), biomeTypeList.get(biome).toString()));
 			} else {
 				biomeTypeList.put(biome, type);
 			}

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,10 @@
 package zeldaswordskills;
 
 import net.minecraftforge.common.MinecraftForge;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.command.ZSSCommands;
 import zeldaswordskills.entity.ZSSEntities;
@@ -32,7 +36,6 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
@@ -65,6 +68,8 @@ public class ZSSMain
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
 	public static CommonProxy proxy;
 
+	public static final Logger logger = LogManager.getLogger(ModInfo.ID);
+
 	/** Helper class for registering custom tiles with Antique Atlas mod if loaded */
 	public static AntiqueAtlasHelper atlasHelper = new AntiqueAtlasHelper();
 	/** Whether Antique Atlas mod is loaded */
@@ -74,7 +79,6 @@ public class ZSSMain
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		LogHelper.preInit();
 		Config.preInit(event);
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");

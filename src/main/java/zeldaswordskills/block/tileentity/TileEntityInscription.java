@@ -32,7 +32,6 @@ import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 
 public class TileEntityInscription extends TileEntity
@@ -57,7 +56,7 @@ public class TileEntityInscription extends TileEntity
 	 */
 	public void setSong(AbstractZeldaSong song) {
 		if (song != null && !song.canLearnFromInscription()) {
-			LogHelper.warning(song.getDisplayName() + " cannot be learned from inscriptions; coordinates: " + xCoord + "/" + yCoord + "/" + zCoord);
+			ZSSMain.logger.warn(String.format("%s cannot be learned from inscriptions; coordinates: %d/%d/%d", song.getDisplayName(), xCoord, yCoord, zCoord));
 			return;
 		}
 		this.song = song;
@@ -89,7 +88,7 @@ public class TileEntityInscription extends TileEntity
 	 */
 	public boolean onActivated(EntityPlayer player) {
 		if (song == null) {
-			LogHelper.warning("TileEntityInscription at " + xCoord + "/" + yCoord + "/" + zCoord + " is not valid! Is client? " + worldObj.isRemote);
+			ZSSMain.logger.warn(String.format("TileEntityInscription at %d/%d/%d does not have a valid song!", xCoord, yCoord, zCoord));
 			return false;
 		}
 		ItemStack stack = player.getHeldItem();

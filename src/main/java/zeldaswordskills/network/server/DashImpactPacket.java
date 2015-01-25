@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,11 +24,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Dash;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -93,7 +93,7 @@ public class DashImpactPacket extends AbstractServerMessage<DashImpactPacket>
 				if (entityHit != null) {
 					mop = new MovingObjectPosition(entityHit);
 				} else {
-					LogHelper.warning("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
+					ZSSMain.logger.warn("Could not retrieve valid entity for MovingObjectPosition while handling Dash Packet!");
 				}
 			}
 			dash.onImpact(player.worldObj, player, mop);

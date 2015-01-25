@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,9 @@ package zeldaswordskills.entity.buff;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.UpdateBuffPacket;
-import zeldaswordskills.util.LogHelper;
 
 /**
  * 
@@ -94,7 +94,7 @@ public class BuffBase
 	 */
 	public void combine(BuffBase newBuff) {
 		if (newBuff.buff != this.buff) {
-			LogHelper.warning("Combining two buffs of different types should be impossible!");
+			ZSSMain.logger.warn("Combining two buffs of different types should be impossible!");
 		} else if (this.isPermanent()) {
 			// can't combine permanent effects
 		} else if (newBuff.amplifier > this.amplifier) {

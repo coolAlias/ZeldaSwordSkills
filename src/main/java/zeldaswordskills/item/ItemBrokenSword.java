@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -39,13 +39,13 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -81,7 +81,7 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 			MerchantRecipeList trades = villager.getRecipes(player);
 			Item brokenItem = Item.getItemById(stack.getItemDamage());
 			if (!(brokenItem instanceof ItemSword) || (brokenItem instanceof ItemZeldaSword && !((ItemZeldaSword) brokenItem).givesBrokenItem)) {
-				LogHelper.warning("Broken sword contained an invalid item: " + brokenItem + "; defaulting to Ordon Sword");
+				ZSSMain.logger.warn("Broken sword contained an invalid item: " + brokenItem + "; defaulting to Ordon Sword");
 				brokenItem = ZSSItems.swordOrdon;
 			}
 			if (villager.getProfession() == 3 || isGoron) {

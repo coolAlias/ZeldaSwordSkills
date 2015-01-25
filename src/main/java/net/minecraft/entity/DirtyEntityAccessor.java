@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package net.minecraft.entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import zeldaswordskills.util.LogHelper;
+import zeldaswordskills.ZSSMain;
 
 public class DirtyEntityAccessor {
 
@@ -69,7 +69,7 @@ public class DirtyEntityAccessor {
 				((EntityPlayer) entity).eyeHeight = ((EntityPlayer) entity).getDefaultEyeHeight();
 			}
 		} else {
-			LogHelper.warning("Attempted to restore original size without any available data");
+			ZSSMain.logger.warn("Attempted to restore original size without any available data");
 		}
 	}
 }

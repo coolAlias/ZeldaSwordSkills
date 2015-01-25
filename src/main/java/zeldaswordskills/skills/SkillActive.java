@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.bidirectional.DeactivateSkillPacket;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -201,7 +201,7 @@ public abstract class SkillActive extends SkillBase
 		if (isActive()) {
 			onDeactivated(player.worldObj, player);
 			if (isActive()) {
-				LogHelper.severe(getDisplayName() + " is still active after onDeactivated called - this may result in SEVERE errors or even crashes!!!");
+				ZSSMain.logger.error(getDisplayName() + " is still active after onDeactivated called - this may result in SEVERE errors or even crashes!!!");
 			} else if (player.worldObj.isRemote) {
 				PacketDispatcher.sendToServer(new DeactivateSkillPacket(this));
 			} else {

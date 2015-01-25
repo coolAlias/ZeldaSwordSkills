@@ -23,11 +23,11 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.AbstractMessage;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.SongNote;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -67,7 +67,7 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 		String s = ByteBufUtils.readUTF8String(buffer);
 		song = ZeldaSongs.getSongByName(s);
 		if (song == null) {
-			LogHelper.severe("Invalid song name '" + s + "' read from packet!");
+			ZSSMain.logger.error("Invalid song name '" + s + "' read from packet!");
 		}
 		int n = buffer.readByte();
 		notes = (n > 0 ? new ArrayList<SongNote>() : null);

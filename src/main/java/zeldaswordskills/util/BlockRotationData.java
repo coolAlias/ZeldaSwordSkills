@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import zeldaswordskills.ZSSMain;
 
 public class BlockRotationData
 {
@@ -108,7 +109,7 @@ public class BlockRotationData
 	 */
 	public static final boolean registerCustomBlockRotation(Block block, Rotation rotationType, boolean override) {
 		if (blockRotationData.containsKey(block)) {
-			LogHelper.warning("Block " + block + " already has a rotation type." + (override ? " Overriding previous data." : ""));
+			ZSSMain.logger.warn("Block " + block + " already has a rotation type." + (override ? " Overriding previous data." : ""));
 			if (override) {
 				blockRotationData.remove(block);
 			} else {

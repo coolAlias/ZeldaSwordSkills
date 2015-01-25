@@ -39,7 +39,6 @@ import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
@@ -115,7 +114,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 					songs.songToLearn = song;
 					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, x, y, z);
 				} else {
-					LogHelper.warning("Warp stone at " + x + "/" + y + "/" + z + " had invalid metadata: did not return a song!");
+					ZSSMain.logger.warn(String.format("Warp stone at %d/%d/%d had invalid metadata: did not return a song!", x, y, z));
 				}
 			}
 			return true;

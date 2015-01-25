@@ -27,10 +27,10 @@ import java.util.Map;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.SongNote;
 
 public final class ZeldaSongs
@@ -104,13 +104,13 @@ public final class ZeldaSongs
 	 */
 	public static void register(AbstractZeldaSong song) {
 		if (songNames.contains(song.getUnlocalizedName()) || songMap.containsKey(song.getUnlocalizedName())) {
-			LogHelper.warning("Failed to register " + song.getUnlocalizedName() + ": Unlocalized name must be unique.");
+			ZSSMain.logger.warn(String.format("Failed to register %s: Unlocalized name must be unique.", song.getUnlocalizedName()));
 		} else if (!ZeldaSongs.areNotesUnique(song.getNotes())) {
-			LogHelper.warning("Failed to register " + song.getUnlocalizedName() + ": Notes provided are not unique " + song.getNotes());
+			ZSSMain.logger.warn(String.format("Failed to register %s: Notes provided are not unique %s", song.getUnlocalizedName(), song.getNotes()));
 		} else {
 			songNames.add(song.getUnlocalizedName());
 			songMap.put(song.getUnlocalizedName(), song);
-			LogHelper.info("Registered " + song.getDisplayName() + " as '" + song.getUnlocalizedName() + "' with notes " + song.getNotes());
+			ZSSMain.logger.info(String.format("Registered %s as '%s' with notes %s", song.getDisplayName(), song.getUnlocalizedName(), song.getNotes()));
 		}
 	}
 

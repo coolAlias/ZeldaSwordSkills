@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.CustomEntityList;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -101,10 +101,11 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List itemList) {
 		List<Integer> colors = CustomEntityList.entityEggs.get(classToSpawn);
-		if (colors.isEmpty()) {
-			LogHelper.warning("Custom entity egg has an empty color list");
+		if (colors == null || colors.isEmpty()) {
+			ZSSMain.logger.error("Custom entity egg has an empty color list");
+			return;
 		} else if (colors.size() % 2 != 0) {
-			LogHelper.warning("Custom entity egg has an odd number of colors");
+			ZSSMain.logger.error("Custom entity egg has an odd number of colors");
 		}
 		for (int i = 0; i < (colors.size() / 2); ++i) {
 			itemList.add(new ItemStack(item, 1, i));

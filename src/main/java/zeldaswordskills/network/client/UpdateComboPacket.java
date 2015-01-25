@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,11 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -65,7 +65,7 @@ public class UpdateComboPacket extends AbstractClientMessage<UpdateComboPacket>
 				skill.setCombo(combo);
 			}
 		} catch (ClassCastException e) {
-			LogHelper.warning("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
+			ZSSMain.logger.error("Class Cast Exception from invalid Combo skill id of " + combo.getSkill());
 		}
 	}
 }

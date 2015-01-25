@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -93,7 +93,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.LibPotionID;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BiomeType;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.SpawnableEntityData;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
@@ -172,7 +171,7 @@ public class ZSSEntities
 			if (biome != null) {
 				EntityRegistry.addSpawn(entity, spawnData.spawnRate, spawnData.min, spawnData.max, spawnData.creatureType, biome);
 			} else {
-				LogHelper.warning("Unable to find matching biome for " + name + " while adding spawns for entity " + entity.getName().substring(entity.getName().lastIndexOf(".") + 1));
+				ZSSMain.logger.warn(String.format("Unable to find matching biome for %s while adding spawns for %s!", name, entity.getName().substring(entity.getName().lastIndexOf(".") + 1)));
 			}
 		}
 	}
@@ -297,7 +296,7 @@ public class ZSSEntities
 	 */
 	private static void addSpawnableEntityData(Class<? extends EntityLiving> entity, EnumCreatureType creatureType, int min, int max, int spawnRate) {
 		if (spawnableEntityData.containsKey(entity)) {
-			LogHelper.warning("Spawnable entity " + entity.getName().substring(entity.getName().lastIndexOf(".") + 1) + " has already been registered!");
+			ZSSMain.logger.warn("Spawnable entity " + entity.getName().substring(entity.getName().lastIndexOf(".") + 1) + " has already been registered!");
 		} else {
 			spawnableEntityData.put(entity, new SpawnableEntityData(creatureType, min, max, spawnRate));
 		}
@@ -309,7 +308,7 @@ public class ZSSEntities
 	private static void addSpawnLocations(Class<? extends EntityLiving> entity, String... biomes) {
 		if (biomes != null && biomes.length > 0) {
 			if (defaultSpawnLists.containsKey(entity)) {
-				LogHelper.warning(entity.getName().substring(entity.getName().lastIndexOf(".") + 1) + " already has an array of default spawn locations!");
+				ZSSMain.logger.warn(entity.getName().substring(entity.getName().lastIndexOf(".") + 1) + " already has an array of default spawn locations!");
 			} else {
 				defaultSpawnLists.put(entity, biomes);
 			}

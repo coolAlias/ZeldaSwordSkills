@@ -34,6 +34,7 @@ import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.LearnSongPacket;
@@ -41,7 +42,6 @@ import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.WarpPoint;
@@ -106,7 +106,7 @@ public class ZSSPlayerSongs
 			return false;
 		} else if (song == ZeldaSongs.songScarecrow) {
 			if (notes == null || notes.size() != 8 || !ZeldaSongs.areNotesUnique(notes)) {
-				LogHelper.warning("Trying to add Scarecrow's Song with invalid list: " + notes);
+				ZSSMain.logger.warn("Trying to add Scarecrow's Song with invalid list: " + notes);
 				return false;
 			}
 			// first time add notes only
@@ -302,7 +302,7 @@ public class ZSSPlayerSongs
 					warpTag.setInteger("WarpKey", i);
 					warpList.appendTag(warpTag);
 				} else {
-					LogHelper.warning("NULL warp point stored in map with key " + i);
+					ZSSMain.logger.warn("NULL warp point stored in map with key " + i);
 				}
 			}
 			compound.setTag("WarpList", warpList);
@@ -337,7 +337,7 @@ public class ZSSPlayerSongs
 					scarecrowNotes.add(SongNote.values()[n]);
 				}
 			} catch (Exception e) {
-				LogHelper.warning("Exception thrown while loading Scarecrow's Song notes: " + e.getMessage());
+				ZSSMain.logger.error("Exception thrown while loading Scarecrow's Song notes: " + e.getMessage());
 			}
 		}
 

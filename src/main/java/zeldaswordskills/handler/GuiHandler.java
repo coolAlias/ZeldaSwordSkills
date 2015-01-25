@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.client.gui.GuiLearnSong;
 import zeldaswordskills.client.gui.GuiMaskTrader;
@@ -30,7 +31,6 @@ import zeldaswordskills.client.gui.GuiSkills;
 import zeldaswordskills.inventory.ContainerMaskTrader;
 import zeldaswordskills.inventory.ContainerPedestal;
 import zeldaswordskills.inventory.ContainerSkills;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler
@@ -81,7 +81,7 @@ public class GuiHandler implements IGuiHandler
 			try {
 				return new GuiLearnSong(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 			} catch (IllegalArgumentException e) {
-				LogHelper.warning(e.getMessage());
+				ZSSMain.logger.error(e.getMessage());
 				return null;
 			}
 		}

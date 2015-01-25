@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import java.util.Map;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import zeldaswordskills.util.LogHelper;
+import zeldaswordskills.ZSSMain;
 
 /**
  * 
@@ -85,7 +85,7 @@ public class CustomEntityList
 		} else if (!IDtoClassMapping.containsKey(entitiesAdded)) {
 			return entitiesAdded++;
 		} else {
-			LogHelper.warning("ID Conflict: Entity ID " + entitiesAdded + " already taken while getting ID for entity of class " + oclass);
+			ZSSMain.logger.warn(String.format("ID Conflict: Entity ID %d already taken while getting ID for entity of class %s", entitiesAdded, oclass));
 			while (IDtoClassMapping.containsKey(entitiesAdded)) {
 				++entitiesAdded;
 			}
@@ -109,12 +109,12 @@ public class CustomEntityList
 			try {
 				entity.readFromNBT(compound);
 			} catch (Exception e) {
-				LogHelper.severe(String.format("An Entity %s has thrown an exception during loading, its state cannot be restored. Report this to the mod author", compound.getString("id")));
+				ZSSMain.logger.error(String.format("An Entity %s has thrown an exception during loading, its state cannot be restored. Report this to the mod author", compound.getString("id")));
 				e.printStackTrace();
 				entity = null;
 			}
 		} else {
-			LogHelper.warning("Skipping Entity with id " + compound.getString("id"));
+			ZSSMain.logger.warn("Skipping Entity with id " + compound.getString("id"));
 		}
 
 		return entity;

@@ -68,7 +68,6 @@ import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.world.gen.structure.LinksHouse;
 import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -86,7 +85,7 @@ public class ZSSItems
 			if (itemList.containsKey(a) && itemList.containsKey(b)) {
 				return itemList.get(a) - itemList.get(b);
 			} else {
-				LogHelper.warning("A mod item " + a.getUnlocalizedName() + " or " + b.getUnlocalizedName() + " is missing a comparator mapping");
+				ZSSMain.logger.warn("A mod item " + a.getUnlocalizedName() + " or " + b.getUnlocalizedName() + " is missing a comparator mapping");
 				return GameData.getItemRegistry().getId(a) - GameData.getItemRegistry().getId(b);
 			}
 		}
@@ -570,7 +569,7 @@ public class ZSSItems
 		if (block instanceof ItemBlock) {
 			itemList.put(block, sortId++);
 		} else {
-			LogHelper.warning("Tried to register a non-ItemBlock item for " + block.getUnlocalizedName());
+			ZSSMain.logger.warn("Tried to register a non-ItemBlock item for " + block.getUnlocalizedName());
 		}
 	}
 

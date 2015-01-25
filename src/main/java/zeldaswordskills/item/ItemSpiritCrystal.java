@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
@@ -49,7 +50,6 @@ import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -135,7 +135,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 			case BlockSacredFlame.DIN: cost = handleDin(stack, world, player); break;
 			case BlockSacredFlame.FARORE: cost = handleFarore(stack, world, player); break;
 			case BlockSacredFlame.NAYRU: break;
-			default: LogHelper.warning("Invalid spirit type " + spiritType + " while using spirit crystal");
+			default: ZSSMain.logger.warn("Invalid spirit type " + spiritType + " while using spirit crystal");
 			}
 
 			if (damageStack(stack, player, cost)) {
@@ -206,15 +206,13 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	 * Affects all blocks in the radius with the effects of Din's Fire
 	 */
 	private void affectDinBlocks(World world, EntityPlayer player, float radius) {
-		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, null));
-		Iterator iterator;
-		ChunkPosition chunkposition;
+		List<ChunkPosition> affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, null));
 		int i, j, k;
 		Block block;
-
-		iterator = affectedBlockPositions.iterator();
+		ChunkPosition chunkposition;
+		Iterator<ChunkPosition> iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
-			chunkposition = (ChunkPosition)iterator.next();
+			chunkposition = iterator.next();
 			i = chunkposition.chunkPosX;
 			j = chunkposition.chunkPosY;
 			k = chunkposition.chunkPosZ;
@@ -242,12 +240,11 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		int l1 = MathHelper.floor_double(player.posY + (double) radius + 1.0D);
 		int i2 = MathHelper.floor_double(player.posZ - (double) radius - 1.0D);
 		int j2 = MathHelper.floor_double(player.posZ + (double) radius + 1.0D);
-		List list = world.getEntitiesWithinAABBExcludingEntity(player, AxisAlignedBB.getBoundingBox((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
+		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(player, AxisAlignedBB.getBoundingBox((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
 		Vec3 vec3 = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
 
-		for (int k2 = 0; k2 < list.size(); ++k2)
-		{
-			Entity entity = (Entity) list.get(k2);
+		for (int k2 = 0; k2 < list.size(); ++k2) {
+			Entity entity = list.get(k2);
 			double d0 = entity.posX - player.posX;
 			double d1 = entity.posY + (double) entity.getEyeHeight() - player.posY;
 			double d2 = entity.posZ - player.posZ;

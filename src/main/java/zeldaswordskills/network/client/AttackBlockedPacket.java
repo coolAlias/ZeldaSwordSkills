@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,9 +22,9 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 
 public class AttackBlockedPacket extends AbstractClientMessage<AttackBlockedPacket>
@@ -51,7 +51,7 @@ public class AttackBlockedPacket extends AbstractClientMessage<AttackBlockedPack
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		if (shield == null) {
-			LogHelper.severe("Shield stack was NULL while handling " + getClass().getSimpleName());
+			ZSSMain.logger.error("Shield stack was NULL while handling " + getClass().getSimpleName());
 		} else {
 			ZSSPlayerInfo.get(player).onAttackBlocked(shield, 0.0F);
 		}

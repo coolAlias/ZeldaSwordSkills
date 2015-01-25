@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.BossType;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 
@@ -252,7 +252,7 @@ public class RoomBoss extends RoomBase
 		case NORTH: z = bBox.minZ; break;
 		case EAST: x = bBox.maxX; break;
 		case WEST: x = bBox.minX; break;
-		default: LogHelper.warning("Placing Boss door with invalid door side");
+		default: ZSSMain.logger.warn("Placing Boss door with invalid door side");
 		}
 
 		world.setBlock(x, y, z, ZSSBlocks.doorLocked, type.ordinal() & ~0x8, 2);

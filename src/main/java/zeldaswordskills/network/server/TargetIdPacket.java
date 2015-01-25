@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,11 @@ import java.io.IOException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -89,7 +89,7 @@ public class TargetIdPacket extends AbstractServerMessage<TargetIdPacket>
 				targetEntity = player.worldObj.getEntityByID(entityId);
 				skill.setCurrentTarget(player, targetEntity);
 				if (targetEntity == null) { // For some reason the target id is sometimes incorrect or out of date
-					LogHelper.warning("Invalid target; entity with id " + entityId + " is null");
+					ZSSMain.logger.warn("Invalid target; entity with id " + entityId + " is null");
 				}
 			}
 		}

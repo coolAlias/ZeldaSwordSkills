@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.SyncSkillPacket;
 import zeldaswordskills.ref.ModInfo;
@@ -45,7 +46,6 @@ import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.skills.sword.SwordBreak;
-import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -112,7 +112,7 @@ public abstract class SkillBase
 		this.id = skillIndex++;
 		if (register) {
 			if (skillsMap.containsKey(id)) {
-				LogHelper.warning("CONFLICT @ skill " + id + " id already occupied by "
+				ZSSMain.logger.warn("CONFLICT @ skill " + id + " id already occupied by "
 						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
 			}
 			skillsMap.put(id, this);

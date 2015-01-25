@@ -33,6 +33,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.common.util.ForgeDirection;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityInscription;
@@ -40,7 +41,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.BiomeType;
-import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;
 
 public class MapGenSongPillar extends ZSSMapGenBase
@@ -124,7 +124,7 @@ public class MapGenSongPillar extends ZSSMapGenBase
 			AbstractZeldaSong song = ZeldaSongs.getSongByName(compound.getString("song"));
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), song);
 		} else {
-			LogHelper.warning("Failed to translate Song Pillar NBT compound into structure map");
+			ZSSMain.logger.warn("Failed to translate Song Pillar NBT compound into structure map");
 		}
 	}
 
