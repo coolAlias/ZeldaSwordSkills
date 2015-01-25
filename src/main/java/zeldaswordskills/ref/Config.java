@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,8 @@ import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.BonusHeart;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.BossType;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -169,6 +171,10 @@ public class Config
 	/*================== SONGS =====================*/
 	/** Number of ticks allowed between notes before played notes are cleared [5-100] */
 	private static int resetNotesInterval;
+	/** [Song of Storms] Time required between each use of the song (by anybody) [0-24000] */
+	private static int minSongIntervalStorm;
+	/** [Sun's Song] Time required between each use of the song (by anybody) [0-24000] */
+	private static int minSongIntervalSun;
 	/*================== DUNGEON GEN =====================*/
 	/** Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected */
 	private static boolean avoidModBlocks;
@@ -362,13 +368,6 @@ public class Config
 		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 15);
 		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
-		/*================== SONGS =====================*/
-		resetNotesInterval = MathHelper.clamp_int(config.get("Songs", "Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
-		for (ZeldaSong song : ZeldaSong.values()) {
-			if (!config.get("Songs", "Whether " + song.toString() + "'s main effect is enabled (does not affect notification of Song Blocks)", true).getBoolean(true)) {
-				song.setIsEnabled(false);
-			}
-		}
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
 		enableWindows = config.get("Dungeon Generation", "Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
@@ -448,6 +447,15 @@ public class Config
 		BiomeType.postInit(config);
 		BossType.postInit(config);
 		ZSSEntities.postInit(config);
+		/*================== SONGS =====================*/
+		resetNotesInterval = MathHelper.clamp_int(config.get("Songs", "Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
+		minSongIntervalStorm = MathHelper.clamp_int(config.get("Songs", "[Song of Storms] Time required between each use of the song (by anybody) [0-24000]", 600).getInt(), 0, 24000);
+		minSongIntervalSun = MathHelper.clamp_int(config.get("Songs", "[Sun's Song] Time required between each use of the song (by anybody) [0-24000]", 1200).getInt(), 0, 24000);
+		for (AbstractZeldaSong song : ZeldaSongs.getRegisteredSongs()) {
+			if (!config.get("Songs", "Whether " + song.getDisplayName() + "'s main effect is enabled (does not affect notification of Song Blocks or Entities)", true).getBoolean(true)) {
+				song.setIsEnabled(false);
+			}
+		}
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -521,6 +529,8 @@ public class Config
 	}
 	/*================== SONGS =====================*/
 	public static int getNoteResetInterval() { return resetNotesInterval; }
+	public static int getMinIntervalStorm() { return minSongIntervalStorm; }
+	public static int getMinIntervalSun() { return minSongIntervalSun; }
 	/*================== DUNGEON GEN =====================*/
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }

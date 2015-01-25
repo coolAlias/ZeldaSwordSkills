@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,8 @@ import zeldaswordskills.entity.ai.IVillageDefender;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -311,8 +312,8 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 	}
 
 	@Override
-	public boolean onSongPlayed(EntityPlayer player, ZeldaSong song, int power, int affected) {
-		if (song == ZeldaSong.SARIAS_SONG) {
+	public boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
+		if (song == ZeldaSongs.songSaria) {
 			playLivingSound();
 			if (("Darunia").equals(getCustomNameTag())) {
 				if (ZSSPlayerSongs.get(player).hasCuredNpc("Darunia")) {

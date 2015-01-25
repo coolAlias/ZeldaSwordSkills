@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,8 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -65,8 +66,8 @@ public class BlockChestInvisible extends BlockChestLocked implements ISongBlock 
 	}
 
 	@Override
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int power, int affected) {
-		if (power > 4 && song == ZeldaSong.ZELDAS_LULLABY && affected == 0) {
+	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
+		if (power > 4 && song == ZeldaSongs.songZeldasLullaby && affected == 0) {
 			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof IInventory) {
 				convertToChest((IInventory) te, world, x, y, z);

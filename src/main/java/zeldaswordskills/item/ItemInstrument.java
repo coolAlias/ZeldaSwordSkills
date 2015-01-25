@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,8 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -83,7 +84,7 @@ public class ItemInstrument extends Item
 	}
 
 	/** Map of teacher name->song taught, retrieved by the teacher's class */
-	private static final Map<Class<? extends EntityLiving>, Map<String, ZeldaSong>> teachersForClass = new HashMap<Class<? extends EntityLiving>, Map<String, ZeldaSong>>();
+	private static final Map<Class<? extends EntityLiving>, Map<String, AbstractZeldaSong>> teachersForClass = new HashMap<Class<? extends EntityLiving>, Map<String, AbstractZeldaSong>>();
 
 	@SideOnly(Side.CLIENT)
 	private List<IIcon> icons;
@@ -102,7 +103,7 @@ public class ItemInstrument extends Item
 	}
 
 	/**
-	 * Returns {@link Instrument#getPower} for determining effects of a {@link ZeldaSong}
+	 * Returns {@link Instrument#getPower} for determining effects of the {@link AbstractZeldaSong}
 	 */
 	public int getSongStrength(ItemStack stack) {
 		return getInstrument(stack).getPower();
@@ -150,10 +151,10 @@ public class ItemInstrument extends Item
 	 */
 	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, EntityLiving entity) {
 		if (entity.hasCustomNameTag() && teachersForClass.containsKey(entity.getClass())) {
-			Map<String, ZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
-			ZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
+			Map<String, AbstractZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
+			AbstractZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
 			if (toLearn != null) {
-				if (toLearn == ZeldaSong.TIME_SONG && getInstrument(stack).getPower() < 5) {
+				if (toLearn == ZeldaSongs.songTime && getInstrument(stack).getPower() < 5) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.ocarina.toy");
 					return false;
 				}
@@ -161,9 +162,9 @@ public class ItemInstrument extends Item
 					// onItemRightClick still processes after this, despite canceling the interact event -.-
 					ZSSPlayerSongs.get(player).songToLearn = toLearn;
 					if (ZSSPlayerSongs.get(player).isSongKnown(toLearn)) {
-						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", toLearn.toString());
+						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", toLearn.getDisplayName());
 					} else {
-						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", toLearn.toString());
+						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", toLearn.getDisplayName());
 					}
 				}
 				return true;
@@ -236,12 +237,12 @@ public class ItemInstrument extends Item
 	}
 
 	static {
-		Map<String, ZeldaSong> teacherSongs = new HashMap<String, ZeldaSong>();
-		teacherSongs.put("Guru-Guru", ZeldaSong.STORMS_SONG);
-		teacherSongs.put("Impa", ZeldaSong.ZELDAS_LULLABY);
-		teacherSongs.put("Malon", ZeldaSong.EPONAS_SONG);
-		teacherSongs.put("Saria", ZeldaSong.SARIAS_SONG);
-		teacherSongs.put("Zelda", ZeldaSong.TIME_SONG);
+		Map<String, AbstractZeldaSong> teacherSongs = new HashMap<String, AbstractZeldaSong>();
+		teacherSongs.put("Guru-Guru", ZeldaSongs.songStorms);
+		teacherSongs.put("Impa", ZeldaSongs.songZeldasLullaby);
+		teacherSongs.put("Malon", ZeldaSongs.songEpona);
+		teacherSongs.put("Saria", ZeldaSongs.songSaria);
+		teacherSongs.put("Zelda", ZeldaSongs.songTime);
 		teachersForClass.put(EntityVillager.class, teacherSongs);
 	}
 }

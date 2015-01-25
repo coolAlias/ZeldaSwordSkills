@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package zeldaswordskills.block.tileentity;
 
+import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -28,16 +30,17 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 
 public class TileEntityInscription extends TileEntity
 {
-	private ZeldaSong song;
+	private AbstractZeldaSong song;
 
 	public TileEntityInscription() {
-		song = ZeldaSong.TIME_SONG;
+		song = ZeldaSongs.songTime;
 	}
 
 	@Override
@@ -45,16 +48,16 @@ public class TileEntityInscription extends TileEntity
 		return false;
 	}
 
-	public ZeldaSong getSong() {
+	public AbstractZeldaSong getSong() {
 		return song;
 	}
 
 	/**
 	 * Sets the song that will be learned from this inscription
 	 */
-	public void setSong(ZeldaSong song) {
-		if (song == ZeldaSong.SCARECROW_SONG) {
-			LogHelper.warning("Scarecrow's Song cannot be learned from inscriptions; coordinates: " + xCoord + "/" + yCoord + "/" + zCoord);
+	public void setSong(AbstractZeldaSong song) {
+		if (song != null && !song.canLearnFromInscription()) {
+			LogHelper.warning(song.getDisplayName() + " cannot be learned from inscriptions; coordinates: " + xCoord + "/" + yCoord + "/" + zCoord);
 			return;
 		}
 		this.song = song;
@@ -64,13 +67,20 @@ public class TileEntityInscription extends TileEntity
 	}
 
 	private void setNextSong() {
-		int i = (song == null ? 0 : song.ordinal() + 1);
-		if (i == ZeldaSong.values().length) {
+		List<String> songs = ZeldaSongs.getRegisteredNames();
+		int i = Math.max(0, songs.indexOf(song) + 1);
+		if (i == songs.size()) {
 			i = 0;
-		} else if (i == ZeldaSong.SCARECROW_SONG.ordinal()) {
-			++i;
 		}
-		setSong(ZeldaSong.values()[i]);
+		song = null;
+		while (song == null && i < songs.size()) {
+			song = ZeldaSongs.getSongByName(songs.get(i));
+			if (!song.canLearnFromInscription()) {
+				song = null;
+				++i;
+			}
+		}
+		setSong(song);
 	}
 
 	/**
@@ -87,10 +97,10 @@ public class TileEntityInscription extends TileEntity
 			if (player.isSneaking()) {
 				if (!worldObj.isRemote) {
 					setNextSong();
-					PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.new", song.toString());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.new", song.getDisplayName());
 				}
 			} else if (!worldObj.isRemote) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.current", song.toString());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.current", song.getDisplayName());
 			}
 			return true;
 		} else if (stack != null && stack.getItem() instanceof ItemInstrument) {
@@ -121,7 +131,7 @@ public class TileEntityInscription extends TileEntity
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
 		if (compound.hasKey("SongName")) {
-			song = ZeldaSong.getSongFromUnlocalizedName(compound.getString("SongName"));
+			song = ZeldaSongs.getSongByName(compound.getString("SongName"));
 		}
 	}
 

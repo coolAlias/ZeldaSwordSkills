@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -32,11 +32,18 @@ import net.minecraftforge.common.util.ForgeDirection;
 import zeldaswordskills.block.tileentity.TileEntityInscription;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.SideHit;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+/**
+ * 
+ * A block which can be set to teach any {@link AbstractZeldaSong} so
+ * long as {@link AbstractZeldaSong#canLearnFromInscription} returns true.
+ *
+ */
 public class BlockSongInscription extends BlockContainer
 {
 	/** One pixel's thickness */
@@ -109,7 +116,7 @@ public class BlockSongInscription extends BlockContainer
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("SongName")) {
-			ZeldaSong song = ZeldaSong.getSongFromUnlocalizedName(stack.getTagCompound().getString("SongName"));
+			AbstractZeldaSong song = ZeldaSongs.getSongByName(stack.getTagCompound().getString("SongName"));
 			if (song != null) {
 				TileEntity te = world.getTileEntity(x, y, z);
 				if (te instanceof TileEntityInscription) {

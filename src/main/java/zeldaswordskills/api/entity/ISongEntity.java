@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,11 @@ package zeldaswordskills.api.entity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import zeldaswordskills.item.ItemInstrument;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
 
 /**
  * 
- * Entities that react to {@link ZeldaSong}s should use this interface.
+ * Entities that react to {@link AbstractZeldaSong songs} should use this interface.
  *
  */
 public interface ISongEntity {
@@ -33,10 +33,10 @@ public interface ISongEntity {
 	 * Note that it is only called on the server side.
 	 * @param player	Player who played the song
 	 * @param song		Song that was played
-	 * @param power		Potency level of the {@link ItemInstrument.Instrument} used to play the song; always at least 1
+	 * @param power		Potency level of the {@link ItemInstrument.Instrument instrument} used to play the song
 	 * @param affected	Number of entities already affected by the song
 	 * @return			True if the entity was affected
 	 */
-	public boolean onSongPlayed(EntityPlayer player, ZeldaSong song, int power, int affected);
+	public boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected);
 
 }

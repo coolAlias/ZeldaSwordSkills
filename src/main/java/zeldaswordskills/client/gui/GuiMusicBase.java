@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.SongNote.PlayableNote;
 import cpw.mods.fml.relauncher.Side;
@@ -77,7 +77,7 @@ public abstract class GuiMusicBase extends GuiScreen
 	protected int guiTop;
 
 	/** Currently playing song, if any */
-	protected ZeldaSong song;
+	protected AbstractZeldaSong song;
 
 	/** Stores the notes played so far */
 	protected final List<SongNote> melody = new ArrayList<SongNote>();
@@ -142,7 +142,7 @@ public abstract class GuiMusicBase extends GuiScreen
 			}
 		}
 		if (song != null) {
-			String s = song.toString();
+			String s = song.getDisplayName();
 			fontRendererObj.drawString(s, guiLeft + (xSize / 2) - (fontRendererObj.getStringWidth(s) / 2), guiTop + 3, 0xFFFFFF);
 		}
 		super.drawScreen(mouseX, mouseY, f);
@@ -227,6 +227,7 @@ public abstract class GuiMusicBase extends GuiScreen
 		melody.add(note);
 		ticksSinceLastNote = 0;
 		float f = (float) Math.pow(2.0D, (double)(note.ordinal() - 12) / 12.0D);
+		// TODO retrieve note to play from player's held ItemInstrument when gui constructed
 		mc.thePlayer.playSound(ModInfo.ID + ":note.ocarina", 3.0F, f);
 		Vec3 look = mc.thePlayer.getLookVec();
 		mc.theWorld.spawnParticle("note",

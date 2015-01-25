@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package zeldaswordskills.entity;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +39,8 @@ import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.LearnSongPacket;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
@@ -53,14 +53,14 @@ public class ZSSPlayerSongs
 {
 	private final EntityPlayer player;
 
-	private final Set<ZeldaSong> knownSongs = EnumSet.noneOf(ZeldaSong.class);
+	private final Set<AbstractZeldaSong> knownSongs = new HashSet<AbstractZeldaSong>();
 
 	/** Coordinates of most recently activated Warp Stones, stored using the block's metadata as key */
 	private final Map<Integer, WarpPoint> warpPoints = new HashMap<Integer, WarpPoint>();
 
 	/** Song to be learned from the learning GUI is set by the block or entity triggering the GUI */
 	@SideOnly(Side.CLIENT)
-	public ZeldaSong songToLearn;
+	public AbstractZeldaSong songToLearn;
 
 	/** Notes set by the player to play the Scarecrow's Song */
 	private final List<SongNote> scarecrowNotes = new ArrayList<SongNote>();
@@ -91,7 +91,7 @@ public class ZSSPlayerSongs
 	/**
 	 * Returns true if the player knows the song
 	 */
-	public boolean isSongKnown(ZeldaSong song) {
+	public boolean isSongKnown(AbstractZeldaSong song) {
 		return knownSongs.contains(song);
 	}
 
@@ -100,12 +100,12 @@ public class ZSSPlayerSongs
 	 * When called on the server, sends a packet to update the client.
 	 * @param notes	Only used when learning the Scarecrow Song, otherwise null
 	 */
-	public boolean learnSong(ZeldaSong song, List<SongNote> notes) {
+	public boolean learnSong(AbstractZeldaSong song, List<SongNote> notes) {
 		boolean addSong = true;
 		if (isSongKnown(song)) {
 			return false;
-		} else if (song == ZeldaSong.SCARECROW_SONG) {
-			if (notes == null || notes.size() != 8 || !ZeldaSong.areNotesUnique(notes)) {
+		} else if (song == ZeldaSongs.songScarecrow) {
+			if (notes == null || notes.size() != 8 || !ZeldaSongs.areNotesUnique(notes)) {
 				LogHelper.warning("Trying to add Scarecrow's Song with invalid list: " + notes);
 				return false;
 			}
@@ -126,15 +126,15 @@ public class ZSSPlayerSongs
 		if (addSong) {
 			knownSongs.add(song);
 			player.triggerAchievement(ZSSAchievements.ocarinaSong);
-			if (song == ZeldaSong.SCARECROW_SONG) {
+			if (song == ZeldaSongs.songScarecrow) {
 				player.triggerAchievement(ZSSAchievements.ocarinaScarecrow);
 			}
-			if (knownSongs.size() == ZeldaSong.values().length) {
+			if (knownSongs.size() > 15) {
 				player.triggerAchievement(ZSSAchievements.ocarinaMaestro);
 			}
 			if (!player.worldObj.isRemote) {
 				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.learned", song.toString());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.learned", song.getDisplayName());
 				PacketDispatcher.sendTo(new LearnSongPacket(song, notes), (EntityPlayerMP) player);
 			}
 		}
@@ -145,9 +145,9 @@ public class ZSSPlayerSongs
 	 * Checks the player's known songs to see if any match the notes played
 	 * @return	The song matching the notes played or null
 	 */
-	public ZeldaSong getKnownSongFromNotes(List<SongNote> notesPlayed) {
-		for (ZeldaSong song : knownSongs) {
-			if (song == ZeldaSong.SCARECROW_SONG) {
+	public AbstractZeldaSong getKnownSongFromNotes(List<SongNote> notesPlayed) {
+		for (AbstractZeldaSong song : knownSongs) {
+			if (song == ZeldaSongs.songScarecrow) {
 				if (notesPlayed != null && notesPlayed.size() == scarecrowNotes.size()) {
 					for (int i = 0; i < scarecrowNotes.size(); ++i) {
 						if (notesPlayed.get(i) != scarecrowNotes.get(i)) {
@@ -176,7 +176,7 @@ public class ZSSPlayerSongs
 	/**
 	 * Returns the chunk coordinates to warp to for the various warp songs, or null if not yet set
 	 */
-	public WarpPoint getWarpPoint(ZeldaSong song) {
+	public WarpPoint getWarpPoint(AbstractZeldaSong song) {
 		Integer meta = BlockWarpStone.reverseLookup.get(song);
 		return (meta == null ? null : warpPoints.get(meta));
 	}
@@ -189,7 +189,7 @@ public class ZSSPlayerSongs
 	public boolean canOpenScarecrowGui(boolean addChat) {
 		if (scarecrowNotes.isEmpty()) {
 			return true;
-		} else if (isSongKnown(ZeldaSong.SCARECROW_SONG)) {
+		} else if (isSongKnown(ZeldaSongs.songScarecrow)) {
 			if (addChat) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.scarecrow.known");
 			}
@@ -270,7 +270,7 @@ public class ZSSPlayerSongs
 
 	public void saveNBTData(NBTTagCompound compound) {
 		NBTTagList songs = new NBTTagList();
-		for (ZeldaSong song : knownSongs) {
+		for (AbstractZeldaSong song : knownSongs) {
 			NBTTagCompound tag = new NBTTagCompound();
 			// using unlocalized name instead of ordinal in case enum order/size ever changes
 			tag.setString("song", song.getUnlocalizedName());
@@ -324,7 +324,7 @@ public class ZSSPlayerSongs
 		knownSongs.clear();
 		for (int i = 0; i < songs.tagCount(); ++i) {
 			NBTTagCompound tag = songs.getCompoundTagAt(i);
-			ZeldaSong song = ZeldaSong.getSongFromUnlocalizedName(tag.getString("song"));
+			AbstractZeldaSong song = ZeldaSongs.getSongByName(tag.getString("song"));
 			if (song != null) {
 				knownSongs.add(song);
 			}

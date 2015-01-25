@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,8 +25,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.AbstractMessage;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
+import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.SongNote;
+import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -38,7 +41,7 @@ import cpw.mods.fml.relauncher.Side;
  */
 public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 {
-	private ZeldaSong song;
+	private AbstractZeldaSong song;
 
 	private List<SongNote> notes;
 
@@ -47,21 +50,25 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 	/**
 	 * Sync song learned to client or server
 	 */
-	public LearnSongPacket(ZeldaSong song) {
+	public LearnSongPacket(AbstractZeldaSong song) {
 		this(song, null);
 	}
 
 	/**
 	 * Sync Scarecrow's Song notes to server and back to client
 	 */
-	public LearnSongPacket(ZeldaSong song, List<SongNote> notes) {
+	public LearnSongPacket(AbstractZeldaSong song, List<SongNote> notes) {
 		this.song = song;
 		this.notes = notes;
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		song = ZeldaSong.values()[buffer.readByte() % ZeldaSong.values().length];
+		String s = ByteBufUtils.readUTF8String(buffer);
+		song = ZeldaSongs.getSongByName(s);
+		if (song == null) {
+			LogHelper.severe("Invalid song name '" + s + "' read from packet!");
+		}
 		int n = buffer.readByte();
 		notes = (n > 0 ? new ArrayList<SongNote>() : null);
 		for (int i = 0; i < n; ++i) {
@@ -71,7 +78,7 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeByte((byte) song.ordinal());
+		ByteBufUtils.writeUTF8String(buffer, song.getUnlocalizedName());
 		int n = (notes == null ? 0 : notes.size());
 		buffer.writeByte((byte) n);
 		for (int i = 0; i < n; ++i) {
@@ -81,6 +88,8 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		ZSSPlayerSongs.get(player).learnSong(song, notes);
+		if (song != null) {
+			ZSSPlayerSongs.get(player).learnSong(song, notes);
+		}
 	}
 }

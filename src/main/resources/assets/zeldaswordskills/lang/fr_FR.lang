@@ -699,6 +699,7 @@ tooltip.zss.block.core.desc.0=Peut être miné avec des outils normaux
 tooltip.zss.block.dungeon.desc.0=Ne peut pas être miné, mais explosé
 tooltip.zss.block.dungeon.desc.1=Accroupir + appliquer sur un bloc pour changer la texture
 tooltip.zss.block.unbreakable.desc=Ne peut par aucun moyen être détruit
+tooltip.zss.block.warp_stone.desc=Teaches %s
 tooltip.zss.bomb.desc.0=Ca a l'air vraiment dangereux ! Il vaut mieux la jeter en vitesse !
 tooltip.zss.bomb.desc.1=[clic droit pour jeter]
 tooltip.zss.bombbag.desc.0=Un sac pratique pour transporter les bombes

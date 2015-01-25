@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import zeldaswordskills.network.bidirectional.LearnSongPacket;
 import zeldaswordskills.network.bidirectional.PlayRecordPacket;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -35,7 +35,7 @@ public class GuiLearnSong extends GuiMusicBase
 	protected static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/gui/gui_ocarina.png");
 
 	/** The song being learned */
-	private ZeldaSong songToLearn;
+	private AbstractZeldaSong songToLearn;
 
 	/** Index of note currently being played; also used to flag song to learn has finished playing or not */
 	private int currentNoteIndex;
@@ -71,7 +71,7 @@ public class GuiLearnSong extends GuiMusicBase
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		super.drawScreen(mouseX, mouseY, f);
 		if (!demoPlayed && song == null) {
-			String s = songToLearn.toString();
+			String s = songToLearn.getDisplayName();
 			fontRendererObj.drawString(s, guiLeft + (xSize / 2) - (fontRendererObj.getStringWidth(s) / 2), guiTop + 3, 0xFFFFFF);
 		}
 	}

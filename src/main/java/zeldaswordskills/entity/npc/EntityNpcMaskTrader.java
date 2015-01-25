@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -93,15 +93,15 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 		if (stack != null && stack.getItem() instanceof ItemInstrument) {
 			if (player.worldObj.isRemote) {
 				ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
-				if (songs.isSongKnown(ZeldaSong.HEALING_SONG)) {
+				if (songs.isSongKnown(ZeldaSongs.songHealing)) {
 					// instrument doesn't matter when reviewing a known song
-					songs.songToLearn = ZeldaSong.HEALING_SONG;
+					songs.songToLearn = ZeldaSongs.songHealing;
 					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
 				} else if (stack.getItemDamage() == ItemInstrument.Instrument.OCARINA_TIME.ordinal()) {
 					new TimedChatDialogue(player, Arrays.asList(
 							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.0"),
 							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.1")));
-					songs.songToLearn = ZeldaSong.HEALING_SONG;
+					songs.songToLearn = ZeldaSongs.songHealing;
 					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
 				} else {
 					new TimedChatDialogue(player, Arrays.asList(

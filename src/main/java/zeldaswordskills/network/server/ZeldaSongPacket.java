@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,10 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
+import zeldaswordskills.util.LogHelper;
+import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.relauncher.Side;
 
 /**
@@ -33,26 +36,32 @@ import cpw.mods.fml.relauncher.Side;
  */
 public class ZeldaSongPacket extends AbstractServerMessage<ZeldaSongPacket>
 {
-	private ZeldaSong song;
+	private AbstractZeldaSong song;
 
 	public ZeldaSongPacket() {}
 
-	public ZeldaSongPacket(ZeldaSong song) {
+	public ZeldaSongPacket(AbstractZeldaSong song) {
 		this.song = song;
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		this.song = ZeldaSong.values()[buffer.readInt() % ZeldaSong.values().length];
+		String s = ByteBufUtils.readUTF8String(buffer);
+		song = ZeldaSongs.getSongByName(s);
+		if (song == null) {
+			LogHelper.severe("Invalid song name '" + s + "' read from packet!");
+		}
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeInt(song.ordinal());
+		ByteBufUtils.writeUTF8String(buffer, song.getUnlocalizedName());
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		song.performSongEffects(player);
+		if (song != null) {
+			song.performSongEffects(player);
+		}
 	}
 }

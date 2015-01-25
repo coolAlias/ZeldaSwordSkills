@@ -22,6 +22,9 @@ package zeldaswordskills.util;
  * 
  * 12 notes per octave for 2 octaves, starting on A1 (natural) up to G2-sharp,
  * with an extra flat A1 as the first value to round out the control-scheme.
+ * 
+ * Keep in mind that for the standard music GUI used by the ocarina, only notes
+ * from B1 natural to F2 natural are playable.
  *
  */
 public enum SongNote

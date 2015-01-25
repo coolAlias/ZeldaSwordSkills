@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package zeldaswordskills.block;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,8 @@ import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
@@ -47,8 +47,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockWarpStone extends Block implements ILiftable, ISmashable
 {
-	public static final Map<Integer, ZeldaSong> warpBlockSongs = new HashMap<Integer, ZeldaSong>();
-	public static final Map<ZeldaSong, Integer> reverseLookup = new EnumMap<ZeldaSong, Integer>(ZeldaSong.class);
+	public static final Map<Integer, AbstractZeldaSong> warpBlockSongs = new HashMap<Integer, AbstractZeldaSong>();
+	public static final Map<AbstractZeldaSong, Integer> reverseLookup = new HashMap<AbstractZeldaSong, Integer>();
 
 	public BlockWarpStone() {
 		super(Material.rock);
@@ -103,12 +103,12 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 		int meta = world.getBlockMetadata(x, y, z);
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() instanceof ItemInstrument) {
-			ZeldaSong song = warpBlockSongs.get(meta);
+			AbstractZeldaSong song = warpBlockSongs.get(meta);
 			ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
 			if (!world.isRemote) {
 				if (song != null) {// && songs.isSongKnown(song)) { // otherwise have to click again after learning the song
 					songs.onActivatedWarpStone(x, y, z, meta);
-					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", song.toString(), x, y, z);
+					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", song.getDisplayName(), x, y, z);
 				}
 			} else if (!player.isSneaking()) {
 				if (song != null) {
@@ -133,19 +133,19 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 		}
 	}
 
-	private static void addSongMapping(int meta, ZeldaSong song) {
+	private static void addSongMapping(int meta, AbstractZeldaSong song) {
 		warpBlockSongs.put(meta, song);
 		reverseLookup.put(song, meta);
 	}
 
 	static {
 		int i = 0;
-		addSongMapping(i++, ZeldaSong.FOREST_MINUET);
-		addSongMapping(i++, ZeldaSong.FIRE_BOLERO);
-		addSongMapping(i++, ZeldaSong.WATER_SERENADE);
-		addSongMapping(i++, ZeldaSong.SPIRIT_REQUIEM);
-		addSongMapping(i++, ZeldaSong.SHADOW_NOCTURNE);
-		addSongMapping(i++, ZeldaSong.LIGHT_PRELUDE);
-		addSongMapping(i++, ZeldaSong.ORDER_OATH);
+		addSongMapping(i++, ZeldaSongs.songWarpForest);
+		addSongMapping(i++, ZeldaSongs.songWarpFire);
+		addSongMapping(i++, ZeldaSongs.songWarpWater);
+		addSongMapping(i++, ZeldaSongs.songWarpSpirit);
+		addSongMapping(i++, ZeldaSongs.songWarpShadow);
+		addSongMapping(i++, ZeldaSongs.songWarpLight);
+		addSongMapping(i++, ZeldaSongs.songWarpOrder);
 	}
 }

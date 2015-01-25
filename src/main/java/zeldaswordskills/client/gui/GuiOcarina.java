@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import zeldaswordskills.network.bidirectional.PlayRecordPacket;
 import zeldaswordskills.network.server.ZeldaSongPacket;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -89,7 +89,7 @@ public class GuiOcarina extends GuiMusicBase
 
 	@Override
 	public void updateScreen() {
-		if (song == ZeldaSong.SCARECROW_SONG && scarecrowNotes != null) {
+		if (song == ZeldaSongs.songScarecrow && scarecrowNotes != null) {
 			if (++ticksSinceLastNote == 20) {
 				if (currentNoteIndex == scarecrowNotes.size()) {
 					mc.thePlayer.closeScreen();
@@ -106,7 +106,7 @@ public class GuiOcarina extends GuiMusicBase
 	public void onGuiClosed() {
 		if (song != null) {
 			if (ticksSinceLastNote > song.getMinDuration() || (scarecrowNotes != null && currentNoteIndex == scarecrowNotes.size())) {
-				if (scarecrowFirst || (scarecrowNotes != null && !ZSSPlayerSongs.get(mc.thePlayer).isSongKnown(ZeldaSong.SCARECROW_SONG))) {
+				if (scarecrowFirst || (scarecrowNotes != null && !ZSSPlayerSongs.get(mc.thePlayer).isSongKnown(ZeldaSongs.songScarecrow))) {
 					PacketDispatcher.sendToServer(new LearnSongPacket(song, scarecrowNotes));
 				} else {
 					PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
@@ -122,7 +122,7 @@ public class GuiOcarina extends GuiMusicBase
 		// For learning Scarecrow's Song, enter 8 notes once, then same notes again to send AddSongPacket to server
 		if (scarecrowNotes != null) {
 			if (melody.size() == 8) {
-				if (!ZeldaSong.areNotesUnique(melody)) {
+				if (!ZeldaSongs.areNotesUnique(melody)) {
 					melody.clear();
 					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.song.scarecrow.copycat");
 				} else if (scarecrowNotes.isEmpty()) {
@@ -154,7 +154,7 @@ public class GuiOcarina extends GuiMusicBase
 									StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.1")),
 									0, 1600);
 						}
-						song = ZeldaSong.SCARECROW_SONG;
+						song = ZeldaSongs.songScarecrow;
 						mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
 						ticksSinceLastNote = 0;
 					} else {
@@ -166,8 +166,10 @@ public class GuiOcarina extends GuiMusicBase
 		} else if (melody.size() < 9) { // no songs are longer than 8 notes
 			song = ZSSPlayerSongs.get(mc.thePlayer).getKnownSongFromNotes(melody);
 			if (song != null) { // indicates player knows the song
-				mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
-				if (song == ZeldaSong.SCARECROW_SONG) {
+				if (song.playSuccessSound()) {
+					mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
+				}
+				if (song == ZeldaSongs.songScarecrow) {
 					scarecrowNotes = new ArrayList<SongNote>(melody);
 					ticksSinceLastNote = 0;
 				} else {

@@ -15,32 +15,25 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.item;
+package zeldaswordskills.songs;
 
-import java.util.List;
-
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
-import zeldaswordskills.block.BlockWarpStone;
-import zeldaswordskills.songs.AbstractZeldaSong;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.api.block.ISongBlock;
+import zeldaswordskills.api.entity.ISongEntity;
+import zeldaswordskills.util.SongNote;
 
-public class ItemWarpStone extends ItemMetadataBlock {
+/**
+ * Songs with no particular effect in and of themselves, but may have special
+ * effects defined by {@link ISongBlock} and {@link ISongEntity} classes.
+ */
+public final class ZeldaSongNoEffect extends AbstractZeldaSong {
 
-	public ItemWarpStone(Block block) {
-		super(block);
+	public ZeldaSongNoEffect(String unlocalizedName, int minDuration, SongNote... notes) {
+		super(unlocalizedName, minDuration, notes);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
-		AbstractZeldaSong song = BlockWarpStone.warpBlockSongs.get(stack.getItemDamage());
-		if (song != null) {
-			list.add(StatCollector.translateToLocalFormatted("tooltip.zss.block.warp_stone.desc", EnumChatFormatting.GOLD + song.getDisplayName()));
-		}
-	}
+	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {}
+
 }

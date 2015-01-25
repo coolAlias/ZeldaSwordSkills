@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,8 @@ import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -47,7 +48,7 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 	public static final String[] names = {"time_block","royal_block"};
 
 	/** Song required to manipulate each block, based on metadata less bit8 */
-	private static final Map<Integer, ZeldaSong> requiredSongs = new HashMap<Integer, ZeldaSong>();
+	private static final Map<Integer, AbstractZeldaSong> requiredSongs = new HashMap<Integer, AbstractZeldaSong>();
 
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconEnd;
@@ -109,7 +110,7 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 	}
 
 	@Override
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, ZeldaSong song, int power, int affected) {
+	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
 		if (power > 4) {
 			int meta = world.getBlockMetadata(x, y, z);
 			if (song == requiredSongs.get((meta & ~0x8))) {
@@ -150,7 +151,7 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 	}
 
 	static {
-		requiredSongs.put(0, ZeldaSong.TIME_SONG);
-		requiredSongs.put(1, ZeldaSong.ZELDAS_LULLABY);
+		requiredSongs.put(0, ZeldaSongs.songTime);
+		requiredSongs.put(1, ZeldaSongs.songZeldasLullaby);
 	}
 }
