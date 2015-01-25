@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,8 @@ import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityInscription;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.ZeldaSong;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.StructureGenUtils;
@@ -48,7 +49,7 @@ public class MapGenSongPillar extends ZSSMapGenBase
 	private static final Set<String> allowedBiomes = new HashSet<String>();
 
 	/** Song inscription to place on top of the pillar for the current generation */
-	private ZeldaSong song;
+	private AbstractZeldaSong song;
 
 	/** Biome of currently generating chunk */
 	private BiomeGenBase biome;
@@ -80,13 +81,15 @@ public class MapGenSongPillar extends ZSSMapGenBase
 		int z = (chunkZ << 4) + rand.nextInt(16);
 		biome = world.getBiomeGenForCoords(x, z);
 		boolean flag = (biome == BiomeGenBase.swampland && rand.nextFloat() < 0.35F);
-		song = (flag ? ZeldaSong.SOARING_SONG : null);
-		if (!flag && biome != null && biome.biomeName != null) {
+		boolean flag2 = (biome == BiomeGenBase.savanna && rand.nextFloat() < 0.35F);
+		song = (flag ? ZeldaSongs.songSoaring : (flag2 ? ZeldaSongs.songSun : null));
+		if (song == null && biome != null && biome.biomeName != null) {
 			flag = allowedBiomes.contains(biome.biomeName);
 		}
 		if (flag && generate2(rand, x, z)) {
 			onPillarPlaced(chunkX, chunkZ);
 		}
+		song = null;
 	}
 
 	private boolean generate2(Random rand, int x, int z) {
@@ -118,7 +121,7 @@ public class MapGenSongPillar extends ZSSMapGenBase
 		if (compound.hasKey("chunkX") && compound.hasKey("chunkZ") && compound.hasKey("song")) {
 			int i = compound.getInteger("chunkX");
 			int j = compound.getInteger("chunkZ");
-			ZeldaSong song = ZeldaSong.getSongFromUnlocalizedName(compound.getString("song"));
+			AbstractZeldaSong song = ZeldaSongs.getSongByName(compound.getString("song"));
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), song);
 		} else {
 			LogHelper.warning("Failed to translate Song Pillar NBT compound into structure map");
@@ -269,7 +272,7 @@ public class MapGenSongPillar extends ZSSMapGenBase
 			for (int k = z - range; cont && k <= z + range; ++k) {
 				chunk = Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, k));
 				if (structureMap.containsKey(chunk)) {
-					ZeldaSong zs = (ZeldaSong) structureMap.get(chunk);
+					AbstractZeldaSong zs = (AbstractZeldaSong) structureMap.get(chunk);
 					d2 = Math.ceil(Math.sqrt(((i - x) * (i - x)) + ((k - z) * (k - z))));
 					if (flag && zs != null) {
 						flag = false;
