@@ -32,6 +32,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
@@ -76,6 +78,9 @@ public class ZSSPlayerSongs
 
 	/** Entity ID of last horse ridden, should be more efficient when getting entity */
 	private int horseId = -1;
+
+	/** Last chunk coordinates of horse ridden, in case chunk not loaded */
+	private int horseChunkX, horseChunkZ;
 
 	/** Set of all NPCs this player has cured */
 	private final Set<String> curedNpcs = new HashSet<String>();
@@ -231,9 +236,19 @@ public class ZSSPlayerSongs
 	public EntityHorse getLastHorseRidden() {
 		Entity entity = (horseId < 0 ? null : player.worldObj.getEntityByID(horseId));
 		if (entity == null && horseUUID != null) {
-			entity = WorldUtils.getEntityByUUID(player.worldObj, horseUUID);
-			if (entity != null) {
-				horseId = entity.getEntityId();
+			entity = getHorseByUUID();
+		}
+		// Check horse's last known chunk coordinates
+		if (entity == null) {
+			ZSSMain.logger.trace(String.format("Searching for horse using horse's chunk coordinates %d/%d", horseChunkX, horseChunkZ));
+			entity = getHorseFromChunk(horseChunkX, horseChunkZ);
+			int n = 1; // search n surrounding chunks if horse is still null
+			for (int i = -n; entity == null && i <= n; ++i) {
+				for (int k = -n; entity == null && k <= n; ++k) {
+					if (i != 0 && k != 0) {
+						entity = getHorseFromChunk(horseChunkX + i, horseChunkZ + k);
+					}
+				}
 			}
 		}
 		if (entity instanceof EntityHorse && entity.isEntityAlive()) {
@@ -244,13 +259,51 @@ public class ZSSPlayerSongs
 	}
 
 	/**
+	 * Searches for horse by UUID; if found, sets horseId
+	 */
+	private Entity getHorseByUUID() {
+		if (horseUUID == null) {
+			return null;
+		}
+		Entity entity = WorldUtils.getEntityByUUID(player.worldObj, horseUUID);
+		if (entity instanceof EntityHorse) {
+			ZSSMain.logger.trace("Found horse by UUID!");
+			horseId = entity.getEntityId();
+		}
+		return entity;
+	}
+
+	/**
+	 * Loads the chunk if necessary and searches for the player's horse by UUID
+	 */
+	private Entity getHorseFromChunk(int chunkX, int chunkZ) {
+		Chunk chunk = player.worldObj.getChunkFromChunkCoords(chunkX, chunkZ);
+		if (chunk != null && chunk.isChunkLoaded) {
+			ZSSMain.logger.trace(String.format("Loaded chunk coordinates %d/%d, searching for horse...", chunkX, chunkZ));
+			return getHorseByUUID();
+		}
+		return null;
+	}
+
+	/**
 	 * Sets the horse as this player's last horse ridden, for Epona's Song
 	 */
 	public void setHorseRidden(EntityHorse horse) {
-		if (horse.getEntityId() != horseId && horse.isTame() && horse.func_152119_ch().equals(player.getUniqueID().toString())) {
+		if (horse.getEntityId() == horseId) {
+			setHorseCoordinates(horse);
+		} else if (horse.isTame() && horse.func_152119_ch().equals(player.getUniqueID().toString())) {
 			this.horseId = horse.getEntityId();
 			this.horseUUID = horse.getPersistentID();
+			setHorseCoordinates(horse);
 		}
+	}
+
+	/**
+	 * Sets last ridden horse's last chunk coordinates
+	 */
+	private void setHorseCoordinates(EntityHorse horse) {
+		this.horseChunkX = (MathHelper.floor_double(horse.posX) >> 4);
+		this.horseChunkZ = (MathHelper.floor_double(horse.posZ) >> 4);
 	}
 
 	/**
@@ -291,6 +344,8 @@ public class ZSSPlayerSongs
 		if (horseUUID != null) {
 			compound.setLong("HorseUUIDMost", horseUUID.getMostSignificantBits());
 			compound.setLong("HorseUUIDLeast", horseUUID.getLeastSignificantBits());
+			compound.setInteger("HorseChunkX", horseChunkX);
+			compound.setInteger("HorseChunkZ", horseChunkZ);
 		}
 
 		if (!warpPoints.isEmpty()) {
@@ -343,6 +398,10 @@ public class ZSSPlayerSongs
 
 		scarecrowTime = compound.getLong("ScarecrowTime");
 		nextSongHealTime = compound.getLong("NextHealSongTime");
+		if (compound.hasKey("HorseChunkX") && compound.hasKey("HorseChunkZ")) {
+			horseChunkX = compound.getInteger("HorseChunkX");
+			horseChunkZ = compound.getInteger("HorseChunkZ");
+		}
 		if (compound.hasKey("HorseUUIDMost") && compound.hasKey("HorseUUIDLeast")) {
 			horseUUID = new UUID(compound.getLong("HorseUUIDMost"), compound.getLong("HorseUUIDLeast"));
 		}

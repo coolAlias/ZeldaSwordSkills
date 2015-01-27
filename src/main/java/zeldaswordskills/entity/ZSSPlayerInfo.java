@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -54,6 +54,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	private ZSSPlayerSkills playerSkills;
 
 	private ZSSPlayerSongs playerSongs;
+
+	/** Last ridden entity so it can be set after player is no longer riding */
+	private Entity lastRidden;
 
 	/** Special block timer for shields; player cannot block while this is greater than zero */
 	private int blockTime = 0;
@@ -296,8 +299,14 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			hasAutoBombArrow = false;
 		}
 		// Check for currently ridden horse, used for Epona's Song
-		if (player.ridingEntity instanceof EntityHorse) {
-			playerSongs.setHorseRidden((EntityHorse) player.ridingEntity);
+		if (lastRidden == null && player.ridingEntity != null) {
+			lastRidden = player.ridingEntity;
+			if (lastRidden instanceof EntityHorse) {
+				playerSongs.setHorseRidden((EntityHorse) lastRidden);
+			}
+		} else if (player.ridingEntity == null && lastRidden instanceof EntityHorse) {
+			playerSongs.setHorseRidden((EntityHorse) lastRidden);
+			lastRidden = null; // dismounted and horse's last known coordinates set
 		}
 	}
 
