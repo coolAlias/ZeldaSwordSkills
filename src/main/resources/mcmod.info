@@ -10,8 +10,8 @@
   "updateUrl": "",
   "authorList": ["coolAlias"],
   "credits": "Thanks to GotoLink for BG2-related support, and many others for their contributions",
-  "parent": "",
   "screenshots": [],
+  "parent": "",
   "dependencies": ["antiqueatlas","battlegear2"],
   "dependants": ["dynamicswordskills"]
 }

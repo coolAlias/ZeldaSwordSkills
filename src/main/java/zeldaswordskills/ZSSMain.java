@@ -44,6 +44,7 @@ import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -104,6 +105,8 @@ public class ZSSMain
 		if (Config.areBossDungeonsEnabled()) {
 			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
 		}
+		String link = "https://raw.githubusercontent.com/coolAlias/ZeldaSwordSkills/master/src/main/resources/versionlist.json";
+		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
 	}
 
 	@Mod.EventHandler
