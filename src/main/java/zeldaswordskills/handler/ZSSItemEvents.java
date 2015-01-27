@@ -159,8 +159,8 @@ public class ZSSItemEvents
 	@SubscribeEvent
 	public void onAnvilUpdate(AnvilUpdateEvent event) {
 		// Don't allow unenchantable items to be enchanted in the anvil:
-		boolean left = (event.left.getItem() instanceof ItemEnchantedBook && event.right.getItem().getItemEnchantability() < 1 && (Config.allUnenchantablesAreDisabled() || event.right.getItem() instanceof IUnenchantable));
-		boolean right = (event.right.getItem() instanceof ItemEnchantedBook && event.left.getItem().getItemEnchantability() < 1 && (Config.allUnenchantablesAreDisabled() || event.left.getItem() instanceof IUnenchantable));
+		boolean left = (event.left.getItem() instanceof ItemEnchantedBook && event.right.getItem().getItemEnchantability() < 1 && (Config.areUnenchantablesDisabled() || event.right.getItem() instanceof IUnenchantable));
+		boolean right = (event.right.getItem() instanceof ItemEnchantedBook && event.left.getItem().getItemEnchantability() < 1 && (Config.areUnenchantablesDisabled() || event.left.getItem() instanceof IUnenchantable));
 		event.setCanceled(left || right);
 	}
 
@@ -237,8 +237,10 @@ public class ZSSItemEvents
 		case LEFT_CLICK_BLOCK:
 			if (stack != null && stack.getItem() instanceof ISmashBlock && event.entityPlayer.attackTime == 0) {
 				if (blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
-					ZSSCombatEvents.setPlayerAttackTime(event.entityPlayer);
-					PacketDispatcher.sendTo(new UnpressKeyPacket(UnpressKeyPacket.LMB), (EntityPlayerMP) event.entityPlayer);
+					if (event.entityPlayer instanceof EntityPlayerMP) {
+						ZSSCombatEvents.setPlayerAttackTime(event.entityPlayer);
+						PacketDispatcher.sendTo(new UnpressKeyPacket(UnpressKeyPacket.LMB), (EntityPlayerMP) event.entityPlayer);
+					}
 					event.useBlock = Result.DENY;
 				}
 			}
@@ -314,7 +316,9 @@ public class ZSSItemEvents
 						world.playSoundAtEntity(player, Sounds.ROCK_FALL, 1.0F, 1.0F);
 					}
 					// func_147480_a is destroyBlock
-					world.func_147480_a(x, y, z, false);
+					if (!world.isRemote) { 
+						world.func_147480_a(x, y, z, false);
+					}
 					wasDestroyed = true;
 				}
 			}
