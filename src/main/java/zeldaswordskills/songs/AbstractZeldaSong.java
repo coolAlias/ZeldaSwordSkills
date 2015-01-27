@@ -104,7 +104,15 @@ public abstract class AbstractZeldaSong
 	/**
 	 * True if this song can be learned from {@link BlockSongInscription}
 	 */
-	public boolean canLearnFromInscription() {
+	public boolean canLearnFromInscription(World world, int x, int y, int z, Block block, int meta) {
+		return true;
+	}
+
+	/**
+	 * Use to control if player is able to learn this song or not.
+	 * Should return the same result on both server and client.
+	 */
+	public boolean canLearn(EntityPlayer player) {
 		return true;
 	}
 

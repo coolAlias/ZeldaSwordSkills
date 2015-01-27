@@ -101,13 +101,19 @@ public class ZSSPlayerSongs
 	}
 
 	/**
-	 * Adds the song to the player's repertoire, or returns false if already known.
+	 * Adds the song to the player's repertoire if able.
 	 * When called on the server, sends a packet to update the client.
 	 * @param notes	Only used when learning the Scarecrow Song, otherwise null
+	 * @return false if song already known or {@link AbstractZeldaSong#canLearn canLearn} returned false
 	 */
 	public boolean learnSong(AbstractZeldaSong song, List<SongNote> notes) {
 		boolean addSong = true;
 		if (isSongKnown(song)) {
+			return false;
+		} else if (!song.canLearn(player)) {
+			if (!player.worldObj.isRemote) {
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.nolearn", song.getDisplayName());
+			}
 			return false;
 		} else if (song == ZeldaSongs.songScarecrow) {
 			if (notes == null || notes.size() != 8 || !ZeldaSongs.areNotesUnique(notes)) {

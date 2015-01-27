@@ -55,7 +55,7 @@ public class TileEntityInscription extends TileEntity
 	 * Sets the song that will be learned from this inscription
 	 */
 	public void setSong(AbstractZeldaSong song) {
-		if (song != null && !song.canLearnFromInscription()) {
+		if (song != null && !song.canLearnFromInscription(worldObj, xCoord, yCoord, zCoord, blockType, blockMetadata)) {
 			ZSSMain.logger.warn(String.format("%s cannot be learned from inscriptions; coordinates: %d/%d/%d", song.getDisplayName(), xCoord, yCoord, zCoord));
 			return;
 		}
@@ -74,7 +74,7 @@ public class TileEntityInscription extends TileEntity
 		song = null;
 		while (song == null && i < songs.size()) {
 			song = ZeldaSongs.getSongByName(songs.get(i));
-			if (!song.canLearnFromInscription()) {
+			if (!song.canLearnFromInscription(worldObj, xCoord, yCoord, zCoord, blockType, blockMetadata)) {
 				song = null;
 				++i;
 			}

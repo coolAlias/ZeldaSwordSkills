@@ -94,7 +94,7 @@ public final class SongAPI {
 
 	/**
 	 * Attempts to add the song to the player's repertoire of known songs.
-	 * @return	False if song was not added, whether because already known or some other reason.
+	 * @return	False if song already known or {@link AbstractZeldaSong#canLearn canLearn} returned false
 	 */
 	public static boolean learnSong(EntityPlayer player, AbstractZeldaSong song) {
 		return ZSSPlayerSongs.get(player).learnSong(song, null);
