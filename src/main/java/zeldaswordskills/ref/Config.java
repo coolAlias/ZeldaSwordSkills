@@ -23,8 +23,10 @@ import java.util.Map;
 
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.network.client.SyncConfigPacket;
 import zeldaswordskills.skills.BonusHeart;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.songs.AbstractZeldaSong;
@@ -33,24 +35,57 @@ import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.BossType;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
+/**
+ * 
+ * Fields denoted with [SYNC] need to be sent to each client as they log in
+ * to the server. In some cases this is because the field is mainly used
+ * on the client (e.g. attack speed), in others because the field is used on
+ * both sides and may result in inconsistencies if not synced (e.g. whip length).
+ *
+ */
 public class Config
 {
 	public static Configuration config;
+	/*================== CLIENT SIDE SETTINGS  =====================*/
+	/** [Buff HUD] Whether the buff bar should be displayed by default */
+	private static boolean isBuffBarEnabled;
+	/** [Buff HUD] Whether the buff bar should be displayed horizontally */
+	private static boolean isBuffBarHorizontal;
+	/** [Buff HUD] Whether the buff bar should be displayed on the left side of the screen */
+	private static boolean isBuffBarLeft;
+	/** [Chat] Whether to show a chat message when striking secret blocks */
+	private static boolean showSecretMessage;
+	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
+	private static boolean enableComboHud;
+	/** [Combo HUD] Number of combo hits to display */
+	private static int hitsToDisplay;
+	/** [Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry */
+	private static boolean allowVanillaControls;
+	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
+	private static boolean doubleTap;
+	/** [Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100] */
+	private static int resetNotesInterval;
+	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
+	private static boolean enableHookshotSound;
+	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
+	private static boolean autoTarget;
+	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
+	private static boolean enablePlayerTarget;
 	/*================== MOD INTER-COMPATIBILITY =====================*/
-	/** [BattleGear2] Allow Master Swords to be held in the off-hand */
+	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
 	private static boolean enableOffhandMaster;
 	/*================== GENERAL =====================*/
-	/** Whether players can be stunned; if false, item use is still interrupted */
+	/** [SYNC] Whether players can be stunned; if false, item use is still interrupted */
 	private static boolean enableStunPlayer;
-	/** Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds */
+	/** [SYNC] Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds */
 	private static boolean enableSwingSpeed;
-	/** Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
+	/** [SYNC] Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20] */
 	private static int baseSwingSpeed;
 	/** Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time) */
 	private static boolean enableHardcoreZeldaFanMode;
-	/** Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets) */
+	/** [SYNC] Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets) */
 	private static boolean enableVanillaLift;
-	/** Whether vanilla blocks can be smashed using appropriate items (e.g. hammers) */
+	/** [SYNC] Whether vanilla blocks can be smashed using appropriate items (e.g. hammers) */
 	private static boolean enableVanillaSmash;
 	/** Always pick up small hearts regardless of health */
 	private static boolean alwaysPickupHearts;
@@ -66,8 +101,6 @@ public class Config
 	private static int keeseSwarmSize;
 	/** [Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30] */
 	private static int sacredRefreshRate;
-	/** Whether to show a chat message when striking secret blocks */
-	private static boolean showSecretMessage;
 	/** [Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs */
 	private static boolean disableVanillaBuffs;
 	/** [NPC] Sets whether Zelda NPCs are invulnerable or not */
@@ -76,19 +109,10 @@ public class Config
 	private static int naviRange;
 	/** [NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200] */
 	private static int naviFrequency;
-	/*================== Buff Bar HUD =====================*/
-	/** [Buff HUD] Whether the buff bar should be displayed by default */
-	private static boolean isBuffBarEnabled;
-	/** [Buff HUD] Whether the buff bar should be displayed horizontally */
-	private static boolean isBuffBarHorizontal;
-	/** [Buff HUD] Whether the buff bar should be displayed on the left side of the screen */
-	private static boolean isBuffBarLeft;
-	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
-	private static boolean enableComboHud;
 	/*================== ITEMS =====================*/
 	/** [Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame */
 	private static boolean arrowsConsumeFlame;
-	/** [Bombs] Minimum fuse time; set to 0 to disable held bomb ticks */
+	/** [SYNC] [Bombs] Minimum fuse time; set to 0 to disable held bomb ticks */
 	private static int bombFuseTime;
 	/** [Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone */
 	private static boolean onlyBombSecretStone;
@@ -100,7 +124,7 @@ public class Config
 	private static boolean enableDinIgnite;
 	/** [Din's Fire] Whether Din's Fire can melt unbreakable ice blocks */
 	private static boolean enableDinMelt;
-	/** [Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil */
+	/** [SYNC] [Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil */
 	private static boolean disableAllUnenchantables;
 	/** [Hero's Bow] Cost (in emeralds) to upgrade, per level */
 	private static int heroBowUpgradeCost;
@@ -112,14 +136,12 @@ public class Config
 	private static boolean enableLightArrowNoClip;
 	/** [Hero's Bow] Whether to automate bomb arrow firing when sneaking */
 	private static boolean enableAutoBombArrows;
-	/** [Hookshot] Max range of non-extended hookshots */
+	/** [SYNC] [Hookshot] Max range of non-extended hookshots */
 	private static int hookshotRange;
-	/** [Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps! */
+	/** [SYNC] [Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps! */
 	private static boolean enableHookableOnly;
 	/** [Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass */
 	private static boolean enableHookshotBreakBlocks;
-	/** [Hookshot] Whether to play the 'itembreak' sound when the hookshot misses */
-	private static boolean enableHookshotSound;
 	/** [Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280] */
 	private static int rodUpgradeCost;
 	/** [Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword */
@@ -128,7 +150,7 @@ public class Config
 	private static int slingshotUpgradeOne;
 	/** [Slingshot] Cost (in emeralds) for second upgrade */
 	private static int slingshotUpgradeTwo;
-	/** [Whip] Range, in blocks, of the standard whip [4-12] */
+	/** [SYNC] [Whip] Range, in blocks, of the standard whip [4-12] */
 	private static int whipRange;
 	/*================== STARTING GEAR =====================*/
 	/** Whether starting gear will be granted */
@@ -148,29 +170,17 @@ public class Config
 	/** Start the game with Navi in a bottle (you can always acquire her later if false) */
 	public static boolean enableNavi;
 	/*================== SKILLS =====================*/
-	/** Whether to use default movement controls to activate skills such as Dodge */
-	private static boolean allowVanillaControls;
-	/** Whether Dodge and Parry require double-tap or not (double-tap always required for vanilla movement keys) */
-	private static boolean doubleTap;
 	/** Max number of bonus 1/2 hearts (capped at 80) */
 	private static int maxBonusHearts;
-	/** Whether auto-targeting is enabled or not */
-	private static boolean autoTarget;
-	/** Whether players can be targeted */
-	private static boolean enablePlayerTarget;
-	/** Number of combo hits to display */
-	private static int hitsToDisplay;
 	/** [Back Slice] Allow Back Slice to potentially knock off player armor */
 	private static boolean allowDisarmorPlayer;
 	/** [Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50] */
 	private static float disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
 	private static float disarmPenalty;
-	/** [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
+	/** [SYNC] [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
 	private static boolean requireFullHealth;
 	/*================== SONGS =====================*/
-	/** Number of ticks allowed between notes before played notes are cleared [5-100] */
-	private static int resetNotesInterval;
 	/** [Song of Storms] Time required between each use of the song (by anybody) [0-24000] */
 	private static int minSongIntervalStorm;
 	/** [Sun's Song] Time required between each use of the song (by anybody) [0-24000] */
@@ -296,9 +306,25 @@ public class Config
 
 	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
+		ZSSMain.logger.info("Reading config: " + config.toString());
 		config.load();
 		ZSSItems.initConfig(config);
 
+		/*================== CLIENT SIDE SETTINGS  =====================*/
+		String category = "client";
+		config.addCustomCategoryComment(category, "This category contains client side settings; i.e. they are not synchronized with the server.");
+		isBuffBarEnabled = config.get(category, "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
+		isBuffBarHorizontal = config.get(category, "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
+		isBuffBarLeft = config.get(category, "[Buff HUD] Whether the buff bar should be displayed on the left side of the screen", false).getBoolean(false);
+		showSecretMessage = config.get(category, "[Chat] Whether to show a chat message when striking secret blocks", false).getBoolean(false);
+		enableComboHud = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
+		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
+		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
+		doubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
+		resetNotesInterval = MathHelper.clamp_int(config.get(category, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
+		enableHookshotSound = config.get(category, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
+		autoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
+		enablePlayerTarget = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
 		/*================== GENERAL =====================*/
@@ -315,16 +341,10 @@ public class Config
 		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt(), 0, 100);
 		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt(), 4, 16);
 		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt(), 0, 30);
-		showSecretMessage = config.get("General", "Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
 		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
 		naviRange = MathHelper.clamp_int(config.get("General", "Range at which Navi can sense secret rooms, in blocks (0 to disable) [0-10]", 4).getInt(), 0, 10);
 		naviFrequency = MathHelper.clamp_int(config.get("General", "[NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200]", 50).getInt(), 20, 200);
-		/*================== Buff Bar HUD =====================*/
-		isBuffBarEnabled = config.get("General", "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
-		isBuffBarHorizontal = config.get("General", "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
-		isBuffBarLeft = config.get("General", "[Buff HUD] Whether the buff bar should be displayed on the left side of the screen", false).getBoolean(false);
-		enableComboHud = config.get("General", "[Combo HUD] Whether the combo hit counter will display by default (may be toggled in game)", true).getBoolean(true);
 		/*================== ITEMS =====================*/
 		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
 		bombFuseTime = MathHelper.clamp_int(config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt(), 0, 128);
@@ -342,7 +362,6 @@ public class Config
 		hookshotRange = MathHelper.clamp_int(config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt(), 4, 16);
 		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
-		enableHookshotSound = config.get("Item", "[Hookshot] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
 		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
 		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt(), 64, 320);
@@ -358,12 +377,7 @@ public class Config
 		enableSword = config.get("Bonus Gear", "Grants a Kokiri sword", true).getBoolean(true);
 		enableNavi = config.get("Bonus Gear", "Start the game with Navi in a bottle (you can always acquire her later if false)", false).getBoolean(false);
 		/*================== SKILLS =====================*/
-		allowVanillaControls = config.get("Skills", "Allow vanilla controls to activate skills", true).getBoolean(true);
-		autoTarget = config.get("Skills", "Enable auto-targeting of next opponent", true).getBoolean(true);
-		enablePlayerTarget = config.get("Skills", "Enable targeting of players by default (can be toggled in game)", true).getBoolean(true);
-		doubleTap = config.get("Skills", "Require double tap activation (double-tap always required for vanilla movement keys)", true).getBoolean(true);
 		maxBonusHearts = MathHelper.clamp_int(config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt(), 0, BonusHeart.MAX_BONUS_HEARTS);
-		hitsToDisplay = MathHelper.clamp_int(config.get("Skills", "Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
 		allowDisarmorPlayer = config.get("Skills", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
 		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 15);
 		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
@@ -448,7 +462,6 @@ public class Config
 		BossType.postInit(config);
 		ZSSEntities.postInit(config);
 		/*================== SONGS =====================*/
-		resetNotesInterval = MathHelper.clamp_int(config.get("Songs", "Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
 		minSongIntervalStorm = MathHelper.clamp_int(config.get("Songs", "[Song of Storms] Time required between each use of the song (by anybody) [0-24000]", 600).getInt(), 0, 24000);
 		minSongIntervalSun = MathHelper.clamp_int(config.get("Songs", "[Sun's Song] Time required between each use of the song (by anybody) [0-24000]", 1200).getInt(), 0, 24000);
 		for (AbstractZeldaSong song : ZeldaSongs.getRegisteredSongs()) {
@@ -461,6 +474,21 @@ public class Config
 		}
 	}
 
+	/*================== CLIENT SIDE SETTINGS  =====================*/
+	public static boolean isBuffBarEnabled() { return isBuffBarEnabled; }
+	public static boolean isBuffBarHorizontal() { return isBuffBarHorizontal; }
+	public static boolean isBuffBarLeft() { return isBuffBarLeft; }
+	public static boolean showSecretMessage() { return showSecretMessage; }
+	public static boolean isComboHudEnabled() { return enableComboHud; }
+	public static int getHitsToDisplay() { return hitsToDisplay; }
+	public static boolean allowVanillaControls() { return allowVanillaControls; }
+	public static boolean requiresDoubleTap() { return doubleTap; }
+	public static boolean autoTargetEnabled() { return autoTarget; }
+	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
+	public static boolean canTargetPlayers() { return enablePlayerTarget; }
+	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
+	public static boolean enableHookshotMissSound() { return enableHookshotSound; }
+	public static int getNoteResetInterval() { return resetNotesInterval; }
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	public static boolean allowOffhandMaster() { return enableOffhandMaster; }
 	/*================== GENERAL =====================*/
@@ -474,7 +502,6 @@ public class Config
 	public static float getBossHealthFactor() { return bossHealthFactor; }
 	public static int getNumBosses() { return bossNumber; }
 	public static int getSacredFlameRefreshRate() { return sacredRefreshRate; }
-	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
 	public static boolean areNpcsInvulnerable() { return npcsAreInvulnerable; }
 	public static int getNaviRange() { return naviRange; }
@@ -483,11 +510,6 @@ public class Config
 	public static float getKeeseCursedChance() { return keeseCursedChance; }
 	public static float getKeeseSwarmChance() { return keeseSwarmChance; }
 	public static int getKeeseSwarmSize() { return keeseSwarmSize; }
-	/*================== BUFF BAR HUD =====================*/
-	public static boolean isBuffBarEnabled() { return isBuffBarEnabled; }
-	public static boolean isBuffBarHorizontal() { return isBuffBarHorizontal; }
-	public static boolean isBuffBarLeft() { return isBuffBarLeft; }
-	public static boolean isComboHudEnabled() { return enableComboHud; }
 	/*================== ITEMS =====================*/
 	public static boolean getArrowsConsumeFlame() { return arrowsConsumeFlame; }
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
@@ -496,7 +518,7 @@ public class Config
 	public static boolean canDekuDenude() { return enableDekuDenude; }
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
-	public static boolean allUnenchantablesAreDisabled() { return disableAllUnenchantables; }
+	public static boolean areUnenchantablesDisabled() { return disableAllUnenchantables; }
 	public static int getHeroBowUpgradeCost() { return heroBowUpgradeCost; }
 	public static boolean enableFireArrowIgnite() { return enableFireArrowIgnite; }
 	public static boolean enableFireArrowMelt() { return enableFireArrowMelt; }
@@ -505,21 +527,13 @@ public class Config
 	public static int getHookshotRange() { return hookshotRange; }
 	public static boolean allowHookableOnly() { return enableHookableOnly; }
 	public static boolean canHookshotBreakBlocks() { return enableHookshotBreakBlocks; }
-	public static boolean enableHookshotMissSound() { return enableHookshotSound; }
 	public static int getRodUpgradeCost() { return rodUpgradeCost; }
 	public static int getRequiredKills() { return temperedRequiredKills - 1; }
 	public static int getSlingshotCostOne() { return slingshotUpgradeOne; }
 	public static int getSlingshotCostTwo() { return slingshotUpgradeTwo; }
 	public static int getWhipRange() { return whipRange; }
 	/*================== SKILLS =====================*/
-	public static boolean allowVanillaControls() { return allowVanillaControls; }
-	public static boolean requiresDoubleTap() { return doubleTap; }
 	public static byte getMaxBonusHearts() { return (byte) maxBonusHearts; }
-	public static boolean autoTargetEnabled() { return autoTarget; }
-	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
-	public static boolean canTargetPlayers() { return enablePlayerTarget; }
-	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
-	public static int getHitsToDisplay() { return hitsToDisplay; }
 	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
 	public static float getDisarmPenalty() { return disarmPenalty; }
 	public static float getDisarmTimingBonus() { return disarmTimingBonus; }
@@ -528,7 +542,6 @@ public class Config
 		return (requireFullHealth ? 0.0F : (0.6F * level));
 	}
 	/*================== SONGS =====================*/
-	public static int getNoteResetInterval() { return resetNotesInterval; }
 	public static int getMinIntervalStorm() { return minSongIntervalStorm; }
 	public static int getMinIntervalSun() { return minSongIntervalSun; }
 	/*================== DUNGEON GEN =====================*/
@@ -599,4 +612,25 @@ public class Config
 	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
 	public static float getMobVariantChance() { return mobVariantChance; }
 
+	/**
+	 * Updates client settings from server packet
+	 */
+	public static void syncClientSettings(SyncConfigPacket msg) {
+		if (!msg.isMessageValid()) {
+			ZSSMain.logger.error("Invalid SyncConfigPacket attempting to process!");
+			return;
+		}
+		Config.enableOffhandMaster = msg.enableOffhandMaster;
+		Config.enableStunPlayer = msg.enableStunPlayer;
+		Config.enableSwingSpeed = msg.enableSwingSpeed;
+		Config.enableVanillaLift = msg.enableVanillaLift;
+		Config.enableVanillaSmash = msg.enableVanillaSmash;
+		Config.disableAllUnenchantables = msg.disableAllUnenchantables;
+		Config.enableHookableOnly = msg.enableHookableOnly;
+		Config.requireFullHealth = msg.requireFullHealth;
+		Config.baseSwingSpeed = msg.baseSwingSpeed;
+		Config.bombFuseTime = msg.bombFuseTime;
+		Config.hookshotRange = msg.hookshotRange;
+		Config.whipRange = msg.whipRange;
+	}
 }

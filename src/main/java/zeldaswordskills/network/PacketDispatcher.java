@@ -31,6 +31,7 @@ import zeldaswordskills.network.client.MortalDrawPacket;
 import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
+import zeldaswordskills.network.client.SyncConfigPacket;
 import zeldaswordskills.network.client.SyncEntityInfoPacket;
 import zeldaswordskills.network.client.SyncPlayerInfoPacket;
 import zeldaswordskills.network.client.SyncSkillPacket;
@@ -86,6 +87,7 @@ public class PacketDispatcher
 		registerMessage(PacketISpawnParticles.class);
 		registerMessage(SetNockedArrowPacket.class);
 		registerMessage(SpawnNayruParticlesPacket.class);
+		registerMessage(SyncConfigPacket.class);
 		registerMessage(SyncEntityInfoPacket.class);
 		registerMessage(SyncPlayerInfoPacket.class);
 		registerMessage(SyncSkillPacket.class);

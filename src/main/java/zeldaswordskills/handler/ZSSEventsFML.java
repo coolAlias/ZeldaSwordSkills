@@ -1,9 +1,12 @@
 package zeldaswordskills.handler;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemInstrument;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.SyncConfigPacket;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
@@ -26,5 +29,8 @@ public class ZSSEventsFML {
 	@SubscribeEvent
 	public void onPlayerLoggedIn(PlayerLoggedInEvent event) {
 		ZSSPlayerInfo.get(event.player).onPlayerLoggedIn();
+		if (event.player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncConfigPacket(), (EntityPlayerMP) event.player);
+		}
 	}
 }
