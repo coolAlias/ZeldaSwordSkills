@@ -70,12 +70,12 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 					epona.clearLeashed(true, true);
 				}
 				Vec3 vec3 = player.getLookVec();
-				if (!((WorldServer) player.worldObj).getEntityTracker().getTrackingPlayers(epona).contains(player)) {
-					((WorldServer) player.worldObj).getEntityTracker().addEntityToTracker(epona);
-				}
 				epona.setPosition(player.posX + (vec3.xCoord * 2.0D), player.posY + 1, player.posZ + (vec3.zCoord * 2.0D));
-				PacketDispatcher.sendToPlayers(new S18PacketEntityTeleport(epona), ((WorldServer) player.worldObj).getEntityTracker().getTrackingPlayers(epona));
+				S18PacketEntityTeleport packet = new S18PacketEntityTeleport(epona);
+				PacketDispatcher.sendTo(packet, player); // send to ocarina player first, maybe it will be faster 
+				PacketDispatcher.sendToPlayersExcept(packet, player, ((WorldServer) player.worldObj).getEntityTracker().getTrackingPlayers(epona));
 				epona.makeHorseRearWithSound();
+				ZSSPlayerSongs.get(player).setHorseRidden(epona); // sets last chunk coordinates in case player doesn't mount
 			}
 		}
 	}

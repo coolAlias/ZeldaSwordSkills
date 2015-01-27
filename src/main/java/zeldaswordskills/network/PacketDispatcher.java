@@ -186,12 +186,32 @@ public class PacketDispatcher
 	}
 
 	/**
+	 * Sends a vanilla Packet to a player. SERVER->CLIENT only.
+	 */
+	public static void sendTo(Packet packet, EntityPlayer player) {
+		if (player instanceof EntityPlayerMP) {
+			((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+		}
+	}
+
+	/**
 	 * Sends a vanilla Packet to players provided. SERVER->CLIENT only.
 	 */
 	public static void sendToPlayers(Packet packet, Collection<EntityPlayer> players) {
 		for (EntityPlayer player : players) {
 			if (player instanceof EntityPlayerMP) {
 				((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+			}
+		}
+	}
+
+	/**
+	 * Sends a vanilla Packet to all players in the list except for the one player. SERVER->CLIENT only.
+	 */
+	public static void sendToPlayersExcept(Packet packet, EntityPlayer player, Collection<EntityPlayer> players) {
+		for (EntityPlayer p : players) {
+			if (p != player && p instanceof EntityPlayerMP) {
+				((EntityPlayerMP) p).playerNetServerHandler.sendPacket(packet);
 			}
 		}
 	}
