@@ -28,6 +28,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 
 /**
@@ -61,7 +62,9 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 		int z = MathHelper.floor_double(player.posZ);
 		if (player.worldObj.provider.isSurfaceWorld() && player.worldObj.canBlockSeeTheSky(x, y, z)) {
 			EntityHorse epona = ZSSPlayerSongs.get(player).getLastHorseRidden();
-			if (epona != null) {
+			if (epona == null) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.missing");
+			} else {
 				// TODO check for clear space where horse should spawn?
 				if (epona.riddenByEntity != null) {
 					epona.riddenByEntity.mountEntity(null);
