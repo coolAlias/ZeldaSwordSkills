@@ -22,10 +22,12 @@ import java.util.List;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
 import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.util.SongNote;
 
 /**
@@ -33,7 +35,6 @@ import zeldaswordskills.util.SongNote;
  * teleports the last ridden horse to the player so long as the horse is in
  * the same dimension.
  * TODO force load chunk containing horse if not loaded
- * TODO fix bug where horse does not appear visually immediately on client
  */
 public class ZeldaSongEpona extends AbstractZeldaSong {
 
@@ -68,10 +69,12 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 				if (epona.getLeashed()) {
 					epona.clearLeashed(true, true);
 				}
-				((WorldServer) player.worldObj).getEntityTracker().removeEntityFromAllTrackingPlayers(epona);
 				Vec3 vec3 = player.getLookVec();
+				if (!((WorldServer) player.worldObj).getEntityTracker().getTrackingPlayers(epona).contains(player)) {
+					((WorldServer) player.worldObj).getEntityTracker().addEntityToTracker(epona);
+				}
 				epona.setPosition(player.posX + (vec3.xCoord * 2.0D), player.posY + 1, player.posZ + (vec3.zCoord * 2.0D));
-				((WorldServer) player.worldObj).getEntityTracker().addEntityToTracker(epona);
+				PacketDispatcher.sendToPlayers(new S18PacketEntityTeleport(epona), ((WorldServer) player.worldObj).getEntityTracker().getTrackingPlayers(epona));
 				epona.makeHorseRearWithSound();
 			}
 		}
