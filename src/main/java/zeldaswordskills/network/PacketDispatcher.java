@@ -17,8 +17,14 @@
 
 package zeldaswordskills.network;
 
+import java.util.Collection;
+
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.bidirectional.AttackTimePacket;
 import zeldaswordskills.network.bidirectional.DeactivateSkillPacket;
@@ -177,5 +183,46 @@ public class PacketDispatcher
 	 */
 	public static final void sendToServer(IMessage message) {
 		PacketDispatcher.dispatcher.sendToServer(message);
+	}
+
+	/**
+	 * Sends a vanilla Packet to players provided. SERVER->CLIENT only.
+	 */
+	public static void sendToPlayers(Packet packet, Collection<EntityPlayer> players) {
+		for (EntityPlayer player : players) {
+			if (player instanceof EntityPlayerMP) {
+				((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+			}
+		}
+	}
+
+	/**
+	 * Sends a vanilla Packet to all players in the same dimension. SERVER->CLIENT only.
+	 */
+	public static void sendToAll(Packet packet, World world) {
+		if (world instanceof WorldServer) {
+			for (Object o : ((WorldServer) world).playerEntities) {
+				if (o instanceof EntityPlayerMP) {
+					((EntityPlayerMP) o).playerNetServerHandler.sendPacket(packet);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sends a vanilla Packet to all players within the given range of an entity. SERVER->CLIENT only.
+	 */
+	public static void sendToAllAround(Packet packet, Entity entity, int range) {
+		int rangeSq = (range * range);
+		if (entity.worldObj instanceof WorldServer) {
+			for (Object o : ((WorldServer) entity.worldObj).playerEntities) {
+				if (o instanceof EntityPlayerMP) {
+					EntityPlayerMP player = (EntityPlayerMP) o;
+					if (player.getDistanceSqToEntity(entity) <= rangeSq) {
+						((EntityPlayerMP) o).playerNetServerHandler.sendPacket(packet);
+					}
+				}
+			}
+		}
 	}
 }
