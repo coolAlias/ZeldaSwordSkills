@@ -35,7 +35,6 @@ import zeldaswordskills.util.SongNote;
  * Epona's song tames nearby horses and, if played on a powerful instrument,
  * teleports the last ridden horse to the player so long as the horse is in
  * the same dimension.
- * TODO force load chunk containing horse if not loaded
  */
 public class ZeldaSongEpona extends AbstractZeldaSong {
 
