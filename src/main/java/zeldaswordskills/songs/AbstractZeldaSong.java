@@ -275,7 +275,7 @@ public abstract class AbstractZeldaSong
 	}
 
 	/**
-	 * Notifies all {ISongEntity}s within the given radius of the song played
+	 * Notifies all {@link ISongEntity ISongEntities} within the given radius of the song played
 	 */
 	private void notifySongEntities(World world, EntityPlayer player, int power, int radius) {
 		int affected = 0;
