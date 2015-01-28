@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,5 +27,7 @@ public class ZSSCommands
 	public static void registerCommands(FMLServerStartingEvent event) {
 		event.registerServerCommand(CommandGrantSkill.INSTANCE);
 		event.registerServerCommand(CommandRemoveSkill.INSTANCE);
+		event.registerServerCommand(CommandGrantSong.INSTANCE);
+		event.registerServerCommand(CommandRemoveSong.INSTANCE);
 	}
 }

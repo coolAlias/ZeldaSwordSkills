@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSongs;
@@ -34,7 +35,7 @@ import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
- * Sent to client to sync songs when learned
+ * Sent to client to sync songs when learned or removed
  * 
  * Sent to server when song learned from GUI; for Scarecrow's Song, notes are also sent
  *
@@ -44,6 +45,10 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 	private AbstractZeldaSong song;
 
 	private List<SongNote> notes;
+
+	private boolean remove;
+
+	private boolean reset;
 
 	public LearnSongPacket() {}
 
@@ -62,8 +67,28 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 		this.notes = notes;
 	}
 
+	/**
+	 * Send notice to remove a specific song on the client side
+	 */
+	public LearnSongPacket(AbstractZeldaSong song, boolean remove) {
+		this.song = song;
+		this.remove = remove;
+	}
+
+	/**
+	 * Send notice to remove all songs on the client side
+	 */
+	public LearnSongPacket(boolean reset) {
+		this.reset = reset;
+	}
+
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
+		reset = buffer.readBoolean();
+		if (reset) {
+			return; // done processing this packet
+		}
+		remove = buffer.readBoolean();
 		String s = ByteBufUtils.readUTF8String(buffer);
 		song = ZeldaSongs.getSongByName(s);
 		if (song == null) {
@@ -78,6 +103,11 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeBoolean(reset);
+		if (reset) {
+			return; // done
+		}
+		buffer.writeBoolean(remove);
 		ByteBufUtils.writeUTF8String(buffer, song.getUnlocalizedName());
 		int n = (notes == null ? 0 : notes.size());
 		buffer.writeByte((byte) n);
@@ -88,8 +118,18 @@ public class LearnSongPacket extends AbstractMessage<LearnSongPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		if (song != null) {
-			ZSSPlayerSongs.get(player).learnSong(song, notes);
+		if ((reset || remove) && side.isServer()) {
+			((EntityPlayerMP) player).playerNetServerHandler.kickPlayerFromServer("Sent invalid packet to server!");
+			return;
+		}
+		if (reset) {
+			ZSSPlayerSongs.get(player).resetKnownSongs();
+		} else if (song != null) {
+			if (remove) {
+				ZSSPlayerSongs.get(player).removeSong(song);
+			} else {
+				ZSSPlayerSongs.get(player).learnSong(song, notes);
+			}
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class CommandGrantSkill extends CommandBase
 {
 	public static final ICommand INSTANCE = new CommandGrantSkill();
 
-	public CommandGrantSkill() {}
+	private CommandGrantSkill() {}
 
 	@Override
 	public String getCommandName() {

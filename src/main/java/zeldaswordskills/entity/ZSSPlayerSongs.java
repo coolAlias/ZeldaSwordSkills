@@ -18,6 +18,7 @@
 package zeldaswordskills.entity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -153,6 +154,36 @@ public class ZSSPlayerSongs
 	}
 
 	/**
+	 * Returns true if the song was removed from the player's repertoire
+	 */
+	public boolean removeSong(AbstractZeldaSong song) {
+		if (knownSongs.contains(song)) {
+			knownSongs.remove(song);
+			if (song == ZeldaSongs.songScarecrow) {
+				scarecrowNotes.clear();
+				scarecrowTime = 0;
+			}
+			if (player instanceof EntityPlayerMP) {
+				PacketDispatcher.sendTo(new LearnSongPacket(song, true), (EntityPlayerMP) player);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Completely wipes all songs (including Scarecrow's Song) from player's repertoire
+	 */
+	public void resetKnownSongs() {
+		knownSongs.clear();
+		scarecrowNotes.clear();
+		scarecrowTime = 0;
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new LearnSongPacket(true), (EntityPlayerMP) player);
+		}
+	}
+
+	/**
 	 * Checks the player's known songs to see if any match the notes played
 	 * @return	The song matching the notes played or null
 	 */
@@ -233,7 +264,7 @@ public class ZSSPlayerSongs
 	 * Returns a copy of the notes set for the Scarecrow song, if any
 	 */
 	public List<SongNote> getScarecrowNotes() {
-		return new ArrayList<SongNote>(scarecrowNotes);
+		return Collections.unmodifiableList(scarecrowNotes);
 	}
 
 	/**
