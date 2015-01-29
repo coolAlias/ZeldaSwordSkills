@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,11 +26,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.util.BossType;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -58,7 +60,6 @@ public class ItemDoorLocked extends Item implements IUnenchantable
 		} else {
 			++y;
 			Block block = ZSSBlocks.doorLocked;
-
 			if (player.canPlayerEdit(x, y, z, side, stack) && player.canPlayerEdit(x, y + 1, z, side, stack)) {
 				if (!block.canPlaceBlockAt(world, x, y, z)) {
 					return false;
@@ -74,23 +75,29 @@ public class ItemDoorLocked extends Item implements IUnenchantable
 	}
 
 	@Override
+	public String getItemStackDisplayName(ItemStack stack) {
+		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name",
+				BossType.values()[stack.getItemDamage() % BossType.values().length].getDisplayName());
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < 8; ++i) {
+		for (int i = 0; i < BossType.values().length; ++i) {
 			list.add(new ItemStack(item, 1, i));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int par1) {
-		return iconArray[par1 % 8];
+	public IIcon getIconFromDamage(int damage) {
+		return iconArray[damage % BossType.values().length];
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[8];
+		iconArray = new IIcon[BossType.values().length];
 		for (int i = 0; i < iconArray.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9).toLowerCase() + i);
 		}
