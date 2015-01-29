@@ -29,7 +29,6 @@ import net.minecraft.server.MinecraftServer;
 import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.songs.AbstractZeldaSong;
-import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 
 public class CommandGrantSong extends CommandBase
@@ -66,10 +65,8 @@ public class CommandGrantSong extends CommandBase
 		} else if (("all").equals(args[1])) {
 			boolean flag = true;
 			for (AbstractZeldaSong song : SongAPI.getRegisteredSongs()) {
-				if (song != ZeldaSongs.songScarecrow) {
-					if (!info.learnSong(song, null)) {
-						flag = false;
-					}
+				if (song.canLearnFromCommand() && !info.learnSong(song, null)) {
+					flag = false;
 				}
 			}
 			if (!flag) {
@@ -81,8 +78,8 @@ public class CommandGrantSong extends CommandBase
 			AbstractZeldaSong song = SongAPI.getSongByName(args[1]);
 			if (song == null) {
 				throw new CommandException("commands.song.generic.unknown", args[1]);
-			} else if (song == ZeldaSongs.songScarecrow) {
-				throw new CommandException("commands.grantsong.failure.scarecrow", song.getDisplayName());
+			} else if (!song.canLearnFromCommand()) {
+				throw new CommandException("commands.grantsong.failure.denied", song.getDisplayName());
 			} else if (info.learnSong(song, null)) {
 				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), song.getDisplayName());
 			} else {

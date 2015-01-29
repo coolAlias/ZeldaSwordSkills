@@ -24,13 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.bidirectional.PlaySoundPacket;
-import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.SongNote;
 
 public final class ZeldaSongs
@@ -129,15 +123,5 @@ public final class ZeldaSongs
 	public static final AbstractZeldaSong songWarpSpirit = new ZeldaSongWarp("requiem", 125, SongNote.D1, SongNote.F1, SongNote.D1, SongNote.A2, SongNote.F1, SongNote.D1);
 	public static final AbstractZeldaSong songWarpWater = new ZeldaSongWarp("serenade", 83, SongNote.D1, SongNote.F1, SongNote.A2, SongNote.A2, SongNote.B2);
 	public static final AbstractZeldaSong songZeldasLullaby = new ZeldaSongNoEffect("lullaby", 129, SongNote.B2, SongNote.D2, SongNote.A2, SongNote.B2, SongNote.D2, SongNote.A2);
-	/**
-	 * The Scarecrow Song is the only song with notes determined by the player.
-	 * When played, a scarecrow will pop up temporarily.
-	 */
-	public static final AbstractZeldaSong songScarecrow = new AbstractZeldaSong("scarecrow", 160) {
-		@Override
-		protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
-			// TODO
-			PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-		}
-	};
+	public static final AbstractZeldaSong songScarecrow = new ZeldaSongScarecrow();
 }
