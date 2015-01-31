@@ -277,7 +277,6 @@ public class ZSSPlayerSongs
 		}
 		// Check horse's last known chunk coordinates
 		if (entity == null) {
-			ZSSMain.logger.trace(String.format("Searching for horse using horse's chunk coordinates %d/%d", horseChunkX, horseChunkZ));
 			entity = getHorseFromChunk(horseChunkX, horseChunkZ);
 			int n = 1; // search n surrounding chunks if horse is still null
 			for (int i = -n; entity == null && i <= n; ++i) {
@@ -304,7 +303,6 @@ public class ZSSPlayerSongs
 		}
 		Entity entity = WorldUtils.getEntityByUUID(player.worldObj, horseUUID);
 		if (entity instanceof EntityHorse) {
-			ZSSMain.logger.trace("Found horse by UUID!");
 			horseId = entity.getEntityId();
 		}
 		return entity;
@@ -316,7 +314,6 @@ public class ZSSPlayerSongs
 	private Entity getHorseFromChunk(int chunkX, int chunkZ) {
 		Chunk chunk = player.worldObj.getChunkFromChunkCoords(chunkX, chunkZ);
 		if (chunk != null && chunk.isChunkLoaded) {
-			ZSSMain.logger.trace(String.format("Loaded chunk coordinates %d/%d, searching for horse...", chunkX, chunkZ));
 			return getHorseByUUID();
 		}
 		return null;
