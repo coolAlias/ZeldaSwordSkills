@@ -43,6 +43,7 @@ import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.world.crisis.BossBattle;
@@ -167,6 +168,10 @@ public enum BossType
 		if (biome == null) {
 			ZSSMain.logger.warn(String.format("Null biome at %d/%d while getting Boss Type", x, z));
 			return null;
+		}
+		if (Config.areBossDungeonsRandom()) {
+			int i = world.rand.nextInt(BossType.values().length);
+			return BossType.values()[i];
 		}
 		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
 	}

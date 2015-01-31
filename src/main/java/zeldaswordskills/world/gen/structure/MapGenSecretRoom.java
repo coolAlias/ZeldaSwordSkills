@@ -45,18 +45,19 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		this.worldObj = world;
 		loadOrCreateData(worldObj);
 		NBTTagList roomList = getStructureListFor(chunkX, chunkZ);
-		int posX = chunkX << 4;
-		int posZ = chunkZ << 4;
+		int posX = (chunkX << 4);
+		int posZ = (chunkZ << 4);
 		int posY = StructureGenUtils.getAverageSurfaceHeight(world, posX, posZ);
 		if (posY < 1) {
 			return;
 		}
 		for (int i = 0; i < Config.getAttemptsPerChunk(); ++i) {
 			if (rand.nextFloat() < Config.getSecretRoomChance()) {
-				int x = posX + rand.nextInt(16);
+				int size = Math.min(rand.nextInt(6) + 3, 6);
+				int x = posX + rand.nextInt(16 - size);
 				int y = rand.nextInt(posY) + (i % 2 == 0 ? rand.nextInt(16) : rand.nextInt(8));
-				int z = posZ + rand.nextInt(16);
-				RoomSecret room = new RoomSecret(chunkX, chunkZ, Math.min(rand.nextInt(6) + 3, 6), Blocks.stone);
+				int z = posZ + rand.nextInt(16 - size);
+				RoomSecret room = new RoomSecret(chunkX, chunkZ, size, Blocks.stone);
 				if (room.generate(this, world, rand, x, y, z)) {
 					roomList.appendTag(room.writeToNBT());
 					updateChunkStructureMap(roomList, chunkX, chunkZ);
@@ -65,7 +66,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		}
 
 		if (roomList.tagCount() > 0) {
-			ZSSMain.logger.trace(String.format("roomList for chunk %d/%d contains %d elements", chunkX, chunkZ, roomList.tagCount()));
+			//ZSSMain.logger.trace(String.format("roomList for chunk %d/%d contains %d elements", chunkX, chunkZ, roomList.tagCount()));
 			NBTTagCompound compound = new NBTTagCompound();
 			compound.setTag("roomList", roomList);
 			addRoomTag(compound, chunkX, chunkZ);

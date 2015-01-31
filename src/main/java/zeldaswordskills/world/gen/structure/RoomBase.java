@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -234,6 +234,7 @@ public abstract class RoomBase
 	/**
 	 * After a failed validation, attempts to place structure in ocean if applicable
 	 * @param sink if true, sinks the structure by some amount into the ocean floor
+	 * @return true if successful, in which case inOcean is set to true
 	 */
 	protected boolean placeInOcean(World world, boolean sink) {
 		bBox.offset(0, 4, 0); // move back up a little

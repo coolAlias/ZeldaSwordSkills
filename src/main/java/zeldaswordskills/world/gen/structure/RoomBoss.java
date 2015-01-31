@@ -82,21 +82,23 @@ public class RoomBoss extends RoomBase
 	 */
 	protected boolean initDungeon(World world, int x, int y, int z) {
 		bBox.offset(x, y, z);
-		if (type == null || y < bBox.getYSize() || y > (type == BossType.HELL ? 96 : 160)) {
+		if (type == null || y < bBox.getYSize() || y > (world.provider.isHellWorld ? 96 : 160)) {
 			return false;
+		}
+		// allow all boss types to potentially generate in the Nether (for randomized locations config option)
+		if (world.provider.isHellWorld) {
+			inNether = true;
+			if (!placeInNether(world)) {
+				return false;
+			}
 		}
 
 		switch(type) {
 		case HELL:
-			inNether = true;
-			if (placeInNether(world)) {
-				doDefaultAdjustments(world);
-				if (world.rand.nextFloat() < 0.75F) {
-					submerged = true;
-					inLava = true;
-				}
-			} else {
-				return false;
+			doDefaultAdjustments(world);
+			if (world.rand.nextFloat() < 0.75F) {
+				submerged = true;
+				inLava = true;
 			}
 			break;
 		case OCEAN:

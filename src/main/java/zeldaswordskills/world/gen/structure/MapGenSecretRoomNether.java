@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -33,15 +33,15 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 		this.worldObj = world;
 		loadOrCreateData(worldObj);
 		NBTTagList roomList = getStructureListFor(chunkX, chunkZ);
-		int posX = chunkX << 4;
-		int posZ = chunkZ << 4;
-
+		int posX = (chunkX << 4);
+		int posZ = (chunkZ << 4);
 		for (int i = 0; i < Config.getNetherAttemptsPerChunk(); ++i) {
 			if (rand.nextFloat() < Config.getNetherSecretRoomChance()) {
-				int x = posX + rand.nextInt(16);
+				int size = (rand.nextInt(6) + 3);
+				int x = posX + rand.nextInt(16 - size);
 				int y = rand.nextInt((i % 4 == 1 ? 64 : 128)) - rand.nextInt(16);
-				int z = posZ + rand.nextInt(16);
-				RoomSecret room = new RoomSecret(chunkX, chunkZ, rand.nextInt(6) + 3, Blocks.netherrack);
+				int z = posZ + rand.nextInt(16 - size);
+				RoomSecret room = new RoomSecret(chunkX, chunkZ, size, Blocks.netherrack);
 				if (room.generate(this, world, rand, x, y, z)) {
 					roomList.appendTag(room.writeToNBT());
 					updateChunkStructureMap(roomList, chunkX, chunkZ);
@@ -54,8 +54,6 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 			NBTTagCompound compound = new NBTTagCompound();
 			compound.setTag("roomList", roomList);
 			addRoomTag(compound, chunkX, chunkZ);
-		} else {
-			//LogHelper.log(Level.INFO, "Nether roomList for chunk " + chunkX + "/" + chunkZ + " contains ZERO elements");
 		}
 	}
 

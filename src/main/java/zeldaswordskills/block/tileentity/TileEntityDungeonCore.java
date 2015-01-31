@@ -190,13 +190,13 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		} else if (shouldUpdate()) {
 			//LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
-				//LogHelper.finer(String.format("Structure at %d/%d/%d failed verification during its update tick - replacing all blocks", xCoord, yCoord, zCoord));
+				//ZSSMain.logger.info(String.format("Structure at %d/%d/%d failed verification during its update tick - replacing all blocks", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				alreadyVerified = true;
 				if (isBossRoom) {
 					isOpened = true;
 				} else {
-					//LogHelper.finer("Structure was not a Boss Dungeon - removing core block now");
+					//ZSSMain.logger.info("Structure was not a Boss Dungeon - removing core block now");
 					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 					removeCoreBlock();
 				}

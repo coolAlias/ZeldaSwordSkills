@@ -188,10 +188,12 @@ public class Config
 	/*================== DUNGEON GEN =====================*/
 	/** Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected */
 	private static boolean avoidModBlocks;
-	/** Whether boss dungeons are allowed to have windows or not */
+	/** [Boss Dungeon] Whether boss dungeons are allowed to have windows or not */
 	private static boolean enableWindows;
-	/** Enable Boss Dungeon generation */
+	/** [Boss Dungeon] Enable Boss Dungeon generation */
 	private static boolean enableBossDungeons;
+	/** [Boss Dungeon] Ignore biome settings and randomize boss dungeon / boss key locations */
+	private static boolean randomizeBossDungeons;
 	/** Minimum number of chunks between Boss Dungeons in the Overworld */
 	private static int minBossDistance;
 	/** Minimum number of chunks between Boss Dungeons in the Nether */
@@ -384,8 +386,9 @@ public class Config
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
-		enableWindows = config.get("Dungeon Generation", "Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
-		enableBossDungeons = config.get("Dungeon Generation", "Enable Boss Dungeon generation", true).getBoolean(true);
+		enableWindows = config.get("Dungeon Generation", "[Boss Dungeon] Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
+		enableBossDungeons = config.get("Dungeon Generation", "[Boss Dungeon] Enable Boss Dungeon generation", true).getBoolean(true);
+		randomizeBossDungeons = config.get("Dungeon Generation", "[Boss Dungeon] Ignore biome settings and randomize boss dungeon / boss key locations", false).getBoolean(false);
 		mainDungeonDifficulty = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt(), 1, 3);
 		secretRoomChance = 0.01F * (float) MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt(), 1, 100);
 		minLandDistance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt(), 2, 16);
@@ -548,6 +551,7 @@ public class Config
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }
 	public static boolean areBossDungeonsEnabled() { return enableBossDungeons; }
+	public static boolean areBossDungeonsRandom() { return randomizeBossDungeons; }
 	public static int getMinBossDistance() { return minBossDistance; }
 	public static int getMinLandDistance() { return minLandDistance; }
 	public static int getMinOceanDistance() { return minOceanDistance; }

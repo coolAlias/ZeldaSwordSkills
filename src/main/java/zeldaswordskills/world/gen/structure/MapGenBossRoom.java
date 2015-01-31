@@ -44,18 +44,17 @@ public class MapGenBossRoom extends ZSSMapGenBase
 	public void generate(IChunkProvider provider, World world, Random rand, int chunkX, int chunkZ) {
 		this.worldObj = world;
 		loadOrCreateData(worldObj);
-		int posX = (chunkX << 4) + rand.nextInt(16);
-		int posZ = (chunkZ << 4) + rand.nextInt(16);
-
+		int size = rand.nextInt(5) + 9;
+		int posX = (chunkX << 4) + rand.nextInt(16 - size);
+		int posZ = (chunkZ << 4) + rand.nextInt(16 - size);
 		BossType type = BossType.getBossType(world, posX, posZ);
 		if (type != null) {
-			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, rand.nextInt(5) + 9, Blocks.stone);
+			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, size, Blocks.stone);
 			if (rand.nextFloat() < 0.2F && !areStructuresWithinRange(room, Config.getMinBossDistance())) {
 				int posY = StructureGenUtils.getAverageSurfaceHeight(world, posX, posZ);
 				if (room.generate(this, world, rand, posX, posY, posZ)) {
 					//LogHelper.finer("Boss room of type " + type.toString() + " successfully generated at " + room.getBoundingBox().toString());
-					onStructureGenerated(type, chunkX, chunkZ);
-					AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + type.ordinal(), room.getBoundingBox().getCenterX() >> 4, room.getBoundingBox().getCenterZ() >> 4);
+					onStructureGenerated(world, room);
 				} else {
 					//LogHelper.finest("Boss room of type " + type.toString() + " failed to generate at " + room.getBoundingBox().toString());
 				}
@@ -105,7 +104,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			for (int j = room.chunkZ - range; j <= room.chunkZ + range; ++j) {
 				if (structureMap.containsKey(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)))) {
 					BossType type = ((RoomBoss) room).getBossType();
-					if (type != null && type.ordinal() == getBossTypeFor(i, j)) {
+					if (type != null && (Config.areBossDungeonsRandom() || type.ordinal() == getBossTypeFor(i, j))) {
 						//LogHelper.finer("Boss room of same type found within " + range + " chunks of " + room.chunkX + "/" + room.chunkZ);
 						return true;
 					} else if (((room.chunkX - i) * (room.chunkX - i) + (room.chunkZ - j) * (room.chunkZ - j)) < (range * range) / 2) {
@@ -147,10 +146,11 @@ public class MapGenBossRoom extends ZSSMapGenBase
 	/**
 	 * Updates the structure map and adds the appropriate nbt compound to the room data
 	 */
-	protected void onStructureGenerated(BossType type, int chunkX, int chunkZ) {
-		structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)), type.ordinal());
+	protected void onStructureGenerated(World world, RoomBoss room) {
+		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + room.getBossType().ordinal(), room.chunkX, room.chunkZ);
+		structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(room.chunkX, room.chunkZ)), room.getBossType().ordinal());
 		NBTTagCompound compound = new NBTTagCompound();
-		compound.setInteger("bossType", type.ordinal());
-		addRoomTag(compound, chunkX, chunkZ);
+		compound.setInteger("bossType", room.getBossType().ordinal());
+		addRoomTag(compound, room.chunkX, room.chunkZ);
 	}
 }

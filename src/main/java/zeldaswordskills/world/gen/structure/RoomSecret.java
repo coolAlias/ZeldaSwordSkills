@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,7 @@ public class RoomSecret extends RoomBase
 		if (y < bBox.maxY) {
 			return false;
 		}
-		inNether = (world.provider.dimensionId == -1);
+		inNether = (world.provider.isHellWorld);
 		bBox.offset(x, y - bBox.maxY, z);
 		int worldHeight = (inNether ? 128 : world.getHeightValue(bBox.getCenterX(), bBox.getCenterZ()));
 		if (bBox.maxY > worldHeight) {
@@ -90,7 +90,7 @@ public class RoomSecret extends RoomBase
 
 	@Override
 	protected void setMetadata(World world, int x, int z) {
-		BossType type = BossType.getBossType(world, x, z);
+		BossType type = (Config.areBossDungeonsRandom() ? null : BossType.getBossType(world, x, z));
 		boolean inWater = inOcean || StructureGenUtils.getNumBlocksOfMaterial(world, bBox, Material.water, 1) > 0;
 		if (type != null) {
 			switch(type) {
@@ -98,9 +98,10 @@ public class RoomSecret extends RoomBase
 			case OCEAN: metadata = (inWater ? 6 : 0); break; // gravel or stone
 			default: metadata = 0;
 			}
+		} else if (world.provider.isHellWorld) {
+			metadata = 2; // nether brick
 		} else {
-			//BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
-			metadata = (inWater ? 6 : 0); // biome != null && biome.biomeName.toLowerCase().contains("beach") && 
+			metadata = (inWater ? 6 : 0); 
 		}
 		if (door != null) {
 			metadata |= 8;
