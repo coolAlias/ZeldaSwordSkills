@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -85,9 +85,9 @@ public abstract class ZSSMapGenBase
 			} else {
 				NBTTagCompound compound = roomData.getRoomData();
 				// func_150296_c is getTags()
-				Iterator iterator = compound.func_150296_c().iterator();
+				Iterator<String> iterator = compound.func_150296_c().iterator();
 				while (iterator.hasNext()) {
-					String s = (String) iterator.next();
+					String s = iterator.next();
 					NBTBase nbtbase = compound.getTag(s);
 					if (nbtbase.getId() == Constants.NBT.TAG_COMPOUND) {
 						translateNbtIntoMap((NBTTagCompound) nbtbase);

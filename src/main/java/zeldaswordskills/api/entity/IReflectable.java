@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,29 +21,33 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import zeldaswordskills.item.ItemZeldaShield;
 
 /**
  * 
- * For projectiles that need special handling when reflected with the Mirror Shield.
+ * For projectiles that need special handling when blocked by Zelda Shields.
+ * TODO make more generic:
+ *  - when struck by projectile while any IReflector item is in use
+ *  - or at least all Zelda Shields should be able to ineract with this interface (e.g. Deku Shield vs. Octorok rocks)
  *
  */
 public interface IReflectable extends IProjectile {
 
 	/**
-	 * Called when the projectile is blocked with a Mirror Shield
-	 * @param shield	Mirror Shield stack used to block the attack
+	 * Called when the projectile is blocked with a {@link ItemZeldaShield mirror shield}
+	 * @param shield	Shield stack used to block the attack
 	 * @param player	Defending player that is reflecting the projectile
 	 * @param shooter	Shooter of the projectile, possibly null
 	 * @return Chance that the projectile will be reflected, between 0.0F and 1.0F inclusive
 	 */
-	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, Entity shooter);
+	public float getReflectChance(ItemStack shield, EntityPlayer player, Entity shooter);
 
 	/**
 	 * Called using the new projectile instance, just before it is spawned into the world
-	 * @param shield	Mirror Shield stack used to block the attack
+	 * @param shield	Shield stack used to block the attack
 	 * @param player	Defending player that is reflecting the projectile
 	 * @param shooter	Shooter of the original projectile, possibly null
 	 * @param oldEntity	Original projectile entity
 	 */
-	public void onReflected(ItemStack mirrorShield, EntityPlayer player, Entity shooter, Entity oldEntity);
+	public void onReflected(ItemStack shield, EntityPlayer player, Entity shooter, Entity oldEntity);
 }
