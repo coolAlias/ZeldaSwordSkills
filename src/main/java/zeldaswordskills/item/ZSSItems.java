@@ -492,7 +492,7 @@ public class ZSSItems
 		// KEYS TAB ITEMS
 		keyBig = new ItemKeyBig().setUnlocalizedName("zss.keybig").setFull3D();
 		keySmall = new ItemMiscZSS(6).setUnlocalizedName("zss.keysmall").setFull3D().setCreativeTab(ZSSCreativeTabs.tabKeys);
-		keySkeleton = new ItemMiscZSS(32).setUnlocalizedName("zss.keyskeleton").setFull3D().setMaxStackSize(1).setCreativeTab(ZSSCreativeTabs.tabKeys);
+		keySkeleton = new ItemMiscZSS(32).setUnlocalizedName("zss.keyskeleton").setFull3D().setMaxStackSize(1).setMaxDamage(Config.getNumSkelKeyUses()).setCreativeTab(ZSSCreativeTabs.tabKeys);
 
 		// TOOLS TAB ITEMS
 		hookshot = new ItemHookShot().setUnlocalizedName("zss.hookshot");

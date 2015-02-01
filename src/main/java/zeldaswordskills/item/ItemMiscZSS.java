@@ -52,12 +52,13 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ItemMiscZSS extends Item implements IUnenchantable
 {
 	/** The price this item will fetch if sold to a villager */
-	private final int sell_price;
+	private final int sellPrice;
 
 	public ItemMiscZSS(int price) {
 		super();
 		setMaxDamage(0);
-		sell_price = price;
+		this.canRepair = false;
+		this.sellPrice = price;
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
 
@@ -126,8 +127,8 @@ public class ItemMiscZSS extends Item implements IUnenchantable
 
 	private void handleGenericTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
-		if (trades != null && sell_price > 0) {
-			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sell_price));
+		if (trades != null && sellPrice > 0) {
+			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sellPrice));
 			if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
 			} else {

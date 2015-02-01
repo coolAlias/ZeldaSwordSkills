@@ -36,6 +36,7 @@ import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -159,8 +160,16 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	private boolean canUnlock(EntityPlayer player) {
-		return (player.getHeldItem() != null && (player.getHeldItem().getItem() == ZSSItems.keySkeleton ||
-				(player.getHeldItem().getItem() == ZSSItems.keySmall && player.inventory.consumeInventoryItem(ZSSItems.keySmall))));
+		ItemStack key = player.getHeldItem();
+		if (key != null) {
+			if (key.getItem() == ZSSItems.keySmall) {
+				return PlayerUtils.consumeHeldItem(player, ZSSItems.keySmall, 1);
+			} else if (key.getItem() == ZSSItems.keySkeleton) {
+				key.damageItem(1, player);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

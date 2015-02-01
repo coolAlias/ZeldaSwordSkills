@@ -27,6 +27,7 @@ import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -72,14 +73,14 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote) {
-			if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.keySkeleton && player.inventory.consumeInventoryItem(ZSSItems.keySkeleton)) {
+			if (PlayerUtils.consumeHeldItem(player, ZSSItems.keySkeleton, 0, 1)) {
 				world.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 				world.setBlockToAir(x, y, z);
 			} else {
 				world.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 			}
 		}
-		return false;
+		return false; // returning true here prevents ItemBigKey from processing onItemUse
 	}
 
 	@Override
