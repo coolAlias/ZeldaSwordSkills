@@ -50,7 +50,7 @@ public class RoomBoss extends RoomBase
 	public static final int[] facingToOrientation = {3,4,2,5};
 
 	/** Side of the structure in which the door is located; use above directional values */
-	private int doorSide = SOUTH;
+	private int doorSide = -1;
 
 	/** The type of dungeon this is, as determined by biome using BossType.getBossType */
 	private final BossType type;
@@ -207,36 +207,25 @@ public class RoomBoss extends RoomBase
 		int x = bBox.getCenterX();
 		int y = bBox.minY + 1;
 		int z = bBox.getCenterZ();
-
-		Block block1 = world.getBlock(x, y, bBox.maxZ + 1);
-		Block block2 = world.getBlock(x, y + 1, bBox.maxZ + 1);
-		// func_149730_j is the equivalent of opaqueCubeLookup
-		if (!block1.func_149730_j() && !block2.func_149730_j()) {
-			doorSide = SOUTH;
-			return;
+		int dx, dz; 
+		doorSide = world.rand.nextInt(4);
+		for (int i = 0; i < 4; ++i) {
+			dx = x;
+			dz = z;
+			switch(doorSide) {
+			case SOUTH: dz = bBox.maxZ + 1; break;
+			case NORTH: dz = bBox.minZ - 1; break;
+			case EAST: dx = bBox.maxX + 1; break;
+			case WEST: dx = bBox.maxX - 1; break;
+			default: ZSSMain.logger.warn(String.format("Invalid boss door side %d at %d/%d/%d", doorSide, x, y, z));
+			}
+			Block block1 = world.getBlock(dx, y, dz);
+			Block block2 = world.getBlock(dx, y + 1, dz);
+			if (!block1.func_149730_j() && !block2.func_149730_j()) {
+				return;
+			}
+			doorSide = (doorSide == EAST ? SOUTH : doorSide + 1);
 		}
-
-		block1 = world.getBlock(x, y, bBox.minZ - 1);
-		block2 = world.getBlock(x, y + 1, bBox.minZ - 1);
-		if (!block1.func_149730_j() && !block2.func_149730_j()) {
-			doorSide = NORTH;
-			return;
-		}
-
-		block1 = world.getBlock(bBox.maxX + 1, y, z);
-		block2 = world.getBlock(bBox.maxX + 1, y + 1, z);
-		if (!block1.func_149730_j() && !block2.func_149730_j()) {
-			doorSide = EAST;
-			return;
-		}
-
-		block1 = world.getBlock(bBox.minX - 1, y, z);
-		block2 = world.getBlock(bBox.minX - 1, y + 1, z);
-		if (!block1.func_149730_j() && !block2.func_149730_j()) {
-			doorSide = WEST;
-			return;
-		}
-
 		doorSide = -1;
 	}
 
@@ -247,8 +236,6 @@ public class RoomBoss extends RoomBase
 		int x = bBox.getCenterX();
 		int y = bBox.minY + (submerged ? 2 : 1);
 		int z = bBox.getCenterZ();
-
-		//determineDoorSide(world, true);
 		switch(doorSide) {
 		case SOUTH: z = bBox.maxZ; break;
 		case NORTH: z = bBox.minZ; break;
