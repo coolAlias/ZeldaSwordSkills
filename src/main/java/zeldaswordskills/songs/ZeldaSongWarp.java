@@ -85,13 +85,14 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 				if (dimension != warp.dimensionId) {
 					((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, warp.dimensionId, new TeleporterNoPortal((WorldServer) player.worldObj));
 				}
-				boolean noBlock = false; // false if the player will appear on solid ground
-				boolean noAir = false; // false if the player has air to breathe (TODO)
+				boolean noBlock = true; // true if warp block not found
+				boolean noAir = false; // true if new position is not suitable
 				Block block = player.worldObj.getBlock(warp.x, warp.y, warp.z);
 				int meta = player.worldObj.getBlockMetadata(warp.x, warp.y, warp.z);
 				if (isBlockValid(player.worldObj, warp.x, warp.y, warp.z, block, meta)) {
+					noBlock = false;
 					if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D, null, true, false)) {
-						noBlock = true;
+						noAir = true;
 					}
 				}
 				// set back to original dimension and position if new position invalid
@@ -100,7 +101,7 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 						((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, dimension, new TeleporterNoPortal((WorldServer) player.worldObj));
 					}
 					player.setPositionAndUpdate(dx, dy, dz);
-					PlayerUtils.sendTranslatedChat(player, noBlock ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing");
+					PlayerUtils.sendTranslatedChat(player, noAir ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing");
 				} else {
 					PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 				}
