@@ -21,9 +21,11 @@ import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.ZSSMain;
@@ -142,8 +144,41 @@ public class PlayerUtils
 	}
 
 	/**
+	 * Attempts to consume the amount given from the player's held item stack only;
+	 * does not check stack damage. In Creative, acts like hasItem (does not consume).
+	 */
+	public static boolean consumeHeldItem(EntityPlayer player, Item item, int amount) {
+		return consumeHeldItem(player, item, -1, amount);
+	}
+
+	/**
+	 * Attempts to consume the amount given from the player's held item stack only.
+	 * In Creative, acts like hasItem (does not consume).
+	 * @param damage Required stack damage to match, or -1 to not check damage
+	 */
+	public static boolean consumeHeldItem(EntityPlayer player, Item item, int damage, int amount) {
+		ItemStack stack = player.getHeldItem();
+		if (stack == null || stack.getItem() != item || stack.stackSize < amount) {
+			return false;
+		} else if (damage > -1 && stack.getItemDamage() != damage) {
+			return false;
+		} else if (player.capabilities.isCreativeMode) {
+			return true;
+		} else {
+			stack.stackSize -= amount;
+			if (stack.stackSize < 1) {
+				stack = null;
+				player.setCurrentItemOrArmor(0, null);
+			}
+			PacketDispatcher.sendTo(new S2FPacketSetSlot(player.openContainer.windowId, player.inventory.currentItem, stack), player);
+			return true;
+		}
+	}
+
+	/**
 	 * Returns true if the required number of item were removed from the player's inventory;
 	 * if the entire quantity is not present, then no items are removed.
+	 * In Creative, acts like hasItem (does not consume).
 	 */
 	public static boolean consumeInventoryItem(EntityPlayer player, Item item, int required) {
 		return consumeInventoryItem(player, item, 0, required);
@@ -158,6 +193,7 @@ public class PlayerUtils
 
 	/**
 	 * A metadata-sensitive version of {@link InventoryPlayer#consumeInventoryItem(int)}
+	 * In Creative, acts like hasItem (does not consume).
 	 * @param item	The type of item to consume
 	 * @param meta	The required damage value of the stack
 	 * @param required	The number of such items to consume
@@ -169,17 +205,24 @@ public class PlayerUtils
 		for (int i = 0; i < player.inventory.getSizeInventory() && consumed > 0; ++i) {
 			ItemStack invStack = player.inventory.getStackInSlot(i);
 			if (invStack != null && invStack.getItem() == item && invStack.getItemDamage() == meta) {
+				Slot slot = player.openContainer.getSlotFromInventory(player.inventory, i);
 				if (invStack.stackSize <= consumed) {
 					consumed -= invStack.stackSize;
-					player.inventory.setInventorySlotContents(i, null);
+					if (!player.capabilities.isCreativeMode) {
+						player.inventory.setInventorySlotContents(i, null);
+						PacketDispatcher.sendTo(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, null), player);
+					}
 				} else {
-					player.inventory.setInventorySlotContents(i, invStack.splitStack(invStack.stackSize - consumed));
+					if (!player.capabilities.isCreativeMode) {
+						invStack = invStack.splitStack(invStack.stackSize - consumed);
+						player.inventory.setInventorySlotContents(i, invStack);
+						PacketDispatcher.sendTo(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, invStack), player);
+					}
 					consumed = 0;
-					break;
 				}
 			}
 		}
-		if (consumed > 0) {
+		if (consumed > 0 && !player.capabilities.isCreativeMode) {
 			player.inventory.addItemStackToInventory(new ItemStack(item, required - consumed, meta));
 		}
 
