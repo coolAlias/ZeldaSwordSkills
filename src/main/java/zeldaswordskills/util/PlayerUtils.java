@@ -157,6 +157,9 @@ public class PlayerUtils
 	 * @param damage Required stack damage to match, or -1 to not check damage
 	 */
 	public static boolean consumeHeldItem(EntityPlayer player, Item item, int damage, int amount) {
+		if (amount < 1) {
+			return false;
+		}
 		ItemStack stack = player.getHeldItem();
 		if (stack == null || stack.getItem() != item || stack.stackSize < amount) {
 			return false;
@@ -200,6 +203,9 @@ public class PlayerUtils
 	 * @return	True if the entire amount was consumed; if this is not possible, no items are consumed and it returns false
 	 */
 	public static boolean consumeInventoryItem(EntityPlayer player, Item item, int meta, int required) {
+		if (required < 1) {
+			return false;
+		}
 		// decremented until it reaches zero, meaning the entire required amount was consumed
 		int consumed = required;
 		for (int i = 0; i < player.inventory.getSizeInventory() && consumed > 0; ++i) {
