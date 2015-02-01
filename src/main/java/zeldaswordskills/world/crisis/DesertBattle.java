@@ -73,15 +73,15 @@ public class DesertBattle extends BossBattle {
 				for (int k = minZ; k < maxZ; ++k) {
 					if (activate) {
 						if (world.getBlock(i, j, k) == Blocks.dispenser && world.rand.nextInt(9 - (2 * difficulty)) == 0) { 
-							Blocks.dispenser.updateTick(world, i, j, k, world.rand);
+							TileEntity te = world.getTileEntity(i, j, k);
+							if (te instanceof IInventory) {
+								WorldUtils.addItemToInventory(new ItemStack(Items.arrow), (IInventory) te);
+								Blocks.dispenser.updateTick(world, i, j, k, world.rand);
+							}
 						}
 					} else {
 						world.setBlock(i, j, k, Blocks.dispenser);
 						world.setBlockMetadataWithNotify(i, j, k, RoomBoss.facingToOrientation[(side + 2) % 4], 2);
-						TileEntity te = world.getTileEntity(i, j, k);
-						if (te instanceof IInventory) {
-							WorldUtils.addItemToInventory(new ItemStack(Items.arrow, (difficulty == 3 ? 24 : 16)), (IInventory) te);
-						}
 					}
 				}
 			}
