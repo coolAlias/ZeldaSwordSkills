@@ -59,6 +59,7 @@ public class ItemPendant extends Item implements IUnenchantable
 	public ItemPendant() {
 		super();
 		setMaxDamage(0);
+		setMaxStackSize(1);
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
