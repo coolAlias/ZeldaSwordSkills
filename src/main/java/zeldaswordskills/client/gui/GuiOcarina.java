@@ -51,6 +51,9 @@ public class GuiOcarina extends GuiMusicBase
 	/** Index of note currently being played, used for the Scarecrow Song only */
 	private int currentNoteIndex;
 
+	/** If the player was sneaking when opening the GUI, the song is played without effect */
+	private final boolean wasSneaking;
+
 	public GuiOcarina(int x, int y, int z) {
 		this(x, y, z, false);
 	}
@@ -64,6 +67,7 @@ public class GuiOcarina extends GuiMusicBase
 				scarecrowNotes = new ArrayList<SongNote>();
 			}
 		}
+		wasSneaking = mc.thePlayer.isSneaking();
 	}
 
 	@Override
@@ -108,7 +112,7 @@ public class GuiOcarina extends GuiMusicBase
 			if (ticksSinceLastNote > song.getMinDuration() || (scarecrowNotes != null && currentNoteIndex == scarecrowNotes.size())) {
 				if (scarecrowFirst || (scarecrowNotes != null && !ZSSPlayerSongs.get(mc.thePlayer).isSongKnown(ZeldaSongs.songScarecrow))) {
 					PacketDispatcher.sendToServer(new LearnSongPacket(song, scarecrowNotes));
-				} else {
+				} else if (!wasSneaking) {
 					PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
 				}
 			} else {
