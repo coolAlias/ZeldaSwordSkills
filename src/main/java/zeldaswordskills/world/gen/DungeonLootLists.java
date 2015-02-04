@@ -80,7 +80,7 @@ public class DungeonLootLists
 	NETHER_LOOT = "zss.nether_chest_loot";
 
 	/** List of droppable skill orb items as weighted chest contents, not including the bonus heart */
-	private static final List<WeightedRandomChestContent> skillOrbLootList = new ArrayList<WeightedRandomChestContent>();
+	private static WeightedRandomChestContent[] skillOrbLootList;
 
 	/**
 	 * Initializes all of the loot tables for dungeon generation
@@ -92,12 +92,6 @@ public class DungeonLootLists
 		initLockedLoot();
 		initNetherLoot();
 		initSkillOrbLoot();
-	}
-
-	/** Returns the list of droppable skill orbs */
-	public static WeightedRandomChestContent[] getSkillOrbList() {
-		List<WeightedRandomChestContent> lootTable = new ArrayList<WeightedRandomChestContent>(skillOrbLootList);
-		return lootTable.toArray(new WeightedRandomChestContent[lootTable.size()]);
 	}
 
 	/**
@@ -159,7 +153,7 @@ public class DungeonLootLists
 		if (stack != null && rand.nextFloat() < 0.2F) {
 			WorldUtils.addItemToInventoryAtRandom(rand, stack, chest, 3);
 		} else {
-			WorldUtils.generateRandomChestContents(rand, getSkillOrbList(), chest, 1, false);
+			WorldUtils.generateRandomChestContents(rand, skillOrbLootList, chest, 1, false);
 		}
 	}
 
@@ -314,10 +308,12 @@ public class DungeonLootLists
 	};
 
 	private static void initSkillOrbLoot() {
+		List<WeightedRandomChestContent> lootTable = new ArrayList<WeightedRandomChestContent>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
-			if (skill.isLoot()) {
-				skillOrbLootList.add(getLoot(ZSSItems.skillOrb, skill.getId(), 1, 1, Config.getLockedLootWeight()));
+			if (Config.isLootableSkill(skill)) {
+				lootTable.add(getLoot(ZSSItems.skillOrb, skill.getId(), 1, 1, Config.getLockedLootWeight()));
 			}
 		}
+		skillOrbLootList = lootTable.toArray(new WeightedRandomChestContent[lootTable.size()]);
 	}
 }

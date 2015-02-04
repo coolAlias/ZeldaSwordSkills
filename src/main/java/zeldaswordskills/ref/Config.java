@@ -19,7 +19,9 @@ package zeldaswordskills.ref;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
@@ -268,6 +270,8 @@ public class Config
 	smallKeyWeight;
 	/** Loot weight for items in locked chests */
 	private static int lockedLootWeight;
+	/** [Skill Orbs] Whether this skill may appear as random loot, such as in Boss chests */
+	private static Set<Byte> lootableOrbs = new HashSet<Byte>();
 	/*================== DROPS =====================*/
 	/** Chance of grass dropping loot (set to zero to disable) */
 	private static float grassDropChance;
@@ -444,6 +448,9 @@ public class Config
 				int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
 				orbDropChance.put(skill.getId(), (0.001F * (float) i));
 			}
+			if (skill.isLoot() && config.get("Loot", "[Skill Orbs] Whether " + skill.getDisplayName() + " orbs may appear as random loot, such as in Boss chests", true).getBoolean(true)) {
+				lootableOrbs.add(skill.getId());
+			}
 		}
 		powerDropRate = Math.max(config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt(), 20);
 		// TODO playerWhipLootChance = config.get("Drops", "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)[0-100]", 15).getInt();
@@ -595,6 +602,9 @@ public class Config
 	public static int getBigKeyWeight() { return bigKeyWeight; }
 	public static int getSmallKeyWeight() { return smallKeyWeight; }
 	public static int getLockedLootWeight() { return lockedLootWeight; }
+	public static boolean isLootableSkill(SkillBase skill) {
+		return lootableOrbs.contains(skill.getId());
+	}
 	/*================== DROPS =====================*/
 	public static float getGrassDropChance() { return grassDropChance; }
 	public static float getJarDropChance() { return jarDropChance; }
