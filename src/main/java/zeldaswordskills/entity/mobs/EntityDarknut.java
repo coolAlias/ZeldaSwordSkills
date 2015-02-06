@@ -192,13 +192,14 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	 * Sets the Darknut's type: 0 - normal, 1 - Mighty
 	 */
 	@Override
-	public void setType(int type) {
+	public EntityDarknut setType(int type) {
 		dataWatcher.updateObject(TYPE_INDEX, (byte) type);
 		setWearingCape((type > 0 ? (byte) 60 : (byte) 0));
 		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue((type > 0 ? 100.0D : 50.0D));
 		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue((type > 0 ? 7.0D : 5.0D));
 		setHealth(getMaxHealth());
 		experienceValue = (type > 0 ? 20 : 12);
+		return this;
 	}
 
 	protected float getArmorDamage() {

@@ -59,7 +59,9 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 	}
 
 	@Override
-	public void setType(int type) {} // don't allow setting type
+	public EntityBlackKnight setType(int type) {
+		return this; // only one type, nothing to set
+	}
 
 	@Override
 	public void addRandomArmor() {

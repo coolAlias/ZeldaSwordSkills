@@ -186,8 +186,9 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	}
 
 	@Override
-	public void setType(int type) {
+	public EntityWizzrobe setType(int type) {
 		setType(WizzrobeType.values()[type % WizzrobeType.values().length]);
+		return this;
 	}
 
 	private void setTypeOnSpawn() {

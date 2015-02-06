@@ -89,8 +89,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	 * Sets the octorok's type: 0 - normal, 1 - bomb shooter
 	 */
 	@Override
-	public void setType(int type) {
+	public EntityOctorok setType(int type) {
 		dataWatcher.updateObject(OCTOROK_TYPE_INDEX, (byte)(type % 2));
+		return this;
 	}
 
 	@Override

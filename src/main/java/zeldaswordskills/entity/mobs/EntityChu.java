@@ -170,8 +170,9 @@ public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IE
 	}
 
 	@Override
-	public void setType(int type) {
+	public EntityChu setType(int type) {
 		setType(ChuType.values()[type % ChuType.values().length]);
+		return this;
 	}
 
 	private void setTypeOnSpawn() {

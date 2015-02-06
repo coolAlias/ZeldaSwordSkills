@@ -139,8 +139,9 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	}
 
 	@Override
-	public void setType(int type) {
+	public EntityKeese setType(int type) {
 		setType(KeeseType.values()[type % KeeseType.values().length]);
+		return this;
 	}
 
 	/**
