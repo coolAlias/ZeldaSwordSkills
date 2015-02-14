@@ -111,7 +111,7 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 
 		if (used) {
 			WorldUtils.playSoundAtEntity(player, Sounds.CORK, 0.4F, 1.0F);
-			if (!player.capabilities.isCreativeMode) {
+			if (!player.capabilities.isCreativeMode || stack.hasDisplayName()) {
 				--stack.stackSize;
 				if (stack.stackSize <= 0) {
 					return new ItemStack(Items.glass_bottle);
