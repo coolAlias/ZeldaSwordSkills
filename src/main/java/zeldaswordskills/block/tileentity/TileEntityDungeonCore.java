@@ -18,6 +18,13 @@
 package zeldaswordskills.block.tileentity;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.monster.EntityCaveSpider;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySpider;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -31,8 +38,15 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo.Stats;
+import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.PlayerUtils;
@@ -235,6 +249,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				if (info.getStat(Stats.STAT_SECRET_ROOMS) > 49) {
 					player.triggerAchievement(ZSSAchievements.bombJunkie);
 				}
+				if (worldObj.rand.nextFloat() < Config.getRoomSpawnMobChance()) {
+					spawnRandomMob();
+				}
 			}
 		}
 
@@ -255,6 +272,55 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		int z = box.getCenterZ() + (doorSide == RoomBoss.SOUTH ? 1 : (doorSide == RoomBoss.NORTH ? -1 : 0));
 		int y = (worldObj.getBlock(x, box.minY + 2, z) == ZSSBlocks.secretStone ? box.minY + 2 : box.minY + 3);
 		worldObj.setBlockToAir(x, y, z);
+	}
+
+	/**
+	 * Spawns a mob inside of non-boss secret rooms (call when breached)
+	 * Only allows spawning for rooms size 5+ (at least a 3x3x3 space inside)
+	 */
+	private void spawnRandomMob() {
+		if (worldObj.isRemote || box == null || box.getXSize() < 5) {
+			return;
+		}
+		// get the block above the tile to check for liquids
+		Block block = worldObj.getBlock(xCoord, yCoord + 1, zCoord);
+		EntityLiving mob = null;
+		int rarity = worldObj.rand.nextInt(64) - (worldObj.difficultySetting.getDifficultyId() * 2);
+		int type = -1; // for IEntityVariants to set a specific type
+		if (block.getMaterial() == Material.water) {
+			mob = new EntityOctorok(worldObj);
+			type = (rarity < 8 ? 1 : 0);
+		} else if (block.getMaterial() == Material.lava) {
+			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
+			type = (rarity > 7 ? EntityKeese.KeeseType.FIRE.ordinal() : EntityKeese.KeeseType.CURSED.ordinal());
+		// START rarity 'switch', starting with most likely cases
+		} else if (rarity > 50) {
+			mob = new EntityZombie(worldObj);
+		} else if (rarity > 40) {
+			mob = new EntitySkeleton(worldObj);
+		} else if (rarity > 30) {
+			mob = (worldObj.rand.nextInt(8) > 1 ? new EntitySpider(worldObj) : new EntityCaveSpider(worldObj));
+		} else if (rarity > 20) {
+			mob = new EntityCreeper(worldObj);
+		} else if (rarity > 10) {
+			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
+		} else if (rarity > 4) {
+			mob = new EntityChu(worldObj);
+		} else if (rarity > -2) {
+			mob = new EntityWizzrobe(worldObj);
+			//((EntityWizzrobe) mob).getTeleportAI().setTeleBounds(box);
+		} else {
+			mob = new EntityDarknut(worldObj);
+		}
+		if (mob != null) {
+			mob.setPosition(xCoord + 0.5D, yCoord + 1.5D, zCoord + 0.5D);
+			mob.onSpawnWithEgg(null);
+			if (type > -1 && mob instanceof IEntityVariant) {
+				((IEntityVariant) mob).setType(type);
+			}
+			worldObj.spawnEntityInWorld(mob);
+			mob.playLivingSound();
+		}
 	}
 
 	/**

@@ -309,6 +309,8 @@ public class Config
 	/** Number of trades required before a villager offers other services */
 	private static int friendTradesRequired;
 	/*================== MOB SPAWNING =====================*/
+	/** Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100] */
+	private static float roomSpawnMobChance;
 	/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
 	private static float mobVariantChance;
 
@@ -465,6 +467,7 @@ public class Config
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt(), 1, 15);
 		/*================== MOB SPAWNING =====================*/
+		roomSpawnMobChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100]", 25).getInt(), 0, 100);
 		mobVariantChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt(), 0, 100);
 	}
 
@@ -627,6 +630,7 @@ public class Config
 	public static float getMaskBuyChance() { return maskBuyChance; }
 	public static int getFriendTradesRequired() { return friendTradesRequired; }
 	/*================== MOB SPAWNING =====================*/
+	public static float getRoomSpawnMobChance() { return roomSpawnMobChance; }
 	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
 	public static float getMobVariantChance() { return mobVariantChance; }
 
