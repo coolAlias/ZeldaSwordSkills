@@ -248,17 +248,6 @@ public class ZSSCombatEvents
 	}
 
 	/**
-	 * Listen for when an entity truly dies (only care about the player, but no PlayerEvent suffices)
-	 */
-	@SubscribeEvent(priority=EventPriority.LOWEST)
-	public void onTrulyDied(LivingDeathEvent event) {
-		if (event.entity instanceof EntityPlayer) {
-			// remove all temporary buffs:
-			ZSSEntityInfo.get((EntityPlayer) event.entity).removeAllBuffs(false, false);
-		}
-	}
-
-	/**
 	 * Returns the damage amount modified by both the attacker's and the defender's relevant buffs
 	 */
 	public static float applyDamageModifiers(EntityLivingBase defender, DamageSource source, float amount) {

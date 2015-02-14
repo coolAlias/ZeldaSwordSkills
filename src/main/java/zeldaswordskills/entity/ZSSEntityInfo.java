@@ -167,7 +167,7 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 */
 	public void stun(int time, boolean alwaysStuns) {
 		int stunTime = (stunResistTime > 0 || (!alwaysStuns && isImmuneToStun()) ? 0 : time);
-		if (stunTime > 0) {
+		if (stunTime > 0 && !entity.worldObj.isRemote) {
 			stunTime *= 1.0F + (getBuffAmplifier(Buff.RESIST_STUN) * 0.01F);
 			stunTime *= 1.0F - (getBuffAmplifier(Buff.RESIST_STUN) * 0.01F);
 			if (stunTime > 0) {
@@ -231,6 +231,8 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 		NBTTagCompound compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 		this.loadNBTData(compound);
+		// remove temporary buffs after copying to use the new entity instance when removed
+		this.removeAllBuffs(false, false);
 	}
 
 	@Override
