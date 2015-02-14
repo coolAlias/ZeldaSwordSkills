@@ -212,6 +212,17 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 		dataWatcher.updateObject(SHOCK_INDEX, time);
 	}
 
+	/** Whether this Keese may spawn a swarm in the near future */
+	public boolean getSpawnSwarm() {
+		return !swarmSpawned;
+	}
+
+	/** Disable or re-enable possibility of spawning a swarm */
+	public EntityKeese setSpawnSwarm(boolean spawnSwarm) {
+		this.swarmSpawned = !spawnSwarm;
+		return this;
+	}
+
 	/**
 	 * Returns amount of damage this type of Keese inflicts
 	 */
