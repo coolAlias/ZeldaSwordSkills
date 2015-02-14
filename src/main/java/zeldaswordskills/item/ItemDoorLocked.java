@@ -107,6 +107,7 @@ public class ItemDoorLocked extends Item implements IUnenchantable
 	 * Places first the bottom then the top block with correct metadata values
 	 */
 	public static void placeDoorBlock(World world, int x, int y, int z, int meta, Block block) {
+		meta &= 0x7;
 		world.setBlock(x, y, z, block, meta, 2);
 		world.setBlock(x, y + 1, z, block, meta | 0x8, 2);
 		world.notifyBlocksOfNeighborChange(x, y, z, block);
