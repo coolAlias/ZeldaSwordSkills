@@ -242,7 +242,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	@Override
-	public void addRandomArmor() {
+	protected void addRandomArmor() {
 		// don't use super.addRandomArmor, as Darknuts always have certain equipment
 		setCurrentItemOrArmor(0, new ItemStack(ZSSItems.swordDarknut));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, new ItemStack(Items.iron_chestplate));
