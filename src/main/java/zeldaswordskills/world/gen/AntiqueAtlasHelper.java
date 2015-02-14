@@ -41,12 +41,12 @@ public class AntiqueAtlasHelper
 	}
 
 	/**
-	 * Places custom tile at the given chunk coordinates
+	 * Places global custom tile at the given chunk coordinates
 	 */
 	public static void placeCustomTile(World world, String tileName, int chunkX, int chunkZ) {
 		if (ZSSMain.isAtlasEnabled && !world.isRemote) {
 			try {
-				AtlasAPI.getTileAPI().putCustomTile(world, world.provider.dimensionId, tileName, chunkX, chunkZ);
+				AtlasAPI.getTileAPI().putCustomGlobalTile(world, tileName, chunkX, chunkZ);
 			} catch (Exception e) {
 				ZSSMain.logger.error("Unable to add Atlas data: " + e.getLocalizedMessage());
 			}
@@ -62,8 +62,8 @@ public class AntiqueAtlasHelper
 			try {
 				for (BossType type : BossType.values()) {
 					String name = ModInfo.ATLAS_DUNGEON_ID + type.ordinal();
-					AtlasAPI.getTileAPI().setTextureIfNone(name, new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + ".png"));
-					AtlasAPI.getTileAPI().setTextureIfNone(name + "_fin", new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + "_fin.png"));
+					AtlasAPI.getTileAPI().setCustomTileTexture(name, new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + ".png"));
+					AtlasAPI.getTileAPI().setCustomTileTexture(name + "_fin", new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + "_fin.png"));
 				}
 			} catch (Exception e) {
 				ZSSMain.logger.error(e.getLocalizedMessage());
