@@ -281,7 +281,7 @@ public class ZSSPlayerSongs
 			int n = 1; // search n surrounding chunks if horse is still null
 			for (int i = -n; entity == null && i <= n; ++i) {
 				for (int k = -n; entity == null && k <= n; ++k) {
-					if (i != 0 && k != 0) {
+					if (i != 0 || k != 0) {
 						entity = getHorseFromChunk(horseChunkX + i, horseChunkZ + k);
 					}
 				}
