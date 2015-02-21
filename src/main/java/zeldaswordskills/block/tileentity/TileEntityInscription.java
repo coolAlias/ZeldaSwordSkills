@@ -72,11 +72,16 @@ public class TileEntityInscription extends TileEntity
 			i = 0;
 		}
 		song = null;
+		boolean looped = false;
 		while (song == null && i < songs.size()) {
 			song = ZeldaSongs.getSongByName(songs.get(i));
 			if (!song.canLearnFromInscription(worldObj, xCoord, yCoord, zCoord, blockType, blockMetadata)) {
 				song = null;
 				++i;
+				if (i == songs.size() && !looped) {
+					looped = true;
+					i = 0;
+				}
 			}
 		}
 		setSong(song);
