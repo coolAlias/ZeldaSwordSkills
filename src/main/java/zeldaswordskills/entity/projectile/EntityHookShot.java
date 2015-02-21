@@ -352,7 +352,8 @@ public class EntityHookShot extends EntityThrowable
 				thrower.motionX = thrower.motionY = thrower.motionZ = 0.0D;
 			} else {
 				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_X) - thrower.posX);
-				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Y) + (this.height / 3.0F) - thrower.posY);
+				// Added 0.1D to help 'boost' the player up onto ledges - works great
+				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Y) + (this.height / 3.0F) - thrower.posY + 0.1D);
 				double dz = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Z) - thrower.posZ);
 				TargetUtils.setEntityHeading(thrower, dx, dy, dz, 1.0F, 1.0F, true);
 			}
