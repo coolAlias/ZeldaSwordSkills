@@ -44,8 +44,8 @@ public interface ILiftable {
 
 	/**
 	 * Called after the block is picked up by a player, but before it is set to air,
-	 * allowing tile entity data to be stored in the player's held item stack
-	 * @param stack the stack used to lift the block is always an ILiftBlock
+	 * allowing tile entity data to be stored in the ItemHeldBlock stack's NBT tag
+	 * @param stack the ItemHeldBlock stack containing the ILiftBlock stack used to pick up the block
 	 * @param meta the metadata of the block before it was picked up
 	 */
 	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta);

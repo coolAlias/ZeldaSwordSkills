@@ -272,17 +272,17 @@ public class ZSSItemEvents
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (isLiftable || !block.hasTileEntity(meta))) {
 				if (!world.isRemote) {
-					// make a copy for ILiftable#onLifted
-					ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack.copy(), block, meta);
+					ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack, block, meta);
 					if (returnStack != null && returnStack.stackSize <= 0) {
 						returnStack = null;
 					}
-					player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, returnStack));
-					world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
-							block.stepSound.getBreakSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+					ItemStack heldBlock = ItemHeldBlock.getBlockStack(block, meta, returnStack);
 					if (isLiftable) {
-						((ILiftable) block).onLifted(world, player, stack, x, y, z, meta);
+						((ILiftable) block).onLifted(world, player, heldBlock, x, y, z, meta);
 					}
+					player.setCurrentItemOrArmor(0, heldBlock);
+					world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, block.stepSound.getBreakSound(),
+							(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
 					world.setBlockToAir(x, y, z);
 				}
 				return true;
