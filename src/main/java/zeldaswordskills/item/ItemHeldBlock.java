@@ -162,7 +162,7 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 				entity.motionZ *= 0.25D;
 			}
 		} else {
-			if (entity instanceof EntityPlayer && dropHeldBlock(stack, world, (EntityPlayer) entity)) {
+			if (!world.isRemote && entity instanceof EntityPlayer && dropHeldBlock(stack, world, (EntityPlayer) entity)) {
 				ItemStack gauntlets = (stack.hasTagCompound() && stack.getTagCompound().hasKey("gauntlets") ?
 						ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("gauntlets")) : null);
 				((EntityPlayer) entity).inventory.setInventorySlotContents(slot, gauntlets);
