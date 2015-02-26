@@ -148,6 +148,8 @@ public class Config
 	private static int rodUpgradeCost;
 	/** [Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword */
 	private static int temperedRequiredKills;
+	/** [SYNC] [Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal */
+	private static boolean allMasterSwordsProvidePower;
 	/** [Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500] */
 	private static int numSkelKeyUses;
 	/** [Slingshot] Cost (in emeralds) for first upgrade */
@@ -374,6 +376,7 @@ public class Config
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
+		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", false).getBoolean(false);
 		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 100).getInt(), 0, 500);
 		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt(), 64, 320);
 		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt(), 128, 640);
@@ -545,6 +548,7 @@ public class Config
 	public static boolean canHookshotBreakBlocks() { return enableHookshotBreakBlocks; }
 	public static int getRodUpgradeCost() { return rodUpgradeCost; }
 	public static int getRequiredKills() { return temperedRequiredKills - 1; }
+	public static boolean getMasterSwordsProvidePower() { return allMasterSwordsProvidePower; }
 	public static int getNumSkelKeyUses() { return numSkelKeyUses; }
 	public static int getSlingshotCostOne() { return slingshotUpgradeOne; }
 	public static int getSlingshotCostTwo() { return slingshotUpgradeTwo; }
@@ -654,5 +658,6 @@ public class Config
 		Config.bombFuseTime = msg.bombFuseTime;
 		Config.hookshotRange = msg.hookshotRange;
 		Config.whipRange = msg.whipRange;
+		Config.allMasterSwordsProvidePower = msg.allMasterSwordsProvidePower;
 	}
 }

@@ -49,7 +49,9 @@ public class SyncConfigPacket extends AbstractClientMessage<SyncConfigPacket>
 	/** Bit 7 (shift 6) */
 	public boolean enableHookableOnly;
 	/** Bit 8 (shift 7) */
-	public boolean requireFullHealth; 
+	public boolean requireFullHealth;
+	/** Bit 9 (shift 8) */
+	public boolean allMasterSwordsProvidePower; 
 	public int baseSwingSpeed;
 	public int bombFuseTime;
 	public int hookshotRange;
@@ -75,6 +77,7 @@ public class SyncConfigPacket extends AbstractClientMessage<SyncConfigPacket>
 		this.disableAllUnenchantables = (bits & (0x1 << 5)) > 0;
 		this.enableHookableOnly = (bits & (0x1 << 6)) > 0;
 		this.requireFullHealth = (bits & (0x1 << 7)) > 0;
+		this.allMasterSwordsProvidePower = (bits & (0x1 << 8)) > 0;
 		this.baseSwingSpeed = buffer.readInt();
 		this.bombFuseTime = buffer.readInt();
 		this.hookshotRange = buffer.readInt();
@@ -93,6 +96,7 @@ public class SyncConfigPacket extends AbstractClientMessage<SyncConfigPacket>
 		bits |= (Config.areUnenchantablesDisabled() ? (0x1 << 5) : 0x0);
 		bits |= (Config.allowHookableOnly() ? (0x1 << 6) : 0x0);
 		bits |= (Config.getHealthAllowance(1) == 0.0F ? (0x1 << 7) : 0x0);
+		bits |= (Config.getMasterSwordsProvidePower() ? (0x1 << 8) : 0x0);
 		buffer.writeShort(bits);
 		buffer.writeInt(Config.getBaseSwingSpeed());
 		buffer.writeInt(Config.getBombFuseTime());

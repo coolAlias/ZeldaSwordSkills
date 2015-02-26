@@ -27,7 +27,9 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
+import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -51,6 +53,16 @@ public class TileEntityPedestal extends TileEntityInventory
 
 	public TileEntityPedestal() {
 		inventory = new ItemStack[3];
+	}
+
+	/**
+	 * Returns the amount of redstone power provided by the implanted sword, if any
+	 */
+	public int getPowerLevel() {
+		if (sword != null && sword.getItem() instanceof ItemZeldaSword && ((ItemZeldaSword) sword.getItem()).isMasterSword()) {
+			return sword.getItem() == ZSSItems.swordMaster || Config.getMasterSwordsProvidePower() ? 15 : 0;
+		}
+		return 0;
 	}
 
 	/**
