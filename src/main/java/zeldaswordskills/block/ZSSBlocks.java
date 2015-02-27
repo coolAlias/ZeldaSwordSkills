@@ -28,6 +28,7 @@ import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.block.tileentity.TileEntityInscription;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
@@ -42,6 +43,7 @@ import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
 import zeldaswordskills.item.ItemBlockTime;
 import zeldaswordskills.item.ItemCeramicJar;
 import zeldaswordskills.item.ItemDungeonBlock;
+import zeldaswordskills.item.ItemGossipStone;
 import zeldaswordskills.item.ItemMetadataBlock;
 import zeldaswordskills.item.ItemSacredFlame;
 import zeldaswordskills.item.ItemSecretStone;
@@ -69,6 +71,7 @@ public class ZSSBlocks
 	leverGiant,
 	beamWooden,
 	hookTarget,
+	gossipStone,
 	inscription,
 	warpStone,
 	secretStone,
@@ -101,6 +104,7 @@ public class ZSSBlocks
 		timeBlock = new BlockTime().setBlockName("zss.time_block");
 		inscription = new BlockSongInscription().setBlockName("zss.inscription");
 		warpStone = new BlockWarpStone().setBlockName("zss.warp_stone");
+		gossipStone = new BlockGossipStone().setBlockName("zss.gossip_stone");
 		register();
 	}
 
@@ -139,12 +143,14 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(timeBlock, ItemBlockTime.class, timeBlock.getUnlocalizedName());
 		GameRegistry.registerBlock(inscription, inscription.getUnlocalizedName());
 		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
+		GameRegistry.registerBlock(gossipStone, ItemGossipStone.class, gossipStone.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
 		GameRegistry.registerTileEntity(TileEntityChestInvisible.class, "tileEntityChestInvisible");
 		GameRegistry.registerTileEntity(TileEntityDungeonBlock.class, "tileEntityDungeonBlock");
 		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, "tileEntityDungeonCore");
+		GameRegistry.registerTileEntity(TileEntityGossipStone.class, "tileEntityGossipStone");
 		GameRegistry.registerTileEntity(TileEntityInscription.class, "tileEntityInscription");
 		GameRegistry.registerTileEntity(TileEntityPedestal.class, "tileEntityPedestal");
 		GameRegistry.registerTileEntity(TileEntitySacredFlame.class, "tileEntitySacredFlame");

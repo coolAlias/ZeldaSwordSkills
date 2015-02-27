@@ -139,6 +139,20 @@ buff.zss.weakness_magic.name=Weakness to Magic
 buff.zss.weakness_shock.name=Weakness to Shock
 buff.zss.weakness_stun.name=Weakness to Stun
 
+chat.zss.block.gossip_stone.default=Someone forgot to give me a message!
+chat.zss.block.gossip_stone.hint.0=Try using boomerangs or hookshots on electrified enemies.
+chat.zss.block.gossip_stone.hint.1=Wild fairies fade away in sunlight.
+chat.zss.block.gossip_stone.hint.2=Darknuts' armor is weakest in the back.
+chat.zss.block.gossip_stone.hint.3=Mighty Darknuts cannot be defeated until their cape is destroyed.
+chat.zss.block.gossip_stone.hint.4=Striking an electrified enemy with a melee weapon is a bad idea.
+chat.zss.block.gossip_stone.hint.5=A Fairy Bottle on one's belt is the best insurance policy.
+chat.zss.block.gossip_stone.hint.6=Wizzrobes are most vulnerable while casting a spell.
+chat.zss.block.gossip_stone.hint.7=Try swinging different items through the Sacred Flames.
+chat.zss.block.gossip_stone.hint.8=Many mobs will ignore players wearing a Spooky Mask.
+chat.zss.block.gossip_stone.hint.9=Guru-Guru down at the windmill enjoys a good storm.
+chat.zss.block.gossip_stone.hint.10=Zelda's Lullaby can reveal hidden things.
+chat.zss.block.gossip_stone.hint.11=Keep an eye out for void particles - something might be there!
+chat.zss.block.gossip_stone.silent=The stone is silent.
 chat.zss.block.secret=This tool doesn't seem to be very effective...
 chat.zss.block.warp_stone.activate=Warp coordinates for %s set to %d/%d/%d.
 chat.zss.dungeon.sneak_in=Ganondorf: Thought you could sneak in, eh? Mwa ha ha ha!
@@ -596,6 +610,7 @@ entity.zeldaswordskills.wizzrobe.name.2=Thunder Wizzrobe
 entity.zeldaswordskills.wizzrobe.name.3=Gale Wizzrobe
 entity.zeldaswordskills.wizzrobe_grand.name=Grand Wizzrobe
 
+gui.zss.gossip_stone.name=Gossip Stone Secret Message
 gui.zss.mask_trader.name=Welcome to the Happy Mask Shop!
 
 itemGroup.zss.blocks=Zelda Blocks
@@ -879,6 +894,8 @@ tile.zss.dungeoncore.name=Fairy Spawner
 tile.zss.dungeoncore.name.unbreakable=Fairy Spawner (unbreakable)
 tile.zss.dungeonstone.name=Dungeon Stone
 tile.zss.dungeonstone.name.unbreakable=Dungeon Stone (unbreakable)
+tile.zss.gossip_stone.name=Gossip Stone
+tile.zss.gossip_stone.name.unbreakable=Gossip Stone (unbreakable)
 tile.zss.lever_giant.name=Giant Lever
 tile.zss.hook_target.name=Hookshot Target
 tile.zss.inscription.name=Song Inscription

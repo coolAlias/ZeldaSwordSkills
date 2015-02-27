@@ -22,7 +22,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
+import zeldaswordskills.client.gui.GuiEditGossipStone;
 import zeldaswordskills.client.gui.GuiLearnSong;
 import zeldaswordskills.client.gui.GuiMaskTrader;
 import zeldaswordskills.client.gui.GuiOcarina;
@@ -41,7 +43,9 @@ public class GuiHandler implements IGuiHandler
 			/** Same as GUI_OCARINA but with a flag set for learning the Scarecrow Song */
 			GUI_SCARECROW = 4,
 			/** Gui to open for learning all songs but the Scarecrow Song */
-			GUI_LEARN_SONG = 5;
+			GUI_LEARN_SONG = 5,
+			/** Gui opened when a Gossip Stone is placed, like the vanilla sign editor */
+			GUI_EDIT_GOSSIP_STONE = 6;
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
@@ -62,9 +66,9 @@ public class GuiHandler implements IGuiHandler
 
 	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+		TileEntity te = world.getTileEntity(x, y, z);
 		switch(id) {
 		case GUI_PEDESTAL:
-			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				return new GuiPedestal(player.inventory, (TileEntityPedestal) te);
 			}
@@ -75,6 +79,19 @@ public class GuiHandler implements IGuiHandler
 			return new GuiSkills(player);
 		case GUI_OCARINA:
 			return new GuiOcarina(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
+		case GUI_EDIT_GOSSIP_STONE:
+			if (te == null) {
+				// modeled after vanilla sign editor handling, since TE is not yet available on client
+				te = new TileEntityGossipStone();
+				te.setWorldObj(world);
+				te.xCoord = x;
+				te.yCoord = y;
+				te.zCoord = z;
+			}
+			if (te instanceof TileEntityGossipStone) {
+				return new GuiEditGossipStone((TileEntityGossipStone) te);
+			}
+			break;
 		case GUI_SCARECROW:
 			return new GuiOcarina(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ), true);
 		case GUI_LEARN_SONG:

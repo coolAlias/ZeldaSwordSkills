@@ -39,6 +39,7 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
+import zeldaswordskills.world.gen.feature.WorldGenGossipStones;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
@@ -104,6 +105,9 @@ public class ZSSMain
 		MinecraftForge.EVENT_BUS.register(dungeonGen);
 		if (Config.areBossDungeonsEnabled()) {
 			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
+		}
+		if (Config.getGossipStoneRate() > 0) {
+			MinecraftForge.EVENT_BUS.register(WorldGenGossipStones.INSTANCE);
 		}
 		String link = "https://raw.githubusercontent.com/coolAlias/ZeldaSwordSkills/master/src/main/resources/versionlist.json";
 		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);

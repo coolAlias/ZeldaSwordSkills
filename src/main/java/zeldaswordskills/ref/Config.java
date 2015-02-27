@@ -245,6 +245,8 @@ public class Config
 	private static int jarsPerClusterNether;
 	/** [Ceramic Jars][Nether] Max number of jar clusters per chunk */
 	private static int jarClustersPerChunkNether;
+	/** [Gossip Stones] Chance (1 = 0.1% chance) per chunk of a Gossip Stone generating [0-100] */
+	private static float gossipStoneRate;
 	/** [Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64] */
 	private static int maxPillarRange;
 	/** [Song Pillars] Minimum number of chunks between broken pillars [4-64] */
@@ -376,7 +378,7 @@ public class Config
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
-		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", false).getBoolean(false);
+		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
 		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 100).getInt(), 0, 500);
 		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt(), 64, 320);
 		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt(), 128, 640);
@@ -424,6 +426,7 @@ public class Config
 		jarGenChanceNether = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt(), 0, 100);
 		jarsPerClusterNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt(), 2, 20);
 		jarClustersPerChunkNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt(), 1, 20);
+		gossipStoneRate = 0.0001F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Gossip Stones] Chance per chunk of a Gossip Stone generating (100 = 1% chance)[0-500]", 50).getInt(), 0, 500);
 		maxPillarRange = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64]", 64).getInt(), 16, 64);
 		minBrokenPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt(), 4, 128);
 		minSongPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt(), 8, 128);
@@ -593,6 +596,7 @@ public class Config
 	public static float getJarGenChanceNether() { return jarGenChanceNether; }
 	public static int getJarClustersPerChunkNether() { return jarClustersPerChunkNether; }
 	public static int getJarsPerClusterNether() { return jarsPerClusterNether; }
+	public static float getGossipStoneRate() { return gossipStoneRate; }
 	public static int getPillarRange() { return maxPillarRange; }
 	public static int getBrokenPillarMin() { return minBrokenPillarDistance; }
 	public static int getSongPillarMin() { return minSongPillarDistance; }

@@ -34,6 +34,7 @@ import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import zeldaswordskills.network.client.AttackBlockedPacket;
 import zeldaswordskills.network.client.InLiquidPacket;
 import zeldaswordskills.network.client.MortalDrawPacket;
+import zeldaswordskills.network.client.OpenGossipStoneEditorPacket;
 import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
@@ -53,6 +54,7 @@ import zeldaswordskills.network.server.FallDistancePacket;
 import zeldaswordskills.network.server.GetBombPacket;
 import zeldaswordskills.network.server.OpenGuiPacket;
 import zeldaswordskills.network.server.RefreshSpinPacket;
+import zeldaswordskills.network.server.SetGossipStoneMessagePacket;
 import zeldaswordskills.network.server.TargetIdPacket;
 import zeldaswordskills.network.server.ZeldaSongPacket;
 import zeldaswordskills.ref.ModInfo;
@@ -90,6 +92,7 @@ public class PacketDispatcher
 		registerMessage(AttackBlockedPacket.class);
 		registerMessage(InLiquidPacket.class);
 		registerMessage(MortalDrawPacket.class);
+		registerMessage(OpenGossipStoneEditorPacket.class);
 		registerMessage(PacketISpawnParticles.class);
 		registerMessage(SetNockedArrowPacket.class);
 		registerMessage(SpawnNayruParticlesPacket.class);
@@ -111,6 +114,7 @@ public class PacketDispatcher
 		registerMessage(GetBombPacket.class);
 		registerMessage(OpenGuiPacket.class);
 		registerMessage(RefreshSpinPacket.class);
+		registerMessage(SetGossipStoneMessagePacket.class);
 		registerMessage(TargetIdPacket.class);
 		registerMessage(ZeldaSongPacket.class);
 	}
