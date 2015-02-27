@@ -41,7 +41,6 @@ public class WorldGenJars extends WorldGenerator {
 			int i = x + rand.nextInt(4) - rand.nextInt(4);
 			int j = y + rand.nextInt(4) - rand.nextInt(4);
 			int k = z + rand.nextInt(4) - rand.nextInt(4);
-
 			if (canPlaceBlockAt(world, i, j, k, isUnderground) && (!world.provider.hasNoSky || j < 127) && ZSSBlocks.ceramicJar.canBlockStay(world, i, j, k)) {
 				world.setBlock(i, j, k, ZSSBlocks.ceramicJar, 0, 2);
 				--n;
