@@ -226,6 +226,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		ZSSEntityInfo info = ZSSEntityInfo.get(this);
 		info.removeAllBuffs();
 		info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 50);
+		info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 50);
 		switch(getMagicType()) {
 		case FIRE:
 			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 50);
@@ -388,6 +389,18 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	 */
 	protected float getTelevadeChance() {
 		return 0.5F;
+	}
+
+	@Override
+	public boolean canContinueCasting() {
+		ZSSEntityInfo info = ZSSEntityInfo.get(this);
+		if (info.isBuffActive(Buff.STUN)) {
+			if (worldObj.rand.nextInt(50) > info.getBuffAmplifier(Buff.STUN)) {
+				info.removeBuff(Buff.STUN);
+			}
+			return false;
+		}
+		return true;
 	}
 
 	@Override

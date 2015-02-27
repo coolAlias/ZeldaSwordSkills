@@ -105,6 +105,8 @@ public class EntityAIRangedMagic extends EntityAIBase
 		} else if (!entity.getEntitySenses().canSee(attackTarget) && ++unseenTimer > MAX_TIME_UNSEEN) {
 			unseenTimer = 0;
 			return false;
+		} else if (!caster.canContinueCasting()) {
+			return false;
 		}
 		return entity.getDistanceSq(attackTarget.posX, attackTarget.boundingBox.minY, attackTarget.posZ) < minDistanceSq;
 	}
@@ -156,11 +158,11 @@ public class EntityAIRangedMagic extends EntityAIBase
 
 	@Override
 	public void updateTask() {
-		double d = entity.getDistanceSq(attackTarget.posX, attackTarget.boundingBox.minY, attackTarget.posZ);
 		if (castingTimer > 0) {
 			--castingTimer;
 			entity.getLookHelper().setLookPositionWithEntity(attackTarget, 30.0F, 30.0F);
 			if (castingTimer == 0) {
+				double d = entity.getDistanceSq(attackTarget.posX, attackTarget.boundingBox.minY, attackTarget.posZ);
 				float f = (float)(MathHelper.sqrt_double(d) / minDistance);
 				float f1 = MathHelper.clamp_float(f, 0.1F, 1.0F);
 				caster.castRangedSpell(attackTarget, f1);

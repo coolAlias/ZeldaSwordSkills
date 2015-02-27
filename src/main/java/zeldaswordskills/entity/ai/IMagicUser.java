@@ -30,6 +30,11 @@ import net.minecraft.entity.EntityLivingBase;
 public interface IMagicUser {
 
 	/**
+	 * Called each tick to check if caster can continue casting
+	 */
+	public boolean canContinueCasting();
+
+	/**
 	 * Called from {@link EntityAIRangedMagic} when a spell is about to begin charging.
 	 * Allows entity to determine which spell should be cast and set the cast time
 	 * appropriately, as well as set animation flags and such.
