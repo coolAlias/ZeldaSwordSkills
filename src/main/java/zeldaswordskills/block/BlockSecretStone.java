@@ -17,6 +17,7 @@
 
 package zeldaswordskills.block;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -111,6 +112,13 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	@Override
 	public Item getItemDropped(int meta, Random rand, int fortune) {
 		return Item.getItemFromBlock(getBlockFromMeta(meta));
+	}
+
+	@Override
+	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int meta, int fortune) {
+		ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
+		drops.add(new ItemStack(getItemDropped(meta, world.rand, fortune)));
+		return drops;
 	}
 
 	@Override
