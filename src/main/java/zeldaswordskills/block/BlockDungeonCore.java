@@ -64,6 +64,7 @@ public class BlockDungeonCore extends BlockDungeonStone
 
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
+		// super plays the break sound and prints a message: only call if unbreakable
 		if (world.getBlockMetadata(x, y, z) > 7) {
 			super.onBlockClicked(world, x, y, z, player);
 		}

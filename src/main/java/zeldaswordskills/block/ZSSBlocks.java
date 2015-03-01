@@ -87,8 +87,8 @@ public class ZSSBlocks
 	public static void preInit() {
 		barrierLight = new BlockHeavy(Material.rock, BlockWeight.MEDIUM).setBlockName("zss.barrier_light");
 		barrierHeavy = new BlockHeavy(Material.rock, BlockWeight.VERY_HEAVY).setBlockName("zss.barrier_heavy");
-		pegWooden = new BlockPeg(BlockPeg.pegWoodMaterial, BlockWeight.VERY_LIGHT).setBlockName("zss.peg_wooden");
-		pegRusty = new BlockPeg(BlockPeg.pegRustyMaterial, BlockWeight.MEDIUM).setBlockName("zss.peg_rusty");
+		pegWooden = new BlockPeg(ZSSBlockMaterials.pegWoodMaterial, BlockWeight.VERY_LIGHT).setBlockName("zss.peg_wooden");
+		pegRusty = new BlockPeg(ZSSBlockMaterials.pegRustyMaterial, BlockWeight.MEDIUM).setBlockName("zss.peg_rusty");
 		ceramicJar = new BlockCeramicJar().setBlockName("zss.ceramic_jar").setBlockTextureName("stone");
 		chestLocked = new BlockChestLocked().setBlockName("zss.chest_locked");
 		pedestal = new BlockPedestal().setBlockName("zss.pedestal");

@@ -61,7 +61,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	private static boolean keepInventory;
 
 	public BlockCeramicJar() {
-		super(Material.clay);
+		super(ZSSBlockMaterials.adventureClay);
 		disableStats();
 		setBlockUnbreakable();
 		setStepSound(soundTypeStone);
@@ -81,7 +81,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 
 	@Override
 	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
-		return blockMaterial;
+		return Material.clay;
 	}
 
 	@Override

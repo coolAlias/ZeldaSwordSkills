@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
@@ -37,6 +36,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.block.ISongBlock;
@@ -54,16 +54,13 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockGossipStone extends Block implements ILiftable, ISmashable, ISongBlock
+public class BlockGossipStone extends Block implements IHookable, ILiftable, ISmashable, ISongBlock
 {
-	/** Material like rock but it can be harvested in adventure mode (allows player to left-click) */
-	public static final Material materialAdventureStone = new MaterialAdventureStone();
-
 	@SideOnly(Side.CLIENT)
 	private IIcon topIcon;
 
 	public BlockGossipStone() {
-		super(materialAdventureStone);
+		super(ZSSBlockMaterials.adventureStone);
 		setHardness(10.0F);
 		setHarvestLevel("pickaxe", 2);
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
@@ -79,6 +76,21 @@ public class BlockGossipStone extends Block implements ILiftable, ISmashable, IS
 	@Override
 	public TileEntity createTileEntity(World world, int meta) {
 		return new TileEntityGossipStone();
+	}
+
+	@Override
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
+		return Result.DENY;
+	}
+
+	@Override
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
+		return Result.DEFAULT;
+	}
+
+	@Override
+	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
+		return Material.rock;
 	}
 
 	@Override
@@ -204,16 +216,5 @@ public class BlockGossipStone extends Block implements ILiftable, ISmashable, IS
 		String s = ModInfo.ID + ":" + getUnlocalizedName().substring(9);
 		blockIcon = register.registerIcon(s);
 		topIcon = register.registerIcon(s + "_top");
-	}
-
-	/**
-	 * Material identical to rock, except it can be left-clicked in Adventure Mode
-	 */
-	public static class MaterialAdventureStone extends Material {
-		public MaterialAdventureStone() {
-			super(MapColor.stoneColor);
-			this.setRequiresTool();
-			this.setAdventureModeExempt();
-		}
 	}
 }

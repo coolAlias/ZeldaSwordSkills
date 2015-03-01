@@ -20,8 +20,6 @@ package zeldaswordskills.block;
 import java.util.List;
 
 import net.minecraft.block.BlockContainer;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -58,13 +56,11 @@ public class BlockSacredFlame extends BlockContainer
 {
 	public static final int DIN = 0x1, FARORE = 0x2, NAYRU = 0x4;
 
-	public static final Material materialSacredFlame = new MaterialSacredFlame(MapColor.airColor);
-
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
 
 	public BlockSacredFlame() {
-		super(materialSacredFlame);
+		super(ZSSBlockMaterials.sacredFlame);
 		disableStats();
 		setBlockUnbreakable();
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
@@ -209,18 +205,5 @@ public class BlockSacredFlame extends BlockContainer
 	public IIcon getIcon(int side, int meta) {
 		meta &= ~0x8;
 		return iconArray[(meta == DIN ? 0 : meta)];
-	}
-}
-
-/**
- * 
- * Simply a way to access protected method setNoPushMobility().
- *
- */
-class MaterialSacredFlame extends Material {
-
-	public MaterialSacredFlame(MapColor color) {
-		super(color);
-		setNoPushMobility();
 	}
 }
