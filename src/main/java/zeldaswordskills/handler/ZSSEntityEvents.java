@@ -25,6 +25,7 @@ import net.minecraft.entity.INpc;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -36,6 +37,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.EntityGoron;
@@ -46,6 +48,8 @@ import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
+import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.item.ItemBombFlowerSeed;
 import zeldaswordskills.item.ItemCustomEgg;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
@@ -139,6 +143,13 @@ public class ZSSEntityEvents
 				}
 			}
 			event.setCanceled(flag2);
+		} else if (event.target instanceof EntityChicken && stack != null && stack.getItem() instanceof ItemBombFlowerSeed) {
+			if (!event.target.worldObj.isRemote && ((EntityChicken) event.target).interact(event.entityPlayer)) {
+				int time = 60 + event.target.worldObj.rand.nextInt(60);
+				EntityBomb bomb = new EntityBomb(event.target.worldObj).setType(BombType.BOMB_STANDARD).setTime(time);
+				ZSSEntityInfo.get((EntityChicken) event.target).onBombIngested(bomb);
+				event.setCanceled(true);
+			}
 		}
 		if (!event.isCanceled() && event.target instanceof INpc) {
 			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);

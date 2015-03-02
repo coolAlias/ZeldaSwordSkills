@@ -28,9 +28,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
+import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.api.entity.IEntityBombEater;
+import zeldaswordskills.api.entity.IEntityBombIngestible;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.network.PacketDispatcher;
@@ -54,6 +58,12 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 
 	/** Time this entity will remain immune to further stun effects */
 	private int stunResistTime;
+
+	/** Time until the ingested bomb explodes */
+	private int fuseTime;
+
+	/** The ingested bomb entity instance */
+	private IEntityBombIngestible ingestedBomb;
 
 	public ZSSEntityInfo(EntityLivingBase entity) {
 		this.entity = entity;
@@ -186,6 +196,24 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	}
 
 	/**
+	 * Call when the entity ingests an ingestible bomb entity - only one bomb
+	 * may be ingested at a time using this implementation.
+	 * @param bomb Ingested bombs are immediately set to dead in the world
+	 * @param boolean true if the bomb was ingested
+	 */
+	public <T extends Entity & IEntityBombIngestible> boolean onBombIngested(T bomb) {
+		if (ingestedBomb != null) {
+			return false;
+		}
+		fuseTime = bomb.getFuseTime(entity);
+		ingestedBomb = bomb;
+		if (!bomb.worldObj.isRemote) { 
+			bomb.setDead();
+		}
+		return true;
+	}
+
+	/**
 	 * This method should be called every update tick; currently called from LivingUpdateEvent
 	 */
 	public void onUpdate() {
@@ -197,6 +225,38 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 		if (stunResistTime > 0 && !isBuffActive(Buff.STUN)) {
 			--stunResistTime;
 		}
+		updateIngestedTime();
+	}
+
+	private void updateIngestedTime() {
+		if (fuseTime > 0) {
+			--fuseTime;
+			if (fuseTime == 0 && ingestedBomb != null) {
+				onBombIndigestion();
+			}
+		}
+	}
+
+	private void onBombIndigestion() {
+		boolean explode = true;
+		boolean isFatal = true;
+		if (entity instanceof IEntityBombEater) {
+			IEntityBombEater eater = (IEntityBombEater) entity;
+			if (!eater.onBombIndigestion(ingestedBomb)) {
+				return; // custom implementation handled it
+			}
+			explode = eater.doesIngestedBombExplode(ingestedBomb);
+			isFatal = eater.isIngestedBombFatal(ingestedBomb);
+		}
+		if (explode) {
+			float r = ingestedBomb.getExplosionRadius(entity);
+			float dmg = ingestedBomb.getExplosionDamage(entity);
+			CustomExplosion.createExplosion(ingestedBomb, entity.worldObj, entity.posX, entity.posY, entity.posZ, r, dmg, true);
+		}
+		if (isFatal) {
+			entity.attackEntityFrom(DamageSource.setExplosionSource(null), entity.getMaxHealth() * 2);
+		}
+		ingestedBomb = null;
 	}
 
 	/**

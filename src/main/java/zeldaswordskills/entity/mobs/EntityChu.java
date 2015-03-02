@@ -44,6 +44,8 @@ import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
 import zeldaswordskills.api.damage.IDamageSourceStun;
+import zeldaswordskills.api.entity.IEntityBombEater;
+import zeldaswordskills.api.entity.IEntityBombIngestible;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -54,6 +56,7 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -86,7 +89,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Drops yellow chu jelly. These are most often found in deserts.
  *
  */
-public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IEntityVariant
+public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, IEntityLootable, IEntityVariant
 {
 	/** Chuchu types, in order of rarity and strength */
 	public static enum ChuType {
@@ -596,6 +599,27 @@ public class EntityChu extends EntityLiving implements IMob, IEntityLootable, IE
 				}
 			}
 		}
+	}
+
+	@Override
+	public Result ingestBomb(IEntityBombIngestible bomb) {
+		worldObj.playSoundAtEntity(this, Sounds.CHU_MERGE, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+		return Result.DEFAULT;
+	}
+
+	@Override
+	public boolean onBombIndigestion(IEntityBombIngestible bomb) {
+		return true;
+	}
+
+	@Override
+	public boolean doesIngestedBombExplode(IEntityBombIngestible bomb) {
+		return true;
+	}
+
+	@Override
+	public boolean isIngestedBombFatal(IEntityBombIngestible bomb) {
+		return getSize() < 4;
 	}
 
 	@Override

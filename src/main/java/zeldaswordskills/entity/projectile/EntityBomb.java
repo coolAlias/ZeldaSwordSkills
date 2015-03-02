@@ -17,6 +17,8 @@
 
 package zeldaswordskills.entity.projectile;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -30,14 +32,17 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
-import zeldaswordskills.api.entity.IEntityBomb;
+import zeldaswordskills.api.entity.IEntityBombEater;
+import zeldaswordskills.api.entity.IEntityBombIngestible;
+import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class EntityBomb extends EntityMobThrowable implements IEntityBomb
+public class EntityBomb extends EntityMobThrowable implements IEntityBombIngestible
 {
 	/** Time until explosion */
 	private int fuseTime = 24;
@@ -80,6 +85,21 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		dataWatcher.addObject(BOMBTYPE_DATAWATCHER_INDEX, BombType.BOMB_STANDARD.ordinal());
 	}
 
+	@Override
+	public float getExplosionDamage(Entity entity) {
+		return getDamage();
+	}
+
+	@Override
+	public float getExplosionRadius(Entity entity) {
+		return getRadius();
+	}
+
+	@Override
+	public int getFuseTime(Entity entity) {
+		return fuseTime;
+	}
+
 	/**
 	 * Adds time to bomb's fuse
 	 */
@@ -94,6 +114,10 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	public EntityBomb setTime(int time) {
 		fuseTime = Math.max(time, 1);
 		return this;
+	}
+
+	public float getRadius() {
+		return radius > 0 ? radius : ItemBomb.getRadius(getType());
 	}
 
 	/**
@@ -215,6 +239,11 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 			motionY *= -0.5D;
 		}
 
+		if (!worldObj.isRemote && ticksExisted > 5 && wasBombEaten()) {
+			setDead(); // make sure it's dead
+			return;
+		}
+
 		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
 		// func_147470_e is isBoundingBoxBurning
 		boolean inFire = (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
@@ -229,12 +258,31 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 		}
 
 		if (!worldObj.isRemote && shouldExplode(inFire)) {
-			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), getDamage(), canGrief);
+			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, getRadius(), getDamage(), canGrief);
 			if (getType() == BombType.BOMB_FLOWER) {
 				disperseSeeds();
 			}
 			setDead();
 		}
+	}
+
+	/**
+	 * Returns true if any nearby {@link IEntityBombEater} consumes this bomb
+	 */
+	private boolean wasBombEaten() {
+		List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, boundingBox.expand(0.5D, 0.5D, 0.5D));
+		for (EntityLivingBase entity : entities) {
+			if (!entity.isEntityAlive()) {
+				continue;
+			}
+			Result result = (entity instanceof IEntityBombEater ? ((IEntityBombEater) entity).ingestBomb(this) : Result.DEFAULT);
+			if (result == Result.ALLOW) {
+				return true;
+			} else if (result == Result.DEFAULT && ZSSEntityInfo.get(entity).onBombIngested(this)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
