@@ -32,7 +32,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
@@ -65,19 +64,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenchantable
 {
-	/*========================== RENDER RESOURCE LOCATIONS =========================*/
-	/** Standard bomb textures */
-	public static final ResourceLocation bombBase = new ResourceLocation(ModInfo.ID, "textures/entity/bomb.png");
-	public static final ResourceLocation bombFlash = new ResourceLocation(ModInfo.ID, "textures/entity/bombflash.png");
-	/** Water bomb textures */
-	public static final ResourceLocation waterBase = new ResourceLocation(ModInfo.ID, "textures/entity/bombwater.png");
-	public static final ResourceLocation waterFlash = new ResourceLocation(ModInfo.ID, "textures/entity/bombwaterflash.png");
-	/** Fire bomb textures */
-	public static final ResourceLocation fireBase = new ResourceLocation(ModInfo.ID, "textures/entity/bombfire.png");
-	public static final ResourceLocation fireFlash = new ResourceLocation(ModInfo.ID, "textures/entity/bombfireflash.png");
-
-	public static final String[] bombNames = {"Bomb","Water Bomb","Fire Bomb"};
-
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
 
@@ -241,7 +227,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName() + "." + stack.getItemDamage();
+		return getUnlocalizedName() + "." + getType(stack).unlocalizedName;
 	}
 
 	@Override
@@ -256,8 +242,9 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister register) {
 		iconArray = new IIcon[BombType.values().length];
+		String s = ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_";
 		for (int i = 0; i < BombType.values().length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + (getUnlocalizedName().substring(9) + (i + 1)));
+			iconArray[i] = register.registerIcon(s + getType(i).unlocalizedName);
 		}
 	}
 

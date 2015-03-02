@@ -28,9 +28,16 @@ package zeldaswordskills.api.entity;
  */
 public enum BombType {
 	/** Applies vanilla explosion rules */
-	BOMB_STANDARD,
+	BOMB_STANDARD("standard"),
 	/** Ignores water when determining which blocks to destroy; less effective in the Nether */
-	BOMB_WATER,
+	BOMB_WATER("water"),
 	/** Ignores lava when determining which blocks to destroy */
-	BOMB_FIRE
+	BOMB_FIRE("fire");
+
+	/** The unlocalized name of the bomb type, e.g. 'standard', 'fire', etc. */
+	public final String unlocalizedName;
+	
+	private BombType(String name) {
+		this.unlocalizedName = name;
+	}
 }
