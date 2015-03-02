@@ -24,10 +24,7 @@ public class Sounds {
 	public static final String BOW_RELEASE = "random.bow";
 	public static final String BOW_HIT = "random.bowhit";
 	public static final String CLICK = "random.click";
-	/** "damage.hit" is registered to "game.[entity].hurt", where [entity] may also be a category such as "neutral"
-	 * "random.successful_hit" is the sound played when a player lands an attack, which is actually what we want here */
-	//public static final String DAMAGE_HIT = "damage.hit";
-	public static final String DAMAGE_SUCCESSFUL_HIT = "random.successful_hit";
+	public static final String DAMAGE_SUCCESSFUL_HIT = "game.neutral.hurt";
 	//public static final String DAMAGE_HOSTILE_HIT = "game.hostile.hurt";
 	public static final String EXPLOSION = "random.explode";
 	public static final String FIRE_FIZZ = "random.fizz";

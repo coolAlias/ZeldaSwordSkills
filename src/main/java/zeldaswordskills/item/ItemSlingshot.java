@@ -18,6 +18,7 @@
 package zeldaswordskills.item;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,16 +76,25 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 	/** The angle between each seed fragment */
 	protected final float spread;
 
+	/** Maps seed Items to seed Type (dye item must also check damage value) */
+	private static final Map<Item, SeedType> seedToType = new HashMap<Item, SeedType>();
+
 	/** Maps the seed types to seed Items for consuming seed shot */
-	private static final Map<SeedType, Item> typeToSeed = new EnumMap(SeedType.class);
+	private static final Map<SeedType, Item> typeToSeed = new EnumMap<SeedType, Item>(SeedType.class);
 
 	public static void initializeSeeds(){
-		typeToSeed.put(SeedType.COCOA, Items.dye);
-		typeToSeed.put(SeedType.DEKU, ZSSItems.dekuNut);
-		typeToSeed.put(SeedType.GRASS, Items.wheat_seeds);
-		typeToSeed.put(SeedType.MELON, Items.melon_seeds);
-		typeToSeed.put(SeedType.NETHERWART, Items.nether_wart);
-		typeToSeed.put(SeedType.PUMPKIN, Items.pumpkin_seeds);
+		addSeedMapping(SeedType.BOMB, ZSSItems.bombFlowerSeed);
+		addSeedMapping(SeedType.COCOA, Items.dye);
+		addSeedMapping(SeedType.DEKU, ZSSItems.dekuNut);
+		addSeedMapping(SeedType.GRASS, Items.wheat_seeds);
+		addSeedMapping(SeedType.MELON, Items.melon_seeds);
+		addSeedMapping(SeedType.NETHERWART, Items.nether_wart);
+		addSeedMapping(SeedType.PUMPKIN, Items.pumpkin_seeds);
+	}
+
+	private static void addSeedMapping(SeedType type, Item item) {
+		seedToType.put(item, type);
+		typeToSeed.put(type, item);
 	}
 
 	public ItemSlingshot() {
@@ -225,19 +235,10 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 	 */
 	protected SeedType getSeedType(EntityPlayer player) {
 		for (ItemStack stack : player.inventory.mainInventory) {
-			if (stack != null) {
-				if (stack.getItem() == Items.wheat_seeds) {
-					return SeedType.GRASS;
-				} else if (stack.getItem() == Items.melon_seeds) {
-					return SeedType.MELON;
-				} else if (stack.getItem() == Items.nether_wart) {
-					return SeedType.NETHERWART;
-				} else if (stack.getItem() == Items.pumpkin_seeds) {
-					return SeedType.PUMPKIN;
-				} else if (stack.getItem() == Items.dye && stack.getItemDamage() == 3) {
-					return SeedType.COCOA;
-				} else if (stack.getItem() == ZSSItems.dekuNut) {
-					return SeedType.DEKU;
+			if (stack != null && seedToType.containsKey(stack.getItem())) {
+				SeedType type = seedToType.get(stack.getItem());
+				if (type != SeedType.COCOA || stack.getItemDamage() == 3) {
+					return type;
 				}
 			}
 		}

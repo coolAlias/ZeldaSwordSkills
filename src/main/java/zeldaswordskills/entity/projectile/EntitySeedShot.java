@@ -31,23 +31,30 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
+import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 public class EntitySeedShot extends EntityMobThrowable
 {
 	public static enum SeedType {
-		NONE(0.0F),
-		COCOA(1.25F),
-		DEKU(1.5F),
-		GRASS(1.0F),
-		MELON(1.25F),
-		NETHERWART(1.5F),
-		PUMPKIN(1.25F);
+		NONE(0.0F, "crit"),
+		BOMB(1.5F, "largeexplode"),
+		COCOA(1.25F, "crit"),
+		DEKU(1.5F, "largeexplode"),
+		GRASS(1.0F, "crit"),
+		MELON(1.25F, "crit"),
+		NETHERWART(1.5F, "crit"),
+		PUMPKIN(1.25F, "crit");
 
 		private final float damage;
-		private SeedType(float damage) {
+
+		/** Name of particle to spawn upon impact */
+		public final String particleName;
+
+		private SeedType(float damage, String particle) {
 			this.damage = damage;
+			this.particleName = particle;
 		}
 		/** Returns the base damage for this seed type */
 		public float getDamage() {
@@ -135,6 +142,7 @@ public class EntitySeedShot extends EntityMobThrowable
 	 */
 	public DamageSource getDamageSource() {
 		switch(getType()) {
+		case BOMB: return new DamageSourceBaseIndirect("slingshot", this, getThrower()).setExplosion().setProjectile();
 		case DEKU: return new DamageSourceBaseIndirect("slingshot", this, getThrower()).setStunDamage(80, 2, true).setProjectile();
 		case NETHERWART: return new EntityDamageSourceIndirect("slingshot", this, getThrower()).setFireDamage().setProjectile();
 		default: return new EntityDamageSourceIndirect("slingshot", this, getThrower()).setProjectile();
@@ -163,7 +171,7 @@ public class EntitySeedShot extends EntityMobThrowable
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		String particle = (getType() == SeedType.DEKU ? "largeexplode" : "crit");
+		String particle = getType().particleName;
 		for (int i = 0; i < 4; ++i) {
 			worldObj.spawnParticle(particle,
 					posX - motionX * (double) i / 4.0D,
@@ -216,9 +224,14 @@ public class EntitySeedShot extends EntityMobThrowable
 			}
 		} else {
 			playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-			if (block instanceof BlockButtonWood) {
-				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
+			if (getType() == SeedType.BOMB) {
+				float dmg = SeedType.BOMB.getDamage() * 2.0F;
+				CustomExplosion.createExplosion(new EntityBomb(worldObj), worldObj, mop.blockX, mop.blockY, mop.blockZ, 3.0F, dmg, false);
+			} else {
+				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				if (block instanceof BlockButtonWood) {
+					WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
+				}
 			}
 			setDead();
 		}
