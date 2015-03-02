@@ -171,7 +171,8 @@ public class ZSSItems
 	potionBlue,
 	potionYellow,
 	rocsFeather,
-	instrument;
+	instrument,
+	bombFlowerSeed;
 
 	//================ TREASURES TAB ================//
 	public static Item
@@ -547,6 +548,7 @@ public class ZSSItems
 		treasure = new ItemTreasure().setUnlocalizedName("zss.treasure");
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "You must first clear this area of debris!", "deku_nut").setUnlocalizedName("zss.links_house");
 		instrument = new ItemInstrument();
+		bombFlowerSeed = new ItemBombFlowerSeed().setUnlocalizedName("zss.seed_bomb_flower");
 
 		// ITEMS WITH NO TAB
 		heldBlock = new ItemHeldBlock().setUnlocalizedName("zss.held_block");

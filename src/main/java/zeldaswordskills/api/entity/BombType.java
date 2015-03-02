@@ -32,7 +32,9 @@ public enum BombType {
 	/** Ignores water when determining which blocks to destroy; less effective in the Nether */
 	BOMB_WATER("water"),
 	/** Ignores lava when determining which blocks to destroy */
-	BOMB_FIRE("fire");
+	BOMB_FIRE("fire"),
+	/** Same as BOMB_STANDARD, except some bomb flower seeds may be dispersed */
+	BOMB_FLOWER("flower");
 
 	/** The unlocalized name of the bomb type, e.g. 'standard', 'fire', etc. */
 	public final String unlocalizedName;

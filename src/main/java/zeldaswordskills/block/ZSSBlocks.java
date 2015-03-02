@@ -36,6 +36,7 @@ import zeldaswordskills.client.render.block.RenderCeramicJar;
 import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.client.render.block.RenderGiantLever;
 import zeldaswordskills.client.render.block.RenderSacredFlame;
+import zeldaswordskills.client.render.block.RenderSpecialCrop;
 import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderTileEntityChestLocked;
@@ -62,6 +63,7 @@ public class ZSSBlocks
 	barrierLight,
 	barrierHeavy,
 	timeBlock,
+	bombFlower,
 	ceramicJar,
 	chestLocked,
 	chestInvisible,
@@ -105,6 +107,7 @@ public class ZSSBlocks
 		inscription = new BlockSongInscription().setBlockName("zss.inscription");
 		warpStone = new BlockWarpStone().setBlockName("zss.warp_stone");
 		gossipStone = new BlockGossipStone().setBlockName("zss.gossip_stone");
+		bombFlower = new BlockBombFlower().setBlockName("zss.bomb_flower");
 		register();
 	}
 
@@ -117,6 +120,7 @@ public class ZSSBlocks
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChestLocked.class, new RenderTileEntityChestLocked());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPedestal.class, new RenderTileEntityPedestal());
 		RenderingRegistry.registerBlockHandler(new RenderTileDungeonBlock());
+		RenderingRegistry.registerBlockHandler(new RenderSpecialCrop());
 		RenderingRegistry.registerBlockHandler(new RenderCeramicJar());
 		RenderingRegistry.registerBlockHandler(new RenderChestLocked());
 		RenderingRegistry.registerBlockHandler(new RenderGiantLever());
@@ -144,6 +148,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(inscription, inscription.getUnlocalizedName());
 		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
 		GameRegistry.registerBlock(gossipStone, ItemGossipStone.class, gossipStone.getUnlocalizedName());
+		GameRegistry.registerBlock(bombFlower, bombFlower.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");

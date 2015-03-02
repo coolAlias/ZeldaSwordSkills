@@ -35,6 +35,7 @@ import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.WorldUtils;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 {
@@ -229,6 +230,9 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 
 		if (!worldObj.isRemote && shouldExplode(inFire)) {
 			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), getDamage(), canGrief);
+			if (getType() == BombType.BOMB_FLOWER) {
+				disperseSeeds();
+			}
 			setDead();
 		}
 	}
@@ -273,6 +277,18 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBomb
 	private boolean shouldExplode(boolean inFire) {
 		boolean inNether = (worldObj.provider.dimensionId == -1 && getType() == BombType.BOMB_STANDARD);
 		return (ticksExisted >= fuseTime || inNether || (inFire && getType() == BombType.BOMB_STANDARD));
+	}
+
+	/**
+	 * Scatters several seeds for naturally exploding bomb flowers (i.e. no thrower)
+	 */
+	private void disperseSeeds() {
+		if (getThrower() == null) {
+			int n = worldObj.rand.nextInt(3) + 1;
+			for (int i = 0; i < n; ++i) {
+				WorldUtils.spawnItemWithRandom(worldObj, new ItemStack(ZSSItems.bombFlowerSeed), posX, posY, posZ, 0.15F);
+			}
+		}
 	}
 
 	@Override

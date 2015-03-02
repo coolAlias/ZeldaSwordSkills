@@ -358,19 +358,27 @@ public class WorldUtils
 	}
 
 	/**
-	 * Spawns the provided ItemStack as an EntityItem with randomized position and motion
-	 * Used by blocks to scatter items when broken
+	 * Spawns the provided ItemStack as an EntityItem with randomized position and motion,
+	 * with default motion factor used by blocks to scatter items when the block is broken
 	 */
 	public static void spawnItemWithRandom(World world, ItemStack stack, double x, double y, double z) {
+		spawnItemWithRandom(world, stack, x, y, z, 0.05F);
+	}
+
+	/**
+	 * Spawns the provided ItemStack as an EntityItem with randomized position and motion
+	 * @param motionFactor	EntityItem's motion is multiplied by this amount; clamped between 0.0F and 1.0F
+	 */
+	public static void spawnItemWithRandom(World world, ItemStack stack, double x, double y, double z, float motionFactor) {
 		if (!world.isRemote && stack != null) {
 			double spawnX = x + world.rand.nextFloat();
 			double spawnY = y + world.rand.nextFloat();
 			double spawnZ = z + world.rand.nextFloat();
-			float f3 = 0.05F;
+			float f = MathHelper.clamp_float(motionFactor, 0.0F, 1.0F);
 			EntityItem entityitem = new EntityItem(world, spawnX, spawnY, spawnZ, stack);
-			entityitem.motionX = (-0.5F + world.rand.nextGaussian()) * f3;
-			entityitem.motionY = (4 + world.rand.nextGaussian()) * f3;
-			entityitem.motionZ = (-0.5F + world.rand.nextGaussian()) * f3;
+			entityitem.motionX = (-0.5F + world.rand.nextGaussian()) * f;
+			entityitem.motionY = (4 + world.rand.nextGaussian()) * f;
+			entityitem.motionZ = (-0.5F + world.rand.nextGaussian()) * f;
 			entityitem.delayBeforeCanPickup = 10;
 			world.spawnEntityInWorld(entityitem);
 		}

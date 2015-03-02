@@ -17,7 +17,11 @@
 
 package zeldaswordskills.util;
 
+import java.util.UUID;
+
 import mods.battlegear2.api.core.IBattlePlayer;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -42,6 +46,9 @@ import zeldaswordskills.network.bidirectional.PlaySoundPacket;
  */
 public class PlayerUtils
 {
+	/** Copy of Item#field_111210_e which is the UUID used to store weapon damage modifiers */
+	public static final UUID itemDamageUUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
+
 	/**
 	 * Returns whether the player is using an item, accounting for possibility of Battlegear2 offhand item use
 	 */
@@ -52,6 +59,15 @@ public class PlayerUtils
 			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
 		}
 		return false;
+	}
+
+	/**
+	 * Returns true if the player is holding any type of item which grants a damage bonus,
+	 * including from tools such as axes, shovels, etc.
+	 */
+	public static boolean isHoldingWeapon(EntityPlayer player) {
+		AttributeModifier itemDamage = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.attackDamage).getModifier(itemDamageUUID);
+		return itemDamage != null && itemDamage.getAmount() > 0;
 	}
 
 	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} */

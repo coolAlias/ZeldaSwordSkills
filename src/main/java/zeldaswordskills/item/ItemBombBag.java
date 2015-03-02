@@ -194,7 +194,9 @@ public class ItemBombBag extends Item implements IUnenchantable
 	 * @return the number of bombs that wouldn't fit, if any (usually returns a negative value)
 	 */
 	public int addBombs(ItemStack bag, ItemStack bombs) {
-		if (areMatchingTypes(bag, bombs, true)) {
+		if (ItemBomb.getType(bombs) == BombType.BOMB_FLOWER) {
+			return bombs.stackSize; // can't put bomb flowers in bomb bags
+		} else if (areMatchingTypes(bag, bombs, true)) {
 			int remaining = addBombs(bag, bombs.stackSize);
 			setBagBombType(bag, ItemBomb.getType(bombs).ordinal());
 			return remaining;
