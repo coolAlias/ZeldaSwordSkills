@@ -37,6 +37,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import zeldaswordskills.api.block.IBoomerangBlock;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
@@ -252,25 +253,46 @@ public class EntityBoomerang extends EntityMobThrowable
 			}
 		} else {
 			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-			//if (block != null) {
 			boolean flag = block.getMaterial().blocksMovement();
-			float hardness = block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ);
-			block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-			if (block.getMaterial() != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
-				// func_147480_a is destroyBlock
-				worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, true);
-			} else if (block instanceof BlockButton || (block instanceof BlockLever &&
-					getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
-				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
-				flag = true;
+			if (block instanceof IBoomerangBlock) {
+				flag = ((IBoomerangBlock) block).onBoomerangCollided(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			} else {
+				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				float hardness = block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ);
+				if (block.getMaterial() != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
+					// func_147480_a is destroyBlock
+					worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, true);
+				} else if (block instanceof BlockButton || (block instanceof BlockLever &&
+						getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
+					WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
+					flag = true;
+				}
 			}
 			if (flag && !noClip) {
 				noClip = true;
 				distance = Math.min(distance, 0);
 				setThrowableHeading(-motionX, -motionY, -motionZ, getVelocity(), 1.0F);
 			}
-			//}
 		}
+	}
+
+	/**
+	 * Attempts to add the item either as the currently riding entity, or as a
+	 * captured drop (in which case the item entity is set to dead)
+	 * @return true if the item was captured in one form or another
+	 */
+	public boolean captureItem(EntityItem item) {
+		if (item.isEntityAlive()) {
+			if (riddenByEntity == null) {
+				item.mountEntity(this);
+				return true;
+			} else if (captureAll && item != riddenByEntity) {
+				capturedItems.add(item.getEntityItem());
+				item.setDead();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -280,14 +302,8 @@ public class EntityBoomerang extends EntityMobThrowable
 		if (riddenByEntity == null || captureAll) {
 			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : items) {
-				if (!item.isEntityAlive()) {
-					continue;
-				}
-				if (riddenByEntity == null) {
-					item.mountEntity(this);
-				} else if (captureAll && item != riddenByEntity) {
-					capturedItems.add(item.getEntityItem());
-					item.setDead();
+				if (captureItem(item) && !captureAll) {
+					return;
 				}
 			}
 		}
