@@ -38,6 +38,7 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
@@ -460,10 +461,23 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 		return (worldObj.difficultySetting != EnumDifficulty.PEACEFUL && (posY < 64.0D || rand.nextInt(16) > 13) && isValidLightLevel() && !worldObj.isAnyLiquid(boundingBox));
 	}
 
+	/**
+	 * Copied from EntityMob
+	 */
 	protected boolean isValidLightLevel() {
 		int i = MathHelper.floor_double(posX);
 		int j = MathHelper.floor_double(boundingBox.minY);
 		int k = MathHelper.floor_double(posZ);
-		return worldObj.getLightBrightness(i, j, k) <= rand.nextInt(8);
+		if (worldObj.getSavedLightValue(EnumSkyBlock.Sky, i, j, k) > rand.nextInt(32)) {
+			return false;
+		}
+		int l = worldObj.getBlockLightValue(i, j, k);
+		if (worldObj.isThundering()) {
+			int i1 = worldObj.skylightSubtracted;
+			worldObj.skylightSubtracted = 10;
+			l = worldObj.getBlockLightValue(i, j, k);
+			worldObj.skylightSubtracted = i1;
+		}
+		return l <= this.rand.nextInt(8);
 	}
 }
