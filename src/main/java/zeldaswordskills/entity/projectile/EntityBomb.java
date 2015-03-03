@@ -275,7 +275,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 			if (!entity.isEntityAlive()) {
 				continue;
 			}
-			Result result = (entity instanceof IEntityBombEater ? ((IEntityBombEater) entity).ingestBomb(this) : Result.DEFAULT);
+			Result result = (entity instanceof IEntityBombEater ? ((IEntityBombEater) entity).ingestBomb(this) : Result.DENY);
 			if (result == Result.ALLOW) {
 				return true;
 			} else if (result == Result.DEFAULT && ZSSEntityInfo.get(entity).onBombIngested(this)) {
