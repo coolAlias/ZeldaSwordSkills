@@ -36,6 +36,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
 import zeldaswordskills.api.block.IBoomerangBlock;
+import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.client.render.block.RenderSpecialCrop;
@@ -47,7 +48,7 @@ import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
+public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExplodable
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -67,7 +68,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
 	 */
 	@Override
 	protected Item func_149866_i() {
-		return ZSSItems.bombFlowerSeed;
+		return null;
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
 	 */
 	@Override
 	protected Item func_149865_P() {
-		return ZSSItems.bomb;
+		return null;
 	}
 
 	@Override
@@ -109,16 +110,19 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
 			return false; // this lets bonemeal do its thing
 		} else if (!world.isRemote) {
 			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FLOWER.ordinal()));
-			world.setBlockMetadataWithNotify(x, y, z, 0, 3);
+			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
 		}
 		return true;
 	}
 
 	@Override
 	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
-		if (!world.isRemote && world.getBlockMetadata(x, y, z) == 7 && PlayerUtils.isHoldingWeapon(player)) {
-			world.setBlockToAir(x, y, z);
-			createExplosion(world, x, y, z);
+		if (world.getBlockMetadata(x, y, z) == 7) {
+			if (PlayerUtils.isHoldingWeapon(player)) {
+				createExplosion(world, x, y, z, true);
+			} else {
+				disperseSeeds(world, x, y, z, true);
+			}
 		}
 	}
 
@@ -126,8 +130,8 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
 	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
 		int meta = world.getBlockMetadata(x, y, z);
 		super.onBlockExploded(world, x, y, z, explosion);
-		if (meta == 7 && !world.isRemote) {
-			createExplosion(world, x, y, z);
+		if (meta == 7) {
+			createExplosion(world, x, y, z, false);
 		}
 	}
 
@@ -144,8 +148,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
 				bomb.setDead();
 			}
 			if (!captured) {
-				world.setBlockToAir(x, y, z);
-				createExplosion(world, x, y, z);
+				createExplosion(world, x, y, z, true);
 			}
 		}
 		return false;
@@ -153,9 +156,8 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
 
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
-		if (!world.isRemote && world.getBlockMetadata(x, y, z) == 7 && entity instanceof IProjectile) {
-			world.setBlockToAir(x, y, z);
-			createExplosion(world, x, y, z);
+		if (world.getBlockMetadata(x, y, z) == 7 && entity instanceof IProjectile) {
+			createExplosion(world, x, y, z, true);
 		}
 	}
 
@@ -171,18 +173,34 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock
 		if (meta < 7 && rand.nextInt(6) == 0) {
 			world.setBlockMetadataWithNotify(x, y, z, meta + 1, 2);
 		} else if (meta == 7 && rand.nextInt(16) == 0) {
-			// fruit explodes to disperse seeds
-			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-			EntityBomb bomb = new EntityBomb(world, x + 0.5D, y + 0.5D, z + 0.5D).setType(BombType.BOMB_FLOWER).setTime(64).setNoGrief();
-			world.spawnEntityInWorld(bomb);
+			disperseSeeds(world, x, y, z, false);
 		}
 	}
 
 	/**
-	 * Creates an immediate non-seeding explosion at the block's coordinates
+	 * Creates an immediate non-seeding explosion at the block's coordinates, optionally setting the block to air
 	 */
-	private void createExplosion(World world, int x, int y, int z) {
-		CustomExplosion.createExplosion(new EntityBomb(world).setType(BombType.BOMB_STANDARD), world, x, y, z, 3.0F, 0.0F, true);
+	private void createExplosion(World world, int x, int y, int z, boolean toAir) {
+		if (!world.isRemote) {
+			if (toAir) {
+				world.setBlockToAir(x, y, z);
+			}
+			CustomExplosion.createExplosion(world, x, y, z, 3.0F, BombType.BOMB_STANDARD);
+		}
+	}
+
+	/**
+	 * Spawns a bomb entity at the block's position and sets the growth stage back to zero
+	 */
+	private void disperseSeeds(World world, int x, int y, int z, boolean isGriefing) {
+		if (!world.isRemote) {
+			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+			EntityBomb bomb = new EntityBomb(world, x + 0.5D, y + 0.5D, z + 0.5D).setType(BombType.BOMB_FLOWER).setTime(64);
+			if (!isGriefing) {
+				bomb.setNoGrief();
+			}
+			world.spawnEntityInWorld(bomb);
+		}
 	}
 
 	@Override
