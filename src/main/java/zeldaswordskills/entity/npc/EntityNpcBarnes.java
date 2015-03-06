@@ -40,6 +40,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 	private static final MerchantRecipe standardBomb = new MerchantRecipe(new ItemStack(Items.emerald, 8), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()));
 	private static final MerchantRecipe waterBomb = new MerchantRecipe(new ItemStack(Items.emerald, 12), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()));
 	private static final MerchantRecipe fireBomb = new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FIRE.ordinal()));
+	private static final MerchantRecipe bombSeeds = new MerchantRecipe(new ItemStack(ZSSItems.bombFlowerSeed), new ItemStack(Items.emerald, 4));
 
 	/** Barnes' current customer */
 	private EntityPlayer customer;
@@ -129,7 +130,13 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 			String chat = "chat.zss.npc.barnes.greeting";
 			boolean openGui = true;
 			if (stack != null && trades != null) {
-				if (stack.getItem() == Items.fish) {
+				if (stack.getItem() == ZSSItems.bombFlowerSeed) {
+					if (insertBombTrade(bombSeeds)) {
+						chat = "chat.zss.npc.barnes.trade.bombseeds.new";
+					} else {
+						chat = "chat.zss.npc.barnes.trade.bombseeds.old";
+					}
+				} else if (stack.getItem() == Items.fish) {
 					if (insertBombTrade(waterBomb)) {
 						--stack.stackSize;
 						chat = "chat.zss.npc.barnes.trade.water";
@@ -168,7 +175,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 	}
 
 	/**
-	 * Inserts any trade at the first available slot after any bombs already in stoc
+	 * Inserts any trade at the first available slot after any bombs already in stock
 	 * @return true if the trade was inserted, or false if a similar trade already existed
 	 */
 	private boolean insertBombTrade(MerchantRecipe trade) {
