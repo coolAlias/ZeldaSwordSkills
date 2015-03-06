@@ -21,6 +21,7 @@ import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.world.gen.feature.WorldGenBombFlowers;
 import zeldaswordskills.world.gen.feature.WorldGenJars;
 import zeldaswordskills.world.gen.structure.MapGenBossRoom;
 import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
@@ -39,6 +40,7 @@ public class ZSSWorldGenEvent
 	private MapGenBossRoomNether netherBossGen = new MapGenBossRoomNether();
 	private MapGenSongPillar pillarGen = new MapGenSongPillar();
 	private WorldGenJars jarGen = new WorldGenJars();
+	private WorldGenBombFlowers bombGen = new WorldGenBombFlowers();
 
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
@@ -74,6 +76,7 @@ public class ZSSWorldGenEvent
 				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
 			pillarGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			bombGen.generate(event.world, event.rand, event.chunkX, event.chunkZ);
 			break;
 		default: break;
 		}
