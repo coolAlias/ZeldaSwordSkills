@@ -34,13 +34,14 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.WorldUtils;
 
 public class EntitySeedShot extends EntityMobThrowable
 {
 	public static enum SeedType {
 		NONE(0.0F, "crit"),
-		BOMB(1.5F, "largeexplode"),
+		BOMB(3.0F, "largeexplode"),
 		COCOA(1.25F, "crit"),
 		DEKU(1.5F, "largeexplode"),
 		GRASS(1.0F, "crit"),
@@ -172,21 +173,14 @@ public class EntitySeedShot extends EntityMobThrowable
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		String particle = getType().particleName;
-		for (int i = 0; i < 4; ++i) {
-			worldObj.spawnParticle(particle,
-					posX - motionX * (double) i / 4.0D,
-					posY - motionY * (double) i / 4.0D,
-					posZ - motionZ * (double) i / 4.0D,
-					motionX, motionY + 0.2D, motionZ);
-		}
-
 		if (mop.entityHit != null) {
 			if (isBurning() && !(mop.entityHit instanceof EntityEnderman)) {
 				mop.entityHit.setFire(5);
 			}
-
-			if (mop.entityHit.attackEntityFrom(getDamageSource(), calculateDamage())) {
+			if (getType() == SeedType.BOMB) {
+				CustomExplosion.createExplosion(new EntityBomb(worldObj), worldObj, posX, posY, posZ, 3.0F, SeedType.BOMB.getDamage(), false);
+				setDead();
+			} else if (mop.entityHit.attackEntityFrom(getDamageSource(), calculateDamage())) {
 				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (knockback > 0) {
 					float f = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
@@ -224,18 +218,37 @@ public class EntitySeedShot extends EntityMobThrowable
 				prevRotationYaw += 180.0F;
 			}
 		} else {
-			playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
 			if (block.getMaterial() != Material.air) {
 				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
 			}
-			if (getType() == SeedType.BOMB) {
-				float dmg = SeedType.BOMB.getDamage() * 2.0F;
-				CustomExplosion.createExplosion(new EntityBomb(worldObj), worldObj, mop.blockX, mop.blockY, mop.blockZ, 3.0F, dmg, false);
+			boolean flag = !block.getBlocksMovement(worldObj, mop.blockX, mop.blockY, mop.blockZ);
+			if (getType() == SeedType.BOMB && flag) {
+				double dx = mop.sideHit == SideHit.WEST ? -0.5D : mop.sideHit == SideHit.EAST ? 0.5D : 0.0D;
+				double dy = mop.sideHit == SideHit.BOTTOM ? -0.5D : mop.sideHit == SideHit.TOP ? 0.5D : 0.0D;
+				double dz = mop.sideHit == SideHit.NORTH ? -0.5D : mop.sideHit == SideHit.SOUTH ? 0.5D : 0.0D;
+				if (!worldObj.isRemote) {
+					CustomExplosion.createExplosion(new EntityBomb(worldObj), worldObj, posX + dx, posY + dy, posZ + dz, 3.0F, SeedType.BOMB.getDamage(), false);
+				}
 			} else if (block instanceof BlockButtonWood) {
 				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
+				flag = true;
 			}
-			setDead();
+			if (flag) {
+				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+				setDead();
+			}
+		}
+		// Only spawn particles if it hit something for sure
+		if (!isEntityAlive()) {
+			String particle = getType().particleName;
+			for (int i = 0; i < 4; ++i) {
+				worldObj.spawnParticle(particle,
+						posX - motionX * (double) i / 4.0D,
+						posY - motionY * (double) i / 4.0D,
+						posZ - motionZ * (double) i / 4.0D,
+						motionX, motionY + 0.2D, motionZ);
+			}
 		}
 	}
 
