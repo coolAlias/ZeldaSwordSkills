@@ -19,6 +19,7 @@ package zeldaswordskills.entity.projectile;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockButtonWood;
+import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityEnderman;
@@ -224,14 +225,15 @@ public class EntitySeedShot extends EntityMobThrowable
 			}
 		} else {
 			playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 0.3F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			if (block.getMaterial() != Material.air) {
+				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			}
 			if (getType() == SeedType.BOMB) {
 				float dmg = SeedType.BOMB.getDamage() * 2.0F;
 				CustomExplosion.createExplosion(new EntityBomb(worldObj), worldObj, mop.blockX, mop.blockY, mop.blockZ, 3.0F, dmg, false);
-			} else {
-				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-				if (block instanceof BlockButtonWood) {
-					WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
-				}
+			} else if (block instanceof BlockButtonWood) {
+				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
 			}
 			setDead();
 		}

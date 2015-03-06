@@ -17,10 +17,13 @@
 
 package zeldaswordskills.entity.projectile;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 
 public class EntityThrowingRock extends EntityMobThrowable
@@ -70,7 +73,12 @@ public class EntityThrowingRock extends EntityMobThrowable
 		for (int l = 0; l < 4; ++l) {
 			worldObj.spawnParticle("crit", posX, posY, posZ, 0.0D, 0.0D, 0.0D);
 		}
-		if (mop.entityHit != null) {
+		if (mop.typeOfHit == MovingObjectType.BLOCK) {
+			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			if (block.getMaterial() != Material.air) {
+				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			}
+		} else if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), getDamage());
 		}
 		if (!worldObj.isRemote) {

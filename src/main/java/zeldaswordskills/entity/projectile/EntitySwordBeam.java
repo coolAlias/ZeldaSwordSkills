@@ -18,6 +18,7 @@
 package zeldaswordskills.entity.projectile;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -156,6 +157,9 @@ public class EntitySwordBeam extends EntityThrowable
 				}
 			} else {
 				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				if (block.getMaterial() != Material.air) {
+					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				}
 				if (block.getMaterial().blocksMovement()) {
 					if (player != null && skill != null) {
 						skill.onImpact(player, true);
