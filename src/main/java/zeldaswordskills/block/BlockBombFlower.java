@@ -178,14 +178,14 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	}
 
 	/**
-	 * Creates an immediate non-seeding explosion at the block's coordinates, optionally setting the block to air
+	 * Creates an immediate explosion at the block's coordinates, optionally setting the block to air
 	 */
 	private void createExplosion(World world, int x, int y, int z, boolean toAir) {
 		if (!world.isRemote) {
 			if (toAir) {
 				world.setBlockToAir(x, y, z);
 			}
-			CustomExplosion.createExplosion(world, x, y, z, 3.0F, BombType.BOMB_STANDARD);
+			CustomExplosion.createExplosion(world, x, y, z, 3.0F, BombType.BOMB_FLOWER);
 		}
 	}
 
