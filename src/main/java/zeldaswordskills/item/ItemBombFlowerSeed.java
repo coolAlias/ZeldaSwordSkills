@@ -19,10 +19,13 @@ package zeldaswordskills.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
@@ -57,7 +60,55 @@ public class ItemBombFlowerSeed extends ItemSeeds {
 	}
 
 	@Override
-    public EnumPlantType getPlantType(IBlockAccess world, int x, int y, int z) {
+	public boolean hasCustomEntity(ItemStack stack) {
+		return true;
+	}
+
+	@Override
+	public Entity createEntity(World world, Entity entity, ItemStack stack) {
+		EntityItem item = new EntityItem(world, entity.posX, entity.posY, entity.posZ, stack) {
+			@Override
+			public void onUpdate() {
+				super.onUpdate();
+				if (!worldObj.isRemote && ticksExisted > 80 && worldObj.rand.nextInt(128) == 0) {
+					int i = MathHelper.floor_double(posX);
+					int j = MathHelper.floor_double(posY);
+					int k = MathHelper.floor_double(posZ);
+					boolean flag = false;
+					if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i, j, k)) {
+						flag = true;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i + 1, j, k)) {
+						++i;
+						flag = true;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i - 1, j, k)) {
+						--i;
+						flag = true;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i, j, k + 1)) {
+						++k;
+						flag = true;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i, j, k - 1)) {
+						--k;
+						flag = true;
+					}
+					if (flag) {
+						worldObj.setBlock(i, j, k, ZSSBlocks.bombFlower);
+						--getEntityItem().stackSize;
+						if (getEntityItem().stackSize == 0) {
+							setDead();
+						}
+					}
+				}
+			}
+		};
+		item.motionX = entity.motionX;
+		item.motionY = entity.motionY;
+		item.motionZ = entity.motionZ;
+		item.delayBeforeCanPickup = 40;
+		return item;
+	}
+
+	@Override
+	public EnumPlantType getPlantType(IBlockAccess world, int x, int y, int z) {
 		return EnumPlantType.Cave;
 	}
 
