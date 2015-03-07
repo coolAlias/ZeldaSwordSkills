@@ -178,13 +178,12 @@ public class EntitySeedShot extends EntityMobThrowable
 				mop.entityHit.setFire(5);
 			}
 			if (getType() == SeedType.BOMB) {
-				CustomExplosion.createExplosion(new EntityBomb(worldObj), worldObj, posX, posY, posZ, 3.0F, SeedType.BOMB.getDamage(), false);
+				CustomExplosion.createExplosion(new EntityBomb(worldObj, getThrower()), worldObj, posX, posY, posZ, 3.0F, SeedType.BOMB.getDamage(), false);
 				setDead();
 			} else if (mop.entityHit.attackEntityFrom(getDamageSource(), calculateDamage())) {
 				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (knockback > 0) {
 					float f = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
-
 					if (f > 0.0F) {
 						double d = (double) knockback * 0.6000000238418579D / (double) f;
 						mop.entityHit.addVelocity(motionX * d, 0.1D, motionZ * d);
@@ -228,7 +227,7 @@ public class EntitySeedShot extends EntityMobThrowable
 				double dy = mop.sideHit == SideHit.BOTTOM ? -0.5D : mop.sideHit == SideHit.TOP ? 0.5D : 0.0D;
 				double dz = mop.sideHit == SideHit.NORTH ? -0.5D : mop.sideHit == SideHit.SOUTH ? 0.5D : 0.0D;
 				if (!worldObj.isRemote) {
-					CustomExplosion.createExplosion(new EntityBomb(worldObj), worldObj, posX + dx, posY + dy, posZ + dz, 3.0F, SeedType.BOMB.getDamage(), false);
+					CustomExplosion.createExplosion(new EntityBomb(worldObj, getThrower()), worldObj, posX + dx, posY + dy, posZ + dz, 3.0F, SeedType.BOMB.getDamage(), false);
 				}
 			} else if (block instanceof BlockButtonWood) {
 				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
