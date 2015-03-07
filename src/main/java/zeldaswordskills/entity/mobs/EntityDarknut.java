@@ -298,9 +298,15 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
+		boolean isPlayer = source.getEntity() instanceof EntityPlayer;
 		if (isEntityInvulnerable() || isSpinning()) {
 			return false;
-		} else if (source.getEntity() == null || source.isUnblockable() || source.isMagicDamage()) {
+		} else if (source.isUnblockable() || (isPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.armorBreak))) {
+			if (parryAttack(source)) {
+				return false;
+			}
+			return super.attackEntityFrom(source, amount);
+		} else if (source.getEntity() == null || source.isMagicDamage()) {
 			return super.attackEntityFrom(source, amount);
 		} else if (isWearingCape()) {
 			if (source.isFireDamage()) {
@@ -319,7 +325,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 					return false;
 				} else {
 					// Allow attack to go through for BackSlice, otherwise it will never trigger
-					if (source.getEntity() instanceof EntityPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.backSlice)) {
+					if (isPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.backSlice)) {
 						return super.attackEntityFrom(source, amount);
 					} else if (amount > ((float) worldObj.difficultySetting.getDifficultyId() * 2.0F)) {
 						WorldUtils.playSoundAtEntity(this, Sounds.ARMOR_BREAK, 0.4F, 0.5F);
@@ -327,7 +333,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 					}
 					return false;
 				}
-			} else if (parryAttack(source.getEntity())) {
+			} else if (parryAttack(source)) {
 				return false;
 			} else {
 				if (recentHitTimer > 0) {
@@ -352,16 +358,19 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	/**
-	 * Returns true if the Darknut was able to parry the entity's attack, and
-	 * may also disarm the attacker
+	 * Returns true if the Darknut was able to parry the source of damage, and
+	 * may also disarm the attacker, if any
 	 */
-	protected boolean parryAttack(Entity entity) {
-		if (TargetUtils.isTargetInFrontOf(this, entity, 90) && rand.nextFloat() < (0.5F - (parryTimer * 0.05F))) {
+	protected boolean parryAttack(DamageSource source) {
+		Entity entity = source.getEntity();
+		if (entity == null || source.isExplosion()) {
+			return false;
+		} else if (TargetUtils.isTargetInFrontOf(this, entity, 90) && rand.nextFloat() < (0.5F - (parryTimer * 0.05F))) {
 			worldObj.setEntityState(this, PARRY_FLAG);
 			parryTimer = 10;
 			super.swingItem();
 			attackTime = Math.max(attackTime, 5); // don't allow attacks until parry animation finishes
-			if (entity instanceof EntityLivingBase) {
+			if (entity instanceof EntityLivingBase && !source.isProjectile()) {
 				EntityLivingBase attacker = (EntityLivingBase) entity;
 				if (attacker.getEquipmentInSlot(0) != null) {
 					WorldUtils.playSoundAtEntity(this, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
