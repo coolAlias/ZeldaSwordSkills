@@ -49,6 +49,7 @@ import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -222,7 +223,10 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 					new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.mask.desired.0"),
 							StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
 				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession());
+					// Custom villager professions all use the same chat message
+					int p = villager.getProfession();
+					String s = (p < 0 || p > EnumVillager.values().length) ? "custom" : String.valueOf(p);
+					PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + s);
 				}
 			} else if (entity instanceof EntityNpcMaskTrader) {
 				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".salesman");
