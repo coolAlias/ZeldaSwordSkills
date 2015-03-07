@@ -19,6 +19,7 @@ package zeldaswordskills.world.gen.feature;
 
 import java.util.Random;
 
+import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import zeldaswordskills.block.ZSSBlocks;
@@ -66,7 +67,8 @@ public class WorldGenBombFlowers extends WorldGenerator
 	 */
 	@Override
 	public boolean generate(World world, Random rand, int x, int y, int z) {
-		if (world.isAirBlock(x, y, z) && ZSSBlocks.bombFlower.canPlaceBlockAt(world, x, y, z)) {
+		// Don't allow placement on cobblestone: probably a village blacksmith
+		if (world.isAirBlock(x, y, z) && world.getBlock(x, y - 1, z) != Blocks.cobblestone && ZSSBlocks.bombFlower.canPlaceBlockAt(world, x, y, z)) {
 			world.setBlock(x, y, z, ZSSBlocks.bombFlower, rand.nextInt(8), 2);
 			return true;
 		}
