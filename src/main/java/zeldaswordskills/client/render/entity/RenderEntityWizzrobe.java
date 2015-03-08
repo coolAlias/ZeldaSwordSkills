@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.BossStatus;
 import net.minecraft.entity.boss.IBossDisplayData;
@@ -76,7 +77,7 @@ public class RenderEntityWizzrobe extends RenderLiving
 	}
 
 	@Override
-	public void doRender(Entity entity, double dx, double dy, double dz, float yaw, float partialTick) {
+	public void doRender(EntityLiving entity, double dx, double dy, double dz, float yaw, float partialTick) {
 		if (entity instanceof IBossDisplayData) {
 			BossStatus.setBossStatus((IBossDisplayData) entity, true);
 		}

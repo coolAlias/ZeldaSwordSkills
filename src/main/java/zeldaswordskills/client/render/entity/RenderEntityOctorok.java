@@ -76,17 +76,7 @@ public class RenderEntityOctorok extends RenderLiving
 	}
 
 	@Override
-	public void doRender(EntityLivingBase entity, double dx, double dy, double dz, float f, float f1) {
-		renderLivingSquid((EntityOctorok) entity, dx, dy, dz, f, f1);
-	}
-
-	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		return (((EntityOctorok) entity).getType() == 0 ? texture1 : texture2);
-	}
-
-	@Override
-	public void doRender(Entity entity, double dx, double dy, double dz, float f, float f1) {
-		renderLivingSquid((EntityOctorok) entity, dx, dy, dz, f, f1);
 	}
 }

@@ -18,7 +18,7 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.renderer.entity.RenderBat;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.util.ResourceLocation;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.ref.ModInfo;
@@ -55,7 +55,7 @@ public class RenderEntityKeese extends RenderBat
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
+	protected ResourceLocation getEntityTexture(EntityBat entity) {
 		return getKeeseTextures((EntityKeese) entity);
 	}
 }
