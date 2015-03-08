@@ -68,7 +68,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	 */
 	@Override
 	protected Item func_149866_i() {
-		return null;
+		return ZSSItems.bombFlowerSeed;
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	 */
 	@Override
 	protected Item func_149865_P() {
-		return null;
+		return ZSSItems.bombFlowerSeed;
 	}
 
 	@Override
