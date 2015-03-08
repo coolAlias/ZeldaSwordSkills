@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.2.4",
+			"modVersion":"2.2.5",
 			"changeLog": [
-	               "Added Gossip Stones",
+	               "Added Bomb Flowers",
 	               "See website for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
