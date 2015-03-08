@@ -17,6 +17,13 @@
 
 package zeldaswordskills.api.entity;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
+import zeldaswordskills.api.entity.CustomExplosion.IgnoreLiquid;
+import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.util.WorldUtils;
+
 /**
  * 
  * Use these in conjunction with IEntityBomb and the static createExplosion methods
@@ -28,18 +35,42 @@ package zeldaswordskills.api.entity;
  */
 public enum BombType {
 	/** Applies vanilla explosion rules */
-	BOMB_STANDARD("standard"),
+	BOMB_STANDARD("standard", IgnoreLiquid.NONE),
 	/** Ignores water when determining which blocks to destroy; less effective in the Nether */
-	BOMB_WATER("water"),
+	BOMB_WATER("water", IgnoreLiquid.WATER),
 	/** Ignores lava when determining which blocks to destroy */
-	BOMB_FIRE("fire"),
+	BOMB_FIRE("fire", IgnoreLiquid.LAVA),
 	/** Same as BOMB_STANDARD, except some bomb flower seeds may be dispersed */
-	BOMB_FLOWER("flower");
+	BOMB_FLOWER("flower", IgnoreLiquid.NONE);
 
 	/** The unlocalized name of the bomb type, e.g. 'standard', 'fire', etc. */
 	public final String unlocalizedName;
-	
-	private BombType(String name) {
+
+	/** Type of liquid to exclude from the explosion calculations */
+	public final IgnoreLiquid ignoreLiquidType;
+
+	private BombType(String name, IgnoreLiquid ignoreLiquidType) {
 		this.unlocalizedName = name;
+		this.ignoreLiquidType = ignoreLiquidType;
+	}
+
+	/**
+	 * Performs any post-explosion effect for this bomb type
+	 * Currently only BOMB_FLOWER has any special after-effect
+	 */
+	public void postExplosionEffect(World world, Explosion explosion) {
+		if (this == BOMB_FLOWER) {
+			disperseSeeds(world, explosion.explosionX, explosion.explosionY, explosion.explosionZ);
+		}
+	}
+
+	/**
+	 * Scatters several bomb flower seeds around the given coordinates
+	 */
+	private void disperseSeeds(World world, double x, double y, double z) {
+		int n = world.rand.nextInt(3) + 1;
+		for (int i = 0; i < n; ++i) {
+			WorldUtils.spawnItemWithRandom(world, new ItemStack(ZSSItems.bombFlowerSeed), x, y, z, 0.15F);
+		}
 	}
 }

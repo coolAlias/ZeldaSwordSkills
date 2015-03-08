@@ -115,6 +115,11 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	}
 
 	@Override
+	public boolean hasPostExplosionEffect() {
+		return false;
+	}
+
+	@Override
 	protected float getVelocityFactor() {
 		return 1.0F;
 	}
@@ -137,7 +142,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (ticksInAir > 5 && worldObj.provider.dimensionId == -1 && getType() == BombType.BOMB_STANDARD && !worldObj.isRemote) {
+		if (worldObj.provider.isHellWorld && ticksInAir > 0 && !worldObj.isRemote && (getType() == BombType.BOMB_STANDARD || getType() == BombType.BOMB_FLOWER)) {
 			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), (float) getDamage(), canGrief);
 			setDead();
 		}
@@ -147,7 +152,8 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	protected void onImpact(MovingObjectPosition mop) {
 		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
 		// func_147470_e is isBoundingBoxBurning
-		if (!isDud(material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox)) {
+		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
+		if (!isDud(inFire)) {
 			if (!worldObj.isRemote) {
 				CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), (float) getDamage(), canGrief);
 				setDead();
@@ -163,7 +169,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	 */
 	private boolean isDud(boolean inFire) {
 		switch(getType()) {
-		case BOMB_WATER: return inFire || (ticksExisted > 8 && worldObj.provider.dimensionId == -1);
+		case BOMB_WATER: return inFire || worldObj.provider.isHellWorld;
 		default: return (worldObj.getBlock((int) posX, (int) posY, (int) posZ).getMaterial() == Material.water);
 		}
 	}

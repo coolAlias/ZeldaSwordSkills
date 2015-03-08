@@ -65,6 +65,9 @@ import zeldaswordskills.ref.Sounds;
  */
 public class CustomExplosion extends Explosion
 {
+	/** Type of liquids to ignore when calculating which blocks to affect */
+	public static enum IgnoreLiquid{NONE, ALL, WATER, LAVA};
+
 	/**
 	 * Creates an explosion based on the BombType given, automatically applying
 	 * various characteristics. If more versatility than this is required, create a
@@ -92,8 +95,7 @@ public class CustomExplosion extends Explosion
 		explosion.scalesWithDistance = (damage == 0.0F);
 		explosion.isSmoking = canGrief;
 		explosion.targetBlock = ((restrictBlocks || Config.onlyBombSecretStone()) ? ZSSBlocks.secretStone : null);
-		explosion.ignoreLiquids = (type != BombType.BOMB_STANDARD);
-		explosion.ignoreLiquidType = (type == BombType.BOMB_FIRE ? 2 : (type == BombType.BOMB_WATER ? 1 : 0));
+		explosion.ignoreLiquidType = type.ignoreLiquidType;
 		float f = bomb.getDestructionFactor();
 		if (world.provider.isHellWorld && type != BombType.BOMB_FIRE) {
 			f *= 0.5F;
@@ -101,6 +103,9 @@ public class CustomExplosion extends Explosion
 		explosion.restrictExplosionBy(f);
 		explosion.doExplosionA();
 		explosion.doExplosionB(true);
+		if (bomb.hasPostExplosionEffect()) {
+			type.postExplosionEffect(world, explosion);
+		}
 	}
 
 	/** Whether or not this explosion will damage entities within the blast explosionSize */
@@ -109,11 +114,8 @@ public class CustomExplosion extends Explosion
 	/** Whether the damage amount scales with distance from explosion's center, as well as chance of catching fire */
 	public boolean scalesWithDistance = true;
 
-	/** Setting this to true will ignore liquids for the purpose of determining which blocks are destroyed */
-	public boolean ignoreLiquids = false;
-
-	/** Exclude only a certain type of liquid: 0 - all liquids; 1 - water only 2 - lava only*/
-	public int ignoreLiquidType = 0;
+	/** Exclude a certain type of liquid when determining which blocks are affected, usually making the explosion more devastating */
+	public IgnoreLiquid ignoreLiquidType = IgnoreLiquid.NONE;
 
 	/** Specific block to target, if any (defaults to all blocks) */
 	public Block targetBlock = null;
@@ -325,9 +327,10 @@ public class CustomExplosion extends Explosion
 							Block block = worldObj.getBlock(l, i1, j1);
 
 							if (block.getMaterial() != Material.air) {
-								boolean flag = !block.getMaterial().isLiquid() || !ignoreLiquids || !(ignoreLiquidType != 0 &&
-										((ignoreLiquidType == 1 && block.getMaterial() == Material.water) ||
-												(ignoreLiquidType == 2 && block.getMaterial() == Material.lava)));
+								// True if block resistance should reduce the explosion radius
+								boolean flag = !block.getMaterial().isLiquid() || ignoreLiquidType == IgnoreLiquid.NONE || 
+										(ignoreLiquidType == IgnoreLiquid.WATER && block.getMaterial() != Material.water) ||
+										(ignoreLiquidType == IgnoreLiquid.LAVA && block.getMaterial() != Material.lava);
 								if (flag) {
 									// func_145772_a is getBlockExplosionResistance
 									float f3 = exploder != null ? exploder.func_145772_a(this, worldObj, l, i1, j1, block) : block.getExplosionResistance(exploder, worldObj, l, i1, j1, explosionX, explosionY, explosionZ);

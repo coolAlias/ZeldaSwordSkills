@@ -39,7 +39,6 @@ import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBombIngestible
@@ -181,6 +180,11 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	}
 
 	@Override
+	public boolean hasPostExplosionEffect() {
+		return getType() != BombType.BOMB_FLOWER || getThrower() == null;
+	}
+
+	@Override
 	protected float getGravityVelocity() {
 		return 0.075F;
 	}
@@ -225,7 +229,6 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		if (onGround) {
 			f = 0.58800006F;
 			Block block = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(boundingBox.minY) - 1, MathHelper.floor_double(posZ));
-
 			if (block.getMaterial() != Material.air) {
 				f = block.slipperiness * 0.98F;
 			}
@@ -246,22 +249,16 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 
 		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
 		// func_147470_e is isBoundingBoxBurning
-		boolean inFire = (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
+		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
 		if (isDud(inFire)) {
 			fuseTime += 10;
 			disarm(worldObj);
-			return;
-		}
-
-		if (ticksExisted % 20 == 0) {
+		} else if (ticksExisted % 20 == 0) {
 			playSound(Sounds.BOMB_FUSE, 1.0F, 2.0F + rand.nextFloat() * 0.4F);
 		}
 
 		if (!worldObj.isRemote && shouldExplode(inFire)) {
 			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, getRadius(), getDamage(), canGrief);
-			if (getType() == BombType.BOMB_FLOWER) {
-				disperseSeeds();
-			}
 			setDead();
 		}
 	}
@@ -290,9 +287,14 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	 */
 	public boolean disarm(World world) {
 		if (!world.isRemote) {
-			if (fuseTime > 4) {
+			if (isEntityAlive() && fuseTime > 4) {
 				setDead();
-				world.spawnEntityInWorld(new EntityItem(world, posX, posY, posZ, new ItemStack(ZSSItems.bomb,1,getType().ordinal())));
+				EntityItem bomb = new EntityItem(world, posX, posY, posZ, new ItemStack(ZSSItems.bomb,1,getType().ordinal()));
+				bomb.delayBeforeCanPickup = 40;
+				bomb.motionX = motionX;
+				bomb.motionY = motionY;
+				bomb.motionZ = motionZ;
+				world.spawnEntityInWorld(bomb);
 				return true;
 			}
 		}
@@ -313,7 +315,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	 */
 	private boolean isDud(boolean inFire) {
 		switch(getType()) {
-		case BOMB_WATER: return inFire || (ticksExisted > 8 && worldObj.provider.dimensionId == -1);
+		case BOMB_WATER: return inFire || worldObj.provider.isHellWorld;
 		default: return (worldObj.getBlock((int) posX, (int) posY, (int) posZ).getMaterial() == Material.water);
 		}
 	}
@@ -323,20 +325,12 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	 * @param inFire whether this bomb is in fire, lava, or currently burning
 	 */
 	private boolean shouldExplode(boolean inFire) {
-		boolean inNether = (worldObj.provider.dimensionId == -1 && getType() == BombType.BOMB_STANDARD);
-		return (ticksExisted >= fuseTime || inNether || (inFire && getType() == BombType.BOMB_STANDARD));
-	}
-
-	/**
-	 * Scatters several seeds for naturally exploding bomb flowers (i.e. no thrower)
-	 */
-	private void disperseSeeds() {
-		if (getThrower() == null) {
-			int n = worldObj.rand.nextInt(3) + 1;
-			for (int i = 0; i < n; ++i) {
-				WorldUtils.spawnItemWithRandom(worldObj, new ItemStack(ZSSItems.bombFlowerSeed), posX, posY, posZ, 0.15F);
-			}
+		if (!isEntityAlive()) {
+			return false;
+		} else if ((inFire || worldObj.provider.isHellWorld) && getType() != BombType.BOMB_FIRE) {
+			return true;
 		}
+		return ticksExisted >= fuseTime;
 	}
 
 	@Override

@@ -46,4 +46,9 @@ public interface IEntityBomb {
 	 */
 	// TODO public boolean canGriefAdventureMode();
 
+	/**
+	 * Return true if {@link BombType#postExplosionEffect} should be called
+	 */
+	public boolean hasPostExplosionEffect();
+
 }
