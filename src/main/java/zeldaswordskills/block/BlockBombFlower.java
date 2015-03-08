@@ -129,10 +129,14 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	@Override
 	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
 		int meta = world.getBlockMetadata(x, y, z);
-		super.onBlockExploded(world, x, y, z, explosion);
 		if (meta == 7) {
-			createExplosion(world, x, y, z, false);
+			// full growth stage (0x7) for rendering, plus bit 8 to make the block explode next update tick
+			world.setBlockMetadataWithNotify(x, y, z, 15, 2);
+			world.scheduleBlockUpdate(x, y, z, this, 5);
+		} else if (meta < 7) {
+			super.onBlockExploded(world, x, y, z, explosion);
 		}
+		// meta 8+ do nothing, these will explode on their own next update tick
 	}
 
 	@Override
@@ -170,7 +174,9 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	public void updateTick(World world, int x, int y, int z, Random rand) {
 		checkAndDropBlock(world, x, y, z);
 		int meta = world.getBlockMetadata(x, y, z);
-		if (meta < 7 && rand.nextInt(6) == 0) {
+		if (meta > 7) {
+			createExplosion(world, x, y, z, true);
+		} else if (meta < 7 && rand.nextInt(6) == 0) {
 			world.setBlockMetadataWithNotify(x, y, z, meta + 1, 2);
 		} else if (meta == 7 && rand.nextInt(16) == 0) {
 			disperseSeeds(world, x, y, z, false);
