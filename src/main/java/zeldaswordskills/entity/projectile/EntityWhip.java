@@ -529,7 +529,7 @@ public class EntityWhip extends EntityThrowable
 		compound.setInteger("hitY", hitY);
 		compound.setInteger("hitZ", hitZ);
 		compound.setByte("customInGround", (byte)(isInGround() ? 1 : 0));
-		compound.setByte("whipType", (byte) getType().ordinal());
+		compound.setInteger("whipType", getType().ordinal());
 	}
 
 	@Override
@@ -543,7 +543,7 @@ public class EntityWhip extends EntityThrowable
 		hitZ = compound.getInteger("hitZ");
 		// retrieving owner name saved by super-class EntityThrowable
 		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
-		dataWatcher.updateObject(WHIP_TYPE_INDEX, WhipType.values()[compound.getByte("whipType") % WhipType.values().length]);
+		dataWatcher.updateObject(WHIP_TYPE_INDEX, WhipType.values()[compound.getInteger("whipType") % WhipType.values().length]);
 		dataWatcher.updateObject(IN_GROUND_INDEX, compound.getByte("customInGround"));
 	}
 }
