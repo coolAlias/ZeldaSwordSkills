@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.2.5",
+			"modVersion":"2.2.5.b",
 			"changeLog": [
-	               "Added Bomb Flowers",
+	               "Several critical bug fixes",
 	               "See website for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
