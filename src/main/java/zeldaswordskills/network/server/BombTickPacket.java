@@ -35,19 +35,30 @@ import cpw.mods.fml.relauncher.Side;
  */
 public class BombTickPacket extends AbstractServerMessage<BombTickPacket>
 {
+	/** Index of inventory slot containing the ticking bomb */
+	private int slot;
+
 	public BombTickPacket() {}
 
-	@Override
-	protected void read(PacketBuffer buffer) throws IOException {}
+	public BombTickPacket(int slot) {
+		this.slot = slot;
+	}
 
 	@Override
-	protected void write(PacketBuffer buffer) throws IOException {}
+	protected void read(PacketBuffer buffer) throws IOException {
+		slot = buffer.readInt();
+	}
+
+	@Override
+	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeInt(slot);
+	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		ItemStack held = player.getHeldItem();
-		if (held != null && held.getItem() instanceof ItemBomb) {
-			((ItemBomb) held.getItem()).tickBomb(held, player.worldObj, player);
+		ItemStack bomb = player.inventory.getStackInSlot(slot);
+		if (bomb != null && bomb.getItem() instanceof ItemBomb) {
+			((ItemBomb) bomb.getItem()).tickBomb(bomb, player.worldObj, player, slot);
 		}
 	}
 }

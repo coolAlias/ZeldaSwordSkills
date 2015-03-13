@@ -163,13 +163,13 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
 
-		if (isHeld) {
+		if (isHeld || getType(stack) == BombType.BOMB_FLOWER) {
 			if (entity instanceof EntityPlayer) {
 				if (world.isRemote && Minecraft.getMinecraft().currentScreen == null) {
-					PacketDispatcher.sendToServer(new BombTickPacket());
+					PacketDispatcher.sendToServer(new BombTickPacket(slot));
 				}
 			} else {
-				tickBomb(stack, world, entity);
+				tickBomb(stack, world, entity, slot);
 			}
 		} else {
 			stack.getTagCompound().setInteger("time", 0);
@@ -180,7 +180,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 	/**
 	 * Increments bomb's timer and causes explosion if time is out; stack must be held by entity
 	 */
-	public void tickBomb(ItemStack stack, World world, Entity entity) {
+	public void tickBomb(ItemStack stack, World world, Entity entity, int slot) {
 		if (!stack.hasTagCompound()) {
 			stack.setTagCompound(new NBTTagCompound());
 			stack.getTagCompound().setInteger("time", 0);
@@ -197,9 +197,14 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 			if (time % 20 == 0) {
 				world.playSoundAtEntity(entity, Sounds.BOMB_FUSE, 1.0F, 2.0F + entity.worldObj.rand.nextFloat() * 0.4F);
 			}
-			stack.getTagCompound().setInteger("time", ((world.provider.dimensionId == -1 && type == BombType.BOMB_STANDARD) ? Config.getBombFuseTime() : ++time));
+			boolean flag = world.provider.isHellWorld && (type == BombType.BOMB_STANDARD || type == BombType.BOMB_FLOWER);
+			stack.getTagCompound().setInteger("time", flag ? Config.getBombFuseTime() : ++time);
 			if (time == Config.getBombFuseTime() && !world.isRemote) {
-				entity.setCurrentItemOrArmor(0, null);
+				if (entity instanceof EntityPlayer) {
+					((EntityPlayer) entity).inventory.setInventorySlotContents(slot, null);
+				} else {
+					entity.setCurrentItemOrArmor(slot, null);
+				}
 				CustomExplosion.createExplosion(world, entity.posX, entity.posY, entity.posZ, getRadius(type), type);
 			}
 		}
