@@ -20,7 +20,9 @@ package zeldaswordskills.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.Item;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.input.Keyboard;
 
@@ -92,7 +94,15 @@ public class ZSSKeyHandler
 	public static void onKeyPressed(Minecraft mc, int kb) {
 		if (mc.inGameHasFocus && mc.thePlayer != null) {
 			ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
-			if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
+			if (kb == mc.gameSettings.keyBindSprint.getKeyCode()) {
+				// Don't allow sprinting while in mid-air (motionY is < 0 even when standing on a block)
+				int x = MathHelper.floor_double(mc.thePlayer.posX);
+				int y = MathHelper.floor_double(mc.thePlayer.posY - mc.thePlayer.yOffset);
+				int z = MathHelper.floor_double(mc.thePlayer.posZ);
+				if (!mc.theWorld.getBlock(x, y - 1, z).isSideSolid(mc.theWorld, x, y - 1, z, ForgeDirection.UP)) {
+					KeyBinding.setKeyBindState(kb, false);
+				}
+			} else if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
 				SkillBase skill = skills.getPlayerSkill(SkillBase.swordBasic);
 				if (skill != null && skill.getLevel() > 0) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(skill));
