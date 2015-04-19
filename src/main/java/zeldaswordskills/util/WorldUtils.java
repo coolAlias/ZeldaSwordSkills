@@ -87,7 +87,8 @@ public class WorldUtils
 	public static boolean canMeltBlock(World world, Block block, int x, int y, int z) {
 		int meta = world.getBlockMetadata(x, y, z);
 		boolean flag = Config.enableFireArrowMelt() ? (meta & ~8) == 5 : meta == 5;
-		return (block.getMaterial() == Material.ice || block.getMaterial() == Material.snow ||
+		return (block.getMaterial() == Material.ice || block.getMaterial() == Material.packedIce ||
+				block.getMaterial() == Material.snow || block.getMaterial() == Material.craftedSnow ||
 				(block == ZSSBlocks.secretStone && flag));
 	}
 
