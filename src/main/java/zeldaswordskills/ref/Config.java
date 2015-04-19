@@ -474,7 +474,7 @@ public class Config
 		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [32-64]", 64).getInt(), 32, 64);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
-		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-15]", 5).getInt(), 1, 15);
+		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-50]", 15).getInt(), 1, 50);
 		/*================== MOB SPAWNING =====================*/
 		roomSpawnMobChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100]", 25).getInt(), 0, 100);
 		mobVariantChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt(), 0, 100);
