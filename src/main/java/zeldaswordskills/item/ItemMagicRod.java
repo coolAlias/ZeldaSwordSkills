@@ -49,6 +49,7 @@ import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.BlockSacredFlame;
+import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -278,6 +279,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 					world.setBlock(p.chunkPosX, p.chunkPosY, p.chunkPosZ, Blocks.fire);
 					world.playSoundEffect(p.chunkPosX + 0.5D, p.chunkPosY + 0.5D, p.chunkPosZ + 0.5D,
 							Sounds.FIRE_IGNITE, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+				} else if (block == ZSSBlocks.bombFlower) {
+					block.onBlockExploded(world, p.chunkPosX, p.chunkPosY, p.chunkPosZ, null);
 				}
 				break;
 			case ICE:
