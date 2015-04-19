@@ -17,7 +17,7 @@
 
 package zeldaswordskills.block.tileentity;
 
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -27,13 +27,17 @@ import net.minecraftforge.common.util.Constants;
 /**
  * 
  * Base class for any tile entity that needs an inventory;
- * disallows update ticks by default, so re-override canUpdate if needed
+ * disallows update ticks by default, so re-override canUpdate if needed;
+ * disallows automation by default, re-override ISidedInventory methods if needed;
  *
  */
-public abstract class TileEntityInventory extends TileEntity implements IInventory
+public abstract class TileEntityInventory extends TileEntity implements ISidedInventory
 {
 	/** The tile entity's inventory slots need to be initialized during construction */
 	protected ItemStack[] inventory;
+
+	/** Dummy array to return for {@link ISidedInventory#getAccessibleSlotsFromSide} */
+	private static final int[] availableSlots = new int[]{0};
 
 	@Override
 	public boolean canUpdate() {
@@ -114,4 +118,18 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	@Override
 	public void closeInventory() {}
 
+	@Override
+	public int[] getAccessibleSlotsFromSide(int side) {
+		return availableSlots;
+	}
+
+	@Override
+	public boolean canInsertItem(int slot, ItemStack stack, int side) {
+		return false;
+	}
+
+	@Override
+	public boolean canExtractItem(int slot, ItemStack stack, int side) {
+		return false;
+	}
 }
