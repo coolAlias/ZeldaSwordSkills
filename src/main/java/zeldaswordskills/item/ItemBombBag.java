@@ -172,8 +172,11 @@ public class ItemBombBag extends Item implements IUnenchantable
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.1"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.2"));
-		String bombName = StatCollector.translateToLocal((getBombsHeld(stack) > 0 && getBagBombType(stack) > 0) ?  "item.zss.bomb." + getBagBombType(stack) + ".name" : "item.zss.bomb.0.name");
-		list.add(EnumChatFormatting.BOLD + StatCollector.translateToLocalFormatted("tooltip.zss.bombbag.desc.bombs", new Object[] {bombName,getBombsHeld(stack),getCapacity(stack)}));
+		int held = getBombsHeld(stack);
+		int i = getBagBombType(stack);
+		BombType type = (held > 0 && i > 0) ? BombType.values()[i % BombType.values().length] : BombType.BOMB_STANDARD;
+		String bombName = StatCollector.translateToLocal("item.zss.bomb." + type.unlocalizedName + ".name");
+		list.add(EnumChatFormatting.BOLD + StatCollector.translateToLocalFormatted("tooltip.zss.bombbag.desc.bombs", bombName, held, getCapacity(stack)));
 	}
 
 	/**
