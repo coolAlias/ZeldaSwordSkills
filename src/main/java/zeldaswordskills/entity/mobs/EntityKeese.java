@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
@@ -423,7 +422,8 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 					} else if (source instanceof IDamageSourceStun) {
 						setShockTime(0);
 					}
-				} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityLivingBase) {
+					// Hack to prevent infinite loop when attacked by other electrified mobs (other keese, chus, etc)
+				} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
 					source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
 					worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 				}

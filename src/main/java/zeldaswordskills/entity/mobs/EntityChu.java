@@ -24,7 +24,6 @@ import java.util.List;
 import net.minecraft.client.particle.EntityBreakingFX;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
@@ -387,7 +386,8 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 				} else if (source instanceof IDamageSourceStun) {
 					setShockTime(0);
 				}
-			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityLivingBase) {
+			// Hack to prevent infinite loop when attacked by other electrified mobs (other chus, keese, etc)
+			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
 				source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
 				worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
