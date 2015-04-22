@@ -28,6 +28,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.OpenSongGuiPacket;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -48,7 +50,7 @@ public class CommandGrantSong extends CommandBase
 	}
 
 	/**
-	 * grantsong <player> <song | all>
+	 * grantsong <player> <song | all> <true>
 	 */
 	@Override
 	public String getCommandUsage(ICommandSender player) {
@@ -60,9 +62,12 @@ public class CommandGrantSong extends CommandBase
 		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
 		EntityPlayerMP player = getPlayer(sender, args[0]);
 		ZSSPlayerSongs info = ZSSPlayerSongs.get(player);
-		if (args.length != 2) {
+		if (args.length != 2 && args.length != 3) {
 			throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
 		} else if (("all").equals(args[1])) {
+			if (args.length != 2) {
+				throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+			}
 			boolean flag = true;
 			for (AbstractZeldaSong song : SongAPI.getRegisteredSongs()) {
 				if (song.canLearnFromCommand() && !info.learnSong(song, null)) {
@@ -80,6 +85,12 @@ public class CommandGrantSong extends CommandBase
 				throw new CommandException("commands.song.generic.unknown", args[1]);
 			} else if (!song.canLearnFromCommand()) {
 				throw new CommandException("commands.grantsong.failure.denied", song.getDisplayName());
+			} else if (args.length == 3) {
+				if (("true").equals(args[2])) {
+					PacketDispatcher.sendTo(new OpenSongGuiPacket(song), player);
+				} else {
+					throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+				}
 			} else if (info.learnSong(song, null)) {
 				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), song.getDisplayName());
 			} else {
@@ -93,6 +104,7 @@ public class CommandGrantSong extends CommandBase
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return getListOfStringsMatchingLastWord(args, SongAPI.getRegisteredNames().toArray(new String[SongAPI.getTotalSongs()]));
+		case 3: return getListOfStringsMatchingLastWord(args, new String[]{"true"});
 		default: return null;
 		}
 	}

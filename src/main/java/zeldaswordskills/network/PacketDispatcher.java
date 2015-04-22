@@ -35,6 +35,7 @@ import zeldaswordskills.network.client.AttackBlockedPacket;
 import zeldaswordskills.network.client.InLiquidPacket;
 import zeldaswordskills.network.client.MortalDrawPacket;
 import zeldaswordskills.network.client.OpenGossipStoneEditorPacket;
+import zeldaswordskills.network.client.OpenSongGuiPacket;
 import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
@@ -93,6 +94,7 @@ public class PacketDispatcher
 		registerMessage(InLiquidPacket.class);
 		registerMessage(MortalDrawPacket.class);
 		registerMessage(OpenGossipStoneEditorPacket.class);
+		registerMessage(OpenSongGuiPacket.class);
 		registerMessage(PacketISpawnParticles.class);
 		registerMessage(SetNockedArrowPacket.class);
 		registerMessage(SpawnNayruParticlesPacket.class);
