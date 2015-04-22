@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.2.5.b",
+			"modVersion":"2.2.5.c",
 			"changeLog": [
-	               "Several critical bug fixes",
+	               "Several more important bug fixes",
 	               "See website for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
