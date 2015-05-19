@@ -36,27 +36,30 @@ public class ZeldaSongSoaring extends AbstractZeldaSong {
 	}
 
 	@Override
-	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
+	protected boolean hasEffect(EntityPlayer player, ItemStack instrument, int power) {
 		// Not usable in the Nether or the End, mainly due to unpredictable results
-		if (power > 4 && Math.abs(player.dimension) != 1) {
-			ChunkCoordinates cc = player.getBedLocation(player.dimension);
-			if (cc != null) {
-				cc = EntityPlayer.verifyRespawnCoordinates(player.worldObj, cc, player.isSpawnForced(player.dimension));
+		return power > 4 && Math.abs(player.dimension) != 1;
+	}
+
+	@Override
+	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
+		ChunkCoordinates cc = player.getBedLocation(player.dimension);
+		if (cc != null) {
+			cc = EntityPlayer.verifyRespawnCoordinates(player.worldObj, cc, player.isSpawnForced(player.dimension));
+		}
+		if (cc == null) {
+			cc = player.worldObj.getSpawnPoint();
+		}
+		if (cc != null) {
+			if (player.ridingEntity != null) {
+				player.mountEntity(null);
 			}
-			if (cc == null) {
-				cc = player.worldObj.getSpawnPoint();
+			player.setPosition((double) cc.posX + 0.5D, (double) cc.posY + 0.1D, (double) cc.posZ + 0.5D);
+			while (!player.worldObj.getCollidingBoundingBoxes(player, player.boundingBox).isEmpty()) {
+				player.setPosition(player.posX, player.posY + 1.0D, player.posZ);
 			}
-			if (cc != null) {
-				if (player.ridingEntity != null) {
-					player.mountEntity(null);
-				}
-				player.setPosition((double) cc.posX + 0.5D, (double) cc.posY + 0.1D, (double) cc.posZ + 0.5D);
-				while (!player.worldObj.getCollidingBoundingBoxes(player, player.boundingBox).isEmpty()) {
-					player.setPosition(player.posX, player.posY + 1.0D, player.posZ);
-				}
-				player.setPositionAndUpdate(player.posX, player.posY, player.posZ);
-				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-			}
+			player.setPositionAndUpdate(player.posX, player.posY, player.posZ);
+			PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 		}
 	}
 }

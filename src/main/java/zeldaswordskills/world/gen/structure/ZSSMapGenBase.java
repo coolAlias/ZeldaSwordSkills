@@ -84,7 +84,7 @@ public abstract class ZSSMapGenBase
 				world.perWorldStorage.setData(getTagName(), roomData);
 			} else {
 				NBTTagCompound compound = roomData.getRoomData();
-				// func_150296_c is getTags()
+				// func_150296_c is getKeySet()
 				Iterator<String> iterator = compound.func_150296_c().iterator();
 				while (iterator.hasNext()) {
 					String s = iterator.next();

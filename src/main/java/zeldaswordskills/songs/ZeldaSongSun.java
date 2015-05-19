@@ -43,20 +43,23 @@ public class ZeldaSongSun extends AbstractZeldaSong
 	}
 
 	@Override
+	protected boolean hasEffect(EntityPlayer player, ItemStack instrument, int power) {
+		return power > 4;
+	}
+
+	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
-		if (power > 4) {
-			if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", getDisplayName(), Config.getMinIntervalSun());
-				return;
-			}
-			PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-			long time = (player.worldObj.getWorldTime() % 24000);
-			long addTime = (time < 12000) ? (12000 - time) : (24000 - time);
-			for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
-				WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
-				worldserver.setWorldTime(worldserver.getWorldTime() + addTime);
-			}
-			nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalSun();
+		if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
+			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", getDisplayName(), Config.getMinIntervalSun());
+			return;
 		}
+		PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
+		long time = (player.worldObj.getWorldTime() % 24000);
+		long addTime = (time < 12000) ? (12000 - time) : (24000 - time);
+		for (int i = 0; i < MinecraftServer.getServer().worldServers.length; ++i) {
+			WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
+			worldserver.setWorldTime(worldserver.getWorldTime() + addTime);
+		}
+		nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalSun();
 	}
 }

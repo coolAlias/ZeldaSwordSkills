@@ -63,10 +63,10 @@ public class CommandGrantSong extends CommandBase
 		EntityPlayerMP player = getPlayer(sender, args[0]);
 		ZSSPlayerSongs info = ZSSPlayerSongs.get(player);
 		if (args.length != 2 && args.length != 3) {
-			throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+			throw new WrongUsageException(getCommandUsage(sender));
 		} else if (("all").equals(args[1])) {
 			if (args.length != 2) {
-				throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+				throw new WrongUsageException(getCommandUsage(sender));
 			}
 			boolean flag = true;
 			for (AbstractZeldaSong song : SongAPI.getRegisteredSongs()) {
@@ -89,7 +89,7 @@ public class CommandGrantSong extends CommandBase
 				if (("true").equals(args[2])) {
 					PacketDispatcher.sendTo(new OpenSongGuiPacket(song), player);
 				} else {
-					throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+					throw new WrongUsageException(getCommandUsage(sender));
 				}
 			} else if (info.learnSong(song, null)) {
 				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), song.getDisplayName());

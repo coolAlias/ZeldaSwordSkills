@@ -44,29 +44,34 @@ public class ZeldaSongStorms extends AbstractZeldaSong
 	}
 
 	@Override
+	protected boolean hasEffect(EntityPlayer player, ItemStack instrument, int power) {
+		return power > 4;
+	}
+
+	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
-		if (power > 4 && player.worldObj instanceof WorldServer) {
-			if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", getDisplayName(), Config.getMinIntervalStorm());
-				return;
-			}
-			nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalStorm();
-			PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-			WorldInfo worldinfo = ((WorldServer) player.worldObj).getWorldInfo();
-			if (worldinfo.isRaining()) {
-				worldinfo.setRainTime(0);
-				worldinfo.setRaining(false);
-			} else {
-				worldinfo.setRainTime(2000);
-				worldinfo.setRaining(true);
-			}
-			if (worldinfo.isThundering()) {
-				worldinfo.setThunderTime(0);
-				worldinfo.setThundering(false);
-			} else {
-				worldinfo.setThunderTime(2000);
-				worldinfo.setThundering(true);
-			}
+		if (!(player.worldObj instanceof WorldServer)) {
+			return;
+		} else if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
+			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", getDisplayName(), Config.getMinIntervalStorm());
+			return;
+		}
+		nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalStorm();
+		PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
+		WorldInfo worldinfo = ((WorldServer) player.worldObj).getWorldInfo();
+		if (worldinfo.isRaining()) {
+			worldinfo.setRainTime(0);
+			worldinfo.setRaining(false);
+		} else {
+			worldinfo.setRainTime(2000);
+			worldinfo.setRaining(true);
+		}
+		if (worldinfo.isThundering()) {
+			worldinfo.setThunderTime(0);
+			worldinfo.setThundering(false);
+		} else {
+			worldinfo.setThunderTime(2000);
+			worldinfo.setThundering(true);
 		}
 	}
 }

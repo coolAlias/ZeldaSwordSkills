@@ -59,7 +59,11 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 		int x = MathHelper.floor_double(player.posX);
 		int y = MathHelper.floor_double(player.boundingBox.maxY);
 		int z = MathHelper.floor_double(player.posZ);
-		if (player.worldObj.provider.isSurfaceWorld() && player.worldObj.canBlockSeeTheSky(x, y, z)) {
+		if (!player.worldObj.provider.isSurfaceWorld()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.dimension");
+		} else if (!player.worldObj.canBlockSeeTheSky(x, y, z)) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.sky");
+		} else {
 			EntityHorse epona = ZSSPlayerSongs.get(player).getLastHorseRidden();
 			if (epona == null) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.missing");

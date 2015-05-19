@@ -61,7 +61,7 @@ public class CommandRemoveSkill extends CommandBase
 			if (!all) {
 				skill = SkillBase.getSkillByName(args[0]);
 				if (skill == null) {
-					throw new CommandException("commands.skill.generic.unknown", new Object[] {args[0]});
+					throw new CommandException("commands.skill.generic.unknown", args[0]);
 				}
 			}
 			EntityPlayerMP player = getCommandSenderAsPlayer(sender);
@@ -73,13 +73,13 @@ public class CommandRemoveSkill extends CommandBase
 				}
 			} else { // player didn't have this skill
 				if (all) {
-					throw new CommandException("commands.removeskill.failure.all", new Object[] {player.getCommandSenderName()});
+					throw new CommandException("commands.removeskill.failure.all", player.getCommandSenderName());
 				} else {
-					throw new CommandException("commands.removeskill.failure.one", new Object[] {player.getCommandSenderName(), skill.getDisplayName()});
+					throw new CommandException("commands.removeskill.failure.one", player.getCommandSenderName(), skill.getDisplayName());
 				}
 			}
 		} else {
-			throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+			throw new WrongUsageException(getCommandUsage(sender));
 		}
 	}
 

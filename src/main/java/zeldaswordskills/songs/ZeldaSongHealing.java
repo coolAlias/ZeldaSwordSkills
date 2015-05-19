@@ -37,12 +37,15 @@ public class ZeldaSongHealing extends AbstractZeldaSong {
 	}
 
 	@Override
+	protected boolean hasEffect(EntityPlayer player, ItemStack instrument, int power) {
+		return power > 4 && ZSSPlayerSongs.get(player).canHealFromSong();
+	}
+
+	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
-		if (power > 4 && ZSSPlayerSongs.get(player).canHealFromSong()) {
-			PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-			player.curePotionEffects(new ItemStack(Items.milk_bucket));
-			player.heal(player.getMaxHealth());
-			ZSSPlayerSongs.get(player).setNextHealTime();
-		}
+		PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
+		player.curePotionEffects(new ItemStack(Items.milk_bucket));
+		player.heal(player.getMaxHealth());
+		ZSSPlayerSongs.get(player).setNextHealTime();
 	}
 }

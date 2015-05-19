@@ -221,6 +221,7 @@ public class RoomBoss extends RoomBase
 			}
 			Block block1 = world.getBlock(dx, y, dz);
 			Block block2 = world.getBlock(dx, y + 1, dz);
+			// func_149730_j is isFullBlock
 			if (!block1.func_149730_j() && !block2.func_149730_j()) {
 				return;
 			}

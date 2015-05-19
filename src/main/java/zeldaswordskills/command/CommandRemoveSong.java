@@ -57,7 +57,7 @@ public class CommandRemoveSong extends CommandBase
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
 		if (args.length != 1) {
-			throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+			throw new WrongUsageException(getCommandUsage(sender));
 		}
 		EntityPlayerMP player = getCommandSenderAsPlayer(sender);
 		ZSSPlayerSongs info = ZSSPlayerSongs.get(player);

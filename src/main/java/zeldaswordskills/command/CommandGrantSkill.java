@@ -106,7 +106,7 @@ public class CommandGrantSkill extends CommandBase
 				throw new CommandException("commands.grantskill.failure.low", player.getCommandSenderName(), skill.getDisplayName(), oldLevel);
 			}
 		} else {
-			throw new WrongUsageException(getCommandUsage(sender), new Object[0]);
+			throw new WrongUsageException(getCommandUsage(sender));
 		}
 	}
 

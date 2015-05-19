@@ -67,44 +67,49 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 	}
 
 	@Override
+	protected boolean hasEffect(EntityPlayer player, ItemStack instrument, int power) {
+		return power > 4;
+	}
+
+	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
 		WarpPoint warp = getWarpPoint(player);
-		if (power > 4 && warp != null) {
-			int dimension = player.worldObj.provider.dimensionId;
-			if (!canCrossDimensions() && dimension != warp.dimensionId) {
-				// can't cross dimensions
-			} else if (dimension == 1 && warp.dimensionId != 1) { // can't teleport from the end to other dimensions
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.warp.end");
-			} else {
-				if (player.ridingEntity != null) {
-					player.mountEntity(null);
+		int dimension = player.worldObj.provider.dimensionId;
+		if (warp == null) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.warp.null");
+		} else if (!canCrossDimensions() && dimension != warp.dimensionId) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.warp.dimension");
+		} else if (dimension == 1 && warp.dimensionId != 1) { // can't teleport from the end to other dimensions
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.warp.end");
+		} else {
+			if (player.ridingEntity != null) {
+				player.mountEntity(null);
+			}
+			double dx = player.posX;
+			double dy = player.posY;
+			double dz = player.posZ;
+			if (dimension != warp.dimensionId) {
+				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, warp.dimensionId, new TeleporterNoPortal((WorldServer) player.worldObj));
+			}
+			boolean noBlock = true; // true if warp block not found
+			boolean noAir = false; // true if new position is not suitable
+			Block block = player.worldObj.getBlock(warp.x, warp.y, warp.z);
+			int meta = player.worldObj.getBlockMetadata(warp.x, warp.y, warp.z);
+			if (isBlockValid(player.worldObj, warp.x, warp.y, warp.z, block, meta)) {
+				noBlock = false;
+				if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D, null, true, false)) {
+					noAir = true;
 				}
-				double dx = player.posX;
-				double dy = player.posY;
-				double dz = player.posZ;
+			}
+			// set back to original dimension and position if new position invalid
+			if (noBlock || noAir) {
 				if (dimension != warp.dimensionId) {
-					((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, warp.dimensionId, new TeleporterNoPortal((WorldServer) player.worldObj));
+					((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, dimension, new TeleporterNoPortal((WorldServer) player.worldObj));
 				}
-				boolean noBlock = true; // true if warp block not found
-				boolean noAir = false; // true if new position is not suitable
-				Block block = player.worldObj.getBlock(warp.x, warp.y, warp.z);
-				int meta = player.worldObj.getBlockMetadata(warp.x, warp.y, warp.z);
-				if (isBlockValid(player.worldObj, warp.x, warp.y, warp.z, block, meta)) {
-					noBlock = false;
-					if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D, null, true, false)) {
-						noAir = true;
-					}
-				}
-				// set back to original dimension and position if new position invalid
-				if (noBlock || noAir) {
-					if (dimension != warp.dimensionId) {
-						((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, dimension, new TeleporterNoPortal((WorldServer) player.worldObj));
-					}
-					player.setPositionAndUpdate(dx, dy, dz);
-					PlayerUtils.sendTranslatedChat(player, noAir ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing");
-				} else {
-					PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-				}
+				player.setPositionAndUpdate(dx, dy, dz);
+				PlayerUtils.sendTranslatedChat(player, noAir ? "chat.zss.song.warp.blocked" : "chat.zss.song.warp.missing");
+			} else {
+				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 			}
 		}
 	}
