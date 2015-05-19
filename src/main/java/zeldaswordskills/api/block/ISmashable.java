@@ -46,8 +46,9 @@ public interface ISmashable {
 	 * whether it can be smashed or not by the item used
 	 * @param stack the itemstack used to smash the block
 	 * @param meta the block metadata
+	 * @param side the side (face) of the block that was hit
 	 */
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta);
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side);
 	
 	/**
 	 * This method is called right before the block smash calculations occur,

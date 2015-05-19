@@ -75,7 +75,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return (meta < 0x8 ? BlockWeight.VERY_HEAVY : BlockWeight.IMPOSSIBLE);
 	}
 

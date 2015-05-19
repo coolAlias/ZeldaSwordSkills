@@ -33,6 +33,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.util.SideHit;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -119,9 +120,9 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 		for (int i = 0; i < n && !flag; ++i) {
 			for (int j = 0; j < (n - i) && !flag; ++ j) {
 				for (int k = 0; k < 4 && !flag; ++k) {
-					flag = tryPlaceBlock(stack, world, x + (dz * j), y - k, z + (dx * j), block, meta);
+					flag = tryPlaceBlock(stack, world, x + (dz * j), y - k, z + (dx * j), block, meta, SideHit.TOP);
 					if (!flag) {
-						flag = tryPlaceBlock(stack, world, x - (dz * j), y - k, z - (dx * j), block, meta);
+						flag = tryPlaceBlock(stack, world, x - (dz * j), y - k, z - (dx * j), block, meta, SideHit.TOP);
 					}
 				}
 			}
@@ -134,7 +135,7 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 	/**
 	 * Returns true if the block was placed at x/y/z; checks for entity collision and other blocks
 	 */
-	private boolean tryPlaceBlock(ItemStack stack, World world, int x, int y, int z, Block block, int meta) {
+	private boolean tryPlaceBlock(ItemStack stack, World world, int x, int y, int z, Block block, int meta, int side) {
 		Block b = world.getBlock(x, y, z);
 		// func_149730_j returns is opaque cube
 		if (world.getBlock(x, y - 1, z).func_149730_j() && b.isReplaceable(world, x, y, z)) {

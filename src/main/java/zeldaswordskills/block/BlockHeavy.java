@@ -60,7 +60,7 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 	}
 
 	@Override
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return weight;
 	}
 
@@ -77,7 +77,7 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta) {}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return (stack.getItem() == ZSSItems.hammerMegaton && PlayerUtils.hasItem(player, ZSSItems.gauntletsGolden) ? weight : weight.next());
 	}
 

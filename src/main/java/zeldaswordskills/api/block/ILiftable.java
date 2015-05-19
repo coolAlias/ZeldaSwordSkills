@@ -17,6 +17,7 @@
 
 package zeldaswordskills.api.block;
 
+import zeldaswordskills.item.ItemHeldBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -39,12 +40,15 @@ public interface ILiftable {
 	 * otherwise unbreakable blocks to be handled efficiently
 	 * @param stack the itemstack used to lift the block
 	 * @param meta the block metadata
+	 * @param side the side (face) of the block the player is trying to lift
+	 * @return return null to use the block's explosion resistance as its weight
 	 */
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta);
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side);
 
 	/**
 	 * Called after the block is picked up by a player, but before it is set to air,
-	 * allowing tile entity data to be stored in the ItemHeldBlock stack's NBT tag
+	 * allowing the ItemHeldBlock stack's NBT tag to be manipulated, e.g. by storing a
+	 * tile entity inside. See {@link ItemHeldBlock#getBlockStack} for more information.
 	 * @param stack the ItemHeldBlock stack containing the ILiftBlock stack used to pick up the block
 	 * @param meta the metadata of the block before it was picked up
 	 */

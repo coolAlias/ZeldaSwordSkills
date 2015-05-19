@@ -77,7 +77,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 	public void dropBlockAsItemWithChance(World world, int x, int y, int z, int meta, float dropChance, int fortune) {}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return BlockWeight.IMPOSSIBLE;
 	}
 
@@ -87,7 +87,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 	}
 
 	@Override
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return BlockWeight.IMPOSSIBLE;
 	}
 

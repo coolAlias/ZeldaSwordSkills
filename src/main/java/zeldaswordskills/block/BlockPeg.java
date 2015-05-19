@@ -101,7 +101,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return weight;
 	}
 

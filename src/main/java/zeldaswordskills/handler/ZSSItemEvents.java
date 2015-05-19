@@ -266,7 +266,7 @@ public class ZSSItemEvents
 			int meta = world.getBlockMetadata(x, y, z);
 			boolean isLiftable = block instanceof ILiftable;
 			boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
-			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta)
+			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta, side)
 					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
@@ -304,7 +304,7 @@ public class ZSSItemEvents
 		boolean wasDestroyed = false;
 		if (player.canPlayerEdit(x, y, z, side, stack) || isSmashable) {
 			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (isSmashable ? ((ISmashable) block).getSmashWeight(player, stack, meta)
+			BlockWeight weight = (isSmashable ? ((ISmashable) block).getSmashWeight(player, stack, meta, side)
 					: (Config.canSmashVanilla() || isVanillaBlockSmashable(block) ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));

@@ -85,7 +85,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return BlockWeight.VERY_LIGHT;
 	}
 

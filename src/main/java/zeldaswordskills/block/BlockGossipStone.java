@@ -94,7 +94,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 	}
 
 	@Override
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return (meta == 0) ? BlockWeight.MEDIUM : BlockWeight.IMPOSSIBLE;
 	}
 
@@ -124,7 +124,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return (meta == 0) ? BlockWeight.VERY_HEAVY : BlockWeight.IMPOSSIBLE;
 	}
 
