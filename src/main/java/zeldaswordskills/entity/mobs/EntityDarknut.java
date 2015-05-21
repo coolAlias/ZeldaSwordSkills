@@ -388,7 +388,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
-		return -(0.1F * (float) worldObj.difficultySetting.getDifficultyId());
+		return (0.1F * (float) worldObj.difficultySetting.getDifficultyId());
 	}
 
 	@Override

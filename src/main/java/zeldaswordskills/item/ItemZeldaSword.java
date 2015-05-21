@@ -150,7 +150,7 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 
 	@Override
 	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
-		return (twoHanded ? -0.25F : 0.0F);
+		return (twoHanded ? 0.25F : 0.0F);
 	}
 
 	@Override

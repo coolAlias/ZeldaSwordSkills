@@ -160,14 +160,13 @@ public class Parry extends SkillActive
 		}
 		// ATTACKER
 		if (attacker instanceof EntityPlayer) {
-			// only modifier that is subtracted
 			modifier -= Config.getDisarmPenalty() * ZSSPlayerSkills.get((EntityPlayer) attacker).getSkillLevel(parry);
 		}
 		if (attacker instanceof IParryModifier) {
-			modifier += ((IParryModifier) attacker).getOffensiveModifier(attacker, offStack);
+			modifier -= ((IParryModifier) attacker).getOffensiveModifier(attacker, offStack);
 		}
 		if (offStack != null && offStack.getItem() instanceof IParryModifier) {
-			modifier += ((IParryModifier) offStack.getItem()).getOffensiveModifier(attacker, offStack);
+			modifier -= ((IParryModifier) offStack.getItem()).getOffensiveModifier(attacker, offStack);
 		}
 		return modifier;
 	}

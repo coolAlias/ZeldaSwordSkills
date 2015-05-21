@@ -93,7 +93,7 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 
 	@Override
 	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
-		return -0.4F;
+		return 0.4F;
 	}
 
 	@Override
