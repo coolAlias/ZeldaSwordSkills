@@ -251,7 +251,7 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 		if (explode) {
 			float r = ingestedBomb.getExplosionRadius(entity);
 			float dmg = ingestedBomb.getExplosionDamage(entity);
-			CustomExplosion.createExplosion(ingestedBomb, entity.worldObj, entity.posX, entity.posY, entity.posZ, r, dmg, true);
+			CustomExplosion.createExplosion(ingestedBomb, entity.worldObj, entity.posX, entity.posY, entity.posZ, r, dmg, false);
 		}
 		if (isFatal) {
 			entity.attackEntityFrom(DamageSource.setExplosionSource(null), entity.getMaxHealth() * 2);
