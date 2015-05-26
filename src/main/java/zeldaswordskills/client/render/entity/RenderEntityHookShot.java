@@ -105,10 +105,10 @@ public class RenderEntityHookShot extends Render
 	}
 
 	/**
-	 * Copied from RenderLiving; not really sure what exactly it does
+	 * Copied from RenderLiving: Gets the value between start and end according to pct
 	 */
-	private double func_110828_a(double par1, double par3, double par5) {
-		return par1 + (par3 - par1) * par5;
+	private double interpolateValue(double start, double end, double pct) {
+		return start + (end - start) * pct;
 	}
 
 	protected void renderLeash(EntityHookShot hookshot, double x, double y, double z, float yaw, float partialTick) {
@@ -117,16 +117,16 @@ public class RenderEntityHookShot extends Render
 			// TODO mess with this to get it looking right with the models
 			y -= (3.0D - (double) hookshot.height) * 0.5D;
 			Tessellator tessellator = Tessellator.instance;
-			double d3 = func_110828_a((double) entity.prevRotationYaw, (double) entity.rotationYaw, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
-			double d4 = func_110828_a((double) entity.prevRotationPitch, (double) entity.rotationPitch, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
+			double d3 = interpolateValue((double) entity.prevRotationYaw, (double) entity.rotationYaw, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
+			double d4 = interpolateValue((double) entity.prevRotationPitch, (double) entity.rotationPitch, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
 			double d5 = Math.cos(d3);
 			double d6 = Math.sin(d3);
 			double d7 = Math.sin(d4);
 			double d8 = Math.cos(d4);
-			double d9 = func_110828_a(entity.prevPosX, entity.posX, (double) partialTick) - d5 * 0.7D - d6 * 0.5D * d8;
-			double d10 = func_110828_a(entity.prevPosY + (double) entity.getEyeHeight() * 0.7D, entity.posY + (double) entity.getEyeHeight() * 0.7D, (double) partialTick) - d7 * 0.5D - 0.25D;
-			double d11 = func_110828_a(entity.prevPosZ, entity.posZ, (double) partialTick) - d6 * 0.7D + d5 * 0.5D * d8;
-			double d12 = func_110828_a((double) hookshot.prevRotationYaw, (double) hookshot.prevRotationPitch, (double) partialTick) * 0.01745329238474369D + (Math.PI / 2D);
+			double d9 = interpolateValue(entity.prevPosX, entity.posX, (double) partialTick) - d5 * 0.7D - d6 * 0.5D * d8;
+			double d10 = interpolateValue(entity.prevPosY + (double) entity.getEyeHeight() * 0.7D, entity.posY + (double) entity.getEyeHeight() * 0.7D, (double) partialTick) - d7 * 0.5D - 0.25D;
+			double d11 = interpolateValue(entity.prevPosZ, entity.posZ, (double) partialTick) - d6 * 0.7D + d5 * 0.5D * d8;
+			double d12 = interpolateValue((double) hookshot.prevRotationYaw, (double) hookshot.prevRotationPitch, (double) partialTick) * 0.01745329238474369D + (Math.PI / 2D);
 			d5 = Math.cos(d12) * (double) hookshot.width * 0.4D;
 			d6 = Math.sin(d12) * (double) hookshot.width * 0.4D;
 			if (hookshot.isInGround()) {
@@ -137,9 +137,9 @@ public class RenderEntityHookShot extends Render
 				hookshot.prevPosY = hookshot.posY;
 				hookshot.prevPosZ = hookshot.posZ;
 			}
-			double d13 = func_110828_a(hookshot.prevPosX, hookshot.posX, (double) partialTick) + d5;
-			double d14 = func_110828_a(hookshot.prevPosY, hookshot.posY, (double) partialTick);
-			double d15 = func_110828_a(hookshot.prevPosZ, hookshot.posZ, (double) partialTick) + d6;
+			double d13 = interpolateValue(hookshot.prevPosX, hookshot.posX, (double) partialTick) + d5;
+			double d14 = interpolateValue(hookshot.prevPosY, hookshot.posY, (double) partialTick);
+			double d15 = interpolateValue(hookshot.prevPosZ, hookshot.posZ, (double) partialTick) + d6;
 			x += d5;
 			z += d6;
 			double d16 = (double)((float)(d9 - d13));
