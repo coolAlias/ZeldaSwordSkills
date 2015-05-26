@@ -25,6 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.util.MathHelper;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
 import zeldaswordskills.item.ItemZeldaSword;
@@ -32,8 +33,6 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -49,7 +48,7 @@ public class TileEntityPedestal extends TileEntityInventory
 	private boolean playSound = true;
 
 	/** Sword's orientation (0 or 1, like anvils) */
-	private byte orientation = 0;
+	private byte orientation;
 
 	public TileEntityPedestal() {
 		inventory = new ItemStack[3];
@@ -105,6 +104,7 @@ public class TileEntityPedestal extends TileEntityInventory
 
 	/**
 	 * Places a copy of the sword into the pedestal, returning true if successful
+	 * @param player may be null
 	 */
 	public boolean setSword(ItemStack stack, EntityPlayer player) {
 		if (sword == null && stack != null && stack.getItem() instanceof ItemSword) {
@@ -126,22 +126,16 @@ public class TileEntityPedestal extends TileEntityInventory
 				WorldUtils.playSoundAt(worldObj, xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 				sword = stack.copy();
 			}
-			orientation = 0;
+			if (player != null) {
+				int facing = MathHelper.floor_double((double)((player.rotationYaw * 4F) / 360f) + 0.5D) & 3;
+				orientation = (byte)(facing == 0 || facing == 2 ? 0 : 1);
+			}
 			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlock(xCoord, yCoord, zCoord));
 			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 			return true;
 		} else {
 			return false;
 		}
-	}
-
-	/**
-	 * Called from client side packet to update sword and orientation
-	 */
-	@SideOnly(Side.CLIENT)
-	public void setSword(ItemStack stack, byte orientation) {
-		this.sword = stack;
-		this.orientation = orientation;
 	}
 
 	/**

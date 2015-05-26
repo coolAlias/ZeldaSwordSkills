@@ -43,7 +43,7 @@ public class LinksHouse implements ISeedStructure
 
 	@Override
 	public boolean generate(World world, EntityPlayer player, int x, int y, int z, int side) {
-		int facing = MathHelper.floor_double((double)((player.rotationYaw * 4F) / 360f) + 0.5D) &3;
+		int facing = MathHelper.floor_double((double)((player.rotationYaw * 4F) / 360f) + 0.5D) & 3;
 		if (StructureGenUtils.isRotatedAreaClear(world, x, z, 0, 7, y + 1, y + 9, -3, 3, facing)) {
 			doGenerate(world, x, y + 1, z, facing);
 			return true;
