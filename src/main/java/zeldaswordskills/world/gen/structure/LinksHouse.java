@@ -137,7 +137,6 @@ public class LinksHouse implements ISeedStructure
 		world.setBlock(dx, y + 1, dz, Blocks.chest, 0, 2); // don't care about metadata during first placement
 		StructureGenUtils.setMetadata(world, dx, y + 1, dz, StructureGenUtils.getMetadata(facing, Blocks.chest, 2));
 		contents.add(new ItemStack(ZSSItems.swordKokiri));
-		contents.add(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.swordBasic.getId()));
 		contents.add(new ItemStack(ZSSItems.keySmall));
 		WorldUtils.addInventoryContentsRandomly(world, dx, y + 1, dz, contents);
 
@@ -147,6 +146,7 @@ public class LinksHouse implements ISeedStructure
 		world.setBlock(dx, y + 5, dz, ZSSBlocks.chestLocked, 0, 2);
 		StructureGenUtils.setMetadata(world, dx, y + 5, dz, StructureGenUtils.getMetadata(facing, ZSSBlocks.chestLocked, 4));
 		contents.clear();
+		contents.add(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.swordBasic.getId()));
 		contents.add(new ItemStack(ZSSItems.heartPiece));
 		WorldUtils.addInventoryContentsRandomly(world, dx, y + 5, dz, contents);
 	}
