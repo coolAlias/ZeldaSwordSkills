@@ -50,6 +50,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Each smash increments the meta until it reaches MAX_STATE, after which
  * any blow that is at least a level higher than the weight can destroy it.
  * 
+ * TODO Pegs put out a redstone signal while in MAX_STATE.
+ * 
  * If not destroyed, the peg will eventually pop back up.
  *
  */
@@ -79,7 +81,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	/** Returns appropriate sound based on block material */
 	private String getHitSound() {
-		return blockMaterial == Material.iron ? Sounds.HIT_RUSTY : Sounds.HIT_PEG;
+		return blockMaterial == ZSSBlockMaterials.pegRustyMaterial ? Sounds.HIT_RUSTY : Sounds.HIT_PEG;
 	}
 
 	@Override

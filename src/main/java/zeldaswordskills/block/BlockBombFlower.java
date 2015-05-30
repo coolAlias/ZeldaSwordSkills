@@ -24,6 +24,7 @@ import net.minecraft.block.BlockCrops;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,18 +38,23 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
 import zeldaswordskills.api.block.IBoomerangBlock;
 import zeldaswordskills.api.block.IExplodable;
+import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.client.render.block.RenderSpecialCrop;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
+import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.SideHit;
+import zeldaswordskills.util.TargetUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExplodable
+public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExplodable, IWhipBlock
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -143,7 +149,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	public boolean onBoomerangCollided(World world, int x, int y, int z, EntityBoomerang boomerang) {
 		if (!world.isRemote && world.getBlockMetadata(x, y, z) == 7) {
 			boolean captured = false;
-			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+			world.setBlockToAir(x, y, z);
 			EntityItem bomb = new EntityItem(world, x + 0.5D, y + 0.5D, z + 0.5D, new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FLOWER.ordinal()));
 			world.spawnEntityInWorld(bomb);
 			if (boomerang.captureItem(bomb)) {
@@ -163,6 +169,34 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 		if (world.getBlockMetadata(x, y, z) == 7 && entity instanceof IProjectile) {
 			createExplosion(world, x, y, z, true);
 		}
+	}
+
+	@Override
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+		return getGrowthStage(world.getBlockMetadata(x, y, z)) < 2;
+	}
+
+	@Override
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+		return (side != SideHit.BOTTOM && world.getBlockMetadata(x, y, z) == 7);
+	}
+
+	@Override
+	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
+		if (ticksInGround > 30 && world.getBlockMetadata(x, y, z) == 7) {
+			EntityLivingBase thrower = whip.getThrower();
+			EntityItem bomb = new EntityItem(world, whip.posX, whip.posY + 1, whip.posZ, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FLOWER.ordinal()));
+			double dx = thrower.posX - bomb.posX;
+			double dy = (thrower.posY + thrower.getEyeHeight()) - bomb.posY;
+			double dz = thrower.posZ - bomb.posZ;
+			TargetUtils.setEntityHeading(bomb, dx, dy * 1.5D, dz, 1.0F, 0.0F, true);
+			if (!world.isRemote) {
+				world.spawnEntityInWorld(bomb);
+			}
+			world.setBlockToAir(x, y, z);
+			whip.setDead();
+		}
+		return Result.DENY;
 	}
 
 	/**

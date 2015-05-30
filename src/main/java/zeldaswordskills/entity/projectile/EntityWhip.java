@@ -247,9 +247,6 @@ public class EntityWhip extends EntityThrowable
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.typeOfHit == MovingObjectType.BLOCK) {
 			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-			if (block.getMaterial() != Material.air) {
-				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-			}
 			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				WorldUtils.playSoundAtEntity(this, Sounds.WHIP_CRACK, 1.0F, 0.2F);
 				motionX = motionY = motionZ = 0.0D;
@@ -301,7 +298,11 @@ public class EntityWhip extends EntityThrowable
 						worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, drop);
 						setDead();
 					}
-				} else if (!block.getMaterial().blocksMovement()) {
+				} else if (block.getMaterial().blocksMovement()) {
+					// Only call onEntityCollidedWithBlock if the whip didn't already grab or break the block
+					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				} else {
+					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
 					return;
 				}
 			}
