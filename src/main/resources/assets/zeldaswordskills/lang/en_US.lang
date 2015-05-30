@@ -925,6 +925,7 @@ tile.zss.gossip_stone.name=Gossip Stone
 tile.zss.gossip_stone.name.unbreakable=Gossip Stone (unbreakable)
 tile.zss.lever_giant.name=Giant Lever
 tile.zss.hook_target.name=Hookshot Target
+tile.zss.hook_target_all.name=Hookshot Target
 tile.zss.inscription.name=Song Inscription
 tile.zss.pedestal.name=Sword Pedestal
 tile.zss.peg_rusty.name=Rusty Peg

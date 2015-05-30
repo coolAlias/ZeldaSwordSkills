@@ -605,6 +605,7 @@ public class ZSSItems
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.gossipStone), " s ","sos"," s ", 's', Blocks.stone, 'o', new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_FAIRY.ordinal()));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTarget), " c ","bab"," b ", 'a', Items.redstone, 'b', Blocks.stone, 'c', Blocks.iron_bars);
+		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTargetAll), "bcb", "cac", "bcb", 'a', Items.redstone, 'b', Blocks.stone, 'c', Blocks.iron_bars);
 		GameRegistry.addShapelessRecipe(new ItemStack(arrowBomb), new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), Items.arrow);
 		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombFire), new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), Items.arrow);
 		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombWater), new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), Items.arrow);

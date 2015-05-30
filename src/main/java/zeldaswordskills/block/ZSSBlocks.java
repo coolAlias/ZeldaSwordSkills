@@ -73,6 +73,7 @@ public class ZSSBlocks
 	leverGiant,
 	beamWooden,
 	hookTarget,
+	hookTargetAll,
 	gossipStone,
 	inscription,
 	warpStone,
@@ -100,7 +101,7 @@ public class ZSSBlocks
 		dungeonCore = new BlockDungeonCore(Material.rock).setBlockName("zss.dungeoncore");
 		dungeonStone = new BlockDungeonStone(Material.rock).setBlockName("zss.dungeonstone");
 		beamWooden = new BlockBar(Material.wood).setBlockName("zss.beam_wooden");
-		hookTarget = new BlockTarget(Material.rock).setBlockName("zss.hook_target");
+		hookTarget = new BlockTargetDirectional(Material.rock).setBlockName("zss.hook_target");
 		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
 		chestInvisible = new BlockChestInvisible().setBlockName("zss.chest_invisible");
 		timeBlock = new BlockTime().setBlockName("zss.time_block");
@@ -108,6 +109,7 @@ public class ZSSBlocks
 		warpStone = new BlockWarpStone().setBlockName("zss.warp_stone");
 		gossipStone = new BlockGossipStone().setBlockName("zss.gossip_stone");
 		bombFlower = new BlockBombFlower().setBlockName("zss.bomb_flower");
+		hookTargetAll = new BlockTarget(Material.rock).setBlockName("zss.hook_target_all");
 		register();
 	}
 
@@ -143,6 +145,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName());
 		GameRegistry.registerBlock(beamWooden, beamWooden.getUnlocalizedName());
 		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
+		GameRegistry.registerBlock(hookTargetAll, hookTargetAll.getUnlocalizedName());
 		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
 		GameRegistry.registerBlock(timeBlock, ItemBlockTime.class, timeBlock.getUnlocalizedName());
 		GameRegistry.registerBlock(inscription, inscription.getUnlocalizedName());
