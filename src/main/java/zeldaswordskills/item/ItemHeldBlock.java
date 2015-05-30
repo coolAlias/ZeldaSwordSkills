@@ -58,11 +58,12 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 
 	/**
 	 * Returns a new ItemStack containing the passed in block, metadata, and gauntlet stack
+	 * NBT format is 'blockId' => integer id of block, 'metadata' => metadata of block, 'gauntlets' => stored gauntlet itemstack
 	 */
 	public static ItemStack getBlockStack(Block block, int metadata, ItemStack gauntlets) {
 		ItemStack stack = new ItemStack(ZSSItems.heldBlock);
 		stack.setTagCompound(new NBTTagCompound());
-		stack.getTagCompound().setInteger("blockID", Block.getIdFromBlock(block));
+		stack.getTagCompound().setInteger("blockId", Block.getIdFromBlock(block));
 		stack.getTagCompound().setInteger("metadata", metadata);
 		if (gauntlets != null) {
 			stack.getTagCompound().setTag("gauntlets", gauntlets.writeToNBT(new NBTTagCompound()));
@@ -72,7 +73,7 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 
 	/** Returns the stored Block or null if none available */
 	public Block getBlockFromStack(ItemStack stack) {
-		return (stack.hasTagCompound() ? Block.getBlockById(stack.getTagCompound().getInteger("blockID")) : null);
+		return (stack.hasTagCompound() ? Block.getBlockById(stack.getTagCompound().getInteger("blockId")) : null);
 	}
 
 	/** Returns the metadata value associated with the stored block */

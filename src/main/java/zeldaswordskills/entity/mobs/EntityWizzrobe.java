@@ -462,6 +462,9 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 					-rand.nextDouble(),
 					(rand.nextDouble() - 0.5D) * 2.0D);
 		}
+		if (worldObj.isDaytime() && ticksExisted % 20 == 0 && !isValidLightLevel()) {
+			despawnEntity();
+		}
 	}
 
 	@Override
@@ -517,7 +520,8 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		switch(getWizzrobeType()) {
 		case FIRE_WIZ: return new ItemStack(ZSSItems.arrowFire);
 		case ICE_WIZ: return new ItemStack(ZSSItems.arrowIce);
-		default: return new ItemStack(ZSSItems.arrowLight);
+		case LIGHTNING_WIZ: return new ItemStack(ZSSItems.arrowLight);
+		default: return null;
 		}
 	}
 
@@ -542,6 +546,11 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	@Override
 	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
 		return true;
+	}
+
+	@Override
+	public boolean getCanSpawnHere() {
+		return !worldObj.isDaytime() && super.getCanSpawnHere();
 	}
 
 	@Override
