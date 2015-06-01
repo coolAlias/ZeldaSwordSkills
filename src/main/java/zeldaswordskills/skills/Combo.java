@@ -117,11 +117,11 @@ public class Combo
 	/** Returns the skill id associated with this Combo */
 	public byte getSkill() { return skillId; }
 
-	/** Returns current combo size */
-	public int getSize() { return damageList.size(); }
+	/** Returns current number of hits */
+	public int getNumHits() { return damageList.size(); }
 
-	/** Returns current combo's maximum size */
-	public int getMaxSize() { return maxComboSize; }
+	/** Returns maximum number of hits allowed before the combo self-terminates */
+	public int getMaxNumHits() { return maxComboSize; }
 
 	/** Returns current damage total for this combo */
 	public float getDamage() { return comboDamage; }
@@ -140,7 +140,7 @@ public class Combo
 
 	/** Returns translated current description of combo; e.g. "Great" */
 	public String getLabel() {
-		return StatCollector.translateToLocal("combo.label." + getSize());
+		return StatCollector.translateToLocal("combo.label." + getNumHits());
 	}
 
 	/**
@@ -161,7 +161,7 @@ public class Combo
 	 * @param target used to track consecutive hits on a single target
 	 */
 	public void add(EntityPlayer player, Entity target, float damage) {
-		if (getSize() < maxComboSize && (comboTimer > 0 || getSize() == 0)) {
+		if (getNumHits() < maxComboSize && (comboTimer > 0 || getNumHits() == 0)) {
 			if (target != null && target == lastEntityHit) {
 				++consecutiveHits;
 			} else {
@@ -184,7 +184,7 @@ public class Combo
 			if (player instanceof EntityPlayerMP) {
 				PacketDispatcher.sendTo(new UpdateComboPacket(this), (EntityPlayerMP) player);
 			}
-			if (getSize() == maxComboSize) {
+			if (getNumHits() == maxComboSize) {
 				endCombo(player);
 			} else {
 				comboTimer = timeLimit;
@@ -205,7 +205,7 @@ public class Combo
 			if (addToLast) {
 				lastDamage = damage;
 			}
-			if (getSize() == 0) {
+			if (getNumHits() == 0) {
 				comboTimer = timeLimit;
 			}
 			if (player instanceof EntityPlayerMP) {
@@ -244,8 +244,8 @@ public class Combo
 		compound.setByte("SkillID", skillId);
 		compound.setInteger("MaxSize", maxComboSize);
 		compound.setInteger("TimeLimit", timeLimit);
-		compound.setInteger("CurrentSize", getSize());
-		for (int i = 0; i < getSize(); ++i) {
+		compound.setInteger("CurrentSize", getNumHits());
+		for (int i = 0; i < getNumHits(); ++i) {
 			compound.setFloat("Dmg" + i, damageList.get(i));
 		}
 		compound.setFloat("TotalDamage", comboDamage);

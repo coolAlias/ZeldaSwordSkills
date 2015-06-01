@@ -101,7 +101,7 @@ public class ComboOverlay extends Gui
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (combo != iCombo.getCombo()) {
 				combo = iCombo.getCombo();
-				lastComboSize = combo.getSize();
+				lastComboSize = combo.getNumHits();
 				displayStartTime = Minecraft.getSystemTime();
 				if (iCombo.getCombo().isFinished()) {
 					iCombo.setCombo(null);
@@ -110,10 +110,10 @@ public class ComboOverlay extends Gui
 			}
 		}
 
-		if (combo != null && combo.getSize() > 0) {
+		if (combo != null && combo.getNumHits() > 0) {
 			// combo has changed, reset time
-			if (lastComboSize != combo.getSize()) {
-				lastComboSize = combo.getSize();
+			if (lastComboSize != combo.getNumHits()) {
+				lastComboSize = combo.getNumHits();
 				displayStartTime = Minecraft.getSystemTime();
 			}
 			// TODO make display look nice
@@ -121,7 +121,7 @@ public class ComboOverlay extends Gui
 				if (shouldDisplay) {
 					String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
 					mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
-					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
+					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getNumHits() + "/" + combo.getMaxNumHits(), 10, 20, 0xFFFFFF, true);
 					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
 					List<Float> damageList = combo.getDamageList();
 					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {

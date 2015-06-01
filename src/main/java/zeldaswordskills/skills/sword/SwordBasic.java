@@ -331,7 +331,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
-		if (event.source.isProjectile()) { return; }
+		boolean addHitFlag = event.source.getDamageType().equals(DamageUtils.INDIRECT_COMBO);
+		if (event.source.isProjectile() && !addHitFlag) { return; }
 		if (combo == null || combo.isFinished()) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit());
 		}
@@ -344,7 +345,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				combo.add(player, event.entityLiving, damage);
 			}
 		}
-		if (event.source.damageType.equals("player")) {
+		if (addHitFlag || event.source.damageType.equals("player")) {
 			String sound = (PlayerUtils.isHoldingSword(player) ? Sounds.SWORD_CUT : Sounds.HURT_FLESH);
 			WorldUtils.playSoundAtEntity(player, sound, 0.4F, 0.5F);
 		}

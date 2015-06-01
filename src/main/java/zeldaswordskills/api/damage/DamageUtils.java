@@ -41,7 +41,9 @@ public class DamageUtils
 	/** Used for damage from non-sword skills such as Slam */
 	NON_SWORD = "nonSword",
 	/** Indirect damage caused by sword skills such as Leaping Blow */
-	INDIRECT_SWORD = "indirectSword";
+	INDIRECT_SWORD = "indirectSword",
+	/** Indirect sword damage that counts as a hit for combos, such as from Sword Beam */
+	INDIRECT_COMBO = "indirectCombo";
 
 	/**
 	 * Returns an armor-bypassing physical DamageSource
@@ -81,6 +83,15 @@ public class DamageUtils
 	 */
 	public static DamageSource causeIndirectSwordDamage(Entity direct, Entity indirect) {
 		return new EntityDamageSourceIndirect(INDIRECT_SWORD, direct, indirect);
+	}
+
+	/**
+	 * Returns an indirect sword-based DamageSource that will count as a hit for combos
+	 * @param direct - entity directly responsible for causing the damage
+	 * @param indirect - entity indirectly responsible, typically the player
+	 */
+	public static DamageSource causeIndirectComboDamage(Entity direct, Entity indirect) {
+		return new EntityDamageSourceIndirect(INDIRECT_COMBO, direct, indirect);
 	}
 
 	public static class DamageSourceBaseDirect extends EntityDamageSource implements IDamageAoE, IDamageType, IDamageSourceStun

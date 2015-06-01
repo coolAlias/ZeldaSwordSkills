@@ -24,10 +24,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
@@ -147,7 +147,7 @@ public class EntitySwordBeam extends EntityThrowable
 					if (skill != null) {
 						skill.onImpact(player, false);
 					}
-					if (entity.attackEntityFrom(DamageSource.causePlayerDamage(player), damage)) {
+					if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player), damage)) {
 						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_SUCCESSFUL_HIT, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;

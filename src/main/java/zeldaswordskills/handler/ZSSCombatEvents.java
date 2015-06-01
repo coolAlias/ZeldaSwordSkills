@@ -185,7 +185,7 @@ public class ZSSCombatEvents
 			ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 			ICombo combo = skills.getComboSkill();
 			if (combo != null && combo.isComboInProgress()) {
-				event.ammount += combo.getCombo().getSize();
+				event.ammount += combo.getCombo().getNumHits();
 			}
 			if (skills.isSkillActive(SkillBase.armorBreak)) {
 				//LogHelper.info("Entity hurt by armor break; player weapon pre-impact damage: " + player.getHeldItem().getItemDamage());
