@@ -28,6 +28,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.ChestGenHooks;
+import zeldaswordskills.block.BlockDoorLocked;
 import zeldaswordskills.block.BlockPeg;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -156,12 +157,15 @@ public class RoomSecret extends RoomBase
 		}
 		if (bBox.getXSize() > 5 && rand.nextFloat() < Config.getBarredRoomChance()) {
 			if (rand.nextInt(16) == 0) {
-				door = ZSSBlocks.timeBlock;
+				door = (submerged && rand.nextInt(3) == 0 ? ZSSBlocks.doorLockedSmall : ZSSBlocks.timeBlock);
 			} else if (!submerged) {
-				if (rand.nextInt(4) == 0) {
-					door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
+				// Wooden Pegs > Light Barriers > Rusty Pegs > Heavy Barriers
+				if (rand.nextInt(3) == 0) {
+					door = (rand.nextInt(3) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
+				} else if (rand.nextInt(3) == 0) {
+					door = ZSSBlocks.doorLockedSmall;
 				} else {
-					door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
+					door = (rand.nextInt(3) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
 				}
 			}
 			side = rand.nextInt(4);
@@ -257,7 +261,7 @@ public class RoomSecret extends RoomBase
 		case WEST: x = bBox.minX; break;
 		}
 		world.setBlock(x, y, z, door, 0, 2);
-		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? Blocks.air : door), 0, 2);
+		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? Blocks.air : door), (door instanceof BlockDoorLocked ? 8 : 0), 2);
 	}
 
 	/**

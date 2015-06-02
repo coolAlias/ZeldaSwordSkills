@@ -185,6 +185,7 @@ public class ZSSItems
 	//================ NO TAB ================//
 	public static Item
 	doorLocked,
+	doorLockedSmall,
 	heldBlock,
 	powerPiece,
 	smallHeart,
@@ -489,7 +490,8 @@ public class ZSSItems
 		supershot = new ItemSlingshot(5, 15F).setUnlocalizedName("zss.supershot");
 
 		// BLOCK TAB ITEMS
-		doorLocked = new ItemDoorLocked().setUnlocalizedName("zss.doorlocked");
+		doorLocked = new ItemDoorBoss().setUnlocalizedName("zss.doorlocked");
+		doorLockedSmall = new ItemDoorLocked(ZSSBlocks.doorLockedSmall).setUnlocalizedName("zss.door_locked_small");
 
 		// KEYS TAB ITEMS
 		keyBig = new ItemKeyBig().setUnlocalizedName("zss.keybig").setFull3D();

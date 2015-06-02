@@ -382,7 +382,7 @@ public class Config
 		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
 		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
-		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 100).getInt(), 0, 500);
+		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 50).getInt(), 0, 500);
 		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt(), 64, 320);
 		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt(), 128, 640);
 		whipRange = MathHelper.clamp_int(config.get("Item", "[Whip] Range, in blocks, of the standard whip [4-12]", 6).getInt(), 4, 12);

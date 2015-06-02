@@ -34,14 +34,11 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.IUnenchantable;
-import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -91,19 +88,6 @@ public class ItemKeyBig extends Item implements IUnenchantable
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		if (world.getBlock(x, y, z) == ZSSBlocks.doorLocked) {
-			if (stack.getItemDamage() == (world.getBlockMetadata(x, y, z) & ~0x8)) {
-				--stack.stackSize;
-				WorldUtils.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.4F, 0.5F);
-				world.setBlockToAir(x, y, z);
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override

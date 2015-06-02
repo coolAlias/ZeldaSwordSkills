@@ -81,6 +81,7 @@ public class ZSSBlocks
 	sacredFlame,
 	// the following have a real Item, not an ItemBlock:
 	doorLocked,
+	doorLockedSmall,
 	dungeonCore,
 	dungeonStone;
 
@@ -96,7 +97,7 @@ public class ZSSBlocks
 		chestLocked = new BlockChestLocked().setBlockName("zss.chest_locked");
 		pedestal = new BlockPedestal().setBlockName("zss.pedestal");
 		sacredFlame = new BlockSacredFlame().setBlockName("zss.sacredflame");
-		doorLocked = new BlockDoorLocked(Material.iron).setBlockName("zss.door_locked");
+		doorLocked = new BlockDoorBoss(Material.iron).setBlockName("zss.door_locked");
 		secretStone = new BlockSecretStone(Material.rock).setBlockName("zss.secretstone");
 		dungeonCore = new BlockDungeonCore(Material.rock).setBlockName("zss.dungeoncore");
 		dungeonStone = new BlockDungeonStone(Material.rock).setBlockName("zss.dungeonstone");
@@ -110,6 +111,7 @@ public class ZSSBlocks
 		gossipStone = new BlockGossipStone().setBlockName("zss.gossip_stone");
 		bombFlower = new BlockBombFlower().setBlockName("zss.bomb_flower");
 		hookTargetAll = new BlockTarget(Material.rock).setBlockName("zss.hook_target_all");
+		doorLockedSmall = new BlockDoorLocked(Material.iron).setBlockName("zss.door_locked_small");
 		register();
 	}
 
@@ -140,6 +142,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(pedestal, ItemMetadataBlock.class, pedestal.getUnlocalizedName());
 		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName());
 		GameRegistry.registerBlock(doorLocked, doorLocked.getUnlocalizedName());
+		GameRegistry.registerBlock(doorLockedSmall, doorLockedSmall.getUnlocalizedName());
 		GameRegistry.registerBlock(secretStone, ItemSecretStone.class, secretStone.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonCore, ItemDungeonBlock.class, dungeonCore.getUnlocalizedName());
 		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName());
