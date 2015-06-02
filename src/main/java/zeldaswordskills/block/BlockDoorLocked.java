@@ -44,7 +44,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class BlockDoorLocked extends Block implements IDungeonBlock
 {
 	@SideOnly(Side.CLIENT)
-	private IIcon iconTop;
+	private IIcon iconEmpty;
+	@SideOnly(Side.CLIENT)
+	private IIcon[] iconsTop;
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconsUpper;
 	@SideOnly(Side.CLIENT)
@@ -101,16 +103,21 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(int side, int meta) {
-		return (side == 1 ? iconTop : meta > 0x7 ? iconsUpper[meta % 8] : iconsLower[meta % 8]);
+		if ((side == 0 && meta > 0x7) || (side == 1 && meta < 0x8)) {
+			return iconEmpty;
+		}
+		return (meta > 0x7 ? (side == 1 ? iconsTop[meta % 8] : iconsUpper[meta % 8]) : (side == 0 ? iconsTop[meta % 8] : iconsLower[meta % 8]));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerBlockIcons(IIconRegister register) {
-		iconTop = register.registerIcon(ModInfo.ID + ":door_locked_top");
+		iconEmpty = register.registerIcon(ModInfo.ID + ":door_locked_top");
+		iconsTop = new IIcon[8];
 		iconsUpper = new IIcon[8];
 		iconsLower = new IIcon[8];
 		for (int i = 0; i < 8; ++i) {
+			iconsTop[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top" + i);
 			iconsUpper[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_upper" + i);
 			iconsLower[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_lower" + i);
 		}
