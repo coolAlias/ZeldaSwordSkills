@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
@@ -106,12 +107,16 @@ public class RenderGenericLiving extends RenderLiving
 		Item item;
 		float f1;
 
-		if (mainModel instanceof IModelBiped) {
+		if (mainModel instanceof ModelBiped) {
+			((ModelBiped) mainModel).heldItemRight = (itemstack == null ? 0 : 1);
+		} else if (mainModel instanceof IModelBiped) {
 			((IModelBiped) mainModel).setHeldItemValue(true, (itemstack == null ? 0 : 1));
 		}
 		if (helm != null) {
 			GL11.glPushMatrix();
-			if (mainModel instanceof IModelBiped) {
+			if (mainModel instanceof ModelBiped) {
+				((ModelBiped) mainModel).bipedHead.postRender(0.0625F);
+			} else if (mainModel instanceof IModelBiped) {
 				((IModelBiped) mainModel).postRenderHead(0.0625F);
 			}
 
@@ -158,7 +163,9 @@ public class RenderGenericLiving extends RenderLiving
 				GL11.glScalef(f1, f1, f1);
 			}
 
-			if (mainModel instanceof IModelBiped) {
+			if (mainModel instanceof ModelBiped) {
+				((ModelBiped) mainModel).bipedRightArm.postRender(0.0625F);
+			} else if (mainModel instanceof IModelBiped) {
 				((IModelBiped) mainModel).postRenderArm(true, 0.0625F);
 			}
 			GL11.glTranslatef(-0.0625F, 0.4375F, 0.0625F);
