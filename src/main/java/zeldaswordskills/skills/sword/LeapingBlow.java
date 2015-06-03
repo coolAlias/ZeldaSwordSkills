@@ -124,7 +124,7 @@ public class LeapingBlow extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
 		// changed from !onGround now that jump key handled immediately from KeyInputEvent
-		return !isActive() && player.onGround && PlayerUtils.isUsingItem(player) && !TargetUtils.isInLiquid(player);
+		return !isActive() && player.onGround && PlayerUtils.isBlocking(player) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
