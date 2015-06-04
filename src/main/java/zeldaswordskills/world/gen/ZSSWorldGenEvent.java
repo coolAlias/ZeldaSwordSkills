@@ -45,20 +45,8 @@ public class ZSSWorldGenEvent
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		switch(event.world.provider.dimensionId) {
-		case -1: // the Nether
-			if (event.type == EventType.GLOWSTONE) {
-				netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-			}
-			break;
-		case 0: // the Overworld
-			if (event.type == EventType.ICE) {
-				bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-			} else if (event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-				event.setResult(Result.DENY);
-			}
-			break;
-		default: break;
+		if (event.world.provider.isSurfaceWorld() && event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
+			event.setResult(Result.DENY);
 		}
 	}
 
@@ -67,11 +55,13 @@ public class ZSSWorldGenEvent
 	public void postPopulate(PopulateChunkEvent.Post event) {
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
+			netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			if (Config.getNetherAttemptsPerChunk() > 0) {
 				netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
 			break;
 		case 0: // the Overworld
+			bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			if (Config.getAttemptsPerChunk() > 0) {
 				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
