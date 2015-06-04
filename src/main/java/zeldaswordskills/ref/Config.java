@@ -85,6 +85,8 @@ public class Config
 	private static int baseSwingSpeed;
 	/** Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time) */
 	private static boolean enableHardcoreZeldaFanMode;
+	/** [SYNC] Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets) */
+	private static boolean enableSecretStoneLift;
 	/** [SYNC] Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets) */
 	private static boolean enableVanillaLift;
 	/** [SYNC] Whether vanilla blocks can be smashed using appropriate items (e.g. hammers) */
@@ -347,6 +349,7 @@ public class Config
 		enableStunPlayer = config.get("General", "Whether players can be stunned; if false, item use is still interrupted", false).getBoolean(false);
 		enableSwingSpeed = config.get("General", "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", true).getBoolean(true);
 		baseSwingSpeed = MathHelper.clamp_int(config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
+		enableSecretStoneLift = config.get("General", "Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets)", false).getBoolean(false);
 		enableVanillaLift = config.get("General", "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", true).getBoolean(true);
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
@@ -520,6 +523,7 @@ public class Config
 	public static boolean canPlayersBeStunned() { return enableStunPlayer; }
 	public static boolean affectAllSwings() { return enableSwingSpeed; }
 	public static int getBaseSwingSpeed() { return baseSwingSpeed; }
+	public static boolean canLiftSecretStone() { return enableSecretStoneLift; }
 	public static boolean canLiftVanilla() { return enableVanillaLift; }
 	public static boolean canSmashVanilla() { return enableVanillaSmash; }
 	public static boolean alwaysPickupHearts() { return alwaysPickupHearts; }
@@ -657,6 +661,7 @@ public class Config
 		Config.enableOffhandMaster = msg.enableOffhandMaster;
 		Config.enableStunPlayer = msg.enableStunPlayer;
 		Config.enableSwingSpeed = msg.enableSwingSpeed;
+		Config.enableSecretStoneLift = msg.enableSecretStoneLift;
 		Config.enableVanillaLift = msg.enableVanillaLift;
 		Config.enableVanillaSmash = msg.enableVanillaSmash;
 		Config.disableAllUnenchantables = msg.disableAllUnenchantables;

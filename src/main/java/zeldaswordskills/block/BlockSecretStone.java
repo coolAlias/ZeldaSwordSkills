@@ -32,12 +32,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
+import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.Config;
@@ -55,7 +56,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockSecretStone extends Block implements IDungeonBlock, IExplodable, ISmashable
+public class BlockSecretStone extends Block implements IDungeonBlock, IExplodable, ILiftable, ISmashable
 {
 	/** List of all currently available secret blocks */
 	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","cobblestone","end_stone"}; // 6 = "quartz_block_chiseled"
@@ -73,6 +74,23 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
+
+	@Override
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
+		return (meta > 7 || !Config.canLiftSecretStone() ? BlockWeight.IMPOSSIBLE : null);
+	}
+
+	@Override
+	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta) {
+		NBTTagCompound tag = stack.getTagCompound();
+		if (tag != null) {
+			tag.setInteger("blockId", Block.getIdFromBlock(BlockSecretStone.getBlockFromMeta(meta)));
+			tag.setInteger("metadata", 0);
+		}
+	}
+
+	@Override
+	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta) {}
 
 	@Override
 	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
@@ -134,16 +152,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 
 	@Override
 	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		// TODO BUG from vanilla Entity.getExplosionResistance passes (x, x, y) as position parameters
 		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
-	}
-
-	// TODO remove when vanilla explosion resistance bug is fixed
-	@Override
-	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
-		if (world.getBlockMetadata(x, y, z) < 0x8) {
-			super.onBlockExploded(world, x, y, z, explosion);
-		}
 	}
 
 	@Override
