@@ -213,11 +213,14 @@ public class Dodge extends SkillActive
 			speed = 1.0D;
 		}
 		double d = 0.15D * speed * speed;
+		//double d = Math.min(0.75D, 0.5D * speed * speed);
 		Vec3 vec3 = player.getLookVec();
 		if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
-			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
+			player.setVelocity(-vec3.zCoord * d, player.motionY, vec3.xCoord * d);
+			//player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 		} else {
-			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
+			player.setVelocity(vec3.zCoord * d, player.motionY, -vec3.xCoord * d);
+			//player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
 		}
 		return true;
 	}

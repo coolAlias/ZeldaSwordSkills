@@ -196,14 +196,11 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 			return false;
 		} else if (super.attackEntityFrom(source, amount)) {
 			Entity entity = source.getEntity();
-			if (riddenByEntity != entity && ridingEntity != entity) {
-				if (entity != this) {
-					entityToAttack = entity;
-				}
-				return true;
-			} else {
-				return true;
+			if (entity != this && entity instanceof EntityLivingBase && riddenByEntity != entity && ridingEntity != entity) {
+				setAttackTarget((EntityLivingBase) entity);
+				entityToAttack = entity;
 			}
+			return true;
 		} else {
 			return false;
 		}

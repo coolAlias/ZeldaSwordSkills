@@ -287,7 +287,7 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 			if (i < 4) { // animation is 5 ticks total
 				rightArm.rotateAngleX = powRotXR[i] + (partialTick * (powRotXR[i + 1] - powRotXR[i]));
 				rightArm.rotateAngleY = powRotYR[i] + (partialTick * (powRotYR[i + 1] - powRotYR[i]));
-				rightArm.rotateAngleZ = powRotZR[i] + (partialTick * (powRotZR[i + 1] - powRotZR[i]));;
+				rightArm.rotateAngleZ = powRotZR[i] + (partialTick * (powRotZR[i + 1] - powRotZR[i]));
 				leftArm.rotateAngleX = powRotXL[i] + (partialTick * (powRotXL[i + 1] - powRotXL[i]));
 				leftArm.rotateAngleY = powRotYL[i] + (partialTick * (powRotYL[i + 1] - powRotYL[i]));
 				leftArm.rotateAngleZ = powRotZL[i] + (partialTick * (powRotZL[i + 1] - powRotZL[i]));
