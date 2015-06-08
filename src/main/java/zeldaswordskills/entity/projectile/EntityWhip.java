@@ -27,6 +27,7 @@ import net.minecraft.block.BlockSandStone;
 import net.minecraft.block.BlockSign;
 import net.minecraft.block.BlockTorch;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,12 +36,15 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
@@ -57,10 +61,8 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -74,17 +76,20 @@ public class EntityWhip extends EntityThrowable
 	protected static final int THROWER_INDEX = 22;
 
 	/** Watchable object index for whip's type */
-	protected static final int WHIP_TYPE_INDEX = 24;
+	protected static final int WHIP_TYPE_INDEX = 23;
 
 	/** Watchable object for if the player has reached the hookshot */
-	protected static final int IN_GROUND_INDEX = 25;
+	protected static final int IN_GROUND_INDEX = 24;
 
 	/** Watchable objects for whip's impact position, set to center of side of block hit;
 	 *  used for determining swing point and also for rendering */
-	public static final int HIT_POS_X = 26, HIT_POS_Y = 27, HIT_POS_Z = 28;
+	public static final int HIT_POS_X = 25, HIT_POS_Y = 26, HIT_POS_Z = 27;
 
-	/** Impact position, used for retrieving block; needed on both sides - requires data watcher? */
-	private int hitX, hitY, hitZ;
+	/** Impact position, used for retrieving block; needed on both sides (requires DataWatcher as of 1.8) */
+	public static final int HIT_X = 28, HIT_Y = 29, HIT_Z = 30;
+
+	/** Needed since 1.8 to adjust the pivot position for the swinging entity's eye height */
+	public static final int SIDE_HIT = 31;
 
 	/** Number of ticks since whip has latched onto a block, since EntityThrowable#ticksInGround field is private */
 	private int ticksInGround = 0;
@@ -120,6 +125,10 @@ public class EntityWhip extends EntityThrowable
 		dataWatcher.addObject(HIT_POS_X, 0.0F);
 		dataWatcher.addObject(HIT_POS_Y, 0.0F);
 		dataWatcher.addObject(HIT_POS_Z, 0.0F);
+		dataWatcher.addObject(HIT_X, 0);
+		dataWatcher.addObject(HIT_Y, 0);
+		dataWatcher.addObject(HIT_Z, 0);
+		dataWatcher.addObject(SIDE_HIT, 0);
 	}
 
 	/**
@@ -151,6 +160,26 @@ public class EntityWhip extends EntityThrowable
 		return (name.equals("") ? null : worldObj.getPlayerEntityByName(name));
 	}
 
+	/**
+	 * Returns the block position of the actual block struck, or null if no block was struck
+	 */
+	protected BlockPos getHitBlockPosition() {
+		if (isInGround()) {
+			return new BlockPos(dataWatcher.getWatchableObjectInt(HIT_X), dataWatcher.getWatchableObjectInt(HIT_Y), dataWatcher.getWatchableObjectInt(HIT_Z));
+		}
+		return null;
+	}
+
+	/**
+	 * Set the position of the actual block struck in onImpact
+	 */
+	protected void setHitBlockPosition(BlockPos pos, EnumFacing face) {
+		dataWatcher.updateObject(HIT_X, pos.getX());
+		dataWatcher.updateObject(HIT_Y, pos.getY());
+		dataWatcher.updateObject(HIT_Z, pos.getZ());
+		dataWatcher.updateObject(SIDE_HIT, face.getIndex());
+	}
+
 	public boolean isInGround() {
 		return (dataWatcher.getWatchableObjectByte(IN_GROUND_INDEX) & 1) == 1;
 	}
@@ -177,12 +206,12 @@ public class EntityWhip extends EntityThrowable
 	/**
 	 * Returns true if the whip can destroy the material type
 	 */
-	protected boolean canBreakBlock(Block block, Material m, int x, int y, int z, int side) {
+	protected boolean canBreakBlock(Block block, Material m, BlockPos pos, EnumFacing side) {
 		EntityLivingBase thrower = getThrower();
 		if (block instanceof IWhipBlock) {
-			return ((IWhipBlock) block).canBreakBlock(getType(), thrower, worldObj, x, y, z, side);
+			return ((IWhipBlock) block).canBreakBlock(getType(), thrower, worldObj, pos, side);
 		}
-		boolean isBreakable = block.getBlockHardness(worldObj, x, y, z) >= 0.0F;
+		boolean isBreakable = block.getBlockHardness(worldObj, pos) >= 0.0F;
 		boolean canPlayerEdit = false;
 		if (thrower instanceof EntityPlayer) {
 			canPlayerEdit = ((EntityPlayer) thrower).capabilities.allowEdit && Config.canHookshotBreakBlocks();
@@ -192,29 +221,29 @@ public class EntityWhip extends EntityThrowable
 	}
 
 	/**
-	 * Returns true if the whip can grapple the block at x/y/z
+	 * Returns true if the whip can grapple the block at the position
 	 */
-	protected boolean canGrabBlock(Block block, int x, int y, int z, int side) {
+	protected boolean canGrabBlock(Block block, BlockPos pos, EnumFacing face) {
 		if (block instanceof IWhipBlock) {
-			return ((IWhipBlock) block).canGrabBlock(getType(), getThrower(), worldObj, x, y, z, side);
+			return ((IWhipBlock) block).canGrabBlock(getType(), getThrower(), worldObj, pos, face);
 		}
 		switch (getType()) {
 		case WHIP_MAGIC:
 			// this excludes things like dirt, most plants, etc.
 			if (block instanceof BlockSandStone || block instanceof BlockHugeMushroom || 
-					(block.getMaterial().blocksMovement() && block.getBlockHardness(worldObj, x, y, z) > 1.0F)) {
+					(block.getMaterial().blocksMovement() && block.getBlockHardness(worldObj, pos) > 1.0F)) {
 				return true;
 			} // otherwise, fall through to standard case:
 		case WHIP_SHORT:
 		case WHIP_LONG:
 			int clear = 0;
-			if (isSideClear(x + 1, y, z) && isSideClear(x - 1, y, z)) {
+			if (isSideClear(pos.east()) && isSideClear(pos.west())) {
 				++clear;
 			}
-			if (isSideClear(x, y + 1, z) && isSideClear(x, y - 1, z)) {
+			if (isSideClear(pos.up()) && isSideClear(pos.down())) {
 				++clear;
 			}
-			if (isSideClear(x, y, z + 1) && isSideClear(x, y, z - 1)) {
+			if (isSideClear(pos.south()) && isSideClear(pos.north())) {
 				++clear;
 			}
 			return (clear > 1 && (block instanceof BlockFence || block instanceof BlockLog ||
@@ -225,16 +254,16 @@ public class EntityWhip extends EntityThrowable
 	}
 
 	/**
-	 * Returns true if the coordinates given are clear of obstacles, such that the
-	 * whip would be able to freely move through the space and latch on
+	 * Returns true if the position given is clear of obstacles, such that
+	 * the whip would be able to freely move through the space and latch on
 	 */
-	protected boolean isSideClear(int x, int y, int z) {
-		Material m = worldObj.getBlock(x, y, z).getMaterial();
+	protected boolean isSideClear(BlockPos pos) {
+		Material m = worldObj.getBlockState(pos).getBlock().getMaterial();
 		return (!m.blocksMovement() || m == Material.leaves);
 	}
 
-	@Override // getVelocity
-	protected float func_70182_d() {
+	@Override
+	protected float getVelocity() {
 		return 1.25F;
 	}
 
@@ -246,40 +275,41 @@ public class EntityWhip extends EntityThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.typeOfHit == MovingObjectType.BLOCK) {
-			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			BlockPos pos = mop.getBlockPos();
+			IBlockState state = worldObj.getBlockState(pos);
+			Block block = state.getBlock();
 			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				WorldUtils.playSoundAtEntity(this, Sounds.WHIP_CRACK, 1.0F, 0.2F);
 				motionX = motionY = motionZ = 0.0D;
-				if (canGrabBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
+				if (canGrabBlock(block, pos, mop.sideHit)) {
 					setInGround(true);
-					AxisAlignedBB box = block.getCollisionBoundingBoxFromPool(worldObj, mop.blockX, mop.blockY, mop.blockZ);
+					AxisAlignedBB box = block.getCollisionBoundingBox(worldObj, pos, state);
 					// bounding box may be null, depending on the block
 					if (box != null) {
 						posX = box.minX + ((box.maxX - box.minX) / 2.0D);
 						posY = box.minY + ((box.maxY - box.minY) / 2.0D);
 						posZ = box.minZ + ((box.maxZ - box.minZ) / 2.0D);
 						switch(mop.sideHit) {
-						case 5: posX = box.maxX; break; // EAST
-						case 4: posX = box.minX - 0.015D; break; // WEST (a little extra to compensate for block border, otherwise renders black)
-						case 3: posZ = box.maxZ; break; // SOUTH
-						case 2: posZ = box.minZ - 0.015D; break; // NORTH (a little extra to compensate for block border, otherwise renders black)
-						case SideHit.TOP: posY = box.maxY; break;
-						case SideHit.BOTTOM: posY = box.minY - 0.015D; break;
+						case EAST: posX = box.maxX; break;
+						case WEST: posX = box.minX - 0.015D; break; // a little extra to compensate for block border, otherwise renders black
+						case SOUTH: posZ = box.maxZ; break;
+						case NORTH: posZ = box.minZ - 0.015D; break; // a little extra to compensate for block border, otherwise renders black
+						case UP: posY = box.maxY; break;
+						case DOWN: posY = box.minY - 0.015D; break;
 						}
 					} else {
 						// adjusting posX/Y/Z here seems to make no difference to the rendering, even when client side makes same changes
-						posX = (double) mop.blockX + 0.5D;
-						posY = (double) mop.blockY + 0.5D;
-						posZ = (double) mop.blockZ + 0.5D;
-						// side hit documentation is wrong!!! based on printing out mop.sideHit:
-						// 2 = NORTH (face of block), 3 = SOUTH, 4 = WEST, 5 = EAST, 0 = BOTTOM, 1 = TOP
+						posX = (double) pos.getX() + 0.5D;
+						posY = (double) pos.getY() + 0.5D;
+						posZ = (double) pos.getZ() + 0.5D;
 						switch(mop.sideHit) {
 						//case 5: posX += 0.5D; break; // EAST
 						//case 4: posX -= 0.515D; break; // WEST (a little extra to compensate for block border, otherwise renders black)
 						//case 3: posZ += 0.5D; break; // SOUTH
 						//case 2: posZ -= 0.515D; break; // NORTH (a little extra to compensate for block border, otherwise renders black)
-						case SideHit.TOP: posY = mop.blockY + 1.0D; break;
-						case SideHit.BOTTOM: posY = mop.blockY - 0.015D; break;
+						case UP: posY = pos.getY() + 1.0D; break;
+						case DOWN: posY = pos.getY() - 0.015D; break;
+						default:
 						}
 					}
 					// however, setting position as watched values and using these on the client works... weird
@@ -287,23 +317,21 @@ public class EntityWhip extends EntityThrowable
 					dataWatcher.updateObject(HIT_POS_Y, (float) posY);
 					dataWatcher.updateObject(HIT_POS_Z, (float) posZ);
 					// unfortunately, this means the datawatcher values are no longer usable for getting the block,
-					// so need to store hitX/Y/Z separately for updating
-					hitX = mop.blockX;
-					hitY = mop.blockY;
-					hitZ = mop.blockZ;
-				}  else if (canBreakBlock(block, block.getMaterial(), mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
+					// so need to store hit position separately for updating
+					setHitBlockPosition(pos, mop.sideHit);
+				}  else if (canBreakBlock(block, block.getMaterial(), pos, mop.sideHit)) {
 					if (!worldObj.isRemote) {
 						// don't drop items for players in creative mode
 						boolean drop = (getThrower() instanceof EntityPlayer ? !(((EntityPlayer) getThrower()).capabilities.isCreativeMode) : true);
-						worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, drop);
+						worldObj.destroyBlock(pos, drop);
 						setDead();
 					}
 				} else if (block.getMaterial().blocksMovement()) {
 					// Only call onEntityCollidedWithBlock if the whip didn't already grab or break the block
-					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+					block.onEntityCollidedWithBlock(worldObj, mop.getBlockPos(), this);
 				} else {
-					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-					return;
+					block.onEntityCollidedWithBlock(worldObj, mop.getBlockPos(), this);
+					return; // continue onward
 				}
 			}
 		} else if (mop.entityHit != null) {
@@ -369,7 +397,7 @@ public class EntityWhip extends EntityThrowable
 				wasItemStolen = true;
 			}
 		}
-		
+
 		if (lootable == null || lootable.onLootStolen(player, wasItemStolen)) {
 			if (!worldObj.isRemote) {
 				target.getEntityData().setBoolean("LootableEntityFlag", true);
@@ -409,13 +437,18 @@ public class EntityWhip extends EntityThrowable
 	 * Returns true if player should swing (player far enough below whip, whip not attached to a lever, etc.)
 	 */
 	private boolean shouldSwing() {
-		Block block = worldObj.getBlock(hitX, hitY, hitZ);
+		BlockPos pos = getHitBlockPosition();
+		if (pos == null) {
+			return false;
+		}
+		IBlockState state = worldObj.getBlockState(pos);
+		Block block = state.getBlock();
 		if (block.getMaterial() == Material.air) {
 			setDead();
 			return false;
 		}
 		if (block instanceof IWhipBlock) {
-			Result result = ((IWhipBlock) block).shouldSwing(this, worldObj, hitX, hitY, hitZ, ticksInGround);
+			Result result = ((IWhipBlock) block).shouldSwing(this, worldObj, pos, ticksInGround);
 			switch (result) {
 			case ALLOW: return true;
 			case DENY: return false;
@@ -426,13 +459,13 @@ public class EntityWhip extends EntityThrowable
 			return false;
 		} else if (block instanceof BlockLever) {
 			if (ticksInGround > 10 && !worldObj.isRemote) {
-				WorldUtils.activateButton(worldObj, block, hitX, hitY, hitZ);
+				WorldUtils.activateButton(worldObj, state, pos);
 				setDead();
 			}
 			return false;
 		} else if (worldObj.isRemote && swingVec == null && getThrower() != null) {
 			// make sure thrower's y position is below impact position before starting swing
-			return getThrower().posY < dataWatcher.getWatchableObjectFloat(HIT_POS_Y);
+			return (getThrower().getEntityBoundingBox().maxY) < dataWatcher.getWatchableObjectFloat(HIT_POS_Y);
 		}
 		return true;
 	}
@@ -470,8 +503,13 @@ public class EntityWhip extends EntityThrowable
 				float x = dataWatcher.getWatchableObjectFloat(HIT_POS_X);
 				float y = dataWatcher.getWatchableObjectFloat(HIT_POS_Y);
 				float z = dataWatcher.getWatchableObjectFloat(HIT_POS_Z);
+				switch (EnumFacing.getFront(dataWatcher.getWatchableObjectInt(SIDE_HIT))) {
+				case UP: break; // do nothing
+				case DOWN: y -= thrower.getEyeHeight(); break; // subtract thrower's eye height
+				default: y -= (thrower.getEyeHeight() / 1.5F); break; // subtract 1/3 of the thrower's eye height
+				}
 				if (swingTicks == 0 && swingVec == null && thrower.motionY < 0) {
-					swingVec = Vec3.createVectorHelper((x - thrower.posX), y - (thrower.posY + thrower.getEyeHeight()), (z - thrower.posZ)).normalize();
+					swingVec = new Vec3((x - thrower.posX), y - thrower.posY, (z - thrower.posZ)).normalize();
 					dy = (thrower.getDistance(x, y, z) / 7.0D); // lower divisor gives bigger change in y
 					// calculate horizontal distance to find initial swing tick position
 					// as distance approaches zero, swing ticks should approach ticks required / 2
@@ -526,9 +564,10 @@ public class EntityWhip extends EntityThrowable
 		compound.setFloat("hitPosX", dataWatcher.getWatchableObjectFloat(HIT_POS_X));
 		compound.setFloat("hitPosY", dataWatcher.getWatchableObjectFloat(HIT_POS_Y));
 		compound.setFloat("hitPosZ", dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
-		compound.setInteger("hitX", hitX);
-		compound.setInteger("hitY", hitY);
-		compound.setInteger("hitZ", hitZ);
+		if (getHitBlockPosition() != null) {
+			compound.setLong("hitPos", getHitBlockPosition().toLong());
+			compound.setInteger("sideHit", dataWatcher.getWatchableObjectInt(SIDE_HIT));
+		}
 		compound.setByte("customInGround", (byte)(isInGround() ? 1 : 0));
 		compound.setInteger("whipType", getType().ordinal());
 	}
@@ -539,9 +578,9 @@ public class EntityWhip extends EntityThrowable
 		dataWatcher.updateObject(HIT_POS_X, compound.getFloat("hitPosX"));
 		dataWatcher.updateObject(HIT_POS_Y, compound.getFloat("hitPosY"));
 		dataWatcher.updateObject(HIT_POS_Z, compound.getFloat("hitPosZ"));
-		hitX = compound.getInteger("hitX");
-		hitY = compound.getInteger("hitY");
-		hitZ = compound.getInteger("hitZ");
+		if (compound.hasKey("hitPos")) {
+			setHitBlockPosition(BlockPos.fromLong(compound.getLong("hitPos")), EnumFacing.getFront(compound.getInteger("sideHit")));
+		}
 		// retrieving owner name saved by super-class EntityThrowable
 		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
 		dataWatcher.updateObject(WHIP_TYPE_INDEX, WhipType.values()[compound.getInteger("whipType") % WhipType.values().length]);

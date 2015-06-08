@@ -19,7 +19,6 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -27,14 +26,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -45,16 +43,27 @@ import cpw.mods.fml.relauncher.SideOnly;
  * The Pendant of Wisdom (Nayru) is found in the House of Gales, hidden under a lake
  *
  */
-public class ItemPendant extends Item implements IUnenchantable
+public class ItemPendant extends BaseModItem implements IUnenchantable
 {
 	/** The three Pendants of Virtue */
-	public static enum PendantType {POWER,WISDOM,COURAGE};
-
-	/** Unlocalized name suffixes */
-	private String[] names = {"_power","_wisdom","_courage"};
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
+	public static enum PendantType {
+		POWER("power", 1),
+		WISDOM("wisdom", 2),
+		COURAGE("courage", 4);
+		public final String unlocalizedName;
+		/** Bit flag used in Pedestal Block/TileEntity */
+		public final int bitFlag;
+		private PendantType(String name, int bitFlag) {
+			this.unlocalizedName = name;
+			this.bitFlag = bitFlag;
+		}
+		/**
+		 * Returns pendant type by damage value (0, 1, or 2), NOT the same as the bit flag
+		 */
+		public static PendantType byDamage(int damage) {
+			return PendantType.values()[damage % PendantType.values().length];
+		}
+	};
 
 	public ItemPendant() {
 		super();
@@ -79,31 +88,25 @@ public class ItemPendant extends Item implements IUnenchantable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int par1) {
-		return iconArray[par1 % names.length];
-	}
-
-	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName() + names[stack.getItemDamage() % names.length];
+		return super.getUnlocalizedName() + "_" + PendantType.byDamage(stack.getItemDamage()).unlocalizedName;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < names.length; ++i) {
-			list.add(new ItemStack(item, 1, i));
+		for (PendantType type : PendantType.values()) {
+			list.add(new ItemStack(item, 1, type.ordinal()));
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[names.length];
-		for (int i = 0; i < names.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":pendant" + names[i]);
+	public String[] getVariants() {
+		String[] variants = new String[PendantType.values().length];
+		for (PendantType type : PendantType.values()) {
+			variants[type.ordinal()] = ModInfo.ID + ":pendant_" + type.unlocalizedName;
 		}
+		return variants;
 	}
 
 	@Override

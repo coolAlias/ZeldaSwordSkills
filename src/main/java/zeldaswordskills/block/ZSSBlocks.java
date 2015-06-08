@@ -22,46 +22,36 @@ import java.lang.reflect.Field;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
-import zeldaswordskills.block.BlockChestInvisible.TileEntityChestInvisible;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
-import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.block.tileentity.TileEntityDungeonStone;
 import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.block.tileentity.TileEntityInscription;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
-import zeldaswordskills.client.render.block.RenderCeramicJar;
-import zeldaswordskills.client.render.block.RenderChestLocked;
-import zeldaswordskills.client.render.block.RenderGiantLever;
-import zeldaswordskills.client.render.block.RenderSacredFlame;
-import zeldaswordskills.client.render.block.RenderSpecialCrop;
-import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
-import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
-import zeldaswordskills.client.render.block.RenderTileEntityChestLocked;
-import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
-import zeldaswordskills.item.ItemBlockTime;
+import zeldaswordskills.item.ItemBlockPedestal;
+import zeldaswordskills.item.ItemBlockUnbreakable;
 import zeldaswordskills.item.ItemCeramicJar;
+import zeldaswordskills.item.ItemDoorBoss;
+import zeldaswordskills.item.ItemDoorLocked;
 import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.item.ItemGossipStone;
 import zeldaswordskills.item.ItemMetadataBlock;
+import zeldaswordskills.item.ItemModBlock;
 import zeldaswordskills.item.ItemSacredFlame;
-import zeldaswordskills.item.ItemSecretStone;
 import zeldaswordskills.item.ItemWarpStone;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BlockRotationData;
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSBlocks
 {
 	public static Block
-	barrierLight,
-	barrierHeavy,
+	heavyBlock,
 	timeBlock,
 	bombFlower,
 	ceramicJar,
@@ -79,9 +69,8 @@ public class ZSSBlocks
 	warpStone,
 	secretStone,
 	sacredFlame,
-	// the following have a real Item, not an ItemBlock:
+	doorBoss,
 	doorLocked,
-	doorLockedSmall,
 	dungeonCore,
 	dungeonStone;
 
@@ -89,101 +78,81 @@ public class ZSSBlocks
 	 * Call during FMLPreInitializationEvent to initialize and register all blocks
 	 */
 	public static void preInit() {
-		barrierLight = new BlockHeavy(Material.rock, BlockWeight.MEDIUM).setBlockName("zss.barrier_light");
-		barrierHeavy = new BlockHeavy(Material.rock, BlockWeight.VERY_HEAVY).setBlockName("zss.barrier_heavy");
-		pegWooden = new BlockPeg(ZSSBlockMaterials.pegWoodMaterial, BlockWeight.VERY_LIGHT).setBlockName("zss.peg_wooden");
-		pegRusty = new BlockPeg(ZSSBlockMaterials.pegRustyMaterial, BlockWeight.MEDIUM).setBlockName("zss.peg_rusty");
-		ceramicJar = new BlockCeramicJar().setBlockName("zss.ceramic_jar").setBlockTextureName("stone");
-		chestLocked = new BlockChestLocked().setBlockName("zss.chest_locked");
-		pedestal = new BlockPedestal().setBlockName("zss.pedestal");
-		sacredFlame = new BlockSacredFlame().setBlockName("zss.sacredflame");
-		doorLocked = new BlockDoorBoss(Material.iron).setBlockName("zss.door_locked");
-		secretStone = new BlockSecretStone(Material.rock).setBlockName("zss.secretstone");
-		dungeonCore = new BlockDungeonCore(Material.rock).setBlockName("zss.dungeoncore");
-		dungeonStone = new BlockDungeonStone(Material.rock).setBlockName("zss.dungeonstone");
-		beamWooden = new BlockBar(Material.wood).setBlockName("zss.beam_wooden");
-		hookTarget = new BlockTargetDirectional(Material.rock).setBlockName("zss.hook_target");
-		leverGiant = new BlockGiantLever().setBlockName("zss.lever_giant");
-		chestInvisible = new BlockChestInvisible().setBlockName("zss.chest_invisible");
-		timeBlock = new BlockTime().setBlockName("zss.time_block");
-		inscription = new BlockSongInscription().setBlockName("zss.inscription");
-		warpStone = new BlockWarpStone().setBlockName("zss.warp_stone");
-		gossipStone = new BlockGossipStone().setBlockName("zss.gossip_stone");
-		bombFlower = new BlockBombFlower().setBlockName("zss.bomb_flower");
-		hookTargetAll = new BlockTarget(Material.rock).setBlockName("zss.hook_target_all");
-		doorLockedSmall = new BlockDoorLocked(Material.iron).setBlockName("zss.door_locked_small");
-		register();
-	}
-
-	/**
-	 * Registers all custom Item renderers
-	 */
-	@SideOnly(Side.CLIENT)
-	public static void registerRenderers() {
-		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCeramicJar.class, new RenderTileEntityCeramicJar());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChestLocked.class, new RenderTileEntityChestLocked());
-		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPedestal.class, new RenderTileEntityPedestal());
-		RenderingRegistry.registerBlockHandler(new RenderTileDungeonBlock());
-		RenderingRegistry.registerBlockHandler(new RenderSpecialCrop());
-		RenderingRegistry.registerBlockHandler(new RenderCeramicJar());
-		RenderingRegistry.registerBlockHandler(new RenderChestLocked());
-		RenderingRegistry.registerBlockHandler(new RenderGiantLever());
-		RenderingRegistry.registerBlockHandler(new RenderSacredFlame());
-	}
-
-	private static void register() {
-		GameRegistry.registerBlock(barrierLight, barrierLight.getUnlocalizedName());
-		GameRegistry.registerBlock(barrierHeavy, barrierHeavy.getUnlocalizedName());
-		GameRegistry.registerBlock(pegWooden, pegWooden.getUnlocalizedName());
-		GameRegistry.registerBlock(pegRusty, pegRusty.getUnlocalizedName());
-		GameRegistry.registerBlock(ceramicJar, ItemCeramicJar.class, ceramicJar.getUnlocalizedName());
-		GameRegistry.registerBlock(chestLocked, chestLocked.getUnlocalizedName());
-		GameRegistry.registerBlock(chestInvisible, chestInvisible.getUnlocalizedName());
-		GameRegistry.registerBlock(pedestal, ItemMetadataBlock.class, pedestal.getUnlocalizedName());
-		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName());
-		GameRegistry.registerBlock(doorLocked, doorLocked.getUnlocalizedName());
-		GameRegistry.registerBlock(doorLockedSmall, doorLockedSmall.getUnlocalizedName());
-		GameRegistry.registerBlock(secretStone, ItemSecretStone.class, secretStone.getUnlocalizedName());
-		GameRegistry.registerBlock(dungeonCore, ItemDungeonBlock.class, dungeonCore.getUnlocalizedName());
-		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName());
-		GameRegistry.registerBlock(beamWooden, beamWooden.getUnlocalizedName());
-		GameRegistry.registerBlock(hookTarget, hookTarget.getUnlocalizedName());
-		GameRegistry.registerBlock(hookTargetAll, hookTargetAll.getUnlocalizedName());
-		GameRegistry.registerBlock(leverGiant, leverGiant.getUnlocalizedName());
-		GameRegistry.registerBlock(timeBlock, ItemBlockTime.class, timeBlock.getUnlocalizedName());
-		GameRegistry.registerBlock(inscription, inscription.getUnlocalizedName());
-		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
-		GameRegistry.registerBlock(gossipStone, ItemGossipStone.class, gossipStone.getUnlocalizedName());
-		GameRegistry.registerBlock(bombFlower, bombFlower.getUnlocalizedName());
-
-		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
-		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
-		GameRegistry.registerTileEntity(TileEntityChestInvisible.class, "tileEntityChestInvisible");
-		GameRegistry.registerTileEntity(TileEntityDungeonBlock.class, "tileEntityDungeonBlock");
-		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, "tileEntityDungeonCore");
-		GameRegistry.registerTileEntity(TileEntityGossipStone.class, "tileEntityGossipStone");
-		GameRegistry.registerTileEntity(TileEntityInscription.class, "tileEntityInscription");
-		GameRegistry.registerTileEntity(TileEntityPedestal.class, "tileEntityPedestal");
-		GameRegistry.registerTileEntity(TileEntitySacredFlame.class, "tileEntitySacredFlame");
-
-		// register item blocks for comparator sorting:
+		// NOTE: pass getUnlocalizedString WITHOUT 'tile.' or blockstate=>model will get confused
+		// NOTE: new Object[]{args...} is required for vararg constructor invocation via Reflection
+		beamWooden = new BlockBar(Material.wood).setUnlocalizedName("beam_wooden");
+		GameRegistry.registerBlock(beamWooden, ItemModBlock.class, beamWooden.getUnlocalizedName().substring(5));
+		bombFlower = new BlockBombFlower().setUnlocalizedName("bomb_flower");
+		GameRegistry.registerBlock(bombFlower, null, bombFlower.getUnlocalizedName().substring(5));
+		ceramicJar = new BlockCeramicJar().setUnlocalizedName("ceramic_jar");
+		GameRegistry.registerBlock(ceramicJar, ItemCeramicJar.class, ceramicJar.getUnlocalizedName().substring(5));
+		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, ModInfo.ID + ":tileEntityCeramicJar");
+		chestInvisible = new BlockChestInvisible().setUnlocalizedName("chest_invisible");
+		GameRegistry.registerBlock(chestInvisible, ItemModBlock.class, chestInvisible.getUnlocalizedName().substring(5));
+		GameRegistry.registerTileEntity(TileEntityChestLocked.class, ModInfo.ID + ":tileEntityChestInvisible");
+		chestLocked = new BlockChestLocked().setUnlocalizedName("chest_locked");
+		GameRegistry.registerBlock(chestLocked, ItemModBlock.class, chestLocked.getUnlocalizedName().substring(5));
+		GameRegistry.registerTileEntity(TileEntityChestLocked.class, ModInfo.ID + ":tileEntityChestLocked");
+		doorBoss = new BlockDoorBoss(Material.iron).setUnlocalizedName("door_boss");
+		GameRegistry.registerBlock(doorBoss, ItemDoorBoss.class, doorBoss.getUnlocalizedName().substring(5));
+		doorLocked = new BlockDoorLocked(Material.iron).setUnlocalizedName("door_locked");
+		GameRegistry.registerBlock(doorLocked, ItemDoorLocked.class, doorLocked.getUnlocalizedName().substring(5));
+		dungeonCore = new BlockDungeonCore(Material.rock).setUnlocalizedName("dungeon_core");
+		GameRegistry.registerBlock(dungeonCore, ItemDungeonBlock.class, dungeonCore.getUnlocalizedName().substring(5), new Object[]{new String[]{"minecraft:stone:1", "minecraft:stone:2"}});
+		GameRegistry.registerTileEntity(TileEntityDungeonCore.class, ModInfo.ID + ":tileEntityDungeonCore");
+		dungeonStone = new BlockDungeonStone(Material.rock).setUnlocalizedName("dungeon_stone");
+		GameRegistry.registerBlock(dungeonStone, ItemDungeonBlock.class, dungeonStone.getUnlocalizedName().substring(5), new Object[]{new String[]{"minecraft:stone:5", "minecraft:stone:6"}});
+		GameRegistry.registerTileEntity(TileEntityDungeonStone.class, ModInfo.ID + ":tileEntityDungeonStone");
+		gossipStone = new BlockGossipStone().setUnlocalizedName("gossip_stone");
+		GameRegistry.registerBlock(gossipStone, ItemGossipStone.class, gossipStone.getUnlocalizedName().substring(5));
+		GameRegistry.registerTileEntity(TileEntityGossipStone.class, ModInfo.ID + ":tileEntityGossipStone");
+		heavyBlock = new BlockHeavy(Material.rock).setUnlocalizedName("heavy_block");
+		GameRegistry.registerBlock(heavyBlock, ItemMetadataBlock.class, heavyBlock.getUnlocalizedName().substring(5), new Object[]{new String[]{BlockHeavy.EnumType.LIGHT.getName(), BlockHeavy.EnumType.HEAVY.getName()}});
+		hookTarget = new BlockTargetDirectional(Material.rock).setUnlocalizedName("hook_target");
+		GameRegistry.registerBlock(hookTarget, ItemModBlock.class, hookTarget.getUnlocalizedName().substring(5));
+		hookTargetAll = new BlockTarget(Material.rock).setUnlocalizedName("hook_target_all");
+		GameRegistry.registerBlock(hookTargetAll, ItemModBlock.class, hookTargetAll.getUnlocalizedName().substring(5));
+		inscription = new BlockSongInscription().setUnlocalizedName("inscription");
+		GameRegistry.registerBlock(inscription, ItemModBlock.class, inscription.getUnlocalizedName().substring(5));
+		GameRegistry.registerTileEntity(TileEntityInscription.class, ModInfo.ID + ":tileEntityInscription");
+		leverGiant = new BlockGiantLever().setUnlocalizedName("lever_giant");
+		GameRegistry.registerBlock(leverGiant, ItemModBlock.class, leverGiant.getUnlocalizedName().substring(5));
+		pegWooden = new BlockPeg(ZSSBlockMaterials.pegWoodMaterial, BlockWeight.VERY_LIGHT).setUnlocalizedName("peg_wooden");
+		GameRegistry.registerBlock(pegWooden, ItemModBlock.class, pegWooden.getUnlocalizedName().substring(5));
+		pegRusty = new BlockPeg(ZSSBlockMaterials.pegRustyMaterial, BlockWeight.MEDIUM).setUnlocalizedName("peg_rusty");
+		GameRegistry.registerBlock(pegRusty, ItemModBlock.class, pegRusty.getUnlocalizedName().substring(5));
+		pedestal = new BlockPedestal().setUnlocalizedName("pedestal");
+		GameRegistry.registerBlock(pedestal, ItemBlockPedestal.class, pedestal.getUnlocalizedName().substring(5));
+		GameRegistry.registerTileEntity(TileEntityPedestal.class, ModInfo.ID + ":tileEntityPedestal");
+		sacredFlame = new BlockSacredFlame().setUnlocalizedName("sacred_flame");
+		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName().substring(5));
+		GameRegistry.registerTileEntity(TileEntitySacredFlame.class, ModInfo.ID + ":tileEntitySacredFlame");
+		secretStone = new BlockSecretStone(Material.rock).setUnlocalizedName("secret_stone");
+		GameRegistry.registerBlock(secretStone, ItemBlockUnbreakable.class, secretStone.getUnlocalizedName().substring(5));
+		timeBlock = new BlockTime().setUnlocalizedName("time_block");
+		GameRegistry.registerBlock(timeBlock, ItemMetadataBlock.class, timeBlock.getUnlocalizedName().substring(5), new Object[]{new String[]{BlockTime.EnumType.TIME.getName(), BlockTime.EnumType.ROYAL.getName()}});
+		warpStone = new BlockWarpStone().setUnlocalizedName("warp_stone");
+		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName().substring(5));
+		// register block items for creative tab comparator sorting:
 		try {
 			for (Field f: ZSSBlocks.class.getFields()) {
 				if (Block.class.isAssignableFrom(f.getType())) {
 					Block block = (Block) f.get(null);
 					if (block != null) {
-						ZSSItems.registerItemBlock(new ItemStack(block).getItem());
+						ItemStack stack = new ItemStack(block);
+						if (stack != null && stack.getItem() != null) {
+							ZSSItems.registerItemBlock(stack.getItem());
+						}
+						if (block instanceof IVanillaRotation) {
+							ZSSMain.logger.debug("Registering custom rotation for " + block.getUnlocalizedName());
+							BlockRotationData.registerCustomBlockRotation(block, ((IVanillaRotation) block).getRotationPattern());
+						}
 					}
 				}
 			}
-		} catch(Exception e) {
-
+		} catch (Exception e) {
+			ZSSMain.logger.warn("Caught exception while registering block ItemBlocks: " + e.toString());
+			e.printStackTrace();
 		}
-
-		// Register rotation types for custom blocks
-		BlockRotationData.registerCustomBlockRotation(chestLocked, BlockRotationData.Rotation.PISTON_CONTAINER);
-		BlockRotationData.registerCustomBlockRotation(chestInvisible, BlockRotationData.Rotation.PISTON_CONTAINER);
-		BlockRotationData.registerCustomBlockRotation(inscription, BlockRotationData.Rotation.PISTON_CONTAINER);
-		BlockRotationData.registerCustomBlockRotation(leverGiant, BlockRotationData.Rotation.LEVER);
 	}
 }

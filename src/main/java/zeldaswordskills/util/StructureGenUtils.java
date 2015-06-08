@@ -22,9 +22,12 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Direction;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.block.BlockChestLocked;
@@ -38,18 +41,20 @@ import zeldaswordskills.world.gen.structure.RoomBase;
  *
  */
 public class StructureGenUtils
-{	
+{
+	/** Used for metadata rotation */
+	public static final int[] rotateRight = new int[] {1, 2, 3, 0};
+
 	/**
 	 * Scans the surface of the chunk and returns the average height for the entire chunk
 	 * by sampling the world height value of 25 of the 256 surface blocks
-	 * posX and posZ are real world coordinates, not chunk coordinates
 	 */
-	public static int getAverageSurfaceHeight(World world, int posX, int posZ) {
-		int height = world.getHeightValue(posX, posZ);
+	public static int getAverageSurfaceHeight(World world, BlockPos pos) {
+		int height = world.getHeight(pos).getY();
 		int count = 1;
-		for (int i = posX + 3; i < posX + 16; i += 3) {
-			for (int j = posZ + 3; j < posZ + 16; j += 3) {
-				height += world.getHeightValue(i, j);
+		for (int i = pos.getX() + 3; i < pos.getX() + 16; i += 3) {
+			for (int k = pos.getZ() + 3; k < pos.getZ() + 16; k += 3) {
+				height += world.getHeight(new BlockPos(i, 64, k)).getY();
 				++count;
 			}
 		}
@@ -60,9 +65,11 @@ public class StructureGenUtils
 	 * Returns the distance squared between the centers of two bounding boxes
 	 */
 	public static double getDistanceSqBetween(StructureBoundingBox box1, StructureBoundingBox box2) {
-		int dx = box1.getCenterX() - box2.getCenterX();
-		int dy = box1.getCenterY() - box2.getCenterY();
-		int dz = box1.getCenterZ() - box2.getCenterZ();
+		Vec3i c1 = box1.getCenter();
+		Vec3i c2 = box2.getCenter();
+		int dx = c1.getX() - c2.getX();
+		int dy = c1.getY() - c2.getY();
+		int dz = c1.getZ() - c2.getZ();
 		return (dx * dx + dy * dy + dz * dz);
 	}
 
@@ -71,7 +78,8 @@ public class StructureGenUtils
 	 * @param max if any distance exceeds this threshold, this value will be returned
 	 */
 	public static int getAverageDistanceToGround(World world, StructureBoundingBox box, int max) {
-		int i = getDistanceToGround(world, box.getCenterX(), box.minY, box.getCenterZ());
+		Vec3i center = box.getCenter();
+		int i = getDistanceToGround(world, center.getX(), box.minY, center.getZ());
 		int total = i;
 		if (i > max) { return max; }
 		i = getDistanceToGround(world, box.minX, box.minY, box.minZ);
@@ -94,7 +102,7 @@ public class StructureGenUtils
 	 */
 	public static int getDistanceToGround(World world, int x, int y, int z) {
 		int i = 0;
-		while (!world.getBlock(x, y - 1, z).getMaterial().isSolid() && y > 5) {
+		while (!world.isSideSolid(new BlockPos(x, y - 1, z), EnumFacing.UP) && y > 5) {
 			--y;
 			++i;
 		}
@@ -113,19 +121,19 @@ public class StructureGenUtils
 	 * Fills area defined by arguments and within the structure's bounding box with given metadata block,
 	 * up to but not including the max boundary
 	 */
-	public static void fillWithBlocks(World world, StructureBoundingBox box, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, Block block, int meta) {
-		fillWithBlocks(world, box, minX, maxX, minY, maxY, minZ, maxZ, block, meta, false);
+	public static void fillWithBlocks(World world, StructureBoundingBox box, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, IBlockState state) {
+		fillWithBlocks(world, box, minX, maxX, minY, maxY, minZ, maxZ, state, false);
 	}
 
 	/**
 	 * Fills area defined by arguments with given metadata block, up to but not including the max boundary
 	 * @param ignoreBounds if true, will fill in blocks even outside of the structure's bounding box bounds
 	 */
-	public static void fillWithBlocks(World world, StructureBoundingBox box, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, Block block, int meta, boolean ignoreBounds) {
+	public static void fillWithBlocks(World world, StructureBoundingBox box, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, IBlockState state, boolean ignoreBounds) {
 		for (int i = minX; i < maxX; ++i) {
 			for (int j = minY; j < maxY; ++j) {
 				for (int k = minZ; k < maxZ; ++k) {
-					setBlockAtPosition(world, box, i, j, k, block, meta, ignoreBounds);
+					setBlockAtPosition(world, box, i, j, k, state, ignoreBounds);
 				}
 			}
 		}
@@ -136,12 +144,14 @@ public class StructureGenUtils
 	 * and without replacing any currently existing solid blocks
 	 * @param flag block notification flag; see setBlock for details
 	 */
-	public static void fillWithoutReplace(World world, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, Block block, int meta, int flag) {
+	public static void fillWithoutReplace(World world, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, IBlockState state, int flag) {
+		BlockPos pos;
 		for (int i = minX; i < maxX; ++i) {
 			for (int j = minY; j < maxY; ++j) {
 				for (int k = minZ; k < maxZ; ++k) {
-					if (!world.getBlock(i, j, k).getMaterial().isSolid()) {
-						world.setBlock(i, j, k, block, meta, flag);
+					pos = new BlockPos(i, j, k);
+					if (!world.getBlockState(pos).getBlock().getMaterial().isSolid()) {
+						world.setBlockState(pos, state, flag);
 					}
 				}
 			}
@@ -152,14 +162,22 @@ public class StructureGenUtils
 	 * Fills downward from the structure's bottom layer to the ground level, replacing
 	 * any non-solid or leaf blocks with the block and meta provided
 	 */
-	public static void fillDown(World world, StructureBoundingBox box, Block block, int metadata) {
+	public static void fillDown(World world, StructureBoundingBox box, IBlockState state) {
 		for (int i = box.minX; i <= box.maxX; ++i) {
 			for (int k = box.minZ; k <= box.maxZ; ++k) {
-				for (int j = box.minY - 1; j > 4 && (!world.getBlock(i, j, k).getMaterial().isSolid() || world.getBlock(i, j, k).getMaterial() == Material.leaves); --j) {
-					world.setBlock(i, j, k, block, metadata, 2);
+				for (int j = box.minY - 1; j > 4 && canReplace(world.getBlockState(new BlockPos(i, j, k)).getBlock().getMaterial()); --j) {
+					world.setBlockState(new BlockPos(i, j, k), state, 2);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns true if material is not solid or is leaves
+	 * @param material
+	 */
+	private static boolean canReplace(Material material) {
+		return !material.isSolid() || material == Material.leaves;
 	}
 
 	/**
@@ -171,9 +189,9 @@ public class StructureGenUtils
 		for (int i = minX; i < maxX; ++i) {
 			for (int j = minY; j < maxY; ++j) {
 				for (int k = minZ; k < maxZ; ++k) {
-					if (block == null || world.getBlock(i, j, k) == block) {
-						// func_147480_a is destroyBlock
-						world.func_147480_a(i, j, k, drop);
+					BlockPos pos = new BlockPos(i, j, k);
+					if (block == null || world.getBlockState(pos).getBlock() == block) {
+						world.destroyBlock(pos, drop);
 					}
 				}
 			}
@@ -212,22 +230,23 @@ public class StructureGenUtils
 	}
 
 	/**
-	 * Returns true if the block at x/y/z is a chest or locked chest
+	 * Returns true if the block at position is a chest or locked chest
 	 */
-	public static boolean isBlockChest(World world, int x, int y, int z) {
-		Block block = world.getBlock(x, y, z);
+	public static boolean isBlockChest(World world, BlockPos pos) {
+		Block block = world.getBlockState(pos).getBlock();
 		return (block instanceof BlockChest || block instanceof BlockChestLocked);
 	}
 
 	/**
 	 * Replaces all blocks of given material in area with block and meta provided
 	 */
-	public static void replaceMaterialWith(World world, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, Material material, Block block, int meta) {
+	public static void replaceMaterialWith(World world, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, Material material, IBlockState state) {
 		for (int i = minX; i < maxX; ++i) {
 			for (int j = minY; j < maxY; ++j) {
 				for (int k = minZ; k < maxZ; ++k) {
-					if (world.getBlock(i, j, k).getMaterial() == material) {
-						world.setBlock(i, j, k, block, meta, 3);
+					BlockPos pos = new BlockPos(i, j, k);
+					if (world.getBlockState(pos).getBlock().getMaterial() == material) {
+						world.setBlockState(pos, state, 3);
 					}
 				}
 			}
@@ -237,29 +256,29 @@ public class StructureGenUtils
 	/**
 	 * Sets the block at a position offset by the amounts x/y/z within the bounding box
 	 */
-	public static void setBlockAtPosition(World world, StructureBoundingBox box, int x, int y, int z, Block block, int meta) {
-		setBlockAtPosition(world, box, x, y, z, block, meta, false);
+	public static void setBlockAtPosition(World world, StructureBoundingBox box, int x, int y, int z, IBlockState state) {
+		setBlockAtPosition(world, box, x, y, z, state, false);
 	}
 
 	/**
 	 * Sets the block at a position offset by the amounts x/y/z within the bounding box
 	 * @param ignoreBounds if true, will set a block even if it is outside of the structure's bounding box bounds
 	 */
-	public static void setBlockAtPosition(World world, StructureBoundingBox box, int x, int y, int z, Block block, int meta, boolean ignoreBounds) {
+	public static void setBlockAtPosition(World world, StructureBoundingBox box, int x, int y, int z, IBlockState state, boolean ignoreBounds) {
 		int j1 = getXWithOffset(box, x, z);
 		int k1 = getYWithOffset(box, y);
 		int l1 = getZWithOffset(box, x, z);
-		if (ignoreBounds || box.isVecInside(j1, k1, l1)) {
-			world.setBlock(j1, k1, l1, block, meta, 2);
+		if (ignoreBounds || box.isVecInside(new Vec3i(j1, k1, l1))) {
+			world.setBlockState(new BlockPos(j1, k1, l1), state, 2);
 		}
 	}
 
 	/**
 	 * Sets the block at this position only if the current block is replaceable
 	 */
-	public static void setBlockIfReplaceable(World world, int x, int y, int z, Block block, int meta) {
-		if (world.getBlock(x, y, z).isReplaceable(world, x, y, z)) {
-			world.setBlock(x, y, z, block, meta, 2);
+	public static void setBlockIfReplaceable(World world, BlockPos pos, IBlockState state) {
+		if (world.getBlockState(pos).getBlock().isReplaceable(world, pos)) {
+			world.setBlockState(pos, state, 2);
 		}
 	}
 
@@ -272,20 +291,19 @@ public class StructureGenUtils
 	public static void adjustCornersForMaterial(World world, StructureBoundingBox box, Material material, int n, boolean checkAbove, boolean moveUp) {
 		int count = n;
 		int i = (moveUp ? 1 : -1);
-
-		while (count > 0 && world.getBlock(box.maxX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.maxZ).getMaterial() == material) {
+		while (count > 0 && world.getBlockState(new BlockPos(box.maxX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.maxZ)).getBlock().getMaterial() == material) {
 			--count;
 			box.offset(0, i, 0);
 		}
-		while (count > 0 && world.getBlock(box.maxX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.minZ).getMaterial() == material) {
+		while (count > 0 && world.getBlockState(new BlockPos(box.maxX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.minZ)).getBlock().getMaterial() == material) {
 			--count;
 			box.offset(0, i, 0);
 		}
-		while (count > 0 && world.getBlock(box.minX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.maxZ).getMaterial() == material) {
+		while (count > 0 && world.getBlockState(new BlockPos(box.minX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.maxZ)).getBlock().getMaterial() == material) {
 			--count;
 			box.offset(0, i, 0);
 		}
-		while (count > 0 && world.getBlock(box.minX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.minZ).getMaterial() == material) {
+		while (count > 0 && world.getBlockState(new BlockPos(box.minX, (checkAbove ? box.maxY + 1 : box.minY - 1), box.minZ)).getBlock().getMaterial() == material) {
 			--count;
 			box.offset(0, i, 0);
 		}
@@ -309,11 +327,10 @@ public class StructureGenUtils
 		boolean shiftUp = bottomCount > topCount;
 		int maxShift = box.getYSize();
 		int i = (shiftUp ? 1 : -1);
+		Vec3i center = box.getCenter();
 
 		// Adjust center position first
-		while (maxShift > 0 && world.isAirBlock(box.getCenterX(), (shiftUp ? box.minY : box.maxY) - i,
-				box.getCenterZ()) && box.maxY < worldHeight && box.minY > 8)
-		{
+		while (maxShift > 0 && world.isAirBlock(new BlockPos(center.getX(), (shiftUp ? box.minY : box.maxY) - i, center.getZ())) && box.maxY < worldHeight && box.minY > 8) {
 			--maxShift;
 			box.offset(0, i, 0);
 		}
@@ -344,7 +361,7 @@ public class StructureGenUtils
 		for (int i = minX; i <= maxX; ++i) {
 			for (int j = minY; j <= maxY; ++j) {
 				for (int k = minZ; k <= maxZ; ++k) {
-					if (!world.isAirBlock(i, j, k)) {
+					if (!world.isAirBlock(new BlockPos(i, j, k))) {
 						return false;
 					}
 				}
@@ -361,11 +378,12 @@ public class StructureGenUtils
 	public static int getNumBlocksOfMaterial(World world, StructureBoundingBox box, Material material, int offY) {
 		int count = 0;
 		int y = (offY > 0 ? box.maxY + offY : box.minY + offY);
-		count += (world.getBlock(box.getCenterX(), y, box.getCenterZ()).getMaterial() == material ? 1 : 0);
-		count += (world.getBlock(box.maxX, y, box.maxZ).getMaterial() == material ? 1 : 0);
-		count += (world.getBlock(box.maxX, y, box.minZ).getMaterial() == material ? 1 : 0);
-		count += (world.getBlock(box.minX, y, box.maxZ).getMaterial() == material ? 1 : 0);
-		count += (world.getBlock(box.minX, y, box.minZ).getMaterial() == material ? 1 : 0);
+		Vec3i center = box.getCenter();
+		count += (world.getBlockState(new BlockPos(center.getX(), y, center.getZ())).getBlock().getMaterial() == material ? 1 : 0);
+		count += (world.getBlockState(new BlockPos(box.maxX, y, box.maxZ)).getBlock().getMaterial() == material ? 1 : 0);
+		count += (world.getBlockState(new BlockPos(box.maxX, y, box.minZ)).getBlock().getMaterial() == material ? 1 : 0);
+		count += (world.getBlockState(new BlockPos(box.minX, y, box.maxZ)).getBlock().getMaterial() == material ? 1 : 0);
+		count += (world.getBlockState(new BlockPos(box.minX, y, box.minZ)).getBlock().getMaterial() == material ? 1 : 0);
 		return count;
 	}
 
@@ -391,7 +409,7 @@ public class StructureGenUtils
 		for (int i = minX; i < maxX; ++i) {
 			for (int j = minY; j < maxY; ++j) {
 				for (int k = minZ; k < maxZ; ++k) {
-					if (world.getBlock(i, j, k).getMaterial() == material) {
+					if (world.getBlockState(new BlockPos(i, j, k)).getBlock().getMaterial() == material) {
 						++count;
 					}
 				}
@@ -463,11 +481,9 @@ public class StructureGenUtils
 		int extra = (meta & ~3);	// used by doors for hinge orientation, I think
 
 		// east is 3 (0 rotations), north 2 (3 rot), west 1 (2 rot), south 0 (1 rot)
-		int rotations = Direction.rotateRight[facing];
-
+		int rotations = rotateRight[facing];
 		for (int i = 0; i < rotations; ++i) {
 			bitface = meta % 4;
-
 			switch(BlockRotationData.getBlockRotationType(block)) {
 			case ANVIL:
 				meta ^= 1;
@@ -528,24 +544,22 @@ public class StructureGenUtils
 				break;
 			}
 		}
-
 		return meta;
 	}
 
 	/**
-	 * Fixes blocks metadata after they've been placed in the world, specifically for blocks
+	 * Fixes blocks' state after they've been placed in the world, specifically for blocks
 	 * such as rails, furnaces, etc. whose orientation is automatically determined by the block
 	 * when placed via the onBlockAdded method.
 	 */
-	public static final void setMetadata(World world, int x, int y, int z, int origMeta) {
-		Block block = world.getBlock(x, y, z); 
+	public static final void setMetadata(World world, BlockPos pos, IBlockState origState) {
+		Block block = world.getBlockState(pos).getBlock(); 
 		if (BlockRotationData.getBlockRotationType(block) == null) {
 			return;
 		}
-
 		switch(BlockRotationData.getBlockRotationType(block)) {
-		case PISTON_CONTAINER: world.setBlockMetadataWithNotify(x, y, z, origMeta, 2); break;
-		case RAIL: world.setBlockMetadataWithNotify(x, y, z, origMeta, 2); break;
+		case PISTON_CONTAINER: world.setBlockState(pos, origState, 2); break;
+		case RAIL: world.setBlockState(pos, origState, 2); break;
 		default: break;
 		}
 	}
@@ -571,11 +585,11 @@ public class StructureGenUtils
 	 * @param facing	Default is considered EAST
 	 * @param meta		This should already be rotated to the correct value, to avoid processing every single call to setBlock
 	 */
-	public static void rotatedFillWithBlocks(World world, int x, int z, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, int facing, Block block, int meta) {
+	public static void rotatedFillWithBlocks(World world, int x, int z, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, int facing, IBlockState state) {
 		for (int i = minX; i <= maxX; ++i) {
 			for (int j = minY; j <= maxY; ++j) {
 				for (int k = minZ; k <= maxZ; ++k) {
-					world.setBlock(x + getOffsetX(i, k, facing), j, z + getOffsetZ(i, k, facing), block, meta, 2);
+					world.setBlockState(new BlockPos(x + getOffsetX(i, k, facing), j, z + getOffsetZ(i, k, facing)), state, 2);
 				}
 			}
 		}
@@ -615,7 +629,7 @@ public class StructureGenUtils
 		int maxX = Math.max(front, back);
 		int minZ = Math.min(left, right);
 		int maxZ = Math.max(left, right);
-		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
+		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ));
 		return (entities == null || entities.size() == 0) && isAreaClear(world, minX, maxX, minY, maxY, minZ, maxZ);
 	}
 }

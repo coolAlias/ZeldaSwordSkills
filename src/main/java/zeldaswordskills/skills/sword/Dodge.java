@@ -28,6 +28,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
@@ -38,8 +40,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -213,14 +213,11 @@ public class Dodge extends SkillActive
 			speed = 1.0D;
 		}
 		double d = 0.15D * speed * speed;
-		//double d = Math.min(0.75D, 0.5D * speed * speed);
 		Vec3 vec3 = player.getLookVec();
 		if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
-			player.setVelocity(-vec3.zCoord * d, player.motionY, vec3.xCoord * d);
-			//player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
+			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 		} else {
-			player.setVelocity(vec3.zCoord * d, player.motionY, -vec3.xCoord * d);
-			//player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
+			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
 		}
 		return true;
 	}

@@ -31,6 +31,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.entity.IParryModifier;
@@ -47,7 +48,7 @@ import zeldaswordskills.util.PlayerUtils;
  * Orca will teach Link some special sword skills in exchange for Knight's Crests.
  * 
  * Spawned by naming any villager 'Orca' and interacting while holding a Knight's Crest.
- *
+ * 
  */
 public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 {
@@ -92,6 +93,9 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 	}
 
 	private void setMatchOpponent(Entity entity) {
+		if (entity instanceof EntityPlayer) {
+			// TODO triggerAchievement "Sparring Partners"
+		}
 		dataWatcher.updateObject(MATCH_PLAYER_ID, (entity == null ? -1 : entity.getEntityId()));
 	}
 
@@ -116,13 +120,13 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 	}
 
 	@Override
-	public boolean isEntityInvulnerable() {
+	public boolean isEntityInvulnerable(DamageSource source) {
 		return false; // allow Orca to be attacked for training purposes
 	}
 
 	// Orca ignores fall damage so practicing Rising Cut doesn't kill him
 	@Override
-	public void fall(float distance) {}
+	public void fall(float distance, float damageMultiplier) {}
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float damage) {
@@ -180,6 +184,12 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 			amount = DirtyEntityAccessor.getModifiedDamage(this, source, amount);
 			net.minecraftforge.common.ForgeHooks.onLivingHurt(this, source, amount);
 			hitCounter = 0; // reset consecutive hit counter
+			/*
+			Entity opponent = getMatchOpponent();
+			if (opponent == null || opponent != source.getEntity()) {
+				hitCounter = 0; // reset hit counter for new opponent
+			}
+			 */
 		} else {
 			super.damageEntity(source, amount);
 		}
@@ -213,7 +223,7 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 			}
 			int knockback = 0;
 			if (entity instanceof EntityLivingBase) {
-				knockback += EnchantmentHelper.getKnockbackModifier(this, ((EntityLivingBase) entity));
+				knockback += EnchantmentHelper.getKnockbackModifier(this);
 				if (knockback < 1 && entity instanceof EntityPlayer) {
 					knockback = 1;
 				}
@@ -245,8 +255,7 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 		villageObj = tmp;
 		if (entity == null && prevTarget instanceof EntityPlayer) {
 			nextMatch = worldObj.getWorldTime() + MATCH_INTERVAL;
-			// func_142015_aE() is getRevengeTimer()
-			if ((ticksExisted - func_142015_aE()) > 99) { // match timed out
+			if ((ticksExisted - getRevengeTimer()) > 99) { // match timed out
 				sendTranslatedChat((EntityPlayer) prevTarget, "chat.zss.npc.orca.match.timeout." + worldObj.rand.nextInt(3), true);
 			}
 		}
@@ -264,15 +273,18 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 			if (parryFlag) {
 				parryFlag = false;
 				if (getHeldItem() == null) {
+					// TODO ? achievement for disarming Orca
 					setRevengeTarget(null);
 					sendTranslatedChat(player, "chat.zss.npc.orca.match.defeat.disarmed." + worldObj.rand.nextInt(3), true);
 				} else {
 					sendTranslatedChat(player, "chat.zss.npc.orca.match.disarm_attempt." + worldObj.rand.nextInt(3), false);
 				}
 			} else if (combo != null && combo.isComboInProgress() && combo.getCombo().getConsecutiveHits() > 9) {
+				// TODO ? achievement for defeating Orca
 				setRevengeTarget(null);
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.defeat.combo." + worldObj.rand.nextInt(3), true);
 			} else if (getHeldItem() == null) { // weapon was probably destroyed via Sword Break
+				// TODO ? achievement for disarming Orca
 				setRevengeTarget(null);
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.defeat.disarmed." + worldObj.rand.nextInt(3), true);
 			} else if (recentlyHit < 60 && !PlayerUtils.isHoldingWeapon(player)) {
@@ -319,8 +331,8 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 	}
 
 	@Override
-	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
-		data = super.onSpawnWithEgg(data);
+	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
+		data = super.onInitialSpawn(difficulty, data);
 		setCurrentItemOrArmor(0, new ItemStack(Items.wooden_sword));
 		return data;
 	}

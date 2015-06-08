@@ -19,7 +19,10 @@ package zeldaswordskills.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
+import zeldaswordskills.block.BlockSacredFlame;
+import zeldaswordskills.ref.ModInfo;
+
+import com.google.common.base.Function;
 
 /**
  * 
@@ -29,11 +32,22 @@ import net.minecraft.util.StatCollector;
 public class ItemSacredFlame extends ItemMetadataBlock
 {
 	public ItemSacredFlame(Block block) {
-		super(block);
+		super(block, new Function<ItemStack, String>() {
+			@Override
+			public String apply(ItemStack stack) {
+				return BlockSacredFlame.EnumType.byMetadata(stack.getItemDamage()).getName();
+			}
+		});
 	}
 
 	@Override
-	public String getItemStackDisplayName(ItemStack stack) {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal("misc.zss.sacred_flame.name." + stack.getItemDamage());
+	public String[] getVariants() {
+		String s = getUnlocalizedName();
+		s = ModInfo.ID + ":" + s.substring(s.lastIndexOf(".") + 1);
+		String[] variants = new String[BlockSacredFlame.EnumType.values().length];
+		for (BlockSacredFlame.EnumType flame : BlockSacredFlame.EnumType.values()) {
+			variants[flame.getMetadata()] = s + "_" + flame.getName();
+		}
+		return variants;
 	}
 }

@@ -17,70 +17,124 @@
 
 package zeldaswordskills.block;
 
+import java.util.List;
+
+import net.minecraft.block.BlockDoor;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-/**
- * 
- * Like normal doors, these always come in a two-block pair, but may only be removed by
- * using the matching Big Key.
- * 
- * Metadata 0x0 to 0x7 are the key type required to open the door, and 0x8 flags top or bottom.
- *
- */
 public class BlockDoorBoss extends BlockDoorLocked
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconsTop;
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconsUpper;
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconsLower;
+	/** The boss type associated with this door */
+	public static final PropertyEnum BOSS_TYPE = PropertyEnum.create("boss_type", BlockDoorBoss.EnumType.class);
 
 	public BlockDoorBoss(Material material) {
 		super(material);
 	}
 
 	@Override
-	protected boolean canUnlock(EntityPlayer player, int meta) {
-		return PlayerUtils.consumeHeldItem(player, ZSSItems.keyBig, meta & 0x7, 1) || PlayerUtils.consumeHeldItem(player, ZSSItems.keySkeleton, 0, 1);
+	protected boolean canUnlock(EntityPlayer player, IBlockState state) {
+		int meta = ((BlockDoorBoss.EnumType) state.getValue(BOSS_TYPE)).getMetadata();
+		return PlayerUtils.consumeHeldItem(player, ZSSItems.keyBig, meta, 1) || PlayerUtils.consumeHeldItem(player, ZSSItems.keySkeleton, 0, 1);
 	}
 
 	@Override
-	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-		return new ItemStack(ZSSItems.doorLocked, 1, world.getBlockMetadata(x, y, z) & 0x7);
+	public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos) {
+		return new ItemStack(this, 1, ((BlockDoorBoss.EnumType) world.getBlockState(pos).getValue(BOSS_TYPE)).getMetadata());
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		if ((side == 0 && meta > 0x7) || (side == 1 && meta < 0x8)) {
-			return iconEmpty;
+	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		for (BlockDoorBoss.EnumType variant : BlockDoorBoss.EnumType.values()) {
+			list.add(new ItemStack(item, 1, variant.getMetadata()));
 		}
-		return (meta > 0x7 ? (side == 1 ? iconsTop[meta % 8] : iconsUpper[meta % 8]) : (side == 0 ? iconsTop[meta % 8] : iconsLower[meta % 8]));
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		iconEmpty = register.registerIcon(ModInfo.ID + ":empty");
-		iconsTop = new IIcon[8];
-		iconsUpper = new IIcon[8];
-		iconsLower = new IIcon[8];
-		for (int i = 0; i < 8; ++i) {
-			iconsTop[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top" + i);
-			iconsUpper[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_upper" + i);
-			iconsLower[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_lower" + i);
+	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
+		if (state.getBlock() != this) {
+			return false;
+		}
+		return ((BlockDoorBoss.EnumType) state.getValue(BOSS_TYPE)) == BlockDoorBoss.EnumType.byMetadata(meta);
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return super.getStateFromMeta(meta).withProperty(BOSS_TYPE, BlockDoorBoss.EnumType.byMetadata(meta));
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		int i = ((BlockDoorBoss.EnumType) state.getValue(BOSS_TYPE)).getMetadata();
+		if (((BlockDoor.EnumDoorHalf) state.getValue(HALF)) == BlockDoor.EnumDoorHalf.UPPER) {
+			i |= 8;
+		}
+		return i;
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, BOSS_TYPE, HALF);
+	}
+
+	public static enum EnumType implements IStringSerializable {
+		DESERT("temple_desert", 1),
+		EARTH("temple_earth", 6),
+		FIRE("temple_fire", 0),
+		FOREST("temple_forest", 2),
+		ICE("temple_ice", 3),
+		WATER("temple_water", 4),
+		WIND("temple_wind", 5);
+		private final String templeName;
+		private final int meta;
+		private static final EnumType[] META_LOOKUP = new EnumType[EnumType.values().length];
+		private EnumType(String templeName, int meta) {
+			this.templeName = templeName;
+			this.meta = meta;
+		}
+
+		/**
+		 * Returns the unlocalized name of the associated temple, e.g. "temple_fire"
+		 */
+		@Override
+		public String getName() {
+			return this.templeName;
+		}
+
+		/**
+		 * Returns the metadata value belonging to a {key : door : temple} trio
+		 */
+		public int getMetadata() {
+			return this.meta;
+		}
+
+		/**
+		 * Returns door temple type by metadata value
+		 */
+		public static EnumType byMetadata(int meta) {
+			meta &= 0x7;
+			return (meta > -1 && meta < EnumType.META_LOOKUP.length ? EnumType.META_LOOKUP[meta] : EnumType.DESERT);
+		}
+
+		static {
+			for (EnumType type : EnumType.values()) {
+				EnumType.META_LOOKUP[type.meta] = type; 
+			}
 		}
 	}
 }

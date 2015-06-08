@@ -19,10 +19,7 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -30,17 +27,16 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -51,18 +47,12 @@ import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Method;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -72,8 +62,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  * is able to fix it.
  *
  */
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed, IUnenchantable
+// TODO @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+//TODO IBattlegearWeapon,
+public class ItemZeldaSword extends BaseModItemSword implements IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed, IUnenchantable 
 {
 	/** Original ItemSword's field is private, but this has the same functionality */
 	protected final float weaponDamage;
@@ -92,10 +83,6 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 
 	/** Additional exhaustion added each swing */
 	protected final float exhaustion;
-
-	/** Icon for the broken version of this sword */
-	@SideOnly(Side.CLIENT)
-	protected IIcon brokenIcon;
 
 	/** Whether this sword will give the 'broken' version when it breaks */
 	protected boolean givesBrokenItem = true;
@@ -181,8 +168,8 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	}
 
 	@Override
-	public boolean onBlockDestroyed(ItemStack stack, World world, Block block, int x, int y, int z, EntityLivingBase entity) {
-		if ((double) block.getBlockHardness(world, x, y, z) != 0.0D) {
+	public boolean onBlockDestroyed(ItemStack stack, World world, Block block, BlockPos pos, EntityLivingBase entity) {
+		if ((double) block.getBlockHardness(world, pos) != 0.0D) {
 			stack.damageItem((stack.getItem() == ZSSItems.swordGiant ? stack.getMaxDamage() + 1 : 2), entity);
 			onStackDamaged(stack, entity);
 		}
@@ -194,7 +181,10 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	 */
 	protected void onStackDamaged(ItemStack stack, EntityLivingBase entity) {
 		if (stack.stackSize == 0 && givesBrokenItem && entity instanceof EntityPlayer) {
-			PlayerUtils.addItemToInventory((EntityPlayer) entity, new ItemStack(ZSSItems.swordBroken, 1, Item.getIdFromItem(this)));
+			ItemStack broken = ItemBrokenSword.getBrokenSwordFor(this);
+			if (broken != null) {
+				PlayerUtils.addItemToInventory((EntityPlayer) entity, broken);
+			}
 		}
 	}
 
@@ -204,23 +194,8 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	@Override
 	public Multimap getItemAttributeModifiers() {
 		Multimap multimap = HashMultimap.create();
-		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", (double) weaponDamage, 0));
+		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", (double) weaponDamage, 0));
 		return multimap;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int damage) {
-		return (damage == -1 ? brokenIcon : itemIcon);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-		if (givesBrokenItem) {
-			brokenIcon = register.registerIcon(ModInfo.ID + ":broken_" + getUnlocalizedName().substring(9));
-		}
 	}
 
 	@Override
@@ -234,9 +209,10 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 		} else if (stack.getItem() == ZSSItems.swordGolden) {
 			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("SacredFlames")) {
 				int level = stack.getTagCompound().getInteger("SacredFlames");
-				for (int i = 1; i < 5; ++i) {
+				for (int i = 1; i < 5; ++i) { // bits 1, 2, and 4
 					if (i != 3 && (level & i) != 0) {
-						list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.sword_golden.desc.1", StatCollector.translateToLocal("misc.zss.sacred_flame.name." + i)));
+						BlockSacredFlame.EnumType flame = BlockSacredFlame.EnumType.byMetadata((level & i));
+						list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.sword_golden.desc.1", StatCollector.translateToLocal("tile.zss.sacred_flame." + flame.getName() + ".name")));
 					}
 				}
 			}
@@ -245,15 +221,16 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
+		BlockPos pos = core.getPos();
 		ItemStack stack = item.getEntityItem();
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssHitCount") && stack.getTagCompound().getInteger("zssHitCount") > Config.getRequiredKills()) {
 			item.setDead();
-			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.swordGolden), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
+			WorldUtils.spawnItemWithRandom(core.getWorld(), new ItemStack(ZSSItems.swordGolden), pos.getX(), pos.getY() + 2, pos.getZ());
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.sword.blessing");
 			player.triggerAchievement(ZSSAchievements.swordGolden);
 		} else {
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
@@ -281,25 +258,25 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	}
 
 	@Override
-	public boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
+	public boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, BlockSacredFlame.EnumType flame, boolean isActive) {
 		return false;
 	}
 
 	@Override
-	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
+	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, BlockSacredFlame.EnumType flame, boolean isActive) {
 		if (world.isRemote) {
 			return false;
 		} else if (this == ZSSItems.swordGolden && isActive) {
 			NBTTagCompound tag = stack.getTagCompound();
 			if (tag == null) { tag = new NBTTagCompound(); }
-			if ((tag.getInteger("SacredFlames") & type) == 0) {
-				tag.setInteger("SacredFlames", tag.getInteger("SacredFlames") | type);
+			if ((tag.getInteger("SacredFlames") & flame.getBit()) == 0) {
+				tag.setInteger("SacredFlames", tag.getInteger("SacredFlames") | flame.getBit());
 				stack.setTagCompound(tag);
 				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
 				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.new",
-						getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type));
+						getItemStackDisplayName(stack), StatCollector.translateToLocal("tile.zss.sacred_flame." + flame.getName() + ".name"));
 				player.triggerAchievement(ZSSAchievements.swordFlame);
-				addSacredFlameEnchantments(stack, type);
+				addSacredFlameEnchantments(stack, flame);
 				return true;
 			} else {
 				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.old.same", getItemStackDisplayName(stack));
@@ -319,11 +296,11 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	 * Adds appropriate enchantments to Golden Sword when bathing in one of the Sacred Flames
 	 * @param type metadata value of the Sacred Flame
 	 */
-	private void addSacredFlameEnchantments(ItemStack stack, int type) {
-		switch(type) {
-		case BlockSacredFlame.DIN: stack.addEnchantment(Enchantment.fireAspect, 2); break;
-		case BlockSacredFlame.FARORE: stack.addEnchantment(Enchantment.knockback, 2); break;
-		case BlockSacredFlame.NAYRU: stack.addEnchantment(Enchantment.looting, 3); break;
+	private void addSacredFlameEnchantments(ItemStack stack, BlockSacredFlame.EnumType flame) {
+		switch(flame) {
+		case DIN: stack.addEnchantment(Enchantment.fireAspect, 2); break;
+		case FARORE: stack.addEnchantment(Enchantment.knockback, 2); break;
+		case NAYRU: stack.addEnchantment(Enchantment.looting, 3); break;
 		}
 		boolean flag = false;
 		NBTTagList enchList = stack.getTagCompound().getTagList("ench", Constants.NBT.TAG_COMPOUND);
@@ -344,6 +321,7 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 		}
 	}
 
+	/*
 	@Method(modid="battlegear2")
 	@Override
 	public boolean sheatheOnBack(ItemStack stack) {
@@ -383,4 +361,5 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
 		return !twoHanded;
 	}
+	 */
 }

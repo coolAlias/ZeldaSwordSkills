@@ -17,17 +17,25 @@
 
 package zeldaswordskills.block;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
@@ -36,25 +44,19 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockWarpStone extends Block implements ILiftable, ISmashable
 {
-	public static final Map<Integer, AbstractZeldaSong> warpBlockSongs = new HashMap<Integer, AbstractZeldaSong>();
-	public static final Map<AbstractZeldaSong, Integer> reverseLookup = new HashMap<AbstractZeldaSong, Integer>();
+	public static final PropertyEnum WARP_SONG = PropertyEnum.create("warp_song", BlockWarpStone.EnumWarpSong.class);
 
 	public BlockWarpStone() {
 		super(Material.rock);
 		setHardness(50.0F);
 		setResistance(2000.0F);
 		setStepSound(soundTypeStone);
-		setBlockTextureName(ModInfo.ID + ":warp_stone");
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
 
@@ -64,57 +66,57 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 	}
 
 	@Override
-	public int damageDropped(int meta) {
-		return meta;
+	public int damageDropped(IBlockState state) {
+		return state.getBlock().getMetaFromState(state);
 	}
 
 	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+	public boolean canHarvestBlock(IBlockAccess world, BlockPos pos, EntityPlayer player) {
 		return false;
 	}
 
 	@Override
-	public void dropBlockAsItemWithChance(World world, int x, int y, int z, int meta, float dropChance, int fortune) {}
+	public void dropBlockAsItemWithChance(World world, BlockPos pos, IBlockState state, float chance, int fortune) {}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
 		return BlockWeight.IMPOSSIBLE;
 	}
 
 	@Override
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face) {
 		return Result.DENY;
 	}
 
 	@Override
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
 		return BlockWeight.IMPOSSIBLE;
 	}
 
 	@Override
-	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta) {}
+	public void onLifted(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state) {}
 
 	@Override
-	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta) {}
+	public void onHeldBlockPlaced(World world, ItemStack stack, BlockPos pos, IBlockState state) {}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		int meta = world.getBlockMetadata(x, y, z);
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() instanceof ItemInstrument) {
-			AbstractZeldaSong song = warpBlockSongs.get(meta);
+			BlockWarpStone.EnumWarpSong warpSong = (BlockWarpStone.EnumWarpSong) state.getValue(WARP_SONG);
+			AbstractZeldaSong song = warpSong.getWarpSong();
 			ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
 			if (!world.isRemote) {
 				if (song != null) {// && songs.isSongKnown(song)) { // otherwise have to click again after learning the song
-					songs.onActivatedWarpStone(x, y, z, meta);
-					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", song.getDisplayName(), x, y, z);
+					songs.onActivatedWarpStone(pos, warpSong);
+					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", song.getDisplayName(), pos.getX(), pos.getY(), pos.getZ());
 				}
 			} else if (!player.isSneaking()) {
 				if (song != null) {
 					songs.songToLearn = song;
-					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, x, y, z);
+					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, pos.getX(), pos.getY(), pos.getZ());
 				} else {
-					ZSSMain.logger.warn(String.format("Warp stone at %d/%d/%d had invalid metadata: did not return a song!", x, y, z));
+					ZSSMain.logger.warn(String.format("Warp stone at %d/%d/%d had invalid metadata: did not return a song!", pos.getX(), pos.getY(), pos.getZ()));
 				}
 			}
 			return true;
@@ -127,24 +129,73 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < warpBlockSongs.size(); ++i) {
-			list.add(new ItemStack(item, 1, i));
+		for (BlockWarpStone.EnumWarpSong song : BlockWarpStone.EnumWarpSong.values()) {
+			list.add(new ItemStack(item, 1, song.getMetadata()));
 		}
 	}
 
-	private static void addSongMapping(int meta, AbstractZeldaSong song) {
-		warpBlockSongs.put(meta, song);
-		reverseLookup.put(song, meta);
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(WARP_SONG, BlockWarpStone.EnumWarpSong.byMetadata(meta));
 	}
 
-	static {
-		int i = 0;
-		addSongMapping(i++, ZeldaSongs.songWarpForest);
-		addSongMapping(i++, ZeldaSongs.songWarpFire);
-		addSongMapping(i++, ZeldaSongs.songWarpWater);
-		addSongMapping(i++, ZeldaSongs.songWarpSpirit);
-		addSongMapping(i++, ZeldaSongs.songWarpShadow);
-		addSongMapping(i++, ZeldaSongs.songWarpLight);
-		addSongMapping(i++, ZeldaSongs.songWarpOrder);
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return ((EnumWarpSong) state.getValue(WARP_SONG)).getMetadata();
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, WARP_SONG);
+	}
+
+	public static enum EnumWarpSong implements IStringSerializable {
+		FOREST(0, ZeldaSongs.songWarpForest),
+		FIRE(1, ZeldaSongs.songWarpFire),
+		WATER(2, ZeldaSongs.songWarpWater),
+		SPIRIT(3, ZeldaSongs.songWarpSpirit),
+		SHADOW(4, ZeldaSongs.songWarpShadow),
+		LIGHT(5, ZeldaSongs.songWarpLight),
+		ORDER(6, ZeldaSongs.songWarpOrder);
+		private final int meta;
+		private final AbstractZeldaSong song;
+		private EnumWarpSong(int meta, AbstractZeldaSong song) {
+			this.meta = meta;
+			this.song = song;
+		}
+
+		@Override
+		public String getName() {
+			return song.getUnlocalizedName();
+		}
+
+		@Override
+		public String toString() {
+			return song.getDisplayName();
+		}
+
+		public int getMetadata() {
+			return this.meta;
+		}
+
+		public AbstractZeldaSong getWarpSong() {
+			return this.song;
+		}
+
+		public static EnumWarpSong byMetadata(int meta) {
+			return EnumWarpSong.values()[meta & EnumWarpSong.values().length];
+		}
+
+		/**
+		 * Return the EnumWarpSong for the given song, or null if not found
+		 */
+		public static EnumWarpSong bySong(AbstractZeldaSong song) {
+			for (EnumWarpSong type : EnumWarpSong.values()) {
+				if (type.getWarpSong() == song) {
+					return type;
+				}
+			}
+			return null;
+		}
 	}
 }

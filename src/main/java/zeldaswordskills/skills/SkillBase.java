@@ -29,6 +29,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.SyncSkillPacket;
@@ -46,8 +48,6 @@ import zeldaswordskills.skills.sword.SpinAttack;
 import zeldaswordskills.skills.sword.SwordBasic;
 import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.skills.sword.SwordBreak;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -264,7 +264,7 @@ public abstract class SkillBase
 
 	/**
 	 * Returns the key used by the language file for getting tooltip description n
-	 * Language file should contain key "skill.zss.{unlocalizedName}.desc.{label}.n"
+	 * Language file should contain key "skill.{unlocalizedName}.desc.{label}.n"
 	 * @param label the category for the data, usually "tooltip" or "info"
 	 * @param n if less than zero, ".n" will not be appended
 	 */

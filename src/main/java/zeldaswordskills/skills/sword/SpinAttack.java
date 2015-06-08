@@ -24,9 +24,12 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
@@ -38,8 +41,6 @@ import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -191,9 +192,9 @@ public class SpinAttack extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
-		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT].getIsKeyPressed() || ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT].getIsKeyPressed()
-				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.getIsKeyPressed()
-						&& Minecraft.getMinecraft().gameSettings.keyBindRight.getIsKeyPressed()));
+		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT].isKeyDown() || ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT].isKeyDown()
+				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.isKeyDown()
+						&& Minecraft.getMinecraft().gameSettings.keyBindRight.isKeyDown()));
 	}
 
 	@Override
@@ -303,7 +304,7 @@ public class SpinAttack extends SkillActive
 	private void startSpin(World world, EntityPlayer player) {
 		++refreshed;
 		if (world.isRemote) {
-			targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(getRange(), 0.0D, getRange()));
+			targets = world.getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(getRange(), 0.0D, getRange()));
 			if (targets.contains(player)) {
 				targets.remove(player);
 			}
@@ -332,7 +333,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private void spawnParticles(EntityPlayer player) {
 		// TODO these will not be seen by other players
-		String particle = (isFlaming ? "flame" : (superLevel > 0 ? "magicCrit" : "crit"));
+		EnumParticleTypes particle = (isFlaming ? EnumParticleTypes.FLAME : (superLevel > 0 ? EnumParticleTypes.CRIT_MAGIC : EnumParticleTypes.CRIT));
 		Vec3 vec3 = player.getLookVec();
 		double posX = player.posX + (vec3.xCoord * getRange());
 		double posY = player.posY + player.getEyeHeight() - 0.1D;

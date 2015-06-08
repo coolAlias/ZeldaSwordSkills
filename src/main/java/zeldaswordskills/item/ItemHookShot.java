@@ -19,7 +19,6 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -29,11 +28,12 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -42,8 +42,6 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -61,12 +59,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  * by finding components and getting help from villagers.
  *
  */
-public class ItemHookShot extends Item implements IUnenchantable
+public class ItemHookShot extends BaseModItem implements IUnenchantable
 {
-	protected static final String[] shotNames = {"Hookshot","Clawshot","Multishot"};
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
+	protected static final String[] shotNames = {"hookshot","clawshot","multishot"};
 
 	public ItemHookShot() {
 		super();
@@ -83,7 +78,7 @@ public class ItemHookShot extends Item implements IUnenchantable
 
 	@Override
 	public EnumAction getItemUseAction(ItemStack par1ItemStack) {
-		return EnumAction.block;
+		return EnumAction.BLOCK;
 	}
 
 	@Override
@@ -136,12 +131,6 @@ public class ItemHookShot extends Item implements IUnenchantable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int type) {
-		return iconArray[getType(type).ordinal() / 2];
-	}
-
-	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		return getUnlocalizedName() + "." + stack.getItemDamage();
 	}
@@ -156,11 +145,12 @@ public class ItemHookShot extends Item implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[HookshotType.values().length / 2];
+	public String[] getVariants() {
+		String[] variants = new String[HookshotType.values().length];
 		for (int i = 0; i < HookshotType.values().length; ++i) {
-			iconArray[i / 2] = register.registerIcon(ModInfo.ID + ":" + shotNames[getType(i).ordinal() / 2].toLowerCase());
+			variants[i] = ModInfo.ID + ":" + shotNames[i / 2];
 		}
+		return variants;
 	}
 
 	@Override

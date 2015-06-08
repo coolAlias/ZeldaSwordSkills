@@ -23,15 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import mods.battlegear2.api.IAllowItem;
-import mods.battlegear2.api.ISheathed;
-import mods.battlegear2.api.quiver.IArrowFireHandler;
-import mods.battlegear2.api.quiver.ISpecialBow;
-import mods.battlegear2.api.quiver.QuiverArrowRegistry;
-import mods.battlegear2.api.quiver.QuiverArrowRegistry.DefaultArrowFire;
-import mods.battlegear2.enchantments.BaseEnchantment;
-import mods.battlegear2.items.ItemQuiver;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -45,8 +41,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
@@ -54,8 +50,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import net.minecraftforge.fml.common.Optional.Method;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -68,7 +66,6 @@ import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityArrowElemental.ElementType;
-import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -79,12 +76,6 @@ import zeldaswordskills.util.TargetUtils;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Method;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 /**
  * 
  * The Hero's Bow can fire arrows even when the player has none if it has the infinity
@@ -93,15 +84,19 @@ import cpw.mods.fml.relauncher.SideOnly;
  * ice arrows; level 3 can shoot all arrow types
  *
  */
+/*
+// TODO
 @Optional.InterfaceList(value={
 		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.quiver.ISpecialBow", modid="battlegear2", striprefs=true)
 })
-public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantable, IZoom, IAllowItem, ISheathed, ISpecialBow
+, IAllowItem, ISheathed, ISpecialBow
+ */
+public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IModItem, IUnenchantable, IZoom
 {
 	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
+	private List<ModelResourceLocation> models;
 
 	/** Maps arrow IDs to arrow entity class */
 	private static final Map<Item, Class<? extends EntityArrowCustom>> arrowMap = new HashMap<Item, Class<? extends EntityArrowCustom>>();
@@ -113,7 +108,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	private static final Map<Item, ElementType> elementalArrowMap = new HashMap<Item, ElementType>();
 
 	/** Static list to store fire handlers; can't set type without requiring BG2 */
-	private static final List fireHandlers = new ArrayList();
+	// TODO private static final List fireHandlers = new ArrayList();
 
 	public ItemHeroBow() {
 		super();
@@ -121,6 +116,19 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
+	}
+
+	/**
+	 * Returns "item.zss.unlocalized_name" for translation purposes
+	 */
+	@Override
+	public String getUnlocalizedName() {
+		return super.getUnlocalizedName().replaceFirst("item.", "item.zss.");
+	}
+
+	@Override
+	public String getUnlocalizedName(ItemStack stack) {
+		return getUnlocalizedName();
 	}
 
 	/**
@@ -208,9 +216,12 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		// This can only be reached if BG2 is not installed or no arrow was found in the quiver
 		if (nockArrowFromInventory(stack, player)) {
 			int duration = getMaxItemUseDuration(stack);
+			/*
+			// TODO
 			if (ZSSMain.isBG2Enabled) {
 				duration -= (EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.get().effectId, stack) * 20000);
 			}
+			 */
 			player.setItemInUse(stack, duration);
 		}
 		return stack;
@@ -254,9 +265,12 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 			}
 
 			EntityArrow arrowEntity = getArrowEntity(arrowStack, player.worldObj, player, charge * 2.0F);
+			/*
+			// TODO
 			if (arrowEntity == null && ZSSMain.isBG2Enabled) { // try to construct BG2 arrow
 				arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, player.worldObj, player, charge * 2.0F);
 			}
+			 */
 			if (arrowEntity != null) {
 				applyArrowSettings(arrowEntity, bow, charge);
 				if (arrowEntity instanceof EntityArrowCustom) {
@@ -299,7 +313,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 			return true;
 		}
 		// allow hero's bow to fire arrows registered with BG2
-		return ZSSMain.isBG2Enabled && QuiverArrowRegistry.isKnownArrow(arrowStack);
+		return false; // TODO ZSSMain.isBG2Enabled && QuiverArrowRegistry.isKnownArrow(arrowStack);
 	}
 
 	/**
@@ -394,20 +408,68 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
-		if (usingItem == null) { return itemIcon; }
-		int t = stack.getMaxItemUseDuration() - useRemaining;
-		return (t > 17 ? iconArray[2] : (t > 13 ? iconArray[1] : (t > 0 ? iconArray[0] : itemIcon)));
+	public ModelResourceLocation getModel(ItemStack stack, EntityPlayer player, int ticksRemaining) {
+		if (!player.isUsingItem()) {
+			return models.get(0);
+		}
+		int ticks = stack.getMaxItemUseDuration() - ticksRemaining;
+		int i = (ticks > 17 ? 3 : ticks > 13 ? 2 : ticks > 0 ? 1 : 0);
+		ItemStack arrowStack = ZSSPlayerInfo.get(player).getNockedArrow();
+		if (i > 0 && arrowStack != null) {
+			// TODO this works, but is probably not ideal
+			Minecraft mc = Minecraft.getMinecraft();
+			GlStateManager.pushMatrix();
+			boolean firstPerson = (player == mc.thePlayer && mc.getRenderManager().options.thirdPersonView == 0);
+			if (firstPerson) {
+				GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
+				GlStateManager.rotate(-25.0F, 0.0F, 0.0F, 1.0F);
+				GlStateManager.translate(-0.4D, 0.4D, 0.0D);
+				GlStateManager.scale(1.325F, 1.325F, 1.325F);
+			} else {
+				GlStateManager.rotate(87.5F, 0.0F, 1.0F, 0.0F);
+				GlStateManager.rotate(45F, 0.0F, 0.0F, 1.0F);
+				GlStateManager.rotate(-10.0F, 1.0F, 0.0F, 0.0F);
+				GlStateManager.translate(0.125D, 0.125D, 0.125D);
+				GlStateManager.scale(0.625F, 0.625F, 0.625F);
+			}
+			GlStateManager.translate(-(-3F+i)/16F, -(-3F+i)/16F, 0.5F/16F);
+			mc.getRenderItem().renderItemModel(arrowStack);
+			GlStateManager.popMatrix();
+		}
+		return models.get(i);
+	}
+
+	@Override
+	public String[] getVariants() {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		String[] variants = new String[4];
+		for (int i = 0; i < variants.length; ++i) {
+			variants[i] = name + "_" + i;
+		}
+		return variants;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_standard_0");
-		iconArray = new IIcon[3];
-		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_standard_" + (i + 1));
+	public void registerVariants() {
+		String[] variants = getVariants();
+		if (variants != null) {
+			ModelBakery.addVariantName(this, variants);
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderers(ItemModelMesher mesher) {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		models = new ArrayList<ModelResourceLocation>();
+		for (int i = 0; i < 4; ++i) {
+			models.add(new ModelResourceLocation(name + "_" + i, "inventory"));
+		}
+		// Register the first model as the base resource
+		mesher.register(this, 0, models.get(0));
 	}
 
 	@Override
@@ -421,15 +483,16 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
 		ItemStack stack = item.getEntityItem();
 		int n = getLevel(stack);
+		BlockPos pos = core.getPos();
 		if (n < 3 && core.consumeRupees((n + 1) * Config.getHeroBowUpgradeCost())) {
 			setLevel(stack, ++n);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			player.triggerAchievement(ZSSAchievements.fairyBow);
 			if (n == 3) {
 				player.triggerAchievement(ZSSAchievements.fairyBowMax);
 			}
 		} else {
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
@@ -439,6 +502,8 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		return getLevel(stack) < 3;
 	}
 
+	/*
+	// TODO
 	@Method(modid="battlegear2")
 	@Override
 	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
@@ -463,6 +528,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		ItemStack arrow = BattlegearEvents.getQuiverArrow(bow, player);
 		return (canShootArrow(player, bow, arrow) ? Result.ALLOW : Result.DENY);
 	}
+	 */
 
 	/**
 	 * Applies vanilla arrow enchantments and sets critical if applicable
@@ -568,6 +634,8 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	 */
 	@Method(modid="battlegear2")
 	public static void registerBG2() {
+		/*
+		// TODO
 		fireHandlers.add(new HeroBowFireHandler());
 		fireHandlers.add(new DefaultArrowFire());
 		QuiverArrowRegistry.addArrowFireHandler(new HeroBowFireHandler());
@@ -578,6 +646,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowFire, null);
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowIce, null);
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowLight, null);
+		 */
 	}
 
 	/** 
@@ -587,6 +656,8 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	 * ZSS arrows require an appropriately-leveled ItemHeroBow, or creative mode.
 	 *
 	 */
+	/*
+	// TODO
 	@Optional.Interface(iface="mods.battlegear2.api.quiver.IArrowFireHandler", modid="battlegear2", striprefs=true)
 	public static class HeroBowFireHandler implements IArrowFireHandler {
 		@Method(modid="battlegear2")
@@ -614,4 +685,5 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 			return null;
 		}
 	}
+	 */
 }

@@ -19,8 +19,8 @@ package zeldaswordskills.client.render;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -45,9 +45,10 @@ public class EntityRendererAlt extends EntityRenderer
 			super.updateCameraAndRender(partialTick);
 			return;
 		}
-		mc.thePlayer.yOffset -= ySize;
+		// TODO used to be yOffset; not sure what renderOffsetY will do
+		mc.thePlayer.renderOffsetY -= ySize;
 		super.updateCameraAndRender(partialTick);
-		mc.thePlayer.yOffset = 1.62F;
+		mc.thePlayer.renderOffsetY = 1.62F;
 	}
 
 	@Override

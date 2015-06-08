@@ -29,10 +29,11 @@ import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
@@ -66,10 +67,17 @@ import zeldaswordskills.util.WorldUtils;
 public class EntityArrowElemental extends EntityArrowCustom
 {
 	/** Valid element types for elemental arrows */
-	public static enum ElementType {FIRE,ICE,LIGHT};
-
-	/** Particle to spawn, based on element */
-	private static final String[] particles = {"flame","magicCrit","explode"};
+	public static enum ElementType {
+		FIRE("fire", EnumParticleTypes.FLAME),
+		ICE("ice", EnumParticleTypes.CRIT_MAGIC),
+		LIGHT("light", EnumParticleTypes.EXPLOSION_NORMAL);
+		public final String unlocalizedName;
+		public final EnumParticleTypes particle;
+		private ElementType(String unlocalizedName, EnumParticleTypes particle) {
+			this.unlocalizedName = unlocalizedName;
+			this.particle = particle;
+		}
+	};
 
 	/** Watchable object index for arrow's element type */
 	private static final int ARROWTYPE_DATAWATCHER_INDEX = 25;
@@ -136,8 +144,8 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	@Override
-	protected String getParticleName() {
-		return particles[getType().ordinal()];
+	protected EnumParticleTypes getParticle() {
+		return getType().particle;
 	}
 
 	@Override
@@ -148,10 +156,10 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected void updateInAir() {
 		super.updateInAir();
-		boolean flag = (getType() == ElementType.FIRE && worldObj.handleMaterialAcceleration(boundingBox, Material.water, this));
+		boolean flag = (getType() == ElementType.FIRE && worldObj.handleMaterialAcceleration(getEntityBoundingBox(), Material.water, this));
 		if (!worldObj.isRemote && getType() == ElementType.ICE &&
-				(worldObj.handleMaterialAcceleration(boundingBox, Material.water, this) ||
-						worldObj.handleMaterialAcceleration(boundingBox, Material.lava, this))) {
+				(worldObj.handleMaterialAcceleration(getEntityBoundingBox(), Material.water, this) ||
+						worldObj.handleMaterialAcceleration(getEntityBoundingBox(), Material.lava, this))) {
 			flag = affectBlocks();
 		}
 		if (flag) {
@@ -177,9 +185,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 			}
 		} else {
 			if (ticksExisted < 25) {
-				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
 				if (block.getMaterial() != Material.air) {
-					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+					block.onEntityCollidedWithBlock(worldObj, mop.getBlockPos(), this);
 				}
 			} else {
 				extinguishLightArrow();
@@ -220,8 +228,8 @@ public class EntityArrowElemental extends EntityArrowCustom
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
-			worldObj.setBlock(i, j, k, Blocks.ice);
-			worldObj.setBlock(i, j + 1, k, Blocks.ice);
+			worldObj.setBlockState(new BlockPos(i, j, k), Blocks.ice.getDefaultState());
+			worldObj.setBlockState(new BlockPos(i, j + 1, k), Blocks.ice.getDefaultState());
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 		}
 	}
@@ -242,43 +250,37 @@ public class EntityArrowElemental extends EntityArrowCustom
 	 */
 	protected boolean affectBlocks() {
 		boolean flag = false;
-		Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, null));
+		Set<BlockPos> affectedBlocks = new HashSet<BlockPos>(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, null));
 		Block block;
-		int i, j, k;
-
-		for (ChunkPosition position : affectedBlocks) {
-			i = position.chunkPosX;
-			j = position.chunkPosY;
-			k = position.chunkPosZ;
-			block = worldObj.getBlock(i, j, k);
-
+		for (BlockPos pos : affectedBlocks) {
+			block = worldObj.getBlockState(pos).getBlock();
 			switch(getType()) {
 			case FIRE:
 				if (block.getMaterial() == Material.air && Config.enableFireArrowIgnite()) {
-					Block block2 = worldObj.getBlock(i, j - 1, k);
-					if (block2.func_149730_j() && rand.nextInt(8) == 0) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_IGNITE, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-						worldObj.setBlock(i, j, k, Blocks.fire);
+					Block block2 = worldObj.getBlockState(pos.down()).getBlock();
+					if (block2.isFullBlock() && rand.nextInt(8) == 0) {
+						worldObj.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.FIRE_IGNITE, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+						worldObj.setBlockState(pos, Blocks.fire.getDefaultState());
 						flag = true;
 					}
-				} else if (WorldUtils.canMeltBlock(worldObj, block, i, j, k)) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlockToAir(i, j, k);
+				} else if (WorldUtils.canMeltBlock(worldObj, block, pos)) {
+					worldObj.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlockToAir(pos);
 					flag = true;
 				}
 				break;
 			case ICE:
 				if (block.getMaterial() == Material.water) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlock(i, j, k, Blocks.ice);
+					worldObj.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlockState(pos, Blocks.ice.getDefaultState());
 					flag = true;
 				} else if (block.getMaterial() == Material.lava) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlock(i, j, k, (block == Blocks.lava ? Blocks.obsidian : Blocks.cobblestone));
+					worldObj.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlockState(pos, (block == Blocks.lava ? Blocks.obsidian : Blocks.cobblestone).getDefaultState());
 					flag = true;
 				} else if (block.getMaterial() == Material.fire) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlockToAir(i, j, k);
+					worldObj.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
+					worldObj.setBlockToAir(pos);
 					flag = true;
 				}
 				break;
@@ -299,7 +301,7 @@ public class EntityArrowElemental extends EntityArrowCustom
 			double d0 = rand.nextGaussian() * 0.02D;
 			double d1 = rand.nextGaussian() * 0.02D;
 			double d2 = rand.nextGaussian() * 0.02D;
-			worldObj.spawnParticle("explode", posX + (double)(rand.nextFloat() * width * 2.0F) - (double) width,
+			worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, posX + (double)(rand.nextFloat() * width * 2.0F) - (double) width,
 					posY + (double)(rand.nextFloat() * height), posZ + (double)(rand.nextFloat() * width * 2.0F) - (double) width, d0, d1, d2);
 		}
 		if (!worldObj.isRemote) {

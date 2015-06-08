@@ -34,13 +34,13 @@ public interface ISwingSpeed {
 	 * Optional amount of exhaustion to add each swing, regardless of whether
 	 * anything was struck.
 	 */
-	public float getExhaustion();
+	float getExhaustion();
 
 	/**
 	 * The time for which all left-clicks will be prevented after swinging this item;
 	 * may be configured to allow non-ISwingSpeed items to ignore the timer, in which
 	 * case only ISwingSpeed items will be affected
 	 */
-	public int getSwingSpeed();
+	int getSwingSpeed();
 
 }

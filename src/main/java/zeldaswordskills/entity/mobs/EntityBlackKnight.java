@@ -23,6 +23,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -36,7 +37,7 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 		super(world);
 		setSize(1.2F, 3.6F);
 		experienceValue = 50;
-		func_110163_bv(); // sets persistence required to true, meaning will not despawn
+		enablePersistence();
 	}
 
 	@Override
@@ -64,15 +65,15 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 	}
 
 	@Override
-	public void addRandomArmor() {
-		super.addRandomArmor();
+	public void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
+		super.setEquipmentBasedOnDifficulty(difficulty);
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(Items.chainmail_helmet));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_LEGS, new ItemStack(Items.chainmail_leggings));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS, new ItemStack(Items.chainmail_boots));
 		ItemStack sword = getEquipmentInSlot(0);
 		if (sword != null) {
-			switch(worldObj.difficultySetting) {
+			switch(worldObj.getDifficulty()) {
 			case NORMAL:
 				sword.addEnchantment(Enchantment.sharpness, 2);
 				break;

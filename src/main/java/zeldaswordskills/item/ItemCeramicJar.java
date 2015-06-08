@@ -20,14 +20,15 @@ package zeldaswordskills.item;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.entity.projectile.EntityCeramicJar;
 
-public class ItemCeramicJar extends ItemBlock implements IUnenchantable
+public class ItemCeramicJar extends ItemModBlock implements IUnenchantable
 {
 	public ItemCeramicJar(Block block) {
 		super(block);
@@ -39,7 +40,6 @@ public class ItemCeramicJar extends ItemBlock implements IUnenchantable
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("jarStack")) {
 			jar.setStack(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("jarStack")));
 		}
-
 		if (!world.isRemote) {
 			world.spawnEntityInWorld(jar);
 		}
@@ -51,10 +51,10 @@ public class ItemCeramicJar extends ItemBlock implements IUnenchantable
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		if (player.isSneaking() && super.onItemUse(stack, player, world, x, y, z, side, hitX, hitY, hitZ)) {
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ) {
+		if (player.isSneaking() && super.onItemUse(stack, player, world, pos, face, hitX, hitY, hitZ)) {
 			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("jarStack")) {
-				TileEntity te = world.getTileEntity(x, y, z);
+				TileEntity te = world.getTileEntity(pos);
 				if (te instanceof IInventory) {
 					((IInventory) te).setInventorySlotContents(0, ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("jarStack")));
 				}
@@ -62,7 +62,6 @@ public class ItemCeramicJar extends ItemBlock implements IUnenchantable
 
 			return true;
 		}
-
 		return false;
 	}
 }

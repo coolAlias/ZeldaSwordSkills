@@ -22,6 +22,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
@@ -71,12 +72,12 @@ public class EntityThrowingRock extends EntityMobThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		for (int l = 0; l < 4; ++l) {
-			worldObj.spawnParticle("crit", posX, posY, posZ, 0.0D, 0.0D, 0.0D);
+			worldObj.spawnParticle(EnumParticleTypes.CRIT, posX, posY, posZ, 0.0D, 0.0D, 0.0D);
 		}
 		if (mop.typeOfHit == MovingObjectType.BLOCK) {
-			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
 			if (block.getMaterial() != Material.air) {
-				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				block.onEntityCollidedWithBlock(worldObj, mop.getBlockPos(), this);
 			}
 		} else if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), getDamage());

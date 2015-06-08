@@ -17,10 +17,11 @@
 
 package zeldaswordskills.entity.ai;
 
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+
+import com.google.common.base.Predicate;
 
 /**
  * 
@@ -41,13 +42,13 @@ public class EntityAINearestAttackableTargetNight extends EntityAINearestAttacka
 		this(taskOwner, targetClass, targetChance, shouldCheckSight, nearbyOnly, null, minLightLevel);
 	}
 
-	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, IEntitySelector targetEntitySelector, float minLightLevel) {
+	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, Predicate targetEntitySelector, float minLightLevel) {
 		super(taskOwner, targetClass, targetChance, shouldCheckSight, nearbyOnly, targetEntitySelector);
 		this.minLightLevel = minLightLevel;
 	}
 
 	@Override
 	public boolean shouldExecute() {
-		return (taskOwner.getBrightness(1.0F) < minLightLevel ? super.shouldExecute() : false);
+		return (taskOwner.getBrightness(1.0F) < minLightLevel && super.shouldExecute());
 	}
 }

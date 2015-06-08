@@ -20,31 +20,36 @@ package zeldaswordskills.item;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Facing;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.CustomEntityList;
 import zeldaswordskills.entity.IEntityVariant;
+import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -53,16 +58,11 @@ import cpw.mods.fml.relauncher.SideOnly;
  * should use {@link ItemCustomVariantEgg} instead. 
  *
  */
-public class ItemCustomEgg extends Item implements IUnenchantable
+public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavior, IUnenchantable
 {
-	/** The egg's spotted and colored overlay icon */
-	@SideOnly(Side.CLIENT)
-	private IIcon overlay;
-
 	public ItemCustomEgg() {
 		super();
 		setHasSubtypes(true);
-		setTextureName("spawn_egg"); // Item.monsterPlacer.getIconString() is protected >.<
 		setCreativeTab(ZSSCreativeTabs.tabEggs);
 	}
 
@@ -84,32 +84,26 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
 		if (world.isRemote) {
 			return true;
 		} else {
-			Block block = world.getBlock(x, y, z);
-			x += Facing.offsetsXForSide[side];
-			y += Facing.offsetsYForSide[side];
-			z += Facing.offsetsZForSide[side];
-			double d0 = 0.0D;
-
-			if (side == 1 && block != null && block.getRenderType() == 11) {
-				d0 = 0.5D;
+			IBlockState state = world.getBlockState(pos);
+			pos = pos.offset(side);
+			double dy = 0.0D;
+			if (side == EnumFacing.UP && state.getBlock() instanceof BlockFence) {
+				dy = 0.5D;
 			}
-
-			Entity entity = spawnCreature(world, stack.getItemDamage(), x + 0.5D, y + d0, z + 0.5D);
-
+			Entity entity = spawnCreature(world, stack.getItemDamage(), pos.getX() + 0.5D, pos.getY() + dy, pos.getZ() + 0.5D);
 			if (entity != null) {
-				if (entity instanceof EntityLiving && stack.hasDisplayName()) {
-					((EntityLiving) entity).setCustomNameTag(stack.getDisplayName());
+				if (entity instanceof EntityLivingBase && stack.hasDisplayName()) {
+					entity.setCustomNameTag(stack.getDisplayName());
 				}
 
 				if (!player.capabilities.isCreativeMode) {
 					--stack.stackSize;
 				}
 			}
-
 			return true;
 		}
 	}
@@ -118,38 +112,27 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
 			MovingObjectPosition mop = getMovingObjectPositionFromPlayer(world, player, true);
-
-			if (mop != null) {
-				if (mop.typeOfHit == MovingObjectType.BLOCK) {
-					int i = mop.blockX;
-					int j = mop.blockY;
-					int k = mop.blockZ;
-
-					if (!world.canMineBlock(player, i, j, k)) {
-						return stack;
-					}
-
-					if (!player.canPlayerEdit(i, j, k, mop.sideHit, stack)) {
-						return stack;
-					}
-
-					if (world.getBlock(i, j, k).getMaterial() == Material.water) {
-						Entity entity = spawnCreature(world, stack.getItemDamage(), i, j, k);
-
-						if (entity != null) {
-							if (entity instanceof EntityLiving && stack.hasDisplayName()) {
-								((EntityLiving) entity).setCustomNameTag(stack.getDisplayName());
-							}
-
-							if (!player.capabilities.isCreativeMode) {
-								--stack.stackSize;
-							}
+			if (mop != null && mop.typeOfHit == MovingObjectType.BLOCK) {
+				BlockPos pos = mop.getBlockPos();
+				if (!world.isBlockModifiable(player, pos)) {
+					return stack;
+				}
+				if (!player.canPlayerEdit(pos, mop.sideHit, stack)) {
+					return stack;
+				}
+				if (world.getBlockState(pos).getBlock() instanceof BlockLiquid) {
+					Entity entity = spawnCreature(world, stack.getItemDamage(), pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+					if (entity != null) {
+						if (entity instanceof EntityLivingBase && stack.hasDisplayName()) {
+							entity.setCustomNameTag(stack.getDisplayName());
+						}
+						if (!player.capabilities.isCreativeMode) {
+							--stack.stackSize;
 						}
 					}
 				}
 			}
 		}
-
 		return stack;
 	}
 
@@ -159,7 +142,6 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	public Entity spawnCreature(World world, int entityID, double x, double y, double z) {
 		Entity entity = null;
 		Class<? extends Entity> oclass = CustomEntityList.getClassFromID(entityID);
-
 		if (CustomEntityList.entityEggs.containsKey(oclass)) {
 			entity = CustomEntityList.createEntity(oclass, world);
 			if (entity instanceof EntityLiving) {
@@ -167,12 +149,11 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 				entity.setLocationAndAngles(x, y, z, MathHelper.wrapAngleTo180_float(world.rand.nextFloat() * 360.0F), 0.0F);
 				entityliving.rotationYawHead = entityliving.rotationYaw;
 				entityliving.renderYawOffset = entityliving.rotationYaw;
-				entityliving.onSpawnWithEgg((IEntityLivingData) null);
+				entityliving.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entityliving)), null);
 				world.spawnEntityInWorld(entity);
 				entityliving.playLivingSound();
 			}
 		}
-
 		return entity;
 	}
 
@@ -185,33 +166,32 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	 */
 	public static boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
 		Class oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
-
 		if (oclass != null && oclass.isAssignableFrom(entity.getClass())) {
 			EntityAgeable child = entity.createChild(entity);
-
 			if (child != null) {
 				child.setGrowingAge(-24000);
 				child.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, 0.0F, 0.0F);
 				if (!world.isRemote) {
 					world.spawnEntityInWorld(child);
 				}
-
 				if (stack.hasDisplayName()) {
 					child.setCustomNameTag(stack.getDisplayName());
 				}
-
 				if (!player.capabilities.isCreativeMode) {
 					--stack.stackSize;
 					if (stack.stackSize <= 0) {
 						player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
 					}
 				}
-
 				return true;
 			}
 		}
-
 		return false;
+	}
+
+	@Override
+	public String[] getVariants() {
+		return new String[]{"minecraft:spawn_egg"}; // prevent 'missing location' error
 	}
 
 	@Override
@@ -227,22 +207,22 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 		}
 	}
 
+	/**
+	 * Register same base texture for each egg subtype
+	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean requiresMultipleRenderPasses() {
-		return true;
+	public void registerRenderers(ItemModelMesher mesher) {
+		mesher.register(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return new ModelResourceLocation("minecraft:spawn_egg", "inventory");
+			}
+		});
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamageForRenderPass(int damage, int pass) {
-		return pass > 0 ? overlay : super.getIconFromDamageForRenderPass(damage, pass);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		super.registerIcons(register);
-		overlay = register.registerIcon(getIconString() + "_overlay");
+	public IBehaviorDispenseItem getNewDispenserBehavior() {
+		return new BehaviorDispenseCustomMobEgg();
 	}
 }

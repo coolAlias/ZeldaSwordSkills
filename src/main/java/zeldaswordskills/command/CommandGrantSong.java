@@ -26,6 +26,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
@@ -58,7 +59,7 @@ public class CommandGrantSong extends CommandBase
 	}
 
 	@Override
-	public void processCommand(ICommandSender sender, String[] args) {
+	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
 		EntityPlayerMP player = getPlayer(sender, args[0]);
 		ZSSPlayerSongs info = ZSSPlayerSongs.get(player);
@@ -100,7 +101,7 @@ public class CommandGrantSong extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return getListOfStringsMatchingLastWord(args, SongAPI.getRegisteredNames().toArray(new String[SongAPI.getTotalSongs()]));

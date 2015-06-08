@@ -23,8 +23,9 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
@@ -73,7 +74,7 @@ public class SpawnNayruParticlesPacket extends AbstractClientMessage<SpawnNayruP
 			double d0 = player.worldObj.rand.nextGaussian() * 0.02D;
 			double d1 = player.worldObj.rand.nextGaussian() * 0.02D;
 			double d2 = player.worldObj.rand.nextGaussian() * 0.02D;
-			player.worldObj.spawnParticle("magicCrit",
+			player.worldObj.spawnParticle(EnumParticleTypes.CRIT_MAGIC,
 					x + (player.worldObj.rand.nextFloat() * w * 2.0F) -	w,
 					y + (player.worldObj.rand.nextFloat() * h),
 					z + (player.worldObj.rand.nextFloat() * w * 2.0F) - w, d0, d1, d2);

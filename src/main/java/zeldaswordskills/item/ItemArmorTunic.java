@@ -20,7 +20,6 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -29,26 +28,26 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -64,7 +63,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Zora Tunic: special blue tunic allows wearer to breathe under water
  *
  */
-public class ItemArmorTunic extends ItemArmor
+public class ItemArmorTunic extends ItemModArmor
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
@@ -91,6 +90,13 @@ public class ItemArmorTunic extends ItemArmor
 	 */
 	public PotionEffect getEffect() {
 		return tickingEffect;
+	}
+
+	@Override
+	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
+		String name = getUnlocalizedName();
+		name = name.substring(name.lastIndexOf(".") + 1, name.lastIndexOf("_"));
+		return String.format("%s:textures/armor/%s_layer_%d.png", ModInfo.ID, name, (slot == 2 ? 2 : 1));
 	}
 
 	@Override
@@ -163,7 +169,7 @@ public class ItemArmorTunic extends ItemArmor
 	 * Returns true if the armor should be damaged this tick for applying potion effect
 	 */
 	private boolean shouldDamageArmor(World world, EntityPlayer player, ItemStack stack, int effectID) {
-		Material m = world.getBlock((int) player.posX, (int) player.posY + 1, (int) player.posZ).getMaterial();
+		Material m = world.getBlockState(new BlockPos(player).up()).getBlock().getMaterial();
 		if (effectID == Potion.waterBreathing.id) {
 			if (player.isPotionActive(Potion.waterBreathing.getId())) {
 				return false;
@@ -179,14 +185,8 @@ public class ItemArmorTunic extends ItemArmor
 	}
 
 	@Override
-	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
-		String name = getUnlocalizedName().substring(9, getUnlocalizedName().lastIndexOf("_"));
-		return String.format("%s:textures/armor/%s_layer_%d.png", ModInfo.ID, name, (slot == 2 ? 2 : 1));
-	}
-
-	@Override
 	public int getItemEnchantability() {
-		return ArmorMaterial.CLOTH.getEnchantability();
+		return ArmorMaterial.LEATHER.getEnchantability();
 	}
 
 	@Override
@@ -198,12 +198,6 @@ public class ItemArmorTunic extends ItemArmor
 			// TODO return something interesting?
 		}
 		return stack.getItem() == Item.getItemFromBlock(Blocks.wool);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
 	@Override

@@ -59,9 +59,11 @@ public class EntityAIPowerAttack extends EntityAIBase
 	@Override
 	public boolean shouldExecute() {
 		target = attacker.getAttackTarget();
-		if (attacker.attackTime > 0) {
+		// TODO replace attackTime? or do mobs now regulate this some other way?
+		/*if (attacker.attackTime > 0) {
 			return false;
-		} else if (attackTimer > 0) {
+		} else*/
+		if (attackTimer > 0) {
 			--attackTimer;
 			return false;
 		} else if (target == null || !target.isEntityAlive()) {
@@ -91,7 +93,7 @@ public class EntityAIPowerAttack extends EntityAIBase
 		attacker.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1.0D / 3.0D);
 		if (chargeTimer > 0 && --chargeTimer == 0) {
 			attackTimer = 20 + attacker.worldObj.rand.nextInt(20) + attacker.worldObj.rand.nextInt(20);
-			double d = attacker.getDistanceSq(target.posX, target.boundingBox.minY, target.posZ);
+			double d = attacker.getDistanceSq(target.posX, target.getEntityBoundingBox().minY, target.posZ);
 			double width = (attacker.width + target.width) / 2.0F;
 			double reach = (range + width) * (range + width);
 			if (d <= reach && attacker.getEntitySenses().canSee(target)) {

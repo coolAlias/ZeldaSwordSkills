@@ -20,43 +20,46 @@ package zeldaswordskills.entity.projectile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockButtonWood;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.WorldUtils;
 
 public class EntitySeedShot extends EntityMobThrowable
 {
 	public static enum SeedType {
-		NONE(0.0F, "crit"),
-		BOMB(3.0F, "largeexplode"),
-		COCOA(1.25F, "crit"),
-		DEKU(1.5F, "largeexplode"),
-		GRASS(1.0F, "crit"),
-		MELON(1.25F, "crit"),
-		NETHERWART(1.5F, "crit"),
-		PUMPKIN(1.25F, "crit");
+		NONE(0.0F, EnumParticleTypes.CRIT),
+		BOMB(3.0F, EnumParticleTypes.EXPLOSION_LARGE),
+		COCOA(1.25F, EnumParticleTypes.CRIT),
+		DEKU(1.5F, EnumParticleTypes.EXPLOSION_LARGE),
+		GRASS(1.0F, EnumParticleTypes.CRIT),
+		MELON(1.25F, EnumParticleTypes.CRIT),
+		NETHERWART(1.5F, EnumParticleTypes.CRIT),
+		PUMPKIN(1.25F, EnumParticleTypes.CRIT);
 
 		private final float damage;
 
-		/** Name of particle to spawn upon impact */
-		public final String particleName;
+		/** Particle to spawn upon impact */
+		public final EnumParticleTypes particle;
 
-		private SeedType(float damage, String particle) {
+		private SeedType(float damage, EnumParticleTypes particle) {
 			this.damage = damage;
-			this.particleName = particle;
+			this.particle = particle;
 		}
 		/** Returns the base damage for this seed type */
 		public float getDamage() {
@@ -96,11 +99,10 @@ public class EntitySeedShot extends EntityMobThrowable
 			posY -= 0.10000000149011612D;
 			posZ -= (double)(MathHelper.sin(rotationYaw / 180.0F * (float) Math.PI) * 0.16F);
 			setPosition(posX, posY, posZ);
-			yOffset = 0.0F;
 			float f = 0.4F;
 			motionX = (double)(-MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float) Math.PI) * f);
 			motionZ = (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float) Math.PI) * f);
-			motionY = (double)(-MathHelper.sin((rotationPitch + func_70183_g()) / 180.0F * (float)Math.PI) * f);
+			motionY = (double)(-MathHelper.sin((rotationPitch + getInaccuracy()) / 180.0F * (float)Math.PI) * f);
 		}
 		setThrowableHeading(motionX, motionY, motionZ, velocity * 1.5F, 1.0F);
 	}
@@ -189,7 +191,6 @@ public class EntitySeedShot extends EntityMobThrowable
 						mop.entityHit.addVelocity(motionX * d, 0.1D, motionZ * d);
 					}
 				}
-
 				if (mop.entityHit instanceof EntityLivingBase) {
 					EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
 					switch(getType()) {
@@ -199,13 +200,11 @@ public class EntitySeedShot extends EntityMobThrowable
 					}
 
 					if (getThrower() instanceof EntityLivingBase) {
-						// func_151384_a is the new way Thorns is handled
+						// func_151384_a and func_151385_b is the new way Thorns is handled - copied from EntityArrow
 						EnchantmentHelper.func_151384_a((EntityLivingBase) mop.entityHit, getThrower());
-						// TODO not sure what the following does yet, but it's in EntityArro
 						EnchantmentHelper.func_151385_b((EntityLivingBase) getThrower(), mop.entityHit);
 					}
 				}
-
 				if (!(mop.entityHit instanceof EntityEnderman)) {
 					setDead();
 				}
@@ -217,20 +216,22 @@ public class EntitySeedShot extends EntityMobThrowable
 				prevRotationYaw += 180.0F;
 			}
 		} else {
-			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			BlockPos pos = mop.getBlockPos();
+			IBlockState state = worldObj.getBlockState(pos); 
+			Block block = state.getBlock();
 			if (block.getMaterial() != Material.air) {
-				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				block.onEntityCollidedWithBlock(worldObj, pos, this);
 			}
-			boolean flag = !block.getBlocksMovement(worldObj, mop.blockX, mop.blockY, mop.blockZ);
+			boolean flag = block.isSideSolid(worldObj, pos, mop.sideHit);
 			if (getType() == SeedType.BOMB && flag) {
-				double dx = mop.sideHit == SideHit.WEST ? -0.5D : mop.sideHit == SideHit.EAST ? 0.5D : 0.0D;
-				double dy = mop.sideHit == SideHit.BOTTOM ? -0.5D : mop.sideHit == SideHit.TOP ? 0.5D : 0.0D;
-				double dz = mop.sideHit == SideHit.NORTH ? -0.5D : mop.sideHit == SideHit.SOUTH ? 0.5D : 0.0D;
+				double dx = mop.sideHit == EnumFacing.WEST ? -0.5D : mop.sideHit == EnumFacing.EAST ? 0.5D : 0.0D;
+				double dy = mop.sideHit == EnumFacing.DOWN ? -0.5D : mop.sideHit == EnumFacing.UP ? 0.5D : 0.0D;
+				double dz = mop.sideHit == EnumFacing.NORTH ? -0.5D : mop.sideHit == EnumFacing.SOUTH ? 0.5D : 0.0D;
 				if (!worldObj.isRemote) {
 					CustomExplosion.createExplosion(new EntityBomb(worldObj, getThrower()), worldObj, posX + dx, posY + dy, posZ + dz, 3.0F, SeedType.BOMB.getDamage(), false);
 				}
 			} else if (block instanceof BlockButtonWood) {
-				WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
+				WorldUtils.activateButton(worldObj, state, pos);
 				flag = true;
 			}
 			if (flag) {
@@ -240,7 +241,7 @@ public class EntitySeedShot extends EntityMobThrowable
 		}
 		// Only spawn particles if it hit something for sure
 		if (!isEntityAlive()) {
-			String particle = getType().particleName;
+			EnumParticleTypes particle = getType().particle;
 			for (int i = 0; i < 4; ++i) {
 				worldObj.spawnParticle(particle,
 						posX - motionX * (double) i / 4.0D,

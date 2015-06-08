@@ -26,6 +26,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -36,17 +37,23 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -68,6 +75,17 @@ public class CustomExplosion extends Explosion
 	/** Type of liquids to ignore when calculating which blocks to affect */
 	public static enum IgnoreLiquid{NONE, ALL, WATER, LAVA};
 
+	// Duplicate final private values in Explosion class
+	public final boolean isSmoking;
+	public final boolean isFlaming;
+	public final double explosionX;
+	public final double explosionY;
+	public final double explosionZ;
+	public final Entity exploder;
+	public final float explosionSize;
+	// Super class field not needed as none of the super methods are called
+	private final List<BlockPos> affectedBlockPositions;
+
 	/**
 	 * Creates an explosion based on the BombType given, automatically applying
 	 * various characteristics. If more versatility than this is required, create a
@@ -86,18 +104,18 @@ public class CustomExplosion extends Explosion
 	 * @param damage Use 0.0F for vanilla explosion damage; amounts above zero will cause a flat amount regardless of distance
 	 */
 	public static void createExplosion(IEntityBomb bomb, World world, double x, double y, double z, float radius, float damage, boolean canGrief) {
-		CustomExplosion explosion = new CustomExplosion(world, (Entity) bomb, x, y, z, radius).setDamage(damage);
+		CustomExplosion explosion = new CustomExplosion(world, (Entity) bomb, x, y, z, radius, canGrief, false).setDamage(damage);
 		BombType type = bomb.getType();
 		// TODO Adventure Mode is only set per player, not per world
 		//boolean isAdventureMode = (world.getWorldInfo().getGameType() == GameType.ADVENTURE);
 		boolean restrictBlocks = false; // (isAdventureMode && !bomb.canGriefAdventureMode());
 		explosion.setMotionFactor(bomb.getMotionFactor());
 		explosion.scalesWithDistance = (damage == 0.0F);
-		explosion.isSmoking = canGrief;
 		explosion.targetBlock = ((restrictBlocks || Config.onlyBombSecretStone()) ? ZSSBlocks.secretStone : null);
 		explosion.ignoreLiquidType = type.ignoreLiquidType;
 		float f = bomb.getDestructionFactor();
-		if (world.provider.isHellWorld && type != BombType.BOMB_FIRE) {
+		// TODO doesn't allow for any other 'hell' type dimensions...
+		if (world.provider.getDimensionName().equals("Nether") && type != BombType.BOMB_FIRE) {
 			f *= 0.5F;
 		}
 		explosion.restrictExplosionBy(f);
@@ -147,12 +165,30 @@ public class CustomExplosion extends Explosion
 	/** Affected players get added to this map; not sure what it's used for; private in super class */
 	protected Map<EntityPlayer, Vec3> affectedPlayers = new HashMap<EntityPlayer, Vec3>();
 
+	@SideOnly(Side.CLIENT)
+	public CustomExplosion(World world, Entity exploder, double x, double y, double z, float explosionSize, boolean isSmoking, boolean isFlaming, List<BlockPos> affectedBlocks) {
+		this(world, exploder, x, y, z, explosionSize, isSmoking, isFlaming);
+		this.affectedBlockPositions.addAll(affectedBlocks);
+	}
+
 	/**
 	 * Creates a custom explosion; isSmoking is true by default, and isFlaming is false by default
 	 */
 	public CustomExplosion(World world, Entity exploder, double x, double y, double z, float explosionSize) {
-		super(world, exploder, x, y, z, explosionSize);
+		this(world, exploder, x, y, z, explosionSize, true, false);
+	}
+
+	public CustomExplosion(World world, Entity exploder, double x, double y, double z, float explosionSize, boolean isSmoking, boolean isFlaming) {
+		super(world, exploder, x, y, z, explosionSize, isSmoking, isFlaming);
 		this.worldObj = world;
+		this.isSmoking = isSmoking;
+		this.isFlaming = isFlaming;
+		this.explosionX = x;
+		this.explosionY = y;
+		this.explosionZ = z;
+		this.explosionSize = explosionSize;
+		this.exploder = exploder;
+		this.affectedBlockPositions = Lists.newArrayList();
 	}
 
 	/**
@@ -223,39 +259,30 @@ public class CustomExplosion extends Explosion
 	public void doExplosionB(boolean spawnExtraParticles) {
 		worldObj.playSoundEffect(explosionX, explosionY, explosionZ, Sounds.EXPLOSION, 4.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
 		if (explosionSize >= 2.0F && isSmoking) {
-			worldObj.spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D);
+			worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D);
 		} else {
-			worldObj.spawnParticle("largeexplode", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D);
+			worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D);
 		}
 
-		Iterator<ChunkPosition> iterator;
-		ChunkPosition chunkposition;
-		int i, j, k;
+		Iterator<BlockPos> iterator;
+		BlockPos blockpos;
 		Block block;
 		if (isSmoking) {
 			iterator = affectedBlockPositions.iterator();
 			while (iterator.hasNext()) {
-				chunkposition = iterator.next();
-				i = chunkposition.chunkPosX;
-				j = chunkposition.chunkPosY;
-				k = chunkposition.chunkPosZ;
-				block = worldObj.getBlock(i, j, k);
-				explodeBlockAt(block, i, j, k, spawnExtraParticles);
+				blockpos = iterator.next();
+				block = worldObj.getBlockState(blockpos).getBlock();
+				explodeBlockAt(block, blockpos, spawnExtraParticles);
 			}
 		}
 
 		if (isFlaming) {
 			iterator = affectedBlockPositions.iterator();
 			while (iterator.hasNext()) {
-				chunkposition = iterator.next();
-				i = chunkposition.chunkPosX;
-				j = chunkposition.chunkPosY;
-				k = chunkposition.chunkPosZ;
-				block = worldObj.getBlock(i, j, k);
-				Block block1 = worldObj.getBlock(i, j - 1, k);
-				// func_149730_j() returns block.opaque
-				if (block == Blocks.air && block1.func_149730_j() && rand.nextInt(3) == 0) {
-					worldObj.setBlock(i, j, k, Blocks.fire);
+				blockpos = iterator.next();
+				block = worldObj.getBlockState(blockpos).getBlock();
+				if (block == Blocks.air && worldObj.getBlockState(blockpos.down()).getBlock().isFullBlock() && rand.nextInt(3) == 0) {
+					worldObj.setBlockState(blockpos, Blocks.fire.getDefaultState());
 				}
 			}
 		}
@@ -266,11 +293,11 @@ public class CustomExplosion extends Explosion
 	/**
 	 * Actually explodes the block and spawns particles if allowed
 	 */
-	private void explodeBlockAt(Block block, int i, int j, int k, boolean spawnExtraParticles) {
+	private void explodeBlockAt(Block block, BlockPos blockpos, boolean spawnExtraParticles) {
 		if (spawnExtraParticles) {
-			double d0 = (double)((float) i + worldObj.rand.nextFloat());
-			double d1 = (double)((float) j + worldObj.rand.nextFloat());
-			double d2 = (double)((float) k + worldObj.rand.nextFloat());
+			double d0 = (double)((float) blockpos.getX() + worldObj.rand.nextFloat());
+			double d1 = (double)((float) blockpos.getY() + worldObj.rand.nextFloat());
+			double d2 = (double)((float) blockpos.getZ() + worldObj.rand.nextFloat());
 			double d3 = d0 - explosionX;
 			double d4 = d1 - explosionY;
 			double d5 = d2 - explosionZ;
@@ -283,16 +310,14 @@ public class CustomExplosion extends Explosion
 			d3 *= d7;
 			d4 *= d7;
 			d5 *= d7;
-			worldObj.spawnParticle("explode", (d0 + explosionX * 1.0D) / 2.0D, (d1 + explosionY * 1.0D) / 2.0D, (d2 + explosionZ * 1.0D) / 2.0D, d3, d4, d5);
-			worldObj.spawnParticle("smoke", d0, d1, d2, d3, d4, d5);
+			worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + explosionX * 1.0D) / 2.0D, (d1 + explosionY * 1.0D) / 2.0D, (d2 + explosionZ * 1.0D) / 2.0D, d3, d4, d5);
+			worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5);
 		}
-
 		if (block.getMaterial() != Material.air) {
 			if (block.canDropFromExplosion(this)) {
-				block.dropBlockAsItemWithChance(worldObj, i, j, k, worldObj.getBlockMetadata(i, j, k), 1.0F /  explosionSize, 0);
+				block.dropBlockAsItemWithChance(worldObj, blockpos, worldObj.getBlockState(blockpos), 1.0F /  explosionSize, 0);
 			}
-
-			block.onBlockExploded(worldObj, i, j, k, this);
+			block.onBlockExploded(worldObj, blockpos, this);
 		}
 	}
 
@@ -300,7 +325,7 @@ public class CustomExplosion extends Explosion
 	 * Populates the affectedBlocksList with any blocks that should be affected by this explosion
 	 */
 	protected void populateAffectedBlocksList() {
-		HashSet<ChunkPosition> hashset = new HashSet<ChunkPosition>();
+		HashSet<BlockPos> hashset = Sets.newHashSet();
 		float radius = Math.min(explosionSize * restrictExplosion, 16.0F);
 		for (int i = 0; i < MAX_RADIUS; ++i) {
 			for (int j = 0; j < MAX_RADIUS; ++j) {
@@ -319,29 +344,29 @@ public class CustomExplosion extends Explosion
 						double d1 = explosionY;
 						double d2 = explosionZ;
 
-						for (float f2 = 0.3F; f1 > 0.0F; f1 -= f2 * 0.75F)
+						for (float f2 = 0.3F; f1 > 0.0F; f1 -= 0.22500001F)
 						{
 							int l = MathHelper.floor_double(d0);
 							int i1 = MathHelper.floor_double(d1);
 							int j1 = MathHelper.floor_double(d2);
-							Block block = worldObj.getBlock(l, i1, j1);
-
-							if (block.getMaterial() != Material.air) {
+							BlockPos blockpos = new BlockPos(l, i1, j1);
+							IBlockState iblockstate = worldObj.getBlockState(blockpos);
+							Block block = iblockstate.getBlock();
+							Material material = block.getMaterial();
+							if (material != Material.air) {
 								// True if block resistance should reduce the explosion radius
-								boolean flag = !block.getMaterial().isLiquid() || ignoreLiquidType == IgnoreLiquid.NONE || 
-										(ignoreLiquidType == IgnoreLiquid.WATER && block.getMaterial() != Material.water) ||
-										(ignoreLiquidType == IgnoreLiquid.LAVA && block.getMaterial() != Material.lava);
+								boolean flag = !material.isLiquid() || ignoreLiquidType == IgnoreLiquid.NONE || 
+										(ignoreLiquidType == IgnoreLiquid.WATER && material != Material.water) ||
+										(ignoreLiquidType == IgnoreLiquid.LAVA && material != Material.lava);
 								if (flag) {
-									// func_145772_a is getBlockExplosionResistance
-									float f3 = exploder != null ? exploder.func_145772_a(this, worldObj, l, i1, j1, block) : block.getExplosionResistance(exploder, worldObj, l, i1, j1, explosionX, explosionY, explosionZ);
-									f1 -= (f3 + 0.3F) * f2;
+									float f3 = exploder != null ? exploder.getExplosionResistance(this, worldObj, blockpos, iblockstate) : block.getExplosionResistance(worldObj, blockpos, null, this);
+									f1 -= (f3 + 0.3F) * 0.3F;
 								}
 							}
-							// func_145774_a is shouldExplodeBlock
 							if (f1 > 0.0F && (targetBlock == null || block == targetBlock || block instanceof IExplodable) &&
-									(exploder == null || exploder.func_145774_a(this, worldObj, l, i1, j1, block, f1)))
+									(exploder == null || exploder.verifyExplosion(this, worldObj, blockpos, iblockstate, f1)))
 							{
-								hashset.add(new ChunkPosition(l, i1, j1));
+								hashset.add(blockpos);
 							}
 
 							d0 += d3 * (double)f2;
@@ -361,18 +386,20 @@ public class CustomExplosion extends Explosion
 	 */
 	protected void affectEntitiesWithin() {
 		float diameter = explosionSize * 2.0F;
-		int i = MathHelper.floor_double(explosionX - (double) explosionSize - 1.0D);
-		int j = MathHelper.floor_double(explosionX + (double) explosionSize + 1.0D);
-		int k = MathHelper.floor_double(explosionY - (double) explosionSize - 1.0D);
-		int l1 = MathHelper.floor_double(explosionY + (double) explosionSize + 1.0D);
-		int i2 = MathHelper.floor_double(explosionZ - (double) explosionSize - 1.0D);
-		int j2 = MathHelper.floor_double(explosionZ + (double) explosionSize + 1.0D);
-		List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(exploder, AxisAlignedBB.getBoundingBox((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
-		Vec3 vec3 = Vec3.createVectorHelper(explosionX, explosionY, explosionZ);
-
-		for (int k2 = 0; k2 < list.size(); ++k2)
-		{
-			Entity entity = list.get(k2);
+		int i1 = MathHelper.floor_double(explosionX - (double) explosionSize - 1.0D);
+		int j1 = MathHelper.floor_double(explosionY - (double) explosionSize - 1.0D);
+		int k1 = MathHelper.floor_double(explosionZ - (double) explosionSize - 1.0D);
+		int i2 = MathHelper.floor_double(explosionX + (double) explosionSize + 1.0D);
+		int j2 = MathHelper.floor_double(explosionY + (double) explosionSize + 1.0D);
+		int k2 = MathHelper.floor_double(explosionZ + (double) explosionSize + 1.0D);
+		List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(exploder, new AxisAlignedBB((double)i1, (double)j1, (double)k1, (double)i2, (double)j2, (double)k2));
+		net.minecraftforge.event.ForgeEventFactory.onExplosionDetonate(worldObj, this, list, diameter);
+		Vec3 vec3 = new Vec3(explosionX, explosionY, explosionZ);
+		for (int n = 0; n < list.size(); ++n) {
+			Entity entity = list.get(n);
+			if (entity.isImmuneToExplosions()) {
+				continue;
+			}
 			double d7 = (scalesWithDistance ? entity.getDistance(explosionX, explosionY, explosionZ) / (double) diameter : 0.0D);
 			if (d7 <= 1.0D) {
 				double d0 = entity.posX - explosionX;
@@ -383,7 +410,7 @@ public class CustomExplosion extends Explosion
 					d0 /= d8;
 					d1 /= d8;
 					d2 /= d8;
-					double d9 = (double) worldObj.getBlockDensity(vec3, entity.boundingBox);
+					double d9 = (double) worldObj.getBlockDensity(vec3, entity.getEntityBoundingBox());
 					double d10 = (1.0D - d7) * d9;
 					float amount = (damage == 0.0F ? (float)((int)((d10 * d10 + d10) / 2.0D * 8.0D * diameter + 1.0D)) : damage * (float) d10);
 					if (entity.attackEntityFrom(getDamageSource(), amount) && isFlaming && !entity.isImmuneToFire()) {
@@ -391,13 +418,12 @@ public class CustomExplosion extends Explosion
 							entity.setFire(burnTime);
 						}
 					}
-
 					double d11 = EnchantmentProtection.func_92092_a(entity, d10);
 					entity.motionX += d0 * d11 * motionFactor;
 					entity.motionY += d1 * d11 * motionFactor;
 					entity.motionZ += d2 * d11 * motionFactor;
 					if (entity instanceof EntityPlayer) {
-						affectedPlayers.put((EntityPlayer) entity, Vec3.createVectorHelper(d0 * d10, d1 * d10, d2 * d10));
+						affectedPlayers.put((EntityPlayer) entity, new Vec3(d0 * d10, d1 * d10, d2 * d10));
 					}
 				}
 			}

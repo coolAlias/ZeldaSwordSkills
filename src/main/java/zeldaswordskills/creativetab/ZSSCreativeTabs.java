@@ -22,10 +22,10 @@ import java.util.List;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.item.ZSSItems;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSCreativeTabs
 {
@@ -47,15 +47,13 @@ public class ZSSCreativeTabs
 			Collections.sort(itemstacks, ZSSItems.itemstackComparator);
 		}
 	}
-
 	public static CreativeTabs tabBlocks = new ZSSCreativeTab("zss.blocks") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
-			return Item.getItemFromBlock(ZSSBlocks.pedestal);
+			return Item.getItemFromBlock(ZSSBlocks.gossipStone);
 		}
 	};
-
 	public static CreativeTabs tabCombat = new ZSSCreativeTab("zss.combat") {
 		@Override
 		@SideOnly(Side.CLIENT)
@@ -63,7 +61,6 @@ public class ZSSCreativeTabs
 			return ZSSItems.swordMasterTrue;
 		}
 	};
-
 	public static CreativeTabs tabTools = new ZSSCreativeTab("zss.tools") {
 		@Override
 		@SideOnly(Side.CLIENT)
@@ -71,7 +68,6 @@ public class ZSSCreativeTabs
 			return ZSSItems.bombBag;
 		}
 	};
-
 	public static CreativeTabs tabSkills = new ZSSCreativeTab("zss.skills") {
 		@Override
 		@SideOnly(Side.CLIENT)
@@ -79,7 +75,6 @@ public class ZSSCreativeTabs
 			return ZSSItems.skillOrb;
 		}
 	};
-
 	public static CreativeTabs tabMasks = new ZSSCreativeTab("zss.masks") {
 		@Override
 		@SideOnly(Side.CLIENT)
@@ -87,15 +82,13 @@ public class ZSSCreativeTabs
 			return ZSSItems.maskHawkeye;
 		}
 	};
-
 	public static CreativeTabs tabMisc = new ZSSCreativeTab("zss.misc") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
-			return ZSSItems.pendant;
+			return ZSSItems.treasure;
 		}
 	};
-
 	public static CreativeTabs tabKeys = new ZSSCreativeTab("zss.keys") {
 		@Override
 		@SideOnly(Side.CLIENT)
@@ -103,7 +96,6 @@ public class ZSSCreativeTabs
 			return ZSSItems.keySmall;
 		}
 	};
-
 	public static CreativeTabs tabEggs = new ZSSCreativeTab("zss.eggs") {
 		@Override
 		@SideOnly(Side.CLIENT)

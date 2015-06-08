@@ -17,25 +17,28 @@
 
 package zeldaswordskills.item;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
@@ -43,8 +46,6 @@ import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.world.TeleporterNoPortal;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -54,13 +55,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  * world of light when in the dark (the Nether), as well as provides egress from dungeons.
  *
  */
-public class ItemMagicMirror extends Item implements IUnenchantable
+public class ItemMagicMirror extends BaseModItem implements IUnenchantable
 {
+	@SideOnly(Side.CLIENT)
+	private static List<ModelResourceLocation> models;
+
 	/** Ticks required to be in use before effect will occur */
 	private static final int USE_TIME = 140;
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
 
 	public ItemMagicMirror() {
 		super();
@@ -72,12 +73,12 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
-		return 32000;
+		return USE_TIME;
 	}
 
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.block;
+		return EnumAction.BLOCK;
 	}
 
 	@Override
@@ -87,28 +88,31 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 	}
 
 	@Override
-	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		int minTicks = (getMaxItemUseDuration(stack) - (USE_TIME / 2));
-		if (!world.isRemote && ticksRemaining < minTicks) {
+	public ItemStack onItemUseFinish(ItemStack stack, World world, EntityPlayer player) {
+		if (!world.isRemote) {
 			switch(player.dimension) {
 			case -1:
 				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, new TeleporterNoPortal((WorldServer) world));
 				TeleporterNoPortal.adjustPosY(player);
 				break;
 			case 0:
-				double[] coordinates = getLastPosition(stack);
-				if (coordinates != null && !TargetUtils.canEntitySeeSky(world, player)) {
-					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
+				BlockPos pos = getLastPosition(stack);
+				if (pos != null && !TargetUtils.canEntitySeeSky(world, player)) {
+					player.setPositionAndUpdate(pos.getX() + 0.5D, pos.getY() + 0.15D, pos.getZ() + 0.5D);
 				}
 				break;
 			default: break;
 			}
-
+			stack.damageItem(1, player);
+			/*
+			// TODO test if stack is removed
 			stack.damageItem(1, player);
 			if (stack.stackSize == 0 || stack.getItemDamage() == stack.getMaxDamage()) {
 				player.destroyCurrentEquippedItem();
 			}
+			 */
 		}
+		return stack;
 	}
 
 	@Override
@@ -132,77 +136,79 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
+		// TODO causes 'NBT update' graphical glitch while item is held, which is annoying
 		if (!world.isRemote && world.provider.isSurfaceWorld() && world.getTotalWorldTime() % 10 == 0) {
 			boolean flag = (entity instanceof EntityPlayer && !((EntityPlayer) entity).isUsingItem());
 			if (flag && TargetUtils.canEntitySeeSky(world, entity)) {
-				setLastPosition(stack, entity);
+				setLastPosition(stack, new BlockPos(entity));
 			}
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack, int pass) {
+	public boolean hasEffect(ItemStack stack) {
 		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
-		if (usingItem == null) { return iconArray[0]; }
-		int ticksInUse = stack.getMaxItemUseDuration() - useRemaining;
-
-		if ((ticksInUse * 2) > USE_TIME) {
-			return iconArray[3];
-		} else if ((ticksInUse * 3) > USE_TIME) {
-			return iconArray[2];
-		} else if ((ticksInUse * 7) > USE_TIME) {
-			return iconArray[1];
-		} else {
-			return iconArray[0];
+	public ModelResourceLocation getModel(ItemStack stack, EntityPlayer player, int ticksRemaining) {
+		if (!player.isUsingItem()) {
+			return models.get(0);
 		}
+		int i = (ticksRemaining < 20 ? 3 : ticksRemaining < 60 ? 2 : ticksRemaining < 120 ? 1 : 0);
+		return models.get(i);
+	}
+
+	@Override
+	public String[] getVariants() {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		String[] variants = new String[4];
+		for (int i = 0; i < variants.length; ++i) {
+			variants[i] = name + "_" + i;
+		}
+		return variants;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-		iconArray = new IIcon[4];
-		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + (i > 0 ? i : ""));
+	public void registerRenderers(ItemModelMesher mesher) {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		models = new ArrayList<ModelResourceLocation>();
+		for (int i = 0; i < 4; ++i) {
+			models.add(new ModelResourceLocation(name + "_" + i, "inventory"));
 		}
+		// Register the first model as the base resource
+		mesher.register(this, 0, models.get(0));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.1"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magic_mirror.desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magic_mirror.desc.1"));
 	}
 
 	/**
 	 * Returns last recorded above-ground position for player, or null if none available
 	 */
-	protected double[] getLastPosition(ItemStack stack) {
-		double[] coordinates = null;
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("mmLastPosX")) {
-			coordinates = new double[3];
-			coordinates[0] = stack.getTagCompound().getDouble("mmLastPosX");
-			coordinates[1] = stack.getTagCompound().getDouble("mmLastPosY");
-			coordinates[2] = stack.getTagCompound().getDouble("mmLastPosZ");
+	protected BlockPos getLastPosition(ItemStack stack) {
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("mmLastPos")) {
+			return BlockPos.fromLong(stack.getTagCompound().getLong("mmLastPos"));
 		}
-		return coordinates;
+		return null;
 	}
 
 	/**
 	 * Records entity's current position in the stack's NBT tag, creating the tag if necessary
 	 */
-	protected void setLastPosition(ItemStack stack, Entity entity) {
+	protected void setLastPosition(ItemStack stack, BlockPos pos) {
 		if (!stack.hasTagCompound()) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
-		stack.getTagCompound().setDouble("mmLastPosX", entity.posX);
-		stack.getTagCompound().setDouble("mmLastPosY", entity.posY);
-		stack.getTagCompound().setDouble("mmLastPosZ", entity.posZ);
+		stack.getTagCompound().setLong("mmLastPos", pos.toLong());
 	}
 }

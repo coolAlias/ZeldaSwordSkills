@@ -33,6 +33,8 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
@@ -61,8 +63,6 @@ import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
@@ -81,10 +81,11 @@ public class ZSSCombatEvents
 	 */
 	public static void setPlayerAttackTime(EntityPlayer player) {
 		if (!player.capabilities.isCreativeMode) {
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			ItemStack stack = player.getHeldItem();
 			int nextSwing = Config.getBaseSwingSpeed();
 			if (stack != null && stack.getItem() instanceof ISwingSpeed) {
-				nextSwing += Math.max(player.attackTime, ((ISwingSpeed) stack.getItem()).getSwingSpeed());
+				nextSwing += Math.max(info.getAttackTime(), ((ISwingSpeed) stack.getItem()).getSwingSpeed());
 				if (player.worldObj.isRemote) {
 					float exhaustion = ((ISwingSpeed) stack.getItem()).getExhaustion();
 					if (exhaustion > 0.0F) {
@@ -94,7 +95,7 @@ public class ZSSCombatEvents
 					PacketDispatcher.sendTo(new UnpressKeyPacket(UnpressKeyPacket.LMB), (EntityPlayerMP) player);
 				}
 			}
-			player.attackTime = Math.max(player.attackTime, nextSwing);
+			info.setAttackTime(Math.max(info.getAttackTime(), nextSwing));
 		}
 	}
 
@@ -210,13 +211,14 @@ public class ZSSCombatEvents
 		// apply magic armor and combo onHurt last, after other resistances
 		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			/* TODO magic armor:
-				if (player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == ZSSItems.tunicGoronChest) {
-					while (event.ammount > 0 && player.inventory.consumeInventoryItem(Item.emerald.itemID)) {
-						event.ammount -= 1.0F;
-					}
-					event.setCanceled(event.ammount < 0.1F);
+			/* 
+			// TODO magic armor:
+			if (player.getCurrentArmor(ArmorIndex.EQUIPPED_CHEST) != null && player.getCurrentArmor(ArmorIndex.EQUIPPED_CHEST).getItem() == ZSSItems.magicArmor) {
+				while (event.ammount > 0 && player.inventory.consumeInventoryItem(Item.emerald.itemID)) {
+					event.ammount -= 1.0F;
 				}
+				event.setCanceled(event.ammount < 0.1F);
+			}
 			 */
 			if (event.isCanceled()) {
 				return;

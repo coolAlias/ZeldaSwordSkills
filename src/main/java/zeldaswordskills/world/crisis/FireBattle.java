@@ -38,7 +38,7 @@ public class FireBattle extends BossBattle {
 
 	@Override
 	protected void endCrisis(World world) {
-		StructureGenUtils.replaceMaterialWith(world, box.minX, box.maxX, box.minY, box.maxY, box.minZ, box.maxZ, Material.lava, Blocks.air, 0);
+		StructureGenUtils.replaceMaterialWith(world, box.minX, box.maxX, box.minY, box.maxY, box.minZ, box.maxZ, Material.lava, Blocks.air.getDefaultState());
 		super.endCrisis(world);
 	}
 
@@ -46,7 +46,7 @@ public class FireBattle extends BossBattle {
 	protected void onUpdateTick(World world) {
 		if (difficulty > 1) {
 			if (eventTimer % (550 - (difficulty * 50)) == 0) {
-				setRandomBlockTo(world, Blocks.lava, 0, "");
+				setRandomBlockTo(world, Blocks.lava.getDefaultState(), "");
 			}
 			if (eventTimer % (800 - (difficulty * 50)) == 0) {
 				boolean flag = (difficulty == 3);

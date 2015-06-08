@@ -1,0 +1,6 @@
+{
+    "parent": "zeldaswordskills:block/pedestal",
+    "textures": {
+        "side": "zeldaswordskills:blocks/pedestal_side_3"
+    }
+}

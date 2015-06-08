@@ -25,7 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumFacing;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
 import zeldaswordskills.item.ItemZeldaSword;
@@ -70,7 +70,7 @@ public class TileEntityPedestal extends TileEntityInventory
 	public void changeOrientation() {
 		if (hasSword()) {
 			orientation = (byte)(orientation == 0 ? 1 : 0);
-			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+			worldObj.markBlockForUpdate(getPos());
 		}
 	}
 
@@ -94,11 +94,11 @@ public class TileEntityPedestal extends TileEntityInventory
 	 */
 	public void retrieveSword() {
 		if (sword != null) {
-			WorldUtils.playSoundAt(worldObj, xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
-			WorldUtils.spawnItemWithRandom(worldObj, sword, xCoord, yCoord + 1, zCoord);
+			WorldUtils.playSoundAt(worldObj, getPos().getX() + 0.5D, getPos().getY() + 1, getPos().getZ() + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
+			WorldUtils.spawnItemWithRandom(worldObj, sword, getPos().getX() + 0.5D, getPos().getY() + 1, getPos().getZ() + 0.5D);
 			sword = null;
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlock(xCoord, yCoord, zCoord));
-			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+			worldObj.notifyNeighborsOfStateChange(getPos(), blockType);
+			worldObj.markBlockForUpdate(getPos());
 		}
 	}
 
@@ -112,7 +112,7 @@ public class TileEntityPedestal extends TileEntityInventory
 					stack.getTagCompound().hasKey("SacredFlames") &&
 					stack.getTagCompound().getInteger("SacredFlames") == 0x7)
 			{
-				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.MASTER_SWORD, 1.0F, 1.0F);
+				worldObj.playSoundEffect(getPos().getX() + 0.5D, getPos().getY() + 1, getPos().getZ() + 0.5D, Sounds.MASTER_SWORD, 1.0F, 1.0F);
 				ItemStack master = new ItemStack(ZSSItems.swordMasterTrue);
 				master.addEnchantment(Enchantment.sharpness, 5);
 				master.addEnchantment(Enchantment.knockback, 2);
@@ -123,15 +123,14 @@ public class TileEntityPedestal extends TileEntityInventory
 					player.triggerAchievement(ZSSAchievements.swordTrue);
 				}
 			} else {
-				WorldUtils.playSoundAt(worldObj, xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
+				WorldUtils.playSoundAt(worldObj, getPos().getX() + 0.5D, getPos().getY() + 1, getPos().getZ() + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 				sword = stack.copy();
 			}
 			if (player != null) {
-				int facing = MathHelper.floor_double((double)((player.rotationYaw * 4F) / 360f) + 0.5D) & 3;
-				orientation = (byte)(facing == 0 || facing == 2 ? 0 : 1);
+				orientation = (byte)(EnumFacing.fromAngle(player.rotationYaw).getAxis() == EnumFacing.Axis.Z ? 0 : 1);
 			}
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlock(xCoord, yCoord, zCoord));
-			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+			worldObj.notifyNeighborsOfStateChange(pos, blockType);
+			worldObj.markBlockForUpdate(getPos());
 			return true;
 		} else {
 			return false;
@@ -158,13 +157,12 @@ public class TileEntityPedestal extends TileEntityInventory
 				meta |= (i == 2 ? i << 1 : i + 1);
 			}
 		}
-
 		if (meta == 0x7) {
 			meta = 0x8;
 			if (playSound) {
-				worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.MASTER_SWORD, 1.0F, 1.0F);
+				worldObj.playSoundEffect(getPos().getX() + 0.5D, getPos().getY() + 1, getPos().getZ() + 0.5D, Sounds.MASTER_SWORD, 1.0F, 1.0F);
 				retrieveSword();
-				EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 8.0D);
+				EntityPlayer player = worldObj.getClosestPlayer(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, 8.0D);
 				if (player != null) {
 					player.triggerAchievement(ZSSAchievements.swordMaster);
 				}
@@ -172,20 +170,9 @@ public class TileEntityPedestal extends TileEntityInventory
 				playSound = true;
 			}
 		}
-
-		if (meta != blockMetadata || worldObj.getBlockMetadata(xCoord, yCoord, zCoord) != meta) {
-			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, meta, 2);
+		if (meta != getBlockMetadata() || blockType.getMetaFromState(worldObj.getBlockState(pos)) != meta) {
+			worldObj.setBlockState(pos, blockType.getStateFromMeta(meta), 2);
 		}
-	}
-
-	@Override
-	public String getInventoryName() {
-		return "";
-	}
-
-	@Override
-	public boolean hasCustomInventoryName() {
-		return true;
 	}
 
 	@Override
@@ -195,7 +182,7 @@ public class TileEntityPedestal extends TileEntityInventory
 
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer player) {
-		return worldObj.getTileEntity(xCoord, yCoord, zCoord) != this ? false : player.getDistanceSq((double) xCoord + 0.5D, (double) yCoord + 0.5D, (double) zCoord + 0.5D) <= 64.0D;
+		return worldObj.getTileEntity(getPos()) != this ? false : player.getDistanceSqToCenter(getPos()) <= 64.0D;
 	}
 
 	@Override
@@ -207,12 +194,12 @@ public class TileEntityPedestal extends TileEntityInventory
 	public Packet getDescriptionPacket() {
 		NBTTagCompound tag = new NBTTagCompound();
 		this.writeToNBT(tag);
-		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 1, tag);
+		return new S35PacketUpdateTileEntity(getPos(), 1, tag);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
-		readFromNBT(packet.func_148857_g());
+		readFromNBT(packet.getNbtCompound());
 	}
 
 	@Override

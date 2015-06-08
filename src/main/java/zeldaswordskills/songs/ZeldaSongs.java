@@ -104,7 +104,7 @@ public final class ZeldaSongs
 		} else {
 			songNames.add(song.getUnlocalizedName());
 			songMap.put(song.getUnlocalizedName(), song);
-			ZSSMain.logger.info(String.format("Registered %s as '%s' with notes %s", song.getDisplayName(), song.getUnlocalizedName(), song.getNotes()));
+			// ZSSMain.logger.info(String.format("Registered %s as '%s' with notes %s", song.getDisplayName(), song.getUnlocalizedName(), song.getNotes()));
 		}
 	}
 

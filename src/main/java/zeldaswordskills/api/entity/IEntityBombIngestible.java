@@ -30,24 +30,25 @@ import zeldaswordskills.entity.ZSSEntityInfo;
  *
  */
 public interface IEntityBombIngestible extends IEntityBomb {
+
 	/**
 	 * The amount of damage the explosion will cause, or 0 for default explosion damage.
 	 * Note that the entity which ingested the bomb will die by default, but it may
 	 * implement {@link IEntityBombEater} to define custom behavior.
 	 * @param entity The entity which ingested the bomb
 	 */
-	public float getExplosionDamage(Entity entity);
+	float getExplosionDamage(Entity entity);
 
 	/**
 	 * The radius of the resulting explosion
 	 * @param entity The entity which ingested the bomb
 	 */
-	public float getExplosionRadius(Entity entity);
+	float getExplosionRadius(Entity entity);
 
 	/**
 	 * The number of ticks before the ingested bomb explodes
 	 * @param entity The entity which ingested the bomb
 	 */
-	public int getFuseTime(Entity entity);
+	int getFuseTime(Entity entity);
 
 }

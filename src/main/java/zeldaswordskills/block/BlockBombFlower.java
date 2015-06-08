@@ -22,7 +22,11 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
+import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -31,57 +35,50 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.IBoomerangBlock;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
-import zeldaswordskills.client.render.block.RenderSpecialCrop;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
-import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExplodable, IWhipBlock
+public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICustomStateMapper, IExplodable, IWhipBlock
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
+	/** Uses bit 8 (true) to flag this block for an explosion next update tick */
+	public static final PropertyBool EXPLODE = PropertyBool.create("explode");
 
 	public BlockBombFlower() {
 		super();
 		setCreativeTab(null); // no Creative Tab
+		setDefaultState(blockState.getBaseState().withProperty(AGE, Integer.valueOf(0)).withProperty(EXPLODE, Boolean.valueOf(false)));
 	}
 
 	@Override
-	public EnumPlantType getPlantType(IBlockAccess world, int x, int y, int z) {
+	public EnumPlantType getPlantType(IBlockAccess world, BlockPos pos) {
 		return EnumPlantType.Cave;
 	}
 
-	/**
-	 * Item dropped when crop not yet mature
-	 */
 	@Override
-	protected Item func_149866_i() {
+	protected Item getSeed() {
 		return ZSSItems.bombFlowerSeed;
 	}
 
-	/**
-	 * Item harvested when crop fully mature
-	 */
 	@Override
-	protected Item func_149865_P() {
+	protected Item getCrop() {
 		return ZSSItems.bombFlowerSeed;
 	}
 
@@ -91,66 +88,71 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	}
 
 	@Override
+	public boolean canPlaceBlockAt(World world, BlockPos pos) {
+		return super.canPlaceBlockAt(world, pos) && canBlockStay(world, pos, world.getBlockState(pos));
+	}
+
+	@Override
 	protected boolean canPlaceBlockOn(Block block) {
 		return block.getMaterial() == Material.rock;
 	}
 
 	@Override
-	public boolean canBlockStay(World world, int x, int y, int z) {
-		Block soil = world.getBlock(x, y - 1, z);
-		return canPlaceBlockOn(soil) && hasLava(world, x, y - 1, z);
+	public boolean canBlockStay(World world, BlockPos pos, IBlockState state) {
+		Block soil = world.getBlockState(pos.down()).getBlock();
+		return canPlaceBlockOn(soil) && hasLava(world, pos.down());
 	}
 
-	private boolean hasLava(World world, int x, int y, int z) {
+	private boolean hasLava(World world, BlockPos pos) {
 		boolean hasLava = (
-				world.getBlock(x - 1, y, z).getMaterial() == Material.lava ||
-				world.getBlock(x + 1, y, z).getMaterial() == Material.lava ||
-				world.getBlock(x, y, z - 1).getMaterial() == Material.lava ||
-				world.getBlock(x, y, z + 1).getMaterial() == Material.lava);
+				world.getBlockState(pos.north()).getBlock().getMaterial() == Material.lava ||
+				world.getBlockState(pos.south()).getBlock().getMaterial() == Material.lava ||
+				world.getBlockState(pos.east()).getBlock().getMaterial() == Material.lava ||
+				world.getBlockState(pos.west()).getBlock().getMaterial() == Material.lava);
 		return hasLava;
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		if (player.getHeldItem() != null || world.getBlockMetadata(x, y, z) != 7) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
+		if (player.getHeldItem() != null || ((Integer) state.getValue(AGE)).intValue() != 7) {
 			return false; // this lets bonemeal do its thing
 		} else if (!world.isRemote) {
 			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FLOWER.ordinal()));
-			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+			world.setBlockToAir(pos);
 		}
 		return true;
 	}
 
 	@Override
-	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
-		if (world.getBlockMetadata(x, y, z) == 7) {
+	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
+		if (((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7) {
 			if (PlayerUtils.isHoldingWeapon(player)) {
-				createExplosion(world, x, y, z, true);
+				createExplosion(world, pos, true);
 			} else {
-				disperseSeeds(world, x, y, z, true);
+				disperseSeeds(world, pos, true);
 			}
 		}
 	}
 
 	@Override
-	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
-		int meta = world.getBlockMetadata(x, y, z);
-		if (meta == 7) {
-			// full growth stage (0x7) for rendering, plus bit 8 to make the block explode next update tick
-			world.setBlockMetadataWithNotify(x, y, z, 15, 2);
-			world.scheduleBlockUpdate(x, y, z, this, 5);
-		} else if (meta < 7) {
-			super.onBlockExploded(world, x, y, z, explosion);
+	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+		IBlockState state = world.getBlockState(pos);
+		if (((Boolean) state.getValue(EXPLODE)).booleanValue()) {
+			// do nothing, these will explode on their own next update tick
+		} else if (((Integer) state.getValue(AGE)).intValue() == 7) {
+			world.setBlockState(pos, state.withProperty(EXPLODE, Boolean.valueOf(true)), 2);
+			world.scheduleUpdate(pos, this, 5);
+		} else {
+			super.onBlockExploded(world, pos, explosion);
 		}
-		// meta 8+ do nothing, these will explode on their own next update tick
 	}
 
 	@Override
-	public boolean onBoomerangCollided(World world, int x, int y, int z, EntityBoomerang boomerang) {
-		if (!world.isRemote && world.getBlockMetadata(x, y, z) == 7) {
+	public boolean onBoomerangCollided(World world, BlockPos pos, IBlockState state, EntityBoomerang boomerang) {
+		if (!world.isRemote && ((Integer) state.getValue(AGE)).intValue() == 7) {
 			boolean captured = false;
-			world.setBlockToAir(x, y, z);
-			EntityItem bomb = new EntityItem(world, x + 0.5D, y + 0.5D, z + 0.5D, new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FLOWER.ordinal()));
+			world.setBlockToAir(pos);
+			EntityItem bomb = new EntityItem(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FLOWER.ordinal()));
 			world.spawnEntityInWorld(bomb);
 			if (boomerang.captureItem(bomb)) {
 				captured = true; // stop explosion from happening
@@ -158,42 +160,42 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 				bomb.setDead();
 			}
 			if (!captured) {
-				createExplosion(world, x, y, z, true);
+				createExplosion(world, pos, true);
 			}
 		}
 		return false;
 	}
 
 	@Override
-	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
-		if (world.getBlockMetadata(x, y, z) == 7 && entity instanceof IProjectile) {
-			createExplosion(world, x, y, z, true);
+	public void onEntityCollidedWithBlock(World world, BlockPos pos, Entity entity) {
+		if (((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7 && entity instanceof IProjectile) {
+			createExplosion(world, pos, true);
 		}
 	}
 
 	@Override
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
-		return getGrowthStage(world.getBlockMetadata(x, y, z)) < 2;
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
+		return getGrowthStage(((Integer) world.getBlockState(pos).getValue(AGE)).intValue()) < 2;
 	}
 
 	@Override
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
-		return (side != SideHit.BOTTOM && world.getBlockMetadata(x, y, z) == 7);
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
+		return ((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7;
 	}
 
 	@Override
-	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
-		if (ticksInGround > 30 && world.getBlockMetadata(x, y, z) == 7) {
+	public Result shouldSwing(EntityWhip whip, World world, BlockPos pos, int ticksInGround) {
+		if (ticksInGround > 30 && ((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7) {
 			EntityLivingBase thrower = whip.getThrower();
 			EntityItem bomb = new EntityItem(world, whip.posX, whip.posY + 1, whip.posZ, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FLOWER.ordinal()));
 			double dx = thrower.posX - bomb.posX;
-			double dy = (thrower.posY + thrower.getEyeHeight()) - bomb.posY;
+			double dy = (thrower.posY + thrower.getEyeHeight()) - (bomb.posY - 1);
 			double dz = thrower.posZ - bomb.posZ;
-			TargetUtils.setEntityHeading(bomb, dx, dy * 1.5D, dz, 1.0F, 0.0F, true);
+			TargetUtils.setEntityHeading(bomb, dx, dy + 0.5D, dz, 1.0F, 0.0F, true);
 			if (!world.isRemote) {
 				world.spawnEntityInWorld(bomb);
 			}
-			world.setBlockToAir(x, y, z);
+			world.setBlockToAir(pos);
 			whip.setDead();
 		}
 		return Result.DENY;
@@ -205,47 +207,42 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	 * Note that updateTick is only ever called on the server
 	 */
 	@Override
-	public void updateTick(World world, int x, int y, int z, Random rand) {
-		checkAndDropBlock(world, x, y, z);
-		int meta = world.getBlockMetadata(x, y, z);
+	public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
+		checkAndDropBlock(world, pos, state);
+		int meta = getMetaFromState(state);
 		if (meta > 7) {
-			createExplosion(world, x, y, z, true);
+			createExplosion(world, pos, true);
 		} else if (meta < 7 && rand.nextInt(6) == 0) {
-			world.setBlockMetadataWithNotify(x, y, z, meta + 1, 2);
+			world.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(meta + 1)), 2);
 		} else if (meta == 7 && rand.nextInt(16) == 0) {
-			disperseSeeds(world, x, y, z, false);
+			disperseSeeds(world, pos, false);
 		}
 	}
 
 	/**
 	 * Creates an immediate explosion at the block's coordinates, optionally setting the block to air
 	 */
-	private void createExplosion(World world, int x, int y, int z, boolean toAir) {
+	private void createExplosion(World world, BlockPos pos, boolean toAir) {
 		if (!world.isRemote) {
 			if (toAir) {
-				world.setBlockToAir(x, y, z);
+				world.setBlockToAir(pos);
 			}
-			CustomExplosion.createExplosion(world, x, y, z, 3.0F, BombType.BOMB_FLOWER);
+			CustomExplosion.createExplosion(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 3.0F, BombType.BOMB_FLOWER);
 		}
 	}
 
 	/**
 	 * Spawns a bomb entity at the block's position and sets the growth stage back to zero
 	 */
-	private void disperseSeeds(World world, int x, int y, int z, boolean isGriefing) {
+	private void disperseSeeds(World world, BlockPos pos, boolean isGriefing) {
 		if (!world.isRemote) {
-			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-			EntityBomb bomb = new EntityBomb(world, x + 0.5D, y + 0.5D, z + 0.5D).setType(BombType.BOMB_FLOWER).setTime(64);
+			world.setBlockToAir(pos);
+			EntityBomb bomb = new EntityBomb(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D).setType(BombType.BOMB_FLOWER).setTime(64);
 			if (!isGriefing) {
 				bomb.setNoGrief();
 			}
 			world.spawnEntityInWorld(bomb);
 		}
-	}
-
-	@Override
-	public int getRenderType() {
-		return RenderSpecialCrop.renderId;
 	}
 
 	/**
@@ -257,33 +254,43 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	}
 
 	@Override
-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-		int stage = getGrowthStage(world.getBlockMetadata(x, y, z));
+	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
+		int stage = getGrowthStage(((Integer) state.getValue(AGE)).intValue());
 		if (stage == 0) {
 			return null;
 		}
-		return AxisAlignedBB.getBoundingBox(x + minX, y + minY, z + minZ, x + maxX, y + maxY, z + maxZ);
+		return new AxisAlignedBB(pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ, pos.getX() + maxX, pos.getY() + maxY, pos.getZ() + maxZ);
 	}
 
 	@Override
-	public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
-		int stage = getGrowthStage(world.getBlockMetadata(x, y, z));
+	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
+		int stage = getGrowthStage(((Integer) world.getBlockState(pos).getValue(AGE)).intValue());
 		setBlockBounds(0.1F, 0.0F, 0.1F, 0.9F, 0.2F + (stage * 0.15F), 0.9F);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		return iconArray[getGrowthStage(meta)];
+	public IBlockState getStateFromMeta(int meta) {
+		Boolean explode = Boolean.valueOf((meta & 0x8) > 0);
+		return this.getDefaultState().withProperty(AGE, Integer.valueOf(meta & 0x7)).withProperty(EXPLODE, explode);
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		int i = ((Integer) state.getValue(AGE)).intValue();
+		if (((Boolean) state.getValue(EXPLODE)).booleanValue()) {
+			i |= 0x8;
+		}
+		return i;
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, AGE, EXPLODE);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		String s = ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_stage_";
-		iconArray = new IIcon[4];
-		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(s + i);
-		}
+	public IStateMapper getCustomStateMap() {
+		return (new StateMap.Builder()).addPropertiesToIgnore(EXPLODE).build();
 	}
 }

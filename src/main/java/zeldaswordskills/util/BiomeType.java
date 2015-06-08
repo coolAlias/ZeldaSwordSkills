@@ -60,7 +60,7 @@ public enum BiomeType {
 
 	@Override
 	public String toString() {
-		return StatCollector.translateToLocal("biometype." + unlocalizedName + ".name");
+		return StatCollector.translateToLocal("biometype.zss" + unlocalizedName + ".name");
 	}
 
 	/**

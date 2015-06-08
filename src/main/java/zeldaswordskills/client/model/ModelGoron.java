@@ -22,8 +22,9 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.MathHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.entity.npc.EntityGoron;
 
 /**
  * 
@@ -325,7 +326,11 @@ public class ModelGoron extends ModelBase {
 
 	@Override
 	public void setLivingAnimations(EntityLivingBase entity, float par2, float par3, float par4) {
-		int i = entity.attackTime;
+		setLivingAnimations((EntityGoron) entity, par2, par3, par4);
+	}
+
+	private void setLivingAnimations(EntityGoron goron, float par2, float par3, float par4) {
+		int i = goron.getAttackTimer();
 		if (i > 0) {
 			rightArm.rotateAngleX = -2.0F + 1.5F * getSwingAmount((float) i - par4, 10.0F);
 			leftArm.rotateAngleX = -2.0F + 1.5F * getSwingAmount((float) i - par4, 10.0F);
@@ -334,11 +339,15 @@ public class ModelGoron extends ModelBase {
 
 	@Override
 	public void setRotationAngles(float f1, float f2, float f3, float f4, float f5, float f6, Entity entity) {
-		super.setRotationAngles(f1, f2, f3, f4, f5, f6, entity);
+		setRotationAngles(f1, f2, f3, f4, f5, f6, (EntityGoron) entity);
+	}
+
+	private void setRotationAngles(float f1, float f2, float f3, float f4, float f5, float f6, EntityGoron goron) {
+		super.setRotationAngles(f1, f2, f3, f4, f5, f6, goron);
 		head.rotateAngleY = f4 / (180F / (float) Math.PI);
 		//head.rotateAngleX = f5 / (180F / (float) Math.PI);
 
-		if (!(entity instanceof EntityLivingBase) || ((EntityLivingBase) entity).attackTime == 0) {
+		if (goron.getAttackTimer() == 0) {
 			rightArm.rotateAngleX = MathHelper.cos(f1 * 0.6662F + (float) Math.PI) * 2.0F * f2 * 0.5F;
 			leftArm.rotateAngleX = MathHelper.cos(f1 * 0.6662F) * 2.0F * f2 * 0.5F;
 		}

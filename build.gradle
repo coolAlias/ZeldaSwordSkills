@@ -17,20 +17,20 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "2.2.6"
+version = "3.0.1"
 group = "com.google.coolalias.zeldaswordskills" 
-archivesBaseName = "1.7.10-zeldaswordskills"
-
-dependencies {
-	compile files (
-		"eclipse/libs/antiqueatlas-4.2.1-1.7.10-deobf.jar",
-		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.7.0.jar"
-	)
-}
+archivesBaseName = "1.8-zeldaswordskills"
 
 minecraft {
-    version = "1.7.10-10.13.2.1291"
+    version = "1.8-11.14.1.1404"
     runDir = "eclipse"
+    
+    // the mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   snapshot are built nightly.
+    // stable_#            stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not allways work.
+    // simply re-run your setup task after changing the mappings to update your workspace.
+    mappings = "snapshot_20150606"
 }
 
 task deobfJar(type: Jar) {

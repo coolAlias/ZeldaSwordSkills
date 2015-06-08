@@ -1,0 +1,12 @@
+{
+    "variants": {
+    	"pendants=0" : { "model" : "zeldaswordskills:pedestal_0" },
+    	"pendants=1" : { "model" : "zeldaswordskills:pedestal_1" },
+    	"pendants=2" : { "model" : "zeldaswordskills:pedestal_2" },
+    	"pendants=3" : { "model" : "zeldaswordskills:pedestal_3" },
+    	"pendants=4" : { "model" : "zeldaswordskills:pedestal_4" },
+    	"pendants=5" : { "model" : "zeldaswordskills:pedestal_5" },
+    	"pendants=6" : { "model" : "zeldaswordskills:pedestal_6" },
+    	"pendants=7" : { "model" : "zeldaswordskills:pedestal_7" }
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "parent": "zeldaswordskills:item/shield_front",
+    "textures": {
+        "layer0": "zeldaswordskills:items/shield_hylian"
+    }
+}

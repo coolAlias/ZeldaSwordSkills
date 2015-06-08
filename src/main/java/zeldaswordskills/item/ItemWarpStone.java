@@ -20,14 +20,17 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.block.BlockWarpStone;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.songs.AbstractZeldaSong;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ItemWarpStone extends ItemMetadataBlock {
 
@@ -36,9 +39,28 @@ public class ItemWarpStone extends ItemMetadataBlock {
 	}
 
 	@Override
+	public String[] getVariants() {
+		String[] variants = new String[BlockWarpStone.EnumWarpSong.values().length];
+		for (BlockWarpStone.EnumWarpSong warpSong : BlockWarpStone.EnumWarpSong.values()) {
+			// all of the variants use the exact same texture
+			variants[warpSong.getMetadata()] = ModInfo.ID + ":warp_stone";
+		}
+		return variants;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderers(ItemModelMesher mesher) {
+		ModelResourceLocation resource = new ModelResourceLocation(ModInfo.ID + ":warp_stone", "inventory");
+		for (int i = 0; i < BlockWarpStone.EnumWarpSong.values().length; ++i) {
+			mesher.register(this, i, resource); // all have the same texture
+		}
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
-		AbstractZeldaSong song = BlockWarpStone.warpBlockSongs.get(stack.getItemDamage());
+		AbstractZeldaSong song = BlockWarpStone.EnumWarpSong.byMetadata(stack.getItemDamage()).getWarpSong();
 		if (song != null) {
 			list.add(StatCollector.translateToLocalFormatted("tooltip.zss.block.warp_stone.desc", EnumChatFormatting.GOLD + song.getDisplayName()));
 		}

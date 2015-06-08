@@ -23,6 +23,7 @@ import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.item.EntityItem;
@@ -48,6 +49,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -55,6 +58,9 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
@@ -67,6 +73,7 @@ import zeldaswordskills.api.item.ILiftBlock;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
@@ -81,9 +88,6 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
@@ -100,7 +104,7 @@ public class ZSSItemEvents
 			ZSSItemEvents.init();
 		}
 	}
-	
+
 	/** Adds a mob-class to skill orb mapping */
 	private static void addDrop(Class<? extends EntityLivingBase> mobClass, SkillBase skill) {
 		ItemStack stack = new ItemStack(ZSSItems.skillOrb, 1, skill.getId());
@@ -136,7 +140,7 @@ public class ZSSItemEvents
 			ItemStack orb = (isBoss && !flag ? new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.getId()) : getOrbDrop(mob, isBoss));
 			if (orb != null && Config.areOrbDropsEnabled()) {
 				ItemStack helm = (player).getCurrentArmor(ArmorIndex.WORN_HELM);
-				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
+				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F); 
 				float baseChance = Config.getDropChance(orb.getItem() == ZSSItems.heartPiece ? SkillBase.bonusHeart.getId() : orb.getItemDamage());
 				if (baseChance > 0.0F && (isBoss || mob.worldObj.rand.nextFloat() < (baseChance + f + (0.005F * event.lootingLevel)))) {
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
@@ -167,15 +171,16 @@ public class ZSSItemEvents
 	@SubscribeEvent
 	public void onBlockHarvest(HarvestDropsEvent event) {
 		if (event.harvester != null) {
-			if (event.block == Blocks.dirt || event.block == Blocks.grass) {
+			Block block = event.state.getBlock();
+			if (block == Blocks.dirt || block == Blocks.grass) {
 				if (event.harvester.getCurrentArmor(ArmorIndex.WORN_HELM) != null && event.harvester.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == ZSSItems.maskScents && event.world.rand.nextInt(32) == 0) {
 					event.drops.add(event.world.rand.nextInt(4) == 0 ? new ItemStack(Blocks.red_mushroom) : new ItemStack(Blocks.brown_mushroom));
 				}
-			} else if (event.block == Blocks.tallgrass) {
+			} else if (block == Blocks.tallgrass) {
 				if (PlayerUtils.isHoldingSword(event.harvester) && event.world.rand.nextFloat() < Config.getGrassDropChance()) {
 					event.drops.add(ZSSItems.getRandomGrassDrop(event.world.rand));
 				}
-			} else if (event.block == Blocks.iron_ore) {
+			} else if (block == Blocks.iron_ore) {
 				if (event.world.rand.nextFloat() < (0.005F * event.fortuneLevel)) {
 					event.drops.add(new ItemStack(ZSSItems.masterOre));
 					event.harvester.worldObj.playSoundEffect(event.harvester.posX, event.harvester.posY, event.harvester.posZ, Sounds.SPECIAL_DROP, 1.0F, 1.0F);
@@ -235,8 +240,8 @@ public class ZSSItemEvents
 		ItemStack stack = event.entityPlayer.getHeldItem();
 		switch(event.action) {
 		case LEFT_CLICK_BLOCK:
-			if (stack != null && stack.getItem() instanceof ISmashBlock && event.entityPlayer.attackTime == 0) {
-				if (blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
+			if (stack != null && stack.getItem() instanceof ISmashBlock && ZSSPlayerInfo.get(event.entityPlayer).getAttackTime() == 0) {
+				if (blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.pos, event.face)) {
 					if (event.entityPlayer instanceof EntityPlayerMP) {
 						ZSSCombatEvents.setPlayerAttackTime(event.entityPlayer);
 						PacketDispatcher.sendTo(new UnpressKeyPacket(UnpressKeyPacket.LMB), (EntityPlayerMP) event.entityPlayer);
@@ -247,7 +252,7 @@ public class ZSSItemEvents
 			break;
 		case RIGHT_CLICK_BLOCK:
 			if (stack != null && stack.getItem() instanceof ILiftBlock) {
-				if (blockWasLifted(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
+				if (blockWasLifted(event.entityPlayer.worldObj, event.entityPlayer, stack, event.pos, event.face)) {
 					event.useBlock = Result.DENY;
 				}
 			}
@@ -260,30 +265,30 @@ public class ZSSItemEvents
 	 * Returns true if the ILiftBlock itemstack was able to pick up the block clicked
 	 * and the useBlock result should be denied
 	 */
-	private boolean blockWasLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		Block block = world.getBlock(x, y, z);
-		if (player.canPlayerEdit(x, y, z, side, stack) || block instanceof ILiftable) {
-			int meta = world.getBlockMetadata(x, y, z);
+	private boolean blockWasLifted(World world, EntityPlayer player, ItemStack stack, BlockPos pos, EnumFacing face) {
+		IBlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+		if (player.canPlayerEdit(pos, face, stack) || block instanceof ILiftable) {
 			boolean isLiftable = block instanceof ILiftable;
 			boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
-			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta, side)
+			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, state, face)
 					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
-			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
-			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
-			if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (isLiftable || !block.hasTileEntity(meta))) {
+			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, state).weight;
+			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(world, pos, null, null) * 5.0F/3.0F));
+			if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (isLiftable || !block.hasTileEntity(state))) {
 				if (!world.isRemote) {
-					ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack, block, meta);
+					ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack, state);
 					if (returnStack != null && returnStack.stackSize <= 0) {
 						returnStack = null;
 					}
-					ItemStack heldBlock = ItemHeldBlock.getBlockStack(block, meta, returnStack);
+					ItemStack heldBlock = ItemHeldBlock.getBlockStack(state, returnStack);
 					if (isLiftable) {
-						((ILiftable) block).onLifted(world, player, heldBlock, x, y, z, meta);
+						((ILiftable) block).onLifted(world, player, heldBlock, pos, state);
 					}
 					player.setCurrentItemOrArmor(0, heldBlock);
-					world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, block.stepSound.getBreakSound(),
-							(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
-					world.setBlockToAir(x, y, z);
+					world.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, block.stepSound.getBreakSound(),
+							(block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F);
+					world.setBlockToAir(pos);
 				}
 				return true;
 			} else {
@@ -297,32 +302,31 @@ public class ZSSItemEvents
 	 * Returns true if the ISmashBlock itemstack was able to smash up the block clicked
 	 * and the useBlock result should be denied
 	 */
-	private boolean blockWasSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		Block block = world.getBlock(x, y, z);
+	private boolean blockWasSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, EnumFacing face) {
+		IBlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
 		boolean isSmashable = block instanceof ISmashable;
 		Result smashResult = Result.DEFAULT;
 		boolean wasDestroyed = false;
-		if (player.canPlayerEdit(x, y, z, side, stack) || isSmashable) {
-			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (isSmashable ? ((ISmashable) block).getSmashWeight(player, stack, meta, side)
+		if (player.canPlayerEdit(pos, face, stack) || isSmashable) {
+			BlockWeight weight = (isSmashable ? ((ISmashable) block).getSmashWeight(player, stack, state, face)
 					: (Config.canSmashVanilla() || isVanillaBlockSmashable(block) ? null : BlockWeight.IMPOSSIBLE));
-			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, block, meta).weight;
-			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
-			smashResult = (isSmashable ? ((ISmashable) block).onSmashed(world, player, stack, x, y, z, side) : smashResult);
+			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, state, face).weight;
+			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(world, pos, null, null) * 5.0F/3.0F));
+			smashResult = (isSmashable ? ((ISmashable) block).onSmashed(world, player, stack, pos, state, face) : smashResult);
 			if (smashResult == Result.DEFAULT) {
 				boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
-				if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (!block.hasTileEntity(meta) || isSmashable)) {
+				if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (!block.hasTileEntity(state) || isSmashable)) {
 					if (!(block instanceof BlockBreakable)) {
 						world.playSoundAtEntity(player, Sounds.ROCK_FALL, 1.0F, 1.0F);
 					}
-					// func_147480_a is destroyBlock
 					if (!world.isRemote) { 
-						world.func_147480_a(x, y, z, false);
+						world.destroyBlock(pos, false);
 					}
 					wasDestroyed = true;
 				}
 			}
-			((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, block, meta, (smashResult == Result.ALLOW || wasDestroyed));
+			((ISmashBlock) stack.getItem()).onBlockSmashed(player, stack, state, face, (smashResult == Result.ALLOW || wasDestroyed));
 		}
 		return (smashResult == Result.ALLOW || wasDestroyed);
 	}

@@ -17,18 +17,19 @@
 
 package zeldaswordskills.client.gui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
@@ -74,21 +75,16 @@ public class GuiSkills extends GuiContainer
 		super.drawScreen(mouseX, mouseY, f);
 		xSize_lo = mouseX;
 		ySize_lo = mouseY;
-
 		boolean flag = Mouse.isButtonDown(0);
 		int x1 = guiLeft + 259;
 		int y1 = guiTop + 61;
-
 		if (!wasClicking && flag && isMouseInRegion(mouseX, mouseY, x1, x1 + 3, y1, y1 + 88)) {
 			isScrolling = needsScrollBar();
 		}
-
 		if (!flag) {
 			isScrolling = false;
 		}
-
 		wasClicking = flag;
-
 		if (isScrolling) {
 			scrollY = ((float)(mouseY - y1) - 3.0F) / 81.0F;
 			clampScrollBar();
@@ -103,14 +99,14 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
 		if (needsScrollBar()) {
-			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-			GL11.glEnable(GL11.GL_BLEND);
+			GlStateManager.pushAttrib();
+			GlStateManager.enableBlend();
 			mc.renderEngine.bindTexture(texture);
 			RenderHelperQ.drawTexturedRect(259, 55, 282, 0, 3, 5, 285, 180);
 			RenderHelperQ.drawTexturedRect(259, 150, 282, 5, 3, 5, 285, 180);
 			RenderHelperQ.drawTexturedRect(260, 61, 283, 17, 1, 88, 285, 180);
 			RenderHelperQ.drawTexturedRect(259, 61 + (int)(scrollY * 81), 282, 10, 3, 7, 285, 180);
-			GL11.glPopAttrib();
+			GlStateManager.popAttrib();
 		}
 		String s = (currentSkill != null ? currentSkill.getDisplayName().toUpperCase() : StatCollector.translateToLocal("skill.zss.gui.description"));
 		isUnicode = fontRendererObj.getUnicodeFlag();
@@ -133,8 +129,7 @@ public class GuiSkills extends GuiContainer
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
 		RenderHelperQ.drawTexturedRect(texture, guiLeft, guiTop, 0, 0, xSize, ySize, 284, 180);
-		// func_147046_a is drawEntityOnScreen
-		GuiInventory.func_147046_a(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
+		GuiInventory.drawEntityOnScreen(guiLeft + 73, guiTop + 105, 30, guiLeft + 73 - xSize_lo, guiTop + 55 - ySize_lo, mc.thePlayer);
 	}
 
 	/**
@@ -178,7 +173,7 @@ public class GuiSkills extends GuiContainer
 	}
 
 	@Override
-	public void handleMouseInput() {
+	public void handleMouseInput() throws IOException {
 		super.handleMouseInput();
 		if (needsScrollBar()) {
 			int i = Mouse.getEventDWheel();
@@ -199,7 +194,7 @@ public class GuiSkills extends GuiContainer
 	}
 
 	@Override
-	protected void mouseMovedOrUp(int mouseX, int mouseY, int which) {
+	protected void mouseReleased(int mouseX, int mouseY, int which) {
 		Slot slot = this.getSlotAtPosition(mouseX, mouseY);
 		if (slot != null && slot.getStack() != null) {
 			int id = (slot.getStack().getItemDamage() % SkillBase.getNumSkills());
@@ -218,8 +213,7 @@ public class GuiSkills extends GuiContainer
 	private Slot getSlotAtPosition(int x, int y) {
 		for (int k = 0; k < inventorySlots.inventorySlots.size(); ++k) {
 			Slot slot = (Slot) inventorySlots.inventorySlots.get(k);
-			// func_146978_c is isPointInRegion
-			if (func_146978_c(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, x, y)) {
+			if (isPointInRegion(slot.xDisplayPosition, slot.yDisplayPosition, 16, 16, x, y)) {
 				return slot;
 			}
 		}

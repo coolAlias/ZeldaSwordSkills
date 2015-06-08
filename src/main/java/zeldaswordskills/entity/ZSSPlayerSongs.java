@@ -19,7 +19,7 @@ package zeldaswordskills.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +33,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockWarpStone;
@@ -49,8 +52,6 @@ import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.WarpPoint;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSPlayerSongs
 {
@@ -58,8 +59,8 @@ public class ZSSPlayerSongs
 
 	private final Set<AbstractZeldaSong> knownSongs = new HashSet<AbstractZeldaSong>();
 
-	/** Coordinates of most recently activated Warp Stones, stored using the block's metadata as key */
-	private final Map<Integer, WarpPoint> warpPoints = new HashMap<Integer, WarpPoint>();
+	/** Coordinates of most recently activated Warp Stones */
+	private final Map<BlockWarpStone.EnumWarpSong, WarpPoint> warpPoints = new EnumMap<BlockWarpStone.EnumWarpSong, WarpPoint>(BlockWarpStone.EnumWarpSong.class);
 
 	/** Song to be learned from the learning GUI is set by the block or entity triggering the GUI */
 	@SideOnly(Side.CLIENT)
@@ -208,19 +209,18 @@ public class ZSSPlayerSongs
 	/**
 	 * Call each time a warp stone is activated to set the warp coordinates for that block type
 	 */
-	public void onActivatedWarpStone(int x, int y, int z, int meta) {
-		if (warpPoints.containsKey(meta)) {
-			warpPoints.remove(meta);
+	public void onActivatedWarpStone(BlockPos pos, BlockWarpStone.EnumWarpSong warpSong) {
+		if (warpPoints.containsKey(warpSong.getMetadata())) {
+			warpPoints.remove(warpSong.getMetadata());
 		}
-		warpPoints.put(meta, new WarpPoint(player.worldObj.provider.dimensionId, x, y, z));
+		warpPoints.put(warpSong, new WarpPoint(player.worldObj.provider.getDimensionId(), pos));
 	}
 
 	/**
 	 * Returns the chunk coordinates to warp to for the various warp songs, or null if not yet set
 	 */
 	public WarpPoint getWarpPoint(AbstractZeldaSong song) {
-		Integer meta = BlockWarpStone.reverseLookup.get(song);
-		return (meta == null ? null : warpPoints.get(meta));
+		return warpPoints.get(BlockWarpStone.EnumWarpSong.bySong(song));
 	}
 
 	/**
@@ -313,7 +313,7 @@ public class ZSSPlayerSongs
 	 */
 	private Entity getHorseFromChunk(int chunkX, int chunkZ) {
 		Chunk chunk = player.worldObj.getChunkFromChunkCoords(chunkX, chunkZ);
-		if (chunk != null && chunk.isChunkLoaded) {
+		if (chunk != null && chunk.isLoaded()) {
 			return getHorseByUUID();
 		}
 		return null;
@@ -325,7 +325,7 @@ public class ZSSPlayerSongs
 	public void setHorseRidden(EntityHorse horse) {
 		if (horse.getEntityId() == horseId) {
 			setHorseCoordinates(horse);
-		} else if (horse.isTame() && horse.func_152119_ch().equals(player.getUniqueID().toString())) {
+		} else if (horse.isTame() && horse.getOwnerId().equals(player.getUniqueID().toString())) {
 			this.horseId = horse.getEntityId();
 			this.horseUUID = horse.getPersistentID();
 			setHorseCoordinates(horse);
@@ -384,14 +384,14 @@ public class ZSSPlayerSongs
 
 		if (!warpPoints.isEmpty()) {
 			NBTTagList warpList = new NBTTagList();
-			for (Integer i : warpPoints.keySet()) {
-				WarpPoint warp = warpPoints.get(i);
+			for (BlockWarpStone.EnumWarpSong warpSong : warpPoints.keySet()) {
+				WarpPoint warp = warpPoints.get(warpSong);
 				if (warp != null) {
 					NBTTagCompound warpTag = warp.writeToNBT();
-					warpTag.setInteger("WarpKey", i);
+					warpTag.setInteger("WarpKey", warpSong.getMetadata());
 					warpList.appendTag(warpTag);
 				} else {
-					ZSSMain.logger.warn("NULL warp point stored in map with key " + i);
+					ZSSMain.logger.warn("NULL warp point stored in map with key " + warpSong.getMetadata());
 				}
 			}
 			compound.setTag("WarpList", warpList);
@@ -445,7 +445,7 @@ public class ZSSPlayerSongs
 			for (int i = 0; i < warpList.tagCount(); ++i) {
 				NBTTagCompound warpTag = warpList.getCompoundTagAt(i);
 				WarpPoint warp = WarpPoint.readFromNBT(warpTag);
-				warpPoints.put(warpTag.getInteger("WarpKey"), warp);
+				warpPoints.put(BlockWarpStone.EnumWarpSong.byMetadata(warpTag.getInteger("WarpKey")), warp);
 			}
 		}
 

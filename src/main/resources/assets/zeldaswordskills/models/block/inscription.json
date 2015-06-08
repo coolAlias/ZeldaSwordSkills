@@ -1,0 +1,19 @@
+{
+	"textures": {
+		"top": "zeldaswordskills:blocks/inscription",
+		"particle": "zeldaswordskills:blocks/inscription"
+	},
+	"elements": [
+		{   "from": [ 2, 0, 2 ],
+            "to": [ 14, 1, 14 ],
+            "faces": {
+                "down":  { "uv": [ 2, 2, 14, 14 ], "texture": "#top", "cullface": "down" },
+                "up":    { "uv": [ 2, 2, 14, 14 ], "texture": "#top" },
+                "north": { "uv": [ 0, 14, 14, 16 ], "texture": "#top", "cullface": "north" },
+                "south": { "uv": [ 0, 14, 14, 16 ], "texture": "#top", "cullface": "south" },
+                "west":  { "uv": [ 0, 14, 14, 16 ], "texture": "#top", "cullface": "west" },
+                "east":  { "uv": [ 0, 14, 14, 16 ], "texture": "#top", "cullface": "east" }
+            }
+        }
+    ]
+}

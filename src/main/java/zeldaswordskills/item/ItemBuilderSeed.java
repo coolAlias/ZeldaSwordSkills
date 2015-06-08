@@ -20,24 +20,24 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.gen.ISeedStructure;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
  * A seed capable of spawning any {@link ISeedStructure} when right-clicking on a block.
  * 
  */
-public class ItemBuilderSeed extends Item
+public class ItemBuilderSeed extends BaseModItem
 {
 	/** The structure that will generate upon right-clicking on a block */
 	private final Class<? extends ISeedStructure> structure;
@@ -48,21 +48,19 @@ public class ItemBuilderSeed extends Item
 	/**
 	 * @param structure		The structure class that will be generated
 	 * @param failMessage	The message to display (via chat) when the structure fails to generate; may be null
-	 * @param texture		Sets the texture string to: "{modid}:texture"
 	 */
-	public ItemBuilderSeed(Class<? extends ISeedStructure> structure, String failMessage, String texture) {
+	public ItemBuilderSeed(Class<? extends ISeedStructure> structure, String failMessage) {
 		this.structure = structure;
 		this.failMessage = failMessage;
-		setTextureName(ModInfo.ID + ":" + texture);
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote) {
 			ISeedStructure seed = getSeedStructure(structure);
 			if (seed != null) {
-				if (seed.generate(world, player, x, y, z, side)) {
+				if (seed.generate(world, player, pos, face)) {
 					if (!player.capabilities.isCreativeMode) {
 						--stack.stackSize;
 					}

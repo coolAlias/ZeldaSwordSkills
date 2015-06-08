@@ -20,6 +20,7 @@ package zeldaswordskills.api.item;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import zeldaswordskills.block.BlockSacredFlame;
 
 /**
  * 
@@ -32,20 +33,20 @@ public interface ISacredFlame {
 	 * Called when a player activates (right clicks) a Sacred Flame Block.
 	 * Called whether or not the flame is active, and is called on both client and server.
 	 * @param stack the player's currently held item that was used to click the flames
-	 * @param type the flame's type: BlockSacredFlame.DIN, FARORE, or NAYRU
+	 * @param flame the flame's type: BlockSacredFlame.DIN, FARORE, or NAYRU
 	 * @param isActive true if the flame is currently active, i.e. has not been extinguished
 	 * @return true to extinguish the sacred flame block (based on Config settings may permanently destroy the block)
 	 */
-	public boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive);
+	boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, BlockSacredFlame.EnumType flame, boolean isActive);
 
 	/**
 	 * Called when a player left clicks a Sacred Flame Block.
 	 * Called whether or not the flame is active, and is called on both client and server.
 	 * @param stack the player's currently held item that was used to click the flames
-	 * @param type the flame's type: BlockSacredFlame.DIN, FARORE, or NAYRU
+	 * @param flame the flame's type: BlockSacredFlame.DIN, FARORE, or NAYRU
 	 * @param isActive true if the flame is currently active, i.e. has not been extinguished
 	 * @return true to extinguish the sacred flame block (based on Config settings may permanently destroy the block)
 	 */
-	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive);
+	boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, BlockSacredFlame.EnumType flame, boolean isActive);
 
 }

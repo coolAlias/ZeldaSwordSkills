@@ -34,13 +34,13 @@ public interface IFairyUpgrade {
 	 * Called from a fairy spawner during a scheduled update to process any upgrade or other
 	 * effect that should occur; this method is only called if hasFairyUpgrade returns true
 	 */
-	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core);
+	void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core);
 
 	/**
 	 * Return true if this object should call handleFairyUpgrade;
 	 * useful if different objects of the same class are handled differently
 	 * @param stack used to differentiate based on NBT or item damage
 	 */
-	public boolean hasFairyUpgrade(ItemStack stack);
+	boolean hasFairyUpgrade(ItemStack stack);
 
 }

@@ -18,6 +18,7 @@
 package zeldaswordskills.api.entity;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.CustomExplosion.IgnoreLiquid;
@@ -60,7 +61,8 @@ public enum BombType {
 	 */
 	public void postExplosionEffect(World world, Explosion explosion) {
 		if (this == BOMB_FLOWER) {
-			disperseSeeds(world, explosion.explosionX, explosion.explosionY, explosion.explosionZ);
+			Vec3 pos = explosion.getPosition();
+			disperseSeeds(world, pos.xCoord, pos.yCoord, pos.zCoord);
 		}
 	}
 

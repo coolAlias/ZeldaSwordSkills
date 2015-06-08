@@ -17,32 +17,36 @@
 
 package zeldaswordskills.item;
 
+import java.util.Collection;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.client.ISwapModel;
+import zeldaswordskills.client.render.item.ModelItemBombBag;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import com.google.common.collect.Lists;
 
 /**
  * 
@@ -65,15 +69,9 @@ import cpw.mods.fml.relauncher.SideOnly;
  * bag, it will simply be removed rather than dropping to the ground. This is vanilla behavior.
  * 
  */
-public class ItemBombBag extends Item implements IUnenchantable
+public class ItemBombBag extends BaseModItem implements ISwapModel, IUnenchantable
 {
 	private static final int BASE_CAPACITY = 10, MAX_CAPACITY = 50;
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] ones;
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] tens;
 
 	public ItemBombBag() {
 		super();
@@ -144,39 +142,16 @@ public class ItemBombBag extends Item implements IUnenchantable
 	}
 
 	@Override
-	public IIcon getIcon(ItemStack stack, int pass) {
-		int bombsHeld = getBombsHeld(stack);
-		switch(pass) {
-		case 0: return itemIcon;
-		case 1: return ones[bombsHeld % 10];
-		case 2: return tens[(bombsHeld / 10) % 10];
-		default: return itemIcon;
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-		ones = new IIcon[10];
-		tens = new IIcon[10];
-		for (int i = 0; i < 10; ++i) {
-			ones[i] = register.registerIcon(ModInfo.ID + ":digits/" + (i == 0 ? "" : "00") + i);
-			tens[i] = register.registerIcon(ModInfo.ID + ":digits/0" + i + (i == 0 ? "" : "0"));
-		}
-	}
-
-	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.1"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.2"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.1"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.2"));
 		int held = getBombsHeld(stack);
 		int i = getBagBombType(stack);
 		BombType type = (held > 0 && i > 0) ? BombType.values()[i % BombType.values().length] : BombType.BOMB_STANDARD;
-		String bombName = StatCollector.translateToLocal("item.zss.bomb." + type.unlocalizedName + ".name");
-		list.add(EnumChatFormatting.BOLD + StatCollector.translateToLocalFormatted("tooltip.zss.bombbag.desc.bombs", bombName, held, getCapacity(stack)));
+		String bombName = StatCollector.translateToLocal("item.zss.bomb_" + type.unlocalizedName + ".name");
+		list.add(EnumChatFormatting.BOLD + StatCollector.translateToLocalFormatted("tooltip.zss.bomb_bag.desc.bombs", bombName, held, getCapacity(stack)));
 	}
 
 	/**
@@ -351,5 +326,19 @@ public class ItemBombBag extends Item implements IUnenchantable
 			stack.getTagCompound().setInteger("type", -1);
 			stack.getTagCompound().setInteger("capacity", BASE_CAPACITY);
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Collection<ModelResourceLocation> getDefaultResources() {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		return Lists.newArrayList(new ModelResourceLocation(name, "inventory"));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Class<? extends IBakedModel> getNewModel() {
+		return ModelItemBombBag.class;
 	}
 }

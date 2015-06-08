@@ -1,0 +1,20 @@
+{
+    "variants": {
+    	"boss_type=temple_desert,half=lower" : { "model" : "zeldaswordskills:door_temple_desert_lower" },
+    	"boss_type=temple_desert,half=upper" : { "model" : "zeldaswordskills:door_temple_desert_upper" },
+    	"boss_type=temple_earth,half=lower" : { "model" : "zeldaswordskills:door_temple_earth_lower" },
+    	"boss_type=temple_earth,half=upper" : { "model" : "zeldaswordskills:door_temple_earth_upper" },
+    	"boss_type=temple_fire,half=lower" : { "model" : "zeldaswordskills:door_temple_fire_lower" },
+    	"boss_type=temple_fire,half=upper" : { "model" : "zeldaswordskills:door_temple_fire_upper" },
+    	"boss_type=temple_forest,half=lower" : { "model" : "zeldaswordskills:door_temple_forest_lower" },
+    	"boss_type=temple_forest,half=upper" : { "model" : "zeldaswordskills:door_temple_forest_upper" },
+    	"boss_type=temple_ice,half=lower" : { "model" : "zeldaswordskills:door_temple_ice_lower" },
+    	"boss_type=temple_ice,half=upper" : { "model" : "zeldaswordskills:door_temple_ice_upper" },
+    	"boss_type=temple_shadow,half=lower" : { "model" : "zeldaswordskills:door_temple_shadow_lower" },
+    	"boss_type=temple_shadow,half=upper" : { "model" : "zeldaswordskills:door_temple_shadow_upper" },
+    	"boss_type=temple_water,half=lower" : { "model" : "zeldaswordskills:door_temple_water_lower" },
+    	"boss_type=temple_water,half=upper" : { "model" : "zeldaswordskills:door_temple_water_upper" },
+    	"boss_type=temple_wind,half=lower" : { "model" : "zeldaswordskills:door_temple_wind_lower" },
+    	"boss_type=temple_wind,half=upper" : { "model" : "zeldaswordskills:door_temple_wind_upper" }
+    }
+}

@@ -26,8 +26,11 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.client.ZSSKeyHandler;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
@@ -37,8 +40,6 @@ import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -168,7 +169,7 @@ public class ArmorBreak extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyPressed() {
-		return (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].getIsKeyPressed() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.getIsKeyPressed()));
+		return (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].isKeyDown() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.isKeyDown()));
 	}
 
 	/**
@@ -213,7 +214,7 @@ public class ArmorBreak extends SkillActive
 				if (charge == 0) {
 					// can't use the standard animation methods to prevent key/mouse input,
 					// since Armor Break will not return true for isActive
-					player.attackTime = 4; // flag for isAnimating? no player parameter
+					ZSSPlayerInfo.get(player).setAttackTime(4); // flag for isAnimating? no player parameter; // flag for isAnimating? no player parameter
 					player.swingItem();
 					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
 						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.getKeyCode(), false);

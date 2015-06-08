@@ -1,0 +1,11 @@
+{
+    "variants": {
+    	"warp_song=bolero" : { "model" : "zeldaswordskills:warp_stone" },
+    	"warp_song=minuet" : { "model" : "zeldaswordskills:warp_stone" },
+    	"warp_song=nocturne" : { "model" : "zeldaswordskills:warp_stone" },
+    	"warp_song=oath" : { "model" : "zeldaswordskills:warp_stone" },
+    	"warp_song=prelude" : { "model" : "zeldaswordskills:warp_stone" },
+    	"warp_song=requiem" : { "model" : "zeldaswordskills:warp_stone" },
+    	"warp_song=serenade" : { "model" : "zeldaswordskills:warp_stone" }
+    }
+}

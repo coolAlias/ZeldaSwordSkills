@@ -128,15 +128,27 @@ public class BlockRotationData
 		blockRotationData.put(Blocks.anvil, Rotation.ANVIL);
 
 		blockRotationData.put(Blocks.iron_door, Rotation.DOOR);
-		blockRotationData.put(Blocks.wooden_door, Rotation.DOOR);
+		// Wooden Doors
+		blockRotationData.put(Blocks.acacia_door, Rotation.DOOR);
+		blockRotationData.put(Blocks.birch_door, Rotation.DOOR);
+		blockRotationData.put(Blocks.dark_oak_door, Rotation.DOOR);
+		blockRotationData.put(Blocks.jungle_door, Rotation.DOOR);
+		blockRotationData.put(Blocks.oak_door, Rotation.DOOR);
+		blockRotationData.put(Blocks.spruce_door, Rotation.DOOR);
 
 		blockRotationData.put(Blocks.bed, Rotation.GENERIC);
 		blockRotationData.put(Blocks.cocoa, Rotation.GENERIC);
-		blockRotationData.put(Blocks.fence_gate, Rotation.GENERIC);
 		blockRotationData.put(Blocks.pumpkin, Rotation.GENERIC);
 		blockRotationData.put(Blocks.lit_pumpkin, Rotation.GENERIC);
 		blockRotationData.put(Blocks.end_portal_frame, Rotation.GENERIC);
 		blockRotationData.put(Blocks.tripwire_hook, Rotation.GENERIC);
+		// Wooden Gates
+		blockRotationData.put(Blocks.acacia_fence_gate, Rotation.GENERIC);
+		blockRotationData.put(Blocks.birch_fence_gate, Rotation.GENERIC);
+		blockRotationData.put(Blocks.dark_oak_fence_gate, Rotation.GENERIC);
+		blockRotationData.put(Blocks.jungle_fence_gate, Rotation.GENERIC);
+		blockRotationData.put(Blocks.oak_fence_gate, Rotation.GENERIC);
+		blockRotationData.put(Blocks.spruce_fence_gate, Rotation.GENERIC);
 
 		blockRotationData.put(Blocks.chest, Rotation.PISTON_CONTAINER);
 		blockRotationData.put(Blocks.trapped_chest, Rotation.PISTON_CONTAINER);

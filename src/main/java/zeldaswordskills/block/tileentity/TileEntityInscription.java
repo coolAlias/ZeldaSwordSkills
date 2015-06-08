@@ -25,7 +25,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
@@ -34,17 +33,12 @@ import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 
-public class TileEntityInscription extends TileEntity
+public class TileEntityInscription extends TileEntityBase
 {
 	private AbstractZeldaSong song;
 
 	public TileEntityInscription() {
 		song = ZeldaSongs.songTime;
-	}
-
-	@Override
-	public boolean canUpdate() {
-		return false;
 	}
 
 	public AbstractZeldaSong getSong() {
@@ -55,13 +49,13 @@ public class TileEntityInscription extends TileEntity
 	 * Sets the song that will be learned from this inscription
 	 */
 	public void setSong(AbstractZeldaSong song) {
-		if (song != null && !song.canLearnFromInscription(worldObj, xCoord, yCoord, zCoord, blockType, blockMetadata)) {
-			ZSSMain.logger.warn(String.format("%s cannot be learned from inscriptions; coordinates: %d/%d/%d", song.getDisplayName(), xCoord, yCoord, zCoord));
+		if (song != null && !song.canLearnFromInscription(worldObj, worldObj.getBlockState(pos))) {
+			ZSSMain.logger.warn(String.format("%s cannot be learned from inscriptions; coordinates: %d/%d/%d", song.getDisplayName(), pos.getX(), pos.getY(), pos.getZ()));
 			return;
 		}
 		this.song = song;
 		if (!worldObj.isRemote) {
-			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+			worldObj.markBlockForUpdate(pos);
 		}
 	}
 
@@ -75,7 +69,7 @@ public class TileEntityInscription extends TileEntity
 		boolean looped = false;
 		while (song == null && i < songs.size()) {
 			song = ZeldaSongs.getSongByName(songs.get(i));
-			if (!song.canLearnFromInscription(worldObj, xCoord, yCoord, zCoord, blockType, blockMetadata)) {
+			if (!song.canLearnFromInscription(worldObj, worldObj.getBlockState(pos))) {
 				song = null;
 				++i;
 				if (i == songs.size() && !looped) {
@@ -93,7 +87,7 @@ public class TileEntityInscription extends TileEntity
 	 */
 	public boolean onActivated(EntityPlayer player) {
 		if (song == null) {
-			ZSSMain.logger.warn(String.format("TileEntityInscription at %d/%d/%d does not have a valid song!", xCoord, yCoord, zCoord));
+			ZSSMain.logger.warn(String.format("TileEntityInscription at %d/%d/%d does not have a valid song!", pos.getX(), pos.getY(), pos.getZ()));
 			return false;
 		}
 		ItemStack stack = player.getHeldItem();
@@ -110,7 +104,7 @@ public class TileEntityInscription extends TileEntity
 		} else if (stack != null && stack.getItem() instanceof ItemInstrument) {
 			if (worldObj.isRemote) {
 				ZSSPlayerSongs.get(player).songToLearn = song;
-				player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, xCoord, yCoord, zCoord);
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, pos.getX(), pos.getY(), pos.getZ());
 			}
 			return true;
 		} else if (worldObj.isRemote) {
@@ -123,12 +117,12 @@ public class TileEntityInscription extends TileEntity
 	public Packet getDescriptionPacket() {
 		NBTTagCompound tag = new NBTTagCompound();
 		this.writeToNBT(tag);
-		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, 1, tag);
+		return new S35PacketUpdateTileEntity(pos, 1, tag);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
-		readFromNBT(packet.func_148857_g());
+		readFromNBT(packet.getNbtCompound());
 	}
 
 	@Override

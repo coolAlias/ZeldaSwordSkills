@@ -18,42 +18,45 @@
 package zeldaswordskills.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDoor;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Unbreakable door that can be removed via small key. Bit 8 flags the upper block.
+ * Like normal doors, these always come in a two-block pair, but may only be removed by
+ * using the matching Big Key.
+ * 
+ * Metadata 0x0 to 0x7 are the key type required to open the door, and 0x8 flags top or bottom.
  *
  */
 public class BlockDoorLocked extends Block implements IDungeonBlock
 {
-	@SideOnly(Side.CLIENT)
-	protected IIcon iconEmpty;
-	@SideOnly(Side.CLIENT)
-	protected IIcon iconTop;
-	@SideOnly(Side.CLIENT)
-	protected IIcon iconUpper;
-	@SideOnly(Side.CLIENT)
-	protected IIcon iconLower;
+	/** Upper (bit 8) or lower (default) half of door */
+	public static final PropertyEnum HALF = PropertyEnum.create("half", BlockDoor.EnumDoorHalf.class);
 
 	public BlockDoorLocked(Material material) {
 		super(material);
 		setBlockUnbreakable();
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundTypeMetal);
+		setCreativeTab(ZSSCreativeTabs.tabKeys);
+		setDefaultState(blockState.getBaseState().withProperty(HALF, BlockDoor.EnumDoorHalf.LOWER));
 	}
 
 	@Override
@@ -62,19 +65,25 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
+	public EnumWorldBlockLayer getBlockLayer() {
+		return EnumWorldBlockLayer.CUTOUT_MIPPED;
+	}
+
+	@Override
 	public boolean isOpaqueCube() {
 		return false;
 	}
 
 	@Override
-	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
-		return y >= 255 ? false : World.doesBlockHaveSolidTopSurface(world, x, y - 1, z) && super.canPlaceBlockAt(world, x, y, z) && super.canPlaceBlockAt(world, x, y + 1, z);
+	public boolean canPlaceBlockAt(World world, BlockPos pos) {
+		return pos.getY() >= 255 ? false : World.doesBlockHaveSolidTopSurface(world, pos.down()) && super.canPlaceBlockAt(world, pos) && super.canPlaceBlockAt(world, pos.up());
 	}
 
 	/**
 	 * Return true if the player's held item was succesfully used to unlock this door
 	 */
-	protected boolean canUnlock(EntityPlayer player, int meta) {
+	protected boolean canUnlock(EntityPlayer player, IBlockState state) {
 		ItemStack key = player.getHeldItem();
 		if (key != null) {
 			if (key.getItem() == ZSSItems.keySmall) {
@@ -88,11 +97,11 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote) {
-			if (canUnlock(player, world.getBlockMetadata(x, y, z))) {
+			if (canUnlock(player, state)) {
 				world.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
-				world.setBlockToAir(x, y, z);
+				world.setBlockToAir(pos);
 			} else {
 				world.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 			}
@@ -101,33 +110,31 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, Block oldBlock, int oldMeta) {
-		y += (oldMeta > 0x7 ? -1 : 1);
-		if (world.getBlock(x, y, z) == this) {
-			world.setBlockToAir(x, y, z);
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+		pos = (((BlockDoor.EnumDoorHalf) state.getValue(HALF)) == BlockDoor.EnumDoorHalf.LOWER ? pos.up() : pos.down());
+		if (isSameVariant(world, pos, world.getBlockState(pos), state.getBlock().getMetaFromState(state))) {
+			world.setBlockToAir(pos);
 		}
 	}
 
 	@Override
-	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-		return new ItemStack(ZSSItems.doorLockedSmall);
+	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
+		return (state.getBlock() == this);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		if ((side == 0 && meta > 0x7) || (side == 1 && meta < 0x8)) {
-			return iconEmpty;
-		}
-		return (meta > 0x7 ? (side == 1 ? iconTop : iconUpper) : (side == 0 ? iconTop : iconLower));
+	public IBlockState getStateFromMeta(int meta) {
+		BlockDoor.EnumDoorHalf half = ((meta & 8) > 0) ? BlockDoor.EnumDoorHalf.UPPER : BlockDoor.EnumDoorHalf.LOWER;
+		return getDefaultState().withProperty(HALF, half);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		iconEmpty = register.registerIcon(ModInfo.ID + ":empty");
-		iconTop = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top");
-		iconUpper = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_upper");
-		iconLower = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_lower");
+	public int getMetaFromState(IBlockState state) {
+		return (((BlockDoor.EnumDoorHalf) state.getValue(HALF)) == BlockDoor.EnumDoorHalf.UPPER) ? 8 : 0;
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, HALF);
 	}
 }

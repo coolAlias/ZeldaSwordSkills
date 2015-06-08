@@ -20,6 +20,7 @@ package zeldaswordskills.world.gen.feature;
 import java.util.Random;
 
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import zeldaswordskills.block.ZSSBlocks;
@@ -39,23 +40,21 @@ public class WorldGenBombFlowers extends WorldGenerator
 		int i = (chunkX << 4) + 8;
 		int k = (chunkZ << 4) + 8;
 		for (int n = 0; n < 6; ++n) {
-			int j = world.getHeightValue(i, k);
-			generateAt(world, rand, i, j, k); // surface
+			int j = world.getHeight(new BlockPos(i, 64, k)).getY();
+			generateAt(world, rand, new BlockPos(i, j, k)); // surface
 			j = rand.nextInt(48) + rand.nextInt(48);
-			generateAt(world, rand, i, j, k); // subterranean
+			generateAt(world, rand, new BlockPos(i, j, k)); // subterranean
 		}
 	}
 
 	/**
 	 * Attempts to generate several bomb flowers around the given coordinates
 	 */
-	private void generateAt(World world, Random rand, int x, int y, int z) {
+	private void generateAt(World world, Random rand, BlockPos pos) {
 		int n = 6;
 		for (int l = 0; l < 64 && n > 0; ++l) {
-			int i = x + rand.nextInt(8) - rand.nextInt(8);
-			int j = y + rand.nextInt(4) - rand.nextInt(4);
-			int k = z + rand.nextInt(8) - rand.nextInt(8);
-			if (generate(world, rand, i, j, k)) {
+			BlockPos pos1 = pos.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
+			if (generate(world, rand, pos1)) {
 				--n;
 			}
 		}
@@ -66,10 +65,10 @@ public class WorldGenBombFlowers extends WorldGenerator
 	 * @return true if a block was placed
 	 */
 	@Override
-	public boolean generate(World world, Random rand, int x, int y, int z) {
+	public boolean generate(World world, Random rand, BlockPos pos) {
 		// Don't allow placement on cobblestone: probably a village blacksmith
-		if (world.isAirBlock(x, y, z) && world.getBlock(x, y - 1, z) != Blocks.cobblestone && ZSSBlocks.bombFlower.canPlaceBlockAt(world, x, y, z)) {
-			world.setBlock(x, y, z, ZSSBlocks.bombFlower, rand.nextInt(8), 2);
+		if (world.isAirBlock(pos) && world.getBlockState(pos.down()).getBlock() != Blocks.cobblestone && ZSSBlocks.bombFlower.canPlaceBlockAt(world, pos)) {
+			world.setBlockState(pos, ZSSBlocks.bombFlower.getStateFromMeta(rand.nextInt(8)), 2);
 			return true;
 		}
 		return false;

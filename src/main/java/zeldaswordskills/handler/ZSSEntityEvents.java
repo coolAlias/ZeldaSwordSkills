@@ -37,16 +37,17 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.item.ItemBombFlowerSeed;
@@ -59,7 +60,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 

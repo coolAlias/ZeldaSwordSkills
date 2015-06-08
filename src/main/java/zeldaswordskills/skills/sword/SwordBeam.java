@@ -27,8 +27,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.item.ZSSItems;
@@ -40,8 +43,6 @@ import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -128,7 +129,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && player.attackTime == 0 && PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && checkHealth(player) && ZSSPlayerInfo.get(player).canAttack() && PlayerUtils.isHoldingSword(player);
 	}
 
 	/**
@@ -169,7 +170,7 @@ public class SwordBeam extends SkillActive
 			world.spawnEntityInWorld(beam);
 		} else {
 			player.swingItem();
-			player.attackTime = (player.capabilities.isCreativeMode ? 0 : 20 - level);
+			ZSSPlayerInfo.get(player).setAttackTime((player.capabilities.isCreativeMode ? 0 : 20 - level));
 		}
 		return true;
 	}

@@ -22,14 +22,19 @@ import java.util.Random;
 import java.util.Set;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockChest;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import zeldaswordskills.block.BlockChestLocked;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.item.ZSSItems;
@@ -44,9 +49,6 @@ import zeldaswordskills.util.StructureGenUtils;
  */
 public abstract class RoomBase
 {
-	/** Directional values, starting south (+z) and moving clockwise: */
-	public static final int SOUTH = 0, WEST = 1, NORTH = 2, EAST = 3;
-
 	/** Whether this particular dungeon was below water */
 	public boolean submerged = false;
 
@@ -105,14 +107,27 @@ public abstract class RoomBase
 	protected abstract void placeDungeonCore(World world);
 
 	/**
+	 * Use to place a chest with appropriate facing based on surrounding blocks
+	 */
+	protected void placeChest(World world, BlockPos pos, Block chest) {
+		IBlockState chestState = chest.getDefaultState();
+		if (chest instanceof BlockChest) {
+			chestState = ((BlockChest) chest).correctFacing(world, pos, chestState);
+		} else if (chest instanceof BlockChestLocked) {
+			chestState = ((BlockChestLocked) chest).correctFacing(world, pos, chestState);
+		}
+		world.setBlockState(pos, chestState, 2);
+	}
+
+	/**
 	 * Places a pedestal in the dungeon's center with a Master Sword stuck in it
 	 */
 	protected void placePedestal(World world, int offsetY) {
-		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, offsetY, bBox.getZSize() / 2, ZSSBlocks.pedestal, 0);
+		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, offsetY, bBox.getZSize() / 2, ZSSBlocks.pedestal.getDefaultState());
 		int x = StructureGenUtils.getXWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
 		int y = StructureGenUtils.getYWithOffset(bBox, offsetY);
 		int z = StructureGenUtils.getZWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 		if (te instanceof TileEntityPedestal) {
 			((TileEntityPedestal) te).setSword(new ItemStack(ZSSItems.swordMaster), null);
 		}
@@ -137,7 +152,7 @@ public abstract class RoomBase
 		for (int i = bBox.minX; i <= bBox.maxX; ++i) {
 			for (int j = bBox.minY; j <= bBox.maxY; ++j) {
 				for (int k = bBox.minZ; k <= bBox.maxZ; ++k) {
-					Block block = world.getBlock(i, j, k);
+					Block block = world.getBlockState(new BlockPos(i, j, k)).getBlock();
 					if (!canReplaceBlockAt(j, block)) {
 						// TODO avoid mod block check needs testing (are mod block IDs guaranteed to be > 255?)
 						if (block == ZSSBlocks.secretStone || (Config.avoidModBlocks() && Block.getIdFromBlock(block) > 255)) {
@@ -156,7 +171,7 @@ public abstract class RoomBase
 	 * Standard room gen procedure builds basic cube, fills with liquids/air, and calls decorateDungeon
 	 */
 	protected void doStandardRoomGen(World world, Random rand) {
-		StructureGenUtils.fillWithBlocks(world, bBox, 0, bBox.getXSize(), 0, bBox.getYSize(), 0, bBox.getZSize(), ZSSBlocks.secretStone, getMetadata());
+		StructureGenUtils.fillWithBlocks(world, bBox, 0, bBox.getXSize(), 0, bBox.getYSize(), 0, bBox.getZSize(), ZSSBlocks.secretStone.getStateFromMeta(getMetadata()));
 		genSubmerged(world);
 		generateAir(world);
 		decorateDungeon(world, rand);
@@ -185,7 +200,7 @@ public abstract class RoomBase
 
 	/** Shortcut for canReplaceBlockAt(int y, int id) */
 	protected boolean canReplaceBlockAt(World world, int x, int y, int z) {
-		return canReplaceBlockAt(y, world.getBlock(x, y, z));
+		return canReplaceBlockAt(y, world.getBlockState(new BlockPos(x, y, z)).getBlock());
 	}
 
 	/**
@@ -208,14 +223,14 @@ public abstract class RoomBase
 	}
 
 	/** Sets the room's metadata based on world biome */
-	protected abstract void setMetadata(World world, int x, int z);
+	protected abstract void setMetadata(World world, BlockPos pos);
 
 	/**
 	 * Fills room with air according to submerged / ocean status
 	 */
 	protected void generateAir(World world) {
 		if (!inOcean) {
-			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, (submerged ? (inLava || isLocked ? 2 : 3) : 1), bBox.getYSize() - 1, 1, bBox.getZSize() - 1, Blocks.air, 0);
+			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, (submerged ? (inLava || isLocked ? 2 : 3) : 1), bBox.getYSize() - 1, 1, bBox.getZSize() - 1, Blocks.air.getDefaultState());
 		}
 	}
 
@@ -227,7 +242,7 @@ public abstract class RoomBase
 		if (submerged && bBox.getXSize() > 3) {
 			int fillTo = (inLava ? 2 : inOcean ? bBox.getYSize() - 1 : 3);
 			Block block = (inLava ? Blocks.lava : Blocks.water);
-			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, 1, fillTo, 1, bBox.getZSize() - 1, block, 0);
+			StructureGenUtils.fillWithBlocks(world, bBox, 1, bBox.getXSize() - 1, 1, fillTo, 1, bBox.getZSize() - 1, block.getDefaultState());
 		}
 	}
 
@@ -238,17 +253,17 @@ public abstract class RoomBase
 	 */
 	protected boolean placeInOcean(World world, boolean sink) {
 		bBox.offset(0, 4, 0); // move back up a little
-		int x = bBox.getCenterX();
-		int z = bBox.getCenterZ();
-		boolean flag = world.getBiomeGenForCoords(x, z).biomeName.toLowerCase().contains("ocean");
-		if (flag && !inLava && world.getBlock(x, bBox.maxY, z).getMaterial() == Material.water) {
+		Vec3i center = bBox.getCenter();
+		int x = center.getX();
+		int z = center.getZ();
+		boolean flag = world.getBiomeGenForCoords(new BlockPos(center)).biomeName.toLowerCase().contains("ocean");
+		if (flag && !inLava && world.getBlockState(new BlockPos(x, bBox.maxY, z)).getBlock().getMaterial() == Material.water) {
 			int count = 0;
-			while (bBox.minY > 16 && count < 8 && world.getBlock(x, bBox.minY, z).getMaterial() == Material.water) {
+			while (bBox.minY > 16 && count < 8 && world.getBlockState(new BlockPos(x, bBox.minY, z)).getBlock().getMaterial() == Material.water) {
 				bBox.offset(0, -1, 0);
 				++count;
 			}
-
-			if (world.getBlock(x, bBox.minY, z).getMaterial() != Material.water) {
+			if (world.getBlockState(new BlockPos(x, bBox.minY, z)).getBlock().getMaterial() != Material.water) {
 				inOcean = true;
 				StructureGenUtils.adjustCornersForMaterial(world, bBox, Material.water, 6, false, false);
 				if (sink) {
@@ -267,7 +282,6 @@ public abstract class RoomBase
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -276,11 +290,14 @@ public abstract class RoomBase
 	 * @return true if final bottom block is not another secret dungeon block
 	 */
 	protected boolean placeInNether(World world) {
-		while (bBox.minY > 8 && world.getBlock(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()).getMaterial() == Material.lava) {
+		Vec3i center = bBox.getCenter();
+		int x = center.getX();
+		int z = center.getZ();
+		while (bBox.minY > 8 && world.getBlockState(new BlockPos(x, bBox.minY, z)).getBlock().getMaterial() == Material.lava) {
 			bBox.offset(0, -1, 0);
 		}
 		StructureGenUtils.adjustCornersForMaterial(world, bBox, Material.lava, 4, false, false);
-		return (world.getBlock(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()) != ZSSBlocks.secretStone);
+		return (world.getBlockState(new BlockPos(x, bBox.minY, z)).getBlock() != ZSSBlocks.secretStone);
 	}
 
 	protected int validations = 0;
@@ -302,7 +319,7 @@ public abstract class RoomBase
 				if (validations > NUM_VALIDATIONS || bBox.minY < 5) {
 					return false;
 				} else {
-					Block block = world.getBlock(i, bBox.maxY, k);
+					Block block = world.getBlockState(new BlockPos(i, bBox.maxY, k)).getBlock();
 					if (block != null && block.getMaterial().isLiquid()) {
 						submerged = true;
 						inLava = (block == Blocks.lava);
@@ -317,7 +334,6 @@ public abstract class RoomBase
 				}
 			}
 		}
-
 		return true;
 	}
 
@@ -326,7 +342,7 @@ public abstract class RoomBase
 	 */
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound compound = new NBTTagCompound();
-		compound.setTag("BB", bBox.func_151535_h());
+		compound.setTag("BB", bBox.toNBTTagIntArray());
 		return compound;
 	}
 

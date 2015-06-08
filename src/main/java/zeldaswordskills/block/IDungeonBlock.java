@@ -17,10 +17,27 @@
 
 package zeldaswordskills.block;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+
 /**
  * 
  * An interface to allow a variety of blocks to be considered valid during
  * TileEntityDungeonCore's structure validation process
  *
  */
-public interface IDungeonBlock {}
+public interface IDungeonBlock {
+
+	/**
+	 * Called when verifying the door block to allow for variant and tile entity checking.
+	 * Typical implementation may look like this:
+	 *		IBlockState expected = getStateFromMeta(meta);
+	 *		return ((EnumType) state.getValue(VARIANT)) == ((EnumType) expected.getValue(VARIANT));
+	 * @param	state Current state of the block at the given position
+	 * @param	meta Metadata value of the expected door variant
+	 * @return	True if the current state variant is equivalent to that for the metadata value
+	 */
+	boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta);
+
+}

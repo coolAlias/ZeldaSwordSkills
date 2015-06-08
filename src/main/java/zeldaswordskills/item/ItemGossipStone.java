@@ -21,13 +21,13 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.OpenGossipStoneEditorPacket;
 
-public class ItemGossipStone extends ItemMetadataBlock {
+public class ItemGossipStone extends ItemBlockUnbreakable {
 
 	public ItemGossipStone(Block block) {
 		super(block);
@@ -35,41 +35,12 @@ public class ItemGossipStone extends ItemMetadataBlock {
 	}
 
 	@Override
-	public String getItemStackDisplayName(ItemStack stack) {
-		return StatCollector.translateToLocal(getUnlocalizedName() + (stack.getItemDamage() > 0 ? ".name.unbreakable" : ".name"));
-	}
-
-	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		if (world.isRemote || side == 0) {
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ) {
+		if (!super.onItemUse(stack, player, world, pos, face, hitX, hitY, hitZ)) {
 			return false;
-		} else if (!world.getBlock(x, y, z).getMaterial().isSolid()) {
-			return false;
-		} else {
-			switch(side) {
-			case 1: ++y; break;
-			case 2: --z; break;
-			case 3: ++z; break;
-			case 4: --x; break;
-			case 5: ++x; break;
-			}
-			Block block = ZSSBlocks.gossipStone;
-			if (!player.canPlayerEdit(x, y, z, side, stack)) {
-				return false;
-			} else if (!block.canPlaceBlockAt(world, x, y, z)) {
-				return false;
-			} else if (!world.setBlock(x, y, z, block, stack.getItemDamage(), 3)) {
-				return false;
-			}
-			block.onBlockPlacedBy(world, x, y, z, player, stack);
-			block.onPostBlockPlaced(world, x, y, z, stack.getItemDamage());
-			if (!player.capabilities.isCreativeMode) {
-				--stack.stackSize;
-			}
-			if (player instanceof EntityPlayerMP) {
-				PacketDispatcher.sendTo(new OpenGossipStoneEditorPacket(x, y, z), (EntityPlayerMP) player);
-			}
-			return true;
+		} else if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new OpenGossipStoneEditorPacket(pos.offset(face)), (EntityPlayerMP) player);
 		}
+		return true;
 	}
 }

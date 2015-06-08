@@ -1,0 +1,10 @@
+{
+    "variants": {
+    	"extinguished=false,variant=din" : { "model" : "zeldaswordskills:sacred_flame_din" },
+    	"extinguished=false,variant=farore" : { "model" : "zeldaswordskills:sacred_flame_farore" },
+    	"extinguished=false,variant=nayru" : { "model" : "zeldaswordskills:sacred_flame_nayru" },
+    	"extinguished=true,variant=din" : { "model" : "zeldaswordskills:sacred_flame_extinguished" },
+    	"extinguished=true,variant=farore" : { "model" : "zeldaswordskills:sacred_flame_extinguished" },
+    	"extinguished=true,variant=nayru" : { "model" : "zeldaswordskills:sacred_flame_extinguished" }
+    }
+}

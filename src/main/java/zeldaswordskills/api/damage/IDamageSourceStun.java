@@ -26,9 +26,9 @@ package zeldaswordskills.api.damage;
 public interface IDamageSourceStun extends IPostDamageEffect {
 
 	/** Whether this damage source can stun players */
-	public boolean canStunPlayers();
-	
+	boolean canStunPlayers();
+
 	/** Whether this damage source always stuns the target, regardless of immunity or config settings */
-	public boolean alwaysStuns();
+	boolean alwaysStuns();
 
 }

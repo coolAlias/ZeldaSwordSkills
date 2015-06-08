@@ -17,9 +17,10 @@
 
 package zeldaswordskills.api.item;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import zeldaswordskills.api.block.BlockWeight;
 
 /**
@@ -38,9 +39,9 @@ import zeldaswordskills.api.block.BlockWeight;
  * that implement ISmashable, just in case the block does not use an Adventure Mode
  * exempt block material:
  * 
- * // func_150897_b is canHarvestBlock
+ * // canHarvestBlock may be named 'func_150897_b'
  * @Override
- * public boolean func_150897_b(Block block) {
+ * public boolean canHarvestBlock(Block block) {
  * 	return block instanceof ISmashable;
  * }
  *
@@ -49,18 +50,19 @@ public interface ISmashBlock {
 
 	/**
 	 * Returns the strength of this item for the purpose of smashing blocks
-	 * Player-, ItemStack-, and Block- sensitive
-	 * @param block the block that was struck
-	 * @param meta the metadata of the block struck
+	 * @param stack the itemstack used to strike the block
+	 * @param state the current block state of the block being struck
+	 * @param face the face of the block that was hit
 	 */
-	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta);
+	BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face);
 
 	/**
 	 * Called after the player has attempted to smash a block with the stack,
 	 * making it ideal for damaging the stack, for example
-	 * @param meta the metadata of the block before it was smashed
+	 * @param state the state of the block before it was smashed
+	 * @param face the face of the block that was hit
 	 * @param wasSmashed true if the smash was considered successful
 	 */
-	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed);
+	void onBlockSmashed(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face, boolean wasSmashed);
 
 }

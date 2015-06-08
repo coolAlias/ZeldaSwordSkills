@@ -1,0 +1,8 @@
+{
+    "variants": {
+    	"facing=north": { "model": "zeldaswordskills:chest_locked" },
+        "facing=south": { "model": "zeldaswordskills:chest_locked", "y": 180 },
+        "facing=west":  { "model": "zeldaswordskills:chest_locked", "y": 270 },
+        "facing=east":  { "model": "zeldaswordskills:chest_locked", "y": 90 }
+    }
+}

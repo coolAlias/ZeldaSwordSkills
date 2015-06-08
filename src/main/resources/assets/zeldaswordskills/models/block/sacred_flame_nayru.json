@@ -1,0 +1,7 @@
+{
+    "parent": "minecraft:block/fire_floor",
+    "textures": {
+        "particle": "zeldaswordskills:blocks/sacred_flame_nayru_layer_0",
+        "fire": "zeldaswordskills:blocks/sacred_flame_nayru_layer_0"
+    }
+}

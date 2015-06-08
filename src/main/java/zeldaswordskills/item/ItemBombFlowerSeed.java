@@ -18,40 +18,56 @@
 package zeldaswordskills.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemBombFlowerSeed extends ItemSeeds {
+public class ItemBombFlowerSeed extends ItemSeeds implements IModItem {
 
 	public ItemBombFlowerSeed() {
 		super(ZSSBlocks.bombFlower, Blocks.stone);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
+	/**
+	 * Returns "item.zss.unlocalized_name" for translation purposes
+	 */
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		if (side != 1 || !player.canPlayerEdit(x, y, z, side, stack) || !player.canPlayerEdit(x, y + 1, z, side, stack)) {
+	public String getUnlocalizedName() {
+		return super.getUnlocalizedName().replaceFirst("item.", "item.zss.");
+	}
+
+	@Override
+	public String getUnlocalizedName(ItemStack stack) {
+		return getUnlocalizedName();
+	}
+
+	@Override
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ) {
+		if (face == EnumFacing.DOWN || !player.canPlayerEdit(pos, face, stack) || !player.canPlayerEdit(pos.up(), face, stack)) {
 			return false;
 		}
-		++y; // placing it on top of the block at y
-		Block plant = getPlant(world, x, y, z);
-		if (plant.canPlaceBlockAt(world, x, y, z)) {
+		pos = pos.up(); // placing it on top of the block at y
+		Block plant = getPlant(world, pos).getBlock();
+		if (plant.canPlaceBlockAt(world, pos)) {
 			if (!world.isRemote) {
-				world.setBlock(x, y, z, plant);
+				world.setBlockState(pos, plant.getDefaultState());
 			}
 			--stack.stackSize;
 			return true;
@@ -71,27 +87,25 @@ public class ItemBombFlowerSeed extends ItemSeeds {
 			public void onUpdate() {
 				super.onUpdate();
 				if (!worldObj.isRemote && ticksExisted > 80 && worldObj.rand.nextInt(128) == 0) {
-					int i = MathHelper.floor_double(posX);
-					int j = MathHelper.floor_double(posY);
-					int k = MathHelper.floor_double(posZ);
+					BlockPos pos = new BlockPos(this);
 					boolean flag = false;
-					if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i, j, k)) {
+					if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, pos)) {
 						flag = true;
-					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i + 1, j, k)) {
-						++i;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, pos.north())) {
+						pos = pos.north();
 						flag = true;
-					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i - 1, j, k)) {
-						--i;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, pos.south())) {
+						pos = pos.south();
 						flag = true;
-					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i, j, k + 1)) {
-						++k;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, pos.east())) {
+						pos = pos.east();
 						flag = true;
-					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, i, j, k - 1)) {
-						--k;
+					} else if (ZSSBlocks.bombFlower.canPlaceBlockAt(worldObj, pos.west())) {
+						pos = pos.west();
 						flag = true;
 					}
 					if (flag) {
-						worldObj.setBlock(i, j, k, ZSSBlocks.bombFlower);
+						worldObj.setBlockState(pos, ZSSBlocks.bombFlower.getDefaultState());
 						--getEntityItem().stackSize;
 						if (getEntityItem().stackSize == 0) {
 							setDead();
@@ -103,18 +117,51 @@ public class ItemBombFlowerSeed extends ItemSeeds {
 		item.motionX = entity.motionX;
 		item.motionY = entity.motionY;
 		item.motionZ = entity.motionZ;
-		item.delayBeforeCanPickup = 40;
+		item.setPickupDelay(40);
 		return item;
 	}
 
 	@Override
-	public EnumPlantType getPlantType(IBlockAccess world, int x, int y, int z) {
+	public EnumPlantType getPlantType(IBlockAccess world, BlockPos pos) {
 		return EnumPlantType.Cave;
 	}
 
+	/**
+	 * Default behavior returns NULL to not register any variants
+	 */
+	@Override
+	public String[] getVariants() {
+		return null;
+	}
+
+	/**
+	 * Default implementation suggested by {@link IModItem#registerVariants()}
+	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
+	public void registerVariants() {
+		String[] variants = getVariants();
+		if (variants != null) {
+			ModelBakery.addVariantName(this, variants);
+		}
+	}
+
+	/**
+	 * Register all of this Item's renderers here, including for any subtypes.
+	 * Default behavior registers a single inventory-based mesher for each variant
+	 * returned by {@link #getVariants() getVariants}.
+	 * If no variants are available, "mod_id:" plus the item's unlocalized name is used.
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderers(ItemModelMesher mesher) {
+		String[] variants = getVariants();
+		if (variants == null || variants.length < 1) {
+			String name = getUnlocalizedName();
+			variants = new String[]{ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1)};
+		}
+		for (int i = 0; i < variants.length; ++i) {
+			mesher.register(this, i, new ModelResourceLocation(variants[i], "inventory"));
+		}
 	}
 }

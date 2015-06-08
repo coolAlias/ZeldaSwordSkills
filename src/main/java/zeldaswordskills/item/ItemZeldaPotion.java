@@ -19,7 +19,9 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -29,19 +31,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemZeldaPotion extends ItemFood implements IUnenchantable
+public class ItemZeldaPotion extends ItemFood implements IModItem, IUnenchantable
 {
 	/** Amount of HP to restore when consumed */
 	private final float restoreHP;
-
 	/** Id of the buff to add, if any */
 	private Buff buff;
 	/** Duration the buff will last */
@@ -64,14 +65,29 @@ public class ItemZeldaPotion extends ItemFood implements IUnenchantable
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
+	/**
+	 * Returns "item.zss.unlocalized_name" for translation purposes
+	 */
 	@Override
-	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.drink;
+	public String getUnlocalizedName() {
+		return super.getUnlocalizedName().replaceFirst("item.", "item.zss.");
 	}
 
 	@Override
-	public ItemStack onEaten(ItemStack stack, World world, EntityPlayer player) {
-		player.getFoodStats().func_151686_a(this, stack);
+	public String getUnlocalizedName(ItemStack stack) {
+		return getUnlocalizedName();
+	}
+
+	@Override
+	public EnumAction getItemUseAction(ItemStack stack) {
+		return EnumAction.DRINK;
+	}
+
+	@Override
+	public ItemStack onItemUseFinish(ItemStack stack, World world, EntityPlayer player) {
+		// Copy but avoid calling super method in order to allow addition of glass bottle to inventory
+		player.getFoodStats().addStats(this, stack);
+		world.playSoundAtEntity(player, "random.burp", 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
 		player.heal(restoreHP);
 		onFoodEaten(stack, world, player);
 		if (!player.capabilities.isCreativeMode) {
@@ -109,19 +125,52 @@ public class ItemZeldaPotion extends ItemFood implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack, int pass) {
+	public boolean hasEffect(ItemStack stack) {
 		return true;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+	}
+
+	/**
+	 * Default behavior returns NULL to not register any variants
+	 */
+	@Override
+	public String[] getVariants() {
+		return null;
+	}
+
+	/**
+	 * Default implementation suggested by {@link IModItem#registerVariants()}
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerVariants() {
+		String[] variants = getVariants();
+		if (variants != null) {
+			ModelBakery.addVariantName(this, variants);
+		}
+	}
+
+	/**
+	 * Register all of this Item's renderers here, including for any subtypes.
+	 * Default behavior registers a single inventory-based mesher for each variant
+	 * returned by {@link #getVariants() getVariants}.
+	 * If no variants are available, "mod_id:" plus the item's unlocalized name is used.
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderers(ItemModelMesher mesher) {
+		String[] variants = getVariants();
+		if (variants == null || variants.length < 1) {
+			String name = getUnlocalizedName();
+			variants = new String[]{ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1)};
+		}
+		for (int i = 0; i < variants.length; ++i) {
+			mesher.register(this, i, new ModelResourceLocation(variants[i], "inventory"));
+		}
 	}
 }

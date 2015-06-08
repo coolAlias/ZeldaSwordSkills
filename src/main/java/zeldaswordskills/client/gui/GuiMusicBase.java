@@ -17,16 +17,20 @@
 
 package zeldaswordskills.client.gui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
@@ -35,8 +39,6 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.SongNote.PlayableNote;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -111,14 +113,14 @@ public abstract class GuiMusicBase extends GuiScreen
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float f) {
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.pushAttrib();
+		GlStateManager.disableLighting();
+		GlStateManager.enableAlpha();
+		GlStateManager.enableBlend();
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.getTextureManager().bindTexture(getTexture());
-		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glEnable(GL11.GL_BLEND);
 		RenderHelperQ.drawTexturedRect(guiLeft, guiTop, 0, 0, xSize, ySize, fullX, fullY);
-		GL11.glPopAttrib();
+		GlStateManager.popAttrib();
 		int i1 = (melody.size() > MAX_NOTES ? ((melody.size() - 1) / MAX_NOTES) * MAX_NOTES : 0);
 		for (int i = 0; (i + i1) < melody.size(); ++i) {
 			SongNote note = melody.get(i + i1);
@@ -170,7 +172,7 @@ public abstract class GuiMusicBase extends GuiScreen
 	}
 
 	@Override
-	protected void keyTyped(char c, int key) {
+	protected void keyTyped(char c, int key) throws IOException {
 		if (!allowKeyInput()) {
 			super.keyTyped(c, key);
 			return;
@@ -230,7 +232,7 @@ public abstract class GuiMusicBase extends GuiScreen
 		// TODO retrieve note to play from player's held ItemInstrument when gui constructed
 		mc.thePlayer.playSound(ModInfo.ID + ":note.ocarina", 3.0F, f);
 		Vec3 look = mc.thePlayer.getLookVec();
-		mc.theWorld.spawnParticle("note",
+		mc.theWorld.spawnParticle(EnumParticleTypes.NOTE,
 				mc.thePlayer.posX + look.xCoord + mc.theWorld.rand.nextDouble() - 0.5D,
 				mc.thePlayer.posY + look.yCoord + mc.thePlayer.getEyeHeight() + mc.theWorld.rand.nextDouble() - 0.5D,
 				mc.thePlayer.posZ + look.zCoord + mc.theWorld.rand.nextDouble() - 0.5D,

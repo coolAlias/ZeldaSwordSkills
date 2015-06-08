@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_column",
+    "textures": {
+        "end": "zeldaswordskills:blocks/royal_block",
+        "side": "zeldaswordskills:blocks/royal_block_face"
+    }
+}

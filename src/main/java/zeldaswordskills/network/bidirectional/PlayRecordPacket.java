@@ -22,11 +22,12 @@ import java.io.IOException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.network.AbstractMessage;
 import zeldaswordskills.network.PacketDispatcher;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
@@ -40,7 +41,7 @@ import cpw.mods.fml.relauncher.Side;
 public class PlayRecordPacket extends AbstractMessage<PlayRecordPacket>
 {
 	private String record;
-	private int x, y, z;
+	private BlockPos pos;
 
 	public PlayRecordPacket() {}
 
@@ -49,26 +50,22 @@ public class PlayRecordPacket extends AbstractMessage<PlayRecordPacket>
 	 * @param record	Send NULL to stop any currently playing record at the position
 	 */
 	public PlayRecordPacket(String record, Entity entity) {
-		this(record, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ));
+		this(record, new BlockPos(MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ)));
 	}
 
 	/**
 	 * Plays or stops a record at the x/y/z coordinates
 	 * @param record	Send NULL to stop any currently playing record at the position
 	 */
-	public PlayRecordPacket(String record, int x, int y, int z) {
+	public PlayRecordPacket(String record, BlockPos pos) {
 		this.record = record;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.pos = pos;
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
 		record = (buffer.readByte() > 0 ? ByteBufUtils.readUTF8String(buffer) : null);
-		x = buffer.readInt();
-		y = buffer.readInt();
-		z = buffer.readInt();
+		this.pos = new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt());
 	}
 
 	@Override
@@ -77,15 +74,15 @@ public class PlayRecordPacket extends AbstractMessage<PlayRecordPacket>
 		if (record != null) {
 			ByteBufUtils.writeUTF8String(buffer, record);
 		}
-		buffer.writeInt(x);
-		buffer.writeInt(y);
-		buffer.writeInt(z);
+		buffer.writeInt(this.pos.getX());
+		buffer.writeInt(this.pos.getY());
+		buffer.writeInt(this.pos.getZ());
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		if (side.isClient()) {
-			player.worldObj.playRecord(record, x, y, z);
+			player.worldObj.playRecord(pos, record);
 		} else {
 			PacketDispatcher.sendToAllAround(this, player, 64.0D);
 		}

@@ -1,0 +1,18 @@
+{
+    "parent": "zeldaswordskills:builtin/generated",
+    "textures": {
+        "layer0": "zeldaswordskills:items/broken_sword_darknut"
+    },
+    "display": {
+        "thirdperson": {
+	        "rotation": [ 0, 90, -35 ],
+	        "translation": [ 0.00, 1.00, -7.00 ],
+	        "scale": [ 2.00, 2.00, 2.00 ]
+	    },
+        "firstperson": {
+	        "rotation": [ 0, -135, 25 ],
+	        "translation": [ 0.00, 5.50, 2.00 ],
+	        "scale": [ 2.50, 2.50, 2.50 ]
+	    }
+    }
+}

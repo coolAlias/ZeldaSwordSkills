@@ -42,9 +42,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityBackslice;
@@ -64,8 +68,6 @@ import zeldaswordskills.skills.sword.Parry;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntityEvil, IEntityLootable, IParryModifier, IPowerAttacker, IEntityVariant
 {
@@ -117,6 +119,9 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	/** DataWatcher for cape */
 	private final static int CAPE_INDEX = 18;
 
+	/** Replacement for removed 'attackTime' */
+	protected int attackTime;
+
 	/** Timer for attack animation; negative swings one way, positive the other */
 	@SideOnly(Side.CLIENT)
 	public int attackTimer;
@@ -154,7 +159,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
 		tasks.addTask(6, new EntityAILookIdle(this));
 		targetTasks.addTask(1, new EntityAIHurtByTarget(this, true));
-		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
+		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
 		setSize(1.0F, 3.0F);
 		experienceValue = 12;
 	}
@@ -222,11 +227,6 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	@Override
-	protected boolean isAIEnabled() {
-		return true;
-	}
-
-	@Override
 	protected String getLivingSound() {
 		return Sounds.DARKNUT_LIVING;
 	}
@@ -242,7 +242,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	@Override
-	protected void addRandomArmor() {
+	public void setEquipmentBasedOnDifficulty(DifficultyInstance difficulty) {
 		// don't use super.addRandomArmor, as Darknuts always have certain equipment
 		setCurrentItemOrArmor(0, new ItemStack(ZSSItems.swordDarknut));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, new ItemStack(Items.iron_chestplate));
@@ -269,7 +269,8 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public int getTotalArmorValue() {
-		return Math.min(20, super.getTotalArmorValue() + (2 * worldObj.difficultySetting.getDifficultyId()));
+		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+		return Math.min(20, super.getTotalArmorValue() + MathHelper.floor_double(2 * f));
 	}
 
 	public boolean isWearingCape() {
@@ -299,7 +300,8 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
 		boolean isPlayer = source.getEntity() instanceof EntityPlayer;
-		if (isEntityInvulnerable() || isSpinning()) {
+		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+		if (isEntityInvulnerable(source) || isSpinning()) {
 			return false;
 		} else if (source.isUnblockable() || (isPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.armorBreak))) {
 			if (parryAttack(source)) {
@@ -314,7 +316,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 			}
 			return false;
 		} else if (source.isExplosion() && isArmored()) {
-			amount = damageDarknutArmor(amount * (1.25F - (0.25F * (float) worldObj.difficultySetting.getDifficultyId())));
+			amount = damageDarknutArmor(amount * (1.25F - (0.25F * f)));
 			if (amount < 0.5F) {
 				return false;
 			} // otherwise, allow extra damage to bleed through
@@ -327,7 +329,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 					// Allow attack to go through for BackSlice, otherwise it will never trigger
 					if (isPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.backSlice)) {
 						return super.attackEntityFrom(source, amount);
-					} else if (amount > ((float) worldObj.difficultySetting.getDifficultyId() * 2.0F)) {
+					} else if (amount > (f * 2.0F)) {
 						WorldUtils.playSoundAtEntity(this, Sounds.ARMOR_BREAK, 0.4F, 0.5F);
 						damageDarknutArmor(amount * 0.5F);
 					}
@@ -343,7 +345,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 						worldObj.setEntityState(this, SPIN_FLAG);
 						spinAttackTimer = 12;
 						recentHits = 0;
-						targets = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, boundingBox.expand(4.0D, 0.0D, 4.0D));
+						targets = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, getEntityBoundingBox().expand(4.0D, 0.0D, 4.0D));
 						if (targets.contains(this)) {
 							targets.remove(this);
 						}
@@ -388,12 +390,12 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
-		return (0.1F * (float) worldObj.difficultySetting.getDifficultyId());
+		return (0.1F * (float) worldObj.getDifficulty().getDifficultyId());
 	}
 
 	@Override
 	public float getDefensiveModifier(EntityLivingBase entity, ItemStack stack) {
-		return (0.1F * (float) worldObj.difficultySetting.getDifficultyId());
+		return (0.1F * (float) worldObj.getDifficulty().getDifficultyId());
 	}
 
 	/**
@@ -447,8 +449,8 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		float damage = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int k = (flag == POWER_ATTACK_FLAG || flag == SPIN_FLAG ? 1 : 0); // knockback
 		if (entity instanceof EntityLivingBase) {
-			damage += EnchantmentHelper.getEnchantmentModifierLiving(this, (EntityLivingBase) entity);
-			k += EnchantmentHelper.getKnockbackModifier(this, (EntityLivingBase) entity);
+			damage += EnchantmentHelper.func_152377_a(getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
+			k += EnchantmentHelper.getKnockbackModifier(this);
 		}
 		if (entity.attackEntityFrom(getDamageSource(flag), damage)) {
 			if (k > 0) {
@@ -535,7 +537,8 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	 */
 	@Override
 	public int getChargeTime() {
-		return 28 - (worldObj.difficultySetting.getDifficultyId() * 5);
+		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+		return 28 - MathHelper.floor_double(f * 5);
 	}
 
 	@Override
@@ -572,6 +575,9 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 			damageCape();
 		}
 		super.onLivingUpdate();
+		if (attackTime > 0) {
+			--attackTime;
+		}
 		if (parryTimer > 0) {
 			--parryTimer;
 		}
@@ -660,8 +666,8 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	@Override
-	protected void dropRareDrop(int rarity) {
-		switch(rarity) {
+	protected void addRandomDrop() {
+		switch(rand.nextInt(8)) {
 		case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.KNIGHTS_CREST.ordinal()), 0.0F); break;
 		default: entityDropItem(new ItemStack(Items.painting), 0.0F);
 		}
@@ -691,10 +697,11 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	@Override
-	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
-		data = super.onSpawnWithEgg(data);
-		addRandomArmor();
-		if (rand.nextFloat() < (0.05F * (float) worldObj.difficultySetting.getDifficultyId())) {
+	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
+		data = super.onInitialSpawn(difficulty, data);
+		float f = difficulty.getClampedAdditionalDifficulty();
+		setEquipmentBasedOnDifficulty(difficulty);
+		if (rand.nextFloat() < (0.05F * f)) {
 			setType(1);
 		}
 		return data;

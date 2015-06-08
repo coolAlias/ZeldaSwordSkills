@@ -41,6 +41,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.item.ItemTreasure.Treasures;
@@ -57,8 +59,6 @@ import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -531,7 +531,7 @@ public class ZSSPlayerSkills
 			}
 		}
 		if (player.worldObj.isRemote) {
-			if (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].getIsKeyPressed() && isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null) {
+			if (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].isKeyDown() && isSkillActive(SkillBase.swordBasic) && player.getHeldItem() != null) {
 				Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 			}
 		}

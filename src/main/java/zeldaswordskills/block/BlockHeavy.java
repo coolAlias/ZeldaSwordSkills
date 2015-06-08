@@ -17,12 +17,24 @@
 
 package zeldaswordskills.block;
 
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
@@ -31,27 +43,22 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmashable
+public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBlock, ILiftable, ISmashable
 {
-	/** The weight of this block, i.e. the difficulty of lifting this block */
-	private final BlockWeight weight;
+	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockHeavy.EnumType.class);
 
 	/**
 	 * An indestructible block that can only be moved with special items
-	 * @param strengthRequired The strength level required to lift this block
 	 */
-	public BlockHeavy(Material material, BlockWeight strengthRequired) {
+	public BlockHeavy(Material material) {
 		super(material);
-		weight = strengthRequired;
 		disableStats();
 		setBlockUnbreakable();
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
+		setDefaultState(blockState.getBaseState().withProperty(VARIANT, BlockHeavy.EnumType.LIGHT));
 	}
 
 	@Override
@@ -60,35 +67,107 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 	}
 
 	@Override
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
-		return weight;
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
+		return ((BlockHeavy.EnumType) state.getValue(VARIANT)).getWeight();
 	}
 
 	@Override
-	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta) {
-		if (this == ZSSBlocks.barrierHeavy) {
-			player.triggerAchievement(ZSSAchievements.heavyLifter);
-		} else if (this == ZSSBlocks.barrierLight) {
+	public void onLifted(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state) {
+		BlockWeight weight = ((BlockHeavy.EnumType) state.getValue(VARIANT)).getWeight();
+		if (weight.compareTo(BlockWeight.LIGHT) > 0) { // i.e. at least MEDIUM
 			player.triggerAchievement(ZSSAchievements.movingBlocks);
+			if (weight.compareTo(BlockWeight.HEAVY) > 0) { // i.e. at least VERY HEAVY
+				player.triggerAchievement(ZSSAchievements.heavyLifter);
+			}
 		}
 	}
 
 	@Override
-	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta) {}
+	public void onHeldBlockPlaced(World world, ItemStack stack, BlockPos pos, IBlockState state) {}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
+		BlockWeight weight = ((BlockHeavy.EnumType) state.getValue(VARIANT)).getWeight();
 		return (stack.getItem() == ZSSItems.hammerMegaton && PlayerUtils.hasItem(player, ZSSItems.gauntletsGolden) ? weight : weight.next());
 	}
 
 	@Override
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face) {
 		return Result.DEFAULT;
 	}
 
 	@Override
+	public String[] getItemBlockVariants() {
+		String[] variants = new String[BlockHeavy.EnumType.values().length];
+		for (BlockHeavy.EnumType type : BlockHeavy.EnumType.values()) {
+			variants[type.getMetadata()] = ModInfo.ID + ":" + type.getName();
+		}
+		return variants;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
+	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+		for (BlockHeavy.EnumType variant : BlockHeavy.EnumType.values()) {
+			list.add(new ItemStack(item, 1, variant.getMetadata()));
+		}
+	}
+
+	@Override
+	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
+		IBlockState expected = getStateFromMeta(meta);
+		return ((BlockHeavy.EnumType) state.getValue(VARIANT)) == ((BlockHeavy.EnumType) expected.getValue(VARIANT));
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(VARIANT, BlockHeavy.EnumType.byMetadata(meta));
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return ((EnumType) state.getValue(VARIANT)).getMetadata();
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, VARIANT);
+	}
+
+	public static enum EnumType implements IStringSerializable {
+		LIGHT(0, "barrier_light", BlockWeight.MEDIUM),
+		HEAVY(1, "barrier_heavy", BlockWeight.VERY_HEAVY);
+		private final int meta;
+		private final String name;
+		private final BlockWeight weight;
+
+		private EnumType(int meta, String name, BlockWeight weight) {
+			this.meta = meta;
+			this.name = name;
+			this.weight = weight;
+		}
+
+		public int getMetadata() {
+			return this.meta;
+		}
+
+		/**
+		 * Returns the 'weight' of the block for lifting and smashing
+		 */
+		public BlockWeight getWeight() {
+			return weight;
+		}
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
+
+		/**
+		 * Return block variant by metadata value
+		 */
+		public static EnumType byMetadata(int meta) {
+			return EnumType.values()[meta % EnumType.values().length];
+		}
 	}
 }

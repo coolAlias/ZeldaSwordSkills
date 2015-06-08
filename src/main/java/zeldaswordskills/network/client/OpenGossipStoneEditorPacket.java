@@ -21,43 +21,38 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
-import cpw.mods.fml.relauncher.Side;
 
 public class OpenGossipStoneEditorPacket extends AbstractClientMessage<OpenGossipStoneEditorPacket>
 {
-	private int x, y, z;
+	private BlockPos pos;
 
 	public OpenGossipStoneEditorPacket() {}
 
 	/**
-	 * Constructor taking just the coordinates - TileEntity validated when opening GUI
+	 * Constructor taking just the block position - TileEntity validated when opening GUI
 	 */
-	public OpenGossipStoneEditorPacket(int x, int y, int z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+	public OpenGossipStoneEditorPacket(BlockPos pos) {
+		this.pos = pos;
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		this.x = buffer.readInt();
-		this.y = buffer.readInt();
-		this.z = buffer.readInt();
+		this.pos = BlockPos.fromLong(buffer.readLong());
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeInt(this.x);
-		buffer.writeInt(this.y);
-		buffer.writeInt(this.z);
+		buffer.writeLong(pos.toLong());
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		// TileEntity checked in IGuiHandler, so no need to do so here
-		player.openGui(ZSSMain.instance, GuiHandler.GUI_EDIT_GOSSIP_STONE, player.worldObj, x, y, z);
+		player.openGui(ZSSMain.instance, GuiHandler.GUI_EDIT_GOSSIP_STONE, player.worldObj, pos.getX(), pos.getY(), pos.getZ());
 	}
 }

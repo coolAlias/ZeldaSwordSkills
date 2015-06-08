@@ -22,8 +22,8 @@ import java.io.IOException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 

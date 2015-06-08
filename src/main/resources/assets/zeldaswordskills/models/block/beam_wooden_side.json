@@ -1,0 +1,7 @@
+{
+    "parent": "zeldaswordskills:block/column_narrow_side",
+    "textures": {
+        "end": "zeldaswordskills:blocks/beam_wooden_end",
+        "side": "zeldaswordskills:blocks/beam_wooden_horizontal"
+    }
+}

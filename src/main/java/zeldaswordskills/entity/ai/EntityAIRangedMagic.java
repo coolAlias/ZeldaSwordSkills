@@ -108,7 +108,7 @@ public class EntityAIRangedMagic extends EntityAIBase
 		} else if (!caster.canContinueCasting()) {
 			return false;
 		}
-		return entity.getDistanceSq(attackTarget.posX, attackTarget.boundingBox.minY, attackTarget.posZ) < minDistanceSq;
+		return entity.getDistanceSq(attackTarget.posX, attackTarget.getEntityBoundingBox().minY, attackTarget.posZ) < minDistanceSq;
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class EntityAIRangedMagic extends EntityAIBase
 			return false;
 		}
 		attackTarget = target;
-		double d = entity.getDistanceSq(attackTarget.posX, attackTarget.boundingBox.minY, attackTarget.posZ);
+		double d = entity.getDistanceSq(attackTarget.posX, attackTarget.getEntityBoundingBox().minY, attackTarget.posZ);
 		boolean flag = entity.getEntitySenses().canSee(attackTarget);
 
 		if (!flag) {
@@ -162,7 +162,7 @@ public class EntityAIRangedMagic extends EntityAIBase
 			--castingTimer;
 			entity.getLookHelper().setLookPositionWithEntity(attackTarget, 30.0F, 30.0F);
 			if (castingTimer == 0) {
-				double d = entity.getDistanceSq(attackTarget.posX, attackTarget.boundingBox.minY, attackTarget.posZ);
+				double d = entity.getDistanceSq(attackTarget.posX, attackTarget.getEntityBoundingBox().minY, attackTarget.posZ);
 				float f = (float)(MathHelper.sqrt_double(d) / minDistance);
 				float f1 = MathHelper.clamp_float(f, 0.1F, 1.0F);
 				caster.castRangedSpell(attackTarget, f1);

@@ -1,0 +1,31 @@
+{
+    "textures": {
+        "particle": "minecraft:blocks/planks_oak",
+        "top": "zeldaswordskills:blocks/chest_locked_top",
+        "front": "zeldaswordskills:blocks/chest_locked_front",
+        "side": "zeldaswordskills:blocks/chest_locked_side"
+    },
+    "elements": [
+        {   "from": [ 1, 0, 1 ],
+            "to": [ 15, 14, 15 ],
+            "faces": {
+                "down":  { "uv": [ 1, 1, 15, 15 ], "texture": "#top", "cullface": "down" },
+                "up":    { "uv": [ 1, 1, 15, 15 ], "texture": "#top" },
+                "north": { "uv": [ 2, 1, 16, 15 ], "texture": "#front" },
+                "south": { "uv": [ 1, 1, 15, 15 ], "texture": "#side" },
+                "west":  { "uv": [ 1, 1, 15, 15 ], "texture": "#side" },
+                "east":  { "uv": [ 1, 1, 15, 15 ], "texture": "#side" }
+            }
+        },
+        {   "from": [ 7, 7, 0 ],
+            "to": [ 9, 11, 1 ],
+            "faces": {
+                "down":  { "uv": [ 2, 3, 0, 4 ], "texture": "#front" },
+                "up":    { "uv": [ 2, 0, 0, 1 ], "texture": "#front" },
+                "north": { "uv": [ 0, 0, 2, 4 ], "texture": "#front", "cullface": "south" },
+                "west":    { "uv": [ 0, 0, 1, 4 ], "texture": "#front" },
+                "east":    { "uv": [ 1, 0, 2, 4 ], "texture": "#front" }
+            }
+        }
+    ]
+}

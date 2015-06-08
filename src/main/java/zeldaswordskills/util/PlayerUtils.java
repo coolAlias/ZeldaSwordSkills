@@ -19,7 +19,6 @@ package zeldaswordskills.util;
 
 import java.util.UUID;
 
-import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,7 +32,6 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.StatCollector;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.ISkillItem;
 import zeldaswordskills.api.item.ISword;
 import zeldaswordskills.item.ItemZeldaSword;
@@ -51,15 +49,15 @@ public class PlayerUtils
 	public static final UUID itemDamageUUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 
 	/**
-	 * Returns whether the player is blocking with the currently held item, accounting for possibility of Battlegear2 offhand shield use
+	 * Returns whether the player is blocking with the currently held item, accounting for possibility of Battlegear2 shield item use
 	 */
 	public static boolean isBlocking(EntityPlayer player) {
 		ItemStack stack = player.getHeldItem();
-		if (stack != null && player.isUsingItem() && stack.getItem().getItemUseAction(stack) == EnumAction.block) {
+		if (stack != null && player.isUsingItem() && stack.getItem().getItemUseAction(stack) == EnumAction.BLOCK) {
 			return true;
-		} else if (ZSSMain.isBG2Enabled) {
-			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
-		}
+		}/* else if (ExampleMod.isBG2Enabled) {
+			// TODO return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
+		}*/
 		return false;
 	}
 

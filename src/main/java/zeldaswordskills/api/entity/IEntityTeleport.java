@@ -19,6 +19,7 @@ package zeldaswordskills.api.entity;
 
 import zeldaswordskills.entity.ai.EntityAITeleport;
 
+
 /**
  * 
  * For entities using the {@link EntityAITeleport} AI
@@ -29,5 +30,6 @@ public interface IEntityTeleport {
 	/**
 	 * Returns the entity's Teleportation AI
 	 */
-	public EntityAITeleport getTeleportAI();
+	EntityAITeleport getTeleportAI();
+
 }

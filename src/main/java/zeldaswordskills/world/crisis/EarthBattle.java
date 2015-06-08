@@ -18,6 +18,8 @@
 package zeldaswordskills.world.crisis;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
@@ -39,7 +41,7 @@ public class EarthBattle extends BossBattle {
 	protected void generateBossMobs(World world, int number) {
 		Entity mob = core.getBossType().getNewMob(world);
 		if (mob instanceof EntityBlackKnight) { // already a boss-level mob, doesn't need boosting
-			((EntityBlackKnight) mob).addRandomArmor();
+			((EntityBlackKnight) mob).setEquipmentBasedOnDifficulty(world.getDifficultyForLocation(core.getPos()));
 			spawnMobInCorner(world, mob, world.rand.nextInt(4), false, false);
 		}
 	}
@@ -58,13 +60,14 @@ public class EarthBattle extends BossBattle {
 		int x = box.minX + world.rand.nextInt(box.getXSize() - 1) + 1;
 		int y = box.maxY - 1;
 		int z = box.minZ + world.rand.nextInt(box.getZSize() - 1) + 1;
-		if (Math.abs(box.getCenterX() - x) > 1 && Math.abs(box.getCenterZ() - z) > 1) {
+		Vec3i center = box.getCenter();
+		if (Math.abs(center.getX() - x) > 1 && Math.abs(center.getZ() - z) > 1) {
 			EntityBomb bomb = new EntityBomb(world).setDestructionFactor(0.7F).addTime((3 - difficulty) * 16);
 			bomb.setPosition(x, y, z);
-			if (world.isAirBlock(x, box.minY, z)) {
+			if (world.isAirBlock(new BlockPos(x, box.minY, z))) {
 				bomb.setNoGrief();
 			}
-			if (world.getCollidingBoundingBoxes(bomb, bomb.boundingBox).isEmpty()) {
+			if (world.getCollidingBoundingBoxes(bomb, bomb.getEntityBoundingBox()).isEmpty()) {
 				if (!world.isRemote) {
 					world.playSoundEffect(x, y, z, Sounds.BOMB_WHISTLE, 1.0F, 1.0F);
 					world.spawnEntityInWorld(bomb);

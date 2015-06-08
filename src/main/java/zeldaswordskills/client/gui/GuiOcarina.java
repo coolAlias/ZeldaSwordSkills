@@ -21,8 +21,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.LearnSongPacket;
@@ -34,8 +37,6 @@ import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
 import zeldaswordskills.util.TimedChatDialogue;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiOcarina extends GuiMusicBase
@@ -116,7 +117,7 @@ public class GuiOcarina extends GuiMusicBase
 					PacketDispatcher.sendToServer(new ZeldaSongPacket(song));
 				}
 			} else {
-				PacketDispatcher.sendToServer(new PlayRecordPacket(null, x, y, z));
+				PacketDispatcher.sendToServer(new PlayRecordPacket(null, new BlockPos(x, y, z)));
 			}
 		}
 	}
@@ -177,7 +178,7 @@ public class GuiOcarina extends GuiMusicBase
 					scarecrowNotes = new ArrayList<SongNote>(melody);
 					ticksSinceLastNote = 0;
 				} else {
-					PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
+					PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), new BlockPos(x, y, z)));
 				}
 			}
 		}

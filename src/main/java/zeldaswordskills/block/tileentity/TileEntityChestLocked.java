@@ -32,16 +32,6 @@ public class TileEntityChestLocked extends TileEntityInventory
 	}
 
 	@Override
-	public String getInventoryName() {
-		return "";
-	}
-
-	@Override
-	public boolean hasCustomInventoryName() {
-		return true;
-	}
-
-	@Override
 	public int getInventoryStackLimit() {
 		return 64;
 	}

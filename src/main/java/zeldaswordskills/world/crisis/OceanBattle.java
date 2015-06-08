@@ -40,13 +40,13 @@ public class OceanBattle extends BossBattle {
 	@Override
 	protected void endCrisis(World world) {
 		super.endCrisis(world);
-		StructureGenUtils.replaceMaterialWith(world, box.minX + 1, box.maxX, box.minY + 1, box.maxY, box.minZ + 1, box.maxZ, Material.sand, Blocks.water, 0);
+		StructureGenUtils.replaceMaterialWith(world, box.minX + 1, box.maxX, box.minY + 1, box.maxY, box.minZ + 1, box.maxZ, Material.sand, Blocks.water.getDefaultState());
 	}
 
 	@Override
 	protected void onUpdateTick(World world) {
-		world.playSoundEffect(core.xCoord + 0.5D, box.getCenterY(), core.zCoord + 0.5D, Sounds.ROCK_FALL, 1.0F, 1.0F);
-		StructureGenUtils.fillWithoutReplace(world, box.minX + 1, box.maxX, box.maxY-1, box.maxY, box.minZ + 1, box.maxZ, Blocks.sand, 0, 3);
+		world.playSoundEffect(core.getPos().getX() + 0.5D, box.getCenter().getY(), core.getPos().getZ() + 0.5D, Sounds.ROCK_FALL, 1.0F, 1.0F);
+		StructureGenUtils.fillWithoutReplace(world, box.minX + 1, box.maxX, box.maxY-1, box.maxY, box.minZ + 1, box.maxZ, Blocks.sand.getDefaultState(), 3);
 		scheduleUpdateTick((100 - (difficulty * 20)) + world.rand.nextInt(60));
 	}
 }

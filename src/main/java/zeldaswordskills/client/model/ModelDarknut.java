@@ -22,9 +22,9 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntityDarknut;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -366,8 +366,8 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 			rightArm.rotateAngleX = rightArm.rotateAngleX * 0.5F - ((float) Math.PI / 10F) * (float) heldItemRight;
 		}
 
-		if (onGround > -9990.0F) {
-			f6 = onGround;
+		if (swingProgress > -9990.0F) {
+			f6 = swingProgress;
 			body.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(f6) * (float) Math.PI * 2.0F) * 0.2F;
 			if (adjustArms) {
 				rightArm.rotationPointZ = MathHelper.sin(body.rotateAngleY) * 5.0F;
@@ -377,16 +377,16 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 				rightArm.rotateAngleY += body.rotateAngleY;
 				leftArm.rotateAngleY += body.rotateAngleY;
 				leftArm.rotateAngleX += body.rotateAngleY;
-				f6 = 1.0F - onGround;
+				f6 = 1.0F - swingProgress;
 				f6 *= f6;
 				f6 *= f6;
 				f6 = 1.0F - f6;
 				float f7 = MathHelper.sin(f6 * (float) Math.PI);
-				float f8 = MathHelper.sin(onGround * (float) Math.PI) * -(head.rotateAngleX - 0.7F) * 0.75F;
+				float f8 = MathHelper.sin(swingProgress * (float) Math.PI) * -(head.rotateAngleX - 0.7F) * 0.75F;
 				rightArm.rotateAngleX = (float)((double) rightArm.rotateAngleX - ((double) f7 * 1.2D + (double) f8));
 				rightArm.rotateAngleY += body.rotateAngleY * 2.0F;
 				// the following makes the arm rotate parallel to the body
-				rightArm.rotateAngleZ = MathHelper.sin(onGround * (float) Math.PI) * -0.4F;
+				rightArm.rotateAngleZ = MathHelper.sin(swingProgress * (float) Math.PI) * -0.4F;
 			}
 		}
 		if (adjustArms) {
@@ -404,9 +404,24 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		shoulderPlateLeft.rotateAngleZ = leftArm.rotateAngleZ;
 	}
 
+	/**
+	 * Copied from ModelBiped, called from LayerArmorBase
+	 */
 	@Override
-	public void postRenderHead(float scale) {
-		head.postRender(scale);
+	public void setModelAttributes(ModelBase model) {
+		super.setModelAttributes(model);
+		if (model instanceof ModelDarknut) {
+			ModelDarknut modelbiped = (ModelDarknut) model;
+			this.heldItemLeft = modelbiped.heldItemLeft;
+			this.heldItemRight = modelbiped.heldItemRight;
+			//this.isSneak = modelbiped.isSneak;
+			//this.aimedBow = modelbiped.aimedBow;
+		}
+	}
+
+	@Override
+	public ModelRenderer getHeadModel() {
+		return head;
 	}
 
 	@Override

@@ -22,10 +22,10 @@ import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
@@ -65,7 +65,7 @@ public class InLiquidPacket extends AbstractClientMessage<InLiquidPacket>
 			if (player.onGround) {
 				player.motionX *= d;
 				player.motionZ *= d;
-			} else if (player.motionY < 0 && !Minecraft.getMinecraft().gameSettings.keyBindJump.getIsKeyPressed()) {
+			} else if (player.motionY < 0 && !Minecraft.getMinecraft().gameSettings.keyBindJump.isKeyDown()) {
 				player.motionY *= 1.5;
 				if (player.motionY < -0.35D) {
 					player.motionY = -0.35D;

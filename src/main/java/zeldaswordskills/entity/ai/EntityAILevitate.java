@@ -20,6 +20,7 @@ package zeldaswordskills.entity.ai;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 
 /**
@@ -49,7 +50,7 @@ public class EntityAILevitate extends EntityAIBase
 		int y = MathHelper.floor_double(entity.posY);
 		int z = MathHelper.floor_double(entity.posZ);
 		int i = 0;
-		while (i < y && !entity.worldObj.getBlock(x, y - i, z).getMaterial().isSolid() && !entity.worldObj.getBlock(x, y - i, z).getMaterial().isLiquid()) {
+		while (i < y && !entity.worldObj.getBlockState(new BlockPos(x, y - i, z)).getBlock().getMaterial().isSolid() && !entity.worldObj.getBlockState(new BlockPos(x, y - i, z)).getBlock().getMaterial().isLiquid()) {
 			++i;
 		}
 		return entity.getDistanceSq(x, (y - i) + 1, z) < minHeightSq;

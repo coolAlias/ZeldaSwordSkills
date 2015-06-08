@@ -27,20 +27,18 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 
 import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ItemMask;
-import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
-import zeldaswordskills.network.client.AttackBlockedPacket;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
 import zeldaswordskills.network.client.SyncPlayerInfoPacket;
@@ -57,6 +55,12 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/** Last ridden entity so it can be set after player is no longer riding */
 	private Entity lastRidden;
+
+	/** Maximum time the player may be prevented from taking a left-click action */
+	private final static int MAX_ATTACK_DELAY = 50;
+
+	/** Time remaining until player may perform another left-click action, such as an attack */
+	private int attackTime; // TODO move to ZSSEntityInfo ? or player skills?
 
 	/** Special block timer for shields; player cannot block while this is greater than zero */
 	private int blockTime = 0;
@@ -149,6 +153,28 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		return playerSongs;
 	}
 
+	/**
+	 * True if the player can perform a left-click action (i.e. the action timer is zero)
+	 */
+	public boolean canAttack() {
+		return attackTime == 0 || player.capabilities.isCreativeMode;
+	}
+
+	/**
+	 * Returns the current amount of time remaining before a left-click action may be performed
+	 */
+	public int getAttackTime() {
+		return attackTime;
+	}
+
+	/**
+	 * Sets the number of ticks remaining before another action may be performed, but
+	 * no less than the current value and no more than MAX_ATTACK_DELAY.
+	 */
+	public void setAttackTime(int ticks) {
+		this.attackTime = MathHelper.clamp_int(ticks, attackTime, MAX_ATTACK_DELAY);
+	}
+
 	/** Whether the player is able to block at this time (block timer is zero) */
 	public boolean canBlock() {
 		return blockTime == 0;
@@ -159,6 +185,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * @param damage only used server side to calculate exhaustion: 0.3F * damage
 	 */
 	public void onAttackBlocked(ItemStack shield, float damage) {
+		/*
 		ZSSCombatEvents.setPlayerAttackTime(player);
 		blockTime = (shield.getItem() instanceof ItemZeldaShield ? ((ItemZeldaShield) shield.getItem()).getRecoveryTime() : 20);
 		player.clearItemInUse();
@@ -166,6 +193,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			PacketDispatcher.sendTo(new AttackBlockedPacket(shield), (EntityPlayerMP) player);
 			player.addExhaustion(0.3F * damage);
 		}
+		 */
 	}
 
 	/**
@@ -276,6 +304,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void onUpdate() {
 		playerSkills.onUpdate();
+		if (attackTime > 0) {
+			--attackTime;
+		}
 		if (blockTime > 0) {
 			--blockTime;
 		}

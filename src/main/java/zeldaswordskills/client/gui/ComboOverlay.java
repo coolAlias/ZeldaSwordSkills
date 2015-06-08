@@ -23,9 +23,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.EndComboPacket;
@@ -34,9 +38,6 @@ import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -120,12 +121,12 @@ public class ComboOverlay extends Gui
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
 				if (shouldDisplay) {
 					String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
-					mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
-					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getNumHits() + "/" + combo.getMaxNumHits(), 10, 20, 0xFFFFFF, true);
-					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
+					mc.fontRendererObj.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
+					mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getNumHits() + "/" + combo.getMaxNumHits(), 10, 20, 0xFFFFFF, true);
+					mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
 					List<Float> damageList = combo.getDamageList();
 					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-						mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+						mc.fontRendererObj.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
 					}
 				}
 				// for Ending Blow, use canUse instead of canExecute to determine whether notification should be displayed
@@ -133,7 +134,7 @@ public class ComboOverlay extends Gui
 					ICombo skill = skills.getComboSkill();
 					ILockOnTarget target = skills.getTargetingSkill();
 					if (skill != null && skill.isComboInProgress() && target != null && target.getCurrentTarget() == skill.getCombo().getLastEntityHit()) {
-						mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.ending"), (resolution.getScaledWidth() / 2) - 15, 30, 0xFF0000, true);
+						mc.fontRendererObj.drawString(StatCollector.translateToLocal("combo.ending"), (resolution.getScaledWidth() / 2) - 15, 30, 0xFF0000, true);
 					}
 				}
 			}
@@ -172,12 +173,14 @@ public class ComboOverlay extends Gui
 	 */
 
 	public static void drawTexturedQuadFit(double x, double y, double width, double height, double zLevel){
-		Tessellator tessellator = Tessellator.instance;
-		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV(x + 0, y + height, zLevel, 0,1);
-		tessellator.addVertexWithUV(x + width, y + height, zLevel, 1, 1);
-		tessellator.addVertexWithUV(x + width, y + 0, zLevel, 1,0);
-		tessellator.addVertexWithUV(x + 0, y + 0, zLevel, 0, 0);
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer renderer = tessellator.getWorldRenderer();
+		renderer.startDrawingQuads();
+		renderer.addVertexWithUV(x + 0, y + height, zLevel, 0,1);
+		renderer.addVertexWithUV(x + width, y + height, zLevel, 1, 1);
+		renderer.addVertexWithUV(x + width, y + 0, zLevel, 1,0);
+		renderer.addVertexWithUV(x + 0, y + 0, zLevel, 0, 0);
+		// renderer.finishDrawing(); // TODO can just call this instead of tessellator.draw() ???
 		tessellator.draw();
 	}
 }

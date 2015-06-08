@@ -18,8 +18,10 @@
 package zeldaswordskills.api.block;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -76,22 +78,22 @@ public interface IHookable
 	 * Note that blocks destroyed by hookshots do NOT drop any items.
 	 * 
 	 * @param type	The type of hookshot attempting to destroy the block
-	 * @param side	The side of the block that was hit
+	 * @param face	The face of the block that was hit
 	 * @return	Result.DEFAULT to use the standard hookshot mechanics
 	 * 			Result.ALLOW will allow the block to be destroyed
 	 * 			Result.DENY will prevent the block from being destroyed
 	 */
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side);
+	Result canDestroyBlock(HookshotType type, World world, BlockPos pos, EnumFacing face);
 
 	/**
 	 * Return true if the type of hookshot is able to attach to this specific block.
 	 * @param type	The type of hookshot attempting to grapple the block
-	 * @param side	The side of the block that was hit
+	 * @param face	The face of the block that was hit
 	 * @return	Result.DEFAULT to use the standard hookshot mechanics
 	 * 			Result.ALLOW will allow the hookshot to attach to the block
 	 * 			Result.DENY will prevent the hookshot from attaching to the block
 	 */
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side);
+	Result canGrabBlock(HookshotType type, World world, BlockPos pos, EnumFacing face);
 
 	/**
 	 * Returns the Material type that should be used to determine which, if
@@ -99,7 +101,8 @@ public interface IHookable
 	 * this block will be destroyed by the hookshot upon impact. Only used when
 	 * {@link #canDestroyBlock} and {@link #canGrabBlock} return {@link Result#DEFAULT}
 	 * @param type the type of hookshot attempting to grapple the block
+	 * @param face	The face of the block that was hit
 	 */
-	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z);
+	Material getHookableMaterial(HookshotType type, World world, BlockPos pos, EnumFacing face);
 
 }

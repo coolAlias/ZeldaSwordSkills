@@ -28,5 +28,6 @@ package zeldaswordskills.api.damage;
 public interface IDamageAoE {
 
 	/** Return true if this damage source is considered to have an Area of Effect */
-	public boolean isAoEDamage();
+	boolean isAoEDamage();
+
 }

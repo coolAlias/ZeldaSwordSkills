@@ -1,0 +1,8 @@
+{
+    "variants": {
+    	"hits_taken=0" : { "model" : "zeldaswordskills:peg_rusty0" },
+    	"hits_taken=1" : { "model" : "zeldaswordskills:peg_rusty1" },
+    	"hits_taken=2" : { "model" : "zeldaswordskills:peg_rusty2" },
+    	"hits_taken=3" : { "model" : "zeldaswordskills:peg_rusty3" }
+    }
+}

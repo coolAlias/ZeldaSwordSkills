@@ -23,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,6 +45,7 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.TargetUtils;
 
+// TODO switch attack logic to use AI system
 public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootable, IEntityVariant
 {
 	/** Squid type data watcher index (skeleton's use 13) */
@@ -65,11 +67,16 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	private float randomMotionVecY;
 	private float randomMotionVecZ;
 
+	/** Replacement for removed 'attackTime' */
+	protected int attackTime;
+
 	public EntityOctorok(World world) {
 		super(world);
 		experienceValue = 5;
 		setSize(0.95F, 0.95F);
+		rand.setSeed((long)(1 + getEntityId()));
 		rotationVelocity = 1.0F / (rand.nextFloat() + 1.0F) * 0.2F;
+		tasks.addTask(0, new EntityOctorok.AIMoveRandom());
 	}
 
 	@Override
@@ -112,9 +119,10 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+		if (!worldObj.isRemote && worldObj.getDifficulty() == EnumDifficulty.PEACEFUL) {
 			setDead();
 		}
+		updateAttackTarget();
 	}
 
 	@Override
@@ -125,17 +133,14 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		prevSquidRotation = squidRotation;
 		prevTentacleAngle = tentacleAngle;
 		squidRotation += rotationVelocity;
-
 		if (squidRotation > ((float) Math.PI * 2F)) {
 			squidRotation -= ((float) Math.PI * 2F);
 			if (rand.nextInt(10) == 0) {
 				rotationVelocity = 1.0F / (rand.nextFloat() + 1.0F) * 0.2F;
 			}
 		}
-
 		if (isInWater()) {
 			float f;
-
 			if (squidRotation < (float) Math.PI) {
 				f = squidRotation / (float) Math.PI;
 				tentacleAngle = MathHelper.sin(f * f * (float) Math.PI) * (float) Math.PI * 0.25F;
@@ -151,18 +156,17 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 				randomMotionSpeed *= 0.9F;
 				field_70871_bB *= 0.99F;
 			}
-
 			if (!worldObj.isRemote) {
-				if (entityToAttack != null) {
+				Entity target = getAttackTarget();
+				if (target != null) {
 					TargetUtils.setEntityHeading(this, randomMotionVecX, randomMotionVecY, randomMotionVecZ, 0.25F, 1.0F, false);
-					faceEntity(entityToAttack, 30.0F, 120.0F); // squid model values: 30.0F, 210.0F
+					faceEntity(target, 30.0F, 120.0F); // squid model values: 30.0F, 210.0F
 				} else {
 					motionX = (double)(randomMotionVecX * randomMotionSpeed);
 					motionY = (double)(randomMotionVecY * randomMotionSpeed);
 					motionZ = (double)(randomMotionVecZ * randomMotionSpeed);
 				}
 			}
-
 			renderYawOffset += (-((float) Math.atan2(motionX, motionZ)) * 180.0F / (float) Math.PI - renderYawOffset) * 0.1F;
 			rotationYaw = renderYawOffset;
 			squidYaw += (float) Math.PI * field_70871_bB * 1.5F;
@@ -171,7 +175,6 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		} else {
 			tentacleAngle = MathHelper.abs(MathHelper.sin(squidRotation)) * (float) Math.PI * 0.25F;
 			squidPitch = (float)((double) squidPitch + (double)(-90.0F - squidPitch) * 0.02D);
-
 			if (!worldObj.isRemote) {
 				motionX = 0.0D;
 				motionY -= 0.08D;
@@ -186,11 +189,12 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		moveEntity(motionX, motionY, motionZ);
 	}
 
-	@Override
-	protected void updateEntityActionState() {
+	/**
+	 * Updates the current attack target
+	 */
+	protected void updateAttackTarget() {
 		float distance = 0.0F;
-		++entityAge;
-
+		EntityLivingBase entityToAttack = getAttackTarget();
 		if (entityToAttack == null) {
 			entityToAttack = findPlayerToAttack();
 		} else if (entityToAttack.isEntityAlive() && canAttackClass(entityToAttack.getClass())) {
@@ -203,23 +207,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		} else {
 			entityToAttack = null;
 		}
-
-		if (entityAge > 100) {
-			randomMotionVecX = randomMotionVecY = randomMotionVecZ = 0.0F;
-		} else if (rand.nextInt(entityToAttack != null ? 25 : 50) == 0 || !inWater || randomMotionVecX == 0.0F && randomMotionVecY == 0.0F && randomMotionVecZ == 0.0F) {
-			if (entityToAttack != null && distance > 5.0F) {
-				randomMotionVecX = (float)(entityToAttack.posX - posX) * 0.015F;
-				randomMotionVecY = (float)(1 + entityToAttack.posY - posY) * 0.015F;
-				randomMotionVecZ = (float)(entityToAttack.posZ - posZ) * 0.015F;
-			} else {
-				float f = rand.nextFloat() * (float) Math.PI * 2.0F;
-				randomMotionVecX = MathHelper.cos(f) * 0.2F;
-				randomMotionVecY = -0.1F + rand.nextFloat() * 0.3F;
-				randomMotionVecZ = MathHelper.sin(f) * 0.2F;
-			}
+		if (entityToAttack != getAttackTarget()) {
+			setAttackTarget(entityToAttack);
 		}
-
-		despawnEntity();
 	}
 
 	@Override
@@ -237,12 +227,12 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 
 	@Override
 	public boolean isInWater() {
-		return worldObj.handleMaterialAcceleration(boundingBox.expand(0.0D, -0.6000000238418579D, 0.0D), Material.water, this);
+		return worldObj.handleMaterialAcceleration(getEntityBoundingBox().expand(0.0D, -0.6000000238418579D, 0.0D), Material.water, this);
 	}
 
 	@Override
 	public boolean getCanSpawnHere() {
-		return posY > 45.0D && posY < 63.0D && worldObj.difficultySetting != EnumDifficulty.PEACEFUL && super.getCanSpawnHere();
+		return posY > 45.0D && posY < 63.0D && worldObj.getDifficulty() != EnumDifficulty.PEACEFUL && super.getCanSpawnHere();
 	}
 
 	@Override
@@ -250,22 +240,20 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		return Math.min(super.getTotalArmorValue() + 2, 20);
 	}
 
-	@Override
-	protected Entity findPlayerToAttack() {
-		EntityPlayer entityplayer = worldObj.getClosestVulnerablePlayerToEntity(this, 16.0D);
+	// @Override
+	protected EntityLivingBase findPlayerToAttack() {
+		EntityPlayer entityplayer = worldObj.getClosestPlayerToEntity(this, 16.0D);
 		return entityplayer != null && canEntityBeSeen(entityplayer) ? entityplayer : null;
 	}
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
-		if (isEntityInvulnerable() || source.isExplosion()) {
+		if (isEntityInvulnerable(source) || source.isExplosion()) {
 			return false;
 		} else if (super.attackEntityFrom(source, amount)) {
 			Entity entity = source.getEntity();
-			if (riddenByEntity != entity && ridingEntity != entity) {
-				if (entity != this) {
-					entityToAttack = entity;
-				}
+			if (entity != this && entity instanceof EntityLivingBase && riddenByEntity != entity && ridingEntity != entity) {
+				setAttackTarget((EntityLivingBase) entity);
 				return true;
 			} else {
 				return true;
@@ -275,62 +263,67 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		}
 	}
 
+	/**
+	 * Attack entity with 'touch of death'
+	 */
 	@Override
 	public boolean attackEntityAsMob(Entity entity) {
-		float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-		int i = 0;
-
+		attackTime = 20;
+		float damage = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+		int knockback = 0;
 		if (entity instanceof EntityLivingBase) {
-			f += EnchantmentHelper.getEnchantmentModifierLiving(this, (EntityLivingBase)entity);
-			i += EnchantmentHelper.getKnockbackModifier(this, (EntityLivingBase)entity);
+			damage += EnchantmentHelper.func_152377_a(getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
+			knockback += EnchantmentHelper.getKnockbackModifier(this);
 		}
-
-		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), f);
-
+		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), damage);
 		if (flag) {
-			if (i > 0) {
-				entity.addVelocity((double)(-MathHelper.sin(rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F), 0.1D, (double)(MathHelper.cos(rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F));
+			if (knockback > 0) {
+				entity.addVelocity((double)(-MathHelper.sin(rotationYaw * (float)Math.PI / 180.0F) * (float)knockback * 0.5F), 0.1D, (double)(MathHelper.cos(rotationYaw * (float)Math.PI / 180.0F) * (float)knockback * 0.5F));
 				motionX *= 0.6D;
 				motionZ *= 0.6D;
 			}
-
 			int j = EnchantmentHelper.getFireAspectModifier(this);
 			if (j > 0) {
 				entity.setFire(j * 4);
 			}
-
 			if (entity instanceof EntityLivingBase) {
-				// TODO verify that this is indeed the new way 'thorns' is handled
 				EnchantmentHelper.func_151384_a((EntityLivingBase) entity, this);
-				//EnchantmentThorns.func_151367_b(this, (EntityLivingBase) entity, EnchantmentHelper.func_92098_i(this));
 			}
+			EnchantmentHelper.func_151385_b(this, entity);
 		}
-
 		return flag;
 	}
 
-	@Override
+	/**
+	 * Attack entity with ranged attack
+	 */
+	protected void attackEntityWithRangedAttack(EntityLivingBase entity) {
+		attackTime = 20;
+		float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+		Entity projectile;
+		int difficulty = worldObj.getDifficulty().getDifficultyId();
+		if (getType() == 1) {
+			projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
+					setType(BombType.BOMB_WATER).setTime(12 - (difficulty * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * difficulty);
+		} else {
+			projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
+					setIgnoreWater().setDamage(f * difficulty);
+		}
+		// TODO worldObj.playSoundAtEntity(this, ModInfo.SOUND_WEB_SPLAT, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+		if (!worldObj.isRemote) {
+			worldObj.spawnEntityInWorld(projectile);
+		}
+	}
+
+	/**
+	 * Determines which type of attack (melee or ranged) to perform against the target entity
+	 */
 	protected void attackEntity(Entity entity, float distance) {
 		if (attackTime <= 0) {
-			if (distance < 2.0F && entity.boundingBox.maxY > boundingBox.minY && entity.boundingBox.minY < boundingBox.maxY) {
-				attackTime = 20;
+			if (distance < 2.0F && entity.getEntityBoundingBox().maxY > getEntityBoundingBox().minY && entity.getEntityBoundingBox().minY < getEntityBoundingBox().maxY) {
 				attackEntityAsMob(entity);
 			} else if (rand.nextInt(60) == 0 && entity instanceof EntityLivingBase) {
-				attackTime = 20;
-				float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-				Entity projectile;
-				int difficulty = worldObj.difficultySetting.getDifficultyId();
-				if (getType() == 1) {
-					projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
-							setType(BombType.BOMB_WATER).setTime(12 - (difficulty * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * difficulty);
-				} else {
-					projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
-							setIgnoreWater().setDamage(f * difficulty);
-				}
-				// TODO worldObj.playSoundAtEntity(this, ModInfo.SOUND_WEB_SPLAT, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
-				if (!worldObj.isRemote) {
-					worldObj.spawnEntityInWorld(projectile);
-				}
+				attackEntityWithRangedAttack((EntityLivingBase) entity);
 			}
 		}
 	}
@@ -344,10 +337,10 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	}
 
 	@Override
-	protected void dropRareDrop(int rarity) {
-		switch(rarity) {
-		case 1:
-			entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal()), 0.0F);
+	protected void addRandomDrop() {
+		switch(rand.nextInt(8)) {
+		case 0:
+			entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal()), 0.0F);
 			break;
 		default:
 			if (getType() == 1) {
@@ -366,7 +359,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
 		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
-			return new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal());
+			return new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal());
 		} else if (getType() == 1 && rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
 			return new ItemStack(ZSSItems.bomb,1,BombType.BOMB_WATER.ordinal());
 		}
@@ -394,6 +387,44 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		super.readEntityFromNBT(compound);
 		if (compound.hasKey("octorokType")) {
 			setType(compound.getByte("octorokType"));
+		}
+	}
+
+	//========================= Below this line copied from EntitySquid ===================//
+	public void setRandomMotion(float randomMotionX, float randomMotionY, float randomMotionZ) {
+		this.randomMotionVecX = randomMotionX;
+		this.randomMotionVecY = randomMotionY;
+		this.randomMotionVecZ = randomMotionZ;
+	}
+
+	public boolean isMovingRandomly() {
+		return randomMotionVecX != 0.0F || randomMotionVecY != 0.0F || randomMotionVecZ != 0.0F;
+	}
+
+	class AIMoveRandom extends EntityAIBase {
+		private EntityOctorok entity = EntityOctorok.this;
+		@Override
+		public boolean shouldExecute() {
+			return true;
+		}
+		@Override
+		public void updateTask() {
+			int i = entity.getAge();
+			Entity target = entity.getAttackTarget();
+			if (i > 100) {
+				entity.setRandomMotion(0.0F, 0.0F, 0.0F);
+			} else if (target != null && entity.getRNG().nextInt(25) == 0) {
+				float dx = (float)(target.posX - posX) * 0.015F;
+				float dy = (float)(1 + target.posY - posY) * 0.015F;
+				float dz = (float)(target.posZ - posZ) * 0.015F;
+				entity.setRandomMotion(dx, dy, dz);
+			} else if (entity.getRNG().nextInt(50) == 0 || !entity.inWater || !entity.isMovingRandomly()) {
+				float f = entity.getRNG().nextFloat() * (float)Math.PI * 2.0F;
+				float dx = MathHelper.cos(f) * 0.2F;
+				float dy = -0.1F + entity.getRNG().nextFloat() * 0.2F;
+				float dz = MathHelper.sin(f) * 0.2F;
+				entity.setRandomMotion(dx, dy, dz);
+			}
 		}
 	}
 }

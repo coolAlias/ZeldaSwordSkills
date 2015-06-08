@@ -17,10 +17,13 @@
 
 package zeldaswordskills.api.block;
 
-import zeldaswordskills.item.ItemHeldBlock;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import zeldaswordskills.item.ItemHeldBlock;
 
 
 /**
@@ -39,27 +42,27 @@ public interface ILiftable {
 	 * Returns the block's weight for purposes of lifting, allowing
 	 * otherwise unbreakable blocks to be handled efficiently
 	 * @param stack the itemstack used to lift the block
-	 * @param meta the block metadata
-	 * @param side the side (face) of the block the player is trying to lift
+	 * @param state the current block state
+	 * @param face the face (side) of the block the player is trying to lift
 	 * @return return null to use the block's explosion resistance as its weight
 	 */
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side);
+	BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face);
 
 	/**
 	 * Called after the block is picked up by a player, but before it is set to air,
 	 * allowing the ItemHeldBlock stack's NBT tag to be manipulated, e.g. by storing a
 	 * tile entity inside. See {@link ItemHeldBlock#getBlockStack} for more information.
 	 * @param stack the ItemHeldBlock stack containing the ILiftBlock stack used to pick up the block
-	 * @param meta the metadata of the block before it was picked up
+	 * @param state the current block state of the block before it was picked up
 	 */
-	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta);
+	void onLifted(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state);
 
 	/**
 	 * Called when a liftable block is placed from the held block stack, allowing tile entity
 	 * data previously stored in the stack's NBT to be handled, among other things
 	 * @param stack the ItemHeldBlock that was created when the block was lifted
-	 * @param meta the metadata returned from the block's onBlockPlaced method
+	 * @param state the block state returned from the block's onBlockPlaced method
 	 */
-	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta);
+	void onHeldBlockPlaced(World world, ItemStack stack, BlockPos pos, IBlockState state);
 
 }

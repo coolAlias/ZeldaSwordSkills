@@ -18,12 +18,13 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.renderer.entity.RenderBat;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -40,8 +41,8 @@ public class RenderEntityKeese extends RenderBat
 	private static final ResourceLocation thunder = new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder.png");
 	private static final ResourceLocation thunder_shock = new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder_shock.png");
 
-	public RenderEntityKeese() {
-		super();
+	public RenderEntityKeese(RenderManager renderManager) {
+		super(renderManager);
 	}
 
 	protected ResourceLocation getKeeseTextures(EntityKeese keese) {

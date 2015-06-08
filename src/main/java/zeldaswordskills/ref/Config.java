@@ -25,6 +25,7 @@ import java.util.Set;
 
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
@@ -35,7 +36,6 @@ import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.BossType;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
 /**
  * 
@@ -324,7 +324,6 @@ public class Config
 
 	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
-		ZSSMain.logger.info("Reading config: " + config.toString());
 		config.load();
 		ZSSItems.initConfig(config);
 

@@ -17,10 +17,13 @@
 
 package zeldaswordskills.api.block;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import cpw.mods.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -45,21 +48,21 @@ public interface ISmashable {
 	 * Returns the weight of this block for the purpose of determining
 	 * whether it can be smashed or not by the item used
 	 * @param stack the itemstack used to smash the block
-	 * @param meta the block metadata
-	 * @param side the side (face) of the block that was hit
+	 * @param state the current block state
+	 * @param face the face of the block that was hit
 	 */
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side);
+	BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face);
 	
 	/**
 	 * This method is called right before the block smash calculations occur,
 	 * allowing custom handling of the event by the block in question.
 	 * @param stack the stack's item will always be an instance of ISmashBlock
-	 * @param side the side (face) of the block that was hit
+	 * @param face the face of the block that was hit
 	 * @return
 	 * DEFAULT proceeds with the default smash calculations and possible destruction of the block struck
 	 * ALLOW prevents further processing and indicates a successful smash
 	 * DENY prevents further processing and indicates a failed smash attempt
 	 */
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
+	Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face);
 
 }

@@ -19,7 +19,6 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -29,32 +28,29 @@ import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;
 import zeldaswordskills.entity.projectile.EntityWhip;
-import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 // TODO BG2 dual-wielding compatibility
-public class ItemWhip extends Item implements IFairyUpgrade
+public class ItemWhip extends BaseModItem implements IFairyUpgrade
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
-
 	public ItemWhip() {
 		super();
 		setFull3D();
@@ -63,19 +59,9 @@ public class ItemWhip extends Item implements IFairyUpgrade
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/** Returns this whip's enum Type from stack damage value */
-	public WhipType getType(ItemStack stack) {
-		return getType(stack.getItemDamage());
-	}
-
-	/** Returns this whip's enum Type from damage value */
-	public WhipType getType(int damage) {
-		return (damage > -1 ? WhipType.values()[damage % WhipType.values().length] : WhipType.WHIP_SHORT);
-	}
-
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.block;
+		return EnumAction.BLOCK;
 	}
 
 	@Override
@@ -93,7 +79,7 @@ public class ItemWhip extends Item implements IFairyUpgrade
 		player.setItemInUse(stack, getMaxItemUseDuration(stack));
 		EntityWhip whip = new EntityWhip(player.worldObj, player);
 		whip.setThrower(player);
-		whip.setType(getType(stack));
+		whip.setType(WhipType.fromDamage(stack.getItemDamage()));
 		if (!player.worldObj.isRemote) {
 			player.worldObj.spawnEntityInWorld(whip);
 			player.worldObj.playSoundAtEntity(player, Sounds.WHIP, 0.4F, 1.0F);
@@ -107,7 +93,7 @@ public class ItemWhip extends Item implements IFairyUpgrade
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (villager.getProfession() == EnumVillager.BUTCHER.ordinal() && trades != null) {
-				switch(getType(stack)) {
+				switch(WhipType.fromDamage(stack.getItemDamage())) {
 				case WHIP_SHORT:
 					MerchantRecipe trade = new MerchantRecipe(new ItemStack(this, 1, WhipType.WHIP_SHORT.ordinal()), new ItemStack(Items.emerald, 64), new ItemStack(this, 1, WhipType.WHIP_LONG.ordinal()));
 					if (MerchantRecipeHelper.addUniqueTrade(trades, trade)) {
@@ -132,55 +118,48 @@ public class ItemWhip extends Item implements IFairyUpgrade
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
-		if (getType(item.getEntityItem()) == WhipType.WHIP_LONG && core.consumeRupees(320)) {
+		BlockPos pos = core.getPos();
+		if (WhipType.fromDamage(item.getEntityItem().getItemDamage()) == WhipType.WHIP_LONG && core.consumeRupees(320)) {
 			item.setDead();
-			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_MAGIC.ordinal()), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
-			//player.triggerAchievement(ZSSAchievements.magicWhip);
+			WorldUtils.spawnItemWithRandom(core.getWorld(), new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_MAGIC.ordinal()), pos.getX(), pos.getY() + 2, pos.getZ());
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			// TODO ? player.triggerAchievement(ZSSAchievements.magicWhip);
 		} else {
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 
 	@Override
 	public boolean hasFairyUpgrade(ItemStack stack) {
-		return (getType(stack) != WhipType.WHIP_MAGIC);
+		return (WhipType.fromDamage(stack.getItemDamage()) != WhipType.WHIP_MAGIC);
 	}
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName() + "." + stack.getItemDamage();
+		return "item.zss." + WhipType.fromDamage(stack.getItemDamage()).unlocalizedName;
+	}
+
+	@Override
+	public String[] getVariants() {
+		String[] variants = new String[WhipType.values().length];
+		for (WhipType type : WhipType.values()) {
+			variants[type.ordinal()] = ModInfo.ID + ":" + type.unlocalizedName;
+		}
+		return variants;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < WhipType.values().length; ++i) {
-			list.add(new ItemStack(item, 1, i));
+		for (WhipType type : WhipType.values()) {
+			list.add(new ItemStack(item, 1, type.ordinal()));
 		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int type) {
-		switch(getType(type)) {
-		case WHIP_MAGIC: return iconArray[1];
-		default: return iconArray[0];
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[2];
-		iconArray[0] = register.registerIcon(ModInfo.ID + ":whip");
-		iconArray[1] = register.registerIcon(ModInfo.ID + ":whip_magic");
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.whip.desc." + getType(stack).ordinal()));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss." + WhipType.fromDamage(stack.getItemDamage()).unlocalizedName + ".desc"));
 	}
 }

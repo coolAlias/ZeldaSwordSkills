@@ -22,7 +22,13 @@ import java.util.List;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import zeldaswordskills.ref.Config;
 
 /**
@@ -30,29 +36,27 @@ import zeldaswordskills.ref.Config;
  * A jar that holds one ItemStack and sucks in nearby items if inventory is empty
  *
  */
-public class TileEntityCeramicJar extends TileEntityInventory {
-
+public class TileEntityCeramicJar extends TileEntityInventory implements IUpdatePlayerListBox
+{
 	public TileEntityCeramicJar() {
 		inventory = new ItemStack[1];
 	}
 
 	private boolean shouldUpdate() {
 		return (worldObj.getWorldTime() % 20 == 0 && worldObj.rand.nextInt(8) == 0 &&
-				worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 16.0D) != null);
+				worldObj.getClosestPlayer(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, 16.0D) != null);
 	}
 
 	@Override
-	public boolean canUpdate() {
-		return Config.doJarsUpdate();
-	}
-
-	@Override
-	public void updateEntity() {
+	public void update() {
+		if (!Config.doJarsUpdate()) {
+			return;
+		}
 		if (!worldObj.isRemote && getStackInSlot(0) == null && shouldUpdate()) {
-			List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.
-					getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1).expand(1.0D, 1.0D, 1.0D));
+			BlockPos pos = new BlockPos(getPos().getX() + 1, getPos().getY() + 1, getPos().getZ() + 1);
+			List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(getPos(), pos).expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : list) {
-				if (!item.isEntityAlive() || item.ticksExisted < Math.max(item.delayBeforeCanPickup, 40)) {
+				if (!item.isEntityAlive() || item.cannotPickup()) {
 					continue;
 				}
 				ItemStack stack;
@@ -69,16 +73,6 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 	}
 
 	@Override
-	public String getInventoryName() {
-		return "";
-	}
-
-	@Override
-	public boolean hasCustomInventoryName() {
-		return true;
-	}
-
-	@Override
 	public int getInventoryStackLimit() {
 		return 64;
 	}
@@ -91,5 +85,23 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 	@Override
 	public boolean isItemValidForSlot(int slot, ItemStack stack) {
 		return true;
+	}
+
+	@Override
+	public void markDirty() {
+		super.markDirty();
+		worldObj.markBlockForUpdate(getPos());
+	}
+
+	@Override
+	public Packet getDescriptionPacket() {
+		NBTTagCompound tag = new NBTTagCompound();
+		this.writeToNBT(tag);
+		return new S35PacketUpdateTileEntity(getPos(), 1, tag);
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity packet) {
+		readFromNBT(packet.getNbtCompound());
 	}
 }

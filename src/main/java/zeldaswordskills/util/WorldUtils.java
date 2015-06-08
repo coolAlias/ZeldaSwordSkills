@@ -19,12 +19,18 @@ package zeldaswordskills.util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockButton;
+import net.minecraft.block.BlockLever;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
@@ -35,19 +41,23 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.WeightedRandomChestContent;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
-import zeldaswordskills.block.ZSSBlocks;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityFairy;
+import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -60,36 +70,35 @@ public class WorldUtils
 	public static final int MAX_RADIUS = 16;
 
 	/**
-	 * Switches active state of button or lever at x/y/z to and notifies neighbors
+	 * Activates a button or toggles a lever at the given position and notifies neighbors
+	 * @param state Must contain either a BlockButton or BlockLever
 	 */
-	public static void activateButton(World world, Block block, int x, int y, int z) {
-		int meta = world.getBlockMetadata(x, y, z);
-		world.setBlockMetadataWithNotify(x, y, z, (meta < 8 ? meta | 8 : meta & ~8), 3);
-		// func_147479_m is markBlockForRenderUpdate
-		world.func_147479_m(x, y, z);
-		world.playSoundEffect((double) x + 0.5D, (double) y + 0.5D, (double) z + 0.5D, Sounds.CLICK, 0.3F, 0.6F);
-		world.scheduleBlockUpdate(x, y, z, block, block.tickRate(world));
-		world.notifyBlocksOfNeighborChange(x, y, z, block);
-		switch(meta & 7) {
-		case 0: // 0 and 7 are ceiling levers
-		case 7: world.notifyBlocksOfNeighborChange(x, y + 1, z, block); break;
-		case 1: world.notifyBlocksOfNeighborChange(x - 1, y, z, block); break;
-		case 2: world.notifyBlocksOfNeighborChange(x + 1, y, z, block); break;
-		case 3: world.notifyBlocksOfNeighborChange(x, y, z - 1, block); break;
-		case 4: world.notifyBlocksOfNeighborChange(x, y, z + 1, block); break;
-		default: world.notifyBlocksOfNeighborChange(x, y - 1, z, block);
+	public static void activateButton(World world, IBlockState state, BlockPos pos) {
+		Block block = state.getBlock();
+		if (!(block instanceof BlockButton) && !(block instanceof BlockLever)) {
+			return;
 		}
+		IProperty powered = (block instanceof BlockButton) ? BlockButton.POWERED : BlockLever.POWERED;
+		boolean setPowered = block instanceof BlockButton || !((Boolean) state.getValue(powered)).booleanValue();
+		IProperty facing = (block instanceof BlockButton) ? BlockButton.FACING : BlockLever.FACING;
+		world.setBlockState(pos, state.withProperty(powered, Boolean.valueOf(setPowered)), 3);
+		world.markBlockRangeForRenderUpdate(pos, pos);
+		world.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, 0.6F);
+		world.notifyNeighborsOfStateChange(pos, state.getBlock());
+		world.notifyNeighborsOfStateChange(pos.offset(((BlockLever.EnumOrientation) state.getValue(facing)).getFacing().getOpposite()), state.getBlock());
+		world.scheduleUpdate(pos, state.getBlock(), state.getBlock().tickRate(world));
+		world.playSoundEffect((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, Sounds.CLICK, 0.3F, 0.6F);
 	}
 
 	/**
-	 * Whether the block at x/y/z can be melted by any of the various fire effects
+	 * Whether the block at the given position can be melted by any of the various fire effects
 	 */
-	public static boolean canMeltBlock(World world, Block block, int x, int y, int z) {
-		int meta = world.getBlockMetadata(x, y, z);
-		boolean flag = Config.enableFireArrowMelt() ? (meta & ~8) == 5 : meta == 5;
-		return (block.getMaterial() == Material.ice || block.getMaterial() == Material.packedIce ||
-				block.getMaterial() == Material.snow || block.getMaterial() == Material.craftedSnow ||
-				(block == ZSSBlocks.secretStone && flag));
+	public static boolean canMeltBlock(World world, Block block, BlockPos pos) {
+		IBlockState state = world.getBlockState(pos);
+		int meta = state.getBlock().getMetaFromState(state);
+		boolean flag = block instanceof BlockSecretStone && (Config.enableFireArrowMelt() ? (meta & ~8) == 5 : meta == 5);
+		return (flag || block.getMaterial() == Material.ice || block.getMaterial() == Material.packedIce ||
+				block.getMaterial() == Material.snow || block.getMaterial() == Material.craftedSnow);
 	}
 
 	/**
@@ -109,7 +118,7 @@ public class WorldUtils
 			drop.motionX += Math.cos((double) f1) * (double) f;
 			drop.motionY += (double)((entity.worldObj.rand.nextFloat() - entity.worldObj.rand.nextFloat()) * 0.1F);
 			drop.motionZ += Math.sin((double) f1) * (double) f;
-			drop.delayBeforeCanPickup = 40;
+			drop.setPickupDelay(40);
 			entity.worldObj.spawnEntityInWorld(drop);
 			entity.setCurrentItemOrArmor(0, (ItemStack) null);
 		}
@@ -118,20 +127,93 @@ public class WorldUtils
 	/**
 	 * Call when a container block is broken to drop the entire inv into the world
 	 */
-	public static void dropContainerBlockInventory(World world, int x, int y, int z) {
-		TileEntity tileEntity = world.getTileEntity(x, y, z);
+	public static void dropContainerBlockInventory(World world, BlockPos pos) {
+		TileEntity tileEntity = world.getTileEntity(pos);
 		if (!(tileEntity instanceof IInventory)) { return; }
 		IInventory inv = (IInventory) tileEntity;
 		for (int i = 0; i < inv.getSizeInventory(); ++i) {
-			spawnItemWithRandom(world, inv.getStackInSlotOnClosing(i), x, y, z);
+			spawnItemWithRandom(world, inv.getStackInSlotOnClosing(i), pos.getX(), pos.getY(), pos.getZ());
 		}
+	}
+
+	/**
+	 * Undoes whatever acceleration has been applied by materials such as flowing water (see {@link World#handleMaterialAcceleration})
+	 */
+	public static boolean reverseMaterialAcceleration(World world, AxisAlignedBB aabb, Material material, Entity entity) {
+		int i = MathHelper.floor_double(aabb.minX);
+		int j = MathHelper.floor_double(aabb.maxX + 1.0D);
+		int k = MathHelper.floor_double(aabb.minY);
+		int l = MathHelper.floor_double(aabb.maxY + 1.0D);
+		int i1 = MathHelper.floor_double(aabb.minZ);
+		int j1 = MathHelper.floor_double(aabb.maxZ + 1.0D);
+		if (!WorldUtils.isAreaLoaded(world, i, k, i1, j, l, j1, true)) {
+			return false;
+		} else {
+			boolean flag = false;
+			Vec3 vec3 = new Vec3(0.0D, 0.0D, 0.0D);
+			for (int k1 = i; k1 < j; ++k1) {
+				for (int l1 = k; l1 < l; ++l1) {
+					for (int i2 = i1; i2 < j1; ++i2) {
+						BlockPos pos = new BlockPos(k1, l1, i2);
+						IBlockState state = world.getBlockState(pos);
+						Block block = state.getBlock();
+						if (block.getMaterial() == material) {
+							double liquidLevel = (double)((float)(l1 + 1) - BlockLiquid.getLiquidHeightPercent(((Integer) state.getValue(BlockLiquid.LEVEL)).intValue()));
+							if ((double)l >= liquidLevel) {
+								flag = true;
+								vec3 = block.modifyAcceleration(world, pos, entity, vec3);
+							}
+						}
+					}
+				}
+			}
+			if (vec3.lengthVector() > 0.0D && entity.isPushedByWater()) {
+				vec3 = vec3.normalize();
+				double d1 = 0.014D;
+				entity.motionX -= vec3.xCoord * d1;
+				entity.motionY -= vec3.yCoord * d1;
+				entity.motionZ -= vec3.zCoord * d1;
+				entity.motionX *= 0.85D;
+				entity.motionY *= 0.85D;
+				entity.motionZ *= 0.85D;
+			}
+			return flag;
+		}
+	}
+
+	/**
+	 * Copied from {@link World#isAreaLoaded}
+	 */
+	public static boolean isAreaLoaded(World world, int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {
+		if (yEnd >= 0 && yStart < 256) {
+			xStart >>= 4;
+		zStart >>= 4;
+		xEnd >>= 4;
+		zEnd >>= 4;
+		for (int k1 = xStart; k1 <= xEnd; ++k1) {
+			for (int l1 = zStart; l1 <= zEnd; ++l1) {
+				if (!WorldUtils.isChunkLoaded(world, k1, l1, allowEmpty)) {
+					return false;
+				}
+			}
+		}
+		return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Copied from {@link World#isChunkLoaded}
+	 */
+	public static boolean isChunkLoaded(World world, int x, int z, boolean allowEmpty) {
+		return world.getChunkProvider().chunkExists(x, z) && (allowEmpty || !world.getChunkProvider().provideChunk(x, z).isEmpty());
 	}
 
 	/**
 	 * Generates a number of random chest contents, placing them in the chest either completely
 	 * at random or only in empty slots, as designated by the parameters
 	 */
-	public static void generateRandomChestContents(Random rand, WeightedRandomChestContent[] weightedContents, IInventory chest, int numItems, boolean atRandom) {
+	public static void generateRandomChestContents(Random rand, List<WeightedRandomChestContent> weightedContents, IInventory chest, int numItems, boolean atRandom) {
 		for (int i = 0; i < numItems; ++i) {
 			WeightedRandomChestContent weightedChest = (WeightedRandomChestContent) WeightedRandom.getRandomItem(rand, weightedContents);
 			ItemStack[] stacks = ChestGenHooks.generateStacks(rand, weightedChest.theItemId, weightedChest.theMinimumChanceToGenerateItem, weightedChest.theMaximumChanceToGenerateItem);
@@ -198,12 +280,13 @@ public class WorldUtils
 	}
 
 	/**
-	 * Attempts to add all items in the list to container at x/y/z, provided that the tile
-	 * entity at x/y/z is an IInventory. Items are added from the first available slot.
+	 * Attempts to add all items in the list to the IInventory at the given
+	 * position using {@link #addItemToInventoryAtRandom}. Items are added
+	 * beginning at the first available slot.
 	 * @return true if all items were successfully added
 	 */
-	public static boolean addInventoryContents(World world, int x, int y, int z, List<ItemStack> items) {
-		TileEntity te = world.getTileEntity(x, y, z);
+	public static boolean addInventoryContents(World world, BlockPos pos, List<ItemStack> items) {
+		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof IInventory) {
 			IInventory inv = (IInventory) te;
 			for (ItemStack stack : items) {
@@ -217,12 +300,12 @@ public class WorldUtils
 	}
 
 	/**
-	 * Attempts to add all items in the list to container at x/y/z, provided that the tile
-	 * entity at x/y/z is an IInventory using {@link #addItemToInventoryAtRandom}
+	 * Attempts to add all items in the list to the IInventory at the given
+	 * position using {@link #addItemToInventoryAtRandom}
 	 * @return true if all items were successfully added
 	 */
-	public static boolean addInventoryContentsRandomly(World world, int x, int y, int z, List<ItemStack> items) {
-		TileEntity te = world.getTileEntity(x, y, z);
+	public static boolean addInventoryContentsRandomly(World world, BlockPos pos, List<ItemStack> items) {
+		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof IInventory) {
 			IInventory inv = (IInventory) te;
 			boolean flag = true;
@@ -240,8 +323,8 @@ public class WorldUtils
 	 * Populates a list with blocks that can be affected within the given radius
 	 * @param targetBlock the block to target, or null if all blocks may be targeted
 	 */
-	public static HashSet<ChunkPosition> getAffectedBlocksList(World world, Random rand, float radius, double posX, double posY, double posZ, Block targetBlock) {
-		HashSet<ChunkPosition> hashset = new HashSet<ChunkPosition>();
+	public static HashSet<BlockPos> getAffectedBlocksList(World world, Random rand, float radius, double posX, double posY, double posZ, Block targetBlock) {
+		HashSet<BlockPos> hashset = Sets.newHashSet();
 		for (int i = 0; i < MAX_RADIUS; ++i) {
 			for (int j = 0; j < MAX_RADIUS; ++j) {
 				for (int k = 0; k < MAX_RADIUS; ++k) {
@@ -259,17 +342,18 @@ public class WorldUtils
 						double d1 = posY;
 						double d2 = posZ;
 
-						for (float f2 = 0.3F; f1 > 0.0F; f1 -= f2 * 0.75F)
+						for (float f2 = 0.3F; f1 > 0.0F; f1 -= 0.22500001F)
 						{
 							int l = MathHelper.floor_double(d0);
 							int i1 = MathHelper.floor_double(d1);
 							int j1 = MathHelper.floor_double(d2);
-							Block block = world.getBlock(l, i1, j1);
+							BlockPos blockpos = new BlockPos(l, i1, j1);
+							Block block = world.getBlockState(blockpos).getBlock();
 							if (block.getMaterial() != Material.air) {
 								f1 -= 1.3F * f2;
 							}
 							if (f1 > 0.0F && (targetBlock == null || block == targetBlock)) {
-								hashset.add(new ChunkPosition(l, i1, j1));
+								hashset.add(blockpos);
 							}
 
 							d0 += d3 * (double)f2;
@@ -285,6 +369,23 @@ public class WorldUtils
 	}
 
 	/**
+	 * Returns a list of all entities within the given bounding box that match the class or interface provided
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> List<T> getEntitiesWithinAABB(World world, Class<T> clazz, AxisAlignedBB aabb) {
+		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, aabb);
+		List<T> found = Lists.newArrayList();
+		Iterator<Entity> iterator = entities.iterator();
+		while (iterator.hasNext()) {
+			Entity e = iterator.next();
+			if (clazz.isAssignableFrom(e.getClass())) {
+				found.add((T) e);
+			}
+		}
+		return found;
+	}
+
+	/**
 	 * Returns a list of all Tile Entities matching the class given within the bounding box
 	 */
 	public static <T extends TileEntity> List<T> getTileEntitiesWithinAABB(World world, Class<T> clazz, AxisAlignedBB aabb) {
@@ -295,13 +396,13 @@ public class WorldUtils
 		int maxY = MathHelper.floor_double(aabb.maxY + World.MAX_ENTITY_RADIUS);
 		int minZ = MathHelper.floor_double(aabb.minZ - World.MAX_ENTITY_RADIUS);
 		int maxZ = MathHelper.floor_double(aabb.maxZ + World.MAX_ENTITY_RADIUS);
-		if (!world.checkChunksExist(minX, minY, minZ, maxX, maxY, maxZ)) {
+		if (!world.isAreaLoaded(new BlockPos(minX, minY, minZ), new BlockPos(maxX, maxY, maxZ))) {
 			return list;
 		}
 		for (int i = minX; i <= maxX; ++i) {
 			for (int j = minY; j <= maxY; ++j) {
 				for (int k = minZ; k <= maxZ; ++k) {
-					TileEntity te = world.getTileEntity(i, j, k);
+					TileEntity te = world.getTileEntity(new BlockPos(i, j, k));
 					if (te != null && clazz.isAssignableFrom(te.getClass())) {
 						list.add((T) te);
 					}
@@ -329,9 +430,10 @@ public class WorldUtils
 	 * @param requiresFairy if true, only returns a spawner with at least one fairy nearby
 	 */
 	public static TileEntityDungeonCore getNearbyFairySpawner(World world, double x, double y, double z, boolean requiresFairy) {
-		List<TileEntityDungeonCore> list = WorldUtils.getTileEntitiesWithinAABB(world, TileEntityDungeonCore.class, AxisAlignedBB.getBoundingBox(x - 3.0D, y - 2.0D, z - 3.0D, x + 3.0D, y + 2.0D, z + 3.0D));
+		List<TileEntityDungeonCore> list = WorldUtils.getTileEntitiesWithinAABB(world, TileEntityDungeonCore.class, new AxisAlignedBB(x - 3.0D, y - 2.0D, z - 3.0D, x + 3.0D, y + 2.0D, z + 3.0D));
 		for (TileEntityDungeonCore core : list) {
-			if (core.isSpawner() && (!requiresFairy || world.getEntitiesWithinAABB(EntityFairy.class, AxisAlignedBB.getBoundingBox((double) core.xCoord - 5D, (double) core.yCoord - 1, (double) core.zCoord - 5D, (double) core.xCoord + 5D, (double) core.yCoord + 5.0D, (double) core.zCoord + 5D)).size() > 0)) {
+			BlockPos pos = core.getPos();
+			if (core.isSpawner() && (!requiresFairy || world.getEntitiesWithinAABB(EntityFairy.class, new AxisAlignedBB((double) pos.getX() - 5D, (double) pos.getY() - 1, (double) pos.getZ() - 5D, (double) pos.getX() + 5D, (double) pos.getY() + 5.0D, (double) pos.getZ() + 5D)).size() > 0)) {
 				return core;
 			}
 		}
@@ -380,7 +482,7 @@ public class WorldUtils
 			entityitem.motionX = (-0.5F + world.rand.nextGaussian()) * f;
 			entityitem.motionY = (4 + world.rand.nextGaussian()) * f;
 			entityitem.motionZ = (-0.5F + world.rand.nextGaussian()) * f;
-			entityitem.delayBeforeCanPickup = 10;
+			entityitem.setPickupDelay(10);
 			world.spawnEntityInWorld(entityitem);
 		}
 	}
@@ -391,14 +493,14 @@ public class WorldUtils
 	@SideOnly(Side.CLIENT)
 	public static void spawnWorldParticles(World world, EntityFX particle) {
 		Minecraft mc = Minecraft.getMinecraft();
-		if (particle != null && mc != null && mc.renderViewEntity != null && mc.effectRenderer != null) {
+		if (particle != null && mc != null && mc.getRenderViewEntity() != null && mc.effectRenderer != null) {
 			int particleSetting = mc.gameSettings.particleSetting;
 			if (particleSetting == 2 || (particleSetting == 1 && world.rand.nextInt(3) == 0)) {
 				return;
 			}
-			double dx = mc.renderViewEntity.posX - particle.posX;
-			double dy = mc.renderViewEntity.posY - particle.posY;
-			double dz = mc.renderViewEntity.posZ - particle.posZ;
+			double dx = mc.getRenderViewEntity().posX - particle.posX;
+			double dy = mc.getRenderViewEntity().posY - particle.posY;
+			double dz = mc.getRenderViewEntity().posZ - particle.posZ;
 			if (dx * dx + dy * dy + dz * dz < 256) {
 				Minecraft.getMinecraft().effectRenderer.addEffect(particle);
 			}
@@ -427,12 +529,12 @@ public class WorldUtils
 	 * Sets an entity's location near x/y/z so that it doesn't spawn inside of walls.
 	 * @return false if no suitable location found
 	 */
-	public static boolean setEntityInStructure(World world, Entity entity, int x, int y, int z) {
+	public static boolean setEntityInStructure(World world, Entity entity, BlockPos pos) {
 		if (entity == null) { return false; }
 		int i = 0;
-		entity.setLocationAndAngles(x, y, z, 0.0F, 0.0F);
+		entity.setLocationAndAngles(pos.getX(), pos.getY(), pos.getZ(), 0.0F, 0.0F);
 		while (entity.isEntityInsideOpaqueBlock() && i < 8) {
-			if (i == 4) { entity.setPosition(x + 1, y, z + 1); }
+			if (i == 4) { entity.setPosition(pos.getX() + 1, pos.getY(), pos.getZ() + 1); }
 			switch(i % 4) {
 			case 0: entity.setPosition(entity.posX + 0.5D, entity.posY, entity.posZ + 0.5D); break;
 			case 1: entity.setPosition(entity.posX, entity.posY, entity.posZ - 1.0D); break;

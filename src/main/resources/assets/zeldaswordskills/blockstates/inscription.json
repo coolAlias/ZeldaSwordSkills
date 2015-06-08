@@ -1,0 +1,11 @@
+{
+    "variants": {
+        "normal": { "model": "zeldaswordskills:inscription" },
+        "facing=up": { "model": "zeldaswordskills:inscription" },
+        "facing=down": { "model": "zeldaswordskills:inscription", "x": 180, "y": 180 },
+        "facing=east": { "model": "zeldaswordskills:inscription", "x": 270, "y": 270 },
+        "facing=south": { "model": "zeldaswordskills:inscription", "x": 270 },
+        "facing=west": { "model": "zeldaswordskills:inscription", "x": 270, "y": 90 },
+        "facing=north": { "model": "zeldaswordskills:inscription", "x": 270, "y": 180 }
+    }
+}

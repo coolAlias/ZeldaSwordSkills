@@ -1,0 +1,8 @@
+{
+    "variants": {
+    	"ethereal=false,variant=time_block" : { "model" : "zeldaswordskills:time_block" },
+    	"ethereal=true,variant=time_block" : { "model" : "zeldaswordskills:empty" },
+    	"ethereal=false,variant=royal_block" : { "model" : "zeldaswordskills:royal_block" },
+    	"ethereal=true,variant=royal_block" : { "model" : "zeldaswordskills:empty" }
+    }
+}

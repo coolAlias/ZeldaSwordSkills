@@ -19,27 +19,24 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityFairy;
-import zeldaswordskills.entity.EntityNavi;
-import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.entity.passive.EntityFairy;
+import zeldaswordskills.entity.passive.EntityNavi;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -47,7 +44,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * when Link would otherwise die.
  *
  */
-public class ItemFairyBottle extends Item implements IUnenchantable
+public class ItemFairyBottle extends BaseModItem implements IUnenchantable
 {
 	public ItemFairyBottle() {
 		super();
@@ -94,10 +91,10 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 				Vec3 vec3 = player.getLookVec();
 				EntityFairy fairy = new EntityFairy(world);
 				fairy.setPosition(player.posX + (vec3.xCoord * 2D), player.posY + 1.6D, player.posZ + (vec3.zCoord * 2D));
-				List<TileEntityDungeonCore> list = WorldUtils.getTileEntitiesWithinAABB(world, TileEntityDungeonCore.class, fairy.boundingBox.expand(4.0D, 3.0D, 4.0D));
+				List<TileEntityDungeonCore> list = WorldUtils.getTileEntitiesWithinAABB(world, TileEntityDungeonCore.class, fairy.getEntityBoundingBox().expand(4.0D, 3.0D, 4.0D));
 				for (TileEntityDungeonCore core : list) {
 					if (core.isSpawner()) {
-						fairy.setFairyHome(core.xCoord, core.yCoord + 1, core.zCoord);
+						fairy.setFairyHome(core.getPos().up());
 					}
 				}
 				world.spawnEntityInWorld(fairy);
@@ -108,7 +105,6 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 				player.heal(player.getMaxHealth());
 			}
 		}
-
 		if (used) {
 			WorldUtils.playSoundAtEntity(player, Sounds.CORK, 0.4F, 1.0F);
 			if (!player.capabilities.isCreativeMode || stack.hasDisplayName()) {
@@ -120,7 +116,6 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 				}
 			}
 		}
-
 		return stack;
 	}
 
@@ -131,20 +126,14 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack, int pass) {
+	public boolean hasEffect(ItemStack stack) {
 		return true;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.fairybottle.desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.fairybottle.desc.1"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.1"));
 	}
 }

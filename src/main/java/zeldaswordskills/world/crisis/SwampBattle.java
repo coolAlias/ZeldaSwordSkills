@@ -38,7 +38,7 @@ public class SwampBattle extends BossBattle {
 	protected void generateBossMobs(World world, int number) {
 		Entity mob = core.getBossType().getNewMob(world);
 		if (mob instanceof EntityWizzrobe) { // already a boss-level mob, doesn't need boosting
-			((EntityWizzrobe) mob).setTeleBounds(AxisAlignedBB.getBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ));
+			((EntityWizzrobe) mob).setTeleBounds(new AxisAlignedBB(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ));
 			spawnMobInCorner(world, mob, world.rand.nextInt(4), false, false);
 		}
 	}

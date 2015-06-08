@@ -17,41 +17,45 @@
 
 package zeldaswordskills.client.render.entity;
 
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityBoomerang extends Render
 {
-	public RenderEntityBoomerang() {}
+	private final RenderItem renderItem;
+
+	public RenderEntityBoomerang(RenderManager renderManager, RenderItem renderItem) {
+		super(renderManager);
+		this.renderItem = renderItem;
+	}
 
 	public void renderBoomerang(EntityBoomerang entity, double x, double y, double z, float yaw, float partialTick) {
 		ItemStack boomerang = entity.getBoomerang();
 		if (boomerang != null) {
-			GL11.glPushMatrix();
-			GL11.glTranslated(x, y, z);
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(x, y, z);
+			GlStateManager.enableRescaleNormal();
+			GlStateManager.scale(0.5F, 0.5F, 0.5F);
 			float rotation = ((float) entity.ticksExisted + partialTick) * 50;
 			while (rotation > 360) rotation -= 360;
-			GL11.glRotatef(entity.rotationYaw + (entity.prevRotationYaw - entity.rotationYaw) * partialTick - 60.0F, 0.0F, 1.0F, 0.0F);
-			GL11.glRotatef(Math.abs(entity.rotationPitch + (entity.prevRotationPitch - entity.rotationPitch)) * partialTick - rotation, 0.0F, 0.0F, 1.0F);
-			GL11.glTranslatef(-0.5F, -0.5F, 0.0F);
-			IIcon icon = boomerang.getItem().getIconFromDamage(0);
-			bindTexture(renderManager.renderEngine.getResourceLocation(boomerang.getItem().getSpriteNumber()));
-			Tessellator tessellator = Tessellator.instance;
-			ItemRenderer.renderItemIn2D(tessellator, icon.getMaxU(), icon.getMinV(), icon.getMinU(), icon.getMaxV(), icon.getIconWidth(), icon.getIconHeight(), 0.0625F);
-			GL11.glPopMatrix();
+			GlStateManager.rotate(entity.rotationYaw + (entity.prevRotationYaw - entity.rotationYaw) * partialTick - 60.0F, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotate(Math.abs(entity.rotationPitch + (entity.prevRotationPitch - entity.rotationPitch)) * partialTick - rotation, 0.0F, 0.0F, 1.0F);
+			bindTexture(TextureMap.locationBlocksTexture);
+			renderItem.renderItemModel(boomerang);
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.popMatrix();
 		}
+		super.doRender(entity, x, y, z, yaw, partialTick);
 	}
 
 	@Override

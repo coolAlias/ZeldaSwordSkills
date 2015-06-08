@@ -23,22 +23,22 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumAction;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.item.ISacredFlame;
@@ -48,12 +48,9 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -67,10 +64,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 		constantly drains hunger and prevents the use of other magic skills
  *
  */
-public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParticles
+public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpawnParticles
 {
 	/** The spirit's id, from BlockSacredFlame */
-	private final int spiritType;
+	private final BlockSacredFlame.EnumType spiritType;
 
 	/** Cost (in damage) for each use of this item*/
 	private final int costToUse;
@@ -78,9 +75,9 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	/** Amount of time required before the crystal's effects activate */
 	private final int timeToUse;
 
-	public ItemSpiritCrystal(int type, int cost, int time) {
+	public ItemSpiritCrystal(BlockSacredFlame.EnumType flame, int cost, int time) {
 		super();
-		spiritType = type;
+		spiritType = flame;
 		costToUse = cost;
 		timeToUse = time;
 		setMaxDamage(128);
@@ -90,12 +87,12 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
-		return 72000;
+		return timeToUse;
 	}
 
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.block;
+		return EnumAction.BLOCK;
 	}
 
 	@Override
@@ -107,14 +104,14 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		int cost = 0;
 		if (!ZSSPlayerInfo.get(player).isNayruActive()) {
-			if (spiritType == BlockSacredFlame.FARORE && player.isSneaking()) {
+			if (spiritType == BlockSacredFlame.EnumType.FARORE && player.isSneaking()) {
 				mark(stack, world, player);
 				cost = 1;
-			} else if (spiritType == BlockSacredFlame.NAYRU) {
+			} else if (spiritType == BlockSacredFlame.EnumType.NAYRU) {
 				cost = handleNayru(stack, world, player);
 			} else {
 				player.setItemInUse(stack, getMaxItemUseDuration(stack));
-				String sound = (spiritType == BlockSacredFlame.DIN ? Sounds.SUCCESS_MAGIC : Sounds.FLAME_ABSORB);
+				String sound = (spiritType == BlockSacredFlame.EnumType.DIN ? Sounds.SUCCESS_MAGIC : Sounds.FLAME_ABSORB);
 				player.playSound(sound, 1.0F, 1.0F);
 			}
 
@@ -128,35 +125,33 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	}
 
 	@Override
-	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		if (getMaxItemUseDuration(stack) - ticksRemaining > timeToUse) {
-			int cost = 0;
-			switch(spiritType) {
-			case BlockSacredFlame.DIN: cost = handleDin(stack, world, player); break;
-			case BlockSacredFlame.FARORE: cost = handleFarore(stack, world, player); break;
-			case BlockSacredFlame.NAYRU: break;
-			default: ZSSMain.logger.warn("Invalid spirit type " + spiritType + " while using spirit crystal");
-			}
-
-			if (damageStack(stack, player, cost)) {
-				player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalSpirit));
-			}
+	public ItemStack onItemUseFinish(ItemStack stack, World world, EntityPlayer player) {
+		int cost = 0;
+		switch(spiritType) {
+		case DIN: cost = handleDin(stack, world, player); break;
+		case FARORE: cost = handleFarore(stack, world, player); break;
+		case NAYRU: break;
+		default: ZSSMain.logger.warn("Invalid spirit type " + spiritType + " while using spirit crystal");
 		}
+		if (damageStack(stack, player, cost)) {
+			return new ItemStack(ZSSItems.crystalSpirit);
+		}
+		return stack;
 	}
 
 	@Override
-	public boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
+	public boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, BlockSacredFlame.EnumType flame, boolean isActive) {
 		return false;
 	}
 
 	@Override
-	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
+	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, BlockSacredFlame.EnumType flame, boolean isActive) {
 		if (world.isRemote) {
 			return false;
 		} else if (stack.getItemDamage() == 0) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.sacred_flame.full");
 		} else if (isActive) {
-			if (spiritType == type) {
+			if (spiritType == flame) {
 				int originalDamage = stack.getItemDamage();
 				stack.setItemDamage(0);
 				world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
@@ -206,26 +201,22 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	 * Affects all blocks in the radius with the effects of Din's Fire
 	 */
 	private void affectDinBlocks(World world, EntityPlayer player, float radius) {
-		List<ChunkPosition> affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, null));
-		int i, j, k;
+		List<BlockPos> affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, null));
 		Block block;
-		ChunkPosition chunkposition;
-		Iterator<ChunkPosition> iterator = affectedBlockPositions.iterator();
+		BlockPos pos;
+		Iterator<BlockPos> iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
-			chunkposition = iterator.next();
-			i = chunkposition.chunkPosX;
-			j = chunkposition.chunkPosY;
-			k = chunkposition.chunkPosZ;
-			block = world.getBlock(i, j, k);
-
+			pos = iterator.next();
+			block = world.getBlockState(pos).getBlock();
 			if (block.getMaterial() == Material.air && Config.isDinIgniteEnabled()) {
-				Block block1 = world.getBlock(i, j - 1, k);
-				if (block1.func_149730_j() && world.rand.nextInt(8) == 0) {
-					world.setBlock(i, j, k, Blocks.fire);
+				Block block1 = world.getBlockState(pos.down()).getBlock();
+				if (block1.isFullBlock() && world.rand.nextInt(8) == 0) {
+					world.setBlockState(pos, Blocks.fire.getDefaultState());
 				}
-			} else if (WorldUtils.canMeltBlock(world, block, i, j, k)) {
-				world.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
-				world.setBlockToAir(i, j, k);
+			} else if (WorldUtils.canMeltBlock(world, block, pos)) {
+				world.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D,
+						Sounds.FIRE_FIZZ, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+				world.setBlockToAir(pos);
 			}
 		}
 	}
@@ -234,39 +225,28 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	 * Affects all entities within the radius with the effects of Din's Fire
 	 */
 	private void affectDinEntities(World world, EntityPlayer player, float radius) {
-		int i = MathHelper.floor_double(player.posX - (double) radius - 1.0D);
-		int j = MathHelper.floor_double(player.posX + (double) radius + 1.0D);
-		int k = MathHelper.floor_double(player.posY - (double) radius - 1.0D);
-		int l1 = MathHelper.floor_double(player.posY + (double) radius + 1.0D);
-		int i2 = MathHelper.floor_double(player.posZ - (double) radius - 1.0D);
-		int j2 = MathHelper.floor_double(player.posZ + (double) radius + 1.0D);
-		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(player, AxisAlignedBB.getBoundingBox((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
-		Vec3 vec3 = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
-
+		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().expand(radius, radius / 2F, radius));
+		Vec3 vec3 = new Vec3(player.posX, player.posY, player.posZ);
 		for (int k2 = 0; k2 < list.size(); ++k2) {
 			Entity entity = list.get(k2);
 			double d0 = entity.posX - player.posX;
 			double d1 = entity.posY + (double) entity.getEyeHeight() - player.posY;
 			double d2 = entity.posZ - player.posZ;
 			double d8 = (double) MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
-
-			if (d8 != 0.0D)
-			{
+			if (d8 != 0.0D) {
 				d0 /= d8;
 				d1 /= d8;
 				d2 /= d8;
-				double d10 = (double) world.getBlockDensity(vec3, entity.boundingBox);
+				double d10 = (double) world.getBlockDensity(vec3, entity.getEntityBoundingBox());
 				float amount = 32.0F * (float) d10;
 				if (entity.isImmuneToFire()) {
 					amount *= 0.25F;
 				}
-
 				if (entity.attackEntityFrom(new DamageSourceFireIndirect("magic.din", player, player, true).setMagicDamage(), amount) && !entity.isImmuneToFire()) {
 					if (world.rand.nextFloat() < d10) {
 						entity.setFire(10);
 					}
 				}
-
 				double d11 = EnchantmentProtection.func_92092_a(entity, d10);
 				entity.motionX += d0 * d11;
 				entity.motionY += d1 * d11;
@@ -299,8 +279,8 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 					d3 *= d7;
 					d4 *= d7;
 					d5 *= d7;
-					world.spawnParticle("flame", (d0 + posX * 1.0D) / 2.0D, (d1 + posY * 1.0D) / 2.0D, (d2 + posZ * 1.0D) / 2.0D, d3, d4, d5);
-					world.spawnParticle("smoke", d0, d1, d2, d3, d4, d5);
+					world.spawnParticle(EnumParticleTypes.FLAME, (d0 + posX * 1.0D) / 2.0D, (d1 + posY * 1.0D) / 2.0D, (d2 + posZ * 1.0D) / 2.0D, d3, d4, d5);
+					world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5);
 				}
 			}
 		}
@@ -313,7 +293,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		if (canUse(stack)) {
 			double[] coordinates = getRecallCoordinates(stack);
 			if (coordinates != null) {
-				if (getDimension(stack) == player.worldObj.provider.dimensionId) {
+				if (getDimension(stack) == player.worldObj.provider.getDimensionId()) {
 					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
 					player.playSound(Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 					return costToUse;
@@ -352,7 +332,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	 */
 	private void mark(ItemStack stack, World world, EntityPlayer player) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("zssFWdimension", world.provider.dimensionId);
+		stack.getTagCompound().setInteger("zssFWdimension", world.provider.getDimensionId());
 		stack.getTagCompound().setDouble("zssFWposX", player.posX);
 		stack.getTagCompound().setDouble("zssFWposY", player.posY);
 		stack.getTagCompound().setDouble("zssFWposZ", player.posZ);
@@ -383,14 +363,8 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack, int pass) {
+	public boolean hasEffect(ItemStack stack) {
 		return true;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
 	@Override

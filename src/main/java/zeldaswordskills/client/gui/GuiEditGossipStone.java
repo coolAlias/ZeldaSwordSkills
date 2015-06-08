@@ -21,6 +21,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 
@@ -28,8 +30,6 @@ import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.SetGossipStoneMessagePacket;
 import zeldaswordskills.util.StringUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiEditGossipStone extends GuiScreen
@@ -82,7 +82,7 @@ public class GuiEditGossipStone extends GuiScreen
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		drawDefaultBackground();
-		drawCenteredString(fontRendererObj, StatCollector.translateToLocal("gui.zss.gossip_stone.name"), width / 2, 40, 16777215);
+		drawCenteredString(fontRendererObj, StatCollector.translateToLocal("gui.gossip_stone.name"), width / 2, 40, 16777215);
 		String[] lines = StringUtils.wrapString(message.toString(), TileEntityGossipStone.LINE_LENGTH, 5);
 		for (int i = 0; i < lines.length; ++i) {
 			if (i == 0) {

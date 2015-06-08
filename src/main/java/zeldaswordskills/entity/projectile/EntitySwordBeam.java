@@ -24,17 +24,18 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -102,9 +103,8 @@ public class EntitySwordBeam extends EntityThrowable
 		return this;
 	}
 
-	/** Entity's velocity factor */
 	@Override
-	protected float func_70182_d() {
+	protected float getVelocity() {
 		return 1.0F + (level * 0.15F);
 	}
 
@@ -131,8 +131,8 @@ public class EntitySwordBeam extends EntityThrowable
 			setDead();
 		}
 		for (int i = 0; i < 2; ++i) {
-			worldObj.spawnParticle((i % 2 == 1 ? "magicCrit" : "crit"), posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
-			worldObj.spawnParticle((i % 2 == 1 ? "magicCrit" : "crit"), posX, posY, posZ, -motionX + rand.nextGaussian(), 0.01D, -motionZ + rand.nextGaussian());
+			worldObj.spawnParticle((i % 2 == 1 ? EnumParticleTypes.CRIT_MAGIC : EnumParticleTypes.CRIT), posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
+			worldObj.spawnParticle((i % 2 == 1 ? EnumParticleTypes.CRIT_MAGIC : EnumParticleTypes.CRIT), posX, posY, posZ, -motionX + rand.nextGaussian(), 0.01D, -motionZ + rand.nextGaussian());
 		}
 	}
 
@@ -156,9 +156,9 @@ public class EntitySwordBeam extends EntityThrowable
 					setDead();
 				}
 			} else {
-				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
 				if (block.getMaterial() != Material.air) {
-					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+					block.onEntityCollidedWithBlock(worldObj, mop.getBlockPos(), this);
 				}
 				if (block.getMaterial().blocksMovement()) {
 					if (player != null && skill != null) {

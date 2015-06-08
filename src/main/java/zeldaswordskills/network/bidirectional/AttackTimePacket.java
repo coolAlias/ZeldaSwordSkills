@@ -21,8 +21,9 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.network.AbstractMessage;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
@@ -51,6 +52,6 @@ public class AttackTimePacket extends AbstractMessage<AttackTimePacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		player.attackTime = attackTime;
+		ZSSPlayerInfo.get(player).setAttackTime(attackTime);
 	}
 }

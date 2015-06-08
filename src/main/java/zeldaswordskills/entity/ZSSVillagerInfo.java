@@ -27,15 +27,15 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
+import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
-import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -48,6 +48,8 @@ import zeldaswordskills.util.MerchantRecipeHelper;
  */
 public class ZSSVillagerInfo implements IExtendedEntityProperties
 {
+	/** Define villager types for easier to read code */
+	public enum EnumVillager {FARMER,LIBRARIAN,PRIEST,BLACKSMITH,BUTCHER}
 	private static final String SAVE_KEY = "zssVillagerInfo";
 	/** Used for masks when the villager is not interested */
 	private static final int NONE = -1;
@@ -220,9 +222,9 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 */
 	public void setMating() {
 		if (villager.getGrowingAge() == 0 && !isMating()) {
-			village = villager.worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(villager.posX), MathHelper.floor_double(villager.posY), MathHelper.floor_double(villager.posZ), 0);
+			village = villager.worldObj.getVillageCollection().getNearestVillage(new BlockPos(villager), 0);
 			if (areSufficientDoors()) {
-				Entity e = villager.worldObj.findNearestEntityWithinAABB(EntityVillager.class, villager.boundingBox.expand(8.0D, 3.0D, 8.0D), villager);
+				Entity e = villager.worldObj.findNearestEntityWithinAABB(EntityVillager.class, villager.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D), villager);
 				if (e != null && ((EntityVillager) e).getGrowingAge() == 0) {
 					mate = (EntityVillager) e;
 					matingTime = 300;
@@ -260,7 +262,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	}
 
 	private void giveBirth() {
-		EntityVillager baby = villager.createChild(mate);
+		EntityVillager baby = (EntityVillager) villager.createChild(mate);
 		mate.setGrowingAge(6000);
 		villager.setGrowingAge(6000);
 		baby.setGrowingAge(-24000);
@@ -326,7 +328,6 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 */
 	public static void initTrades() {
 		addTreasureTrade(Treasures.EVIL_CRYSTAL,EnumVillager.PRIEST,new ItemStack(ZSSItems.arrowLight,16),new ItemStack(ZSSItems.crystalSpirit));
-
 		addTreasureTrade(Treasures.TENTACLE,"Talon",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.POCKET_EGG.ordinal()));
 		addTreasureTrade(Treasures.POCKET_EGG,"Cucco Lady",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.COJIRO.ordinal()));
 		addTreasureTrade(Treasures.COJIRO,"Grog",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.ODD_MUSHROOM.ordinal()));

@@ -21,16 +21,15 @@ import java.util.Random;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
-import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
 /**
  * 
@@ -47,11 +46,11 @@ public class MapGenBossRoom extends ZSSMapGenBase
 		int size = rand.nextInt(5) + 9;
 		int posX = (chunkX << 4) + rand.nextInt(16 - size);
 		int posZ = (chunkZ << 4) + rand.nextInt(16 - size);
-		BossType type = BossType.getBossType(world, posX, posZ);
+		BossType type = BossType.getBossType(world, new BlockPos(posX, 64, posZ));
 		if (type != null) {
 			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, size, Blocks.stone);
 			if (rand.nextFloat() < 0.2F && !areStructuresWithinRange(room, Config.getMinBossDistance())) {
-				int posY = StructureGenUtils.getAverageSurfaceHeight(world, posX, posZ);
+				int posY = StructureGenUtils.getAverageSurfaceHeight(world, new BlockPos(posX, 64, posZ));
 				if (room.generate(this, world, rand, posX, posY, posZ)) {
 					//LogHelper.finer("Boss room of type " + type.toString() + " successfully generated at " + room.getBoundingBox().toString());
 					onStructureGenerated(world, room);
@@ -147,7 +146,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 	 * Updates the structure map and adds the appropriate nbt compound to the room data
 	 */
 	protected void onStructureGenerated(World world, RoomBoss room) {
-		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + room.getBossType().ordinal(), room.chunkX, room.chunkZ);
+		// TODO AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + room.getBossType().ordinal(), room.chunkX, room.chunkZ);
 		structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(room.chunkX, room.chunkZ)), room.getBossType().ordinal());
 		NBTTagCompound compound = new NBTTagCompound();
 		compound.setInteger("bossType", room.getBossType().ordinal());

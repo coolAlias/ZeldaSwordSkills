@@ -20,8 +20,11 @@ package zeldaswordskills.entity;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.model.ModelSquid;
+import net.minecraft.client.model.ModelSlime;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
@@ -30,6 +33,7 @@ import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntityPigZombie;
@@ -39,15 +43,21 @@ import net.minecraft.entity.monster.EntitySnowman;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.client.model.ModelDarknut;
 import zeldaswordskills.client.model.ModelGoron;
 import zeldaswordskills.client.model.ModelMaskSalesman;
+import zeldaswordskills.client.model.ModelOctorok;
 import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.client.render.RenderNothing;
 import zeldaswordskills.client.render.entity.RenderCustomArrow;
@@ -71,9 +81,12 @@ import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
+import zeldaswordskills.entity.passive.EntityFairy;
+import zeldaswordskills.entity.passive.EntityNavi;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
@@ -94,10 +107,6 @@ import zeldaswordskills.ref.LibPotionID;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.SpawnableEntityData;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class ZSSEntities
 {
@@ -118,20 +127,19 @@ public class ZSSEntities
 	public static void postInit(Configuration config) {
 		// REGISTER ENTITY SPAWN DATA
 		int rate = config.get("Mob Spawns", "[Spawn Rate] Chuchu spawn rate (0 to disable)[0+]", 10).getInt();
-		addSpawnableEntityData(EntityChu.class, EnumCreatureType.monster, 4, 4, rate);
+		addSpawnableEntityData(EntityChu.class, EnumCreatureType.MONSTER, 4, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Darknut spawn rate (0 to disable)[0+]", 5).getInt();
-		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.monster, 1, 1, rate);
+		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.MONSTER, 1, 1, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Fairy (wild) spawn rate (0 to disable)[0+]", 1).getInt();
-		addSpawnableEntityData(EntityFairy.class, EnumCreatureType.ambient, 1, 3, rate);
+		addSpawnableEntityData(EntityFairy.class, EnumCreatureType.AMBIENT, 1, 3, rate);
 		// Gorons are an exception, as they are not spawned using vanilla mechanics
 		spawnGoron = config.get("Mob Spawns", "[Spawn Rate] Goron spawn rate, as a ratio of regular villagers to Gorons (0 to disable)[0+]", 4).getInt();
 		rate = config.get("Mob Spawns", "[Spawn Rate] Keese spawn rate (0 to disable)[0+]", 1).getInt();
-		addSpawnableEntityData(EntityKeese.class, EnumCreatureType.ambient, 4, 4, rate); // TODO should use monster type???
+		addSpawnableEntityData(EntityKeese.class, EnumCreatureType.AMBIENT, 4, 4, rate); // TODO should use monster type???
 		rate = config.get("Mob Spawns", "[Spawn Rate] Octorok spawn rate (0 to disable)[0+]", 8).getInt();
-		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.waterCreature, 2, 4, rate);
+		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.WATER_CREATURE, 2, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
-		addSpawnableEntityData(EntityWizzrobe.class, EnumCreatureType.monster, 1, 1, rate);
-
+		addSpawnableEntityData(EntityWizzrobe.class, EnumCreatureType.MONSTER, 1, 1, rate);
 		// ALLOWED BIOMES
 		for (Class<? extends EntityLiving> entity : defaultSpawnLists.keySet()) {
 			String[] defaultBiomes = defaultSpawnLists.get(entity);
@@ -153,6 +161,7 @@ public class ZSSEntities
 			LootableEntityRegistry.addLootableEntity(EntityCreeper.class, f, new ItemStack(Items.gunpowder));
 			LootableEntityRegistry.addLootableEntity(EntityEnderman.class, f, new ItemStack(Items.ender_pearl));
 			LootableEntityRegistry.addLootableEntity(EntityGhast.class, f, new ItemStack(Items.ghast_tear), new ItemStack(Items.gunpowder), new ItemStack(Items.gunpowder));
+			LootableEntityRegistry.addLootableEntity(EntityGuardian.class, f, new ItemStack(Items.prismarine_crystals), new ItemStack(Blocks.sponge));
 			LootableEntityRegistry.addLootableEntity(EntityIronGolem.class, f, new ItemStack(Items.iron_ingot));
 			LootableEntityRegistry.addLootableEntity(EntityMagmaCube.class, f, new ItemStack(Items.magma_cream));
 			LootableEntityRegistry.addLootableEntity(EntityPigZombie.class, f, new ItemStack(Items.gold_nugget), new ItemStack(Items.gold_nugget), new ItemStack(Items.gold_ingot));
@@ -197,49 +206,50 @@ public class ZSSEntities
 		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
 		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
 		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
-		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
 		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
+		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
 	}
 
 	private static void registerEntities() {
 		int modEntityIndex = 0;
-		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
-		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		// PROJECTILES
+		EntityRegistry.registerModEntity(EntityArrowBomb.class, "arrow_bomb", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrow_custom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowElemental.class, "arrow_elemental", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityBomb.class, "bomb", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBoomerang.class, "boomerang", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
-		EntityRegistry.registerModEntity(EntityCyclone.class, "cyclone", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityCeramicJar.class, "jar", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityCyclone.class, "cyclone", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityHookShot.class, "hookshot", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leaping_blow", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityMagicSpell.class, "magic_spell", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySeedShot.class, "seedshot", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntitySwordBeam.class, "sword_beam", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityThrowingRock.class, "rock", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
-		EntityRegistry.registerModEntity(EntityArrowBomb.class, "arrowbomb", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
-		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrowcustom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
-		EntityRegistry.registerModEntity(EntityArrowElemental.class, "arrowelemental", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
-		EntityRegistry.registerModEntity(EntityMagicSpell.class, "magicspell", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityWhip.class, "whip", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 
 		// NATURALLY SPAWNING MOBS
+		EntityRegistry.registerModEntity(EntityDarknut.class, "darknut", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
+		CustomEntityList.addMapping(EntityDarknut.class, "darknut", 0x1E1E1E, 0x8B2500, 0x1E1E1E, 0xFB2500);
+
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 80, 0xADFF2F, 0xFFFF00);
 		EntityRegistry.registerModEntity(EntityNavi.class, "navi", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 
 		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
 
-		EntityRegistry.registerModEntity(EntityDarknut.class, "darknut", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-		CustomEntityList.addMapping(EntityDarknut.class, "darknut", 0x1E1E1E, 0x8B2500, 0x1E1E1E, 0xFB2500);
-
 		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityKeese.class, "keese", 0x000000, 0x555555, 0x000000, 0xFF4500, 0x000000, 0x40E0D0, 0x000000, 0xFFD700, 0x000000, 0x800080);
 
-		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 64, 3, true);
+		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
 
-		EntityRegistry.registerModEntity(EntityWizzrobe.class, "wizzrobe", ++modEntityIndex, ZSSMain.instance, 64, 3, true);
+		EntityRegistry.registerModEntity(EntityWizzrobe.class, "wizzrobe", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityWizzrobe.class, "wizzrobe", 0x8B2500, 0xFF0000, 0x8B2500, 0x00B2EE, 0x8B2500, 0xEEEE00, 0x8B2500, 0x00EE76);
 
 		// BOSSES
-		registerEntity(EntityGrandWizzrobe.class, "wizzrobe_grand", ++modEntityIndex, 64, 0x8B2500, 0x1E1E1E);
-		registerEntity(EntityBlackKnight.class, "darknut_boss", ++modEntityIndex, 64, 0x1E1E1E, 0x000000);
+		registerEntity(EntityBlackKnight.class, "darknut_boss", ++modEntityIndex, 80, 0x1E1E1E, 0x000000);
+		registerEntity(EntityGrandWizzrobe.class, "wizzrobe_grand", ++modEntityIndex, 80, 0x8B2500, 0x1E1E1E);
 
 		// NPCS
 		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 80, 0xB8860B, 0x8B5A00);
@@ -250,37 +260,46 @@ public class ZSSEntities
 
 	@SideOnly(Side.CLIENT) 
 	public static void registerRenderers() {
-		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow());
-		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb());
-		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang());
-		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar());
-		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu());
-		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing());
-		RenderingRegistry.registerEntityRenderingHandler(EntityDarknut.class, new RenderGenericLiving(
+		RenderManager manager = Minecraft.getMinecraft().getRenderManager();
+		RenderItem itemRender = Minecraft.getMinecraft().getRenderItem();
+		// PROJECTILES
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang(manager, itemRender));
+		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar(manager, itemRender));
+		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(manager, ZSSItems.dekuNut, itemRender));
+		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(manager, ZSSItems.throwingRock, itemRender));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderEntityWhip(manager));
+
+		// NATURALLY SPAWNING MOBS
+		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu(manager, new ModelSlime(16), 0.25F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityDarknut.class, new RenderGenericLiving(manager, 
 				new ModelDarknut(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityBlackKnight.class, new RenderGenericLiving(
-				new ModelDarknut(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy());
-		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy());
-		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(
+		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(manager, 
 				new ModelGoron(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/goron.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese());
-		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot());
-		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
-		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell());
-		RenderingRegistry.registerEntityRenderingHandler(EntityNpcBarnes.class, new RenderGenericLiving(
+		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(manager, new ModelOctorok(), 0.7F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobe.class, new RenderEntityWizzrobe(manager, new ModelWizzrobe(), 1.0F));
+
+		// BOSSES
+		RenderingRegistry.registerEntityRenderingHandler(EntityBlackKnight.class, new RenderGenericLiving(manager, 
+				new ModelDarknut(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
+		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobe(manager, new ModelWizzrobe(), 1.5F));
+
+		// NPCS
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcBarnes.class, new RenderGenericLiving(manager, 
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_barnes.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityNpcMaskTrader.class, new RenderGenericLiving(
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcMaskTrader.class, new RenderGenericLiving(manager, 
 				new ModelMaskSalesman(), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_mask_salesman.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityNpcOrca.class, new RenderGenericLiving(
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcOrca.class, new RenderGenericLiving(manager, 
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_orca.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(new ModelSquid(), 0.7F));
-		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
-		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
-		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(ZSSItems.throwingRock));
-		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderEntityWhip());
-		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobe.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.5F));
 	}
 
 	/**

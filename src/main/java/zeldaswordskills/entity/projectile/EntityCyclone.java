@@ -34,12 +34,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -47,8 +50,6 @@ import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.client.particle.FXCycloneRing;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class EntityCyclone extends EntityMobThrowable
 {
@@ -125,18 +126,18 @@ public class EntityCyclone extends EntityMobThrowable
 	}
 
 	@Override
-	public boolean handleLavaMovement() {
+	public boolean isInLava() {
 		return false;
+	}
+
+	@Override
+	protected float getVelocity() {
+		return 0.75F;
 	}
 
 	@Override
 	protected float getGravityVelocity() {
 		return 0.0F;
-	}
-
-	@Override
-	protected float func_70182_d() {
-		return 0.75F;
 	}
 
 	@Override
@@ -163,14 +164,15 @@ public class EntityCyclone extends EntityMobThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.typeOfHit == MovingObjectType.BLOCK) {
-			Material m = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ).getMaterial();
+			BlockPos pos = mop.getBlockPos();
+			Material m = worldObj.getBlockState(pos).getBlock().getMaterial();
 			if (m == Material.leaves) {
 				if (!worldObj.isRemote && canGrief && Config.canDekuDenude()) {
-					worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, true);
+					worldObj.destroyBlock(pos, true);
 				}
 			} else if (m.blocksMovement()) {
-				if (mop.sideHit == 1) {
-					posY = mop.blockY + 1;
+				if (mop.sideHit == EnumFacing.UP) {
+					posY = pos.getY() + 1;
 					rotationPitch = 0.0F;
 					motionY = 0.0D;
 				} else {
@@ -201,7 +203,7 @@ public class EntityCyclone extends EntityMobThrowable
 	private void attackNearbyEntities() {
 		if (getDamage() > 0.0F) {
 			double d = Math.max(0.5D, getArea() - 1.0D);
-			List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, boundingBox.expand(d, d, d));
+			List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, getEntityBoundingBox().expand(d, d, d));
 			for (EntityLivingBase entity : entities) {
 				if (affectedEntities.contains(entity.getEntityId()) || (entity == getThrower() && ticksExisted < 8)) {
 					continue;
@@ -218,7 +220,7 @@ public class EntityCyclone extends EntityMobThrowable
 	private void captureDrops() {
 		if (!isDead) {
 			double d = Math.max(0.5D, getArea() - 1.0D);
-			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(d, d, d));
+			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, getEntityBoundingBox().expand(d, d, d));
 			for (EntityItem item : items) {
 				if (item.isEntityAlive()) {
 					capturedItems.add(item.getEntityItem());
@@ -241,19 +243,14 @@ public class EntityCyclone extends EntityMobThrowable
 	 * Checks for and destroys leaves each update tick
 	 */
 	private void destroyLeaves() {
-		int i, j, k;
-		ChunkPosition chunkposition;
-		Set<ChunkPosition> affectedBlockPositions = WorldUtils.getAffectedBlocksList(worldObj, rand, getArea(), posX, posY, posZ, null);
-		Iterator<ChunkPosition> iterator = affectedBlockPositions.iterator();
+		BlockPos pos;
+		Set<BlockPos> affectedBlockPositions = WorldUtils.getAffectedBlocksList(worldObj, rand, getArea(), posX, posY, posZ, null);
+		Iterator<BlockPos> iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
-			chunkposition = iterator.next();
-			i = chunkposition.chunkPosX;
-			j = chunkposition.chunkPosY;
-			k = chunkposition.chunkPosZ;
-			Material m = worldObj.getBlock(i, j, k).getMaterial();
+			pos = iterator.next();
+			Material m = worldObj.getBlockState(pos).getBlock().getMaterial();
 			if ((m == Material.leaves && canGrief && Config.canDekuDenude()) || m == Material.plants || m == Material.vine || m == Material.web) {
-				// func_147480_a is destroyBlock
-				worldObj.func_147480_a(i, j, k, true);
+				worldObj.destroyBlock(pos, true);
 			}
 		}
 	}

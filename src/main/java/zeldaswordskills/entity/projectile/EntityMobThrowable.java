@@ -50,13 +50,13 @@ public abstract class EntityMobThrowable extends EntityThrowable
 
 	/**
 	 * Constructs a throwable entity heading towards target's initial position with given velocity, with possible abnormal trajectory;
-	 * @param wobble amount of deviation from base trajectory, used by Skeletons and the like; set to 0.0F for no x/z deviation
+	 * @param inaccuracy amount of deviation from base trajectory, used by Skeletons and the like; set to 0.0F for no x/z deviation
 	 */
-	public EntityMobThrowable(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
+	public EntityMobThrowable(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float inaccuracy) {
 		super(world, shooter);
 		this.posY = shooter.posY + (double) shooter.getEyeHeight() - 0.10000000149011612D;
 		double d0 = target.posX - shooter.posX;
-		double d1 = target.boundingBox.minY + (double)(target.height / 3.0F) - this.posY;
+		double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - this.posY;
 		double d2 = target.posZ - shooter.posZ;
 		double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d2 * d2);
 		if (d3 >= 1.0E-7D) {
@@ -65,9 +65,8 @@ public abstract class EntityMobThrowable extends EntityThrowable
 			double d4 = d0 / d3;
 			double d5 = d2 / d3;
 			setLocationAndAngles(shooter.posX + d4, this.posY, shooter.posZ + d5, f2, f3);
-			yOffset = 0.0F;
 			float f4 = (float) d3 * 0.2F;
-			setThrowableHeading(d0, d1 + (double) f4, d2, velocity, wobble);
+			setThrowableHeading(d0, d1 + (double) f4, d2, velocity, inaccuracy);
 		}
 	}
 

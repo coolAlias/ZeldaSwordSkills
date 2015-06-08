@@ -23,9 +23,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.item.ISpawnParticles;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 
@@ -88,7 +88,7 @@ public class PacketISpawnParticles extends AbstractClientMessage<PacketISpawnPar
 	@Override
 	protected void process(EntityPlayer player, Side side) {
 		if (item instanceof ISpawnParticles) {
-			Vec3 vec3 = Vec3.createVectorHelper(lookX, lookY, lookZ);
+			Vec3 vec3 = new Vec3(lookX, lookY, lookZ);
 			((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r, vec3);
 		}
 	}

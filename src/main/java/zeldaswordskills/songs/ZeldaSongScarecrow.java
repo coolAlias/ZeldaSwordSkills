@@ -17,7 +17,7 @@
 
 package zeldaswordskills.songs;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -49,7 +49,7 @@ public final class ZeldaSongScarecrow extends AbstractZeldaSong {
 	}
 
 	@Override
-	public boolean canLearnFromInscription(World world, int x, int y, int z, Block block, int meta) {
+	public boolean canLearnFromInscription(World world, IBlockState state) {
 		return false;
 	}
 

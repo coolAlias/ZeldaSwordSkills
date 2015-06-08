@@ -21,7 +21,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -30,26 +29,22 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.ZSSVillagerInfo;
+import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemChuJelly extends Item implements IUnenchantable
+public class ItemChuJelly extends BaseModItem implements IUnenchantable
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
-
 	private static final Map<ChuType, Item> jellyMap = new EnumMap<ChuType, Item>(ChuType.class);
 
 	public ItemChuJelly() {
@@ -59,38 +54,33 @@ public class ItemChuJelly extends Item implements IUnenchantable
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
 
-	/** Safe method for obtaining chu type from the stack, regardless of stack damage value */
-	private ChuType getType(ItemStack stack) {
-		return ChuType.values()[stack.getItemDamage() % ChuType.values().length];
-	}
-
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager entityVillager = (EntityVillager) entity;
 			ZSSVillagerInfo villager = ZSSVillagerInfo.get(entityVillager);
 			MerchantRecipeList trades = entityVillager.getRecipes(player);
-			ChuType type = getType(stack);
+			ChuType type = ChuType.fromDamage(stack.getItemDamage());
+			Item potion = ItemChuJelly.getPotionFromChuType(type);
 			entityVillager.playLivingSound();
-			if (villager != null && villager.isChuTrader() && jellyMap.containsKey(type)) {
+			if (villager != null && villager.isChuTrader() && potion != null) {
 				if (villager.getJelliesReceived(type) == 0) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.first");
 					villager.addJelly(type, 1);
 					--stack.stackSize;
 				} else if (villager.canSellType(type, stack)) {
 					MerchantRecipe trade = new MerchantRecipe(new ItemStack(stack.getItem(), 4, type.ordinal()),
-							new ItemStack(Items.emerald, (type.ordinal() + 1) * 8), new ItemStack(jellyMap.get(type)));
+							new ItemStack(Items.emerald, (type.ordinal() + 1) * 8), new ItemStack(potion));
 					if (MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 						player.worldObj.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.new_stock");
-						PlayerUtils.addItemToInventory(player, new ItemStack(jellyMap.get(type)));
+						PlayerUtils.addItemToInventory(player, new ItemStack(potion));
 					} else {
 						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.in_stock");
 					}
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.need_more");
 				}
-
 				if (stack.stackSize == 0) {
 					player.setCurrentItemOrArmor(0, null);
 				}
@@ -103,30 +93,26 @@ public class ItemChuJelly extends Item implements IUnenchantable
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName() + "." + stack.getItemDamage();
+		return getUnlocalizedName() + "_" + ChuType.fromDamage(stack.getItemDamage()).name().toLowerCase();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < ChuType.values().length; ++i) {
-			list.add(new ItemStack(item, 1, i));
+		for (ChuType type : ChuType.values()) {
+			list.add(new ItemStack(item, 1, type.ordinal()));
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int damage) {
-		return iconArray[damage % ChuType.values().length];
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[ChuType.values().length];
-		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + i);
+	public String[] getVariants() {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		String[] variants = new String[ChuType.values().length];
+		for (ChuType type : ChuType.values()) {
+			variants[type.ordinal()] = name + "_" + type.name().toLowerCase();
 		}
+		return variants;
 	}
 
 	@Override
@@ -135,10 +121,16 @@ public class ItemChuJelly extends Item implements IUnenchantable
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.jelly_chu.desc.0"));
 	}
 
-	public static void initializeJellies() {
-		jellyMap.put(ChuType.RED, ZSSItems.potionRed);
-		jellyMap.put(ChuType.GREEN, ZSSItems.potionGreen);
-		jellyMap.put(ChuType.BLUE, ZSSItems.potionBlue);
-		jellyMap.put(ChuType.YELLOW, ZSSItems.potionYellow);
+	/**
+	 * Return the potion item created from this type of Chu's jelly
+	 */
+	public static Item getPotionFromChuType(ChuType type) {
+		if (jellyMap.isEmpty()) {
+			jellyMap.put(ChuType.RED, ZSSItems.potionRed);
+			jellyMap.put(ChuType.GREEN, ZSSItems.potionGreen);
+			jellyMap.put(ChuType.BLUE, ZSSItems.potionBlue);
+			jellyMap.put(ChuType.YELLOW, ZSSItems.potionYellow);
+		}
+		return jellyMap.get(type);
 	}
 }

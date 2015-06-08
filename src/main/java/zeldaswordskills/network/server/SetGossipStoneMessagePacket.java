@@ -22,44 +22,39 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.relauncher.Side;
 
 public class SetGossipStoneMessagePacket extends AbstractServerMessage<SetGossipStoneMessagePacket>
 {
-	private int x, y, z;
+	private BlockPos pos;
 	private String message;
 
 	public SetGossipStoneMessagePacket() {}
 
 	public SetGossipStoneMessagePacket(TileEntityGossipStone te) {
-		this.x = te.xCoord;
-		this.y = te.yCoord;
-		this.z = te.zCoord;
+		this.pos = te.getPos();
 		this.message = te.getMessage();
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		this.x = buffer.readInt();
-		this.y = buffer.readInt();
-		this.z = buffer.readInt();
+		this.pos = BlockPos.fromLong(buffer.readLong());
 		this.message = ByteBufUtils.readUTF8String(buffer);
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeInt(this.x);
-		buffer.writeInt(this.y);
-		buffer.writeInt(this.z);
+		buffer.writeLong(this.pos.toLong());
 		ByteBufUtils.writeUTF8String(buffer, this.message);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		TileEntity te = player.worldObj.getTileEntity(this.x, this.y, this.z);
+		TileEntity te = player.worldObj.getTileEntity(this.pos);
 		if (te instanceof TileEntityGossipStone) {
 			((TileEntityGossipStone) te).setMessage(this.message);
 		}

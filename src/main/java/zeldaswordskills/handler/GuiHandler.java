@@ -19,8 +19,10 @@ package zeldaswordskills.handler;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
@@ -33,7 +35,6 @@ import zeldaswordskills.client.gui.GuiSkills;
 import zeldaswordskills.inventory.ContainerMaskTrader;
 import zeldaswordskills.inventory.ContainerPedestal;
 import zeldaswordskills.inventory.ContainerSkills;
-import cpw.mods.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler
 {
@@ -51,7 +52,7 @@ public class GuiHandler implements IGuiHandler
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
 		switch(id) {
 		case GUI_PEDESTAL:
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 			if (te instanceof TileEntityPedestal) {
 				return new ContainerPedestal(player.inventory, (TileEntityPedestal) te);
 			}
@@ -66,7 +67,7 @@ public class GuiHandler implements IGuiHandler
 
 	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 		switch(id) {
 		case GUI_PEDESTAL:
 			if (te instanceof TileEntityPedestal) {
@@ -84,9 +85,7 @@ public class GuiHandler implements IGuiHandler
 				// modeled after vanilla sign editor handling, since TE is not yet available on client
 				te = new TileEntityGossipStone();
 				te.setWorldObj(world);
-				te.xCoord = x;
-				te.yCoord = y;
-				te.zCoord = z;
+				te.setPos(new BlockPos(x, y, z));
 			}
 			if (te instanceof TileEntityGossipStone) {
 				return new GuiEditGossipStone((TileEntityGossipStone) te);

@@ -17,36 +17,33 @@
 
 package zeldaswordskills.item;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import mods.battlegear2.api.ISheathed;
-import mods.battlegear2.api.core.BattlegearUtils;
-import mods.battlegear2.api.core.InventoryPlayerBattle;
-import mods.battlegear2.api.shield.IArrowCatcher;
-import mods.battlegear2.api.shield.IArrowDisplay;
-import mods.battlegear2.api.shield.IShield;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.item.EnumAction;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.IDamageAoE;
 import zeldaswordskills.api.entity.IReflectable;
@@ -55,6 +52,8 @@ import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.client.ISwapModel;
+import zeldaswordskills.client.render.item.ModelItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.ref.ModInfo;
@@ -62,20 +61,25 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Method;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
+import com.google.common.collect.Lists;
+
+/*
+// TODO
 @Optional.InterfaceList(value={
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowCatcher", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowDisplay", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
-public class ItemZeldaShield extends Item implements IDashItem, IFairyUpgrade,
-ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+ */
+public class ItemZeldaShield extends BaseModItem implements IDashItem, IFairyUpgrade,
+ISwapModel, ISwingSpeed, IUnenchantable
 {
+	@SideOnly(Side.CLIENT)
+	private List<ModelResourceLocation> models;
+
 	/**
 	 * Material used in construction determines various properties:
 	 * WOOD: Can catch arrows, vulnerable to fire; EMERALD: Reflects projectiles
@@ -84,18 +88,15 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	/** Percent of damage from magical AoE attacks that is blocked, if any */
 	private final float magicReduction;
-	
+
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;
-	
+
 	/** Rate at which BG2 stamina bar will decay per tick */
 	private final float bg2DecayRate;
-	
+
 	/** Rate at which BG2 stamina bar will recover per tick; 0.012F takes 5 seconds */
 	private final float bg2RecoveryRate;
-
-	@SideOnly(Side.CLIENT)
-	private IIcon backIcon;
 
 	/**
 	 * @param material Affects shield's qualities, such as weakness to fire or ability to reflect projectiles
@@ -144,11 +145,14 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		float damageBlocked = damage;
 		if (toolMaterial == ToolMaterial.WOOD) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
+				/*
+				// TODO
 				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
 					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
 						((InventoryPlayerBattle) player.inventory).hasChanged = true;
 					}
 				}
+				 */
 			} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
 				damageBlocked *= magicReduction;
 			}
@@ -156,11 +160,15 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
+					/*
+					// TODO
 					if (ZSSMain.isBG2Enabled && BattlegearUtils.isPlayerInBattlemode(player)) {
 						BattlegearUtils.setPlayerOffhandItem(player, null);
 					} else {
 						player.destroyCurrentEquippedItem();
 					}
+					 */
+					player.destroyCurrentEquippedItem();
 				}
 			}
 		} else if (toolMaterial == ToolMaterial.EMERALD) {
@@ -215,7 +223,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.block;
+		return EnumAction.BLOCK;
 	}
 
 	@Override
@@ -248,8 +256,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 				double dx = player.posX + vec3.xCoord * 2.0D;
 				double dy = player.posY + player.getEyeHeight() + vec3.yCoord * 2.0D;
 				double dz = player.posZ + vec3.zCoord * 2.0D;
-				List<EntityFireball> list = player.worldObj.getEntitiesWithinAABB(EntityFireball.class,
-						AxisAlignedBB.getBoundingBox(dx - 1, dy - 1, dz - 1, dx + 1, dy + 1, dz + 1));
+				List<EntityFireball> list = player.worldObj.getEntitiesWithinAABB(EntityFireball.class, new AxisAlignedBB(dx - 1, dy - 1, dz - 1, dx + 1, dy + 1, dz + 1));
 				for (EntityFireball fireball : list) {
 					DamageSource source = DamageSource.causeFireballDamage(fireball, fireball.shootingEntity);
 					if (canBlockDamage(stack, source) && fireball.attackEntityFrom(DamageSource.causePlayerDamage(player), 1.0F)) {
@@ -270,19 +277,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return toRepair.isItemStackDamageable() && stack.getItem() == toolMaterial.func_150995_f();
-	}
-
-	@SideOnly(Side.CLIENT)
-	public IIcon getBackIcon() {
-		return backIcon;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-		backIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_back");
+		return toRepair.isItemStackDamageable() && stack.isItemEqual(toolMaterial.getRepairItemStack());
 	}
 
 	@Override
@@ -293,13 +288,14 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
+		BlockPos pos = core.getPos();
 		if (PlayerUtils.hasItem(player, ZSSItems.swordMasterTrue)) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.shieldMirror);
-			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.shieldMirror), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			WorldUtils.spawnItemWithRandom(core.getWorld(), new ItemStack(ZSSItems.shieldMirror), pos.getX(), pos.getY() + 2, pos.getZ());
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.sword");
 		}
 	}
@@ -309,6 +305,47 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		return this == ZSSItems.shieldHylian;
 	}
 
+	@Override
+	@SideOnly(Side.CLIENT)
+	public ModelResourceLocation getModel(ItemStack stack, EntityPlayer player, int ticksRemaining) {
+		return (player.isUsingItem() ? models.get(1) : models.get(0));
+	}
+
+	@Override
+	public String[] getVariants() {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		return new String[]{name, name + "_using", name + "_back"};
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderers(ItemModelMesher mesher) {
+		String[] resources = getVariants();
+		models = new ArrayList<ModelResourceLocation>(resources.length);
+		for (int i = 0; i < resources.length; ++i) {
+			models.add(new ModelResourceLocation(resources[i], "inventory"));
+		}
+		// Register only the first model as the base resource:
+		mesher.register(this, 0, models.get(0));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Collection<ModelResourceLocation> getDefaultResources() {
+		String[] variants = getVariants();
+		// Swap both regular and 'using' models
+		return Lists.newArrayList(new ModelResourceLocation(variants[0], "inventory"), new ModelResourceLocation(variants[1], "inventory"));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Class<? extends IBakedModel> getNewModel() {
+		return ModelItemShield.class;
+	}
+
+	/*
+	// TODO
 	@Method(modid="battlegear2")
 	@Override
 	public void setArrowCount(ItemStack stack, int count) {
@@ -385,4 +422,5 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	public float getDamageReduction(ItemStack shield, DamageSource source) {
 		return 0.0F;
 	}
+	 */
 }

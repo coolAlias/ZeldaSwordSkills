@@ -1,0 +1,7 @@
+{
+    "parent": "zeldaswordskills:block/door_locked_lower",
+    "textures": {
+        "bottom": "zeldaswordskills:blocks/door_temple_shadow_top",
+        "side": "zeldaswordskills:blocks/door_temple_shadow_lower"
+    }
+}

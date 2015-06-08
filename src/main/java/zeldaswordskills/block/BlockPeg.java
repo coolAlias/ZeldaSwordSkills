@@ -21,15 +21,19 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
@@ -38,11 +42,7 @@ import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityWhip;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -50,22 +50,17 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Each smash increments the meta until it reaches MAX_STATE, after which
  * any blow that is at least a level higher than the weight can destroy it.
  * 
- * TODO Pegs put out a redstone signal while in MAX_STATE.
- * 
  * If not destroyed, the peg will eventually pop back up.
  *
  */
 public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmashable, IWhipBlock
 {
+	/** Maximum number of 'hits' before a peg is considered fully smashed down */
+	private static final int MAX_HITS = 3;
+	/** Current number of hits taken, 0 being fully up, 3 fully smashed into the ground */
+	public static final PropertyInteger HITS_TAKEN = PropertyInteger.create("hits_taken", 0, MAX_HITS);
 	/** The weight of this block, i.e. the difficulty of smashing this block */
 	private final BlockWeight weight;
-	/** Metadata value that signifies a fully smashed down peg */
-	private static final int MAX_STATE = 3;
-
-	@SideOnly(Side.CLIENT)
-	private IIcon iconTop;
-	@SideOnly(Side.CLIENT)
-	private IIcon iconBottom;
 
 	public BlockPeg(Material material, BlockWeight weight) {
 		super(material);
@@ -76,7 +71,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
-		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F, 0.75F);
+		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8125F, 0.75F);
 	}
 
 	/** Returns appropriate sound based on block material */
@@ -85,70 +80,69 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
-		if (side == 0 || side == 1 || world.getBlockMetadata(x, y, z) > 0) {
+	public Result canGrabBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
+		if (face == EnumFacing.UP || face == EnumFacing.DOWN || ((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue() > 0) {
 			return Result.DENY;
 		}
 		return (type.getBaseType() == HookshotType.MULTI_SHOT ? Result.ALLOW : Result.DEFAULT);
 	}
 
 	@Override
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
+	public Result canDestroyBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return Result.DENY;
 	}
 
 	@Override
-	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
+	public Material getHookableMaterial(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return (blockMaterial == ZSSBlockMaterials.pegWoodMaterial ? Material.wood : Material.iron);
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
 		return weight;
 	}
 
 	@Override
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		world.playSoundEffect(x, y, z, getHitSound(), (world.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
-		if (side == 1) {
-			int meta = world.getBlockMetadata(x, y, z);
-			int impact = 1 + ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, this, meta).ordinal() - weight.ordinal();
-			if (impact > 0) {
-				boolean flag = meta < MAX_STATE;
-				meta += impact;
-				if (meta >= MAX_STATE) {
-					if (this == ZSSBlocks.pegRusty) {
-						player.triggerAchievement(ZSSAchievements.hardHitter);
-					} else if (this == ZSSBlocks.pegWooden) {
-						player.triggerAchievement(ZSSAchievements.hammerTime);
-					}
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face) {
+		world.playSoundEffect(pos.getX(), pos.getY(), pos.getZ(), getHitSound(), (world.rand.nextFloat() * 0.4F + 0.5F), 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
+		if (face != EnumFacing.UP) {
+			return Result.DENY;
+		}
+		boolean flag = false;
+		int hits = ((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue();
+		int impact = 1 + ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, state, face).ordinal() - weight.ordinal();
+		if (impact > 0) {
+			flag = hits < MAX_HITS;
+			hits += impact;
+			if (hits >= MAX_HITS) {
+				player.triggerAchievement(ZSSAchievements.hammerTime);
+				if (weight.compareTo(BlockWeight.LIGHT) > 0) { // i.e. at least MEDIUM
+					player.triggerAchievement(ZSSAchievements.hardHitter);
 				}
-				if (meta > MAX_STATE && impact > 1) {
-					flag = true;
-					// func_147480_a is destroyBlock
-					world.func_147480_a(x, y, z, false);
-				} else {
-					world.setBlockMetadataWithNotify(x, y, z, Math.min(meta, MAX_STATE), 3);
-				}
-				return (flag ? Result.ALLOW : Result.DENY);
 			}
 		}
-		return Result.DENY;
+		if (hits > MAX_HITS && impact > 1) {
+			flag = true;
+			world.destroyBlock(pos, false);
+		} else {
+			world.setBlockState(pos, state.withProperty(HITS_TAKEN, Integer.valueOf(Math.min(hits, MAX_HITS))), 3);
+		}
+		return (flag ? Result.ALLOW : Result.DENY);
 	}
 
 	@Override
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
 		return false;
 	}
 
 	@Override
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
-		return (side != 0 && side != 1 && world.getBlockMetadata(x, y, z) < MAX_STATE);
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
+		return (face != EnumFacing.UP && face != EnumFacing.DOWN && ((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue() < MAX_HITS);
 	}
 
 	@Override
-	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
-		if (world.getBlockMetadata(x, y, z) >= MAX_STATE) {
+	public Result shouldSwing(EntityWhip whip, World world, BlockPos pos, int ticksInGround) {
+		if (((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue() >= MAX_HITS) {
 			whip.setDead();
 			return Result.DENY;
 		}
@@ -156,10 +150,10 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public void updateTick(World world, int x, int y, int z, Random rand) {
-		int meta = world.getBlockMetadata(x, y, z);
-		if (meta > 0) {
-			world.setBlockMetadataWithNotify(x, y, z, meta - 1, 3);
+	public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
+		int hits = ((Integer) state.getValue(HITS_TAKEN)).intValue();
+		if (hits > 0) {
+			world.setBlockState(pos, state.withProperty(HITS_TAKEN, Integer.valueOf(hits - 1)), 3);
 		}
 	}
 
@@ -169,54 +163,60 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
-	public boolean renderAsNormalBlock() {
-		return false;
-	}
-
-	@Override
 	public boolean isOpaqueCube() {
 		return false;
 	}
 
 	@Override
-	public boolean canEntityDestroy(IBlockAccess world, int x, int y, int z, Entity entity) {
+	public boolean isFullCube() {
 		return false;
 	}
 
 	@Override
-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-		int meta = world.getBlockMetadata(x, y, z);
-		if (meta == 0) {
-			return AxisAlignedBB.getBoundingBox(x + minX, y + minY, z + minZ, x + maxX, y + maxY + 0.5D, z + maxZ);
-		} else if (meta >= MAX_STATE) {
+	public boolean canEntityDestroy(IBlockAccess world, BlockPos pos, Entity entity) {
+		return false;
+	}
+
+	@Override
+	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
+		int hits = ((Integer) state.getValue(HITS_TAKEN)).intValue();
+		if (hits == 0) {
+			return new AxisAlignedBB(pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ, pos.getX() + maxX, pos.getY() + maxY + 0.5D, pos.getZ() + maxZ);
+		} else if (hits >= MAX_HITS) {
 			return null;
 		} else {
-			return super.getCollisionBoundingBoxFromPool(world, x, y, z);
+			return super.getCollisionBoundingBox(world, pos, state);
 		}
 	}
 
 	@Override
-	public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
-		int meta = Math.min(world.getBlockMetadata(x, y, z), MAX_STATE);
-		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F - (meta * 0.2F), 0.75F);
+	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
+		int hits = Math.min(((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue(), MAX_HITS);
+		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8125F - (hits * 0.1875F), 0.75F);
 	}
 
 	@Override
 	public void setBlockBoundsForItemRender() {
-		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8F, 0.75F);
+		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8125F, 0.75F);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		return (side == 0 ? iconBottom : side == 1 ? iconTop : blockIcon);
+	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
+		return true;
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_side");
-		iconTop = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top");
-		iconBottom = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_bottom");
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(HITS_TAKEN, Integer.valueOf(Math.min(meta, MAX_HITS)));
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return ((Integer) state.getValue(HITS_TAKEN)).intValue();
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, HITS_TAKEN);
 	}
 }

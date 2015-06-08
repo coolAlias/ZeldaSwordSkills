@@ -21,9 +21,13 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockSacredFlame;
@@ -46,11 +50,8 @@ import zeldaswordskills.world.gen.DungeonLootLists;
  */
 public class RoomBoss extends RoomBase
 {
-	/** Mapping of cardinal direction to block-orientation values for blocks using 2,3,4,5 (containers, pistons, etc) */
-	public static final int[] facingToOrientation = {3,4,2,5};
-
-	/** Side of the structure in which the door is located; use above directional values */
-	private int doorSide = -1;
+	/** Side of the structure in which the door is located; will not be null after dungeon initialized */
+	private EnumFacing doorSide = null;
 
 	/** The type of dungeon this is, as determined by biome using BossType.getBossType */
 	private final BossType type;
@@ -82,11 +83,11 @@ public class RoomBoss extends RoomBase
 	 */
 	protected boolean initDungeon(World world, int x, int y, int z) {
 		bBox.offset(x, y, z);
-		if (type == null || y < bBox.getYSize() || y > (world.provider.isHellWorld ? 96 : 160)) {
+		if (type == null || y < bBox.getYSize() || y > (world.provider.getDimensionId() == -1 ? 96 : 160)) {
 			return false;
 		}
 		// allow all boss types to potentially generate in the Nether (for randomized locations config option)
-		if (world.provider.isHellWorld) {
+		if (world.provider.getDimensionId() == -1) {
 			inNether = true;
 			if (!placeInNether(world)) {
 				return false;
@@ -119,9 +120,9 @@ public class RoomBoss extends RoomBase
 		}
 
 		determineDoorSide(world);
-		setMetadata(world, x, z);
+		setMetadata(world, new BlockPos(x, bBox.minY, z));
 		boolean flag = StructureGenUtils.getAverageDistanceToGround(world, bBox, 6) < 4;
-		return (doorSide != -1 && flag && (submerged || !isWaterAroundOrUnder(world)));
+		return (doorSide != null && flag && (submerged || !isWaterAroundOrUnder(world)));
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class RoomBoss extends RoomBase
 	}
 
 	@Override
-	protected void setMetadata(World world, int x, int z) {
+	protected void setMetadata(World world, BlockPos pos) {
 		metadata = type.metadata;
 	}
 
@@ -170,7 +171,7 @@ public class RoomBoss extends RoomBase
 	 */
 	protected void decorateDungeon(World world, Random rand) {
 		int meta = getMetadata();
-		StructureGenUtils.fillDown(world, bBox, BlockSecretStone.getBlockFromMeta(meta), 0);
+		StructureGenUtils.fillDown(world, bBox, ZSSBlocks.secretStone.getStateFromMeta(meta));
 		placeDoor(world);
 		placeDungeonCore(world);
 		placePillars(world, meta);
@@ -187,16 +188,17 @@ public class RoomBoss extends RoomBase
 
 	@Override
 	protected void placeDungeonCore(World world) {
-		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, 0, bBox.getZSize() / 2, ZSSBlocks.dungeonCore, getMetadata() | 0x8);
+		StructureGenUtils.setBlockAtPosition(world, bBox, bBox.getXSize() / 2, 0, bBox.getZSize() / 2, ZSSBlocks.dungeonCore.getStateFromMeta(getMetadata() | 0x8));
 		int x = StructureGenUtils.getXWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
 		int y = StructureGenUtils.getYWithOffset(bBox, 0);
 		int z = StructureGenUtils.getZWithOffset(bBox, bBox.getXSize() / 2, bBox.getZSize() / 2);
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 		if (te instanceof TileEntityDungeonCore) {
 			TileEntityDungeonCore core = (TileEntityDungeonCore) te;
+			core.setRenderState(ZSSBlocks.secretStone.getStateFromMeta(getMetadata()));
 			core.setDungeonBoundingBox(bBox);
 			core.setBossType(type);
-			core.setDoor(ZSSBlocks.doorLocked, doorSide);
+			core.setDoor(ZSSBlocks.doorBoss, type.ordinal(), doorSide);
 		}
 	}
 
@@ -204,11 +206,12 @@ public class RoomBoss extends RoomBase
 	 * Determines which side is most suitable for the door
 	 */
 	protected void determineDoorSide(World world) {
-		int x = bBox.getCenterX();
+		Vec3i center = bBox.getCenter();
+		int x = center.getX();
 		int y = bBox.minY + 1;
-		int z = bBox.getCenterZ();
+		int z = center.getZ();
 		int dx, dz; 
-		doorSide = world.rand.nextInt(4);
+		doorSide = EnumFacing.Plane.HORIZONTAL.random(world.rand);
 		for (int i = 0; i < 4; ++i) {
 			dx = x;
 			dz = z;
@@ -219,24 +222,24 @@ public class RoomBoss extends RoomBase
 			case WEST: dx = bBox.maxX - 1; break;
 			default: ZSSMain.logger.warn(String.format("Invalid boss door side %d at %d/%d/%d", doorSide, x, y, z));
 			}
-			Block block1 = world.getBlock(dx, y, dz);
-			Block block2 = world.getBlock(dx, y + 1, dz);
-			// func_149730_j is isFullBlock
-			if (!block1.func_149730_j() && !block2.func_149730_j()) {
-				return;
+			Block block1 = world.getBlockState(new BlockPos(dx, y, dz)).getBlock();
+			Block block2 = world.getBlockState(new BlockPos(dx, y + 1, dz)).getBlock();
+			if (!block1.isFullBlock() && !block2.isFullBlock()) {
+				return; // the blocks in front of the door are not full blocks, this is a good side for the door
 			}
-			doorSide = (doorSide == EAST ? SOUTH : doorSide + 1);
+			doorSide = doorSide.rotateY();
 		}
-		doorSide = -1;
+		doorSide = null;
 	}
 
 	/**
 	 * Actually places the door; use after determining door side for best results
 	 */
 	protected void placeDoor(World world) {
-		int x = bBox.getCenterX();
+		Vec3i center = bBox.getCenter();
+		int x = center.getX();
 		int y = bBox.minY + (submerged ? 2 : 1);
-		int z = bBox.getCenterZ();
+		int z = center.getZ();
 		switch(doorSide) {
 		case SOUTH: z = bBox.maxZ; break;
 		case NORTH: z = bBox.minZ; break;
@@ -244,9 +247,8 @@ public class RoomBoss extends RoomBase
 		case WEST: x = bBox.minX; break;
 		default: ZSSMain.logger.warn("Placing Boss door with invalid door side");
 		}
-
-		world.setBlock(x, y, z, ZSSBlocks.doorLocked, type.ordinal() & ~0x8, 2);
-		world.setBlock(x, y + 1, z, ZSSBlocks.doorLocked, type.ordinal() | 0x8, 2);
+		world.setBlockState(new BlockPos(x, y, z), ZSSBlocks.doorBoss.getStateFromMeta(type.ordinal() & ~0x8), 2);
+		world.setBlockState(new BlockPos(x, y + 1, z), ZSSBlocks.doorBoss.getStateFromMeta(type.ordinal() | 0x8), 2);
 	}
 
 	/**
@@ -257,29 +259,28 @@ public class RoomBoss extends RoomBase
 		int minY = 1;
 		int minZ = bBox.getZSize() / 2 - 1;
 		if (submerged) {
-			StructureGenUtils.fillWithBlocks(world, bBox, minX, minX + 3, minY, minY + 1, minZ, minZ + 3, BlockSecretStone.getBlockFromMeta(getMetadata()), 0);
+			StructureGenUtils.fillWithBlocks(world, bBox, minX, minX + 3, minY, minY + 1, minZ, minZ + 3, ZSSBlocks.secretStone.getStateFromMeta(meta));
 			++minY;
 		}
 		if (!inOcean) {
-			StructureGenUtils.fillWithBlocks(world, bBox, minX, minX + 3, minY, minY + 1, minZ, minZ + 3, Blocks.stone_slab, BlockSecretStone.getSlabTypeFromMeta(meta));
+			StructureGenUtils.fillWithBlocks(world, bBox, minX, minX + 3, minY, minY + 1, minZ, minZ + 3, BlockSecretStone.EnumType.byMetadata(meta).getSlab());
 		}
-		world.setBlock(bBox.getCenterX(), bBox.minY + (submerged && !inOcean ? 2 : 1), bBox.getCenterZ(), (type == BossType.TAIGA ? Blocks.quartz_block: BlockSecretStone.getBlockFromMeta(getMetadata())), 0, 2);
+		Vec3i center = bBox.getCenter();
+		world.setBlockState(new BlockPos(center.getX(), bBox.minY + (submerged && !inOcean ? 2 : 1), center.getZ()), (type == BossType.TAIGA ? Blocks.quartz_block.getDefaultState() : ZSSBlocks.secretStone.getStateFromMeta(meta)), 2);
 		placeHinderBlock(world);
-
 		boolean hasChest = false;
 		switch(type) {
-		case DESERT:
-		case OCEAN:
-		case MOUNTAIN: placeChest(world, rand, true); hasChest = true; break;
+		case DESERT: // fall through
+		case OCEAN: // fall through
+		case MOUNTAIN: placeMainChest(world, rand, true); hasChest = true; break;
 		case FOREST: placePedestal(world, minY + 1); break;
-		case HELL: placeFlame(world, BlockSacredFlame.DIN); break;
-		case SWAMP: placeFlame(world, BlockSacredFlame.FARORE); break;
-		case TAIGA: placeFlame(world, BlockSacredFlame.NAYRU); break;
+		case HELL: placeFlame(world, BlockSacredFlame.EnumType.DIN); break;
+		case SWAMP: placeFlame(world, BlockSacredFlame.EnumType.FARORE); break;
+		case TAIGA: placeFlame(world, BlockSacredFlame.EnumType.NAYRU); break;
 		default:
 		}
-
 		if (!hasChest) {
-			placeChest(world, rand, false);
+			placeMainChest(world, rand, false);
 		}
 	}
 
@@ -288,39 +289,40 @@ public class RoomBoss extends RoomBase
 	 */
 	protected void placeChandelier(World world) {
 		if (bBox.getYSize() > 7) {
-			int x = bBox.getCenterX();
+			Vec3i center = bBox.getCenter();
+			int x = center.getX();
 			int y = bBox.maxY - 1;
-			int z = bBox.getCenterZ();
+			int z = center.getZ();
 			switch(type) {
 			case OCEAN:
-				world.setBlock(x + 1, y, z + 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x + 1, y, z - 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x - 1, y, z + 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x - 1, y, z - 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x, y, z, Blocks.glowstone, 0, 2);
+				world.setBlockState(new BlockPos(x + 1, y, z + 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x + 1, y, z - 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x - 1, y, z + 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x - 1, y, z - 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x, y, z), Blocks.glowstone.getDefaultState(), 2);
 				break;
 			case SWAMP:
-				world.setBlock(bBox.minX + 1, y, bBox.minZ + 1, Blocks.glowstone, 0, 2);
-				world.setBlock(bBox.minX + 1, y, bBox.maxZ - 1, Blocks.glowstone, 0, 2);
-				world.setBlock(bBox.maxX - 1, y, bBox.minZ + 1, Blocks.glowstone, 0, 2);
-				world.setBlock(bBox.maxX - 1, y, bBox.maxZ - 1, Blocks.glowstone, 0, 2);
+				world.setBlockState(new BlockPos(bBox.minX + 1, y, bBox.minZ + 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(bBox.minX + 1, y, bBox.maxZ - 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(bBox.maxX - 1, y, bBox.minZ + 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(bBox.maxX - 1, y, bBox.maxZ - 1), Blocks.glowstone.getDefaultState(), 2);
 				break;
 			default:
-				world.setBlock(x, y, z, Blocks.fence, 0, 2);
-				world.setBlock(x + 1, y, z, Blocks.fence, 0, 2);
-				world.setBlock(x + 1, y, z, Blocks.fence, 0, 2);
-				world.setBlock(x, y, z + 1, Blocks.fence, 0, 2);
-				world.setBlock(x, y, z - 1, Blocks.fence, 0, 2);
-				world.setBlock(x + 1, y, z + 1, Blocks.fence, 0, 2);
-				world.setBlock(x + 1, y, z - 1, Blocks.fence, 0, 2);
-				world.setBlock(x - 1, y, z + 1, Blocks.fence, 0, 2);
-				world.setBlock(x - 1, y, z - 1, Blocks.fence, 0, 2);
-				world.setBlock(x, y - 1, z, Blocks.fence, 0, 2);
-				world.setBlock(x + 1, y - 1, z + 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x + 1, y - 1, z - 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x - 1, y - 1, z + 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x - 1, y - 1, z - 1, Blocks.glowstone, 0, 2);
-				world.setBlock(x, y - 2, z, Blocks.glowstone, 0, 2);
+				world.setBlockState(new BlockPos(x, y, z), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x + 1, y, z), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x + 1, y, z), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x, y, z + 1), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x, y, z - 1), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x + 1, y, z + 1), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x + 1, y, z - 1), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x - 1, y, z + 1), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x - 1, y, z - 1), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x, y - 1, z), Blocks.oak_fence.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x + 1, y - 1, z + 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x + 1, y - 1, z - 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x - 1, y - 1, z + 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x - 1, y - 1, z - 1), Blocks.glowstone.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(x, y - 2, z), Blocks.glowstone.getDefaultState(), 2);
 			}
 		}
 	}
@@ -328,18 +330,20 @@ public class RoomBoss extends RoomBase
 	/**
 	 * Places and generates the contents of this dungeon's main chest
 	 */
-	protected void placeChest(World world, Random rand, boolean inCenter) {
-		int x = (inCenter ? bBox.getCenterX() : (rand.nextFloat() < 0.5F ? bBox.minX + 1 : bBox.maxX - 1));
+	protected void placeMainChest(World world, Random rand, boolean inCenter) {
+		Vec3i center = bBox.getCenter();
+		int x = (inCenter ? center.getX() : (rand.nextFloat() < 0.5F ? bBox.minX + 1 : bBox.maxX - 1));
 		int y = bBox.minY + (inCenter ? 2 : 1) + (submerged && !inOcean ? 1 : 0);
-		int z = (inCenter ? bBox.getCenterZ() : (rand.nextFloat() < 0.5F ? bBox.minZ + 1 : bBox.maxZ - 1));
-		Block block = (inCenter ? Blocks.chest : ZSSBlocks.chestLocked);
-		world.setBlock(x, y, z, block);
+		int z = (inCenter ? center.getZ() : (rand.nextFloat() < 0.5F ? bBox.minZ + 1 : bBox.maxZ - 1));
+		BlockPos pos = new BlockPos(x, y, z);
+		Block chest = (inCenter ? Blocks.chest : ZSSBlocks.chestLocked);
+		placeChest(world, pos, chest);
 		if (inCenter) {
-			world.setBlockMetadataWithNotify(x, y, z, facingToOrientation[doorSide], 2);
+			world.setBlockState(pos, chest.getStateFromMeta(doorSide.getIndex()), 2);
 		} else if (submerged && !inOcean) {
-			world.setBlock(x, y - 1, z, BlockSecretStone.getBlockFromMeta(getMetadata()), 0, 2);
+			world.setBlockState(pos.down(), ZSSBlocks.secretStone.getStateFromMeta(getMetadata()), 2);
 		}
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof IInventory) {
 			DungeonLootLists.generateBossChestContents(world, rand, (IInventory) te, this);
 		}
@@ -353,7 +357,7 @@ public class RoomBoss extends RoomBase
 			int x = (rand.nextFloat() < 0.5F ? bBox.minX : bBox.maxX);
 			int y = bBox.maxY + 1;
 			int z = (rand.nextFloat() < 0.5F ? bBox.minZ : bBox.maxZ);
-			placeChestAt(world, x, y, z, Blocks.chest, rand, true);
+			placeChestAt(world, new BlockPos(x, y, z), Blocks.chest, rand, true);
 		}
 	}
 
@@ -366,8 +370,8 @@ public class RoomBoss extends RoomBase
 				int x = bBox.minX + rand.nextInt(bBox.getXSize());
 				int y = (rand.nextFloat() < 0.5F ? bBox.minY + 1 : bBox.maxY + 1);
 				int z = bBox.minZ + rand.nextInt(bBox.getZSize());
-				if (bBox.isVecInside(x, y, z)) {
-					placeChestAt(world, x, y, z, ZSSBlocks.chestInvisible, rand, true);
+				if (bBox.isVecInside(new Vec3i(x, y, z))) {
+					placeChestAt(world, new BlockPos(x, y, z), ZSSBlocks.chestInvisible, rand, true);
 				}
 			}
 		}
@@ -377,10 +381,10 @@ public class RoomBoss extends RoomBase
 	 * Places the chest block at the given coordinates provided no other block exists,
 	 * and populates the chest with loot (locked level loot if goodLoot is true)
 	 */
-	protected void placeChestAt(World world, int x, int y, int z, Block chest, Random rand, boolean goodLoot) {
-		if (world.isAirBlock(x, y, z)) {
-			world.setBlock(x, y, z, chest);
-			TileEntity te = world.getTileEntity(x, y, z);
+	protected void placeChestAt(World world, BlockPos pos, Block chest, Random rand, boolean goodLoot) {
+		if (world.isAirBlock(pos)) {
+			placeChest(world, pos, chest);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof IInventory) {
 				DungeonLootLists.generateChestContents(world, rand, (IInventory) te, this, goodLoot);
 			}
@@ -390,18 +394,20 @@ public class RoomBoss extends RoomBase
 	/**
 	 * Places the designated Sacred Flame on the center block
 	 */
-	protected void placeFlame(World world, int meta) {
-		world.setBlock(bBox.getCenterX(), bBox.minY + (submerged ? 3 : 2), bBox.getCenterZ(), ZSSBlocks.sacredFlame, meta, 2);
+	protected void placeFlame(World world, BlockSacredFlame.EnumType flame) {
+		Vec3i center = bBox.getCenter();
+		world.setBlockState(new BlockPos(center.getX(), bBox.minY + (submerged ? 3 : 2), center.getZ()), ZSSBlocks.sacredFlame.getDefaultState().withProperty(BlockSacredFlame.VARIANT, flame), 2);
 	}
 
 	/**
 	 * Places a secret stone block between the chest and door to prevent early looting
 	 */
 	protected void placeHinderBlock(World world) {
-		int x = bBox.getCenterX() + (doorSide == EAST ? 1 : (doorSide == WEST ? -1 : 0));
+		Vec3i center = bBox.getCenter();
+		int x = center.getX() + doorSide.getFrontOffsetX();
 		int y = bBox.minY + (submerged && !inOcean ? 3 : 2);
-		int z = bBox.getCenterZ() + (doorSide == SOUTH ? 1 : (doorSide == NORTH ? -1 : 0));
-		world.setBlock(x, y, z, ZSSBlocks.secretStone, getMetadata(), 2);
+		int z = center.getZ() + doorSide.getFrontOffsetZ();
+		world.setBlockState(new BlockPos(x, y, z), ZSSBlocks.secretStone.getStateFromMeta(getMetadata()), 2);
 	}
 
 	/**
@@ -412,9 +418,10 @@ public class RoomBoss extends RoomBase
 			int x = bBox.minX + rand.nextInt(bBox.getXSize());
 			int y = (onRoof ? bBox.maxY : bBox.minY) + 1;
 			int z = bBox.minZ + rand.nextInt(bBox.getZSize());
-			Material m = world.getBlock(x, y, z).getMaterial();
+			BlockPos pos = new BlockPos(x, y, z);
+			Material m = world.getBlockState(pos).getBlock().getMaterial();
 			if (m == Material.air || m.isLiquid()) {
-				world.setBlock(x, y, z, ZSSBlocks.ceramicJar);
+				world.setBlockState(pos, ZSSBlocks.ceramicJar.getDefaultState());
 			}
 		}
 	}
@@ -428,12 +435,12 @@ public class RoomBoss extends RoomBase
 			return;
 		}
 		if (bBox.getYSize() > 7 && rand.nextFloat() < (type == BossType.HELL ? 0.75F : 0.5F)) {
-			int y = bBox.getCenterY();
-			Block block = BlockSecretStone.getBlockFromMeta(meta);
-			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 1, bBox.minX + 2, y, y + 1, bBox.minZ + 1, bBox.maxZ, block, 0, 3);
-			StructureGenUtils.fillWithoutReplace(world, bBox.maxX - 1, bBox.maxX, y, y + 1, bBox.minZ + 1, bBox.maxZ, block, 0, 3);
-			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 2, bBox.maxX - 1, y, y + 1, bBox.minZ + 1, bBox.minZ + 2, block, 0, 3);
-			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 2, bBox.maxX - 1, y, y + 1, bBox.maxZ - 1, bBox.maxZ, block, 0, 3);
+			int y = bBox.getCenter().getY(); // centerY
+			Block block = BlockSecretStone.EnumType.byMetadata(meta).getDroppedBlock();
+			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 1, bBox.minX + 2, y, y + 1, bBox.minZ + 1, bBox.maxZ, block.getDefaultState(), 3);
+			StructureGenUtils.fillWithoutReplace(world, bBox.maxX - 1, bBox.maxX, y, y + 1, bBox.minZ + 1, bBox.maxZ, block.getDefaultState(), 3);
+			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 2, bBox.maxX - 1, y, y + 1, bBox.minZ + 1, bBox.minZ + 2, block.getDefaultState(), 3);
+			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 2, bBox.maxX - 1, y, y + 1, bBox.maxZ - 1, bBox.maxZ, block.getDefaultState(), 3);
 		}
 	}
 
@@ -446,31 +453,29 @@ public class RoomBoss extends RoomBase
 		int z1 = bBox.minZ - 1;
 		int z2 = bBox.maxZ + 1;
 		int y = bBox.maxY;
-		Block block = BlockSecretStone.getBlockFromMeta(meta);
-		Block stairs = BlockSecretStone.getStairsFromMeta(meta);
-
+		Block block = BlockSecretStone.EnumType.byMetadata(meta).getDroppedBlock();
+		Block stairs = BlockSecretStone.EnumType.byMetadata(meta).getStairBlock();
 		for (int i = x1; i <= x2; ++i) {
-			world.setBlock(i, y, z1, stairs, 6, 3);
-			world.setBlock(i, y + 1, z1, block, 0, 2);
-			world.setBlock(i, y, z2, stairs, 7, 3);
-			world.setBlock(i, y + 1, z2, block, 0, 2);
+			world.setBlockState(new BlockPos(i, y, z1), stairs.getStateFromMeta(6), 3);
+			world.setBlockState(new BlockPos(i, y + 1, z1), block.getDefaultState(), 2);
+			world.setBlockState(new BlockPos(i, y, z2), stairs.getStateFromMeta(7), 3);
+			world.setBlockState(new BlockPos(i, y + 1, z2), block.getDefaultState(), 2);
 			if (i % 2 == 0) {
-				world.setBlock(i, y + 2, z1, block, 0, 2);
-				world.setBlock(i, y + 2, z2, block, 0, 2);
+				world.setBlockState(new BlockPos(i, y + 2, z1), block.getDefaultState(), 2);
+				world.setBlockState(new BlockPos(i, y + 2, z2), block.getDefaultState(), 2);
 			}
 		}
-
 		for (int i = z1; i <= z2; ++i) {
-			world.setBlock(x1, y, i, stairs, 4, 3);
-			world.setBlock(x1, y + 1, i, block, 0, 2);
-			world.setBlock(x2, y, i, stairs, 5, 3);
-			world.setBlock(x2, y + 1, i, block, 0, 2);
+			world.setBlockState(new BlockPos(x1, y, i), stairs.getStateFromMeta(4), 3);
+			world.setBlockState(new BlockPos(x1, y + 1, i), block.getDefaultState(), 2);
+			world.setBlockState(new BlockPos(x2, y, i), stairs.getStateFromMeta(5), 3);
+			world.setBlockState(new BlockPos(x2, y + 1, i), block.getDefaultState(), 2);
 			if (i % 2 == 0) {
-				if (world.getBlock(x1 + 1, y + 2, i) != block) {
-					world.setBlock(x1, y + 2, i, block, 0, 2);
+				if (world.getBlockState(new BlockPos(x1 + 1, y + 2, i)).getBlock() != block) {
+					world.setBlockState(new BlockPos(x1, y + 2, i), block.getDefaultState(), 2);
 				}
-				if (world.getBlock(x2 - 1, y + 2, i) != block) {
-					world.setBlock(x2, y + 2, i, block, 0, 2);
+				if (world.getBlockState(new BlockPos(x2 - 1, y + 2, i)).getBlock() != block) {
+					world.setBlockState(new BlockPos(x2, y + 2, i), block.getDefaultState(), 2);
 				}
 			}
 		}
@@ -484,25 +489,24 @@ public class RoomBoss extends RoomBase
 			return;
 		}
 		if (world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
+			Vec3i center = bBox.getCenter();
 			int offset = (bBox.getXSize() < 11 ? 2 : 3);
-			int x1 = (bBox.getXSize() < 11 ? bBox.getCenterX() : bBox.minX) + offset;
-			int x2 = (bBox.getXSize() < 11 ? bBox.getCenterX() : bBox.maxX) - offset;
-			int z1 = (bBox.getZSize() < 11 ? bBox.getCenterZ() : bBox.minZ) + offset;
-			int z2 = (bBox.getZSize() < 11 ? bBox.getCenterZ() : bBox.maxZ) - offset;
-			Block block = BlockSecretStone.getBlockFromMeta(meta);
-
+			int x1 = (bBox.getXSize() < 11 ? center.getX() : bBox.minX) + offset;
+			int x2 = (bBox.getXSize() < 11 ? center.getX() : bBox.maxX) - offset;
+			int z1 = (bBox.getZSize() < 11 ? center.getZ() : bBox.minZ) + offset;
+			int z2 = (bBox.getZSize() < 11 ? center.getZ() : bBox.maxZ) - offset;
+			IBlockState state = ZSSBlocks.secretStone.getStateFromMeta(meta);
 			for (int y = bBox.minY + 1; y < bBox.maxY; ++y) {
-				world.setBlock(x1, y, z1, block, 0, 2);
-				world.setBlock(x1, y, z2, block, 0, 2);
-				world.setBlock(x2, y, z1, block, 0, 2);
-				world.setBlock(x2, y, z2, block, 0, 2);
+				world.setBlockState(new BlockPos(x1, y, z1), state, 2);
+				world.setBlockState(new BlockPos(x1, y, z2), state, 2);
+				world.setBlockState(new BlockPos(x2, y, z1), state, 2);
+				world.setBlockState(new BlockPos(x2, y, z2), state, 2);
 			}
-
 			if (bBox.getXSize() > 10 && world.rand.nextFloat() < 0.5F) {
-				placePillarLandings(world, block, x1, bBox.getCenterY(), z1, 0);
-				placePillarLandings(world, block, x2, bBox.getCenterY(), z1, 1);
-				placePillarLandings(world, block, x1, bBox.getCenterY(), z2, 2);
-				placePillarLandings(world, block, x2, bBox.getCenterY(), z2, 3);
+				placePillarLandings(world, state, new BlockPos(x1, center.getY(), z1), 0);
+				placePillarLandings(world, state, new BlockPos(x2, center.getY(), z1), 1);
+				placePillarLandings(world, state, new BlockPos(x1, center.getY(), z2), 2);
+				placePillarLandings(world, state, new BlockPos(x2, center.getY(), z2), 3);
 			}
 		}
 	}
@@ -511,23 +515,23 @@ public class RoomBoss extends RoomBase
 	 * Places one-block landings on two sides of the pillar, depending on facing
 	 * @param corner 0 NW, 1 NE, 2 SW, 3 SE
 	 */
-	protected void placePillarLandings(World world, Block block, int x, int y, int z, int corner) {
+	protected void placePillarLandings(World world, IBlockState state, BlockPos pos, int corner) {
 		switch(corner % 4) {
 		case 0:
-			world.setBlock(x + 1, y, z, block);
-			world.setBlock(x, y, z + 1, block);
+			world.setBlockState(pos.east(), state);
+			world.setBlockState(pos.south(), state);
 			break;
 		case 1:
-			world.setBlock(x - 1, y, z, block);
-			world.setBlock(x, y, z + 1, block);
+			world.setBlockState(pos.west(), state);
+			world.setBlockState(pos.south(), state);
 			break;
 		case 2:
-			world.setBlock(x + 1, y, z, block);
-			world.setBlock(x, y, z - 1, block);
+			world.setBlockState(pos.east(), state);
+			world.setBlockState(pos.north(), state);
 			break;
 		case 3:
-			world.setBlock(x - 1, y, z, block);
-			world.setBlock(x, y, z - 1, block);
+			world.setBlockState(pos.west(), state);
+			world.setBlockState(pos.north(), state);
 		}
 	}
 
@@ -537,33 +541,33 @@ public class RoomBoss extends RoomBase
 	protected void placeWindows(World world) {
 		if (Config.areWindowsEnabled() && world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
 			int interval = (bBox.getXSize() % 2 == 1 ? 2 : 3);
-			int j = bBox.getCenterY() + 1;
+			int j = bBox.getCenter().getY() + 1;
 			Block window = (world.rand.nextFloat() < 0.25F ? Blocks.iron_bars : Blocks.air);
 			boolean hasVines = (type == BossType.FOREST || type == BossType.SWAMP);
 			for (int i = bBox.minX + 1; i < bBox.maxX; ++i) {
 				if (i % interval == 0) {
-					world.setBlock(i, j, bBox.minZ, window, 0, 2);
-					world.setBlock(i, j, bBox.maxZ, window, 0, 2);
+					world.setBlockState(new BlockPos(i, j, bBox.minZ), window.getDefaultState(), 2);
+					world.setBlockState(new BlockPos(i, j, bBox.maxZ), window.getDefaultState(), 2);
 					if (hasVines) {
 						if (world.rand.nextFloat() < 0.25F) {
-							placeVines(world, i, j - 1, bBox.minZ - 1, 1);
+							placeVines(world, new BlockPos(i, j - 1, bBox.minZ - 1), 1);
 						}
 						if (world.rand.nextFloat() < 0.25F) {
-							placeVines(world, i, j - 1, bBox.maxZ + 1, 4);
+							placeVines(world, new BlockPos(i, j - 1, bBox.maxZ + 1), 4);
 						}
 					}
 				}
 			}
 			for (int k = bBox.minZ + 1; k < bBox.maxZ; ++k) {
 				if (k % interval == 0) {
-					world.setBlock(bBox.minX, j, k, window, 0, 2);
-					world.setBlock(bBox.maxX, j, k, window, 0, 2);
+					world.setBlockState(new BlockPos(bBox.minX, j, k), window.getDefaultState(), 2);
+					world.setBlockState(new BlockPos(bBox.maxX, j, k), window.getDefaultState(), 2);
 					if (hasVines) {
 						if (world.rand.nextFloat() < 0.25F) {
-							placeVines(world, bBox.minX - 1, j - 1, k, 8);
+							placeVines(world, new BlockPos(bBox.minX - 1, j - 1, k), 8);
 						}
 						if (world.rand.nextFloat() < 0.25F) {
-							placeVines(world, bBox.maxX + 1, j - 1, k, 2);
+							placeVines(world, new BlockPos(bBox.maxX + 1, j - 1, k), 2);
 						}
 					}
 				}
@@ -574,13 +578,13 @@ public class RoomBoss extends RoomBase
 	/**
 	 * Places a random number of vines with the given metadata facing starting from y and moving downward
 	 */
-	protected void placeVines(World world, int x, int y, int z, int meta) {
+	protected void placeVines(World world, BlockPos pos, int meta) {
 		int n = world.rand.nextInt(5) + 1;
 		for (int i = 0; i < n; ++i) {
-			if (!world.isAirBlock(x, y - i, z)) {
+			if (!world.isAirBlock(pos.down(i))) {
 				break;
 			}
-			world.setBlock(x, y - i, z, Blocks.vine, meta, 2);
+			world.setBlockState(pos.down(i), Blocks.vine.getStateFromMeta(meta), 2);
 		}
 	}
 
@@ -595,21 +599,21 @@ public class RoomBoss extends RoomBase
 	@Override
 	protected boolean placeInOcean(World world, boolean sink) {
 		if (type == BossType.OCEAN) {
-			while (bBox.minY > 60 && world.getBlock(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()).getMaterial() == Material.air) {
+			Vec3i center = bBox.getCenter();
+			while (bBox.minY > 60 && world.getBlockState(new BlockPos(center.getX(), bBox.minY, center.getZ())).getBlock().getMaterial() == Material.air) {
 				bBox.offset(0, -1, 0);
 			}
-			while (bBox.minY > 16 && world.getBlock(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()).getMaterial() == Material.water) {
+			while (bBox.minY > 16 && world.getBlockState(new BlockPos(center.getX(), bBox.minY, center.getZ())).getBlock().getMaterial() == Material.water) {
 				bBox.offset(0, -1, 0);
 			}
-			if (world.getBlock(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()).getMaterial() != Material.water &&
-					world.getBlock(bBox.getCenterX(), bBox.maxY, bBox.getCenterZ()).getMaterial() == Material.water) {
+			if (world.getBlockState(new BlockPos(center.getX(), bBox.minY, center.getZ())).getBlock().getMaterial() != Material.water &&
+					world.getBlockState(new BlockPos(center.getX(), bBox.maxY, center.getZ())).getBlock().getMaterial() == Material.water) {
 				inOcean = true;
 				submerged = true;
 				StructureGenUtils.adjustCornersForMaterial(world, bBox, Material.water, 6, false, false);
 				return true;
 			}
 		}
-
 		return false;
 	}
 }

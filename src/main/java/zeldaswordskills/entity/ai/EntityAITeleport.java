@@ -26,6 +26,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -190,9 +192,9 @@ public class EntityAITeleport extends EntityAIBase
 		} else if (fleeTele && delayTimer > (teleportDelay / 2) && target != null && entity.getDistanceSqToEntity(target) < range) {
 			flag = true;
 		} else if (hurtTele && entity.hurtResistantTime > 10 && delayTimer > entity.hurtResistantTime) {
-			flag = true; // hurt time > 10 should restrict teleports to once per time hit 
+			flag = true; // hurt time > 10 should restrict teleports to once per time hit
 		} else if (approachTele && target != null && entity.getDistanceSqToEntity(target) > rangeSq) {
-			if (teleBounds == null || teleBounds.isVecInside(Vec3.createVectorHelper(target.posX, target.posY, target.posZ))) {
+			if (teleBounds == null || teleBounds.isVecInside(new Vec3(target.posX, target.posY, target.posZ))) {
 				if (!entity.worldObj.isRemote) {
 					for (int i = 0; i < 64; ++i) {
 						if (teleportToEntity(entity.worldObj, entity, target)) {
@@ -279,7 +281,7 @@ public class EntityAITeleport extends EntityAIBase
 	 * @return True if the entity successfully teleported
 	 */
 	public static boolean teleportToEntity(World world, EntityLivingBase entity, Entity target, AxisAlignedBB restriction, boolean grounded) {
-		Vec3 vec3 = Vec3.createVectorHelper(entity.posX - target.posX, entity.boundingBox.minY + (double)(entity.height / 2.0F) - target.posY + (double) target.getEyeHeight(), entity.posZ - target.posZ);
+		Vec3 vec3 = new Vec3(entity.posX - target.posX, entity.getEntityBoundingBox().minY + (double)(entity.height / 2.0F) - target.posY + (double) target.getEyeHeight(), entity.posZ - target.posZ);
 		vec3 = vec3.normalize();
 		double d0 = 16.0D;
 		double x = entity.posX + (world.rand.nextDouble() - 0.5D) * 8.0D - vec3.xCoord * d0;
@@ -318,31 +320,26 @@ public class EntityAITeleport extends EntityAIBase
 		int i = MathHelper.floor_double(entity.posX);
 		int j = MathHelper.floor_double(entity.posY);
 		int k = MathHelper.floor_double(entity.posZ);
-
-		if (entity.worldObj.blockExists(i, j, k)) {
-			boolean foundSolidBlock = !grounded;
-			if (grounded) {
-				while (!foundSolidBlock && j > 0) {
-					Block block = entity.worldObj.getBlock(i, j - 1, k);
-					if (block.getMaterial().blocksMovement()) {
-						foundSolidBlock = true;
-					} else {
-						--entity.posY;
-						--j;
-					}
-				}
-			}
-
-			if (foundSolidBlock) {
-				entity.setPosition(entity.posX, entity.posY, entity.posZ);
-				if (restriction != null && !restriction.isVecInside(Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ))) {
-					flag = false;
-				} else if (world.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty() && (!noLiquid || !world.isAnyLiquid(entity.boundingBox))) {
-					flag = true;
+		boolean foundSolidBlock = !grounded;
+		if (grounded) {
+			while (!foundSolidBlock && j > 1) {
+				Block block = entity.worldObj.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
+				if (block.getMaterial().blocksMovement()) {
+					foundSolidBlock = true;
+				} else {
+					--entity.posY;
+					--j;
 				}
 			}
 		}
-
+		if (foundSolidBlock) {
+			entity.setPosition(entity.posX, entity.posY, entity.posZ);
+			if (restriction != null && !restriction.isVecInside(new Vec3(entity.posX, entity.posY, entity.posZ))) {
+				flag = false;
+			} else if (world.getCollidingBoundingBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && (!noLiquid || !world.isAnyLiquid(entity.getEntityBoundingBox()))) {
+				flag = true;
+			}
+		}
 		if (!flag) {
 			entity.setPosition(d3, d4, d5);
 			return false;
@@ -358,9 +355,8 @@ public class EntityAITeleport extends EntityAIBase
 				double d7 = d3 + (entity.posX - d3) * d6 + (world.rand.nextDouble() - 0.5D) * (double) entity.width * 2.0D;
 				double d8 = d4 + (entity.posY - d4) * d6 + world.rand.nextDouble() * (double) entity.height;
 				double d9 = d5 + (entity.posZ - d5) * d6 + (world.rand.nextDouble() - 0.5D) * (double) entity.width * 2.0D;
-				entity.worldObj.spawnParticle("portal", d7, d8, d9, (double) f, (double) f1, (double) f2);
+				entity.worldObj.spawnParticle(EnumParticleTypes.PORTAL, d7, d8, d9, (double) f, (double) f1, (double) f2);
 			}
-
 			entity.worldObj.playSoundEffect(d3, d4, d5, "mob.endermen.portal", 1.0F, 1.0F);
 			entity.playSound("mob.endermen.portal", 1.0F, 1.0F);
 			MinecraftForge.EVENT_BUS.post(new PostEnderTeleport(entity, d3, d4, d5, 0));

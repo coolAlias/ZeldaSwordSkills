@@ -17,7 +17,10 @@
 
 package zeldaswordskills.client.gui;
 
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.LearnSongPacket;
@@ -26,8 +29,6 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiLearnSong extends GuiMusicBase
@@ -107,7 +108,7 @@ public class GuiLearnSong extends GuiMusicBase
 			if (ticksSinceLastNote > song.getMinDuration()) {
 				PacketDispatcher.sendToServer(new LearnSongPacket(song));
 			} else {
-				PacketDispatcher.sendToServer(new PlayRecordPacket(null, x, y, z));
+				PacketDispatcher.sendToServer(new PlayRecordPacket(null, new BlockPos(x, y, z)));
 				PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.song.premature");
 			}
 		}
@@ -122,7 +123,7 @@ public class GuiLearnSong extends GuiMusicBase
 		} else if (songToLearn.areCorrectNotes(melody)) {
 			song = songToLearn;
 			mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
-			PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), x, y, z));
+			PacketDispatcher.sendToServer(new PlayRecordPacket(song.getSoundString(), new BlockPos(x, y, z)));
 			PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.song.correct." + mc.theWorld.rand.nextInt(4));
 		}
 	}

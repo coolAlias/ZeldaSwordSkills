@@ -17,7 +17,7 @@
 
 package zeldaswordskills.songs;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -62,8 +62,8 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 	/**
 	 * Return true if the block at the target position is a valid spot to teleport
 	 */
-	protected boolean isBlockValid(World world, int x, int y, int z, Block block, int meta) {
-		return (block instanceof BlockWarpStone && BlockWarpStone.warpBlockSongs.get(meta) == this);
+	protected boolean isBlockValid(World world, IBlockState state) {
+		return (state.getBlock() instanceof BlockWarpStone && ((BlockWarpStone.EnumWarpSong) state.getValue(BlockWarpStone.WARP_SONG)).getWarpSong() == this);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
 		WarpPoint warp = getWarpPoint(player);
-		int dimension = player.worldObj.provider.dimensionId;
+		int dimension = player.worldObj.provider.getDimensionId();
 		if (warp == null) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.warp.null");
 		} else if (!canCrossDimensions() && dimension != warp.dimensionId) {
@@ -93,11 +93,10 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 			}
 			boolean noBlock = true; // true if warp block not found
 			boolean noAir = false; // true if new position is not suitable
-			Block block = player.worldObj.getBlock(warp.x, warp.y, warp.z);
-			int meta = player.worldObj.getBlockMetadata(warp.x, warp.y, warp.z);
-			if (isBlockValid(player.worldObj, warp.x, warp.y, warp.z, block, meta)) {
+			IBlockState state = player.worldObj.getBlockState(warp.pos);
+			if (isBlockValid(player.worldObj, state)) {
 				noBlock = false;
-				if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D, null, true, false)) {
+				if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.pos.getX() + 0.5D, warp.pos.getY() + 1, (double) warp.pos.getZ() + 0.5D, null, true, false)) {
 					noAir = true;
 				}
 			}

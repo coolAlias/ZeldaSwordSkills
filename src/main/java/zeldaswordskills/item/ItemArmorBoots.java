@@ -21,11 +21,9 @@ import java.util.List;
 import java.util.UUID;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockSoulSand;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -35,16 +33,16 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -53,11 +51,9 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.InLiquidPacket;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.util.WorldUtils;
 
 /**
  * 
@@ -76,7 +72,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Rubber Boots: Handy for reducing the wearer's conductivity.
  *
  */
-public class ItemArmorBoots extends ItemArmor implements IUnenchantable
+public class ItemArmorBoots extends ItemModArmor implements IUnenchantable
 {
 	/** Bonus to knockback resistance when wearing Heavy Boots */
 	private static final UUID heavyBootsKnockbackModifierUUID = UUID.fromString("71AF0F88-82E5-49DE-B9CC-844048E33D69");
@@ -90,12 +86,16 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 	private static final UUID pegasusBootsMoveBonusUUID = UUID.fromString("36A0FC05-50EB-460B-8961-615633A6D813");
 	private static final AttributeModifier pegasusBootsMoveBonus = (new AttributeModifier(pegasusBootsMoveBonusUUID, "Pegasus Boots Speed Bonus", 0.3D, 2)).setSaved(false);
 
+	/** Armor model texture resource location */
+	private final String resourceLocation;
+
 	/**
 	 * Armor types as used on player: 0 boots, 1 legs, 2 chest, 3 helm
 	 * Armor types as used in armor class: 0 helm, 1 chest, 2 legs, 3 boots
 	 */
-	public ItemArmorBoots(ArmorMaterial material, int renderIndex) {
+	public ItemArmorBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
 		super(material, renderIndex, ArmorIndex.TYPE_BOOTS);
+		this.resourceLocation = resourceLocation;
 		setMaxDamage(0);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
@@ -136,41 +136,34 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 			info.setWearingBoots();
 		}
 		if (this == ZSSItems.bootsHeavy) {
-			reverseMaterialAcceleration(world, player.boundingBox.expand(0.0D, -0.4000000059604645D, 0.0D).contract(0.001D, 0.001D, 0.001D), Material.water, player);
+			WorldUtils.reverseMaterialAcceleration(world, player.getEntityBoundingBox().expand(0.0D, -0.4000000059604645D, 0.0D).contract(0.001D, 0.001D, 0.001D), Material.water, player);
 			if (!world.isRemote) {
-				int i = MathHelper.floor_double(player.posX);
-				int j = MathHelper.floor_double(player.boundingBox.minY);
-				int k = MathHelper.floor_double(player.posZ);
-
-				Material m = world.getBlock(i, j, k).getMaterial();
+				BlockPos pos = new BlockPos(player);
+				Material m = world.getBlockState(pos).getBlock().getMaterial();
 				if (m.isLiquid()) {
 					PacketDispatcher.sendTo(new InLiquidPacket(m == Material.lava), (EntityPlayerMP) player);
 				}
-				Material m1 = world.getBlock(i, j - 1, k).getMaterial();
+				Material m1 = world.getBlockState(pos.down()).getBlock().getMaterial();
 				if ((m1 == Material.glass || m1 == Material.ice) && world.getWorldTime() % 2 == 0) {
 					if ((!player.isSneaking() && world.rand.nextFloat() < 0.15F) || world.rand.nextFloat() < 0.01F) {
-						// func_147480_a is destroyBlock
-						world.func_147480_a(i, j - 1, k, false);
+						world.destroyBlock(pos.down(), false);
 					}
 				}
 			}
 		} else if (this == ZSSItems.bootsHover) {
-			int i = MathHelper.floor_double(player.posX);
-			int j = MathHelper.floor_double(player.boundingBox.minY);
-			int k = MathHelper.floor_double(player.posZ);
-			Block block = world.getBlock(i, j - 1, k);
+			Block block = world.getBlockState(new BlockPos(player).down()).getBlock();
 			boolean flag = !block.getMaterial().blocksMovement() || block.slipperiness > 0.6F || block instanceof BlockSoulSand;
 			if (flag && player.isSprinting() && player.motionY < 0.0D && ++info.hoverTime < 40 ) {
 				player.posY += -player.motionY;
 				player.motionY = 0.0D;
 				player.fallDistance = 0.0F;
 				if (info.hoverTime % 3 == 0) {
-					world.spawnParticle("explode", player.posX, player.posY - 2, player.posZ, -player.motionX, player.motionY, -player.motionZ);
+					world.spawnParticle(EnumParticleTypes.CLOUD, player.posX, player.posY - 1, player.posZ, -player.motionX, player.motionY, -player.motionZ);
 				}
 			} else if (info.hoverTime > 0) {
 				info.hoverTime = 0;
 				player.setSprinting(false);
-				if (world.isRemote && Minecraft.getMinecraft().gameSettings.keyBindSprint.getIsKeyPressed()) {
+				if (world.isRemote && Minecraft.getMinecraft().gameSettings.keyBindSprint.isKeyDown()) {
 					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
 				}
 			}
@@ -221,75 +214,15 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 		}
 	}
 
-	/**
-	 * Undoes whatever acceleration has been applied by materials such as flowing water
-	 */
-	public static boolean reverseMaterialAcceleration(World world, AxisAlignedBB aabb, Material material, Entity entity) {
-		int i = MathHelper.floor_double(aabb.minX);
-		int j = MathHelper.floor_double(aabb.maxX + 1.0D);
-		int k = MathHelper.floor_double(aabb.minY);
-		int l = MathHelper.floor_double(aabb.maxY + 1.0D);
-		int i1 = MathHelper.floor_double(aabb.minZ);
-		int j1 = MathHelper.floor_double(aabb.maxZ + 1.0D);
-
-		if (!world.checkChunksExist(i, k, i1, j, l, j1)) {
-			return false;
-		} else {
-			boolean flag = false;
-			Vec3 vec3 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
-			for (int k1 = i; k1 < j; ++k1) {
-				for (int l1 = k; l1 < l; ++l1) {
-					for (int i2 = i1; i2 < j1; ++i2) {
-						Block block = world.getBlock(k1, l1, i2);
-						if (block != null && block.getMaterial() == material) {
-							double d0 = (double)((float)(l1 + 1) - BlockLiquid.getLiquidHeightPercent(world.getBlockMetadata(k1, l1, i2)));
-							if ((double)l >= d0) {
-								flag = true;
-								block.velocityToAddToEntity(world, k1, l1, i2, entity, vec3);
-							}
-						}
-					}
-				}
-			}
-
-			if (vec3.lengthVector() > 0.0D && entity.isPushedByWater()) {
-				vec3 = vec3.normalize();
-				double d1 = 0.014D;
-				entity.motionX -= vec3.xCoord * d1;
-				entity.motionY -= vec3.yCoord * d1;
-				entity.motionZ -= vec3.zCoord * d1;
-				entity.motionX *= 0.85D;
-				entity.motionY *= 0.85D;
-				entity.motionZ *= 0.85D;
-			}
-
-			return flag;
-		}
-	}
-
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
-		if (this == ZSSItems.bootsHeavy) {
-			return "textures/models/armor/iron_layer_1.png";
-		} else if (this == ZSSItems.bootsHover) {
-			return ModInfo.ID + ":textures/armor/mask_hawkeye_layer_1.png";
-		} else if (this == ZSSItems.bootsRubber) {
-			return ModInfo.ID + ":textures/armor/boots_rubber_layer_1.png";
-		} else {
-			return ModInfo.ID + ":textures/armor/hero_tunic_layer_1.png";
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
+		return resourceLocation;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss." + getUnlocalizedName().substring(9) + ".desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 	}
 	// Multimap modifiers are applied both while wearing and while holding an item
 	/*

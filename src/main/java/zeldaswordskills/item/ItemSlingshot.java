@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -32,15 +31,17 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -51,14 +52,11 @@ import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -68,7 +66,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * require a special type of slingshot (upgraded) to shoot properly.
  *
  */
-public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable, IZoom
+public class ItemSlingshot extends BaseModItem implements IFairyUpgrade, IUnenchantable, IZoom
 {
 	/** The number of seeds this slingshot will fire per shot */
 	protected final int seedsFired;
@@ -82,7 +80,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 	/** Maps the seed types to seed Items for consuming seed shot */
 	private static final Map<SeedType, Item> typeToSeed = new EnumMap<SeedType, Item>(SeedType.class);
 
-	public static void initializeSeeds(){
+	private static void initializeSeeds(){
 		addSeedMapping(SeedType.BOMB, ZSSItems.bombFlowerSeed);
 		addSeedMapping(SeedType.COCOA, Items.dye);
 		addSeedMapping(SeedType.DEKU, ZSSItems.dekuNut);
@@ -135,7 +133,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.bow;
+		return EnumAction.BOW;
 	}
 
 	@Override
@@ -152,41 +150,32 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 		float f = (float) charge / 20.0F;
 		f = (f * f + f * 2.0F) / 3.0F;
 		SeedType type = getSeedType(player);
-
 		if (f < 0.3F || type == SeedType.NONE) {
 			return;
 		} else if (f > 1.0F) {
 			f = 1.0F;
 		}
-
 		for (int i = 0; i < seedsFired; ++i) {
 			EntitySeedShot seedShot = new EntitySeedShot(world, player, f, i + 1, spread).setType(type);
 			if (f == 1.0F) {
 				seedShot.setIsCritical(true);
 			}
-
 			float factor = (seedsFired == 1 ? 2.2F : seedsFired < 4 ? 1.4F : 1.0F); 
 			float damage = type.getDamage();
-
 			int k = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, stack);
 			if (k > 0) {
 				damage += ((float)(k * 0.25F) + 0.25F);
 			}
-
 			seedShot.setDamage(damage * factor);
-
 			int l = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, stack);
 			seedShot.setKnockback(l > 0 ? l : (type == SeedType.MELON ? 1 : 0));
-
 			if (type == SeedType.NETHERWART || EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, stack) > 0) {
 				seedShot.setFire(100);
 			}
-
 			if (!world.isRemote) {
 				world.spawnEntityInWorld(seedShot);
 			}
 		}
-
 		world.playSoundAtEntity(player, Sounds.BOW_RELEASE, 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + f * 0.5F);
 		if (!player.capabilities.isCreativeMode) {
 			Item seed = typeToSeed.get(type);
@@ -218,22 +207,16 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 	 */
 	protected boolean hasSeeds(EntityPlayer player) {
 		if (player.capabilities.isCreativeMode) { return true; }
-		for (ItemStack stack : player.inventory.mainInventory) {
-			if (stack != null) {
-				if (stack.getItem() instanceof ItemSeeds || stack.getItem() == ZSSItems.dekuNut) {
-					return true;
-				} else if (stack.getItem() == Items.dye && stack.getItemDamage() == 3) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return getSeedType(player) != SeedType.NONE;
 	}
 
 	/**
-	 * Returns the type of seed to be shot or NONE if no seed available
+	 * Returns the type of seed to be shot or SeedType.NONE if no seed available
 	 */
 	protected SeedType getSeedType(EntityPlayer player) {
+		if (seedToType.isEmpty()) {
+			ItemSlingshot.initializeSeeds();
+		}
 		for (ItemStack stack : player.inventory.mainInventory) {
 			if (stack != null && seedToType.containsKey(stack.getItem())) {
 				SeedType type = seedToType.get(stack.getItem());
@@ -243,12 +226,6 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 			}
 		}
 		return (player.capabilities.isCreativeMode ? SeedType.GRASS : SeedType.NONE);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
 	@Override
@@ -263,16 +240,17 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
 		ItemStack stack = item.getEntityItem();
+		BlockPos pos = core.getPos();
 		if (stack.getItem() == ZSSItems.slingshot && core.consumeRupees(Config.getSlingshotCostOne())) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairySlingshot);
-			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.scattershot), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			WorldUtils.spawnItemWithRandom(core.getWorld(), new ItemStack(ZSSItems.scattershot), pos.getX(), pos.getY() + 2, pos.getZ());
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else if (stack.getItem() == ZSSItems.scattershot && core.consumeRupees(Config.getSlingshotCostTwo())) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairySupershot);
-			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.supershot), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			WorldUtils.spawnItemWithRandom(core.getWorld(), new ItemStack(ZSSItems.supershot), pos.getX(), pos.getY() + 2, pos.getZ());
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
 			addFairyEnchantments(stack, player, core);
 		}
@@ -293,7 +271,6 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 		int lvl = newLvl;
 		boolean flag = false;
 		boolean playSound = false;
-
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("ench")) {
 			NBTTagList enchList = (NBTTagList) stack.getTagCompound().getTag("ench");
 			for (int i = 0; i < enchList.tagCount(); ++i) {
@@ -315,7 +292,6 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 				}
 			}
 		}
-
 		if (!flag) {
 			while (lvl > 0 && core.consumeRupees(divisor * 2)) {
 				--lvl;
@@ -326,11 +302,12 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 				stack.addEnchantment(Enchantment.power, newLvl);
 			}
 		}
+		BlockPos pos = core.getPos();
 		if (playSound) {
 			player.triggerAchievement(ZSSAchievements.fairyEnchantment);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
 		} else {
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}

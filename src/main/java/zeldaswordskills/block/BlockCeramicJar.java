@@ -20,8 +20,9 @@ package zeldaswordskills.block;
 import java.util.Random;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,16 +33,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
-import zeldaswordskills.client.render.block.RenderCeramicJar;
+import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.entity.projectile.EntityCeramicJar;
@@ -49,13 +57,11 @@ import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class BlockCeramicJar extends BlockContainer implements IExplodable, IHookable, ISmashable, IWhipBlock
+public class BlockCeramicJar extends Block implements IExplodable, IHookable, ISmashable, ISpecialRenderer, ITileEntityProvider, IWhipBlock
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;
@@ -66,56 +72,61 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 		setBlockUnbreakable();
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
-		setBlockBounds(0.285F, 0.0F, 0.285F, 0.715F, 0.665F, 0.715F);
+		setBlockBounds(0.25F, 0.0F, 0.25F, 0.6875F, 0.6875F, 0.6875F);
 	}
 
 	@Override
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
+	public TileEntity createNewTileEntity(World world, int meta) {
+		return new TileEntityCeramicJar();
+	}
+
+	@Override
+	public Result canDestroyBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return Result.ALLOW;
 	}
 
 	@Override
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
+	public Result canGrabBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return Result.DENY;
 	}
 
 	@Override
-	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
+	public Material getHookableMaterial(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return Material.clay;
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
 		return BlockWeight.VERY_LIGHT;
 	}
 
 	@Override
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.func_147480_a(x, y, z, false);
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face) {
+		WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+		world.destroyBlock(pos, false);
 		return Result.ALLOW;
 	}
 
 	@Override
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
 		return false;
 	}
 
 	@Override
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
-		return (side != SideHit.BOTTOM && side != SideHit.TOP);
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
+		return true;
 	}
 
 	@Override
-	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
+	public Result shouldSwing(EntityWhip whip, World world, BlockPos pos, int ticksInGround) {
 		if (ticksInGround > 30) {
 			EntityLivingBase thrower = whip.getThrower();
 			EntityCeramicJar jar = new EntityCeramicJar(world, whip.posX, whip.posY + 1, whip.posZ);
 			double dx = thrower.posX - jar.posX;
-			double dy = thrower.posY - jar.posY;
+			double dy = (thrower.posY + thrower.getEyeHeight()) - (jar.posY - 1);
 			double dz = thrower.posZ - jar.posZ;
-			TargetUtils.setEntityHeading(jar, dx, dy, dz, 1.0F, 1.0F, true);
-			TileEntity te = world.getTileEntity(x, y, z);
+			TargetUtils.setEntityHeading(jar, dx, dy + 0.5D, dz, 1.0F, 0.0F, true);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof IInventory) {
 				ItemStack stack = ((IInventory) te).getStackInSlot(0);
 				if (stack != null) {
@@ -126,7 +137,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 				world.spawnEntityInWorld(jar);
 			}
 			keepInventory = true; // don't drop items from breakBlock
-			world.setBlockToAir(x, y, z);
+			world.setBlockToAir(pos);
 			keepInventory = false;
 			whip.setDead();
 		}
@@ -134,7 +145,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	}
 
 	@Override
-	public Item getItemDropped(int meta, Random rand, int fortune) {
+	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
 		return null;
 	}
 
@@ -144,18 +155,8 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	}
 
 	@Override
-	public boolean renderAsNormalBlock() {
+	public boolean isFullCube() {
 		return false;
-	}
-
-	@Override
-	public int getRenderType() {
-		return RenderCeramicJar.renderId;
-	}
-
-	@Override
-	public TileEntity createNewTileEntity(World world, int meta) {
-		return new TileEntityCeramicJar();
 	}
 
 	@Override
@@ -164,40 +165,35 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	}
 
 	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+	public boolean canHarvestBlock(IBlockAccess World, BlockPos pos, EntityPlayer player) {
 		return false;
 	}
 
 	@Override
-	public boolean canBlockStay(World world, int x, int y, int z) {
-		return world.getBlock(x, y - 1, z).func_149730_j();
+	public boolean canPlaceBlockAt(World world, BlockPos pos) {
+		return super.canPlaceBlockAt(world, pos) && world.isSideSolid(pos.down(), EnumFacing.UP);
 	}
 
 	@Override
-	public boolean canPlaceBlockAt(World world, int x, int y, int z) {
-		return super.canPlaceBlockAt(world, x, y, z) && this.canBlockStay(world, x, y, z);
-	}
-
-	@Override
-	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!keepInventory) {
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof IInventory) {
 				IInventory inv = (IInventory) te;
 				if (inv.getStackInSlot(0) == null && world.rand.nextFloat() < Config.getJarDropChance()) {
 					inv.setInventorySlotContents(0, ChestGenHooks.getInfo(DungeonLootLists.JAR_DROPS).getOneItem(world.rand));
 				}
 			}
-			WorldUtils.dropContainerBlockInventory(world, x, y, z);
+			WorldUtils.dropContainerBlockInventory(world, pos);
 		}
-		super.breakBlock(world, x, y, z, block, meta);
+		super.breakBlock(world, pos, state);
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote && player.getHeldItem() == null) {
 			ItemStack jarStack = new ItemStack(this);
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof IInventory) {
 				ItemStack invStack = ((IInventory) te).getStackInSlot(0);
 				if (invStack != null) {
@@ -209,25 +205,24 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 			}
 			player.setCurrentItemOrArmor(0, jarStack);
 			keepInventory = true;
-			world.setBlockToAir(x, y, z);
+			world.setBlockToAir(pos);
 			keepInventory = false;
 		}
 		return true;
 	}
 
 	@Override
-	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
+	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
-			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-			// func_147480_a is destroyBlock
-			world.func_147480_a(x, y, z, false);
+			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.destroyBlock(pos, false);
 		}
 	}
 
 	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack) {
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("jarStack")) {
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof IInventory) {
 				ItemStack jarStack = ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("jarStack"));
 				((IInventory) te).setInventorySlotContents(0, jarStack);
@@ -236,25 +231,32 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	}
 
 	@Override
-	public void onBlockDestroyedByExplosion(World world, int x, int y, int z, Explosion explosion) {
-		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.func_147480_a(x, y, z, false);
+	public void onBlockDestroyedByExplosion(World world, BlockPos pos, Explosion explosion) {
+		WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+		world.destroyBlock(pos, false);
 	}
 
 	@Override
-	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
+	public void onEntityCollidedWithBlock(World world, BlockPos pos, Entity entity) {
 		if (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot) {
-			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-			// func_147480_a is destroyBlock
-			world.func_147480_a(x, y, z, false);
+			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.destroyBlock(pos, false);
 		}
 	}
 
 	@Override
-	public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor) {
-		if (!canBlockStay(world, x, y, z)) {
-			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-			world.func_147480_a(x, y, z, false);
+	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighbor) {
+		if (!world.isSideSolid(pos.down(), EnumFacing.UP)) {
+			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.destroyBlock(pos, false);
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerSpecialRenderer() {
+		if (Config.doJarsUpdate()) { // only need to do special rendering if jars can pick up dropped items
+			ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCeramicJar.class, new RenderTileEntityCeramicJar());
 		}
 	}
 }

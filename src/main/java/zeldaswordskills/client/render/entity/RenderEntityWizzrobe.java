@@ -18,9 +18,11 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderLiving;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -28,9 +30,10 @@ import net.minecraft.entity.boss.BossStatus;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import zeldaswordskills.client.model.ModelCube;
 import zeldaswordskills.client.model.ModelWizzrobe;
@@ -38,8 +41,6 @@ import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityWizzrobe extends RenderLiving
@@ -64,8 +65,8 @@ public class RenderEntityWizzrobe extends RenderLiving
 
 	private final float scale;
 
-	public RenderEntityWizzrobe(ModelWizzrobe model, float scale) {
-		super(model, 0.5F);
+	public RenderEntityWizzrobe(RenderManager renderManager, ModelWizzrobe model, float scale) {
+		super(renderManager, model, 0.5F);
 		this.model = model;
 		this.scale = scale;
 		this.spell = new EntityMagicSpell(Minecraft.getMinecraft().theWorld);
@@ -73,7 +74,7 @@ public class RenderEntityWizzrobe extends RenderLiving
 
 	@Override
 	protected void preRenderCallback(EntityLivingBase entity, float partialTick) {
-		GL11.glScalef(scale, scale, scale);
+		GlStateManager.scale(scale, scale, scale);
 	}
 
 	@Override
@@ -88,28 +89,28 @@ public class RenderEntityWizzrobe extends RenderLiving
 	}
 
 	private void renderSpell(EntityWizzrobe wizzrobe, double dx, double dy, double dz, float yaw, float partialTick) {
-		GL11.glPushMatrix();
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GlStateManager.pushMatrix();
+		GlStateManager.enableBlend();
+		GlStateManager.enableLighting();
+		GlStateManager.enableTexture2D();
+		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
-		Vec3 vec3 = Vec3.createVectorHelper(dx, dy, dz).normalize();
-		GL11.glTranslated(dx - vec3.xCoord, dy + wizzrobe.getEyeHeight(), dz - vec3.zCoord);
-		GL11.glScalef(scale, scale, scale);
+		Vec3 vec3 = new Vec3(dx, dy, dz).normalize();
+		GlStateManager.translate(dx - vec3.xCoord, dy + wizzrobe.getEyeHeight(), dz - vec3.zCoord);
+		GlStateManager.scale(scale, scale, scale);
 		float roll = ((float) wizzrobe.getCurrentCastingTime() + partialTick) * 40;
 		while (roll > 360) roll -= 360;
-		GL11.glRotatef(yaw, 0, 1, 0);
-		GL11.glRotatef(roll, 0.8F, 0F, -0.6F);
+		GlStateManager.rotate(yaw, 0, 1, 0);
+		GlStateManager.rotate(roll, 0.8F, 0F, -0.6F);
 		bindTexture(wizzrobe.getMagicType().getEntityTexture());
-		Tessellator.instance.setBrightness(0xf000f0);
+		Tessellator.getInstance().getWorldRenderer().setBrightness(0xf000f0);
 		box1.render(spell);
-		GL11.glRotatef(45, 1, 0, 1);
+		GlStateManager.rotate(45, 1, 0, 1);
 		box2.render(spell);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glPopMatrix();
+		GlStateManager.disableRescaleNormal();
+		GlStateManager.disableLighting();
+		GlStateManager.disableBlend();
+		GlStateManager.popMatrix();
 	}
 
 	@Override

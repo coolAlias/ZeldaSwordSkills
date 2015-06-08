@@ -20,6 +20,7 @@ package zeldaswordskills.entity.projectile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -28,10 +29,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
@@ -44,9 +49,7 @@ import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -73,9 +76,12 @@ public class EntityHookShot extends EntityThrowable
 
 	/**
 	 * Watchable objects for hookshot's impact position - prevents client from occasionally trying to go to 0,0,0 (due to client values not being set)
-	 * Used instead of super's integer versions and set to inside the struck block to prevent the player's motion from freaking out
+	 * Used instead of super's integer versions and set to the center of the face struck to prevent the player's motion from freaking out
 	 */
 	public static final int HIT_POS_X = 26, HIT_POS_Y = 27, HIT_POS_Z = 28;
+
+	/** Needed since 1.8 to adjust the position used to determine whether the player has reached the hook or not */
+	public static final int SIDE_HIT = 29;
 
 	/** Stops reeling player in when true */
 	protected boolean reachedHook = false;
@@ -103,6 +109,7 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.addObject(HIT_POS_X, 0.0F);
 		dataWatcher.addObject(HIT_POS_Y, 0.0F);
 		dataWatcher.addObject(HIT_POS_Z, 0.0F);
+		dataWatcher.addObject(SIDE_HIT, 0);
 	}
 
 	/**
@@ -158,20 +165,20 @@ public class EntityHookShot extends EntityThrowable
 	}
 
 	/**
-	 * Returns true if the block at x/y/z can be grappled by this type of hookshot
+	 * Returns true if the block at the given position can be grappled by this type of hookshot
 	 */
-	protected boolean canGrabBlock(Block block, int x, int y, int z, int side) {
+	protected boolean canGrabBlock(Block block, BlockPos pos, EnumFacing face) {
 		Material material = block.getMaterial();
 		Result result = Result.DEFAULT;
 		if (block instanceof IHookable) {
-			result = ((IHookable) block).canGrabBlock(getType(), worldObj, x, y, z, side);
-			material = ((IHookable) block).getHookableMaterial(getType(), worldObj, x, y, z);
+			result = ((IHookable) block).canGrabBlock(getType(), worldObj, pos, face);
+			material = ((IHookable) block).getHookableMaterial(getType(), worldObj, pos, face);
 		} else if (Config.allowHookableOnly()) {
 			return false;
 		}
-		switch(result) {
+		switch (result) {
 		case DEFAULT:
-			switch(getType()) {
+			switch (getType()) {
 			case WOOD_SHOT:
 			case WOOD_SHOT_EXT:
 				return material == Material.wood;
@@ -190,16 +197,16 @@ public class EntityHookShot extends EntityThrowable
 	/**
 	 * Returns true if the hookshot can destroy the material type
 	 */
-	protected boolean canDestroyBlock(Block block, int x, int y, int z, int side) {
+	protected boolean canDestroyBlock(Block block, BlockPos pos, EnumFacing face) {
 		Result result = Result.DEFAULT;
 		if (block instanceof IHookable) {
-			result = ((IHookable) block).canDestroyBlock(getType(), worldObj, x, y, z, side);
+			result = ((IHookable) block).canDestroyBlock(getType(), worldObj, pos, face);
 		} else if (Config.allowHookableOnly()) {
 			return false;
 		}
-		switch(result) {
+		switch (result) {
 		case DEFAULT:
-			boolean isBreakable = block.getBlockHardness(worldObj, x, y, z) >= 0.0F;
+			boolean isBreakable = block.getBlockHardness(worldObj, pos) >= 0.0F;
 			boolean canPlayerEdit = false;
 			if (getThrower() instanceof EntityPlayer) {
 				canPlayerEdit = ((EntityPlayer) getThrower()).capabilities.allowEdit && Config.canHookshotBreakBlocks();
@@ -210,8 +217,8 @@ public class EntityHookShot extends EntityThrowable
 		}
 	}
 
-	@Override // getVelocity
-	protected float func_70182_d() {
+	@Override
+	protected float getVelocity() {
 		return 1.25F;
 	}
 
@@ -223,57 +230,59 @@ public class EntityHookShot extends EntityThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.typeOfHit == MovingObjectType.BLOCK && getTarget() == null) {
-			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			BlockPos pos = mop.getBlockPos();
+			IBlockState state = worldObj.getBlockState(pos);
+			Block block = state.getBlock();
 			if (!block.getMaterial().blocksMovement()) {
 				return;
 			}
 			if (block.getMaterial() != Material.air) {
-				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				block.onEntityCollidedWithBlock(worldObj, pos, this);
 			}
 			if (!isInGround() && ticksExisted < getMaxDistance()) {
 				motionX = motionY = motionZ = 0.0D;
-				if (canGrabBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
+				if (canGrabBlock(block, pos, mop.sideHit)) {
 					setInGround(true);
 					// adjusting posX/Y/Z here seems to make no difference to the rendering, even when client side makes same changes
-					posX = (double) mop.blockX + 0.5D;
-					posY = (double) mop.blockY + 0.5D;
-					posZ = (double) mop.blockZ + 0.5D;
-					// side hit documentation is wrong!!! based on printing out mop.sideHit:
-					// 2 = NORTH (face of block), 3 = SOUTH, 4 = WEST, 5 = EAST, 0 = BOTTOM, 1 = TOP
-					switch(mop.sideHit) {
-					case 5: posX += 0.5D; break; // EAST
-					case 4: posX -= 0.515D; break; // WEST (a little extra to compensate for block border, otherwise renders black)
-					case 3: posZ += 0.5D; break; // SOUTH
-					case 2: posZ -= 0.515D; break; // NORTH (a little extra to compensate for block border, otherwise renders black)
-					case SideHit.TOP: posY = mop.blockY + 1.0D; break;
-					case SideHit.BOTTOM: posY = mop.blockY; break;
+					posX = (double) pos.getX() + 0.5D;
+					posY = (double) pos.getY() + 0.5D;
+					posZ = (double) pos.getZ() + 0.5D;
+					switch (mop.sideHit) {
+					case EAST: posX += 0.5D; break;
+					case WEST: posX -= 0.515D; break; // a little extra to compensate for block border, otherwise renders black
+					case SOUTH: posZ += 0.5D; break;
+					case NORTH: posZ -= 0.515D; break; // a little extra to compensate for block border, otherwise renders black
+					case UP: posY = pos.getY() + 1.0D; break;
+					case DOWN: posY = pos.getY(); break;
 					}
 					// however, setting position as watched values and using these on the client works... weird
 					dataWatcher.updateObject(HIT_POS_X, (float) posX);
 					dataWatcher.updateObject(HIT_POS_Y, (float) posY);
 					dataWatcher.updateObject(HIT_POS_Z, (float) posZ);
+					dataWatcher.updateObject(SIDE_HIT, mop.sideHit.getIndex());
 				} else if (!worldObj.isRemote) {
-					if (canDestroyBlock(block, mop.blockX, mop.blockY, mop.blockZ, mop.sideHit)) {
-						worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, false);
+					if (canDestroyBlock(block, pos, mop.sideHit)) {
+						worldObj.destroyBlock(pos, false);
 					}
 					setDead();
 				}
 			}
 
 			if (!worldObj.isRemote) {
-				worldObj.playSoundAtEntity(this, block.stepSound.getStepResourcePath(), 1.0F, 1.0F);
+				worldObj.playSoundAtEntity(this, block.stepSound.getBreakSound(), 1.0F, 1.0F);
 			} else {
-				for (int i = 0; i < 10; ++i) {
-					worldObj.spawnParticle("blockcrack_" + Block.getIdFromBlock(block) + "_" + worldObj.getBlockMetadata(mop.blockX, mop.blockY, mop.blockZ),
-							posX, posY, posZ, rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
+				if (block.getRenderType() != -1) {
+					int stateId = Block.getStateId(state);
+					for (int i = 0; i < 10; ++i) {
+						worldObj.spawnParticle(EnumParticleTypes.BLOCK_CRACK, posX, posY, posZ, rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian(), stateId);
+					}
 				}
 			}
 		} else if (mop.entityHit != null && getTarget() == null) {
 			mop.entityHit.attackEntityFrom(getDamageSource(), 1.0F);
 			worldObj.playSoundAtEntity(mop.entityHit, Sounds.WOOD_CLICK, 1.0F, 1.0F);
 			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
-			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null &&
-					player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
+			if (player != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy && player.isSneaking()) {
 				setTarget(mop.entityHit);
 				motionX = -motionX;
 				motionY = -motionY;
@@ -340,8 +349,13 @@ public class EntityHookShot extends EntityThrowable
 		EntityLivingBase thrower = getThrower();
 		if (thrower != null && isInGround()) {
 			thrower.fallDistance = 0.0F;
-			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_POS_X), dataWatcher.getWatchableObjectFloat(HIT_POS_Y), dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
-
+			double hitPosY = dataWatcher.getWatchableObjectFloat(HIT_POS_Y);
+			switch (EnumFacing.getFront(dataWatcher.getWatchableObjectInt(SIDE_HIT))) {
+			case UP: break; // do nothing
+			case DOWN: hitPosY -= thrower.getEyeHeight(); break; // subtract thrower's eye height
+			default: hitPosY -= (thrower.getEyeHeight() / 1.5F); break; // subtract 1/3 of the thrower's eye height
+			}
+			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_POS_X), hitPosY, dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
 			if (!reachedHook) {
 				reachedHook = d < 1.0D;
 			}
@@ -352,8 +366,7 @@ public class EntityHookShot extends EntityThrowable
 				thrower.motionX = thrower.motionY = thrower.motionZ = 0.0D;
 			} else {
 				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_X) - thrower.posX);
-				// Added a little 'boost' to help the player up onto ledges - works great
-				double dy = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Y) + (this.height / 3.0F) - thrower.posY + 0.05D);
+				double dy = 0.15D * (hitPosY - thrower.posY); //  + (this.height / 3.0F)
 				double dz = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_Z) - thrower.posZ);
 				TargetUtils.setEntityHeading(thrower, dx, dy, dz, 1.0F, 1.0F, true);
 			}
@@ -398,6 +411,7 @@ public class EntityHookShot extends EntityThrowable
 		compound.setFloat("hitPosX", dataWatcher.getWatchableObjectFloat(HIT_POS_X));
 		compound.setFloat("hitPosY", dataWatcher.getWatchableObjectFloat(HIT_POS_Y));
 		compound.setFloat("hitPosZ", dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
+		compound.setInteger("sideHit", dataWatcher.getWatchableObjectInt(SIDE_HIT));
 		compound.setByte("customInGround", (byte)(isInGround() ? 1 : 0));
 		compound.setByte("reachedHook", (byte)(reachedHook ? 1 : 0));
 		compound.setByte("shotType", (byte) getType().ordinal());
@@ -410,6 +424,7 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.updateObject(HIT_POS_X, compound.getFloat("hitPosX"));
 		dataWatcher.updateObject(HIT_POS_Y, compound.getFloat("hitPosY"));
 		dataWatcher.updateObject(HIT_POS_Z, compound.getFloat("hitPosZ"));
+		dataWatcher.updateObject(SIDE_HIT, compound.getInteger("sideHit"));
 		reachedHook = (compound.getByte("reachedHook") == 1);
 		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
 		dataWatcher.updateObject(SHOTTYPE_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);

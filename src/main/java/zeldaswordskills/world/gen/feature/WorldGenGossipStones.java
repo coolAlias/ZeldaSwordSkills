@@ -20,33 +20,38 @@ package zeldaswordskills.world.gen.feature;
 import java.util.Random;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.ref.Config;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
- * Self-contained world generator requires its INSTANCE to be
- * registered to the MinecraftForge.EVENT_BUS
+ * Self-contained world generator; needs only to be registered to
+ * the MinecraftForge.EVENT_BUS using its INSTANCE
  *
  */
-public class WorldGenGossipStones
+public class WorldGenGossipStones extends WorldGenerator
 {
 	public static final WorldGenGossipStones INSTANCE = new WorldGenGossipStones();
 
-	private WorldGenGossipStones() {}
+	private WorldGenGossipStones() {
+		super(false);
+	}
 
-	public boolean generate(World world, Random rand, int x, int y, int z) {
-		if (world.isSideSolid(x, y - 1, z, ForgeDirection.UP) && world.getBlock(x, y, z).getMaterial().isReplaceable() && world.canBlockSeeTheSky(x, y, z)) {
-			world.setBlock(x, y, z, ZSSBlocks.gossipStone, 0, 2);
-			TileEntity te = world.getTileEntity(x, y, z);
+	@Override
+	public boolean generate(World world, Random rand, BlockPos pos) {
+		if (world.isSideSolid(pos.down(), EnumFacing.UP) && world.getBlockState(pos).getBlock().isReplaceable(world, pos) && world.canBlockSeeSky(pos)) {
+			world.setBlockState(pos, ZSSBlocks.gossipStone.getDefaultState(), 2);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityGossipStone) {
-				String hint = StatCollector.translateToLocal("chat.zss.block.gossip_stone.hint." + rand.nextInt(12));
+				String hint = StatCollector.translateToLocal("chat.block.gossip_stone.hint." + rand.nextInt(12));
 				((TileEntityGossipStone) te).setMessage(hint);
 			}
 		}
@@ -54,15 +59,15 @@ public class WorldGenGossipStones
 	}
 
 	@SubscribeEvent
-	public void onDecorate(PopulateChunkEvent.Post event) {
+	public void onPostPopulateChunk(PopulateChunkEvent.Post event) {
 		if (!event.world.provider.isSurfaceWorld()) {
 			return;
 		}
 		if (event.rand.nextFloat() < Config.getGossipStoneRate()) {
 			int i = (event.chunkX << 4) + event.rand.nextInt(16);
 			int k = (event.chunkZ << 4) + event.rand.nextInt(16);
-			int j = event.world.getHeightValue(i, k);
-			generate(event.world, event.rand, i, j, k);
+			int j = event.world.getHeight(new BlockPos(i, 64, k)).getY();
+			generate(event.world, event.rand, new BlockPos(i, j, k));
 		}
 	}
 }

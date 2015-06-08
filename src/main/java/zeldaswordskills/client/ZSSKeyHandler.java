@@ -20,9 +20,15 @@ package zeldaswordskills.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.Item;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 
@@ -30,6 +36,7 @@ import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.GuiHandler;
@@ -42,11 +49,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class ZSSKeyHandler
@@ -72,7 +74,7 @@ public class ZSSKeyHandler
 	public ZSSKeyHandler() {
 		this.mc = Minecraft.getMinecraft();
 		for (int i = 0; i < desc.length; ++i) {
-			keys[i] = new KeyBinding("key.zss." + desc[i] + ".desc", keyValues[i], StatCollector.translateToLocal("key.zss.label"));
+			keys[i] = new KeyBinding("key.zss." + desc[i] + ".desc", keyValues[i], StatCollector.translateToLocal("key.label"));
 			ClientRegistry.registerKeyBinding(keys[i]);
 		}
 	}
@@ -97,9 +99,9 @@ public class ZSSKeyHandler
 			if (kb == mc.gameSettings.keyBindSprint.getKeyCode()) {
 				// Don't allow sprinting while in mid-air (motionY is < 0 even when standing on a block)
 				int x = MathHelper.floor_double(mc.thePlayer.posX);
-				int y = MathHelper.floor_double(mc.thePlayer.posY - mc.thePlayer.yOffset);
+				int y = MathHelper.floor_double(mc.thePlayer.posY - mc.thePlayer.getYOffset());
 				int z = MathHelper.floor_double(mc.thePlayer.posZ);
-				if (!mc.theWorld.getBlock(x, y - 1, z).isSideSolid(mc.theWorld, x, y - 1, z, ForgeDirection.UP)) {
+				if (!mc.theWorld.isSideSolid(new BlockPos(x, y - 1, z), EnumFacing.UP)) {
 					KeyBinding.setKeyBindState(kb, false);
 				}
 			} else if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
@@ -109,7 +111,7 @@ public class ZSSKeyHandler
 				}
 			} else if (kb == keys[KEY_BOMB].getKeyCode()) {
 				// prevent player from holding RMB while getting bombs, as it can crash the game
-				if (mc.gameSettings.keyBindUseItem.getIsKeyPressed()) {
+				if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
 					KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
 				}
 				PacketDispatcher.sendToServer(new GetBombPacket());
@@ -156,7 +158,7 @@ public class ZSSKeyHandler
 		} else if (kb == keys[KEY_ATTACK].getKeyCode() || kb == mc.gameSettings.keyBindAttack.getKeyCode()) {
 			KeyBinding key = (kb == keys[KEY_ATTACK].getKeyCode() ? keys[KEY_ATTACK] : mc.gameSettings.keyBindAttack);
 			Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
-			boolean flag = (heldItem instanceof ItemHeldBlock || (mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
+			boolean flag = (heldItem instanceof ItemHeldBlock || (!ZSSPlayerInfo.get(mc.thePlayer).canAttack() && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
 			if (canInteract && !flag) {
 				KeyBinding.setKeyBindState(key.getKeyCode(), true);
 			} else if (!flag) {
@@ -170,7 +172,7 @@ public class ZSSKeyHandler
 				}
 			}
 			// Only allow attack key to continue processing if it was set to pressed
-			if (key.getIsKeyPressed()) {
+			if (key.isKeyDown()) {
 				// Nayru's Love prevents skill activation, but can still attack
 				if (skills.isNayruActive() || !skills.onKeyPressed(mc, key)) {
 					ZSSClientEvents.performComboAttack(mc, skill);

@@ -18,9 +18,9 @@
 package zeldaswordskills.client.model;
 
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.render.entity.RenderGenericLiving;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -33,14 +33,14 @@ import cpw.mods.fml.relauncher.SideOnly;
 public interface IModelBiped {
 
 	/**
-	 * Should call {@link ModelRenderer#postRender} for the model's head
+	 * Return the head portion of the model for rendering the helmet layer
 	 */
 	@SideOnly(Side.CLIENT)
-	public void postRenderHead(float scale);
+	public ModelRenderer getHeadModel();
 
 	/**
 	 * Should call {@link ModelRenderer#postRender} for the model's right or left arm
-	 * @param isRight	True when rendering the right arm
+	 * @param isRight	True when rendering the right arm (seems to ALWAYS be true...)
 	 */
 	@SideOnly(Side.CLIENT)
 	public void postRenderArm(boolean isRight, float scale);
@@ -52,6 +52,7 @@ public interface IModelBiped {
 	 * @param isRight	True when setting the item held in the right hand
 	 * @param heldValue	0 for no item, 1 for an item
 	 */
+	@Deprecated // no longer called, unless a custom LayerArmorBase is also added
 	@SideOnly(Side.CLIENT)
 	public void setHeldItemValue(boolean isRight, int heldValue);
 

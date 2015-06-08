@@ -17,23 +17,39 @@
 
 package zeldaswordskills.item;
 
+import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockIce;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.api.item.IDynamicItemBlock;
+import zeldaswordskills.block.BlockDungeonStone;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.ZSSBlocks;
-import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.block.tileentity.TileEntityDungeonStone;
+import zeldaswordskills.client.ISwapModel;
+import zeldaswordskills.client.render.item.ModelDynamicItemBlock;
+import zeldaswordskills.ref.ModInfo;
+
+import com.google.common.collect.Lists;
 
 /**
  * 
@@ -43,67 +59,108 @@ import cpw.mods.fml.relauncher.SideOnly;
  * of the itemblock to match, both while held and when placed. 
  *
  */
-public class ItemDungeonBlock extends ItemMetadataBlock
+public class ItemDungeonBlock extends ItemBlockUnbreakable implements IDynamicItemBlock, ISwapModel
 {
-	public ItemDungeonBlock(Block block) {
+	/** Default block + meta for rendering in inventory without NBT compound */
+	// private final Block[] defaultBlocks = new Block[2];
+	private final int[] defaultMeta = new int[2];
+
+	/**
+	 * @param variants one "modid:block_name:meta_value" for each of the default item models
+	 */
+	public ItemDungeonBlock(Block block, String... variants) {
 		super(block);
+		if (variants == null || variants.length != 2) {
+			throw new IllegalArgumentException("Variants must contain 2 strings");
+		}
+		for (int i = 0; i < variants.length; ++i) {
+			String[] parts = variants[i].split(":");
+			if (parts == null || parts.length != 3) {
+				throw new IllegalArgumentException("Invalid format: " + variants[i] + "; format is 'mod_id:block_name:meta_value'");
+			}
+			/*
+			// TODO
+			// Regex + matches seemingly unable to work properly here: "Meta value must be an integer! Received: 1" wtf.
+			else if (!parts[2].matches("\\d.\\d?")) { // only allow up to 2 digits
+				throw new IllegalArgumentException("Meta value must be an integer! Received: " + parts[2]);
+			}
+			defaultBlocks[i] = GameRegistry.findBlock(parts[0], parts[1]);
+			// Problem: returned block always null during startup
+			if (!(defaultBlocks[i] instanceof Block)) {
+				throw new IllegalArgumentException("Unable to find valid block for " + parts[0] + ":" + parts[1]);
+			}
+			 */
+			defaultMeta[i] = Integer.valueOf(parts[2]);
+		}
 	}
 
 	@Override
-	public String getItemStackDisplayName(ItemStack stack) {
-		return StatCollector.translateToLocal(getUnlocalizedName() + (stack.getItemDamage() > 7 ? ".name.unbreakable" : ".name"));
+	public IBlockState getBlockStateFromStack(ItemStack stack) {
+		Block block = getBlockFromStack(stack);
+		return block.getStateFromMeta(getMetaFromStack(stack));
 	}
 
 	/**
-	 * Returns the block that will be placed into the world; also used for rendering
+	 * Returns the block used for rendering
 	 */
-	public Block getBlockFromStack(ItemStack stack) {
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("renderBlock")) {
-			int blockID = stack.getTagCompound().getInteger("renderBlock");
-			return Block.getBlockById(blockID);
+	private Block getBlockFromStack(ItemStack stack) {
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("renderBlock", Constants.NBT.TAG_INT)) {
+			return Block.getBlockById(stack.getTagCompound().getInteger("renderBlock"));
 		}
-		return this.field_150939_a;
+		return Blocks.stone;// TODO defaultBlocks[stack.getItemDamage() > 0 ? 1 : 0];
 	}
 
-	/** Returns the metadata value associated with the block to place or render */
-	public int getMetaFromStack(ItemStack stack) {
-		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("metadata") : 0);
+	/**
+	 * Metadata value associated with the block to render
+	 */
+	private int getMetaFromStack(ItemStack stack) {
+		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("metadata") : defaultMeta[stack.getItemDamage() > 0 ? 1 : 0]);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(ItemStack stack, int pass) {
-		Block block = getBlockFromStack(stack);
-		return (block != null && block != this.field_150939_a ? block.getIcon(1, getMetaFromStack(stack)) : Blocks.stone.getIcon(1, 0));
+	public int getColorFromItemStack(ItemStack stack, int renderPass) {
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("blockColor")) {
+			return stack.getTagCompound().getInteger("blockColor");
+		}
+		return super.getColorFromItemStack(stack, renderPass);
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ) {
 		if (player.isSneaking()) {
 			if (!world.isRemote) {
-				Block block = world.getBlock(x, y, z);
-				int meta = world.getBlockMetadata(x, y, z);
-				if (block == ZSSBlocks.secretStone) {
-					block = BlockSecretStone.getBlockFromMeta(meta);
-					meta = 0;
-				} else {
-					TileEntity te = world.getTileEntity(x, y, z);
-					if (te instanceof TileEntityDungeonBlock) {
-						block = ((TileEntityDungeonBlock) te).getRenderBlock();
-						meta = ((TileEntityDungeonBlock) te).getRenderMetadata();
+				IBlockState state = world.getBlockState(pos);
+				Block block = state.getBlock();
+				int meta = block.getMetaFromState(state);
+				if (block instanceof BlockSecretStone) {
+					block = ((BlockSecretStone.EnumType) state.getValue(BlockSecretStone.VARIANT)).getDroppedBlock();
+					meta = state.getBlock().getMetaFromState(state);
+				} else if (block instanceof BlockDungeonStone) {
+					TileEntity te = world.getTileEntity(pos);
+					if (te instanceof TileEntityDungeonStone) {
+						IBlockState render = ((TileEntityDungeonStone) te).getRenderState();
+						if (render == null) {
+							render = ((BlockDungeonStone) block).getDefaultRenderState(stack.getItemDamage() > 7);
+						}
+						if (render != null) {
+							block = render.getBlock();
+							meta = block.getMetaFromState(render);
+						}
 					}
 				}
-				if (block != null && (block.isOpaqueCube() || block == Blocks.ice)) {
+				if (block.isOpaqueCube() || block instanceof BlockIce) {
 					if (!stack.hasTagCompound()) {
 						stack.setTagCompound(new NBTTagCompound());
 					}
 					stack.getTagCompound().setInteger("renderBlock", Block.getIdFromBlock(block));
 					stack.getTagCompound().setInteger("metadata", meta);
+					stack.getTagCompound().setInteger("blockColor", block.colorMultiplier(world, pos));
 				}
 			}
 			return false;
 		} else {
-			return super.onItemUse(stack, player, world, x, y, z, side, hitX, hitY, hitZ);
+			return super.onItemUse(stack, player, world, pos, face, hitX, hitY, hitZ);
 		}
 	}
 
@@ -114,8 +171,39 @@ public class ItemDungeonBlock extends ItemMetadataBlock
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.unbreakable.desc"));
 		} else {
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block." +
-					(field_150939_a == ZSSBlocks.dungeonCore ? "core" : "dungeon") + ".desc.0"));
+					(block == ZSSBlocks.dungeonCore ? "core" : "dungeon") + ".desc.0"));
 		}
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.dungeon.desc.1"));
+	}
+
+	@Override
+	public String[] getVariants() {
+		return new String[]{ModInfo.ID + ":dungeon_block"}; // allows smart item model to be registered
+	}
+
+	/**
+	 * Required or smart model will not work
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderers(ItemModelMesher mesher) {
+		mesher.register(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return ModelDynamicItemBlock.resource;
+			}
+		});
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Collection<ModelResourceLocation> getDefaultResources() {
+		return Lists.newArrayList(ModelDynamicItemBlock.resource);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Class<? extends IBakedModel> getNewModel() {
+		return ModelDynamicItemBlock.class;
 	}
 }

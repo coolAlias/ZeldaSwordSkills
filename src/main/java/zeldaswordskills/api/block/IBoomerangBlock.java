@@ -17,16 +17,19 @@
 
 package zeldaswordskills.api.block;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 
 public interface IBoomerangBlock {
+
 	/**
 	 * Called instead {@code Block#onEntityCollidedWithBlock} when an {@code EntityBoomerang}
 	 * enters the block's space. Any special interactions (e.g. destroying or activating
 	 * the block) should be handled here, as the default interactions will not occur.
 	 * @return true to cause the boomerang to reverse course after hitting the block
 	 */
-	public boolean onBoomerangCollided(World world, int x, int y, int z, EntityBoomerang boomerang);
+	public boolean onBoomerangCollided(World world, BlockPos pos, IBlockState state, EntityBoomerang boomerang);
 
 }

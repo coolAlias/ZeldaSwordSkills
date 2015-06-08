@@ -38,10 +38,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IEntityTeleport;
@@ -195,7 +199,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
 			setType(rand.nextInt(WizzrobeType.values().length));
 		} else {
-			BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
+			BiomeGenBase biome = worldObj.getBiomeGenForCoords(new BlockPos(this));
 			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
 			for (WizzrobeType t : WizzrobeType.values()) {
 				if (t.favoredBiome == biomeType) {
@@ -205,7 +209,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 			}
 			// no favored biome was found, set based on remaining biome types
 			if (biomeType != null) {
-				switch(biomeType) {
+				switch (biomeType) {
 				case ARID:
 					setType(rand.nextFloat() < 0.5F ? WizzrobeType.LIGHTNING_WIZ : WizzrobeType.FIRE_WIZ);
 					break;
@@ -227,7 +231,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		info.removeAllBuffs();
 		info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 50);
 		info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 50);
-		switch(getMagicType()) {
+		switch (getMagicType()) {
 		case FIRE:
 			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 50);
 			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
@@ -280,11 +284,6 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	}
 
 	@Override
-	public boolean isAIEnabled() {
-		return true;
-	}
-
-	@Override
 	protected float getSoundVolume() {
 		return 0.4F;
 	}
@@ -321,9 +320,10 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 
 	@Override
 	protected void damageEntity(DamageSource source, float amount) {
-		if (getCurrentCastingTime() > 0 && !isEntityInvulnerable() && amount >= getMinInterruptDamage()) {
+		if (getCurrentCastingTime() > 0 && !isEntityInvulnerable(source) && amount >= getMinInterruptDamage()) {
 			float interruptChance = 1.0F - ((getMaxInterruptDamage() - amount) / getMaxInterruptDamage());
 			if (rand.nextFloat() < interruptChance) {
+				ZSSMain.logger.info("Interrupted! Scheduling teleport");
 				magicAI.interruptCasting();
 				teleportAI.scheduleNextTeleport(2); // teleport right away - no second attacks!
 			}
@@ -331,9 +331,9 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		super.damageEntity(source, amount);
 	}
 
-	@Override
-	protected Entity findPlayerToAttack() {
-		return (getBrightness(1.0F) < 0.5F ? worldObj.getClosestVulnerablePlayerToEntity(this, 32.0D) : null);
+	//@Override // method no longer exists in super classes
+	protected EntityLivingBase findPlayerToAttack() {
+		return (getBrightness(1.0F) < 0.5F ? worldObj.getClosestPlayerToEntity(this, 32.0D) : null);
 	}
 
 	/**
@@ -408,7 +408,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (target == null) {
 			return 0;
 		}
-		int castTime = getBaseCastingTime() - (worldObj.difficultySetting.getDifficultyId() * 10);
+		int castTime = getBaseCastingTime() - MathHelper.floor_double((worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty() * 10));
 		castTime += (rand.nextInt(castTime) - rand.nextInt(castTime)) / 2;
 		setMaxCastingTime(castTime);
 		setCurrentCastingTime(castTime);
@@ -420,8 +420,9 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 
 	@Override
 	public void castRangedSpell(EntityLivingBase target, float range) {
-		float difficulty = (float) worldObj.difficultySetting.getDifficultyId();
-		EntityMagicSpell spell = new EntityMagicSpell(worldObj, this, target, 0.8F + (0.25F * difficulty), (float)(14 - worldObj.difficultySetting.getDifficultyId() * 4));
+		float difficulty = (float) worldObj.getDifficulty().getDifficultyId();
+		// TODO plus additional difficulty: worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+		EntityMagicSpell spell = new EntityMagicSpell(worldObj, this, target, 0.8F + (0.25F * difficulty), (float)(14 - (difficulty * 4)));
 		spell.setType(getMagicType());
 		spell.setArea(getSpellAoE());
 		spell.setDamageBypassesArmor();
@@ -454,16 +455,13 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		}
 		// spawn some Enderman-like particles
 		for (int i = 0; i < 2; ++i) {
-			worldObj.spawnParticle("portal",
+			worldObj.spawnParticle(EnumParticleTypes.PORTAL,
 					posX + (rand.nextDouble() - 0.5D) * (double) width,
 					posY + rand.nextDouble() * (double) height - 0.25D,
 					posZ + (rand.nextDouble() - 0.5D) * (double) width,
 					(rand.nextDouble() - 0.5D) * 2.0D,
 					-rand.nextDouble(),
 					(rand.nextDouble() - 0.5D) * 2.0D);
-		}
-		if (worldObj.isDaytime() && ticksExisted % 20 == 0 && !isValidLightLevel()) {
-			despawnEntity();
 		}
 	}
 
@@ -477,11 +475,11 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (isBurning() && getMagicType() == MagicType.FIRE) {
 			extinguish(); // immune to burning, but not all fire damage
 		}
-		if (teleportAI.getTeleBounds() == null && this.getEntityToAttack() == null && ++noTargetTime > 400) {
+		if (teleportAI.getTeleBounds() == null && this.getAttackTarget() == null && ++noTargetTime > 400) {
 			noTargetTime = 0;
-			Entity player = findPlayerToAttack();
+			EntityLivingBase player = findPlayerToAttack();
 			if (player != null && canEntityBeSeen(player) && !worldObj.isRemote) {
-				setTarget(player);
+				setAttackTarget(player);
 				for (int i = 0; i < 64; ++i) {
 					if (EntityAITeleport.teleportToEntity(worldObj, this, player, null, teleportAI.isGrounded)) {
 						break;
@@ -489,10 +487,13 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 				}
 			}
 		}
+		if (worldObj.isDaytime() && ticksExisted % 20 == 0 && !isValidLightLevel()) {
+			despawnEntity();
+		}
 	}
 
 	@Override
-	protected void fall(float distance) {}
+	public void fall(float distance, float damageMultiplier) {}
 
 	@Override
 	protected Item getDropItem() {
@@ -500,24 +501,23 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	}
 
 	@Override
-	protected void dropRareDrop(int rarity) {
-		entityDropItem(getRareDrop(rarity, 4), 0.0F);
+	protected void addRandomDrop() {
+		entityDropItem(getRareDrop(4), 0.0F);
 	}
 
 	/**
-	 * @param rarity	Typically 0 or 1
 	 * @param modifier	Applied to book enchantment level
 	 */
-	private ItemStack getRareDrop(int rarity, int modifier) {
-		if (rarity > 0) {
-			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
-		}
-		if (rand.nextInt(8) == 0) {
+	private ItemStack getRareDrop(int modifier) {
+		int rarity = rand.nextInt(8);
+		if (rarity == 0) {
+			return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
+		} else if (rarity < 4) {
 			ItemStack book = new ItemStack(Items.book);
 			EnchantmentHelper.addRandomEnchantment(rand, book, rand.nextInt(8) + rand.nextInt(8) + modifier);
 			return book;
 		}
-		switch(getWizzrobeType()) {
+		switch (getWizzrobeType()) {
 		case FIRE_WIZ: return new ItemStack(ZSSItems.arrowFire);
 		case ICE_WIZ: return new ItemStack(ZSSItems.arrowIce);
 		case LIGHTNING_WIZ: return new ItemStack(ZSSItems.arrowLight);
@@ -533,9 +533,9 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
 		if (rand.nextInt(10 - whip.ordinal()) == 0) {
-			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+			return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
 		}
-		return getRareDrop(0, (3 * (whip.ordinal() + 1)));
+		return getRareDrop((3 * (whip.ordinal() + 1)));
 	}
 
 	@Override
@@ -554,8 +554,8 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	}
 
 	@Override
-	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
-		data = super.onSpawnWithEgg(data);
+	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
+		data = super.onInitialSpawn(difficulty, data);
 		setTypeOnSpawn();
 		return data;
 	}
@@ -589,7 +589,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 			double maxY = bounds.getDouble("maxY");
 			double minZ = bounds.getDouble("minZ");
 			double maxZ = bounds.getDouble("maxZ");
-			setTeleBounds(AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
+			setTeleBounds(new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ));
 		}
 	}
 }

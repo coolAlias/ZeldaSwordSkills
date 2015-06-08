@@ -17,25 +17,39 @@
 
 package zeldaswordskills.item;
 
+import java.util.Collection;
+
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSnow;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.ILiftable;
+import zeldaswordskills.api.item.IDynamicItemBlock;
 import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.api.item.IUnenchantable;
-import zeldaswordskills.util.SideHit;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.client.ISwapModel;
+import zeldaswordskills.client.render.item.ModelDynamicItemBlock;
+
+import com.google.common.collect.Lists;
 
 /**
  * 
@@ -47,38 +61,57 @@ import cpw.mods.fml.relauncher.SideOnly;
  * immediately into the world.
  *
  */
-public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
+public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHandleToss, ISwapModel, IUnenchantable
 {
 	public ItemHeldBlock() {
 		super();
 		setMaxDamage(0);
 		setMaxStackSize(1);
-		setTextureName("stone");
 	}
 
 	/**
 	 * Returns a new ItemStack containing the passed in block, metadata, and gauntlet stack
 	 * NBT format is 'blockId' => integer id of block, 'metadata' => metadata of block, 'gauntlets' => stored gauntlet itemstack
 	 */
-	public static ItemStack getBlockStack(Block block, int metadata, ItemStack gauntlets) {
+	public static ItemStack getBlockStack(IBlockState state, ItemStack gauntlets) {
 		ItemStack stack = new ItemStack(ZSSItems.heldBlock);
+		Block block = state.getBlock();
 		stack.setTagCompound(new NBTTagCompound());
 		stack.getTagCompound().setInteger("blockId", Block.getIdFromBlock(block));
-		stack.getTagCompound().setInteger("metadata", metadata);
+		stack.getTagCompound().setInteger("metadata", block.getMetaFromState(state));
+		stack.getTagCompound().setInteger("blockColor", block.getRenderColor(state));
 		if (gauntlets != null) {
 			stack.getTagCompound().setTag("gauntlets", gauntlets.writeToNBT(new NBTTagCompound()));
 		}
 		return stack;
 	}
 
-	/** Returns the stored Block or null if none available */
+	@Override
+	public IBlockState getBlockStateFromStack(ItemStack stack) {
+		Block block = getBlockFromStack(stack);
+		return block.getStateFromMeta(getMetaFromStack(stack));
+	}
+
+	/** Returns the stored Block or stone if none available */
 	public Block getBlockFromStack(ItemStack stack) {
-		return (stack.hasTagCompound() ? Block.getBlockById(stack.getTagCompound().getInteger("blockId")) : null);
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("blockId", Constants.NBT.TAG_INT)) {
+			return Block.getBlockById(stack.getTagCompound().getInteger("blockId"));
+		}
+		return Blocks.stone;
 	}
 
 	/** Returns the metadata value associated with the stored block */
 	public int getMetaFromStack(ItemStack stack) {
 		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("metadata") : 0);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public int getColorFromItemStack(ItemStack stack, int renderPass) {
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("blockColor")) {
+			return stack.getTagCompound().getInteger("blockColor");
+		}
+		return super.getColorFromItemStack(stack, renderPass);
 	}
 
 	/**
@@ -87,24 +120,25 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 	 * @return true if the dropped block was able to be placed
 	 */
 	public boolean dropHeldBlock(ItemStack stack, World world, EntityPlayer player) {
-		int x = MathHelper.floor_double(player.posX);
-		int y = MathHelper.floor_double(player.boundingBox.minY);
-		int z = MathHelper.floor_double(player.posZ);
-		int meta = getMetaFromStack(stack);
 		Block block = getBlockFromStack(stack);
 		if (block != null) {
+			int x = MathHelper.floor_double(player.posX);
+			int y = MathHelper.floor_double(player.getEntityBoundingBox().minY);
+			int z = MathHelper.floor_double(player.posZ);
+			int meta = getMetaFromStack(stack);
+			IBlockState state = block.getStateFromMeta(meta);
 			Vec3 vec3 = player.getLookVec();
 			int dx = Math.abs(vec3.xCoord) < 0.25D ? 0 : (vec3.xCoord < 0 ? -1 : 1);
 			int dz = Math.abs(vec3.zCoord) < 0.25D ? 0 : (vec3.zCoord < 0 ? -1 : 1);
-			boolean flag = tryDropBlock(stack, world, x + dx, y + 1, z + dz, dx, dz, block, meta, 4);
+			boolean flag = tryDropBlock(stack, world, player, x + dx, y + 1, z + dz, dx, dz, state, meta, 4);
 			if (!flag) {
-				flag = tryDropBlock(stack, world, x, y + 1, z, -dx, -dz, block, meta, 5);
+				flag = tryDropBlock(stack, world, player, x, y + 1, z, -dx, -dz, state, meta, 5);
 			}
 			if (!flag && !block.getMaterial().isSolid()) {
-				flag = placeBlockAt(stack, player ,world, x, y, z, 1, (float) player.posX, (float) player.posY, (float) player.posZ, block, meta);
+				flag = placeBlockAt(stack, player, world, new BlockPos(x, y, z), EnumFacing.UP, state);
 			}
 			if (flag) {
-				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D), block.stepSound.getBreakSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+				world.playSoundEffect((x + 0.5D), (y + 0.5D), (z + 0.5D), block.stepSound.getBreakSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F);
 			}
 			return flag;
 		}
@@ -116,14 +150,14 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 	 * @param n the number of block lengths to check
 	 * @return true if the block was placed
 	 */
-	private boolean tryDropBlock(ItemStack stack, World world, int x, int y, int z, int dx, int dz, Block block, int meta, int n) {
+	private boolean tryDropBlock(ItemStack stack, World world, EntityPlayer player, int x, int y, int z, int dx, int dz, IBlockState state, int meta, int n) {
 		boolean flag = false;
 		for (int i = 0; i < n && !flag; ++i) {
 			for (int j = 0; j < (n - i) && !flag; ++ j) {
 				for (int k = 0; k < 4 && !flag; ++k) {
-					flag = tryPlaceBlock(stack, world, x + (dz * j), y - k, z + (dx * j), block, meta, SideHit.TOP);
+					flag = tryPlaceBlock(stack, world, player, new BlockPos(x + (dz * j), y - k, z + (dx * j)), state, meta);
 					if (!flag) {
-						flag = tryPlaceBlock(stack, world, x - (dz * j), y - k, z - (dx * j), block, meta, SideHit.TOP);
+						flag = tryPlaceBlock(stack, world, player, new BlockPos(x - (dz * j), y - k, z - (dx * j)), state, meta);
 					}
 				}
 			}
@@ -134,21 +168,16 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 	}
 
 	/**
-	 * Returns true if the block was placed at x/y/z; checks for entity collision and other blocks
+	 * Returns true if the block was placed at the given position; checks for entity collision and other blocks
 	 */
-	private boolean tryPlaceBlock(ItemStack stack, World world, int x, int y, int z, Block block, int meta, int side) {
-		Block b = world.getBlock(x, y, z);
-		// func_149730_j returns is opaque cube
-		if (world.getBlock(x, y - 1, z).func_149730_j() && b.isReplaceable(world, x, y, z)) {
-			if (world.canPlaceEntityOnSide(block, x, y, z, false, 1, null, stack)) {
-				int placedMeta = block.onBlockPlaced(world, x, y, z, 1, (float)(x + 0.5F), (float)(y + 0.5F), (float)(z + 0.5F), meta);
-				if (world.setBlock(x, y, z, block, placedMeta, 3)) {
-					if (world.getBlock(x, y, z) == block) {
-						block.onPostBlockPlaced(world, x, y, z, placedMeta);
-						if (block instanceof ILiftable) {
-							((ILiftable) block).onHeldBlockPlaced(world, stack, x, y, z, placedMeta);
-						}
-					}
+	private boolean tryPlaceBlock(ItemStack stack, World world, EntityPlayer player, BlockPos pos, IBlockState state, int meta) {
+		Block block = state.getBlock();
+		Block b = world.getBlockState(pos).getBlock();
+		if (world.getBlockState(pos.down()).getBlock().isFullBlock() && b.isReplaceable(world, pos)) {
+			if (world.canBlockBePlaced(block, pos, false, EnumFacing.UP, null, stack)) {
+				state = block.onBlockPlaced(world, pos, EnumFacing.UP, (pos.getX() + 0.5F), (pos.getY() + 0.5F), (pos.getZ() + 0.5F), meta, player);
+				if (placeBlockAt(stack, player, world, pos, EnumFacing.UP, state)) {
+					world.playSoundEffect((pos.getX() + 0.5D), (pos.getY() + 0.5D), (pos.getZ() + 0.5D), block.stepSound.getBreakSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getFrequency() * 0.8F);
 					return true;
 				}
 			}
@@ -178,34 +207,26 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		Block b = world.getBlock(x, y, z);
-		if (b == Blocks.snow_layer) {
-			side = 1;
-		} else if (b != Blocks.vine && b != Blocks.tallgrass && b != Blocks.deadbush && !b.isReplaceable(world, x, y, z)) {
-			switch(side) {
-			case 0: --y; break;
-			case 1: ++y; break;
-			case 2: --z; break;
-			case 3: ++z; break;
-			case 4: --x; break;
-			case 5: ++x; break;
-			default:
-			}
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+		IBlockState worldState = world.getBlockState(pos);
+		Block worldBlock = worldState.getBlock();
+		Block blockToPlace = getBlockFromStack(stack);
+		if (worldBlock == Blocks.snow_layer && ((Integer) worldState.getValue(BlockSnow.LAYERS)).intValue() < 1) {
+			side = EnumFacing.UP;
+		} else if (!worldBlock.isReplaceable(world, pos)) {
+			pos = pos.offset(side);
 		}
-
-		Block block = getBlockFromStack(stack);
-		if (block == null|| stack.stackSize == 0) {
+		if (stack.stackSize == 0) {
 			return false;
-		} else if (!player.canPlayerEdit(x, y, z, side, stack) && !(block instanceof ILiftable)) {
+		} else if (!player.canPlayerEdit(pos, side, stack)) {
 			return false;
-		} else if (y == 255 && block.getMaterial().isSolid()) {
+		} else if (pos.getY() == 255 && blockToPlace.getMaterial().isSolid()) {
 			return false;
-		} else if (world.canPlaceEntityOnSide(block, x, y, z, false, side, null, stack)) {
+		} else if (world.canBlockBePlaced(blockToPlace, pos, false, side, null, stack)) {
 			int meta = getMetaFromStack(stack);
-			int placedMeta = block.onBlockPlaced(world, x, y, z, side, hitX, hitY, hitZ, meta);
-			if (placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, block, placedMeta)) {
-				world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D), block.stepSound.getBreakSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
+			IBlockState state = blockToPlace.onBlockPlaced(world, pos, side, hitX, hitY, hitZ, meta, player);
+			if (placeBlockAt(stack, player, world, pos, side, state)) {
+				world.playSoundEffect((pos.getX() + 0.5D), (pos.getY() + 0.5D), (pos.getZ() + 0.5D), blockToPlace.stepSound.getBreakSound(), (blockToPlace.stepSound.getVolume() + 1.0F) / 2.0F, blockToPlace.stepSound.getFrequency() * 0.8F);
 				ItemStack gauntlets = (stack.hasTagCompound() && stack.getTagCompound().hasKey("gauntlets") ?
 						ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("gauntlets")) : null);
 				player.setCurrentItemOrArmor(0, gauntlets);
@@ -217,18 +238,18 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 	}
 
 	/**
-	 * Copied from ItemBlock with added Block parameter; places the block after
-	 * all other checks have been made
+	 * Copied from ItemBlock (removed hit parameters); places the block after all other checks have been made
 	 */
-	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, Block block, int meta) {
-		if (!world.setBlock(x, y, z, block, meta, 3)) {
+	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, IBlockState state) {
+		if (!world.setBlockState(pos, state, 3)) {
 			return false;
 		}
-		if (world.getBlock(x, y, z) == block) {
-			block.onBlockPlacedBy(world, x, y, z, player, stack);
-			block.onPostBlockPlaced(world, x, y, z, meta);
+		Block block = world.getBlockState(pos).getBlock();
+		if (block == state.getBlock()) {
+			ItemBlock.setTileEntityNBT(world, pos, stack);
+			block.onBlockPlacedBy(world, pos, state, player, stack);
 			if (block instanceof ILiftable) {
-				((ILiftable) block).onHeldBlockPlaced(world, stack, x, y, z, meta);
+				((ILiftable) block).onHeldBlockPlaced(world, stack, pos, state);
 			}
 		}
 		return true;
@@ -241,19 +262,6 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public int getSpriteNumber() {
-		return 0;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(ItemStack stack, int pass) {
-		Block block = getBlockFromStack(stack);
-		return (block != null ? block.getIcon(1, getMetaFromStack(stack)) : Blocks.stone.getIcon(1, 0));
-	}
-
-	@Override
 	public void onItemTossed(EntityItem item, EntityPlayer player) {
 		ItemStack stack = item.getEntityItem();
 		if (dropHeldBlock(stack, player.getEntityWorld(), player)) {
@@ -262,5 +270,31 @@ public class ItemHeldBlock extends Item implements IHandleToss, IUnenchantable
 			player.setCurrentItemOrArmor(0, gauntlets);
 			item.setDead();
 		}
+	}
+
+	/**
+	 * Required or smart model will not work
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerRenderers(ItemModelMesher mesher) {
+		mesher.register(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return ModelDynamicItemBlock.resource;
+			}
+		});
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Collection<ModelResourceLocation> getDefaultResources() {
+		return Lists.newArrayList(ModelDynamicItemBlock.resource);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Class<? extends IBakedModel> getNewModel() {
+		return ModelDynamicItemBlock.class;
 	}
 }

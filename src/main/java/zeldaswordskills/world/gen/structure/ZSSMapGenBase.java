@@ -78,14 +78,13 @@ public abstract class ZSSMapGenBase
 	 */
 	protected final void loadOrCreateData(World world) {
 		if (roomData == null) {
-			roomData = (RoomGenData) world.perWorldStorage.loadData(RoomGenData.class, getTagName());
+			roomData = (RoomGenData) world.getPerWorldStorage().loadData(RoomGenData.class, getTagName());
 			if (roomData == null) {
 				roomData = new RoomGenData(getTagName());
-				world.perWorldStorage.setData(getTagName(), roomData);
+				world.getPerWorldStorage().setData(getTagName(), roomData);
 			} else {
 				NBTTagCompound compound = roomData.getRoomData();
-				// func_150296_c is getKeySet()
-				Iterator<String> iterator = compound.func_150296_c().iterator();
+				Iterator<String> iterator = compound.getKeySet().iterator();
 				while (iterator.hasNext()) {
 					String s = iterator.next();
 					NBTBase nbtbase = compound.getTag(s);

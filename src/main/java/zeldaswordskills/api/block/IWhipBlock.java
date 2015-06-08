@@ -18,9 +18,11 @@
 package zeldaswordskills.api.block;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.entity.projectile.EntityWhip;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -31,20 +33,29 @@ public interface IWhipBlock
 {
 	public static enum WhipType {
 		/** Standard whip can latch on to all 'post'-like blocks: fences, logs, levers, ladders, signs, etc. */
-		WHIP_SHORT(false),
+		WHIP_SHORT("whip", false),
 		/** Same as the standard whip, but with twice the range */
-		WHIP_LONG(true),
+		WHIP_LONG("whip_long", true),
 		/** The magic whip can latch on to any solid surface and has the same range as the long whip */
-		WHIP_MAGIC(true);
+		WHIP_MAGIC("whip_magic", true);
 
+		public final String unlocalizedName;
 		private final boolean isExtended;
 
-		private WhipType(boolean isExtended) {
+		private WhipType(String unlocalizedName, boolean isExtended) {
+			this.unlocalizedName = unlocalizedName;
 			this.isExtended = isExtended;
 		}
 
 		public boolean isExtended() {
 			return isExtended;
+		}
+
+		/**
+		 * Return the whip type by stack damage value
+		 */
+		public static WhipType fromDamage(int damage) {
+			return WhipType.values()[damage % WhipType.values().length];
 		}
 	}
 
@@ -53,16 +64,16 @@ public interface IWhipBlock
 	 * This method is never called if canGrabBlock returns true, as the whip
 	 * can not both attach to and break a block at the same time.
 	 * @param thrower Not likely to be null, but it is conceivable
-	 * @param side	The side of the block that was hit
+	 * @param face	The face of the block that was hit
 	 */
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
+	boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face);
 
 	/**
 	 * Return true if the type of whip is able to attach to this specific block.
 	 * @param thrower Not likely to be null, but it is conceivable
-	 * @param side	The side of the block that was hit
+	 * @param face	The face of the block that was hit
 	 */
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
+	boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face);
 
 	/**
 	 * Allows for special interactions, such as pulling levers, rather than swinging.
@@ -71,6 +82,6 @@ public interface IWhipBlock
 	 * @param ticksInGround	Useful if the action requires a certain amount of time to perform
 	 * @return ALLOW to swing, DENY to not swing, and DEFAULT to use standard behavior.
 	 */
-	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround);
+	Result shouldSwing(EntityWhip whip, World world, BlockPos pos, int ticksInGround);
 
 }

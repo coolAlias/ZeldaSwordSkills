@@ -23,6 +23,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import zeldaswordskills.block.BlockPedestal;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.item.ItemPendant;
 
@@ -101,7 +102,7 @@ public class ContainerPedestal extends Container
 
 	@Override
 	public ItemStack slotClick(int slot, int par2, int par3, EntityPlayer player) {
-		if (slot < INV_START && pedestal.getWorldObj().getBlockMetadata(pedestal.xCoord, pedestal.yCoord, pedestal.zCoord) == 0x8) {
+		if (slot < INV_START && ((Boolean) pedestal.getWorld().getBlockState(pedestal.getPos()).getValue(BlockPedestal.UNLOCKED)).booleanValue()) {
 			return null;
 		} else {
 			return super.slotClick(slot, par2, par3, player);

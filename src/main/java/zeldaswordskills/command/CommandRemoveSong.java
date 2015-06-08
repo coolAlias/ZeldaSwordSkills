@@ -25,6 +25,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
 import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.songs.AbstractZeldaSong;
@@ -55,7 +56,7 @@ public class CommandRemoveSong extends CommandBase
 	}
 
 	@Override
-	public void processCommand(ICommandSender sender, String[] args) {
+	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 		if (args.length != 1) {
 			throw new WrongUsageException(getCommandUsage(sender));
 		}
@@ -78,7 +79,7 @@ public class CommandRemoveSong extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		return args.length == 1 ? getListOfStringsMatchingLastWord(args, SongAPI.getRegisteredNames().toArray(new String[SongAPI.getTotalSongs()])) : null;
 	}
 }

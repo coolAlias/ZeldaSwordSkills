@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -29,6 +29,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
@@ -69,7 +72,7 @@ public class EntityLeapingBlow extends EntityThrowable
 		this.setSize(BASE_SIZE, HEIGHT);
 		this.posY = thrower.posY + 0.2D;
 		this.motionY = 0.0D;
-		this.setThrowableHeading(motionX, motionY, motionZ, func_70182_d(), 1.0F);
+		this.setThrowableHeading(motionX, motionY, motionZ, getVelocity(), 1.0F);
 	}
 
 	public EntityLeapingBlow(World world, double x, double y, double z) {
@@ -108,7 +111,7 @@ public class EntityLeapingBlow extends EntityThrowable
 
 	/** Returns area within which to search for targets each tick */
 	private AxisAlignedBB getAoE() {
-		return boundingBox.expand((0.25F * level), 0.0F, (0.25F * level));
+		return getEntityBoundingBox().expand((0.25F * level), 0.0F, (0.25F * level));
 	}
 
 	@Override
@@ -132,17 +135,34 @@ public class EntityLeapingBlow extends EntityThrowable
 				}
 			}
 		}
-		/** Velocity x and z for spawning particles to left and right of entity */
-		double vX = motionZ;
-		double vZ = motionX;
-		String particle = (isMaster ? "magicCrit" : "crit");
-		Block block = worldObj.getBlock((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
-		if (block.getMaterial() != Material.air) {
-			particle = "blockcrack_" + Block.getIdFromBlock(block) + "_" + worldObj.getBlockMetadata((int) (posX + (boundingBox.maxX - boundingBox.minX) / 2), (int) posY - 1, (int) (posZ + (boundingBox.maxZ - boundingBox.minZ) / 2));
+		int x = MathHelper.floor_double(posX);
+		int y = MathHelper.floor_double(posY - 0.20000000298023224D);
+		int z = MathHelper.floor_double(posZ);
+		IBlockState state = worldObj.getBlockState(new BlockPos(x, y, z));
+		Block block = state.getBlock();
+		int[] extra = {};
+		EnumParticleTypes particle = (isMaster ? EnumParticleTypes.CRIT_MAGIC : EnumParticleTypes.CRIT);
+		if (block.getRenderType() != -1) {
+			particle = EnumParticleTypes.BLOCK_CRACK;
+			extra = new int[]{Block.getStateId(state)};
+			worldObj.spawnParticle(EnumParticleTypes.BLOCK_CRACK, this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.getEntityBoundingBox().minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, -this.motionX * 4.0D, 1.5D, -this.motionZ * 4.0D, extra);
 		}
-		for (int i = 0; i < 4; ++i) {
-			worldObj.spawnParticle(particle, posX, posY, posZ, vX + rand.nextGaussian(), 0.01D, vZ + rand.nextGaussian());
-			worldObj.spawnParticle(particle, posX, posY, posZ, -vX + rand.nextGaussian(), 0.01D, -vZ + rand.nextGaussian());
+		spawnParticles(particle, 4, motionZ, 0.01D, motionX, extra);
+		spawnParticles(particle, 4, -motionZ, 0.01D, -motionX, extra);
+	}
+
+	/**
+	 * Spawns the designated particle at the current entity's position, with optional
+	 * motion to add to the otherwise random amount
+	 * @param n  Number of particles to spawn
+	 * @param dX Motion along X-axis (+/- this.motionZ for lateral motion)
+	 * @param dY Motion along Y-axis
+	 * @param dZ Motion along Z-axis (+/- this.motionX for lateral motion)
+	 * @param extra additional arguments for World#spawnParticle
+	 */
+	private void spawnParticles(EnumParticleTypes particle, int n, double dX, double dY, double dZ, int ... extra) {
+		for (int i = 0; i < n; ++i) {
+			worldObj.spawnParticle(particle, posX, posY, posZ, dX + rand.nextGaussian(), dY, dZ + rand.nextGaussian(), extra);
 		}
 	}
 
@@ -161,7 +181,7 @@ public class EntityLeapingBlow extends EntityThrowable
 					}
 				}
 			} else {
-				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+				Block block = worldObj.getBlockState(mop.getBlockPos()).getBlock();
 				if (block.getMaterial().blocksMovement()) {
 					setDead();
 				}
@@ -169,9 +189,8 @@ public class EntityLeapingBlow extends EntityThrowable
 		}
 	}
 
-	/** Entity's velocity factor */
 	@Override
-	protected float func_70182_d() {
+	protected float getVelocity() {
 		return 0.5F;
 	}
 

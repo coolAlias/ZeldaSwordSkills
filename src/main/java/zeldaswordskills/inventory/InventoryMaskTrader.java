@@ -44,13 +44,13 @@ public class InventoryMaskTrader extends AbstractInventory {
 	}
 
 	@Override
-	public String getInventoryName() {
-		return "gui.zss.mask_trader.name";
+	public String getCommandSenderName() {
+		return "gui.mask_trader.name";
 	}
 
 	@Override
-	public boolean hasCustomInventoryName() {
-		return true;
+	public boolean hasCustomName() {
+		return false;
 	}
 
 	@Override
@@ -66,5 +66,10 @@ public class InventoryMaskTrader extends AbstractInventory {
 	@Override
 	public boolean isItemValidForSlot(int slot, ItemStack stack) {
 		return false;
+	}
+
+	@Override
+	protected String getNbtKey() {
+		return null; // doesn't need to save
 	}
 }

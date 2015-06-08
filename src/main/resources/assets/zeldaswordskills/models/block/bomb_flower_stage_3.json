@@ -1,0 +1,6 @@
+{
+    "parent": "minecraft:block/crop",
+    "textures": {
+        "crop": "zeldaswordskills:blocks/bomb_flower_stage_3"
+    }
+}

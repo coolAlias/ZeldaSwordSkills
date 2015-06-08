@@ -50,7 +50,7 @@ public class GenericAIDefendVillage extends EntityAITarget
 
 			if (!isSuitableTarget(aggressor, false)) {
 				if (taskOwner.getRNG().nextInt(20) == 0) {
-					aggressor = village.func_82685_c(defender);
+					aggressor = village.getNearestTargetPlayer(defender);
 					return isSuitableTarget(aggressor, false);
 				} else {
 					return false;

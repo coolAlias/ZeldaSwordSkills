@@ -22,6 +22,8 @@ import java.util.Random;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.Vec3i;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -47,7 +49,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		NBTTagList roomList = getStructureListFor(chunkX, chunkZ);
 		int posX = (chunkX << 4);
 		int posZ = (chunkZ << 4);
-		int posY = StructureGenUtils.getAverageSurfaceHeight(world, posX, posZ);
+		int posY = StructureGenUtils.getAverageSurfaceHeight(world, new BlockPos(posX, 64, posZ));
 		if (posY < 1) {
 			return;
 		}
@@ -66,7 +68,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		}
 
 		if (roomList.tagCount() > 0) {
-			//ZSSMain.logger.trace(String.format("roomList for chunk %d/%d contains %d elements", chunkX, chunkZ, roomList.tagCount()));
+			//ExampleMod.logger.info(String.format("roomList for chunk %d/%d contains %d elements", chunkX, chunkZ, roomList.tagCount()));
 			NBTTagCompound compound = new NBTTagCompound();
 			compound.setTag("roomList", roomList);
 			addRoomTag(compound, chunkX, chunkZ);
@@ -85,7 +87,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 			NBTTagCompound compound = (NBTTagCompound) roomList.getCompoundTagAt(i);
 			if (compound.hasKey("BB")) {
 				StructureBoundingBox box = new StructureBoundingBox(compound.getIntArray("BB"));
-				if (box.isVecInside(x, y, z)) {
+				if (box.isVecInside(new Vec3i(x, y, z))) {
 					return box;
 				}
 			}

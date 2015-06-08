@@ -20,7 +20,7 @@ package zeldaswordskills.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -31,13 +31,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 /**
@@ -80,26 +80,23 @@ public class TargetUtils
 	 * 
 	 */
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
-		Vec3 vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
-		Vec3 vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
-		// func_147447_a is the ray_trace method
-		MovingObjectPosition mop = world.func_147447_a(vec3, vec31, false, true, false);
-		vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
-		vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
-
+		double posY = entity.posY + entity.getEyeHeight(); // fix for Dash
+		Vec3 vec3 = new Vec3(entity.posX, posY, entity.posZ);
+		Vec3 vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
+		MovingObjectPosition mop = world.rayTraceBlocks(vec3, vec31, false, true, false);
+		vec3 = new Vec3(entity.posX, posY, entity.posZ);
+		vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
 		if (mop != null) {
-			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+			vec31 = new Vec3(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
 		}
-
 		Entity target = null;
-		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.boundingBox.addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
+		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
 		//double hitBox = 0.3D;
-
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = (Entity) list.get(i);
 			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
-				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
+				AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().expand(hitBox, hitBox, hitBox);
 				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
 				if (mop1 != null) {
 					double d1 = vec3.distanceTo(mop1.hitVec);
@@ -110,11 +107,9 @@ public class TargetUtils
 				}
 			}
 		}
-
 		if (target != null) {
 			mop = new MovingObjectPosition(target);
 		}
-
 		if (mop != null && mop.entityHit instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) mop.entityHit;
 			if (player.capabilities.disableDamage || (shooter instanceof EntityPlayer
@@ -123,7 +118,6 @@ public class TargetUtils
 				mop = null;
 			}
 		}
-
 		return mop;
 	}
 
@@ -174,9 +168,8 @@ public class TargetUtils
 			targetY += vec3.yCoord;
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
-
-			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
-					AxisAlignedBB.getBoundingBox(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius));
+			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
+			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
 					double newDistance = (closestToSeeker ? target.getDistanceSqToEntity(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
@@ -211,8 +204,8 @@ public class TargetUtils
 			targetY += vec3.yCoord;
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
-			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
-					AxisAlignedBB.getBoundingBox(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius));
+			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
+			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
 					if (!targets.contains(target)) {
@@ -316,8 +309,7 @@ public class TargetUtils
 		} else if (player.isOnSameTeam(entity)) {
 			return true;
 		} else if (entity instanceof IEntityOwnable) {
-			// IEntityOwnable.func_152113_b() returns a String - is this getOwnerName ??? 
-			return ((IEntityOwnable) entity).func_152113_b().equals(player.getCommandSenderName());
+			return ((IEntityOwnable) entity).getOwner() == player;
 		} else {
 			return false;
 		}
@@ -327,33 +319,22 @@ public class TargetUtils
 	 * Returns true if the entity has an unimpeded view of the sky
 	 */
 	public static boolean canEntitySeeSky(World world, Entity entity) {
-		ChunkCoordinates cc = getEntityCoordinates(entity);
-		for (int y = cc.posY + 1; y < world.getActualHeight(); ++y) {
-			if (!world.isAirBlock(cc.posX, y, cc.posZ)) {
+		BlockPos pos = new BlockPos(entity);
+		while (pos.getY() < world.getActualHeight()) {
+			if (!world.isAirBlock(pos)) {
 				return false;
 			}
+			pos = pos.up();
 		}
 		return true;
-	}
-
-	/**
-	 * Returns the chunk coordinates for the entity's current position
-	 */
-	public static ChunkCoordinates getEntityCoordinates(Entity entity) {
-		int i = MathHelper.floor_double(entity.posX + 0.5D);
-		// pre-1.8 the client player.posY is higher by player.yOffset amount
-		int j = MathHelper.floor_double(entity.posY + 0.5D - (entity.worldObj.isRemote ? entity.yOffset : 0D));
-		int k = MathHelper.floor_double(entity.posZ + 0.5D);
-		return new ChunkCoordinates(i,j,k);
 	}
 
 	/**
 	 * Whether the entity is currently standing in any liquid
 	 */
 	public static boolean isInLiquid(Entity entity) {
-		ChunkCoordinates cc = getEntityCoordinates(entity);
-		Block block = entity.worldObj.getBlock(cc.posX, cc.posY, cc.posZ);
-		return block.getMaterial().isLiquid();
+		IBlockState state = entity.worldObj.getBlockState(new BlockPos(entity));
+		return state.getBlock().getMaterial().isLiquid();
 	}
 
 	/**

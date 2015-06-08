@@ -17,10 +17,8 @@
 
 package zeldaswordskills.item;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -29,11 +27,12 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -42,14 +41,9 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemSkillOrb extends Item implements IUnenchantable 
+public class ItemSkillOrb extends BaseModItem implements IUnenchantable 
 {
-	@SideOnly(Side.CLIENT)
-	private List<IIcon> icons;
-
 	public ItemSkillOrb() {
 		super();
 		setMaxDamage(0);
@@ -65,8 +59,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 				if (skills.grantSkill(skill)) {
 					world.playSoundAtEntity(player, Sounds.LEVELUP, 1.0F, 1.0F);
-					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.levelup",
-							skill.getDisplayName(), skills.getSkillLevel(skill));
+					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.level_up", skill.getDisplayName(), skills.getSkillLevel(skill));
 					if (skill == SkillBase.bonusHeart) {
 						player.triggerAchievement(ZSSAchievements.skillHeart);
 						if (skills.getSkillLevel(skill) > 19) {
@@ -93,7 +86,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 						--stack.stackSize;
 					}
 				} else {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.maxlevel", skill.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.max_level", skill.getDisplayName());
 				}
 			}
 		}
@@ -123,13 +116,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
-		return StatCollector.translateToLocal(super.getUnlocalizedName() + ".name") + " " + (skill != null ? skill.getDisplayName() : "");
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int damage) {
-		return icons.get(damage % icons.size());
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + (skill != null ? skill.getDisplayName() : "");
 	}
 
 	@Override
@@ -137,15 +124,6 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (SkillBase skill : SkillBase.getSkills()) {
 			list.add(new ItemStack(item, 1, skill.getId()));
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		icons = new ArrayList<IIcon>(SkillBase.getNumSkills());
-		for (SkillBase skill : SkillBase.getSkills()) {
-			icons.add(register.registerIcon(skill.getIconTexture()));
 		}
 	}
 
@@ -163,5 +141,14 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.skillorb.desc.0"));
 			}
 		}
+	}
+
+	@Override
+	public String[] getVariants() {
+		String[] variants = new String[SkillBase.getNumSkills()];
+		for (SkillBase skill : SkillBase.getSkills()) {
+			variants[skill.getId()] = skill.getIconTexture();
+		}
+		return variants;
 	}
 }

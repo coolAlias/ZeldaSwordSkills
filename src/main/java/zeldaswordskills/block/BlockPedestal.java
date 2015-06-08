@@ -20,9 +20,15 @@ package zeldaswordskills.block;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -31,39 +37,45 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
+import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
  * The pedestal for the Master Sword is completely unbreakable so long as a sword
  * remains set in the block.
  * 
- * Meta & 0x1 is for the Pendant of Courage
- * Meta & 0x2 is for the Pendant of Power
- * Meta & 0x4 is for the Pendant of Wisdom
- * Meta & 0x8 flags that the sword has been taken
+ * Outputs a redstone signal when any kind of Master Sword is held within.
  *
  */
-public class BlockPedestal extends BlockContainer
+public class BlockPedestal extends Block implements IBlockItemVariant, ICustomStateMapper, ISpecialRenderer, ITileEntityProvider
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon iconTop;
-	@SideOnly(Side.CLIENT)
-	private IIcon iconBottom;
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconSide;
+	public static final int ALL_PENDANTS = 7;
+	/**
+	 * Bit 1 is for the Pendant of Courage
+	 * Bit 2 is for the Pendant of Power
+	 * Bit 4 is for the Pendant of Wisdom
+	 */
+	public static final PropertyInteger PENDANTS = PropertyInteger.create("pendants", 0, ALL_PENDANTS);
+	/**
+	 * Whether the pedestal is unlocked, i.e. swords may be removed (locked = 0, unlocked = 8)
+	 * While locked, the block may not be broken, but pendants may be added and removed at will
+	 */
+	public static final PropertyBool UNLOCKED = PropertyBool.create("unlocked");
 
 	public BlockPedestal() {
 		super(Material.rock);
@@ -73,6 +85,7 @@ public class BlockPedestal extends BlockContainer
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 		setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
+		setDefaultState(blockState.getBaseState().withProperty(PENDANTS, Integer.valueOf(0)).withProperty(UNLOCKED, Boolean.valueOf(false)));
 	}
 
 	@Override
@@ -81,7 +94,7 @@ public class BlockPedestal extends BlockContainer
 	}
 
 	@Override
-	public boolean renderAsNormalBlock() {
+	public boolean isFullCube() {
 		return false;
 	}
 
@@ -96,56 +109,48 @@ public class BlockPedestal extends BlockContainer
 	}
 
 	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) {
-		return meta == 0x8;
+	public boolean canHarvestBlock(IBlockAccess world, BlockPos pos, EntityPlayer player) {
+		return ((Boolean) world.getBlockState(pos).getValue(UNLOCKED)).booleanValue();
 	}
 
 	@Override
-	public float getBlockHardness(World world, int x, int y, int z) {
-		return (world.getBlockMetadata(x, y, z) == 0x8 ? blockHardness : -1.0F);
+	public float getBlockHardness(World world, BlockPos pos) {
+		return (((Boolean) world.getBlockState(pos).getValue(UNLOCKED)).booleanValue() ? blockHardness : -1.0F);
 	}
 
 	@Override
-	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		return (world.getBlockMetadata(x, y, z) == 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
-	}
-
-	// TODO remove when vanilla explosion resistance bug is fixed
-	@Override
-	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
-		if (world.getBlockMetadata(x, y, z) == 0x8) {
-			super.onBlockExploded(world, x, y, z, explosion);
-		}
+	public float getExplosionResistance(World world, BlockPos pos, Entity entity, Explosion explosion) {
+		return (((Boolean) world.getBlockState(pos).getValue(UNLOCKED)).booleanValue() ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 
 	@Override
-	public int damageDropped(int meta) {
-		return (meta == 0x8 ? 0x8 : 0x0);
+	public int damageDropped(IBlockState state) {
+		return ((Boolean) state.getValue(UNLOCKED)).booleanValue() ? 0x8 : 0x0;
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		if (player.isSneaking() || !(world.getTileEntity(x, y, z) instanceof TileEntityPedestal)) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
+		if (player.isSneaking() || !(world.getTileEntity(pos) instanceof TileEntityPedestal)) {
 			return false;
 		}
 		if (!world.isRemote) {
-			TileEntityPedestal te = (TileEntityPedestal) world.getTileEntity(x, y, z);
+			TileEntityPedestal te = (TileEntityPedestal) world.getTileEntity(pos);
 			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
 				te.setSword(player.getHeldItem(), player);
 				player.setCurrentItemOrArmor(0, null);
-			} else if (world.getBlockMetadata(x, y, z) == 0x8 && te.hasSword()) {
+			} else if (((Boolean) state.getValue(UNLOCKED)).booleanValue() && te.hasSword()) {
 				te.retrieveSword();
 			} else {
-				player.openGui(ZSSMain.instance, GuiHandler.GUI_PEDESTAL, world, x, y, z);
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_PEDESTAL, world, pos.getX(), pos.getY(), pos.getZ());
 			}
 		}
 		return true;
 	}
 
 	@Override
-	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
+	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
 		if (!world.isRemote) {
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityPedestal) {
 				((TileEntityPedestal) te).changeOrientation();
 			}
@@ -153,9 +158,9 @@ public class BlockPedestal extends BlockContainer
 	}
 
 	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack) {
 		if (stack.getItemDamage() == 0x8) {
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityPedestal) {
 				((TileEntityPedestal) te).onBlockPlaced();
 			}
@@ -163,16 +168,16 @@ public class BlockPedestal extends BlockContainer
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
-		if (meta != 0x8) {
-			WorldUtils.dropContainerBlockInventory(world, x, y, z);
-		} else if (meta == 0x8) {
-			TileEntity te = world.getTileEntity(x, y, z);
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+		if (((Boolean) state.getValue(UNLOCKED)).booleanValue()) {
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityPedestal) {
 				((TileEntityPedestal) te).retrieveSword();
 			}
+		} else {
+			WorldUtils.dropContainerBlockInventory(world, pos);
 		}
-		super.breakBlock(world, x, y, z, block, meta);
+		super.breakBlock(world, pos, state);
 	}
 
 	@Override
@@ -181,8 +186,8 @@ public class BlockPedestal extends BlockContainer
 	}
 
 	@Override
-	public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side) {
-		TileEntity te = world.getTileEntity(x, y, z);
+	public int isProvidingWeakPower(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing face) {
+		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityPedestal) {
 			return ((TileEntityPedestal) te).getPowerLevel();
 		}
@@ -197,19 +202,52 @@ public class BlockPedestal extends BlockContainer
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		return (side == 0 ? iconBottom : side == 1 ? iconTop : iconSide[Math.min(meta, 7)]);
+	public IBlockState getStateFromMeta(int meta) {
+		Integer pendants = Integer.valueOf((meta & 0x7));
+		return getDefaultState().withProperty(PENDANTS, pendants).withProperty(UNLOCKED, Boolean.valueOf(meta > 0x7));
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		int i = ((Integer) state.getValue(PENDANTS)).intValue();
+		if (((Boolean)state.getValue(UNLOCKED)).booleanValue()) {
+			i |= 0x8;
+		}
+		return i;
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, PENDANTS, UNLOCKED);
+	}
+
+	/**
+	 * Only two item variants - no pendants and all pendants
+	 */
+	@Override
+	public String[] getItemBlockVariants() {
+		return new String[]{ModInfo.ID + ":pedestal_0", ModInfo.ID + ":pedestal_7"};
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		iconTop = register.registerIcon(ModInfo.ID + ":pedestal_top");
-		iconBottom = register.registerIcon(ModInfo.ID + ":pedestal_bottom");
-		iconSide = new IIcon[8];
-		for (int i = 0; i < iconSide.length; ++i) {
-			iconSide[i] = register.registerIcon(ModInfo.ID + ":pedestal_side_" + i);
-		}
+	public IStateMapper getCustomStateMap() {
+		// can't use this because meta 8 needs to be remapped to 7:
+		// return (new StateMap.Builder()).addPropertiesToIgnore(UNLOCKED).build();
+		return new StateMapperBase() {
+			@Override
+			protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+				String resource = getUnlocalizedName();
+				resource = resource.substring(resource.lastIndexOf(".") + 1) + "#" + PENDANTS.getName() + "=";
+				int pendants = ((Boolean) state.getValue(UNLOCKED)).booleanValue() ? ALL_PENDANTS : ((Integer) state.getValue(PENDANTS)).intValue();
+				return new ModelResourceLocation(ModInfo.ID + ":" + resource + pendants);
+			}
+		};
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerSpecialRenderer() {
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPedestal.class, new RenderTileEntityPedestal());
 	}
 }

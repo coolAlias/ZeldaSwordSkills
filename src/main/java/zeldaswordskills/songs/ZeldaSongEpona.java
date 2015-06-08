@@ -23,6 +23,7 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S18PacketEntityTeleport;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
@@ -45,7 +46,7 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
 		@SuppressWarnings("unchecked")
-		List<EntityHorse> horses = player.worldObj.getEntitiesWithinAABB(EntityHorse.class, player.boundingBox.expand(8.0D, 4.0D, 8.0D));
+		List<EntityHorse> horses = player.worldObj.getEntitiesWithinAABB(EntityHorse.class, player.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D));
 		for (EntityHorse horse : horses) {
 			if (!horse.isTame()) {
 				horse.setTamedBy(player);
@@ -57,11 +58,11 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 			return; // only maximum power instruments can teleport Epona
 		}
 		int x = MathHelper.floor_double(player.posX);
-		int y = MathHelper.floor_double(player.boundingBox.maxY);
+		int y = MathHelper.floor_double(player.getEntityBoundingBox().maxY);
 		int z = MathHelper.floor_double(player.posZ);
 		if (!player.worldObj.provider.isSurfaceWorld()) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.dimension");
-		} else if (!player.worldObj.canBlockSeeTheSky(x, y, z)) {
+		} else if (!player.worldObj.canBlockSeeSky(new BlockPos(x, y, z))) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.sky");
 		} else {
 			EntityHorse epona = ZSSPlayerSongs.get(player).getLastHorseRidden();

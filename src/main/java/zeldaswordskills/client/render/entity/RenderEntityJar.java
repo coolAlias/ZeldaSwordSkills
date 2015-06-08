@@ -17,37 +17,41 @@
 
 package zeldaswordskills.client.render.entity;
 
-import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityCeramicJar;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityJar extends Render
 {
-	private final RenderBlocks blockRenderer = new RenderBlocks();
+	private final RenderItem renderItem;
+	private static final ItemStack jar = new ItemStack(ZSSBlocks.ceramicJar);
 
-	public RenderEntityJar() {}
+	public RenderEntityJar(RenderManager renderManager, RenderItem renderItem) {
+		super(renderManager);
+		this.renderItem = renderItem;
+	}
 
 	public void renderJar(EntityCeramicJar entity, double dx, double dy, double dz, float yaw, float partialTick) {
-		GL11.glPushMatrix();
-		GL11.glTranslated(dx, dy, dz);
-		GL11.glRotatef(yaw, 0, 1, 0);
-		float roll = ((float) entity.ticksExisted + partialTick) * 5;
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(dx, dy, dz);
+		GlStateManager.rotate(yaw, 0, 1, 0);
+		float roll = ((float) entity.ticksExisted + partialTick) * 7;
 		while (roll > 360) { roll -= 360; }
-		GL11.glRotatef(roll, -0.25F, 0.1F, 0);
-		GL11.glScalef(1.0F, 1.0F, 1.0F);
+		GlStateManager.rotate(roll, -0.25F, 0.1F, 0);
+		GlStateManager.scale(1.5F, 1.5F, 1.5F);
 		bindEntityTexture(entity);
-		blockRenderer.renderBlockAsItem(ZSSBlocks.ceramicJar, 0, entity.getBrightness(partialTick));
-		GL11.glPopMatrix();
+		renderItem.renderItemModel(jar);
+		GlStateManager.popMatrix();
 	}
 
 	@Override

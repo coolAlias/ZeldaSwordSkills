@@ -17,17 +17,6 @@
 
 package zeldaswordskills.handler;
 
-import mods.battlegear2.api.PlayerEventChild.ShieldBlockEvent;
-import mods.battlegear2.api.quiver.IArrowContainer2;
-import mods.battlegear2.api.quiver.ISpecialBow;
-import mods.battlegear2.api.quiver.QuiverArrowRegistry;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.event.entity.player.ArrowNockEvent;
-import zeldaswordskills.item.ItemZeldaArrow;
-import zeldaswordskills.item.ItemZeldaShield;
-import cpw.mods.fml.common.eventhandler.EventPriority;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
@@ -36,6 +25,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
  */
 public class BattlegearEvents {
 
+	/* TODO add if/when BG2 updates
 	@SubscribeEvent
 	public void onBlocked(ShieldBlockEvent event) {
 		if (event.shield.getItem() instanceof ItemZeldaShield) {
@@ -48,14 +38,14 @@ public class BattlegearEvents {
 	/**
 	 * Returns the currently selected quiver arrow, or null if empty or no quiver
 	 * @param quiver if null, current quiver retrieved using {@link QuiverArrowRegistry#getArrowContainer}
-	 */
+	 *
 	public static ItemStack getQuiverArrow(ItemStack bow, EntityPlayer player) {
 		return getQuiverArrow(bow, QuiverArrowRegistry.getArrowContainer(bow, player), player);
 	}
 
 	/**
 	 * Returns the currently selected quiver arrow, or null if quiver is null or does not contain arrows
-	 */
+	 *
 	public static ItemStack getQuiverArrow(ItemStack bow, ItemStack quiver, EntityPlayer player) {
 		if (quiver != null) {
 			int slot = ((IArrowContainer2) quiver.getItem()).getSelectedSlot(quiver);
@@ -67,7 +57,7 @@ public class BattlegearEvents {
 	/**
 	 * Required to prevent nocking unusable ZSS arrows in vanilla and other bows
 	 * (merely cosmetic, as they can not be fired by the default fire handler)
-	 */
+	 *
 	@SubscribeEvent(priority=EventPriority.HIGH)
 	public void preArrowNock(ArrowNockEvent event) {
 		// ISpecialBows should determine nocking result on their own
@@ -78,4 +68,5 @@ public class BattlegearEvents {
 			}
 		}
 	}
+	*/
 }

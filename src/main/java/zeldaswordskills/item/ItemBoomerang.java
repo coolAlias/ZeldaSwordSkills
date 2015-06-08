@@ -19,15 +19,16 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -36,15 +37,12 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable
+public class ItemBoomerang extends BaseModItem implements IFairyUpgrade, IUnenchantable
 {
 	/** The amount of damage this boomerang will cause */
 	private final float damage;
@@ -79,7 +77,7 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable
 		player.swingItem();
 		player.addExhaustion(0.3F);
 		if (!world.isRemote) {
-			world.playSoundAtEntity(player, Sounds.WHOOSH, 1.0F, 1.0F);
+			world.playSoundAtEntity(player, Sounds.WHOOSH, 0.5F, 1.0F);
 			world.spawnEntityInWorld(new EntityBoomerang(world, player).setCaptureAll(captureAll).
 					setRange(range).setInvStack(stack, player.inventory.currentItem).setDamage(damage));
 			player.setCurrentItemOrArmor(0, null);
@@ -95,12 +93,6 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.boomerang.desc.0"));
 		list.add("");
@@ -110,13 +102,14 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IUnenchantable
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
+		BlockPos pos = core.getPos();
 		if (ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart) >= Config.getMaxBonusHearts() / 2) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairyBoomerang);
-			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.boomerangMagic), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+			WorldUtils.spawnItemWithRandom(core.getWorld(), new ItemStack(ZSSItems.boomerangMagic), pos.getX(), pos.getY() + 2, pos.getZ());
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+			core.getWorld().playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}

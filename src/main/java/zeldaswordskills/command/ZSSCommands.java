@@ -17,7 +17,7 @@
 
 package zeldaswordskills.command;
 
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 public class ZSSCommands
 {

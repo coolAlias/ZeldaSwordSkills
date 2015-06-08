@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "axis=x":   { "model": "zeldaswordskills:beam_wooden_side" },
+        "axis=y":  { "model": "zeldaswordskills:beam_wooden" },
+        "axis=z":   { "model": "zeldaswordskills:beam_wooden_side", "y": 90 }
+    }
+}

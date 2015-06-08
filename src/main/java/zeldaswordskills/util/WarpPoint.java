@@ -18,6 +18,7 @@
 package zeldaswordskills.util;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.util.Constants;
 
 /**
@@ -29,15 +30,18 @@ public class WarpPoint
 {
 	/** Warp dimension */
 	public final int dimensionId;
-	
-	/** Warp coordinates */
-	public final int x, y, z;
 
-	public WarpPoint(int dimensionId, int x, int y, int z) {
+	/** Warp coordinates */
+	public final BlockPos pos;
+
+	public WarpPoint(int dimensionId, BlockPos pos) {
 		this.dimensionId = dimensionId;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.pos = pos;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("[%d/%d/%d in dimension %d]", pos.getX(), pos.getY(), pos.getZ(), dimensionId);
 	}
 
 	/**
@@ -45,7 +49,7 @@ public class WarpPoint
 	 */
 	public NBTTagCompound writeToNBT() {
 		NBTTagCompound tag = new NBTTagCompound();
-		tag.setIntArray("WarpPointData", new int[]{dimensionId, x, y, z});
+		tag.setIntArray("WarpPointData", new int[]{dimensionId, pos.getX(), pos.getY(), pos.getZ()});
 		return tag;
 	}
 
@@ -56,7 +60,7 @@ public class WarpPoint
 	public static WarpPoint readFromNBT(NBTTagCompound tag) {
 		if (tag.hasKey("WarpPointData") && tag.getTag("WarpPointData").getId() == Constants.NBT.TAG_INT_ARRAY) {
 			int[] data = tag.getIntArray("WarpPointData");
-			return new WarpPoint(data[0], data[1], data[2], data[3]);
+			return new WarpPoint(data[0], new BlockPos(data[1], data[2], data[3]));
 		}
 		return null;
 	}

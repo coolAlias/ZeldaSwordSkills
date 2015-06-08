@@ -17,21 +17,27 @@
 
 package zeldaswordskills.block;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -39,22 +45,12 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockTime extends Block implements IDungeonBlock, ISongBlock
+public class BlockTime extends Block implements IBlockItemVariant, IDungeonBlock, ISongBlock
 {
-	/** Unlocalized names of all song blocks */
-	public static final String[] names = {"time_block","royal_block"};
-
-	/** Song required to manipulate each block, based on metadata less bit8 */
-	private static final Map<Integer, AbstractZeldaSong> requiredSongs = new HashMap<Integer, AbstractZeldaSong>();
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconEnd;
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconFace;
+	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockTime.EnumType.class);
+	/** Whether the block is currently ethereal or not */
+	public static final PropertyBool ETHEREAL = PropertyBool.create("ethereal");
 
 	public BlockTime() {
 		super(Material.rock);
@@ -63,6 +59,18 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
+		setDefaultState(blockState.getBaseState().withProperty(VARIANT, BlockTime.EnumType.TIME).withProperty(ETHEREAL, Boolean.FALSE));
+	}
+
+	@Override
+	public int getMobilityFlag() {
+		return 2;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public EnumWorldBlockLayer getBlockLayer() {
+		return EnumWorldBlockLayer.CUTOUT_MIPPED;
 	}
 
 	@Override
@@ -76,28 +84,33 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 	}
 
 	@Override
-	public int getMobilityFlag() {
-		return 2;
+	public boolean isFullCube() {
+		return false;
 	}
 
 	@Override
-	public boolean canCollideCheck(int meta, boolean isHoldingBoat) {
-		return meta < 0x8;
+	public boolean isBlockSolid(IBlockAccess world, BlockPos pos, EnumFacing side) {
+		return !((Boolean) world.getBlockState(pos).getValue(ETHEREAL)).booleanValue();
 	}
 
 	@Override
-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-		return (world.getBlockMetadata(x, y, z) > 0x7 ? null : super.getCollisionBoundingBoxFromPool(world, x, y, z));
+	public boolean canCollideCheck(IBlockState state, boolean isHoldingBoat) {
+		return !((Boolean) state.getValue(ETHEREAL)).booleanValue();
 	}
 
 	@Override
-	public boolean isReplaceable(IBlockAccess world, int x, int y, int z) {
-		return (world.getBlockMetadata(x, y, z) > 0x7 ? true : super.isReplaceable(world, x, y, z));
+	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
+		return (((Boolean) state.getValue(ETHEREAL)).booleanValue() ? null : super.getCollisionBoundingBox(world, pos, state));
 	}
 
 	@Override
-	public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
-		if (world.getBlockMetadata(x, y, z) > 0x7) {
+	public boolean isReplaceable(World world, BlockPos pos) {
+		return (((Boolean) world.getBlockState(pos).getValue(ETHEREAL)).booleanValue() ? true : super.isReplaceable(world, pos));
+	}
+
+	@Override
+	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
+		if (((Boolean) world.getBlockState(pos).getValue(ETHEREAL)).booleanValue()) {
 			setBlockBounds(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		} else {
 			setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
@@ -110,11 +123,11 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 	}
 
 	@Override
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
+	public boolean onSongPlayed(World world, BlockPos pos, EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
 		if (power > 4) {
-			int meta = world.getBlockMetadata(x, y, z);
-			if (song == requiredSongs.get((meta & ~0x8))) {
-				world.setBlockMetadataWithNotify(x, y, z, (meta < 0x8 ? (meta | 0x8) : (meta & ~0x8)), 2);
+			IBlockState state = world.getBlockState(pos);
+			if (song == ((BlockTime.EnumType) state.getValue(VARIANT)).getRequiredSong()) {
+				world.setBlockState(pos, state.withProperty(ETHEREAL, !((Boolean) state.getValue(ETHEREAL))), 2);
 				if (affected == 0) {
 					world.playSoundAtEntity(player, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 				}
@@ -125,33 +138,82 @@ public class BlockTime extends Block implements IDungeonBlock, ISongBlock
 	}
 
 	@Override
+	public String[] getItemBlockVariants() {
+		String[] variants = new String[BlockTime.EnumType.values().length];
+		for (BlockTime.EnumType type : BlockTime.EnumType.values()) {
+			variants[type.getMetadata()] = ModInfo.ID + ":" + type.getName();
+		}
+		return variants;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < names.length; ++i) {
-			list.add(new ItemStack(item, 1, i));
+		for (BlockTime.EnumType variant : BlockTime.EnumType.values()) {
+			list.add(new ItemStack(item, 1, variant.getMetadata()));
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		int i = (meta & ~0x8);
-		return (side < 2 ? iconEnd[i] : iconFace[i]);
+	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
+		IBlockState expected = getStateFromMeta(meta);
+		return ((BlockTime.EnumType) state.getValue(VARIANT)) == ((BlockTime.EnumType) expected.getValue(VARIANT));
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		iconFace = new IIcon[names.length];
-		iconEnd = new IIcon[names.length];
-		for (int i = 0; i < names.length; ++i) {
-			iconEnd[i] = register.registerIcon(ModInfo.ID + ":" + names[i]);
-			iconFace[i] = register.registerIcon(ModInfo.ID + ":" + names[i] + "_face");
-		}
+	public IBlockState getStateFromMeta(int meta) {
+		BlockTime.EnumType type = BlockTime.EnumType.byMetadata(meta);
+		return getDefaultState().withProperty(VARIANT, type).withProperty(ETHEREAL, Boolean.valueOf((meta & 0x8) > 0));
 	}
 
-	static {
-		requiredSongs.put(0, ZeldaSongs.songTime);
-		requiredSongs.put(1, ZeldaSongs.songZeldasLullaby);
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		int i = ((BlockTime.EnumType) state.getValue(VARIANT)).getMetadata();
+		if (((Boolean) state.getValue(ETHEREAL)).booleanValue()) {
+			i |= 0x8;
+		}
+		return i;
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, VARIANT, ETHEREAL);
+	}
+
+	public static enum EnumType implements IStringSerializable {
+		TIME(0, "time_block", ZeldaSongs.songTime),
+		ROYAL(1, "royal_block", ZeldaSongs.songZeldasLullaby);
+		private final int meta;
+		private final String name;
+		private final AbstractZeldaSong requiredSong;
+
+		private EnumType(int meta, String name, AbstractZeldaSong requiredSong) {
+			this.meta = meta;
+			this.name = name;
+			this.requiredSong = requiredSong;
+		}
+
+		public int getMetadata() {
+			return this.meta;
+		}
+
+		/**
+		 * Returns the song required to toggle this block's solid/ethereal state
+		 */
+		public AbstractZeldaSong getRequiredSong() {
+			return requiredSong;
+		}
+
+		@Override
+		public String getName() {
+			return this.name;
+		}
+
+		/**
+		 * Return block variant by metadata value
+		 */
+		public static EnumType byMetadata(int meta) {
+			return EnumType.values()[(meta & 0x7) % EnumType.values().length];
+		}
 	}
 }

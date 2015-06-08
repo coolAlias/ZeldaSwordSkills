@@ -34,9 +34,12 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.client.ZSSKeyHandler;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
@@ -48,8 +51,6 @@ import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -171,7 +172,7 @@ public class Dash extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		isActive = true;
-		initialPosition = Vec3.createVectorHelper(player.posX, player.posY + player.getEyeHeight() - 0.10000000149011612D, player.posZ);
+		initialPosition = new Vec3(player.posX, player.posY + player.getEyeHeight() - 0.10000000149011612D, player.posZ);
 		ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
 			target = skill.getCurrentTarget();
@@ -182,7 +183,7 @@ public class Dash extends SkillActive
 			double d0 = (target.posX - player.posX);
 			double d1 = (target.posY + (double)(target.height / 3.0F) - player.posY);
 			double d2 = (target.posZ - player.posZ);
-			trajectory = Vec3.createVectorHelper(d0, d1, d2).normalize();
+			trajectory = new Vec3(d0, d1, d2).normalize();
 		}
 		return isActive();
 	}
@@ -211,7 +212,7 @@ public class Dash extends SkillActive
 				if (mop != null) {
 					PacketDispatcher.sendToServer(new DashImpactPacket(player, mop));
 					// Player cannot attack directly after impacting something
-					player.attackTime = (player.capabilities.isCreativeMode ? 0 : 10 - level);
+					ZSSPlayerInfo.get(player).setAttackTime((player.capabilities.isCreativeMode ? 0 : 10 - level));
 					impactTime = 5;
 					if (mop.typeOfHit == MovingObjectType.ENTITY) {
 						target = mop.entityHit;

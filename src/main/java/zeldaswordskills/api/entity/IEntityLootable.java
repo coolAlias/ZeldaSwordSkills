@@ -33,14 +33,14 @@ public interface IEntityLootable {
 	 * @param whip		Type of whip being used to steal the item
 	 * @return			The chance that an item will be looted
 	 */
-	public float getLootableChance(EntityPlayer player, WhipType whip);
+	float getLootableChance(EntityPlayer player, WhipType whip);
 
 	/**
 	 * @param player	The whip-wielding thief attempting to steal
 	 * @param whip		Type of whip being used to steal the item
 	 * @return			The ItemStack that the thief will receive, possibly NULL
 	 */
-	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip);
+	ItemStack getEntityLoot(EntityPlayer player, WhipType whip);
 
 	/**
 	 * Called after each attempt to steal an item from this entity.
@@ -48,13 +48,13 @@ public interface IEntityLootable {
 	 * @param wasItemStolen		Whether an item was truly stolen or not
 	 * @return					True to prevent any further stealing attempts against this entity
 	 */
-	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen);
+	boolean onLootStolen(EntityPlayer player, boolean wasItemStolen);
 
 	/**
 	 * Whether the entity should take damage from the whip after having an item stolen
 	 * @param player	The whip-wielding thief that stole an item
 	 * @param whip		Type of whip used to steal the item
 	 */
-	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip);
+	boolean isHurtOnTheft(EntityPlayer player, WhipType whip);
 
 }

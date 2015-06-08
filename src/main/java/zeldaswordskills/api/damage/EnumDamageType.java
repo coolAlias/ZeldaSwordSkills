@@ -50,7 +50,7 @@ public enum EnumDamageType {
 	SHOCK,
 	/** Stun damage temporarily stuns affected entities */
 	STUN;
-	
+
 	/**
 	 * Handles secondary effects of this damage type upon damaging a living entity
 	 */
@@ -73,18 +73,18 @@ public enum EnumDamageType {
 		default:
 		}
 	}
-	
+
 	/** Map of damage types to resistance types */
 	public static final Map<EnumDamageType, Buff> damageResistMap = new EnumMap<EnumDamageType, Buff>(EnumDamageType.class);
 	/** Map of damage types to weakness types */
 	public static final Map<EnumDamageType, Buff> damageWeaknessMap = new EnumMap<EnumDamageType, Buff>(EnumDamageType.class);
-	
+
 	static {
 		// do not include FIRE, since it is handled by isFireDamage()
 		damageResistMap.put(COLD, Buff.RESIST_COLD);
 		damageResistMap.put(HOLY, Buff.RESIST_HOLY);
 		damageResistMap.put(SHOCK, Buff.RESIST_SHOCK);
-		
+
 		damageWeaknessMap.put(COLD, Buff.WEAKNESS_COLD);
 		damageWeaknessMap.put(HOLY, Buff.WEAKNESS_HOLY);
 		damageWeaknessMap.put(SHOCK, Buff.WEAKNESS_SHOCK);

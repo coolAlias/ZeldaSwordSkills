@@ -17,52 +17,42 @@
 
 package zeldaswordskills.client.render.block;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
-import zeldaswordskills.client.model.ModelCeramicJar;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-/**
- * 
- * Because I'm lazy and can't figure out how to render a model from ISimpleBlockRenderingHandler... derp.
- *
- */
-@SideOnly(Side.CLIENT)
 public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 {
-	/** Ceramic jar model texture */
-	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID + ":textures/entity/ceramic_jar.png");
+	private final RenderItem renderItem;
 
-	private ModelCeramicJar model = new ModelCeramicJar();
-
-	public RenderTileEntityCeramicJar() {}
-
-	@Override
-	public void renderTileEntityAt(TileEntity te, double dx, double dy, double dz, float partialTick) {
-		renderTileEntityJarAt((TileEntityCeramicJar) te, dx, dy, dz, partialTick);
+	public RenderTileEntityCeramicJar() {
+		this.renderItem = Minecraft.getMinecraft().getRenderItem();
 	}
 
-	/**
-	 * Renders the TileEntity for the jar at a position.
-	 */
-	public void renderTileEntityJarAt(TileEntityCeramicJar jar, double dx, double dy, double dz, float partialTick) {
-		bindTexture(texture);
-		GL11.glPushMatrix();
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GL11.glTranslated(dx + 0.5D, dy + 1.485D, dz + 0.5D);
-		GL11.glScalef(1.0F, -1.0F, -1.0F);
-		model.renderAll();
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-		GL11.glPopMatrix();
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+	@Override
+	public void renderTileEntityAt(TileEntity te, double dx, double dy, double dz, float partialTick, int blockDamageProgress) {
+		renderPedestal((TileEntityCeramicJar) te, dx, dy, dz, partialTick);
+	}
+
+	private void renderPedestal(TileEntityCeramicJar jar, double dx, double dy, double dz, float partialTick) {
+		ItemStack stack = jar.getStackInSlot(0);
+		if (stack != null) {
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(dx + 0.45D, dy + 0.2D, dz + 0.45D);
+			GlStateManager.enableRescaleNormal();
+			GlStateManager.scale(0.425F, 0.425F, 0.425F);
+			GlStateManager.rotate(45F, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotate(30F, 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotate((stack.getItem().isFull3D() ? 225.0F : 45.0F), 0.0F, 0.0F, 1.0F);
+			bindTexture(TextureMap.locationBlocksTexture);
+			renderItem.renderItemModel(stack);
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.popMatrix();
+		}
 	}
 }

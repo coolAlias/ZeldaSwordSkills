@@ -37,6 +37,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.entity.IEntityBackslice;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSClientEvents;
@@ -52,8 +54,6 @@ import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -205,7 +205,7 @@ public class BackSlice extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			if (keyPressed != null && keyPressed.getIsKeyPressed() && key == mc.gameSettings.keyBindForward) {
+			if (keyPressed != null && keyPressed.isKeyDown() && key == mc.gameSettings.keyBindForward) {
 				if (ticksTilFail > 0) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;
@@ -268,7 +268,7 @@ public class BackSlice extends SkillActive
 				speed = 1.0D;
 			}
 			double d = 0.15D * speed * speed;
-			if (player.isInWater() || player.handleLavaMovement()) {
+			if (player.isInWater() || player.isInLava()) {
 				d *= 0.15D;
 			}
 			Vec3 vec3 = player.getLookVec();

@@ -19,20 +19,17 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.item.ILiftBlock;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -44,7 +41,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * exceed the required strength. Blocks with tile entities cannot be moved.
  *
  */
-public class ItemPowerGauntlets extends Item implements ILiftBlock, IUnenchantable
+public class ItemPowerGauntlets extends BaseModItem implements ILiftBlock, IUnenchantable
 {
 	/** Max resistance that a block may have and still be picked up */
 	private final BlockWeight strength;
@@ -58,19 +55,13 @@ public class ItemPowerGauntlets extends Item implements ILiftBlock, IUnenchantab
 	}
 
 	@Override
-	public BlockWeight getLiftStrength(EntityPlayer player, ItemStack stack, Block block, int meta) {
+	public BlockWeight getLiftStrength(EntityPlayer player, ItemStack stack, IBlockState state) {
 		return strength;
 	}
 
 	@Override
-	public ItemStack onLiftBlock(EntityPlayer player, ItemStack stack, Block block, int meta) {
+	public ItemStack onLiftBlock(EntityPlayer player, ItemStack stack, IBlockState state) {
 		return stack;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
 	@Override

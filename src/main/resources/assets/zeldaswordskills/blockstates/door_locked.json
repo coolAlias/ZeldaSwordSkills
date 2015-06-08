@@ -1,0 +1,6 @@
+{
+    "variants": {
+    	"half=lower" : { "model" : "zeldaswordskills:door_locked_lower" },
+    	"half=upper" : { "model" : "zeldaswordskills:door_locked_upper" }
+    }
+}

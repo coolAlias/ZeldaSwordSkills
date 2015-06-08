@@ -19,6 +19,7 @@ package zeldaswordskills.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
@@ -53,34 +54,37 @@ public class TeleporterNoPortal extends Teleporter
 	public static void adjustPosY(Entity entity) {
 		int x = MathHelper.floor_double(entity.posX);
 		int z = MathHelper.floor_double(entity.posZ);
-		int y = entity.worldObj.getHeightValue(x, z);
-		switch(entity.worldObj.provider.dimensionId) {
+		BlockPos pos = entity.worldObj.getHeight(new BlockPos(x, 64, z));
+		switch(entity.worldObj.provider.getDimensionId()) {
 		case -1:
-			y -= 10;
+			pos = pos.down(10);
 			boolean flag = true;
-			while (y > 30 && flag) {
-				if (entity.worldObj.getBlock(x, y, z).getMaterial().blocksMovement() && entity.worldObj.isAirBlock(x, y + 1, z) && entity.worldObj.isAirBlock(x, y + 2, z)) {
+			while (pos.getY() > 30 && flag) {
+				if (entity.worldObj.getBlockState(pos).getBlock().getMaterial().blocksMovement() && entity.worldObj.isAirBlock(pos.up(1)) && entity.worldObj.isAirBlock(pos.up(2))) {
 					flag = false;
 				} else {
-					--y;
+					pos = pos.down(1);
 				}
 			}
 			break;
 		default:
 		}
 		if (entity instanceof EntityPlayer) {
-			((EntityPlayer) entity).setPositionAndUpdate((double) x + 0.5D, y + 1, (double) z + 0.5D);
+			((EntityPlayer) entity).setPositionAndUpdate((double) x + 0.5D, pos.up(1).getY(), (double) z + 0.5D);
 		} else {
-			entity.setPosition((double) x + 0.5D, y + 1, (double) z + 0.5D);
+			entity.setPosition((double) x + 0.5D, pos.up(1).getY(), (double) z + 0.5D);
 		}
 	}
 
 	@Override
-	public void placeInPortal(Entity entity, double dx, double dy, double dz, float yaw) {
+	public void placeInPortal(Entity entity, float yaw) {
+		int x = MathHelper.floor_double(entity.posX);
+		int y = MathHelper.floor_double(entity.posY) - 1;
+		int z = MathHelper.floor_double(entity.posZ);
 		if (entity instanceof EntityPlayer) {
-			((EntityPlayer) entity).setPositionAndUpdate(dx, dy, dz);
+			((EntityPlayer) entity).setPositionAndUpdate(x, y, z);
 		} else {
-			entity.setPosition(dx, dy, dz);
+			entity.setPosition(x, y, z);
 		}
 	}
 

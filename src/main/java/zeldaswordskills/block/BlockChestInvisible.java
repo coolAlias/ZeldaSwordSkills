@@ -19,20 +19,28 @@ package zeldaswordskills.block;
 
 import java.util.Random;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.ISongBlock;
-import zeldaswordskills.block.tileentity.TileEntityChestLocked;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockChestInvisible extends BlockChestLocked implements ISongBlock {
+public class BlockChestInvisible extends BlockChestLocked implements ICustomStateMapper, ISongBlock {
 
 	public BlockChestInvisible() {
 		super();
@@ -40,21 +48,22 @@ public class BlockChestInvisible extends BlockChestLocked implements ISongBlock 
 	}
 
 	@Override
-	public TileEntity createNewTileEntity(World world, int meta) {
-		return new TileEntityChestInvisible();
+	@SideOnly(Side.CLIENT)
+	public EnumWorldBlockLayer getBlockLayer() {
+		return EnumWorldBlockLayer.CUTOUT_MIPPED;
 	}
 
 	@Override
-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
 		return null;
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
 		if (world.isRemote) {
 			return true;
 		}
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(pos);
 		if (!(te instanceof IInventory)) {
 			return false;
 		}
@@ -66,11 +75,11 @@ public class BlockChestInvisible extends BlockChestLocked implements ISongBlock 
 	}
 
 	@Override
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
+	public boolean onSongPlayed(World world, BlockPos pos, EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
 		if (power > 4 && song == ZeldaSongs.songZeldasLullaby && affected == 0) {
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof IInventory) {
-				convertToChest((IInventory) te, world, x, y, z);
+				convertToChest((IInventory) te, world, pos);
 				world.playSoundAtEntity(player, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 				return true;
 			}
@@ -80,16 +89,21 @@ public class BlockChestInvisible extends BlockChestLocked implements ISongBlock 
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void randomDisplayTick(World world, int x, int y, int z, Random rand) {
-		double dx = (double) x + rand.nextFloat();
-		double dy = (double) y + 0.1D + (rand.nextFloat() * 0.5D);
-		double dz = (double) z + rand.nextFloat();
-		world.spawnParticle("depthsuspend", dx, dy, dz, 0.0D, 0.0D, 0.0D);
+	public void randomDisplayTick(World world, BlockPos pos, IBlockState state, Random rand) {
+		double dx = (double) pos.getX() + rand.nextFloat();
+		double dy = (double) pos.getY() + 0.1D + (rand.nextFloat() * 0.5D);
+		double dz = (double) pos.getZ() + rand.nextFloat();
+		world.spawnParticle(EnumParticleTypes.SUSPENDED_DEPTH, dx, dy, dz, 0.0D, 0.0D, 0.0D);
 	}
 
-	public static class TileEntityChestInvisible extends TileEntityChestLocked {
-		public TileEntityChestInvisible() {
-			super();
-		}
+	@Override
+	@SideOnly(Side.CLIENT)
+	public IStateMapper getCustomStateMap() {
+		return new StateMapperBase() {
+			@Override
+			protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+				return new ModelResourceLocation(ModInfo.ID + ":chest_invisible");
+			}
+		};
 	}
 }

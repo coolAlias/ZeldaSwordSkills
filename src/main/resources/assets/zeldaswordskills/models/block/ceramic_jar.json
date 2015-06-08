@@ -1,0 +1,197 @@
+{
+    "textures": {
+        "particle": "zeldaswordskills:blocks/ceramic_jar",
+        "end": "zeldaswordskills:blocks/ceramic_jar_end",
+        "side": "zeldaswordskills:blocks/ceramic_jar"
+    },
+    "elements": [
+        {   "from": [ 4.5, 0, 4.5 ],
+            "to": [ 10.5, 1, 10.5 ],
+            "faces": {
+                "down":  { "uv": [ 6, 1, 11, 7 ], "texture": "#side", "cullface": "down" },
+                "up":    { "uv": [ 0, 0, 6, 6 ], "texture": "#side" },
+                "north": { "uv": [ 0, 0, 6, 1 ], "texture": "#side" },
+                "south": { "uv": [ 0, 0, 6, 1 ], "texture": "#side" },
+                "west":  { "uv": [ 0, 0, 6, 1 ], "texture": "#side" },
+                "east":  { "uv": [ 0, 0, 6, 1 ], "texture": "#side" }
+            },
+            "__comment": "Next is all four side walls"
+        },
+        {   "from": [ 4, 1, 4 ],
+            "to": [ 11, 7, 5 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 7, 1 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 0, 7, 1 ], "texture": "#side" },
+                "north": { "uv": [ 0, 1, 7, 7 ], "texture": "#side" },
+                "south": { "uv": [ 0, 1, 7, 7 ], "texture": "#side" },
+                "west":    { "uv": [ 0, 1, 1, 7 ], "texture": "#side" },
+                "east":    { "uv": [ 0, 1, 1, 7 ], "texture": "#side" }
+            },
+            "__comment": "North wall"
+        },
+        {   "from": [ 4, 1, 10 ],
+            "to": [ 11, 7, 11 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 7, 1 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 0, 7, 1 ], "texture": "#side" },
+                "north": { "uv": [ 0, 1, 7, 7 ], "texture": "#side" },
+                "south": { "uv": [ 0, 1, 7, 7 ], "texture": "#side" },
+                "west":    { "uv": [ 0, 1, 1, 7 ], "texture": "#side" },
+                "east":    { "uv": [ 0, 1, 1, 7 ], "texture": "#side" }
+            },
+            "__comment": "South wall"
+        },
+        {   "from": [ 4, 1, 5 ],
+            "to": [ 5, 7, 10 ],
+            "faces": {
+                "down":  { "uv": [ 0, 1, 1, 6 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 1, 1, 6 ], "texture": "#side" },
+                "west":    { "uv": [ 1, 1, 6, 7 ], "texture": "#side" },
+                "east":    { "uv": [ 1, 1, 6, 7 ], "texture": "#side" }
+            },
+            "__comment": "West wall"
+        },
+        {   "from": [ 10, 1, 5 ],
+            "to": [ 11, 7, 10 ],
+            "faces": {
+                "down":  { "uv": [ 0, 1, 1, 6 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 1, 1, 6 ], "texture": "#side" },
+                "west":    { "uv": [ 1, 1, 6, 7 ], "texture": "#side" },
+                "east":    { "uv": [ 1, 1, 6, 7 ], "texture": "#side" }
+            },
+            "__comment": "East wall; next is top before neck"
+        },
+        {   "from": [ 4, 7, 4 ],
+            "to": [ 11, 8, 6 ],
+            "faces": {
+                "down":  { "uv": [ 0, 2, 7, 0 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 2, 7, 0 ], "texture": "#side" },
+                "north": { "uv": [ 0, 8, 7, 9 ], "texture": "#side" },
+                "south": { "uv": [ 0, 8, 7, 9 ], "texture": "#side" },
+                "west":    { "uv": [ 0, 0, 1, 1 ], "texture": "#side" },
+                "east":    { "uv": [ 0, 0, 1, 1 ], "texture": "#side" }
+            },
+            "__comment": "North portion of shoulder; top and bottom vertices flipped"
+        },
+        {   "from": [ 4, 7, 9 ],
+            "to": [ 11, 8, 11 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 7, 2 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 0, 7, 2 ], "texture": "#side" },
+                "north": { "uv": [ 0, 8, 7, 9 ], "texture": "#side" },
+                "south": { "uv": [ 0, 8, 7, 9 ], "texture": "#side" },
+                "west":    { "uv": [ 0, 0, 1, 1 ], "texture": "#side" },
+                "east":    { "uv": [ 0, 0, 1, 1 ], "texture": "#side" }
+            },
+            "__comment": "South portion of shoulder"
+        },
+        {   "from": [ 4, 7, 6 ],
+            "to": [ 6, 8, 9 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 2, 3 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 0, 2, 3 ], "texture": "#side" },
+                "west":    { "uv": [ 1, 8, 4, 9 ], "texture": "#side" },
+                "east":    { "uv": [ 1, 8, 4, 9 ], "texture": "#side" }
+            },
+            "__comment": "West portion of shoulder"
+        },
+        {   "from": [ 9, 7, 6 ],
+            "to": [ 11, 8, 9 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 2, 3 ], "texture": "#side" },
+                "up":    { "uv": [ 0, 0, 2, 3 ], "texture": "#side" },
+                "west":    { "uv": [ 1, 8, 4, 9 ], "texture": "#side" },
+                "east":    { "uv": [ 1, 8, 4, 9 ], "texture": "#side" }
+            },
+            "__comment": "East portion of shoulder; neck will be 5x2x5"
+        },
+        {   "from": [ 5, 8, 5 ],
+            "to": [ 10, 9.5, 6 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 5, 1 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 5, 1 ], "texture": "#end" },
+                "north": { "uv": [ 0, 0, 5, 2 ], "texture": "#end" },
+                "south": { "uv": [ 0, 0, 5, 2 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 1, 2 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 1, 2 ], "texture": "#end" }
+            },
+            "__comment": "North wall of neck"
+        },
+        {   "from": [ 5, 8, 9 ],
+            "to": [ 10, 9.5, 10 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 5, 1 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 5, 1 ], "texture": "#end" },
+                "north": { "uv": [ 0, 0, 5, 2 ], "texture": "#end" },
+                "south": { "uv": [ 0, 0, 5, 2 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 1, 2 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 1, 2 ], "texture": "#end" }
+            },
+            "__comment": "South wall of neck"
+        },
+        {   "from": [ 5, 8, 6 ],
+            "to": [ 6, 9.5, 9 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 1, 3 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 1, 3 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 3, 2 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 3, 2 ], "texture": "#end" }
+            },
+            "__comment": "West wall of neck"
+        },
+        {   "from": [ 9, 8, 6 ],
+            "to": [ 10, 9.5, 9 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 1, 3 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 1, 3 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 3, 2 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 3, 2 ], "texture": "#end" }
+            },
+            "__comment": "East wall of neck; next is lip"
+        },
+        {   "from": [ 4.5, 9.5, 4.5 ],
+            "to": [ 10.5, 10.5, 6.5 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 6, 2 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 6, 2 ], "texture": "#end" },
+                "north": { "uv": [ 0, 0, 6, 1 ], "texture": "#end" },
+                "south": { "uv": [ 0, 0, 6, 1 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" }
+            },
+            "__comment": "North part of lip"
+        },
+        {   "from": [ 4.5, 9.5, 8.5 ],
+            "to": [ 10.5, 10.5, 10.5 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 6, 2 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 6, 2 ], "texture": "#end" },
+                "north": { "uv": [ 0, 0, 6, 1 ], "texture": "#end" },
+                "south": { "uv": [ 0, 0, 6, 1 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" }
+            },
+            "__comment": "South part of lip"
+        },
+        {   "from": [ 4.5, 9.5, 6.5 ],
+            "to": [ 6.5, 10.5, 8.5 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 2, 2 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 2, 2 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" }
+            },
+            "__comment": "West part of lip"
+        },
+        {   "from": [ 8.5, 9.5, 6.5 ],
+            "to": [ 10.5, 10.5, 8.5 ],
+            "faces": {
+                "down":  { "uv": [ 0, 0, 2, 2 ], "texture": "#end" },
+                "up":    { "uv": [ 0, 0, 2, 2 ], "texture": "#end" },
+                "west":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" },
+                "east":    { "uv": [ 0, 0, 2, 1 ], "texture": "#end" }
+            },
+            "__comment": "East part of lip"
+        }
+    ]
+}

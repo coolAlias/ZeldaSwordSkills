@@ -19,25 +19,26 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import mods.battlegear2.api.IAllowItem;
-import mods.battlegear2.api.ISheathed;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
@@ -47,25 +48,22 @@ import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.PacketISpawnParticles;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
 
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Method;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
+/*
 @Optional.InterfaceList(value={
 		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true)
 })
-public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IAllowItem, ISheathed
+ */
+public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable // TODO , IAllowItem, ISheathed
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -85,9 +83,8 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
 
-	// func_150897_b is canHarvestBlock
 	@Override
-	public boolean func_150897_b(Block block) {
+	public boolean canHarvestBlock(Block block) {
 		return block instanceof ISmashable || block instanceof BlockBreakable;
 	}
 
@@ -107,12 +104,12 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 	}
 
 	@Override
-	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta) {
-		return (block instanceof BlockBreakable) ? strength.next() : strength;
+	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing side) {
+		return (state.getBlock() instanceof BlockBreakable) ? strength.next() : strength;
 	}
 
 	@Override
-	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed) {
+	public void onBlockSmashed(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing side, boolean wasSmashed) {
 		if (!wasSmashed) {
 			WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 		}
@@ -150,7 +147,7 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 
 	@Override
 	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.block;
+		return EnumAction.BLOCK;
 	}
 
 	@Override
@@ -160,7 +157,7 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (player.attackTime == 0) {
+		if (ZSSPlayerInfo.get(player).canAttack()) {
 			player.setItemInUse(stack, this.getMaxItemUseDuration(stack));
 		}
 		return stack;
@@ -168,7 +165,7 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		if (this == ZSSItems.hammerSkull && player.attackTime == 0) {
+		if (this == ZSSItems.hammerSkull && ZSSPlayerInfo.get(player).canAttack()) {
 			int ticksInUse = getMaxItemUseDuration(stack) - ticksRemaining;
 			float charge = (float) ticksInUse / 40.0F;
 			charge = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
@@ -183,7 +180,7 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 				DamageSource specialAttack = new DamageSourceBaseDirect("player", player).setStunDamage((int)(60 * charge), 5, true).setDamageBypassesArmor();
 				float damage = (weaponDamage * charge) / 2.0F;
 				if (damage > 0.5F) {
-					List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(4.0D, 0.0D, 4.0D));
+					List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, player.getEntityBoundingBox().expand(4.0D, 0.0D, 4.0D));
 					for (EntityLivingBase entity : entities) {
 						if (entity != player && entity.onGround) {
 							entity.attackEntityFrom(specialAttack, damage);
@@ -210,16 +207,16 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 
 	@SideOnly(Side.CLIENT)
 	private void spawnParticlesAt(World world, double x, double y, double z) {
-		String particle;
 		int posY = MathHelper.floor_double(y);
-		Block block = world.getBlock(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
-		if (block.getMaterial() != Material.air) {
-			particle = "blockcrack_" + Block.getIdFromBlock(block) + "_" + world.getBlockMetadata(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z));
+		IBlockState state = world.getBlockState(new BlockPos(MathHelper.floor_double(x), posY - 1, MathHelper.floor_double(z)));
+		Block block = state.getBlock();
+		if (block.getRenderType() != -1) {
+			int stateId = Block.getStateId(state);
 			for (int i = 0; i < 4; ++i) {
 				double dx = x + world.rand.nextFloat() - 0.5F;
 				double dy = posY + world.rand.nextFloat() * 0.2F;
 				double dz = z + world.rand.nextFloat() - 0.5F;
-				world.spawnParticle(particle, dx, dy, dz, world.rand.nextGaussian(), 0, world.rand.nextGaussian());
+				world.spawnParticle(EnumParticleTypes.BLOCK_CRACK, dx, dy, dz, world.rand.nextGaussian(), 0, world.rand.nextGaussian(), stateId);
 			}
 		}
 	}
@@ -227,14 +224,8 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 	@Override
 	public Multimap getAttributeModifiers(ItemStack stack) {
 		Multimap multimap = super.getAttributeModifiers(stack);
-		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", (double) weaponDamage, 0));
+		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", (double) weaponDamage, 0));
 		return multimap;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
 	@Override
@@ -243,6 +234,8 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 	}
 
+	/*
+	// TODO
 	@Method(modid="battlegear2")
 	@Override
 	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
@@ -254,4 +247,5 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 	public boolean sheatheOnBack(ItemStack stack) {
 		return true;
 	}
+	 */
 }

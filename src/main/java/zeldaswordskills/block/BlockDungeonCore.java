@@ -17,12 +17,15 @@
 
 package zeldaswordskills.block;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockStone;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 
@@ -31,8 +34,6 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
  * This block is the core of the dungeon, providing the tile entity that verifies the
  * integrity of the structure and 'disables' indestructible blocks in addition to
  * playing the medley when breached.
- * 
- * Uses the same bit flag as {@link #BlockDungeonStone}
  *
  */
 public class BlockDungeonCore extends BlockDungeonStone
@@ -49,35 +50,40 @@ public class BlockDungeonCore extends BlockDungeonStone
 	}
 
 	@Override
-	public float getBlockHardness(World world, int x, int y, int z) {
-		return (world.getBlockMetadata(x, y, z) < 0x8 ? blockHardness : -1.0F);
+	public float getBlockHardness(World world, BlockPos pos) {
+		return (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue() ? -1.0F : blockHardness);
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, Block oldBlock, int oldMeta) {
-		TileEntity te = world.getTileEntity(x, y, z);
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
+		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityDungeonCore) {
 			((TileEntityDungeonCore) te).onBlockBroken();
 		}
-		super.breakBlock(world, x, y, z, oldBlock, oldMeta);
+		super.breakBlock(world, pos, state);
 	}
 
 	@Override
-	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
+	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
 		// super plays the break sound and prints a message: only call if unbreakable
-		if (world.getBlockMetadata(x, y, z) > 7) {
-			super.onBlockClicked(world, x, y, z, player);
+		if (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue()) {
+			super.onBlockClicked(world, pos, player);
 		}
 	}
 
 	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack) {
 		if (entity instanceof EntityPlayer) {
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityDungeonCore) {
 				((TileEntityDungeonCore) te).setSpawner();
 			}
 		}
-		super.onBlockPlacedBy(world, x, y, z, entity, stack);
+		super.onBlockPlacedBy(world, pos, state, entity, stack);
+	}
+
+	@Override
+	public IBlockState getDefaultRenderState(boolean isUnbreakable) {
+		return Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, isUnbreakable ? BlockStone.EnumType.GRANITE_SMOOTH : BlockStone.EnumType.GRANITE);
 	}
 }

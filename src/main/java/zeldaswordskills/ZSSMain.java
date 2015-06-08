@@ -18,6 +18,16 @@
 package zeldaswordskills;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.command.ZSSCommands;
 import zeldaswordskills.entity.ZSSEntities;
-import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.handler.ZSSEntityEvents;
@@ -40,16 +49,7 @@ import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
 import zeldaswordskills.world.gen.feature.WorldGenGossipStones;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLInterModComms;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
+import zeldaswordskills.world.gen.feature.WorldGenJars;
 
 /**
  * 
@@ -67,7 +67,7 @@ public class ZSSMain
 	@Mod.Instance(ModInfo.ID)
 	public static ZSSMain instance;
 
-	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
+	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.SERVER_PROXY)
 	public static CommonProxy proxy;
 
 	public static final Logger logger = LogManager.getLogger(ModInfo.ID);
@@ -94,7 +94,7 @@ public class ZSSMain
 
 	@Mod.EventHandler
 	public void load(FMLInitializationEvent event) {
-		proxy.registerRenderers();
+		proxy.init();
 		ZSSItems.init();
 		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
@@ -109,6 +109,7 @@ public class ZSSMain
 		if (Config.getGossipStoneRate() > 0) {
 			MinecraftForge.EVENT_BUS.register(WorldGenGossipStones.INSTANCE);
 		}
+		MinecraftForge.EVENT_BUS.register(WorldGenJars.INSTANCE);
 		String link = "https://raw.githubusercontent.com/coolAlias/ZeldaSwordSkills/master/src/main/resources/versionlist.json";
 		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
 	}
@@ -118,7 +119,7 @@ public class ZSSMain
 		Config.postInit();
 		if (isBG2Enabled) {
 			ItemHeroBow.registerBG2();
-			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
+			// TODO MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
 		DungeonLootLists.init();
 	}

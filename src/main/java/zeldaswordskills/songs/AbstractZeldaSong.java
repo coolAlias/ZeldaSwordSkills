@@ -22,8 +22,10 @@ import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -35,6 +37,7 @@ import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
+import zeldaswordskills.util.WorldUtils;
 
 /**
  * 
@@ -63,7 +66,7 @@ public abstract class AbstractZeldaSong
 
 	/**
 	 * Verifies uniqueness of song name and notes and adds it to the registry.
-	 * @param unlocalizedName	See {@link #unlocalizedName}, e.g. 'zss.songname'
+	 * @param unlocalizedName	See {@link #unlocalizedName}, e.g. 'songname'
 	 * @param minDuration		See {@link #minDuration}; measured in ticks
 	 * @param notes				Minimum of 3 notes are required
 	 */
@@ -119,7 +122,7 @@ public abstract class AbstractZeldaSong
 	/**
 	 * True if this song can be learned from {@link BlockSongInscription}
 	 */
-	public boolean canLearnFromInscription(World world, int x, int y, int z, Block block, int meta) {
+	public boolean canLearnFromInscription(World world, IBlockState state) {
 		return true;
 	}
 
@@ -272,15 +275,16 @@ public abstract class AbstractZeldaSong
 	 */
 	private void notifySongBlocks(World world, EntityPlayer player, int power, int radius) {
 		int x = MathHelper.floor_double(player.posX);
-		int y = MathHelper.floor_double(player.boundingBox.minY);
+		int y = MathHelper.floor_double(player.getEntityBoundingBox().minY);
 		int z = MathHelper.floor_double(player.posZ);
 		int affected = 0;
 		for (int i = (x - radius); i <= (x + radius); ++i) {
 			for (int j = (y - (radius / 2)); j <= (y + (radius / 2)); ++ j) {
 				for (int k = (z - radius); k <= (z + radius); ++k) {
-					Block block = world.getBlock(i, j, k);
+					BlockPos pos = new BlockPos(i, j, k);
+					Block block = world.getBlockState(pos).getBlock();
 					if (block instanceof ISongBlock) {
-						if (((ISongBlock) block).onSongPlayed(world, i, j, k, player, this, power, affected)) {
+						if (((ISongBlock) block).onSongPlayed(world, pos, player, this, power, affected)) {
 							++affected;
 						}
 					}
@@ -294,8 +298,7 @@ public abstract class AbstractZeldaSong
 	 */
 	private void notifySongEntities(World world, EntityPlayer player, int power, int radius) {
 		int affected = 0;
-		@SuppressWarnings("unchecked")
-		List<ISongEntity> entities = world.getEntitiesWithinAABB(ISongEntity.class, player.boundingBox.expand(radius, (double) radius / 2.0D, radius));
+		List<ISongEntity> entities = WorldUtils.getEntitiesWithinAABB(world, ISongEntity.class, player.getEntityBoundingBox().expand(radius, (double) radius / 2.0D, radius));
 		for (ISongEntity entity : entities) {
 			if (entity.onSongPlayed(player, this, power, affected)) {
 				++affected;

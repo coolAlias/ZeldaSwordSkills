@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_column",
+    "textures": {
+        "end": "zeldaswordskills:blocks/time_block",
+        "side": "zeldaswordskills:blocks/time_block_face"
+    }
+}

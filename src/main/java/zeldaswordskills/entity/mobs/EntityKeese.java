@@ -31,11 +31,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -100,7 +101,10 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	}
 
 	/** Chunk coordinates toward which this Keese is currently heading */
-	private ChunkCoordinates currentFlightTarget;
+	private BlockPos currentFlightTarget;
+
+	/** Replacement for removed 'attackTime' */
+	protected int attackTime;
 
 	/** Data watcher index for this Keese's type */
 	private static final int TYPE_INDEX = 17;
@@ -148,14 +152,14 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	 * Sets the Keese's type when spawned
 	 */
 	private void setTypeOnSpawn() {
-		if (worldObj.provider.isHellWorld && rand.nextFloat() < Config.getKeeseCursedChance()) {
+		if (worldObj.provider.getDimensionId() == -1 && rand.nextFloat() < Config.getKeeseCursedChance()) {
 			setType(KeeseType.CURSED);
 		} else if (rand.nextFloat() < Config.getKeeseCursedChance()) { // second chance for both Hell and everywhere else
 			setType(KeeseType.CURSED);
 		} else if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
 			setType(rand.nextInt(KeeseType.values().length));
 		} else {
-			BiomeGenBase biome = worldObj.getBiomeGenForCoords(MathHelper.floor_double(posX), MathHelper.floor_double(posZ));
+			BiomeGenBase biome = worldObj.getBiomeGenForCoords(new BlockPos(this));
 			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
 			for (KeeseType t : KeeseType.values()) {
 				if (t.favoredBiome == biomeType || t.secondBiome == biomeType) {
@@ -235,7 +239,8 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	 */
 	private DamageSource getDamageSource() {
 		if (getShockTime() > 0) {
-			return new DamageSourceShock("shock", this, worldObj.difficultySetting.getDifficultyId() * 50, 1.0F);
+			float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+			return new DamageSourceShock("shock", this, MathHelper.floor_double(f * 50), 1.0F);
 		}
 		switch(getType()) {
 		case FIRE: return new EntityDamageSource("mob", this).setFireDamage();
@@ -244,17 +249,17 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 		}
 	}
 
-	// rarity may be 1 or 0, with 1 being more rare
 	@Override
-	protected void dropRareDrop(int rarity) {
+	protected void addRandomDrop() {
+		int rarity = rand.nextInt(8);
 		if (getType() == KeeseType.CURSED) {
 			switch(rarity) {
-			case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal()), 0.0F); break;
+			case 0: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal()), 0.0F); break;
 			default: entityDropItem(new ItemStack(rand.nextInt(8) == 0 ? ZSSItems.smallHeart : ZSSItems.heartPiece), 0.0F);
 			}
 		} else {
 			switch(rarity) {
-			case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.MONSTER_CLAW.ordinal()), 0.0F); break;
+			case 0: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.MONSTER_CLAW.ordinal()), 0.0F); break;
 			default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
@@ -332,6 +337,9 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		if (attackTime > 0) {
+			--attackTime;
+		}
 		if (!swarmSpawned && !worldObj.isRemote) {
 			swarmSpawned = true;
 			if (rand.nextFloat() < Config.getKeeseSwarmChance()) {
@@ -354,7 +362,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 				worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
 		}
-		if (!worldObj.isRemote && worldObj.difficultySetting == EnumDifficulty.PEACEFUL) {
+		if (!worldObj.isRemote && worldObj.getDifficulty() == EnumDifficulty.PEACEFUL) {
 			this.setDead();
 		}
 	}
@@ -367,25 +375,24 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 		}
 		super.updateAITasks();
 		if (!getIsBatHanging()) {
-			if (currentFlightTarget != null && (!worldObj.isAirBlock(currentFlightTarget.posX, currentFlightTarget.posY, currentFlightTarget.posZ) || currentFlightTarget.posY < 1)) {
+			if (currentFlightTarget != null && (!worldObj.isAirBlock(currentFlightTarget) || currentFlightTarget.getY() < 1)) {
 				currentFlightTarget = null;
 			}
-
-			if (currentFlightTarget == null || rand.nextInt(30) == 0 || currentFlightTarget.getDistanceSquared((int) posX, (int) posY, (int) posZ) < (attackingPlayer != null ? 1.0F : 4.0F)) {
+			BlockPos pos = new BlockPos(this);
+			if (currentFlightTarget == null || rand.nextInt(30) == 0 || currentFlightTarget.distanceSq(pos) < (attackingPlayer != null ? 1.0F : 4.0F)) {
 				attackingPlayer = getLastAttacker() instanceof EntityPlayer ? (EntityPlayer) getLastAttacker() : worldObj.getClosestPlayerToEntity(this, 8.0D);
 				if (attackingPlayer != null && !attackingPlayer.capabilities.isCreativeMode &&
 						(attackingPlayer.getCurrentArmor(ArmorIndex.WORN_HELM) == null || attackingPlayer.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != ZSSItems.maskSkull))
 				{
-					currentFlightTarget = new ChunkCoordinates((int) attackingPlayer.posX, (int) attackingPlayer.posY + 1, (int) attackingPlayer.posZ);
-					worldObj.playAuxSFXAtEntity(attackingPlayer, 1015, (int) posX, (int) posY, (int) posZ, 0);
+					currentFlightTarget = new BlockPos((int) attackingPlayer.posX, (int) attackingPlayer.posY + 1, (int) attackingPlayer.posZ);
+					worldObj.playAuxSFXAtEntity(attackingPlayer, 1015, pos, 0);
 				} else {
-					currentFlightTarget = new ChunkCoordinates((int) posX + rand.nextInt(7) - rand.nextInt(7), (int) posY + rand.nextInt(6) - 2, (int) posZ + rand.nextInt(7) - rand.nextInt(7));
+					currentFlightTarget = new BlockPos((int) posX + rand.nextInt(7) - rand.nextInt(7), (int) posY + rand.nextInt(6) - 2, (int) posZ + rand.nextInt(7) - rand.nextInt(7));
 				}
 			}
-
-			double d0 = (double) currentFlightTarget.posX + 0.5D - posX;
-			double d1 = (double) currentFlightTarget.posY + 0.1D - posY;
-			double d2 = (double) currentFlightTarget.posZ + 0.5D - posZ;
+			double d0 = (double) currentFlightTarget.getX() + 0.5D - posX;
+			double d1 = (double) currentFlightTarget.getY() + 0.1D - posY;
+			double d2 = (double) currentFlightTarget.getZ() + 0.5D - posZ;
 			motionX += (Math.signum(d0) * 0.5D - motionX) * 0.10000000149011612D;
 			motionY += (Math.signum(d1) * 0.699999988079071D - motionY) * 0.10000000149011612D;
 			motionZ += (Math.signum(d2) * 0.5D - motionZ) * 0.10000000149011612D;
@@ -393,12 +400,12 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 			float f1 = MathHelper.wrapAngleTo180_float(f - rotationYaw);
 			moveForward = 0.5F;
 			rotationYaw += f1;
-
-			if (attackingPlayer == null && rand.nextInt(100) == 0 && worldObj.getBlock(MathHelper.floor_double(posX), (int) posY + 1, MathHelper.floor_double(posZ)).isNormalCube()) {
+			if (attackingPlayer == null && rand.nextInt(100) == 0 && worldObj.getBlockState(pos.up()).getBlock().isNormalCube()) {
 				setIsBatHanging(true);
 			} else if (canShock() && getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
 				if (attackingPlayer != null && ((recentlyHit > 0 && rand.nextInt(20) == 0) || rand.nextInt(300) == 0)) {
-					setShockTime(rand.nextInt(50) + (worldObj.difficultySetting.getDifficultyId() * (rand.nextInt(20) + 10)));
+					float difficulty = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+					setShockTime(rand.nextInt(50) + MathHelper.floor_double(difficulty * (rand.nextInt(20) + 10)));
 				}
 			}
 		}
@@ -406,7 +413,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
-		if (isEntityInvulnerable()) {
+		if (isEntityInvulnerable(source)) {
 			return false;
 		} else {
 			if (!worldObj.isRemote && getIsBatHanging()) {
@@ -430,7 +437,6 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 
 				return false;
 			}
-
 			return super.attackEntityFrom(source, amount);
 		}
 	}
@@ -450,34 +456,32 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	}
 
 	@Override
-	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
-		data = super.onSpawnWithEgg(data);
+	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
+		data = super.onInitialSpawn(difficulty, data);
 		setTypeOnSpawn();
 		return data;
 	}
 
 	@Override
 	public boolean getCanSpawnHere() {
-		return (worldObj.difficultySetting != EnumDifficulty.PEACEFUL && (posY < 64.0D || rand.nextInt(16) > 13) && isValidLightLevel() && !worldObj.isAnyLiquid(boundingBox));
+		return (worldObj.getDifficulty() != EnumDifficulty.PEACEFUL && (posY < 64.0D || rand.nextInt(16) > 13) && isValidLightLevel() && !worldObj.isAnyLiquid(getEntityBoundingBox()));
 	}
 
 	/**
 	 * Copied from EntityMob
 	 */
 	protected boolean isValidLightLevel() {
-		int i = MathHelper.floor_double(posX);
-		int j = MathHelper.floor_double(boundingBox.minY);
-		int k = MathHelper.floor_double(posZ);
-		if (worldObj.getSavedLightValue(EnumSkyBlock.Sky, i, j, k) > rand.nextInt(32)) {
+		BlockPos blockpos = new BlockPos(posX, getEntityBoundingBox().minY, posZ);
+		if (this.worldObj.getLightFor(EnumSkyBlock.SKY, blockpos) > rand.nextInt(32)) {
 			return false;
 		}
-		int l = worldObj.getBlockLightValue(i, j, k);
+		int i = worldObj.getLightFromNeighbors(blockpos);
 		if (worldObj.isThundering()) {
-			int i1 = worldObj.skylightSubtracted;
-			worldObj.skylightSubtracted = 10;
-			l = worldObj.getBlockLightValue(i, j, k);
-			worldObj.skylightSubtracted = i1;
+			int j = worldObj.getSkylightSubtracted();
+			worldObj.setSkylightSubtracted(10);
+			i = worldObj.getLightFromNeighbors(blockpos);
+			worldObj.setSkylightSubtracted(j);
 		}
-		return l <= this.rand.nextInt(8);
+		return i <= rand.nextInt(8);
 	}
 }

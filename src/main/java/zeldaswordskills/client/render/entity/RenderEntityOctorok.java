@@ -18,19 +18,17 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderLiving;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-
-import zeldaswordskills.client.model.ModelOctorok;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityOctorok extends RenderLiving
@@ -38,8 +36,8 @@ public class RenderEntityOctorok extends RenderLiving
 	private static final ResourceLocation texture1 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok1.png");
 	private static final ResourceLocation texture2 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok2.png");
 
-	public RenderEntityOctorok(ModelBase model, float shadowSize) {
-		super(new ModelOctorok(), shadowSize);
+	public RenderEntityOctorok(RenderManager renderManager, ModelBase model, float shadowSize) {
+		super(renderManager, model, shadowSize);
 	}
 
 	public void renderLivingSquid(EntityOctorok entity, double dx, double dy, double dz, float f, float f1) {
@@ -49,11 +47,11 @@ public class RenderEntityOctorok extends RenderLiving
 	protected void rotateSquidsCorpse(EntityOctorok octorok, float dx, float dy, float dz) {
 		float f3 = octorok.prevSquidPitch + (octorok.squidPitch - octorok.prevSquidPitch) * dz;
 		float f4 = octorok.prevSquidYaw + (octorok.squidYaw - octorok.prevSquidYaw) * dz;
-		GL11.glTranslatef(0.0F, 0.5F, 0.0F);
-		GL11.glRotatef(180.0F - dy, 0.0F, 1.0F, 0.0F);
-		GL11.glRotatef(f3, 1.0F, 0.0F, 0.0F);
-		GL11.glRotatef(f4, 0.0F, 1.0F, 0.0F);
-		GL11.glTranslatef(0.0F, -1.2F, 0.0F);
+		GlStateManager.translate(0.0F, 0.5F, 0.0F);
+		GlStateManager.rotate(180.0F - dy, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate(f3, 1.0F, 0.0F, 0.0F);
+		GlStateManager.rotate(f4, 0.0F, 1.0F, 0.0F);
+		GlStateManager.translate(0.0F, -1.2F, 0.0F);
 	}
 
 	protected float handleRotationFloat(EntityOctorok octorok, float f) {

@@ -22,12 +22,12 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 

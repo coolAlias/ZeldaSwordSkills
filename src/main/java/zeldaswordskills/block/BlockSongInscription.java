@@ -18,25 +18,24 @@
 package zeldaswordskills.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import zeldaswordskills.block.tileentity.TileEntityInscription;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
-import zeldaswordskills.util.SideHit;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.util.BlockRotationData;
 
 /**
  * 
@@ -44,8 +43,11 @@ import cpw.mods.fml.relauncher.SideOnly;
  * long as {@link AbstractZeldaSong#canLearnFromInscription} returns true.
  *
  */
-public class BlockSongInscription extends BlockContainer
+public class BlockSongInscription extends Block implements ITileEntityProvider, IVanillaRotation
 {
+	/** The direction the inscription faces is opposite of the block face to which it is attached */
+	public static final PropertyDirection FACING = PropertyDirection.create("facing");
+
 	/** One pixel's thickness */
 	private static final float px1 = (1.0F / 16.0F);
 
@@ -54,7 +56,8 @@ public class BlockSongInscription extends BlockContainer
 
 	public BlockSongInscription() {
 		super(Material.iron);
-		setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, px1, 1.0F);
+		setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.UP));
+		setBlockBounds(px2, 0.0F, px2, 1.0F - px2, px1, 1.0F - px2);
 		setHardness(50.0F);
 		setResistance(2000.0F);
 		setStepSound(soundTypeMetal);
@@ -72,7 +75,7 @@ public class BlockSongInscription extends BlockContainer
 	}
 
 	@Override
-	public boolean renderAsNormalBlock() {
+	public boolean isFullCube() {
 		return false;
 	}
 
@@ -82,18 +85,20 @@ public class BlockSongInscription extends BlockContainer
 	}
 
 	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+	public boolean canHarvestBlock(IBlockAccess world, BlockPos pos, EntityPlayer player) {
 		return false;
 	}
 
+	/*
 	@Override
-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
 		return null;
 	}
+	 */
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
-		TileEntity te = world.getTileEntity(x, y, z);
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
+		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityInscription) {
 			return ((TileEntityInscription) te).onActivated(player);
 		}
@@ -101,24 +106,33 @@ public class BlockSongInscription extends BlockContainer
 	}
 
 	@Override
-	public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int meta) {
-		switch(side) {
-		case 2: return 3;
-		case 3: return 2;
-		case 4: return 5;
-		case 5: return 4;
-		case SideHit.TOP: return 0;
-		case SideHit.BOTTOM: return 1;
-		}
-		return meta;
+	public boolean canPlaceBlockOnSide(World world, BlockPos pos, EnumFacing side) {
+		return world.isSideSolid(pos.offset(side.getOpposite()), side, true);
 	}
 
 	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
+	public boolean canPlaceBlockAt(World world, BlockPos pos) {
+		for (EnumFacing face : EnumFacing.values()) {
+			// TODO many vanilla blocks pass 'true' as 3rd parameter
+			if (world.isSideSolid(pos.offset(face), face.getOpposite(), true)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+		// TODO vanilla button also passes 'true' here
+		return world.isSideSolid(pos.offset(face.getOpposite()), face) ? getDefaultState().withProperty(FACING, face) : getDefaultState().withProperty(FACING, EnumFacing.UP);
+	}
+
+	@Override
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack) {
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("SongName")) {
 			AbstractZeldaSong song = ZeldaSongs.getSongByName(stack.getTagCompound().getString("SongName"));
 			if (song != null) {
-				TileEntity te = world.getTileEntity(x, y, z);
+				TileEntity te = world.getTileEntity(pos);
 				if (te instanceof TileEntityInscription) {
 					((TileEntityInscription) te).setSong(song);
 				}
@@ -132,41 +146,44 @@ public class BlockSongInscription extends BlockContainer
 	}
 
 	@Override
-	public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
+	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
 		float f = 1.0F - px2;
-		switch(world.getBlockMetadata(x, y, z)) {
-		case 1: setBlockBounds(px2, 1.0F - px1, px2, f, 1.0F, f); break;
-		case 2: setBlockBounds(px2, px2, 0.0F, f, f, px1); break;
-		case 3: setBlockBounds(px2, px2, 1.0F - px1, f, f, 1.0F); break;
-		case 4: setBlockBounds(0.0F, px2, px2, px1, f, f); break;
-		case 5: setBlockBounds(1.0F - px1, px2, px2, 1.0F, f, f); break;
-		default: setBlockBounds(px2, 0.0F, px2, f, px1, f); break;
+		switch((EnumFacing) world.getBlockState(pos).getValue(FACING)) {
+		case DOWN: setBlockBounds(px2, 1.0F - px1, px2, f, 1.0F, f); break;
+		case UP: setBlockBounds(px2, 0.0F, px2, f, px1, f); break;
+		case NORTH: setBlockBounds(px2, px2, 1.0F - px1, f, f, 1.0F); break;
+		case SOUTH: setBlockBounds(px2, px2, 0.0F, f, f, px1); break;
+		case WEST: setBlockBounds(1.0F - px1, px2, px2, 1.0F, f, f); break;
+		case EAST: setBlockBounds(0.0F, px2, px2, px1, f, f); break;
 		}
 	}
 
 	@Override
-	public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
-		int meta = world.getBlockMetadata(x, y, z);
-		int x1 = x;
-		int y1 = y;
-		int z1 = z;
-		ForgeDirection side = null;
-		switch(meta) {
-		case 0: --y1; side = ForgeDirection.UP; break;
-		case 1: ++y1; side = ForgeDirection.DOWN; break;
-		case 2: --z1; side = ForgeDirection.SOUTH; break;
-		case 3: ++z1; side = ForgeDirection.NORTH; break;
-		case 4: --x1; side = ForgeDirection.EAST; break;
-		case 5: ++x1; side = ForgeDirection.WEST; break;
-		}
-		if (!world.isSideSolid(x1, y1, z1, side)) {
-			world.setBlockToAir(x, y, z);
+	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighbor) {
+		EnumFacing face = (EnumFacing) state.getValue(FACING);
+		if (!world.isSideSolid(pos.offset(face.getOpposite()), face)) { // TODO , true) is used in many vanilla blocks
+			dropBlockAsItem(world, pos, state, 0);
+			world.setBlockToAir(pos);
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(FACING, EnumFacing.getFront(meta));
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return ((EnumFacing) state.getValue(FACING)).getIndex();
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, FACING);
+	}
+
+	@Override
+	public BlockRotationData.Rotation getRotationPattern() {
+		return BlockRotationData.Rotation.PISTON_CONTAINER;
 	}
 }

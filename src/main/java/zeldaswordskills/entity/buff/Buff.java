@@ -127,9 +127,9 @@ public enum Buff
 			entity.posY = entity.prevPosY - entity.motionY;
 			entity.posZ = entity.prevPosZ - entity.motionZ;
 			entity.motionX = entity.motionY = entity.motionZ = 0.0D;
-			entity.attackTime = 20;
+			// TODO entity.attackTime = 20; // attacks are already canceled in LivingAttackEvent
 			if (entity instanceof EntityCreature) {
-				((EntityCreature) entity).setTarget(null);
+				((EntityCreature) entity).setAttackTarget(null);
 			}
 			break;
 		default:

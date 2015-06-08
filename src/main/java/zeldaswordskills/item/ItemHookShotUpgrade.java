@@ -19,7 +19,6 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -29,11 +28,12 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.TradeHandler;
@@ -41,23 +41,28 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * All HookShot add-ons belong to this class. Handles adding tooltip and custom trades.
+ * All HookShot upgrades belong to this class. Handles adding tooltip and custom trades.
  *
  */
-public class ItemHookShotUpgrade extends Item implements IUnenchantable
+public class ItemHookShotUpgrade extends BaseModItem implements IUnenchantable
 {
-	/** Current types of add-ons available */
-	public static enum AddonType { EXTENSION, STONECLAW, MULTI };
-
-	protected static final String[] addonNames = {"Extender","Claw","Multi"};
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
+	/** Current types of available hookshot upgrades */
+	public static enum UpgradeType {
+		EXTENDER("extender"), CLAW("claw"), MULTI("multi");
+		public final String unlocalizedName;
+		private UpgradeType(String name) {
+			this.unlocalizedName = name;
+		}
+		/**
+		 * Return upgrade type from item damage
+		 */
+		public static UpgradeType fromDamage(int damage) {
+			return values()[damage % values().length];
+		}
+	};
 
 	public ItemHookShotUpgrade() {
 		super();
@@ -67,8 +72,8 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 	}
 
 	/** Returns this addon's enum Type from stack damage value */
-	public AddonType getType(int damage) {
-		return (damage > -1 ? AddonType.values()[damage % AddonType.values().length] : AddonType.EXTENSION);
+	public UpgradeType getType(int damage) {
+		return (damage > -1 ? UpgradeType.values()[damage % UpgradeType.values().length] : UpgradeType.EXTENDER);
 	}
 
 	@Override
@@ -95,39 +100,33 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int type) {
-		return iconArray[getType(type).ordinal()];
-	}
-
-	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName() + "." + stack.getItemDamage();
+		return getUnlocalizedName() + "_" + UpgradeType.fromDamage(stack.getItemDamage()).unlocalizedName;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < AddonType.values().length; ++i) {
+		for (int i = 0; i < UpgradeType.values().length; ++i) {
 			list.add(new ItemStack(item, 1, i));
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[AddonType.values().length];
-		for (int i = 0; i < AddonType.values().length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + addonNames[getType(i).ordinal()].toLowerCase());
+	public String[] getVariants() {
+		String[] variants = new String[UpgradeType.values().length];
+		for (UpgradeType upgrade : UpgradeType.values()) {
+			variants[upgrade.ordinal()] = ModInfo.ID + ":hookshot_upgrade_" + upgrade.unlocalizedName; 
 		}
+		return variants;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.upgrade.desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.upgrade.desc.1"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.upgrade.desc.2"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot_upgrade.desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot_upgrade.desc.1"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot_upgrade.desc.2"));
 	}
 
 	/**
@@ -160,7 +159,7 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 	 * that also doesn't have a trade recipe already in the merchant's list, or null
 	 */
 	private MerchantRecipe getHookShotTradeFromInventory(ItemStack stack, EntityPlayer player, MerchantRecipeList list) {
-		AddonType type = ((ItemHookShotUpgrade) stack.getItem()).getType(stack.getItemDamage());
+		UpgradeType type = ((ItemHookShotUpgrade) stack.getItem()).getType(stack.getItemDamage());
 		for (ItemStack invStack : player.inventory.mainInventory) {
 			if (invStack != null && invStack.getItem() instanceof ItemHookShot) {
 				if (!MerchantRecipeHelper.doesListContain(list, TradeHandler.getTrade(type, invStack))) {

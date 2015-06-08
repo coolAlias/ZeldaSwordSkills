@@ -18,19 +18,17 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.client.model.ModelBomb;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -54,7 +52,8 @@ public class RenderEntityBomb extends Render
 
 	protected ModelBase model;
 
-	public RenderEntityBomb() {
+	public RenderEntityBomb(RenderManager renderManager) {
+		super(renderManager);
 		model = new ModelBomb();
 	}
 
@@ -70,16 +69,16 @@ public class RenderEntityBomb extends Render
 	}
 
 	public void renderEntityModel(Entity bomb, double x, double y, double z, float yaw, float partialTick) {
-		GL11.glPushMatrix();
+		GlStateManager.pushMatrix();
 		float scale = bomb.ticksExisted % 13 > 10 ? 1.65F : 1.25F;
 		bindTexture(getEntityTexture(bomb));
-		GL11.glTranslated(x, y, z);
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		GL11.glRotatef(150, 1F, 1F, 300F);
-		GL11.glScalef(scale, scale, scale);
-		GL11.glTranslatef(0.0F, -1.0F, 0.0F);
+		GlStateManager.translate(x, y, z);
+		GlStateManager.enableRescaleNormal();
+		GlStateManager.rotate(150, 1F, 1F, 300F);
+		GlStateManager.scale(scale, scale, scale);
+		GlStateManager.translate(0.0F, -1.0F, 0.0F);
 		model.render(bomb, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0475F);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-		GL11.glPopMatrix();
+		GlStateManager.disableRescaleNormal();
+		GlStateManager.popMatrix();
 	}
 }

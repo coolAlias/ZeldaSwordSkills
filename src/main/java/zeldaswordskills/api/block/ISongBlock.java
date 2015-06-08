@@ -18,6 +18,7 @@
 package zeldaswordskills.api.block;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.songs.AbstractZeldaSong;
@@ -38,6 +39,6 @@ public interface ISongBlock {
 	 * @param affected	Number of blocks already affected by the song
 	 * @return			True if the block was affected
 	 */
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, AbstractZeldaSong song, int power, int affected);
+	boolean onSongPlayed(World world, BlockPos pos, EntityPlayer player, AbstractZeldaSong song, int power, int affected);
 
 }

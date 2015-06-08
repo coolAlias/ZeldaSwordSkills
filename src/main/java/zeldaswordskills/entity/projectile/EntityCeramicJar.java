@@ -23,6 +23,7 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
@@ -58,13 +59,13 @@ public class EntityCeramicJar extends EntityThrowable
 	}
 
 	@Override
-	protected float func_70182_d() {
-		return 1.0F;
+	protected float getVelocity() {
+		return 0.65F;
 	}
 
 	@Override
 	protected float getGravityVelocity() {
-		return 0.1F;
+		return 0.05F;
 	}
 
 	@Override
@@ -72,12 +73,11 @@ public class EntityCeramicJar extends EntityThrowable
 		if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), 2.0F);
 		}
+		int stateId = Block.getStateId(ZSSBlocks.ceramicJar.getDefaultState());
 		for (int i = 0; i < 20; ++i) {
-			worldObj.spawnParticle("blockcrack_" + Block.getIdFromBlock(ZSSBlocks.ceramicJar) + "_0", posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
+			worldObj.spawnParticle(EnumParticleTypes.BLOCK_CRACK, posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian(), stateId);
 		}
-
 		WorldUtils.playSoundAtEntity(this, Sounds.BREAK_JAR, 0.4F, 0.5F);
-
 		if (stack == null && rand.nextFloat() < Config.getJarDropChance()) {
 			stack = ChestGenHooks.getInfo(DungeonLootLists.JAR_DROPS).getOneItem(rand);
 		}

@@ -20,17 +20,17 @@ package zeldaswordskills.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.render.EntityRendererAlt;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillActive;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -56,7 +56,7 @@ public class TargetingTickHandler
 	public void onRenderTick(RenderTickEvent event) {
 		if (event.phase == Phase.START) {
 			if (mc.thePlayer != null && ZSSPlayerSkills.get(mc.thePlayer) != null) {
-				updateRenderer();
+				// TODO updateRenderer();
 				ZSSPlayerSkills.get(mc.thePlayer).onRenderTick(event.renderTickTime);
 				// Hack for magic rods, since the item's update tick isn't called frequently enough
 				if (mc.thePlayer.getItemInUse() != null && mc.thePlayer.getItemInUse().getItem() instanceof ItemMagicRod) {

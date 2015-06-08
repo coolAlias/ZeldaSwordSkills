@@ -18,59 +18,63 @@
 package zeldaswordskills.block;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import zeldaswordskills.util.BlockRotationData;
 
-public class BlockTargetDirectional extends BlockTarget
+public class BlockTargetDirectional extends BlockTarget implements IVanillaRotation
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon iconFace;
+	public static final PropertyDirection FACING = PropertyDirection.create("facing");
 
 	public BlockTargetDirectional(Material material) {
 		super(material);
 	}
 
 	@Override
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
-		return ((side + 1) == world.getBlockMetadata(x, y, z) ? Result.ALLOW : Result.DENY);
+	public Result canGrabBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
+		return (face.getOpposite() == ((EnumFacing) world.getBlockState(pos).getValue(FACING)) ? Result.ALLOW : Result.DENY);
 	}
 
 	@Override
-	public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int meta) {
-		return side + 1;
+	public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ, int meta, EntityLivingBase entity) {
+		return getStateFromMeta(meta).withProperty(FACING, face.getOpposite());
 	}
 
 	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
-		// add 1 to all meta values so 0 can flag block in inventory (original: 2, 5, 3, 4)
-		int face = MathHelper.floor_double((double)(entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-		byte meta = (byte)(face == 0 ? 3 : face == 1 ? 6 : face == 2 ? 4 : 5);
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack) {
+		EnumFacing face = EnumFacing.fromAngle(entity.rotationYaw);
 		if (entity.rotationPitch < -45.0F) {
-			meta = 1;
+			face = EnumFacing.UP;
 		} else if (entity.rotationPitch > 45.0F) {
-			meta = 2;
+			face = EnumFacing.DOWN;
 		}
-		world.setBlockMetadataWithNotify(x, y, z, meta, 3);
+		world.setBlockState(pos, state.withProperty(FACING, face), 3);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		return meta == 0 ? (side == 1 ? iconFace : blockIcon) : ((side + 1) != meta ? blockIcon : iconFace);
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(FACING, EnumFacing.getFront(meta));
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_side");
-		iconFace = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_face");
+	public int getMetaFromState(IBlockState state) {
+		return ((EnumFacing) state.getValue(FACING)).getIndex();
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, FACING);
+	}
+
+	@Override
+	public BlockRotationData.Rotation getRotationPattern() {
+		return BlockRotationData.Rotation.PISTON_CONTAINER;
 	}
 }

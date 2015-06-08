@@ -1,0 +1,6 @@
+{
+    "variants": {
+    	"unbreakable=false" : { "model" : "zeldaswordskills:gossip_stone" },
+    	"unbreakable=true" : { "model" : "zeldaswordskills:gossip_stone" }
+    }
+}

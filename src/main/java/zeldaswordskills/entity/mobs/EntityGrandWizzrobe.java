@@ -24,6 +24,8 @@ import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -50,8 +52,8 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		tasks.addTask(0, new EntityAILevitate(this, 2.5D));
 		targetTasks.taskEntries.clear();
 		targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
-		func_110163_bv(); // sets persistence required to true, meaning will not despawn
+		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+		enablePersistence();
 		setType(rand.nextInt(WizzrobeType.values().length));
 		setSize(1.0F, 3.0F);
 		experienceValue = 50;
@@ -86,7 +88,8 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 
 	@Override
 	public int getTotalArmorValue() {
-		return super.getTotalArmorValue() + (worldObj.difficultySetting.getDifficultyId() * 4);
+		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+		return super.getTotalArmorValue() + MathHelper.floor_double(f * 4);
 	}
 
 	@Override
@@ -154,12 +157,12 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		super.dropFewItems(recentlyHit, lootingLevel);
-		entityDropItem(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), 0.0F);
+		entityDropItem(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), 0.0F);
 	}
 
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
-		return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+		return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
 	}
 
 	@Override

@@ -1,4 +1,5 @@
-@API(owner = "zeldaswordskills", provides = "ZeldaDamageAPI", apiVersion = "0.3")
+@API(owner = "zeldaswordskills", provides = "ZeldaDamageAPI", apiVersion = "0.4")
 package zeldaswordskills.api.damage;
 
-import cpw.mods.fml.common.API;
+import net.minecraftforge.fml.common.API;
+

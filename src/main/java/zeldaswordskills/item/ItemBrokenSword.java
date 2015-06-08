@@ -19,9 +19,6 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -33,17 +30,18 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
@@ -51,19 +49,16 @@ import zeldaswordskills.util.PlayerUtils;
 
 import com.google.common.collect.Multimap;
 
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Method;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 /**
  * 
  * Broken version of each sword; can only be repaired by a blacksmith.
  *
  */
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegearWeapon
+// TODO @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+public class ItemBrokenSword extends BaseModItem implements IUnenchantable // TODO, IBattlegearWeapon
 {
+	private static final String[] parentSwords = new String[]{"sword_kokiri","sword_ordon","sword_giant","sword_darknut"};
+
 	public ItemBrokenSword() {
 		super();
 		setFull3D();
@@ -79,9 +74,10 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 			boolean isGoron = (entity instanceof EntityGoron);
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			Item brokenItem = Item.getItemById(stack.getItemDamage());
+			Item brokenItem = ItemBrokenSword.getSwordByDamage(stack.getItemDamage());
 			if (!(brokenItem instanceof ItemSword) || (brokenItem instanceof ItemZeldaSword && !((ItemZeldaSword) brokenItem).givesBrokenItem)) {
 				ZSSMain.logger.warn("Broken sword contained an invalid item: " + brokenItem + "; defaulting to Ordon Sword");
+				stack.setItemDamage(1);
 				brokenItem = ZSSItems.swordOrdon;
 			}
 			if (villager.getProfession() == 3 || isGoron) {
@@ -104,38 +100,36 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 			} else {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.sorry");
 			}
-
 			return true;
 		}
-
 		return false;
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int damage) {
-		Item sword = Item.getItemById(damage);
-		if (sword instanceof ItemZeldaSword && ((ItemZeldaSword) sword).givesBrokenItem) {
-			return sword.getIconFromDamage(-1); // -1 returns brokenIcon for ItemZeldaSword
-		} else {
-			return itemIcon;
-		}
-	}
-
-	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
-		Item sword = Item.getItemById(stack.getItemDamage());
-		String name = (sword instanceof ItemZeldaSword && ((ItemZeldaSword) sword).givesBrokenItem) ? sword.getUnlocalizedName() : ZSSItems.swordOrdon.getUnlocalizedName();
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal(name + ".name");
+		Item sword = ItemBrokenSword.getSwordByDamage(stack.getItemDamage());
+		if (sword == null) {
+			ZSSMain.logger.warn("Unable to determine parent sword for broken sword with damage value " + stack.getItemDamage());
+			return super.getItemStackDisplayName(stack);
+		}
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal(sword.getUnlocalizedName() + ".name");
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordKokiri)));
-		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordOrdon)));
-		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordGiant)));
-		list.add(new ItemStack(item, 1, Item.getIdFromItem(ZSSItems.swordDarknut)));
+		for (int i = 0; i < parentSwords.length; ++i) {
+			list.add(new ItemStack(item, 1, i));
+		}
+	}
+
+	@Override
+	public String[] getVariants() {
+		String[] variants = new String[parentSwords.length];
+		for (int i = 0; i < parentSwords.length; ++i) {
+			variants[i] = ModInfo.ID + ":broken_" + parentSwords[i];
+		}
+		return variants;
 	}
 
 	@Override
@@ -145,18 +139,37 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":broken_sword_ordon");
-	}
-
-	@Override
 	public Multimap getAttributeModifiers(ItemStack stack) {
 		Multimap multimap = super.getAttributeModifiers(stack);
-		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(field_111210_e, "Weapon modifier", 2.0D, 0));
+		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", 2.0D, 0));
 		return multimap;
 	}
 
+	/**
+	 * Returns the broken version of the item, if any (may return NULL)
+	 */
+	public static ItemStack getBrokenSwordFor(Item item) {
+		String name = item.getUnlocalizedName();
+		name = name.substring(name.lastIndexOf(".") + 1);
+		for (int i = 0; i < parentSwords.length; ++i) {
+			if (parentSwords[i].equals(name)) {
+				return new ItemStack(ZSSItems.swordBroken, 1, i);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the full version of this broken sword
+	 */
+	public static Item getSwordByDamage(int damage) {
+		if (damage > -1 && damage < parentSwords.length) {
+			return GameRegistry.findItem(ModInfo.ID, parentSwords[damage]);
+		}
+		return ZSSItems.swordOrdon;
+	}
+
+	/*
 	@Method(modid="battlegear2")
 	@Override
 	public boolean sheatheOnBack(ItemStack stack) {
@@ -196,4 +209,5 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IBattlegear
 	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
 		return true;
 	}
+	 */
 }

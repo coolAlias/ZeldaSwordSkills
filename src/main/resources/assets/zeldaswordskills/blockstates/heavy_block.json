@@ -1,0 +1,6 @@
+{
+    "variants": {
+    	"variant=barrier_light" : { "model" : "zeldaswordskills:barrier_light" },
+    	"variant=barrier_heavy" : { "model" : "zeldaswordskills:barrier_heavy" }
+    }
+}

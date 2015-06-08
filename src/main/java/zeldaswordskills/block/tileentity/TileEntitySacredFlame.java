@@ -18,11 +18,13 @@
 package zeldaswordskills.block.tileentity;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.Constants;
+import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.ref.Config;
 
-public class TileEntitySacredFlame extends TileEntity
+public class TileEntitySacredFlame extends TileEntity implements IUpdatePlayerListBox
 {
 	/** Minimum date before next spawn reset */
 	private long nextResetDate = 0;
@@ -37,11 +39,10 @@ public class TileEntitySacredFlame extends TileEntity
 	}
 
 	@Override
-	public void updateEntity() {
+	public void update() {
 		if (nextResetDate > 0 && worldObj.getWorldTime() > nextResetDate) {
 			nextResetDate = 0;
-			int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
-			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, meta & ~0x8, 3);
+			worldObj.setBlockState(pos, worldObj.getBlockState(pos).withProperty(BlockSacredFlame.EXTINGUISHED, Boolean.valueOf(false)), 3);
 		}
 	}
 

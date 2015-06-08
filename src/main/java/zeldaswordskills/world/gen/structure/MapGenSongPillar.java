@@ -27,12 +27,13 @@ import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraftforge.common.util.ForgeDirection;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
@@ -79,7 +80,7 @@ public class MapGenSongPillar extends ZSSMapGenBase
 		loadOrCreateData(worldObj);
 		int x = (chunkX << 4) + rand.nextInt(16);
 		int z = (chunkZ << 4) + rand.nextInt(16);
-		biome = world.getBiomeGenForCoords(x, z);
+		biome = world.getBiomeGenForCoords(new BlockPos(x, 64, z));
 		boolean flag = (biome == BiomeGenBase.swampland && rand.nextFloat() < 0.35F);
 		boolean flag2 = (biome == BiomeGenBase.savanna && rand.nextFloat() < 0.35F);
 		song = (flag ? ZeldaSongs.songSoaring : (flag2 ? ZeldaSongs.songSun : null));
@@ -93,7 +94,7 @@ public class MapGenSongPillar extends ZSSMapGenBase
 	}
 
 	private boolean generate2(Random rand, int x, int z) {
-		int y = worldObj.getHeightValue(x, z) - 1;
+		int y = worldObj.getHeight(new BlockPos(x, 64, z)).down().getY();
 		if (rand.nextFloat() < (rand.nextFloat() * 0.2F) && canGenerateAt(worldObj, x, y, z)) {
 			doGenerate(worldObj, rand, x, y, z);
 			return true;
@@ -152,67 +153,67 @@ public class MapGenSongPillar extends ZSSMapGenBase
 		for (int i = x - 1; i <= x + 1; ++i) {
 			for (int k = z - 1; k <= z + 1; ++k) {
 				meta = (rand.nextFloat() < 0.2F ? 1 : rand.nextFloat() < 0.2F ? 2 : 0);
-				world.setBlock(i, y, k, Blocks.stonebrick, meta, 2);
+				world.setBlockState(new BlockPos(i, y, k), Blocks.stonebrick.getStateFromMeta(meta), 2);
 			}
 		}
-		world.setBlock(x, y, z + 2, Blocks.stonebrick, (rand.nextFloat() < 0.4F ? 1 : 0), 2);
-		world.setBlock(x, y, z - 2, Blocks.stonebrick, (rand.nextFloat() < 0.4F ? 1 : 0), 2);
-		world.setBlock(x + 2, y, z, Blocks.stonebrick, (rand.nextFloat() < 0.4F ? 1 : 0), 2);
-		world.setBlock(x - 2, y, z, Blocks.stonebrick, (rand.nextFloat() < 0.4F ? 1 : 0), 2);
+		world.setBlockState(new BlockPos(x, y, z + 2), Blocks.stonebrick.getStateFromMeta(rand.nextFloat() < 0.4F ? 1 : 0), 2);
+		world.setBlockState(new BlockPos(x, y, z - 2), Blocks.stonebrick.getStateFromMeta(rand.nextFloat() < 0.4F ? 1 : 0), 2);
+		world.setBlockState(new BlockPos(x + 2, y, z), Blocks.stonebrick.getStateFromMeta(rand.nextFloat() < 0.4F ? 1 : 0), 2);
+		world.setBlockState(new BlockPos(x - 2, y, z), Blocks.stonebrick.getStateFromMeta(rand.nextFloat() < 0.4F ? 1 : 0), 2);
 		if (song == null) {
-			if (world.isSideSolid(x + 2, y, z + 2, ForgeDirection.UP) && rand.nextFloat() < 0.35F) {
-				StructureGenUtils.setBlockIfReplaceable(world, x + 2, y + 1, z + 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x + 2, y, z + 2), EnumFacing.UP) && rand.nextFloat() < 0.35F) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x + 2, y + 1, z + 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			if (world.isSideSolid(x - 2, y, z + 2, ForgeDirection.UP) && rand.nextFloat() < 0.35F) {
-				StructureGenUtils.setBlockIfReplaceable(world, x - 2, y + 1, z + 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x - 2, y, z + 2), EnumFacing.UP) && rand.nextFloat() < 0.35F) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x - 2, y + 1, z + 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			if (world.isSideSolid(x + 2, y , z - 2, ForgeDirection.UP) && rand.nextFloat() < 0.35F) {
-				StructureGenUtils.setBlockIfReplaceable(world, x + 2, y + 1, z - 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x + 2, y , z - 2), EnumFacing.UP) && rand.nextFloat() < 0.35F) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x + 2, y + 1, z - 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			if (world.isSideSolid(x - 2, y, z - 2, ForgeDirection.UP) && rand.nextFloat() < 0.35F) {
-				StructureGenUtils.setBlockIfReplaceable(world, x - 2, y + 1, z - 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x - 2, y, z - 2), EnumFacing.UP) && rand.nextFloat() < 0.35F) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x - 2, y + 1, z - 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			world.setBlock(x, y + 1, z, Blocks.stonebrick, 2, 2);
-			world.setBlock(x, y + 2, z, Blocks.stonebrick, 1, 2);
+			world.setBlockState(new BlockPos(x, y + 1, z), Blocks.stonebrick.getStateFromMeta(2), 2);
+			world.setBlockState(new BlockPos(x, y + 2, z), Blocks.stonebrick.getStateFromMeta(1), 2);
 			if (rand.nextFloat() < 0.5F) {
-				world.setBlock(x, y + 3, z, Blocks.stonebrick, 1, 2);
-				world.setBlock(x, y + 4, z, Blocks.stonebrick, 1, 2);
+				world.setBlockState(new BlockPos(x, y + 3, z), Blocks.stonebrick.getStateFromMeta(1), 2);
+				world.setBlockState(new BlockPos(x, y + 4, z), Blocks.stonebrick.getStateFromMeta(1), 2);
 				if (rand.nextFloat() < 0.5F) {
-					world.setBlock(x + 1, y + 4, z, Blocks.stone_brick_stairs, 5, 2);
+					world.setBlockState(new BlockPos(x + 1, y + 4, z), Blocks.stone_brick_stairs.getStateFromMeta(5), 2);
 				}
 				if (rand.nextFloat() < 0.5F) {
-					world.setBlock(x - 1, y + 4, z, Blocks.stone_brick_stairs, 4, 2);
+					world.setBlockState(new BlockPos(x - 1, y + 4, z), Blocks.stone_brick_stairs.getStateFromMeta(4), 2);
 				}
 				if (rand.nextFloat() < 0.5F) {
-					world.setBlock(x, y + 4, z + 1, Blocks.stone_brick_stairs, 7, 2);
+					world.setBlockState(new BlockPos(x, y + 4, z + 1), Blocks.stone_brick_stairs.getStateFromMeta(7), 2);
 				}
 				if (rand.nextFloat() < 0.5F) {
-					world.setBlock(x, y + 4, z - 1, Blocks.stone_brick_stairs, 6, 2);
+					world.setBlockState(new BlockPos(x, y + 4, z - 1), Blocks.stone_brick_stairs.getStateFromMeta(6), 2);
 				}
 			}
 		} else {
-			if (world.isSideSolid(x + 2, y, z + 2, ForgeDirection.UP)) {
-				StructureGenUtils.setBlockIfReplaceable(world, x + 2, y + 1, z + 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x + 2, y, z + 2), EnumFacing.UP)) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x + 2, y + 1, z + 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			if (world.isSideSolid(x - 2, y, z + 2, ForgeDirection.UP)) {
-				StructureGenUtils.setBlockIfReplaceable(world, x - 2, y + 1, z + 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x - 2, y, z + 2), EnumFacing.UP)) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x - 2, y + 1, z + 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			if (world.isSideSolid(x + 2, y , z - 2, ForgeDirection.UP)) {
-				StructureGenUtils.setBlockIfReplaceable(world, x + 2, y + 1, z - 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x + 2, y , z - 2), EnumFacing.UP)) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x + 2, y + 1, z - 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			if (world.isSideSolid(x - 2, y, z - 2, ForgeDirection.UP)) {
-				StructureGenUtils.setBlockIfReplaceable(world, x - 2, y + 1, z - 2, Blocks.stonebrick, 3);
+			if (world.isSideSolid(new BlockPos(x - 2, y, z - 2), EnumFacing.UP)) {
+				StructureGenUtils.setBlockIfReplaceable(world, new BlockPos(x - 2, y + 1, z - 2), Blocks.stonebrick.getStateFromMeta(3));
 			}
-			world.setBlock(x, y + 1, z, Blocks.stonebrick, 2, 2);
-			world.setBlock(x, y + 2, z, Blocks.stonebrick, 1, 2);
-			world.setBlock(x, y + 3, z, Blocks.stonebrick, 1, 2);
-			world.setBlock(x, y + 4, z, ZSSBlocks.secretStone, 3, 2); // stonebrick secret stone
-			world.setBlock(x + 1, y + 4, z, Blocks.stone_brick_stairs, 5, 2);
-			world.setBlock(x - 1, y + 4, z, Blocks.stone_brick_stairs, 4, 2);
-			world.setBlock(x, y + 4, z + 1, Blocks.stone_brick_stairs, 7, 2);
-			world.setBlock(x, y + 4, z - 1, Blocks.stone_brick_stairs, 6, 2);
-			world.setBlock(x, y + 5, z, ZSSBlocks.inscription, 0, 2);
-			TileEntity te = world.getTileEntity(x, y + 5, z);
+			world.setBlockState(new BlockPos(x, y + 1, z), Blocks.stonebrick.getStateFromMeta(2), 2);
+			world.setBlockState(new BlockPos(x, y + 2, z), Blocks.stonebrick.getStateFromMeta(1), 2);
+			world.setBlockState(new BlockPos(x, y + 3, z), Blocks.stonebrick.getStateFromMeta(1), 2);
+			world.setBlockState(new BlockPos(x, y + 4, z), ZSSBlocks.secretStone.getStateFromMeta(3), 2); // stonebrick secret stone
+			world.setBlockState(new BlockPos(x + 1, y + 4, z), Blocks.stone_brick_stairs.getStateFromMeta(5), 2);
+			world.setBlockState(new BlockPos(x - 1, y + 4, z), Blocks.stone_brick_stairs.getStateFromMeta(4), 2);
+			world.setBlockState(new BlockPos(x, y + 4, z + 1), Blocks.stone_brick_stairs.getStateFromMeta(7), 2);
+			world.setBlockState(new BlockPos(x, y + 4, z - 1), Blocks.stone_brick_stairs.getStateFromMeta(6), 2);
+			world.setBlockState(new BlockPos(x, y + 5, z), ZSSBlocks.inscription.getDefaultState(), 2);
+			TileEntity te = world.getTileEntity(new BlockPos(x, y + 5, z));
 			if (te instanceof TileEntityInscription) {
 				((TileEntityInscription) te).setSong(song);
 			}
@@ -224,13 +225,13 @@ public class MapGenSongPillar extends ZSSMapGenBase
 	 * are comprised of non-solid blocks and / or all the same block
 	 */
 	private boolean canGenerateAt(World world, int x, int y, int z) {
-		Block block = world.getBlock(x, y, z);
+		Block block = world.getBlockState(new BlockPos(x, y, z)).getBlock();
 		Block block2;
 		for (int i = x - 1; i <= x + 1; ++i) {
 			for (int j = y - 1; j <= y; ++j) {
 				for (int k = z - 1; k <= z + 1; ++k) {
-					block2 = world.getBlock(i, j, k);
-					if (block2 instanceof IDungeonBlock || world.getBlock(i, j + 4, k) instanceof IDungeonBlock) {
+					block2 = world.getBlockState(new BlockPos(i, j, k)).getBlock();
+					if (block2 instanceof IDungeonBlock || world.getBlockState(new BlockPos(i, j + 4, k)).getBlock() instanceof IDungeonBlock) {
 						return false;
 					} else if (j < y) {
 						if (!block2.getMaterial().isSolid() || block2.getMaterial() == Material.leaves) {

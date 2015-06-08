@@ -43,5 +43,5 @@ public interface IUnenchantable {
 	 * @param enchantedBook	The Enchanted Book
 	 * @return	Result of the combination, or null to prevent enchantment
 	 */
-	//public ItemStack getAnvilResult(ItemStack toEnchant, ItemStack enchantedBook);
+	//ItemStack getAnvilResult(ItemStack toEnchant, ItemStack enchantedBook);
 }

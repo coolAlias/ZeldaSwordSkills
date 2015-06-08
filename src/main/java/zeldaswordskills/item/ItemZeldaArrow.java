@@ -17,12 +17,10 @@
 
 package zeldaswordskills.item;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.ref.ModInfo;
 
 /**
  * 
@@ -30,26 +28,25 @@ import zeldaswordskills.ref.ModInfo;
  * Battlegear2's quiver system.
  *
  */
-public class ItemZeldaArrow extends Item
+public class ItemZeldaArrow extends BaseModItem
 {
 	/** Whether this arrow should glow as if enchanted */
 	private final boolean isMagic;
 
 	/**
-	 * @param name Used as texture name; unlocalized name is 'zss.name'
+	 * @param name Unlocalized name
 	 * @param isMagic Gives this arrow the enchanted glow if true
 	 */
 	public ItemZeldaArrow(String name, boolean isMagic) {
 		super();
 		this.isMagic = isMagic;
-		setUnlocalizedName("zss." + name);
-		setTextureName(ModInfo.ID + ":" + name);
+		setUnlocalizedName(name);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack, int pass) {
+	public boolean hasEffect(ItemStack stack) {
 		return isMagic;
 	}
 }

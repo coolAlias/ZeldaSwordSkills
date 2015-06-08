@@ -22,6 +22,7 @@ import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
@@ -29,7 +30,6 @@ import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.MortalDraw;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 

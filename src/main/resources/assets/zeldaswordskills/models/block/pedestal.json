@@ -1,0 +1,7 @@
+{
+    "parent": "minecraft:block/half_slab",
+    "textures": {
+        "top": "zeldaswordskills:blocks/pedestal_top",
+        "bottom": "zeldaswordskills:blocks/pedestal_bottom"
+    }
+}

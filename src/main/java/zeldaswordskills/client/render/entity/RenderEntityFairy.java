@@ -17,23 +17,19 @@
 
 package zeldaswordskills.client.render.entity;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-
-import zeldaswordskills.entity.EntityFairy;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityFairy extends Render
@@ -41,14 +37,15 @@ public class RenderEntityFairy extends Render
 	/** Copy of XP Orb texture */
 	private static final ResourceLocation texture = new ResourceLocation(ModInfo.ID, "textures/entity/fairy.png");
 
-	public RenderEntityFairy() {
+	public RenderEntityFairy(RenderManager renderManager) {
+		super(renderManager);
 		shadowSize = 0.15F;
 		shadowOpaque = 0.75F;
 	}
 
 	public void renderFairy(EntityFairy fairy, double x, double y, double z, float yaw, float partialTick) {
-		GL11.glPushMatrix();
-		GL11.glTranslated(x, y, z);
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(x, y, z);
 		bindEntityTexture(fairy);
 		int i = 10;
 		float f2 = (i % 4 * 16 + 0) / 64.0F;
@@ -62,32 +59,31 @@ public class RenderEntityFairy extends Render
 		int k = j % 65536;
 		int l = j / 65536;
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, k / 1.0F, l / 1.0F);
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		float f9 = 255.0F;
 		float f10 = (0x00EE00 + partialTick + fairy.ticksExisted) / 2.0F;
 		l = (int)((MathHelper.sin(f10) + 1.0F) * 0.5F * f9);
 		int i1 = (int)f9;
 		int j1 = (int)((MathHelper.sin(f10 + 4.1887903F) + 1.0F) * 0.1F * f9);
 		int k1 = l << 16 | i1 << 8 | j1;
-		GL11.glRotatef(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-		GL11.glRotatef(-renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+		GlStateManager.rotate(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate(-renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
 		float f11 = 0.3F;
-		GL11.glScalef(f11, f11, f11);
-		Tessellator tessellator = Tessellator.instance;
-		tessellator.startDrawingQuads();
-		tessellator.setColorRGBA_I(k1, 128);
-		tessellator.setNormal(0.0F, 1.0F, 0.0F);
-		tessellator.addVertexWithUV((0.0F - f7), (0.0F - f8), 0.0D, f2, f5);
-		tessellator.addVertexWithUV((f6 - f7), (0.0F - f8), 0.0D, f3, f5);
-		tessellator.addVertexWithUV((f6 - f7), (1.0F - f8), 0.0D, f3, f4);
-		tessellator.addVertexWithUV((0.0F - f7), (1.0F - f8), 0.0D, f2, f4);
+		GlStateManager.scale(f11, f11, f11);
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer renderer = tessellator.getWorldRenderer();
+		renderer.startDrawingQuads();
+		renderer.setColorRGBA_I(k1, 128);
+		renderer.setNormal(0.0F, 1.0F, 0.0F);
+		renderer.addVertexWithUV((0.0F - f7), (0.0F - f8), 0.0D, f2, f5);
+		renderer.addVertexWithUV((f6 - f7), (0.0F - f8), 0.0D, f3, f5);
+		renderer.addVertexWithUV((f6 - f7), (1.0F - f8), 0.0D, f3, f4);
+		renderer.addVertexWithUV((0.0F - f7), (1.0F - f8), 0.0D, f2, f4);
 		tessellator.draw();
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-		GL11.glPopMatrix();
-		if (shouldRenderNametag(fairy)) {
-			renderNameTag(fairy, x, y, z);
-		}
+		GlStateManager.disableBlend();
+		GlStateManager.disableRescaleNormal();
+		GlStateManager.popMatrix();
+		super.doRender(fairy, x, y, z, yaw, partialTick);
 	}
 
 	@Override
@@ -98,18 +94,5 @@ public class RenderEntityFairy extends Render
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		return texture;
-	}
-
-	protected boolean shouldRenderNametag(EntityLiving entity) {
-		return Minecraft.isGuiEnabled() && entity != renderManager.livingPlayer && 
-				!entity.isInvisibleToPlayer(Minecraft.getMinecraft().thePlayer) && 
-				entity.riddenByEntity == null && 
-				(entity.getAlwaysRenderNameTagForRender() || entity.hasCustomNameTag() && entity == renderManager.field_147941_i);
-	}
-
-	protected void renderNameTag(EntityLiving entity, double x, double y, double z) {
-		int range = (int)(entity.isSneaking() ? RendererLivingEntity.NAME_TAG_RANGE_SNEAK : RendererLivingEntity.NAME_TAG_RANGE);
-		String name = entity.func_145748_c_().getFormattedText();
-		func_147906_a(entity, name, x, y, z, range);
 	}
 }

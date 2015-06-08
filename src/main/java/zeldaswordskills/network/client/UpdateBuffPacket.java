@@ -22,10 +22,10 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
-import cpw.mods.fml.relauncher.Side;
 
 /**
  * 

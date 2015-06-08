@@ -21,9 +21,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
@@ -130,8 +131,8 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	}
 
 	@Override
-	protected String getParticleName() {
-		return "smoke";
+	protected EnumParticleTypes getParticle() {
+		return EnumParticleTypes.SMOKE_NORMAL;
 	}
 
 	@Override
@@ -142,7 +143,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (worldObj.provider.isHellWorld && ticksInAir > 0 && !worldObj.isRemote && (getType() == BombType.BOMB_STANDARD || getType() == BombType.BOMB_FLOWER)) {
+		if (worldObj.provider.getDimensionId() == -1 && ticksInAir > 0 && !worldObj.isRemote && (getType() == BombType.BOMB_STANDARD || getType() == BombType.BOMB_FLOWER)) {
 			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), (float) getDamage(), canGrief);
 			setDead();
 		}
@@ -150,9 +151,9 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
+		Material material = worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial();
 		// func_147470_e is isBoundingBoxBurning
-		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
+		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.isFlammableWithin(getEntityBoundingBox());
 		if (!isDud(inFire)) {
 			if (!worldObj.isRemote) {
 				CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), (float) getDamage(), canGrief);
@@ -169,8 +170,8 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	 */
 	private boolean isDud(boolean inFire) {
 		switch(getType()) {
-		case BOMB_WATER: return inFire || worldObj.provider.isHellWorld;
-		default: return (worldObj.getBlock((int) posX, (int) posY, (int) posZ).getMaterial() == Material.water);
+		case BOMB_WATER: return inFire || worldObj.provider.getDimensionId() == -1;
+		default: return (worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial() == Material.water);
 		}
 	}
 

@@ -18,83 +18,99 @@
 package zeldaswordskills.block;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
+import net.minecraft.block.BlockStone;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.statemap.IStateMapper;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving.SpawnPlacementType;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.ISmashable;
-import zeldaswordskills.block.tileentity.TileEntityDungeonBlock;
-import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
+import zeldaswordskills.block.tileentity.TileEntityDungeonStone;
+import zeldaswordskills.client.ISwapModel;
+import zeldaswordskills.client.render.block.ModelDungeonBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ItemDungeonBlock;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import com.google.common.collect.Lists;
 
 /**
  * 
  * A simple block that renders as nearly any texture and can only be destroyed by explosions
- * 
- * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, IExplodable, ISmashable
+public class BlockDungeonStone extends Block implements ICustomStateMapper, IDungeonBlock, IExplodable, ISmashable, ISwapModel, ITileEntityProvider
 {
+	public static final PropertyBool UNBREAKABLE = PropertyBool.create("unbreakable");
+	/** Stores the block state that will be rendered */
+	public static final UnlistedRenderBlock RENDER_BLOCK = new UnlistedRenderBlock();
+
 	public BlockDungeonStone(Material material) {
 		super(material);
 		setBlockUnbreakable();
 		setResistance(6.0F);
 		setStepSound(soundTypeStone);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
+		setDefaultState(blockState.getBaseState().withProperty(UNBREAKABLE, Boolean.FALSE));
 	}
 
 	@Override
 	public TileEntity createNewTileEntity(World world, int meta) {
-		return new TileEntityDungeonBlock();
+		return new TileEntityDungeonStone();
 	}
 
 	@Override
-	public int getRenderType() {
-		return RenderTileDungeonBlock.renderId;
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
+		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.VERY_HEAVY);
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
-		return (meta < 0x8 ? BlockWeight.VERY_HEAVY : BlockWeight.IMPOSSIBLE);
-	}
-
-	@Override
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
+	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face) {
 		return Result.DEFAULT;
 	}
 
 	@Override
-	public boolean canEntityDestroy(IBlockAccess world, int x, int y, int z, Entity entity) {
-		return world.getBlockMetadata(x, y, z) < 0x8;
+	public boolean canEntityDestroy(IBlockAccess world, BlockPos pos, Entity entity) {
+		return !((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue();
 	}
 
 	@Override
-	public boolean canCreatureSpawn(EnumCreatureType type, IBlockAccess world, int x, int y, int z) {
+	public boolean canCreatureSpawn(IBlockAccess world, BlockPos pos, SpawnPlacementType type) {
 		return false;
 	}
 
@@ -104,33 +120,28 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 	}
 
 	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+	public boolean canHarvestBlock(IBlockAccess World, BlockPos pos, EntityPlayer player) {
 		return false;
 	}
 
 	@Override
-	public int damageDropped(int meta) {
-		return meta;
+	public int damageDropped(IBlockState state) {
+		return state.getBlock().getMetaFromState(state);
 	}
 
 	@Override
-	public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int meta, int fortune) {
+	public ArrayList<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
 		ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
-		Block block = null;
-		int blockMeta = 0;
-		TileEntity te = world.getTileEntity(x, y, z);
-		if (te instanceof TileEntityDungeonBlock) {
-			block = ((TileEntityDungeonBlock) te).getRenderBlock();
-			blockMeta = ((TileEntityDungeonBlock) te).getRenderMetadata();
-		}
-		if (block != null) {
-			drops.add(new ItemStack(block, 1, blockMeta));
+		IBlockState renderState = ((IExtendedBlockState) state).getValue(RENDER_BLOCK);
+		if (renderState != null) {
+			int meta = renderState.getBlock().getMetaFromState(renderState);
+			drops.add(new ItemStack(renderState.getBlock(), 1, meta));
 		}
 		return drops;
 	}
 
 	@Override
-	public void onBlockClicked(World world, int x, int y, int z, EntityPlayer player) {
+	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
 			if (Config.showSecretMessage()) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.secret");
@@ -141,55 +152,145 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 
 	// this may not even be necessary, since these blocks will only ever be placed by a player
 	@Override
-	public void onBlockAdded(World world, int x, int y, int z) {
-		TileEntity te = world.getTileEntity(x, y, z);
-		if (te instanceof TileEntityDungeonBlock) {
-			TileEntityDungeonBlock stone = (TileEntityDungeonBlock) te;
-			if (stone.getRenderBlock() == null) {
-				stone.setRenderBlock(BlockSecretStone.getBlockFromMeta(world.getBlockMetadata(x, y, z)), 0);
+	public void onBlockAdded(World world, BlockPos pos, IBlockState state) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityDungeonStone) {
+			TileEntityDungeonStone stone = (TileEntityDungeonStone) te;
+			if (stone.getRenderState() == null) {
+				stone.setRenderState(getDefaultRenderState(((Boolean) state.getValue(UNBREAKABLE)).booleanValue()));
 			}
 		}
 	}
 
 	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
-		TileEntity te = world.getTileEntity(x, y, z);
-		if (te instanceof TileEntityDungeonBlock && stack != null && stack.getItem() instanceof ItemDungeonBlock) {
-			Block block = ((ItemDungeonBlock) stack.getItem()).getBlockFromStack(stack);
-			if (block == ZSSBlocks.dungeonStone) {
-				block = (stack.getItemDamage() == 0 ? Blocks.stone : Blocks.obsidian);
-			} else if (block == ZSSBlocks.dungeonCore) {
-				block = (stack.getItemDamage() == 0 ? Blocks.mossy_cobblestone : Blocks.stonebrick);
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase entity, ItemStack stack) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityDungeonStone && stack != null && stack.getItem() instanceof ItemDungeonBlock) {
+			IBlockState renderState = ((ItemDungeonBlock) stack.getItem()).getBlockStateFromStack(stack);
+			if (renderState.getBlock() instanceof BlockDungeonStone) {
+				renderState = ((BlockDungeonStone) renderState.getBlock()).getDefaultRenderState(stack.getItemDamage() > 7);
 			}
-			int meta = ((ItemDungeonBlock) stack.getItem()).getMetaFromStack(stack);
-			((TileEntityDungeonBlock) te).setRenderBlock(block, meta);
+			((TileEntityDungeonStone) te).setRenderState(renderState);
 		}
 	}
 
 	@Override
-	public float getExplosionResistance(Entity entity, World world, int x, int y, int z, double explosionX, double explosionY, double explosionZ) {
-		// TODO BUG from vanilla Entity.getExplosionResistance passes (x, x, y) as position parameters
-		return (world.getBlockMetadata(x, y, z) < 0x8 ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
+	public float getExplosionResistance(World world, BlockPos pos, Entity entity, Explosion explosion) {
+		return (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
 	}
 
-	// TODO remove when vanilla explosion resistance bug is fixed
 	@Override
-	public void onBlockExploded(World world, int x, int y, int z, Explosion explosion) {
-		if (world.getBlockMetadata(x, y, z) < 0x8) {
-			super.onBlockExploded(world, x, y, z, explosion);
+	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
+		return true; // doesn't matter as this block is never used as a door anyway
+	}
+
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(UNBREAKABLE, Boolean.valueOf((meta & 0x8) > 0));
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return ((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? 0x8 : 0x0;
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		// These actually have to be explicitly called as 'new IProperty[]' - cannot simply be listed as arguments
+		return new ExtendedBlockState(this, new IProperty[] {UNBREAKABLE}, new IUnlistedProperty[] {RENDER_BLOCK});
+	}
+
+	@Override
+	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityDungeonStone && state instanceof IExtendedBlockState) {  // avoid crash in case of mismatch
+			IExtendedBlockState extended = (IExtendedBlockState) state;
+			IBlockState renderState = ((TileEntityDungeonStone) te).getRenderState();
+			if (renderState != null) {
+				return extended.withProperty(RENDER_BLOCK, renderState);
+			}
 		}
+		return state;
+	}
+
+	/**
+	 * Return the default render block state for the normal or unbreakable version
+	 */
+	public IBlockState getDefaultRenderState(boolean isUnbreakable) {
+		return Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, isUnbreakable ? BlockStone.EnumType.ANDESITE_SMOOTH : BlockStone.EnumType.ANDESITE);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public int colorMultiplier(IBlockAccess world, BlockPos pos, int renderPass) {
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof TileEntityDungeonStone) {
+			return ((TileEntityDungeonStone) te).getRenderState().getBlock().colorMultiplier(world, pos, renderPass);
+		}
+		return super.colorMultiplier(world, pos, renderPass);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public EnumWorldBlockLayer getBlockLayer() {
+		// CUTOUT_MIPPED allows both grass-like blocks and solids to render perfectly fine
+		// TRANSLUCENT works for the above as well as ice, but results in x-ray issues and is more expensive anyway
+		return EnumWorldBlockLayer.CUTOUT_MIPPED;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
-		list.add(new ItemStack(item, 1, 0x0));
-		list.add(new ItemStack(item, 1, 0x8));
+		list.add(new ItemStack(item, 1, 0));
+		list.add(new ItemStack(item, 1, 8));
+	}
+
+	/**
+	 * Always returns the same base texture, since ISmartModel will handle the actual render state
+	 */
+	@Override
+	@SideOnly(Side.CLIENT)
+	public IStateMapper getCustomStateMap() {
+		return new StateMapperBase() {
+			@Override
+			protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+				return ModelDungeonBlock.resource;
+			}
+		};
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon("stone");
+	public Collection<ModelResourceLocation> getDefaultResources() {
+		return Lists.newArrayList(ModelDungeonBlock.resource);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Class<? extends IBakedModel> getNewModel() {
+		return ModelDungeonBlock.class;
+	}
+
+	public static class UnlistedRenderBlock implements IUnlistedProperty<IBlockState>
+	{
+		@Override
+		public String getName() {
+			return "UnlistedPropertyRenderBlock";
+		}
+
+		@Override
+		public boolean isValid(IBlockState value) {
+			return true;
+		}
+
+		@Override
+		public Class<IBlockState> getType() {
+			return IBlockState.class;
+		}
+
+		@Override
+		public String valueToString(IBlockState value) {
+			return value.toString();
+		}
 	}
 }

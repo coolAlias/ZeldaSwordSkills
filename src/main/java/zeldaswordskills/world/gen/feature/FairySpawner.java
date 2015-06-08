@@ -25,13 +25,14 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityFairy;
+import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.WorldUtils;
 
@@ -105,7 +106,7 @@ public class FairySpawner
 	 * Call when the supporting tile entity is removed to release fairy pool contents
 	 */
 	public void onBlockBroken() {
-		onBlockBroken(core.getWorldObj(), core.xCoord, core.yCoord, core.zCoord);
+		onBlockBroken(core.getWorld(), core.getPos().getX(), core.getPos().getY(), core.getPos().getZ());
 	}
 
 	/**
@@ -124,8 +125,8 @@ public class FairySpawner
 	 * Call every tick to allow the fairy spawner to update
 	 */
 	public void onUpdate() {
-		updateSpawner(core.getWorldObj(), core.xCoord, core.yCoord, core.zCoord);
-		updateItems(core.getWorldObj(), core.xCoord, core.yCoord, core.zCoord);
+		updateSpawner(core.getWorld(), core.getPos().getX(), core.getPos().getY(), core.getPos().getZ());
+		updateItems(core.getWorld(), core.getPos().getX(), core.getPos().getY(), core.getPos().getZ());
 	}
 
 	/**
@@ -134,12 +135,13 @@ public class FairySpawner
 	 */
 	private void updateSpawner(World world, int x, int y, int z) {
 		if (fairiesSpawned < maxFairies && world.rand.nextFloat() < (world.isDaytime() ? 0.01F : 0.2F)) {
-			int nearby = world.getEntitiesWithinAABB(EntityFairy.class, AxisAlignedBB.
-					getBoundingBox(x, box.getCenterY(), z, x + 1, box.getCenterY() + 1, z + 1).
+			int centerY = box.getCenter().getY();
+			int nearby = world.getEntitiesWithinAABB(EntityFairy.class, new AxisAlignedBB(
+					x, centerY, z, x + 1, centerY + 1, z + 1).
 					expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2)).size();
 			if (nearby < 4) {
 				EntityFairy fairy = new EntityFairy(world);
-				fairy.setFairyHome(x, y + 2, z);
+				fairy.setFairyHome(new BlockPos(x, y + 2, z));
 				world.spawnEntityInWorld(fairy);
 				if (++fairiesSpawned == maxFairies) {
 					nextResetDate = world.getWorldTime() + 24000 * (world.rand.nextInt(Config.getDaysToRespawn()) + 1);
@@ -162,8 +164,9 @@ public class FairySpawner
 		} else if (itemUpdate == 0) {
 			EntityPlayer player = world.getPlayerEntityByName(playerName);
 			if (player != null) {
-				List<EntityItem> list = world.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.
-						getBoundingBox(x, box.getCenterY(), z, x + 1, box.getCenterY() + 1, z + 1).
+				int centerY = box.getCenter().getY();
+				List<EntityItem> list = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(
+						x, centerY, z, x + 1, centerY + 1, z + 1).
 						expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2));
 				for (EntityItem item : list) {
 					ItemStack stack = item.getEntityItem();

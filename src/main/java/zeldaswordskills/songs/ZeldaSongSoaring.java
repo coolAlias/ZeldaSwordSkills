@@ -20,7 +20,7 @@ package zeldaswordskills.songs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import zeldaswordskills.ref.Sounds;
@@ -43,19 +43,19 @@ public class ZeldaSongSoaring extends AbstractZeldaSong {
 
 	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
-		ChunkCoordinates cc = player.getBedLocation(player.dimension);
-		if (cc != null) {
-			cc = EntityPlayer.verifyRespawnCoordinates(player.worldObj, cc, player.isSpawnForced(player.dimension));
+		BlockPos pos = player.getBedLocation(player.dimension);
+		if (pos != null) {
+			pos = EntityPlayer.getBedSpawnLocation(player.worldObj, pos, player.isSpawnForced(player.dimension));
 		}
-		if (cc == null) {
-			cc = player.worldObj.getSpawnPoint();
+		if (pos == null) {
+			pos = player.worldObj.getSpawnPoint();
 		}
-		if (cc != null) {
+		if (pos != null) {
 			if (player.ridingEntity != null) {
 				player.mountEntity(null);
 			}
-			player.setPosition((double) cc.posX + 0.5D, (double) cc.posY + 0.1D, (double) cc.posZ + 0.5D);
-			while (!player.worldObj.getCollidingBoundingBoxes(player, player.boundingBox).isEmpty()) {
+			player.setPosition((double) pos.getX() + 0.5D, (double) pos.getY() + 0.1D, (double) pos.getZ() + 0.5D);
+			while (!player.worldObj.getCollidingBoundingBoxes(player, player.getEntityBoundingBox()).isEmpty()) {
 				player.setPosition(player.posX, player.posY + 1.0D, player.posZ);
 			}
 			player.setPositionAndUpdate(player.posX, player.posY, player.posZ);

@@ -18,28 +18,22 @@
 package zeldaswordskills.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRotatedPillar;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityWhip;
-import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.util.SideHit;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockBar extends Block implements IWhipBlock
+public class BlockBar extends BlockRotatedPillar implements IWhipBlock
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon iconHorizontal;
-	@SideOnly(Side.CLIENT)
-	private IIcon iconVertical;
-
 	public BlockBar(Material material) {
 		super(material);
 		setHardness(2.0F);
@@ -50,28 +44,18 @@ public class BlockBar extends Block implements IWhipBlock
 	}
 
 	@Override
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
 		return false;
 	}
 
 	@Override
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
-		switch(world.getBlockMetadata(x, y, z) % 3) {
-		case 0:	return (side != 4 && side != 5); // east/west
-		case 1:	return (side != 2 && side != 3); // north/south
-		case 2:	return (side != 0 && side != 1); // up/down
-		}
-		return false;
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
+		return face.getAxis() != ((EnumFacing.Axis) world.getBlockState(pos).getValue(AXIS));
 	}
 
 	@Override
-	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
+	public Result shouldSwing(EntityWhip whip, World world, BlockPos pos, int ticksInGround) {
 		return Result.DEFAULT;
-	}
-
-	@Override
-	public boolean renderAsNormalBlock() {
-		return false;
 	}
 
 	@Override
@@ -80,58 +64,46 @@ public class BlockBar extends Block implements IWhipBlock
 	}
 
 	@Override
-	public int onBlockPlaced(World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int meta) {
-		// 2 = NORTH (face of block), 3 = SOUTH, 4 = WEST, 5 = EAST, 0 = BOTTOM, 1 = TOP
-		switch(side) {
-		case 2:
-		case 3: return 1;
-		case 4:
-		case 5: return 0;
-		case SideHit.TOP:
-		case SideHit.BOTTOM: return 2;
-		}
-		return meta;
+	public boolean isFullCube() {
+		return false;
 	}
 
 	@Override
-	public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor) {
+	public IBlockState onBlockPlaced(World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+		return super.onBlockPlaced(world, pos, face, hitX, hitY, hitZ, meta, placer).withProperty(AXIS, face.getAxis());
+	}
+
+	@Override
+	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighbor) {
 		boolean drop = false;
-		Block block1;
-		Block block2;
-		switch(world.getBlockMetadata(x, y, z) % 3) {
-		case 0:	// east/west
-			block1 = world.getBlock(x + 1, y, z);
-			block2 = world.getBlock(x - 1, y, z);
-			drop = (!block1.getMaterial().blocksMovement() && !block2.getMaterial().blocksMovement());
+		switch ((EnumFacing.Axis) world.getBlockState(pos).getValue(AXIS)) {
+		case X:
+			drop = (!world.isSideSolid(pos.east(), EnumFacing.WEST) && !world.isSideSolid(pos.west(), EnumFacing.EAST));
 			break;
-		case 1:	// north/south
-			block1 = world.getBlock(x, y, z + 1);
-			block2 = world.getBlock(x, y, z - 1);
-			drop = (!block1.getMaterial().blocksMovement() && !block2.getMaterial().blocksMovement());
+		case Y:
+			drop = (!world.isSideSolid(pos.up(), EnumFacing.DOWN) && !world.isSideSolid(pos.down(), EnumFacing.UP));
 			break;
-		case 2:	// up/down
-			block1 = world.getBlock(x, y + 1, z);
-			block2 = world.getBlock(x, y - 1, z);
-			drop = (!block1.getMaterial().blocksMovement() && !block2.getMaterial().blocksMovement());
+		case Z:
+			drop = (!world.isSideSolid(pos.north(), EnumFacing.SOUTH) && !world.isSideSolid(pos.south(), EnumFacing.NORTH));
 			break;
 		}
 		if (drop && !world.isRemote) {
-			dropBlockAsItem(world, x, y, z, 0, 0);
-			world.setBlockToAir(x, y, z);
+			dropBlockAsItem(world, pos, state, 0);
+			world.setBlockToAir(pos);
 		}
 	}
 
 	@Override
-	public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
-		switch(world.getBlockMetadata(x, y, z) % 3) {
-		case 0:	// east/west
+	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
+		switch ((EnumFacing.Axis) world.getBlockState(pos).getValue(AXIS)) {
+		case X:
 			setBlockBounds(0.0F, 0.25F, 0.25F, 1.0F, 0.75F, 0.75F);
 			break;
-		case 1:	// north/south
-			setBlockBounds(0.25F, 0.25F, 0.0F, 0.75F, 0.75F, 1.0F);
-			break;
-		case 2:	// up/down
+		case Y:
 			setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 1.0F, 0.75F);
+			break;
+		case Z:
+			setBlockBounds(0.25F, 0.25F, 0.0F, 0.75F, 0.75F, 1.0F);
 			break;
 		}
 	}
@@ -142,24 +114,17 @@ public class BlockBar extends Block implements IWhipBlock
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta) {
-		switch(meta % 3) {
-		case 0: // east/west
-			return (side == 4 || side == 5 ? blockIcon : iconHorizontal);
-		case 1: // north/south
-			return (side == 2 || side == 3 ? blockIcon : (side == 4 || side == 5 ? iconHorizontal : iconVertical));
-		case 2: // up/down
-			return (side == 0 || side == 1 ? blockIcon : iconVertical);
-		}
-		return (side == 0 || side == 1 ? blockIcon : iconVertical);
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(AXIS, EnumFacing.Axis.values()[meta % EnumFacing.Axis.values().length]);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_end");
-		iconHorizontal = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_horizontal");
-		iconVertical = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_vertical");
+	public int getMetaFromState(IBlockState state) {
+		return ((EnumFacing.Axis) state.getValue(AXIS)).ordinal();
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, AXIS);
 	}
 }

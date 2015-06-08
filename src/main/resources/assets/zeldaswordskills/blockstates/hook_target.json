@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "facing=down": { "model": "zeldaswordskills:hook_target", "x": 270 },
+        "facing=up": { "model": "zeldaswordskills:hook_target", "x": 90 },
+        "facing=north": { "model": "zeldaswordskills:hook_target", "y": 180 },
+        "facing=south": { "model": "zeldaswordskills:hook_target" },
+        "facing=west": { "model": "zeldaswordskills:hook_target", "y": 90 },
+        "facing=east": { "model": "zeldaswordskills:hook_target", "y": 270 }
+    }
+}

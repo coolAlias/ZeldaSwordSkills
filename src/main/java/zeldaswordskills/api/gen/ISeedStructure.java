@@ -18,6 +18,8 @@
 package zeldaswordskills.api.gen;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 /**
@@ -29,10 +31,10 @@ public interface ISeedStructure {
 
 	/**
 	 * Attempt to generate the structure at the coordinates of the block clicked
-	 * @param y		The y position of the block clicked, so may want to generate at y + 1
-	 * @param side	The side of the block clicked
+	 * @param pos	The position of the block clicked, so may want to generate at pos.up()
+	 * @param face	The face of the block clicked
 	 * @return		True if the structure generated successfully
 	 */
-	public boolean generate(World world, EntityPlayer player, int x, int y, int z, int side);
+	public boolean generate(World world, EntityPlayer player, BlockPos pos, EnumFacing face);
 
 }

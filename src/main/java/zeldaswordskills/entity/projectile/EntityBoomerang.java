@@ -24,6 +24,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockButton;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -32,6 +33,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
@@ -136,19 +138,13 @@ public class EntityBoomerang extends EntityMobThrowable
 	}
 
 	@Override
+	protected float getVelocity() {
+		return 1.0F;
+	}
+
+	@Override
 	protected float getGravityVelocity() {
 		return 0.0F;
-	}
-
-	/** Returns the boomerang's velocity */
-	protected float getVelocity() {
-		return func_70182_d();
-	}
-
-	/** Returns the boomerang's velocity */
-	@Override
-	protected float func_70182_d() {
-		return 1.25F;
 	}
 
 	@Override
@@ -187,11 +183,11 @@ public class EntityBoomerang extends EntityMobThrowable
 		}
 		EntityLivingBase target = getTarget(); 
 		if (target != null) {
-			// TODO make the boomerang curve
 			double d0 = target.posX - this.posX;
-			double d1 = target.boundingBox.minY + (double)(target.height) - this.posY;
+			double d1 = target.getEntityBoundingBox().minY + (double)(target.height) - this.posY;
 			double d2 = target.posZ - this.posZ;
 			/*
+			// TODO make the boomerang curve
 			if (distance > -20) {
 			float yaw = (float)(Math.atan2(d0, d2) * 180.0D / Math.PI);
 		    float pitch = (float)(Math.atan2(d1, Math.sqrt(d0 * d0 + d2 * d2)) * 180.0D / Math.PI);
@@ -245,26 +241,26 @@ public class EntityBoomerang extends EntityMobThrowable
 			if (mop.entityHit != getThrower() && mop.entityHit.attackEntityFrom(getDamageSource(), getDamage())) {
 				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (mop.entityHit instanceof EntityLivingBase && getThrower() != null) {
-					// func_151384_a is the new way Thorns is handled
+					// func_151384_a and func_151385_b is the new way Thorns is handled - copied from EntityArrow
 					EnchantmentHelper.func_151384_a((EntityLivingBase) mop.entityHit, getThrower());
-					// TODO not sure what the following does yet, but it's in EntityArrow
 					EnchantmentHelper.func_151385_b(getThrower(), mop.entityHit);
 				}
 			}
 		} else {
-			Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+			BlockPos pos = mop.getBlockPos();
+			IBlockState state = worldObj.getBlockState(pos);
+			Block block = state.getBlock();
 			boolean flag = block.getMaterial().blocksMovement();
 			if (block instanceof IBoomerangBlock) {
-				flag = ((IBoomerangBlock) block).onBoomerangCollided(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				flag = ((IBoomerangBlock) block).onBoomerangCollided(worldObj, pos, state, this);
 			} else {
-				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-				float hardness = block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ);
+				block.onEntityCollidedWithBlock(worldObj, pos, this);
+				float hardness = block.getBlockHardness(worldObj, pos);
 				if (block.getMaterial() != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
-					// func_147480_a is destroyBlock
-					worldObj.func_147480_a(mop.blockX, mop.blockY, mop.blockZ, true);
+					worldObj.destroyBlock(pos, true);
 				} else if (block instanceof BlockButton || (block instanceof BlockLever &&
 						getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
-					WorldUtils.activateButton(worldObj, block, mop.blockX, mop.blockY, mop.blockZ);
+					WorldUtils.activateButton(worldObj, state, pos);
 					flag = true;
 				}
 			}
@@ -300,7 +296,7 @@ public class EntityBoomerang extends EntityMobThrowable
 	 */
 	private void captureDrops() {
 		if (riddenByEntity == null || captureAll) {
-			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(1.0D, 1.0D, 1.0D));
+			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, getEntityBoundingBox().expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : items) {
 				if (captureItem(item) && !captureAll) {
 					return;
@@ -326,7 +322,7 @@ public class EntityBoomerang extends EntityMobThrowable
 	 * Scans for and captures nearby XP Orbs
 	 */
 	private void captureXpOrbs() {
-		List<EntityXPOrb> orbs = worldObj.getEntitiesWithinAABB(EntityXPOrb.class, boundingBox.expand(1.0D, 1.0D, 1.0D));
+		List<EntityXPOrb> orbs = worldObj.getEntitiesWithinAABB(EntityXPOrb.class, getEntityBoundingBox().expand(1.0D, 1.0D, 1.0D));
 		for (EntityXPOrb orb : orbs) {
 			xp += orb.getXpValue();
 			worldObj.playSoundAtEntity(this, Sounds.XP_ORB, 0.1F, 0.5F * ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.8F));
@@ -354,9 +350,9 @@ public class EntityBoomerang extends EntityMobThrowable
 		int i = MathHelper.floor_double(posX);
 		int j = MathHelper.floor_double(posY);
 		int k = MathHelper.floor_double(posZ);
-		if (worldObj.getBlock(i, j, k).getMaterial() == Material.vine) {
-			// func_147480_a is destroyBlock
-			worldObj.func_147480_a(i, j, k, true);
+		BlockPos pos = new BlockPos(i, j, k);
+		if (worldObj.getBlockState(pos).getBlock().getMaterial() == Material.vine) {
+			worldObj.destroyBlock(pos, true);
 		}
 	}
 

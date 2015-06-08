@@ -35,17 +35,14 @@ import zeldaswordskills.item.ItemCustomEgg;
 public class BehaviorDispenseCustomMobEgg extends BehaviorDefaultDispenseItem {
 	@Override
 	public ItemStack dispenseStack(IBlockSource block, ItemStack stack) {
-		// BlockDispenser.func_149937_b(meta) is getFacing(meta)
-		EnumFacing facing = BlockDispenser.func_149937_b(block.getBlockMetadata());
-		double d0 = block.getX() + facing.getFrontOffsetX();
-		double d1 = block.getYInt() + 0.2D;
-		double d2 = block.getZ() + facing.getFrontOffsetZ();
-		Entity entity = ((ItemCustomEgg) stack.getItem()).spawnCreature(block.getWorld(), stack.getItemDamage(), d0, d1, d2);
-
+		EnumFacing facing = BlockDispenser.getFacing(block.getBlockMetadata());
+		double dx = block.getX() + facing.getFrontOffsetX();
+        double dy = ((float) block.getBlockPos().getY() + 0.2F);
+        double dz= block.getZ() + facing.getFrontOffsetZ();
+		Entity entity = ((ItemCustomEgg) stack.getItem()).spawnCreature(block.getWorld(), stack.getItemDamage(), dx, dy, dz);
 		if (entity instanceof EntityLivingBase && stack.hasDisplayName()) {
 			((EntityLiving) entity).setCustomNameTag(stack.getDisplayName());
 		}
-
 		stack.splitStack(1);
 		return stack;
 	}

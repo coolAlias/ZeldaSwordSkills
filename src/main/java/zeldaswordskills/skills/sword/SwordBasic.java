@@ -27,6 +27,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.EndComboPacket;
@@ -40,8 +42,6 @@ import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -207,7 +207,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		double dx = player.posX - currentTarget.posX;
 		double dz = player.posZ - currentTarget.posZ;
 		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
-		double pitch = Math.atan2(player.posY - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
+		double pitch = Math.atan2((player.posY + player.getEyeHeight()) - (currentTarget.posY + (currentTarget.height / 2.0F)), Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI;
 		double distance = player.getDistanceToEntity(currentTarget);
 		float rYaw = (float)(angle - player.rotationYaw);
 		while (rYaw > 180) { rYaw -= 360; }
@@ -338,14 +338,14 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		}
 		float damage = DirtyEntityAccessor.getModifiedDamage(event.entityLiving, event.source, event.ammount);
 		if (damage > 0) {
-			boolean flag = event.source.damageType.equals(DamageUtils.IARMOR_BREAK);
-			if (flag || event.source.damageType.equals(DamageUtils.INDIRECT_SWORD)) {
+			boolean flag = event.source.getDamageType().equals(DamageUtils.IARMOR_BREAK);
+			if (flag || event.source.getDamageType().equals(DamageUtils.INDIRECT_SWORD)) {
 				combo.addDamageOnly(player, damage, flag);
 			} else {
 				combo.add(player, event.entityLiving, damage);
 			}
 		}
-		if (addHitFlag || event.source.damageType.equals("player")) {
+		if (addHitFlag || event.source.getDamageType().equals("player")) {
 			String sound = (PlayerUtils.isHoldingSword(player) ? Sounds.SWORD_CUT : Sounds.HURT_FLESH);
 			WorldUtils.playSoundAtEntity(player, sound, 0.4F, 0.5F);
 		}

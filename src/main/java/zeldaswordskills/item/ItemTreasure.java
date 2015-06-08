@@ -20,7 +20,6 @@ package zeldaswordskills.item;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INpc;
@@ -30,9 +29,10 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -46,15 +46,13 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
  * Rare items with no use other than as potential trades for upgrades
  *
  */
-public class ItemTreasure extends Item implements IUnenchantable
+public class ItemTreasure extends BaseModItem implements IUnenchantable
 {
 	/** All the different treasure types */
 	public static enum Treasures {
@@ -102,9 +100,6 @@ public class ItemTreasure extends Item implements IUnenchantable
 		/** The price at which the hunter will buy this treasure */
 		public int getValue() { return value; }
 	};
-
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
 
 	public ItemTreasure() {
 		super();
@@ -163,10 +158,10 @@ public class ItemTreasure extends Item implements IUnenchantable
 					if (required == null || PlayerUtils.consumeInventoryItem(player, required, required.stackSize)) {
 						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.setCurrentItemOrArmor(0, trade.getItemToSell());
-						PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".give");
+						PlayerUtils.sendTranslatedChat(player, "chat.zss." + getUnlocalizedName(stack).substring(5) + ".give");
 						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.received", trade.getItemToSell().getDisplayName());
 						if (villagerInfo.onTradedTreasure(player, treasure, player.getHeldItem())) {
-							PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".next");
+							PlayerUtils.sendTranslatedChat(player, "chat.zss." + getUnlocalizedName(stack).substring(5) + ".next");
 						}
 					} else {
 						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : ""));
@@ -182,7 +177,7 @@ public class ItemTreasure extends Item implements IUnenchantable
 					}
 				} else {
 					if (villagerInfo.isFinalTrade(treasure, stack)) {
-						PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".wait");
+						PlayerUtils.sendTranslatedChat(player, "chat.zss." + getUnlocalizedName(stack).substring(5) + ".wait");
 					} else {
 						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested);
 					}
@@ -199,14 +194,17 @@ public class ItemTreasure extends Item implements IUnenchantable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int par1) {
-		return iconArray[par1 % Treasures.values().length];
+	public String getUnlocalizedName(ItemStack stack) {
+		return getUnlocalizedName() + "." + Treasures.values()[stack.getItemDamage() % Treasures.values().length].name;
 	}
 
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName() + "." + Treasures.values()[stack.getItemDamage() % Treasures.values().length].name;
+	public String[] getVariants() {
+		String[] variants = new String[Treasures.values().length];
+		for (Treasures treasure : Treasures.values()) {
+			variants[treasure.ordinal()] = ModInfo.ID + ":" + treasure.name;
+		}
+		return variants;
 	}
 
 	@Override
@@ -214,15 +212,6 @@ public class ItemTreasure extends Item implements IUnenchantable
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
 		for (int i = 0; i < Treasures.values().length; ++i) {
 			list.add(new ItemStack(item, 1, i));
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[Treasures.values().length];
-		for (int i = 0; i < Treasures.values().length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + Treasures.values()[i].name);
 		}
 	}
 

@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity.npc;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -32,15 +33,20 @@ import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.EntityAIWatchClosest2;
-import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.MathHelper;
+import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.village.Village;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ref.Config;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import com.google.common.base.Predicate;
 
 /**
  * 
@@ -60,11 +66,15 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 	public EntityNpcBase(World world) {
 		super(world);
 		this.setSize(0.6F, 1.8F);
-		this.func_110163_bv(); // sets persistence required to true, meaning will not despawn
-		this.getNavigator().setBreakDoors(true);
-		this.getNavigator().setAvoidsWater(true);
+		this.enablePersistence();
+		((PathNavigateGround) this.getNavigator()).setBreakDoors(true);
+		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
 		this.tasks.addTask(0, new EntityAISwimming(this));
-		this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityZombie.class, 8.0F, 0.6D, 0.6D));
+		this.tasks.addTask(1, new EntityAIAvoidEntity(this, new Predicate<Entity>() {
+			public boolean apply(Entity entity) {
+				return entity instanceof IMob;
+			}
+		}, 8.0F, 0.6D, 0.6D));
 		this.tasks.addTask(2, new EntityAIMoveIndoors(this));
 		this.tasks.addTask(3, new EntityAIRestrictOpenDoor(this));
 		this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
@@ -107,26 +117,22 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 	}
 
 	@Override
-	public boolean isEntityInvulnerable() {
+	public boolean isEntityInvulnerable(DamageSource source) {
 		return Config.areNpcsInvulnerable();
-	}
-
-	@Override
-	public boolean isAIEnabled() {
-		return true;
 	}
 
 	@Override
 	protected void updateAITick() {
 		if (--randomTickDivider <= 0) {
-			worldObj.villageCollectionObj.addVillagerPosition(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ));
+			BlockPos pos = new BlockPos(this);
+			worldObj.getVillageCollection().addToVillagerPositionList(pos);
 			randomTickDivider = 70 + rand.nextInt(50);
-			villageObj = worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ), 32);
+			villageObj = worldObj.getVillageCollection().getNearestVillage(pos, 32);
 			if (villageObj == null) {
 				detachHome();
 			} else {
-				ChunkCoordinates chunkcoordinates = villageObj.getCenter();
-				setHomeArea(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ, (int)(villageObj.getVillageRadius() * 0.6F));
+				pos = villageObj.getCenter();
+				setHomePosAndDistance(pos, (int)((float) villageObj.getVillageRadius() * 1.0F));
 			}
 			randomUpdateTick();
 		}
@@ -143,13 +149,13 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 	public void handleHealthUpdate(byte flag) {
 		switch(flag) {
 		case 12:
-			generateRandomParticles("heart");
+			generateRandomParticles(EnumParticleTypes.HEART);
 			break;
 		case 13:
-			generateRandomParticles("angryVillager");
+			generateRandomParticles(EnumParticleTypes.VILLAGER_ANGRY);
 			break;
 		case 14:
-			generateRandomParticles("happyVillager");
+			generateRandomParticles(EnumParticleTypes.VILLAGER_HAPPY);
 			break;
 		default:
 			super.handleHealthUpdate(flag);
@@ -157,7 +163,7 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 	}
 
 	@SideOnly(Side.CLIENT)
-	private void generateRandomParticles(String particle) {
+	private void generateRandomParticles(EnumParticleTypes particle) {
 		for (int i = 0; i < 5; ++i) {
 			double d0 = rand.nextGaussian() * 0.02D;
 			double d1 = rand.nextGaussian() * 0.02D;
@@ -185,8 +191,8 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 	}
 
 	@Override
-	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
-		data = super.onSpawnWithEgg(data);
+	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
+		data = super.onInitialSpawn(difficulty, data);
 		setNameOnSpawn();
 		return data;
 	}

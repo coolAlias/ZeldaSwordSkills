@@ -31,13 +31,18 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
@@ -47,9 +52,6 @@ import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -160,7 +162,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	public void onReflected(ItemStack mirrorShield, EntityPlayer player, Entity shooter, Entity oldEntity) {}
 
 	@Override
-	protected float func_70182_d() {
+	protected float getVelocity() {
 		return 1.0F;
 	}
 
@@ -172,9 +174,16 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		if (!isDead) {
+			// spell should 'impact' liquids as well
+			Block block = worldObj.getBlockState(new BlockPos(this)).getBlock();
+			if (block.getMaterial().isLiquid()) {
+				onImpact(new MovingObjectPosition(new Vec3(posX, posY, posZ), EnumFacing.UP, new BlockPos(this)));
+			}
+		}
 		MagicType type = getType();
 		if (worldObj.isRemote) {
-			String particle = type.getTrailingParticle();
+			EnumParticleTypes particle = type.getTrailingParticle();
 			boolean flag = type != MagicType.FIRE;
 			for (int i = 0; i < 4; ++i) {
 				worldObj.spawnParticle(particle,
@@ -190,18 +199,17 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		double x = (mop.entityHit != null ? mop.entityHit.posX : mop.blockX + 0.5D);
-		double y = (mop.entityHit != null ? mop.entityHit.posY : mop.blockY + 0.5D);
-		double z = (mop.entityHit != null ? mop.entityHit.posZ : mop.blockZ + 0.5D);
+		double x = (mop.entityHit != null ? mop.entityHit.posX : mop.getBlockPos().getX() + 0.5D);
+		double y = (mop.entityHit != null ? mop.entityHit.posY : mop.getBlockPos().getY() + 0.5D);
+		double z = (mop.entityHit != null ? mop.entityHit.posZ : mop.getBlockPos().getZ() + 0.5D);
 		float r = getArea();
-		List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
-				AxisAlignedBB.getBoundingBox(x - r, y - r, z - r, x + r, y + r, z + r));
+		List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(x - r, y - r, z - r, x + r, y + r, z + r));
 		for (EntityLivingBase entity : list) {
-			Vec3 vec3 = Vec3.createVectorHelper(posX - motionX, posY - motionY, posZ - motionZ);
-			Vec3 vec31 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
+			Vec3 vec3 = new Vec3(posX - motionX, posY - motionY, posZ - motionZ);
+			Vec3 vec31 = new Vec3(entity.posX, entity.posY, entity.posZ);
 			MovingObjectPosition mop1 = worldObj.rayTraceBlocks(vec3, vec31);
 			if (mop1 != null && mop1.typeOfHit == MovingObjectType.BLOCK) {
-				Block block = worldObj.getBlock(mop1.blockX, mop1.blockY, mop1.blockZ);
+				Block block = worldObj.getBlockState(mop1.getBlockPos()).getBlock();
 				if (block.getMaterial().blocksMovement()) {
 					continue;
 				}
@@ -211,12 +219,12 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 			}
 		}
 		if (worldObj.isRemote) {
-			spawnImpactParticles("largeexplode", 4, -0.1F);
+			spawnImpactParticles(EnumParticleTypes.EXPLOSION_LARGE, 4, -0.1F);
 			spawnImpactParticles(getType().getTrailingParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
 		} else {
 			worldObj.playSoundAtEntity(this, "random.explode", 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
 			if (getType().affectsBlocks(worldObj, getThrower())) {
-				Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
+				Set<BlockPos> affectedBlocks = new HashSet<BlockPos>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
 				ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
 			}
 			setDead();
@@ -224,7 +232,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	}
 
 	@SideOnly(Side.CLIENT)
-	private void spawnImpactParticles(String particle, int n, float offsetY) {
+	private void spawnImpactParticles(EnumParticleTypes particle, int n, float offsetY) {
 		for (int i = 0; i < n; ++i) {
 			double dx = posX - motionX * (double) i / 4.0D;
 			double dy = posY - motionY * (double) i / 4.0D;
@@ -243,8 +251,8 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
 			if (getThrower() instanceof EntityPlayer) {
-				worldObj.setBlock(i, j, k, Blocks.ice);
-				worldObj.setBlock(i, j + 1, k, Blocks.ice);
+				worldObj.setBlockState(new BlockPos(i, j, k), Blocks.ice.getDefaultState());
+				worldObj.setBlockState(new BlockPos(i, j + 1, k), Blocks.ice.getDefaultState());
 			}
 			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
 			break;

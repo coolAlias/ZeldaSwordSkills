@@ -19,15 +19,14 @@ package zeldaswordskills.block.tileentity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.block.ISongBlock;
-import zeldaswordskills.entity.EntityFairy;
+import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 
-public class TileEntityGossipStone extends TileEntity
+public class TileEntityGossipStone extends TileEntityBase
 {
 	/** Maximum number of characters that will fit on one chat line */
 	public static final int LINE_LENGTH = 64;
@@ -36,11 +35,6 @@ public class TileEntityGossipStone extends TileEntity
 	private long nextFairySpawn;
 
 	public TileEntityGossipStone() {}
-
-	@Override
-	public boolean canUpdate() {
-		return false;
-	}
 
 	/**
 	 * Returns this Gossip Stone's message, or a default message if none was set.
@@ -63,12 +57,12 @@ public class TileEntityGossipStone extends TileEntity
 	 * @return TRUE if this block was affected
 	 */
 	public boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
-		if (worldObj.isDaytime() || nextFairySpawn > worldObj.getWorldTime() || power < 5) {
+		if (power < 5 || worldObj.isDaytime() || nextFairySpawn > worldObj.getWorldTime()) {
 			return false;
 		}
 		if (song == ZeldaSongs.songStorms || song == ZeldaSongs.songSun || song == ZeldaSongs.songZeldasLullaby) {
 			EntityFairy fairy = new EntityFairy(worldObj);
-			fairy.setFairyHome(xCoord, yCoord + 2, zCoord);
+			fairy.setFairyHome(getPos().up(2));
 			worldObj.spawnEntityInWorld(fairy);
 			nextFairySpawn = worldObj.getWorldTime() + 24000 * (worldObj.rand.nextInt(Config.getDaysToRespawn()) + 1);
 			markDirty();

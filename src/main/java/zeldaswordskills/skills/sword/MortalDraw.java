@@ -28,6 +28,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
@@ -39,8 +41,6 @@ import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -158,8 +158,8 @@ public class MortalDraw extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
 		// can't use player.isUsingItem, since hands are empty!
-		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.getIsKeyPressed()
-				|| ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].getIsKeyPressed());
+		return player.getHeldItem() == null && (Minecraft.getMinecraft().gameSettings.keyBindUseItem.isKeyDown()
+				|| ZSSKeyHandler.keys[ZSSKeyHandler.KEY_BLOCK].isKeyDown());
 	}
 
 	@Override

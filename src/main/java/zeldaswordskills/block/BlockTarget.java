@@ -19,14 +19,12 @@ package zeldaswordskills.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockTarget extends Block implements IHookable
 {
@@ -40,23 +38,17 @@ public class BlockTarget extends Block implements IHookable
 	}
 
 	@Override
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
+	public Result canDestroyBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return Result.DENY;
 	}
 
 	@Override
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
+	public Result canGrabBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return Result.ALLOW;
 	}
 
 	@Override
-	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
+	public Material getHookableMaterial(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return blockMaterial;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon(ModInfo.ID + ":hook_target_face");
 	}
 }

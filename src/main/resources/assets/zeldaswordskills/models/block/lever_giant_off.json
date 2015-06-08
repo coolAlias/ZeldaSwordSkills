@@ -1,0 +1,33 @@
+{
+    "ambientocclusion": false,
+    "textures": {
+        "particle": "minecraft:blocks/obsidian",
+        "base": "minecraft:blocks/obsidian",
+        "lever": "zeldaswordskills:blocks/lever_giant"
+    },
+    "elements": [
+        {   "from": [ 3, 0, 2 ],
+            "to": [ 13, 6, 14 ],
+            "faces": {
+                "down":  { "uv": [ 3, 2, 13, 14 ], "texture": "#base" },
+                "up":    { "uv": [ 3, 2, 13, 14 ], "texture": "#base" },
+                "north": { "uv": [ 3, 0, 13,  6 ], "texture": "#base" },
+                "south": { "uv": [ 3, 0, 13,  6 ], "texture": "#base" },
+                "west":  { "uv": [ 2, 0, 14,  6 ], "texture": "#base" },
+                "east":  { "uv": [ 2, 0, 14,  6 ], "texture": "#base" }
+            }
+        },
+        {   "from": [ 6, 2, 6 ],
+            "to": [ 10, 16, 10 ],
+            "rotation": { "origin": [ 6, 6, 6 ], "axis": "x", "angle": 45 },
+            "faces": {
+                "down":  { "uv": [ 6, 6, 10,  8 ], "texture": "#lever" },
+                "up":    { "uv": [ 6, 6, 10,  8 ], "texture": "#lever" },
+                "north": { "uv": [ 6, 6, 10, 16 ], "texture": "#lever" },
+                "south": { "uv": [ 6, 6, 10, 16 ], "texture": "#lever" },
+                "west":  { "uv": [ 6, 6, 10, 16 ], "texture": "#lever" },
+                "east":  { "uv": [ 6, 6, 10, 16 ], "texture": "#lever" }
+            }
+        }
+    ]
+}

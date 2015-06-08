@@ -19,7 +19,6 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -27,31 +26,29 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.block.BlockDoorBoss;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
  * Big Keys come in eight types for each of the eight typs of Boss Doors.
  *
  */
-public class ItemKeyBig extends Item implements IUnenchantable
+public class ItemKeyBig extends BaseModItem implements IUnenchantable
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
-
 	public ItemKeyBig() {
 		super();
 		setMaxDamage(0);
@@ -60,12 +57,12 @@ public class ItemKeyBig extends Item implements IUnenchantable
 	}
 
 	/**
-	 * Returns the appropriate big key for biome found at given coordinates, or null
+	 * Returns the appropriate big key for biome found at given position, or null
 	 */
-	public static ItemStack getKeyForBiome(World world, int x, int z) {
-		BossType type = BossType.getBossType(world, x, z);
+	public static ItemStack getKeyForBiome(World world, BlockPos pos) {
+		BossType type = BossType.getBossType(world, pos);
 		if (type != null) {
-			return new ItemStack(ZSSItems.keyBig,1,type.ordinal());
+			return new ItemStack(ZSSItems.keyBig, 1, type.doorKeyMeta);
 		} else {
 			return null;
 		}
@@ -93,40 +90,34 @@ public class ItemKeyBig extends Item implements IUnenchantable
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name",
-				BossType.values()[stack.getItemDamage() % BossType.values().length].getDisplayName());
+				BossType.byDoorMetadata(stack.getItemDamage()).getDisplayName());
 	}
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName().substring(9) + stack.getItemDamage();
+		return getUnlocalizedName() + stack.getItemDamage();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (BossType boss : BossType.values()) {
-			list.add(new ItemStack(item, 1, boss.ordinal()));
+		for (BlockDoorBoss.EnumType temple : BlockDoorBoss.EnumType.values()) {
+			list.add(new ItemStack(item, 1, temple.getMetadata()));
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int damage) {
-		return iconArray[damage % BossType.values().length];
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[BossType.values().length];
-		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":key_" + BossType.values()[i].getUnlocalizedName());
+	public String[] getVariants() {
+		String[] variants = new String[BlockDoorBoss.EnumType.values().length];
+		for (BlockDoorBoss.EnumType temple : BlockDoorBoss.EnumType.values()) {
+			variants[temple.getMetadata()] = ModInfo.ID + ":key_" + temple.getName();
 		}
+		return variants;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.keybig.desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.key_big.desc.0"));
 	}
 }

@@ -26,6 +26,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
@@ -61,7 +62,7 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public void processCommand(ICommandSender sender, String[] args) {
+	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
 		EntityPlayerMP player = getPlayer(sender, args[0]);
 		ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
@@ -86,7 +87,7 @@ public class CommandGrantSkill extends CommandBase
 			if (skill == null) {
 				throw new CommandException("commands.skill.generic.unknown", args[1]);
 			}
-			int level = parseIntBounded(sender, args[2], 1, 10);
+			int level = parseInt(args[2], 1, 10);
 			int oldLevel = skills.getSkillLevel(skill);
 			if (level > oldLevel) { // grants skill up to level or max level, whichever is reached first
 				/*
@@ -111,7 +112,7 @@ public class CommandGrantSkill extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());

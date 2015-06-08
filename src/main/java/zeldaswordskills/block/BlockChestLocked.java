@@ -17,10 +17,15 @@
 
 package zeldaswordskills.block;
 
+import java.util.Iterator;
+
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
+import net.minecraft.block.BlockChest;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -28,18 +33,19 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
-import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.BlockRotationData;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -48,12 +54,11 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * While in Creative Mode, right-click to open up a normal GUI for easy
  * manipulation of the locked chest contents.
- * 
- * Normal chests use 0x2-0x5 for orientation, so these do as well
  *
  */
-public class BlockChestLocked extends BlockContainer
+public class BlockChestLocked extends Block implements ITileEntityProvider, IVanillaRotation
 {
+	public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
 	/** Prevents inventory from dropping when block is changed to a normal chest */
 	private static boolean keepInventory;
 
@@ -63,7 +68,13 @@ public class BlockChestLocked extends BlockContainer
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setStepSound(soundTypeWood);
 		setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
+		setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
+	}
+
+	@Override
+	public TileEntity createNewTileEntity(World world, int meta) {
+		return new TileEntityChestLocked();
 	}
 
 	@Override
@@ -72,7 +83,7 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	@Override
-	public boolean renderAsNormalBlock() {
+	public boolean isFullCube() {
 		return false;
 	}
 
@@ -82,34 +93,24 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	@Override
-	public int getRenderType() {
-		return RenderChestLocked.renderId;
-	}
-
-	@Override
-	public TileEntity createNewTileEntity(World world, int meta) {
-		return new TileEntityChestLocked();
-	}
-
-	@Override
-	public boolean canHarvestBlock(EntityPlayer player, int meta) {
+	public boolean canHarvestBlock(IBlockAccess world, BlockPos pos, EntityPlayer player) {
 		return false;
 	}
 
 	@Override
-	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
+	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		if (!keepInventory) {
-			WorldUtils.dropContainerBlockInventory(world, x, y, z);
+			WorldUtils.dropContainerBlockInventory(world, pos);
 		}
-		super.breakBlock(world, x, y, z, block, meta);
+		super.breakBlock(world, pos, state);
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
 		if (world.isRemote) {
 			return true;
 		}
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te = world.getTileEntity(pos);
 		if (!(te instanceof IInventory)) {
 			return false;
 		}
@@ -117,7 +118,7 @@ public class BlockChestLocked extends BlockContainer
 			player.displayGUIChest((IInventory) te);
 			return true;
 		} else if (canUnlock(player)) {
-			convertToChest((IInventory) te, world, x, y, z);
+			convertToChest((IInventory) te, world, pos);
 			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_CHEST, 0.4F, 0.5F);
 			return true;
 		} else {
@@ -129,28 +130,27 @@ public class BlockChestLocked extends BlockContainer
 	/**
 	 * Converts this locked chest block into a vanilla chest
 	 */
-	protected void convertToChest(IInventory inv, World world, int x, int y, int z) {
-		int meta = world.getBlockMetadata(x, y, z);
+	protected void convertToChest(IInventory inv, World world, BlockPos pos) {
+		EnumFacing facing = (EnumFacing) world.getBlockState(pos).getValue(FACING);
 		keepInventory = true;
-		world.setBlock(x, y, z, Blocks.chest);
+		world.setBlockState(pos, Blocks.chest.getDefaultState());
 		keepInventory = false;
-
-		boolean isChest = world.getBlock(x + 1, y, z) == Blocks.chest;
+		// If there is not an adjacent chest, make sure the new chest has the same facing
+		boolean isChest = world.getBlockState(pos.east()).getBlock() == Blocks.chest;
 		if (!isChest) {
-			isChest = world.getBlock(x - 1, y, z) == Blocks.chest;
+			isChest = world.getBlockState(pos.west()).getBlock() == Blocks.chest;
 		}
 		if (!isChest) {
-			isChest = world.getBlock(x, y, z + 1) == Blocks.chest;
+			isChest = world.getBlockState(pos.north()).getBlock() == Blocks.chest;
 		}
 		if (!isChest) {
-			isChest = world.getBlock(x, y, z - 1) == Blocks.chest;
+			isChest = world.getBlockState(pos.south()).getBlock() == Blocks.chest;
 		}
 		if (!isChest) {
-			world.setBlockMetadataWithNotify(x, y, z, meta, 3);
+			world.setBlockState(pos, Blocks.chest.getDefaultState().withProperty(BlockChest.FACING, facing), 3);
 		}
-
 		// copy the old inventory to the new chest
-		TileEntity chest = world.getTileEntity(x, y, z);
+		TileEntity chest = world.getTileEntity(pos);
 		if (chest instanceof TileEntityChest) {
 			IInventory inv2 = (IInventory) chest;
 			for (int i = 0; i < inv.getSizeInventory() && i < inv2.getSizeInventory(); ++i) {
@@ -173,43 +173,92 @@ public class BlockChestLocked extends BlockContainer
 	}
 
 	@Override
-	public void onBlockAdded(World world, int x, int y, int z) {
-		super.onBlockAdded(world, x, y, z);
-		Block l = world.getBlock(x, y, z - 1);
-		Block i1 = world.getBlock(x, y, z + 1);
-		Block j1 = world.getBlock(x - 1, y, z);
-		Block k1 = world.getBlock(x + 1, y, z);
-		int meta = 3;
+	public void onBlockAdded(World world, BlockPos pos, IBlockState state) {
+		IBlockState state_north = world.getBlockState(pos.north());
+		IBlockState state_south = world.getBlockState(pos.south());
+		IBlockState state_west = world.getBlockState(pos.west());
+		IBlockState state_east = world.getBlockState(pos.east());
+		EnumFacing facing = (EnumFacing) state.getValue(FACING);
+		if (state_north.getBlock().isFullBlock() && !state_south.getBlock().isFullBlock()) {
+			facing = EnumFacing.SOUTH;
+		}
+		if (state_south.getBlock().isFullBlock() && !state_north.getBlock().isFullBlock()) {
+			facing = EnumFacing.NORTH;
+		}
+		if (state_west.getBlock().isFullBlock() && !state_east.getBlock().isFullBlock()) {
+			facing = EnumFacing.EAST;
+		}
+		if (state_east.getBlock().isFullBlock() && !state_west.getBlock().isFullBlock()) {
+			facing = EnumFacing.WEST;
+		}
+		world.setBlockState(pos, state.withProperty(FACING, facing), 3);
+	}
 
-		if (l.func_149730_j() && !i1.func_149730_j()) {
-			meta = 3;
-		}
-		if (i1.func_149730_j() && !l.func_149730_j()) {
-			meta = 2;
-		}
-		if (j1.func_149730_j() && !k1.func_149730_j()) {
-			meta = 5;
-		}
-		if (k1.func_149730_j() && !j1.func_149730_j()) {
-			meta = 4;
-		}
-
-		world.setBlockMetadataWithNotify(x, y, z, meta, 3);
+	@Override
+	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+		EnumFacing facing = EnumFacing.getHorizontal(MathHelper.floor_double((double)(placer.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3).getOpposite();
+		state = state.withProperty(FACING, facing);
+		world.setBlockState(pos, state, 3);
 	}
 
 	/**
-	 * For use during Creative Mode
+	 * Copied from BlockChest - call any time the chest is placed without knowing where it should face
 	 */
-	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack) {
-		int face = MathHelper.floor_double((double)(entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-		byte meta = (byte)(face == 0 ? 2 : face == 1 ? 5 : face == 2 ? 3 : 4);
-		world.setBlockMetadataWithNotify(x, y, z, meta, 3);
+	public IBlockState correctFacing(World world, BlockPos pos, IBlockState state) {
+		EnumFacing facing = null;
+		Iterator<EnumFacing> iterator = EnumFacing.Plane.HORIZONTAL.iterator();
+		while (iterator.hasNext()) {
+			EnumFacing facing1 = iterator.next();
+			IBlockState iblockstate1 = world.getBlockState(pos.offset(facing1));
+			if (iblockstate1.getBlock() == this) {
+				return state;
+			}
+			if (iblockstate1.getBlock().isFullBlock()) {
+				if (facing != null) {
+					facing = null;
+					break;
+				}
+				facing = facing1;
+			}
+		}
+		if (facing != null) {
+			return state.withProperty(FACING, facing.getOpposite());
+		} else {
+			EnumFacing facing2 = (EnumFacing) state.getValue(FACING);
+			if (world.getBlockState(pos.offset(facing2)).getBlock().isFullBlock()) {
+				facing2 = facing2.getOpposite();
+			}
+			if (world.getBlockState(pos.offset(facing2)).getBlock().isFullBlock()) {
+				facing2 = facing2.rotateY();
+			}
+			if (world.getBlockState(pos.offset(facing2)).getBlock().isFullBlock()) {
+				facing2 = facing2.getOpposite();
+			}
+			return state.withProperty(FACING, facing2);
+		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister register) {
-		blockIcon = register.registerIcon("planks_oak");
+	public IBlockState getStateFromMeta(int meta) {
+		EnumFacing facing = EnumFacing.getFront(meta);
+		if (facing.getAxis() == EnumFacing.Axis.Y) {
+			facing = EnumFacing.NORTH;
+		}
+		return getDefaultState().withProperty(FACING, facing);
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return ((EnumFacing) state.getValue(FACING)).getIndex();
+	}
+
+	@Override
+	protected BlockState createBlockState() {
+		return new BlockState(this, FACING);
+	}
+
+	@Override
+	public BlockRotationData.Rotation getRotationPattern() {
+		return BlockRotationData.Rotation.PISTON_CONTAINER;
 	}
 }

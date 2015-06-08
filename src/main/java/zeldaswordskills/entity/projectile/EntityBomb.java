@@ -27,9 +27,10 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.IEntityBombEater;
@@ -39,7 +40,6 @@ import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBombIngestible
 {
@@ -190,7 +190,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	}
 
 	@Override
-	protected float func_70182_d() {
+	protected float getVelocity() {
 		return 0.5F;
 	}
 
@@ -206,12 +206,12 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 
 	@Override
 	public AxisAlignedBB getBoundingBox() {
-		return boundingBox;
+		return getEntityBoundingBox();
 	}
 
 	@Override
 	public AxisAlignedBB getCollisionBox(Entity entity) {
-		return entity.boundingBox;
+		return entity.getEntityBoundingBox();
 	}
 
 	@Override
@@ -221,14 +221,13 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		prevPosY = posY;
 		prevPosZ = posZ;
 		motionY -= 0.03999999910593033D;
-		// func_145771_j is pushOutOfBlocks
-		noClip = func_145771_j(posX, (boundingBox.minY + boundingBox.maxY) / 2.0D, posZ);
+		noClip = pushOutOfBlocks(posX, (getEntityBoundingBox().minY + getEntityBoundingBox().maxY) / 2.0D, posZ);
 		moveEntity(motionX, motionY, motionZ);
 
 		float f = 0.98F;
 		if (onGround) {
 			f = 0.58800006F;
-			Block block = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(boundingBox.minY) - 1, MathHelper.floor_double(posZ));
+			Block block = worldObj.getBlockState(new BlockPos(this).down()).getBlock();
 			if (block.getMaterial() != Material.air) {
 				f = block.slipperiness * 0.98F;
 			}
@@ -247,9 +246,9 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 			return;
 		}
 
-		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
+		Material material = worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial();
 		// func_147470_e is isBoundingBoxBurning
-		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
+		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.isFlammableWithin(getEntityBoundingBox());
 		if (isDud(inFire)) {
 			fuseTime += 10;
 			disarm(worldObj);
@@ -267,7 +266,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	 * Returns true if any nearby {@link IEntityBombEater} consumes this bomb
 	 */
 	private boolean wasBombEaten() {
-		List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, boundingBox.expand(0.5D, 0.5D, 0.5D));
+		List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, getEntityBoundingBox().expand(0.5D, 0.5D, 0.5D));
 		for (EntityLivingBase entity : entities) {
 			if (!entity.isEntityAlive()) {
 				continue;
@@ -290,7 +289,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 			if (isEntityAlive() && fuseTime > 4) {
 				setDead();
 				EntityItem bomb = new EntityItem(world, posX, posY, posZ, new ItemStack(ZSSItems.bomb,1,getType().ordinal()));
-				bomb.delayBeforeCanPickup = 40;
+				bomb.setPickupDelay(40);
 				bomb.motionX = motionX;
 				bomb.motionY = motionY;
 				bomb.motionZ = motionZ;
@@ -315,8 +314,8 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	 */
 	private boolean isDud(boolean inFire) {
 		switch(getType()) {
-		case BOMB_WATER: return inFire || worldObj.provider.isHellWorld;
-		default: return (worldObj.getBlock((int) posX, (int) posY, (int) posZ).getMaterial() == Material.water);
+		case BOMB_WATER: return inFire || worldObj.provider.getDimensionId() == -1;
+		default: return (worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial() == Material.water);
 		}
 	}
 
@@ -327,7 +326,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	private boolean shouldExplode(boolean inFire) {
 		if (!isEntityAlive()) {
 			return false;
-		} else if ((inFire || worldObj.provider.isHellWorld) && getType() != BombType.BOMB_FIRE) {
+		} else if ((inFire || worldObj.provider.getDimensionId() == -1) && getType() != BombType.BOMB_FIRE) {
 			return true;
 		}
 		return ticksExisted >= fuseTime;

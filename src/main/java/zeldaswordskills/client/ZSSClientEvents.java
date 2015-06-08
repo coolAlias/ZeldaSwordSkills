@@ -18,42 +18,46 @@
 package zeldaswordskills.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.FOVUpdateEvent;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-
-import org.lwjgl.opengl.GL11;
-
-import zeldaswordskills.api.item.ArmorIndex;
+import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.ClientProxy;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemHeldBlock;
-import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.TargetUtils;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
  * Handles all client-sided events, such as render events, mouse event, etc.
  *
  */
+@SuppressWarnings("deprecation") // Stupid to deprecate IBakedModel when it is still perfectly valid to use
 @SideOnly(Side.CLIENT)
 public class ZSSClientEvents
 {
@@ -69,6 +73,35 @@ public class ZSSClientEvents
 
 	public ZSSClientEvents() {
 		this.mc = Minecraft.getMinecraft();
+	}
+
+	@SubscribeEvent
+	public void onBakeModel(ModelBakeEvent event) {
+		for (ModelResourceLocation resource : ClientProxy.smartModels.keySet()) {
+			Object object =  event.modelRegistry.getObject(resource);
+			if (object instanceof IBakedModel) {
+				Class<? extends IBakedModel> clazz = ClientProxy.smartModels.get(resource);
+				try {
+					IBakedModel customRender = clazz.getConstructor(IBakedModel.class).newInstance((IBakedModel) object);
+					event.modelRegistry.putObject(resource, customRender);
+					ZSSMain.logger.debug("Registered new renderer for resource " + resource + ": " + customRender.getClass().getSimpleName());
+				} catch (NoSuchMethodException e) {
+					ZSSMain.logger.warn("Failed to swap model: class " + clazz.getSimpleName() + " is missing a constructor that takes an IBakedModel");
+				} catch (Exception e) {
+					ZSSMain.logger.warn("Failed to swap model with exception: " + e.getMessage());
+				}
+			} else {
+				ZSSMain.logger.warn("Resource is not a baked model! Failed resource: " + resource.toString());
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void onStitchTexture(TextureStitchEvent.Pre event) {
+		String digit = "items/digits/";
+		for (int i = 0; i < 9; ++i) {
+			event.map.registerSprite(new ResourceLocation(ModInfo.ID, digit + i));
+		}
 	}
 
 	/**
@@ -166,7 +199,7 @@ public class ZSSClientEvents
 					event.setCanceled(true);
 				} else {
 					Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
-					event.setCanceled(heldItem instanceof ItemHeldBlock || (mc.thePlayer.attackTime > 0 && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
+					event.setCanceled(heldItem instanceof ItemHeldBlock || (!ZSSPlayerInfo.get(mc.thePlayer).canAttack() && (Config.affectAllSwings() || heldItem instanceof ISwingSpeed)));
 				}
 			} else if (isUseKey) {
 				event.setCanceled(!skills.canInteract() || ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN));
@@ -183,7 +216,6 @@ public class ZSSClientEvents
 				// mouse attack will always be canceled while locked on, as the click has been handled
 				if (Config.allowVanillaControls()) {
 					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
-						//LogHelper.info("MouseEvent - no skill handled attack key press, performing combo attack");
 						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
 					}
@@ -192,7 +224,6 @@ public class ZSSClientEvents
 						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					}
 				}
-
 				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
 				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
@@ -206,19 +237,21 @@ public class ZSSClientEvents
 		}
 	}
 
+	/*
+	// TODO
 	@SubscribeEvent
 	public void onRenderPlayer(RenderPlayerEvent.Pre event) {
 		ItemStack mask = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
 		if (mask != null && mask.getItem() == ZSSItems.maskGiants) {
-			GL11.glPushMatrix();
+			GlStateManager.pushMatrix();
 			needsPop = true;
 			if (event.entityPlayer == mc.thePlayer) {
 				if (mc.inGameHasFocus) {
-					GL11.glTranslatef(0.0F, -6.325F, 0.0F);
-					GL11.glScalef(3.0F, 3.0F, 3.0F);
+					GlStateManager.translate(0.0F, -6.325F, 0.0F);
+					GlStateManager.scale(3.0F, 3.0F, 3.0F);
 				}
 			} else {
-				GL11.glScalef(3.0F, 3.0F, 3.0F);
+				GlStateManager.scale(3.0F, 3.0F, 3.0F);
 			}
 			/*
 			if (fakePlayer == null) {
@@ -241,15 +274,16 @@ public class ZSSClientEvents
 
 		else if (fakePlayer != null) {
 			fakePlayer = null;
-		}*/
+		}*
 		}
 	}
 
 	@SubscribeEvent
 	public void onRenderPlayer(RenderPlayerEvent.Post event) {
 		if (needsPop) {
-			GL11.glPopMatrix();
+			GlStateManager.popMatrix();
 			needsPop = false;
 		}
 	}
+	 */
 }

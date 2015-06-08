@@ -17,11 +17,13 @@
 
 package zeldaswordskills.item;
 
+import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INpc;
@@ -30,15 +32,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.client.ISwapModel;
+import zeldaswordskills.client.render.item.ModelItemBomb;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.projectile.EntityBomb;
@@ -48,8 +54,8 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import com.google.common.collect.Lists;
 
 /**
  * 
@@ -62,11 +68,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * storing the time in NBT instead works nicely.
  *
  */
-public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenchantable
+public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss, ISwapModel, IUnenchantable
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
-
 	/** Blast radius for bombs (Creeper is 3.0F) */
 	public static final float RADIUS = 3.0F;
 
@@ -162,7 +165,6 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
-
 		if (isHeld || getType(stack) == BombType.BOMB_FLOWER) {
 			if (entity instanceof EntityPlayer) {
 				if (world.isRemote && Minecraft.getMinecraft().currentScreen == null) {
@@ -186,9 +188,8 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
-
 		BombType type = getType(stack);
-		if (type != BombType.BOMB_WATER && world.getBlock((int) entity.posX, (int) entity.posY + 1, (int) entity.posZ).getMaterial() == Material.water) {
+		if (type != BombType.BOMB_WATER && world.getBlockState(new BlockPos(entity).up()).getBlock().getMaterial() == Material.water) {
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", true);
 		}
@@ -197,7 +198,8 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 			if (time % 20 == 0) {
 				world.playSoundAtEntity(entity, Sounds.BOMB_FUSE, 1.0F, 2.0F + entity.worldObj.rand.nextFloat() * 0.4F);
 			}
-			boolean flag = world.provider.isHellWorld && (type == BombType.BOMB_STANDARD || type == BombType.BOMB_FLOWER);
+			// TODO NBT update causes refresh, which causes model to render much lower than it actually is
+			boolean flag = world.provider.getDimensionId() == -1 && (type == BombType.BOMB_STANDARD || type == BombType.BOMB_FLOWER);
 			stack.getTagCompound().setInteger("time", flag ? Config.getBombFuseTime() : ++time);
 			if (time == Config.getBombFuseTime() && !world.isRemote) {
 				if (entity instanceof EntityPlayer) {
@@ -215,8 +217,8 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 	 */
 	private boolean canTick(World world, BombType type, boolean inWater) {
 		if (Config.getBombFuseTime() > 0) {
-			switch(type) {
-			case BOMB_WATER: return (world.provider.dimensionId != -1);
+			switch (type) {
+			case BOMB_WATER: return (world.provider.getDimensionId() != -1);
 			default: return (!inWater);
 			}
 		} else {
@@ -225,31 +227,24 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int type) {
-		return iconArray[getType(type).ordinal()];
+	public String getUnlocalizedName(ItemStack stack) {
+		return getUnlocalizedName() + "_" + getType(stack).unlocalizedName;
 	}
 
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName() + "." + getType(stack).unlocalizedName;
+	public String[] getVariants() {
+		String[] variants = new String[BombType.values().length];
+		for (BombType type : BombType.values()) {
+			variants[type.ordinal()] = ModInfo.ID + ":bomb_" + type.unlocalizedName;
+		}
+		return variants;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < BombType.values().length; ++i) {
-			list.add(new ItemStack(item, 1, i));
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[BombType.values().length];
-		String s = ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_";
-		for (int i = 0; i < BombType.values().length; ++i) {
-			iconArray[i] = register.registerIcon(s + getType(i).unlocalizedName);
+		for (BombType type : BombType.values()) {
+			list.add(new ItemStack(item, 1, type.ordinal()));
 		}
 	}
 
@@ -258,5 +253,21 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb.desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb.desc.1"));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Collection<ModelResourceLocation> getDefaultResources() {
+		List<ModelResourceLocation> resources = Lists.newArrayList();
+		for (String s : getVariants()) {
+			resources.add(new ModelResourceLocation(s, "inventory"));
+		}
+		return resources;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Class<? extends IBakedModel> getNewModel() {
+		return ModelItemBomb.class;
 	}
 }

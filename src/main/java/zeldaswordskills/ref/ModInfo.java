@@ -20,10 +20,10 @@ package zeldaswordskills.ref;
 public class ModInfo {
 	public static final String ID = "zeldaswordskills";
 	public static final String NAME = "Zelda Sword Skills";
-	public static final String VERSION = "1.7.10-2.2.6";
+	public static final String VERSION = "1.8.1-3.0.1";
 	public static final String CHANNEL = "zss_channel";
 	public static final String CLIENT_PROXY = "zeldaswordskills.ClientProxy";
-	public static final String COMMON_PROXY = "zeldaswordskills.CommonProxy";
+	public static final String SERVER_PROXY = "zeldaswordskills.ServerProxy";
 	public static final String CONFIG_PATH = ("/" + ID + ".cfg");
 
 	/** Identifier for custom tiles added to Antique Atlas */

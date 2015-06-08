@@ -17,32 +17,31 @@
 
 package zeldaswordskills.block.tileentity;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.util.Constants;
 
 /**
  * 
  * Base class for any tile entity that needs an inventory;
- * disallows update ticks by default, so re-override canUpdate if needed;
  * disallows automation by default, re-override ISidedInventory methods if needed;
+ * displays empty "" translated name by default
  *
  */
-public abstract class TileEntityInventory extends TileEntity implements ISidedInventory
+public abstract class TileEntityInventory extends TileEntityBase implements ISidedInventory
 {
 	/** The tile entity's inventory slots need to be initialized during construction */
 	protected ItemStack[] inventory;
 
 	/** Dummy array to return for {@link ISidedInventory#getAccessibleSlotsFromSide} */
 	private static final int[] availableSlots = new int[]{0};
-
-	@Override
-	public boolean canUpdate() {
-		return false;
-	}
 
 	@Override
 	public int getSizeInventory() {
@@ -113,23 +112,58 @@ public abstract class TileEntityInventory extends TileEntity implements ISidedIn
 	}
 
 	@Override
-	public void openInventory() {}
+	public void openInventory(EntityPlayer player) {}
 
 	@Override
-	public void closeInventory() {}
+	public void closeInventory(EntityPlayer player) {}
 
 	@Override
-	public int[] getAccessibleSlotsFromSide(int side) {
-		return availableSlots;
+	public int getField(int id) {
+		return 0;
 	}
 
 	@Override
-	public boolean canInsertItem(int slot, ItemStack stack, int side) {
+	public void setField(int id, int value) {}
+
+	@Override
+	public int getFieldCount() {
+		return 0;
+	}
+
+	@Override
+	public void clear() {
+		for (int i = 0; i < inventory.length; ++i) {
+			inventory[i] = null;
+		}
+	}
+
+	@Override
+	public String getCommandSenderName() {
+		return "";
+	}
+
+	@Override
+	public boolean hasCustomName() {
 		return false;
 	}
 
 	@Override
-	public boolean canExtractItem(int slot, ItemStack stack, int side) {
+	public IChatComponent getDisplayName() {
+		return (IChatComponent)(hasCustomName() ? new ChatComponentText(getCommandSenderName()) : new ChatComponentTranslation(getCommandSenderName()));
+	}
+
+	@Override
+	public int[] getSlotsForFace(EnumFacing face) {
+		return availableSlots;
+	}
+
+	@Override
+	public boolean canInsertItem(int slot, ItemStack stack, EnumFacing direction) {
+		return false;
+	}
+
+	@Override
+	public boolean canExtractItem(int slot, ItemStack stack, EnumFacing direction) {
 		return false;
 	}
 }

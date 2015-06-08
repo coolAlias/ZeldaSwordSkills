@@ -27,8 +27,9 @@ import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.IMob;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -40,7 +41,8 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityOctorok;
-import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
+import zeldaswordskills.item.ItemBrokenSword;
+import zeldaswordskills.item.ItemHookShotUpgrade.UpgradeType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -59,15 +61,15 @@ import zeldaswordskills.world.crisis.SwampBattle;
  * Defined types for Boss Rooms, Big Keys and other things
  * 
  */
-public enum BossType
+public enum BossType implements IStringSerializable
 {
-	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, ZeldaSongs.songWarpFire, "hell"),
-	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, ZeldaSongs.songWarpSpirit, "desert", "deserthills"),
-	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
-	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
-	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
-	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
-	MOUNTAIN("temple_earth", EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
+	HELL("temple_fire", 0, FireBattle.class, EntityBlaze.class, 7, ZeldaSongs.songWarpFire, "hell"),
+	DESERT("temple_desert", 1, DesertBattle.class, EntityBlaze.class, 1, ZeldaSongs.songWarpSpirit, "desert", "deserthills"),
+	FOREST("temple_forest", 2, ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
+	TAIGA("temple_ice", 3, BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
+	OCEAN("temple_water", 4, OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
+	SWAMP("temple_wind", 5, SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
+	MOUNTAIN("temple_earth", 6, EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");
 	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
 	// need to set their target and aggravation state so they attack automatically
@@ -84,6 +86,9 @@ public enum BossType
 	/** The mob class to spawn when a player enters the boss dungeon */
 	private final Class<? extends IMob> bossMob;
 
+	/** Metadata value of the door / key pair for this temple */
+	public final int doorKeyMeta;
+
 	/** Currently stores metadata value used by SecretStone for returning appropriate Block */
 	public final int metadata;
 
@@ -96,13 +101,19 @@ public enum BossType
 	/** Mapping of biome names to boss types */
 	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
 
-	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, AbstractZeldaSong warpSong, String... defaultBiomes) {
+	private BossType(String name, int doorKeyMeta, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, AbstractZeldaSong warpSong, String... defaultBiomes) {
 		this.unlocalizedName = name;
+		this.doorKeyMeta = doorKeyMeta;
 		this.defaultBiomes = defaultBiomes;
 		this.bossBattle = bossBattle;
 		this.bossMob = bossMob;
 		this.metadata = meta;
 		this.warpSong = warpSong;
+	}
+
+	@Override
+	public String getName() {
+		return unlocalizedName;
 	}
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
@@ -149,6 +160,13 @@ public enum BossType
 	}
 
 	/**
+	 * Return the boss type based on door or key metadata value (NOT secret stone metadata)
+	 */
+	public static BossType byDoorMetadata(int meta) {
+		return BossType.values()[meta % BossType.values().length];
+	}
+
+	/**
 	 * Get a BossType by name; will return null if it the name doesn't match any BossType's unlocalizedName
 	 */
 	public static BossType getBossType(String name) {
@@ -161,12 +179,12 @@ public enum BossType
 	}
 
 	/**
-	 * Returns the BossType for the biome at x/z, or null if no BossType exists for that biome
+	 * Returns the BossType for the biome at the given position, or null if no BossType exists for that biome
 	 */
-	public static BossType getBossType(World world, int x, int z) {
-		BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
+	public static BossType getBossType(World world, BlockPos pos) {
+		BiomeGenBase biome = world.getBiomeGenForCoords(pos);
 		if (biome == null) {
-			ZSSMain.logger.warn(String.format("Null biome at %d/%d while getting Boss Type", x, z));
+			ZSSMain.logger.warn(String.format("Null biome at %d/%d while getting Boss Type", pos.getX(), pos.getZ()));
 			return null;
 		}
 		if (Config.areBossDungeonsRandom()) {
@@ -213,7 +231,7 @@ public enum BossType
 	private static final ItemStack[] desertItems = {
 		new ItemStack(ZSSItems.boomerang),
 		new ItemStack(ZSSItems.bootsHover),
-		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.EXTENSION.ordinal()),
+		new ItemStack(ZSSItems.hookshotUpgrade, 1, UpgradeType.EXTENDER.ordinal()),
 		new ItemStack(ZSSItems.maskGibdo),
 		new ItemStack(ZSSItems.rodFire)
 	};
@@ -228,13 +246,13 @@ public enum BossType
 		new ItemStack(ZSSItems.bootsPegasus),
 		new ItemStack(ZSSItems.hammer),
 		new ItemStack(ZSSItems.maskBlast),
-		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.STONECLAW.ordinal()),
-		new ItemStack(ZSSItems.swordBroken, 1, Item.getIdFromItem(ZSSItems.swordGiant))
+		new ItemStack(ZSSItems.hookshotUpgrade, 1, UpgradeType.CLAW.ordinal()),
+		ItemBrokenSword.getBrokenSwordFor(ZSSItems.swordGiant)
 	};
 	private static final ItemStack[] netherItems = {
 		new ItemStack(ZSSItems.keySkeleton),
 		new ItemStack(ZSSItems.heroBow),
-		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.MULTI.ordinal()),
+		new ItemStack(ZSSItems.hookshotUpgrade, 1, UpgradeType.MULTI.ordinal()),
 		new ItemStack(ZSSItems.maskMajora),
 		new ItemStack(ZSSItems.tunicGoronChest)
 	};

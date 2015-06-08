@@ -116,7 +116,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 	}
 
 	@Override
-	public void func_110297_a_(ItemStack stack) {
+	public void verifySellingItem(ItemStack stack) {
 		if (!worldObj.isRemote && livingSoundTime > -getTalkInterval() + 20) {
 			livingSoundTime = -getTalkInterval();
 			playSound((stack == null ? "mob.villager.no" : "mob.villager.yes"), getSoundVolume(), getSoundPitch());
@@ -158,7 +158,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 				PlayerUtils.sendTranslatedChat(player, chat);
 				if (openGui) {
 					setCustomer(player);
-					player.displayGUIMerchant(this, getCustomNameTag());
+					player.displayVillagerTradeGui(this);
 				}
 			}
 			return true;

@@ -17,15 +17,18 @@
 
 package zeldaswordskills.world.crisis;
 
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.util.WorldUtils;
-import zeldaswordskills.world.gen.structure.RoomBoss;
 
 public class DesertBattle extends BossBattle {
 
@@ -40,14 +43,14 @@ public class DesertBattle extends BossBattle {
 			scheduleUpdateTick(300 - world.rand.nextInt(100));
 			handleDispensers(world, false);
 			if (difficulty == 3) {
-				setDungeonFloorTo(world, Blocks.soul_sand, 0, null);
+				setDungeonFloorTo(world, Blocks.soul_sand.getDefaultState(), null);
 			}
 		}
 	}
 
 	@Override
 	protected void endCrisis(World world) {
-		setDungeonFloorTo(world, Blocks.sandstone, 0, Blocks.soul_sand);
+		setDungeonFloorTo(world, Blocks.sandstone.getDefaultState(), Blocks.soul_sand);
 		super.endCrisis(world);
 	}
 
@@ -63,25 +66,26 @@ public class DesertBattle extends BossBattle {
 	 */
 	protected void handleDispensers(World world, boolean activate) {
 		int j = box.minY + 2;
-		for (int side = 0; side < 4; ++side) {
-			int minX = (side == RoomBoss.EAST ? box.maxX : side == RoomBoss.WEST ? box.minX : (box.minX + 3));
-			int maxX = (side == RoomBoss.SOUTH || side == RoomBoss.NORTH ? box.maxX - 2 : minX + 1);
-			int minZ = (side == RoomBoss.SOUTH ? box.maxZ : side == RoomBoss.NORTH ? box.minZ : (box.minZ + 3));
-			int maxZ = (side == RoomBoss.EAST || side == RoomBoss.WEST ? box.maxZ - 2 : minZ + 1);
-
+		for (EnumFacing side : EnumFacing.HORIZONTALS) {
+			int minX = (side == EnumFacing.EAST ? box.maxX : side == EnumFacing.WEST ? box.minX : (box.minX + 3));
+			int maxX = (side == EnumFacing.SOUTH || side == EnumFacing.NORTH ? box.maxX - 2 : minX + 1);
+			int minZ = (side == EnumFacing.SOUTH ? box.maxZ : side == EnumFacing.NORTH ? box.minZ : (box.minZ + 3));
+			int maxZ = (side == EnumFacing.EAST || side == EnumFacing.WEST ? box.maxZ - 2 : minZ + 1);
 			for (int i = minX; i < maxX; ++i) {
 				for (int k = minZ; k < maxZ; ++k) {
+					BlockPos pos = new BlockPos(i, j, k);
 					if (activate) {
-						if (world.getBlock(i, j, k) == Blocks.dispenser && world.rand.nextInt(9 - (2 * difficulty)) == 0) { 
-							TileEntity te = world.getTileEntity(i, j, k);
+						IBlockState state = world.getBlockState(pos);
+						if (state.getBlock() == Blocks.dispenser && world.rand.nextInt(9 - (2 * difficulty)) == 0) { 
+							TileEntity te = world.getTileEntity(pos);
 							if (te instanceof IInventory) {
 								WorldUtils.addItemToInventory(new ItemStack(Items.arrow), (IInventory) te);
-								Blocks.dispenser.updateTick(world, i, j, k, world.rand);
+								Blocks.dispenser.updateTick(world, pos, state, world.rand);
 							}
 						}
 					} else {
-						world.setBlock(i, j, k, Blocks.dispenser);
-						world.setBlockMetadataWithNotify(i, j, k, RoomBoss.facingToOrientation[(side + 2) % 4], 2);
+						// TODO check that facing is correct
+						world.setBlockState(pos, Blocks.dispenser.getDefaultState().withProperty(BlockDispenser.FACING, side.getOpposite()), 3);
 					}
 				}
 			}

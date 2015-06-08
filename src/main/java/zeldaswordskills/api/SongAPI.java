@@ -51,7 +51,7 @@ import zeldaswordskills.util.SongNote;
  *
  *		If your song conflicted with any previously registered songs, warnings will be
  *		generated in the console log. Song names and notes must be sufficiently unique:
- *		- For names, it is advised to prepend them with a unique identifier, e.g. 'zss.songname'
+ *		- For names, it is advised to prepend them with a unique identifier, e.g. 'yourmodid.songname'
  *		- For notes, consider loading them from config to allow for future conflict resolution
  *
  *		If you need a reference to your song, create a separate reference class similar to Items:
@@ -84,7 +84,7 @@ public final class SongAPI {
 	 * If an instance is required, retrieve it after registration.
 	 */
 	public static void registerSong(AbstractZeldaSong song) {}
-	
+
 	/**
 	 * Returns true if the player knows the song.
 	 */

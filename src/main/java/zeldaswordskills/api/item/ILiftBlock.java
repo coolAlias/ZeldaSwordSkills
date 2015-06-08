@@ -17,7 +17,7 @@
 
 package zeldaswordskills.api.item;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.block.BlockWeight;
@@ -37,16 +37,15 @@ public interface ILiftBlock {
 	/**
 	 * Returns the strength of this item for the purpose of lifting blocks
 	 * Player-, ItemStack-, and Block- sensitive
-	 * @param block the block that was struck
-	 * @param meta the metadata of the block struck
+	 * @param state the block (and its state) that was struck
 	 */
-	public BlockWeight getLiftStrength(EntityPlayer player, ItemStack stack, Block block, int meta);
+	BlockWeight getLiftStrength(EntityPlayer player, ItemStack stack, IBlockState state);
 
 	/**
 	 * Called when a block is lifted right before the stack is stored as NBT in the held block
 	 * @param stack the ILiftBlock itemstack currently held by the player
 	 * @return the stack that will be given to the player when the block is placed; null is okay
 	 */
-	public ItemStack onLiftBlock(EntityPlayer player, ItemStack stack, Block block, int meta);
+	ItemStack onLiftBlock(EntityPlayer player, ItemStack stack, IBlockState state);
 
 }

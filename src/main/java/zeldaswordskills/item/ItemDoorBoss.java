@@ -19,53 +19,46 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
-import zeldaswordskills.block.ZSSBlocks;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.block.BlockDoorBoss;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BossType;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
+/**
+ * 
+ * Item version of boss doors for use in Creative mode and Creative Tabs.
+ *
+ */
 public class ItemDoorBoss extends ItemDoorLocked
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] iconArray;
-
-	public ItemDoorBoss() {
-		super(ZSSBlocks.doorLocked);
+	public ItemDoorBoss(Block block) {
+		super(block);
+		setHasSubtypes(true);
 	}
 
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
-		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name",
-				BossType.values()[stack.getItemDamage() % BossType.values().length].getDisplayName());
+		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name", BossType.byDoorMetadata(stack.getItemDamage()).getDisplayName());
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < BossType.values().length; ++i) {
-			list.add(new ItemStack(item, 1, i));
-		}
+		block.getSubBlocks(item, tab, list);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int damage) {
-		return iconArray[damage % BossType.values().length];
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[BossType.values().length];
-		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9).toLowerCase() + i);
+	public String[] getVariants() {
+		String[] variants = new String[BlockDoorBoss.EnumType.values().length];
+		for (BlockDoorBoss.EnumType temple : BlockDoorBoss.EnumType.values()) {
+			variants[temple.getMetadata()] = ModInfo.ID + ":door_" + temple.getName();
 		}
+		return variants;
 	}
 }
