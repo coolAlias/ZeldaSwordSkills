@@ -1,6 +1,17 @@
 {
 	"versionList": [
 		{
+			"mcVersion":"Minecraft 1.8",
+			"modVersion":"3.0",
+			"changeLog": [
+	               "Initial 1.8 release",
+	               "See main mod page for full change log"
+			],
+			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
+			"isDirectLink":"false",
+			"newFileName":""
+		},
+		{
 			"mcVersion":"Minecraft 1.7.10",
 			"modVersion":"2.2.6",
 			"changeLog": [
