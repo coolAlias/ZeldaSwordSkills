@@ -238,6 +238,11 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IS
 
 	@Override
 	public void onEntityCollidedWithBlock(World world, BlockPos pos, Entity entity) {
+		this.onEntityCollidedWithBlock(world, pos, world.getBlockState(pos), entity);
+	}
+
+	@Override
+	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity) {
 		if (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot) {
 			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.destroyBlock(pos, false);

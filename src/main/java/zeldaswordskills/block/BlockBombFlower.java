@@ -168,7 +168,12 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public void onEntityCollidedWithBlock(World world, BlockPos pos, Entity entity) {
-		if (((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7 && entity instanceof IProjectile) {
+		this.onEntityCollidedWithBlock(world, pos, world.getBlockState(pos), entity);
+	}
+
+	@Override
+	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity) {
+		if (((Integer) state.getValue(AGE)).intValue() == 7 && entity instanceof IProjectile) {
 			createExplosion(world, pos, true);
 		}
 	}
