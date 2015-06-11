@@ -28,6 +28,7 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -329,10 +330,15 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	}
 
 	@Override
+	protected Item getDropItem() {
+		return (getType() > 0 || rand.nextFloat() < 0.5F ? Items.dye : ZSSItems.throwingRock);
+	}
+
+	@Override
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		int j = rand.nextInt(2 + lootingLevel) + 1;
 		for (int k = 0; k < j; ++k) {
-			entityDropItem(new ItemStack(Items.dye, 1, 0), 0.0F);
+			entityDropItem(new ItemStack(getDropItem(), 1, 0), 0.0F);
 		}
 	}
 
@@ -346,7 +352,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 			if (getType() == 1) {
 				entityDropItem(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 0.0F);
 			} else {
-				entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
+				entityDropItem(new ItemStack(rand.nextInt(3) == 0 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 			}
 		}
 	}
@@ -361,9 +367,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
 			return new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal());
 		} else if (getType() == 1 && rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
-			return new ItemStack(ZSSItems.bomb,1,BombType.BOMB_WATER.ordinal());
+			return new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal());
 		}
-		return new ItemStack(Items.dye, 1, 0);
+		return new ItemStack(getDropItem(), 1, 0);
 	}
 
 	@Override
