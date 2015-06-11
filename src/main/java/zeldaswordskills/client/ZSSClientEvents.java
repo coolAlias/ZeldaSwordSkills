@@ -17,16 +17,21 @@
 
 package zeldaswordskills.client;
 
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.MouseEvent;
@@ -36,6 +41,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ClientProxy;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
@@ -45,6 +51,7 @@ import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemHeldBlock;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.ICombo;
@@ -234,6 +241,21 @@ public class ZSSClientEvents
 			}
 		} else  if (isAttackKey) { // not locked on to a target, normal item swing: set attack time only
 			ZSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+		}
+	}
+
+	@SubscribeEvent
+	public void getFogDensity(EntityViewRenderEvent.FogDensity event) {
+		if (event.entity instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.entity;
+			ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
+			if (helm != null && !player.isPotionActive(Potion.blindness)) {
+				if (event.block.getMaterial() == Material.lava && helm.getItem() == ZSSItems.tunicGoronHelm) {
+					event.density = 0.85F;
+					GlStateManager.setFog(2048);
+					event.setCanceled(true);
+				}
+			}
 		}
 	}
 
