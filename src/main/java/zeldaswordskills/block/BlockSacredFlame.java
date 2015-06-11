@@ -68,6 +68,7 @@ public class BlockSacredFlame extends Block implements ITileEntityProvider
 		setBlockUnbreakable();
 		setResistance(BlockWeight.IMPOSSIBLE.weight);
 		setLightLevel(1.0F);
+		setDefaultState(blockState.getBaseState().withProperty(VARIANT, BlockSacredFlame.EnumType.DIN).withProperty(EXTINGUISHED, Boolean.FALSE));
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
 
@@ -171,7 +172,7 @@ public class BlockSacredFlame extends Block implements ITileEntityProvider
 	protected void extinguishFlame(World world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		if (Config.getSacredFlameRefreshRate() > 0 && te instanceof TileEntitySacredFlame) {
-			world.setBlockState(pos, world.getBlockState(pos).withProperty(EXTINGUISHED, Boolean.valueOf(true)), 3);
+			world.setBlockState(pos, world.getBlockState(pos).withProperty(EXTINGUISHED, Boolean.TRUE), 3);
 			((TileEntitySacredFlame) te).extinguish();
 		} else {
 			world.setBlockToAir(pos);

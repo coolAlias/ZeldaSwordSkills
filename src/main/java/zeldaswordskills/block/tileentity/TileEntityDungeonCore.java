@@ -30,6 +30,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
@@ -37,6 +38,8 @@ import net.minecraft.util.Vec3i;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.block.BlockDungeonStone;
+import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
@@ -203,15 +206,12 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 				removeCoreBlock();
 			}
 		} else if (shouldUpdate()) {
-			//LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
-				//ZSSMain.logger.info(String.format("Structure at %d/%d/%d failed verification during its update tick - replacing all blocks", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				alreadyVerified = true;
 				if (isBossRoom) {
 					isOpened = true;
 				} else {
-					//ZSSMain.logger.info("Structure was not a Boss Dungeon - removing core block now");
 					worldObj.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 					removeCoreBlock();
 				}
@@ -226,7 +226,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 	 * Called only when validation fails during an update, not when block broken
 	 */
 	protected void removeCoreBlock() {
-		//LogHelper.fine(String.format("Removing core block from update at %d/%d/%d", xCoord, yCoord, zCoord));
 		EntityPlayer player = worldObj.getClosestPlayer(pos.getX() + 0.5D, pos.getY() + 2.5D, pos.getZ() + 0.5D, 16.0D);
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
@@ -245,7 +244,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 				}
 			} else {
 				info.addStat(Stats.STAT_SECRET_ROOMS, 1);
-				//LogHelper.fine("Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
 				player.triggerAchievement(ZSSAchievements.bombsAway);
 				if (info.getStat(Stats.STAT_SECRET_ROOMS) > 49) {
 					player.triggerAchievement(ZSSAchievements.bombJunkie);
@@ -255,12 +253,10 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 				}
 			}
 		}
-		int meta = getBlockMetadata();
 		if (isSpawner()) {
-			// dungeon core block without bit8 can be broken normally
-			worldObj.setBlockState(pos, blockType.getStateFromMeta(meta & ~0x8), 2);
+			worldObj.setBlockState(pos, worldObj.getBlockState(pos).withProperty(BlockDungeonStone.UNBREAKABLE, Boolean.FALSE), 2);
 		} else {
-			worldObj.setBlockState(pos, ZSSBlocks.secretStone.getStateFromMeta(meta), 2);
+			worldObj.setBlockState(pos, getRenderState(), 2);
 		}
 	}
 
@@ -408,9 +404,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 	 * Called when core block is broken; re-verifies structure and/or sets all blocks to stone
 	 */
 	public void onBlockBroken() {
-		//LogHelper.finer(String.format("Verifying structure after core block broken at %d/%d/%d", xCoord, yCoord, zCoord));
 		if (!alreadyVerified) {
-			//LogHelper.finer("Wasn't already verified: removing structure after core block broken");
 			worldObj.playSoundEffect(pos.getX() + 0.5D, pos.getY() + 1, pos.getZ() + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			verifyStructure(true);
 		}
@@ -424,40 +418,40 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 	 * @param replace if true, all remaining boundary blocks will be replaced with normal stone
 	 */
 	protected boolean verifyStructure(boolean replace) {
-		if (box != null && hasWorldObj()) {
-			if (!replace && door != null) {
-				return verifyDoor();
-			}
-			int invalid = 0;
-			for (int i = box.minX; i <= box.maxX; ++i) {
-				for (int j = box.minY; j <= box.maxY; ++j) {
-					for (int k = box.minZ; k <= box.maxZ; ++k) {
-						if (i == box.minX || i == box.maxX || j == box.minY || j == box.maxY || k == box.minZ || k == box.maxZ) {
-							IBlockState state = worldObj.getBlockState(new BlockPos(i, j, k));
-							Block block = state.getBlock();
-							if (replace) {
-								if (block == ZSSBlocks.secretStone) {
-									//LogHelper.finest(String.format("Replacing secret stone block at %d/%d/%d", i, j, k));
-									int meta = block.getMetaFromState(state);
-									worldObj.setBlockState(new BlockPos(i, j, k), ZSSBlocks.secretStone.getStateFromMeta(meta), 2);
+		if (box == null || !hasWorldObj()) {
+			return false;
+		} else if (!replace && door != null) {
+			return verifyDoor();
+		}
+		int invalid = 0;
+		for (int i = box.minX; i <= box.maxX; ++i) {
+			for (int j = box.minY; j <= box.maxY; ++j) {
+				for (int k = box.minZ; k <= box.maxZ; ++k) {
+					if (i == box.minX || i == box.maxX || j == box.minY || j == box.maxY || k == box.minZ || k == box.maxZ) {
+						BlockPos pos = new BlockPos(i, j, k);
+						IBlockState state = worldObj.getBlockState(pos);
+						if (replace) {
+							if (state.getBlock() == ZSSBlocks.secretStone) {
+								worldObj.setBlockState(pos, ((BlockSecretStone.EnumType) state.getValue(BlockSecretStone.VARIANT)).getDroppedBlock().getDefaultState(), 2);
+							} else if (state.getBlock() == ZSSBlocks.dungeonStone) {
+								// don't use instanceof because we don't want to replace dungeon cores
+								TileEntity te = worldObj.getTileEntity(pos);
+								if (te instanceof TileEntityDungeonStone) {
+									worldObj.setBlockState(pos, ((TileEntityDungeonStone) te).getRenderState(), 2);
+								} else {
+									worldObj.setBlockState(pos, ((BlockDungeonStone) state.getBlock()).getDefaultRenderState(false), 2);
 								}
-							} else {
-								if (block != ZSSBlocks.secretStone && block != ZSSBlocks.dungeonCore) {
-									//LogHelper.finer(String.format("%s block at %d/%d/%d is invalid for this structure", block.getUnlocalizedName(), i, j, k));
-									if (++invalid > 2) {
-										//LogHelper.finer("Failed verification: the structure's integrity has been breached");
-										return false;
-									}
-								}
+							}
+						} else if (!(state.getBlock() instanceof IDungeonBlock)) {
+							if (++invalid > 2) {
+								return false;
 							}
 						}
 					}
 				}
 			}
-			return true;
-		} else {
-			return false;
 		}
+		return true;
 	}
 
 	@Override

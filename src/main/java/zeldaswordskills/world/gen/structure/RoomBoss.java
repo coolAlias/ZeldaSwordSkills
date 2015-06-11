@@ -171,7 +171,7 @@ public class RoomBoss extends RoomBase
 	 */
 	protected void decorateDungeon(World world, Random rand) {
 		int meta = getMetadata();
-		StructureGenUtils.fillDown(world, bBox, ZSSBlocks.secretStone.getStateFromMeta(meta));
+		StructureGenUtils.fillDown(world, bBox, BlockSecretStone.EnumType.byMetadata(meta).getDroppedBlock().getDefaultState());
 		placeDoor(world);
 		placeDungeonCore(world);
 		placePillars(world, meta);
@@ -195,7 +195,7 @@ public class RoomBoss extends RoomBase
 		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 		if (te instanceof TileEntityDungeonCore) {
 			TileEntityDungeonCore core = (TileEntityDungeonCore) te;
-			core.setRenderState(ZSSBlocks.secretStone.getStateFromMeta(getMetadata()));
+			core.setRenderState(BlockSecretStone.EnumType.byMetadata(getMetadata()).getDroppedBlock().getDefaultState());
 			core.setDungeonBoundingBox(bBox);
 			core.setBossType(type);
 			core.setDoor(ZSSBlocks.doorBoss, type.ordinal(), doorSide);
@@ -259,14 +259,14 @@ public class RoomBoss extends RoomBase
 		int minY = 1;
 		int minZ = bBox.getZSize() / 2 - 1;
 		if (submerged) {
-			StructureGenUtils.fillWithBlocks(world, bBox, minX, minX + 3, minY, minY + 1, minZ, minZ + 3, ZSSBlocks.secretStone.getStateFromMeta(meta));
+			StructureGenUtils.fillWithBlocks(world, bBox, minX, minX + 3, minY, minY + 1, minZ, minZ + 3, BlockSecretStone.EnumType.byMetadata(meta).getDroppedBlock().getDefaultState());
 			++minY;
 		}
 		if (!inOcean) {
 			StructureGenUtils.fillWithBlocks(world, bBox, minX, minX + 3, minY, minY + 1, minZ, minZ + 3, BlockSecretStone.EnumType.byMetadata(meta).getSlab());
 		}
 		Vec3i center = bBox.getCenter();
-		world.setBlockState(new BlockPos(center.getX(), bBox.minY + (submerged && !inOcean ? 2 : 1), center.getZ()), (type == BossType.TAIGA ? Blocks.quartz_block.getDefaultState() : ZSSBlocks.secretStone.getStateFromMeta(meta)), 2);
+		world.setBlockState(new BlockPos(center.getX(), bBox.minY + (submerged && !inOcean ? 2 : 1), center.getZ()), (type == BossType.TAIGA ? Blocks.quartz_block.getDefaultState() : BlockSecretStone.EnumType.byMetadata(meta).getDroppedBlock().getDefaultState()), 2);
 		placeHinderBlock(world);
 		boolean hasChest = false;
 		switch(type) {
@@ -341,7 +341,7 @@ public class RoomBoss extends RoomBase
 		if (inCenter) {
 			world.setBlockState(pos, chest.getStateFromMeta(doorSide.getIndex()), 2);
 		} else if (submerged && !inOcean) {
-			world.setBlockState(pos.down(), ZSSBlocks.secretStone.getStateFromMeta(getMetadata()), 2);
+			world.setBlockState(pos.down(), BlockSecretStone.EnumType.byMetadata(getMetadata()).getDroppedBlock().getDefaultState(), 2);
 		}
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof IInventory) {
@@ -495,7 +495,7 @@ public class RoomBoss extends RoomBase
 			int x2 = (bBox.getXSize() < 11 ? center.getX() : bBox.maxX) - offset;
 			int z1 = (bBox.getZSize() < 11 ? center.getZ() : bBox.minZ) + offset;
 			int z2 = (bBox.getZSize() < 11 ? center.getZ() : bBox.maxZ) - offset;
-			IBlockState state = ZSSBlocks.secretStone.getStateFromMeta(meta);
+			IBlockState state = BlockSecretStone.EnumType.byMetadata(meta).getDroppedBlock().getDefaultState();
 			for (int y = bBox.minY + 1; y < bBox.maxY; ++y) {
 				world.setBlockState(new BlockPos(x1, y, z1), state, 2);
 				world.setBlockState(new BlockPos(x1, y, z2), state, 2);

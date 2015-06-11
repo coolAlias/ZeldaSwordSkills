@@ -34,6 +34,7 @@ import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.block.BlockDoorLocked;
 import zeldaswordskills.block.BlockHeavy;
 import zeldaswordskills.block.BlockPeg;
+import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.BlockTime;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -133,7 +134,7 @@ public class RoomSecret extends RoomBase
 		TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
 		if (te instanceof TileEntityDungeonCore) {
 			TileEntityDungeonCore core = (TileEntityDungeonCore) te;
-			core.setRenderState(ZSSBlocks.secretStone.getStateFromMeta(getMetadata()));
+			core.setRenderState(BlockSecretStone.EnumType.byMetadata(getMetadata()).getDroppedBlock().getDefaultState());
 			core.setDungeonBoundingBox(bBox);
 			if (door != null) {
 				core.setDoor(door, doorMeta, face);
