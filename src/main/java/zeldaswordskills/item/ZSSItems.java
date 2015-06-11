@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Random;
 
 import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.passive.EntityVillager;
@@ -41,6 +42,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
@@ -209,8 +211,8 @@ public class ZSSItems
 
 	tunicZoraHelm,
 	tunicZoraChest,
-	tunicZoraLegs;
-	//tunicZoraBoots; // flippers?
+	tunicZoraLegs,
+	tunicZoraBoots;
 
 	/** Special Boots */
 	public static Item
@@ -425,6 +427,7 @@ public class ZSSItems
 		tunicHeroHelm = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("hero_tunic_helm");
 		tunicHeroChest = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setUnlocalizedName("hero_tunic_chest");
 		tunicHeroLegs = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("hero_tunic_legs");
+		tunicHeroBoots = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS).setUnlocalizedName("hero_tunic_boots");
 
 		tunicGoronHelm = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("goron_tunic_helm");
 		tunicGoronChest = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setUnlocalizedName("goron_tunic_chest");
@@ -448,9 +451,26 @@ public class ZSSItems
 		}).setUnlocalizedName("zora_tunic_helm");
 		tunicZoraChest = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setEffect(new PotionEffect(Potion.waterBreathing.getId(), 90, 0)).setUnlocalizedName("zora_tunic_chest");
 		tunicZoraLegs = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zora_tunic_legs");
+		tunicZoraBoots = (new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS) {
+			@Override
+			public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
+				Material m = world.getBlockState(new BlockPos(player).up()).getBlock().getMaterial();
+				if (m.isLiquid() && m != Material.lava && !player.onGround && !player.capabilities.isFlying) {
+					if (((player.motionX * player.motionX) + (player.motionZ * player.motionZ)) < 1.5D) {
+						player.motionX *= 1.115D;
+						player.motionZ *= 1.115D;
+					}
+				} else if (!m.isLiquid() && player.onGround && !player.capabilities.isFlying) {
+					player.motionX *= 0.125D;
+					player.motionZ *= 0.125D;
+					if (player.isSprinting()) {
+						player.setSprinting(false);
+					}
+				}
+			}
+		}).setUnlocalizedName("zora_tunic_boots");
 
 		// BOOTS
-		tunicHeroBoots = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS).setUnlocalizedName("hero_tunic_boots");
 		bootsHeavy = new ItemArmorBoots(ArmorMaterial.IRON, ZSSMain.proxy.addArmor("boots"), "minecraft:textures/models/armor/iron_layer_1.png").setUnlocalizedName("boots_heavy");
 		bootsHover = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/mask_hawkeye_layer_1.png").setUnlocalizedName("boots_hover");
 		bootsPegasus = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/hero_tunic_layer_1.png").setUnlocalizedName("boots_pegasus");

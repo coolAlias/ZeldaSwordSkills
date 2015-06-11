@@ -833,6 +833,7 @@ item.zss.whip_magic.name=Magic Whip
 item.zss.zora_tunic_helm.name=Zora Hat
 item.zss.zora_tunic_chest.name=Zora Tunic
 item.zss.zora_tunic_legs.name=Zora Trousers
+item.zss.zora_tunic_boots.name=Zora Flippers
 
 key.zss.label=Zelda Sword Skills Keys
 key.zss.activate.desc=Z-Target
@@ -1129,6 +1130,7 @@ tooltip.zss.goron_tunic_boots.desc=Part of the Goron armor set
 tooltip.zss.zora_tunic_helm.desc=Part of the Zora armor set
 tooltip.zss.zora_tunic_chest.desc=A rare tunic of the Zora clan\nAllows Link to breathe in the water
 tooltip.zss.zora_tunic_legs.desc=Part of the Zora armor set
+tooltip.zss.zora_tunic_boots.desc=Great for swimming, not walking
 tooltip.zss.whip.desc=A plain but useful leather whip
 tooltip.zss.whip_long.desc=An extra long whip
 tooltip.zss.whip_magic.desc=A magical and extremely versatile whip
