@@ -114,31 +114,28 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 	/**
 	 * Used by the Blast Mask to cause an explosion; sets a short cooldown on the stack
 	 */
-	public void explode(ItemStack stack, World world, double x, double y, double z) {
+	public void explode(EntityPlayer player, ItemStack stack, World world, double x, double y, double z) {
 		if (this == ZSSItems.maskBlast) {
-			if (isCooling(stack)) {
+			if (!player.capabilities.isCreativeMode && isCooling(world, stack)) {
 				world.playSoundEffect(x, y, z, Sounds.CLICK, 0.3F, 0.6F);
 			} else {
 				CustomExplosion.createExplosion(new EntityBomb(world), world, x, y, z, 3.0F, 10.0F, false);
-				setCooldown(stack, 40);
+				setNextUse(world, stack, 40);
 			}
 		}
 	}
 
 	/** Returns true if this Mask is cooling down */
-	private boolean isCooling(ItemStack stack) {
-		return (stack.hasTagCompound() && stack.getTagCompound().getInteger("cooldown") > 0);
+	private boolean isCooling(World world, ItemStack stack) {
+		return (stack.hasTagCompound() && world.getWorldTime() < stack.getTagCompound().getInteger("nextUse"));
 	}
 
-	/** Decrements the stack's cooldown by one; must check NBT tags are valid beforehand */
-	private void decrementCooldown(ItemStack stack) {
-		stack.getTagCompound().setInteger("cooldown", stack.getTagCompound().getInteger("cooldown") - 1);
-	}
-
-	/** Sets the stack's cooldown to the time provided, in ticks */
-	private void setCooldown(ItemStack stack, int time) {
+	/**
+	 * Sets the time, in ticks, which must pass before the stack may be used again
+	 */
+	private void setNextUse(World world, ItemStack stack, int time) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("cooldown", time);
+		stack.getTagCompound().setLong("nextUse", world.getWorldTime() + time);
 	}
 
 	@Override
@@ -153,30 +150,8 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
 			info.setWearingHelm();
 		}
-		if (isCooling(stack)) {
-			decrementCooldown(stack);
-		}
 		if (tickingEffect != null && world.getWorldTime() % 50 == 0) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
-		}
-		if (this == ZSSItems.maskZora) {
-			player.setAir(300);
-		} else if (this == ZSSItems.maskCouples) {
-			if (world.getWorldTime() % 64 == 0) {
-				List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D));
-				for (EntityVillager villager : villagers) {
-					if (world.rand.nextFloat() < 0.5F) {
-						ZSSVillagerInfo.get(villager).setMating();
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (isCooling(stack)) {
-			decrementCooldown(stack);
 		}
 	}
 
@@ -218,12 +193,12 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 					// Custom villager professions all use the same chat message
 					int p = villager.getProfession();
 					String s = (p < 0 || p > EnumVillager.values().length) ? "custom" : String.valueOf(p);
-					PlayerUtils.sendTranslatedChat(player, "chat.zss." + getUnlocalizedName().substring(5) + "." + s);
+					PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + s);
 				}
 			} else if (entity instanceof EntityNpcMaskTrader) {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss." + getUnlocalizedName().substring(5) + ".salesman");
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".salesman");
 			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss." + getUnlocalizedName().substring(5) + "." + itemRand.nextInt(4));
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + itemRand.nextInt(4));
 			}
 		}
 		return true;

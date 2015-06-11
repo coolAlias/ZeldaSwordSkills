@@ -250,7 +250,7 @@ public class ZSSClientEvents
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (helm != null && !player.isPotionActive(Potion.blindness)) {
-				if (event.block.getMaterial() == Material.lava && helm.getItem() == ZSSItems.tunicGoronHelm) {
+				if (event.block.getMaterial() == Material.lava && (helm.getItem() == ZSSItems.tunicGoronHelm || helm.getItem() == ZSSItems.maskGoron)) {
 					event.density = 0.85F;
 					GlStateManager.setFog(2048);
 					event.setCanceled(true);

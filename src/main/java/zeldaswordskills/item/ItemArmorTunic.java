@@ -20,6 +20,7 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -178,7 +179,8 @@ public class ItemArmorTunic extends ItemModArmor
 			if (helm != null && helm.getItem() == ZSSItems.maskZora) {
 				return false;
 			}
-			return (m == Material.water && world.getWorldTime() % 50 == 0);
+			int time = 50 + (50 * EnchantmentHelper.getRespiration(player)) + (helm != null && helm.getItem() == ZSSItems.tunicZoraHelm ? 100 : 0);
+			return (m == Material.water && world.getWorldTime() % time == 0);
 		} else {
 			return false;
 		}
@@ -203,18 +205,9 @@ public class ItemArmorTunic extends ItemModArmor
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		if (stack.getItem() == ZSSItems.tunicHeroChest) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.kokiri.desc.0"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.kokiri.desc.1"));
-		} else if (stack.getItem() == ZSSItems.tunicGoronChest) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.goron.desc.0"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.goron.desc.1"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.goron.desc.2"));
-		} else if (stack.getItem() == ZSSItems.tunicZoraChest) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.zora.desc.0"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.zora.desc.1"));
-		} else {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.generic.desc.0"));
+		String[] tooltips = StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc").split("\\\\n");
+		for (String tooltip : tooltips) {
+			list.add(EnumChatFormatting.ITALIC + tooltip);
 		}
 	}
 }

@@ -18,7 +18,7 @@
 package zeldaswordskills.ref;
 
 public enum LibPotionID {
-	/* POTION DATA VALUES from http://www.minecraftwiki.net/wiki/Potions
+	/* POTION DATA VALUES from http://minecraft.gamepedia.com/Potions
 	 * EXT means "Extended" version of potion
 	 * REV means "Reverted" version of potion
 	 */
@@ -74,6 +74,13 @@ public enum LibPotionID {
 	STRENGTH_SPLASH(16393),
 	STRENGTH_SPLASH_II(16425),
 	STRENGTH_SPLASH_EXT(16457),
+
+	LEAPING(8203),
+	LEAPING_II(8235),
+	LEAPING_EXT(8267),
+	LEAPING_SPLASH(16395),
+	LEAPING_SPLASH_II(16427),
+	LEAPING_SPLASH_EXT(16459),
 
 	INVISIBILITY(8206),
 	INVISIBILITY_REV(8238),
