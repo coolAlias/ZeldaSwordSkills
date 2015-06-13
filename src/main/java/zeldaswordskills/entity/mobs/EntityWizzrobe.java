@@ -45,7 +45,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IEntityTeleport;
@@ -323,7 +322,6 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (getCurrentCastingTime() > 0 && !isEntityInvulnerable(source) && amount >= getMinInterruptDamage()) {
 			float interruptChance = 1.0F - ((getMaxInterruptDamage() - amount) / getMaxInterruptDamage());
 			if (rand.nextFloat() < interruptChance) {
-				ZSSMain.logger.info("Interrupted! Scheduling teleport");
 				magicAI.interruptCasting();
 				teleportAI.scheduleNextTeleport(2); // teleport right away - no second attacks!
 			}
@@ -475,10 +473,10 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (isBurning() && getMagicType() == MagicType.FIRE) {
 			extinguish(); // immune to burning, but not all fire damage
 		}
-		if (teleportAI.getTeleBounds() == null && this.getAttackTarget() == null && ++noTargetTime > 400) {
+		if (teleportAI.getTeleBounds() == null && getAttackTarget() == null && ++noTargetTime > 400) {
 			noTargetTime = 0;
 			EntityLivingBase player = findPlayerToAttack();
-			if (player != null && canEntityBeSeen(player) && !worldObj.isRemote) {
+			if (player instanceof EntityPlayer && !worldObj.isRemote && canEntityBeSeen(player) && !((EntityPlayer) player).capabilities.disableDamage) {
 				setAttackTarget(player);
 				for (int i = 0; i < 64; ++i) {
 					if (EntityAITeleport.teleportToEntity(worldObj, this, player, null, teleportAI.isGrounded)) {
