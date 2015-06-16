@@ -40,6 +40,7 @@ import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 
 /**
  * 
@@ -110,12 +111,30 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** Returns true if this villager is any type of Hunter */
 	public boolean isHunter() {
-		return villager.getProfession() == EnumVillager.BUTCHER.ordinal() && villager.getCustomNameTag() != null && villager.getCustomNameTag().contains("Hunter");
+		return !villager.isChild() && villager.getProfession() == EnumVillager.BUTCHER.ordinal() && villager.getCustomNameTag() != null && villager.getCustomNameTag().contains("Hunter");
 	}
 
 	/** Returns true if this villager is a Monster Hunter */
 	public boolean isMonsterHunter() {
 		return isHunter() && villager.getCustomNameTag().equals("Monster Hunter");
+	}
+
+	/**
+	 * Adds any item to this hunter's list of things to buy (does nothing if {@link #isHunter()} is false)
+	 * @param toBuy ItemStack that the hunter will purchase
+	 * @param price Base price the hunter should pay for the item in question
+	 */
+	public void addHunterTrade(EntityPlayer player, ItemStack toBuy, int price) {
+		if (!isHunter()) {
+			return;
+		}
+		price = isMonsterHunter() ? price + price / 2 : price;
+		if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(toBuy, new ItemStack(Items.emerald, price)))) {
+			PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
+			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.new", toBuy.getDisplayName());
+		} else {
+			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.old", toBuy.getDisplayName());
+		}
 	}
 
 	/**
@@ -194,7 +213,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** Returns whether this villager deals at all in Chu Jellies */
 	public boolean isChuTrader() {
-		return villager.getProfession() == EnumVillager.LIBRARIAN.ordinal() && villager.getCustomNameTag().contains("Doc");
+		return !villager.isChild() && villager.getProfession() == EnumVillager.LIBRARIAN.ordinal() && villager.getCustomNameTag().contains("Doc");
 	}
 
 	/**

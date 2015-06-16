@@ -36,20 +36,24 @@ public class ItemMasterOre extends ItemMiscZSS
 	@Override
 	protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
-		if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.smith");
+		if (villager.isChild()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.child");
+		} else if (!villager.getClass().isAssignableFrom(EntityVillager.class)) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
+		} else if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.smith");
 			if (player.inventory.hasItem(ZSSItems.swordMaster)) {
 				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.new");
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.new");
 					player.triggerAchievement(ZSSAchievements.swordTempered);
 				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.old");
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.old");
 				}
 			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.unworthy");
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.unworthy");
 			}
 		} else {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.villager");
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.villager");
 		}
 	}
 }

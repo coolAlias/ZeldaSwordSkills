@@ -128,7 +128,7 @@ public class ZSSEntityEvents
 		if (event.target.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) event.target;
 			boolean flag2 = villager.getCustomNameTag().contains("Mask Salesman");
-			if (!event.entityPlayer.worldObj.isRemote) {
+			if (!event.entityPlayer.worldObj.isRemote && !villager.isChild()) {
 				if (("Barnes").equals(villager.getCustomNameTag())) {
 					flag2 = EntityNpcBarnes.convertFromVillager(villager, event.entityPlayer, stack);
 				} else if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {

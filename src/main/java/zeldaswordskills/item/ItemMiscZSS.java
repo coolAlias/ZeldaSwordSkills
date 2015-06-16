@@ -44,7 +44,7 @@ import zeldaswordskills.util.PlayerUtils;
 public class ItemMiscZSS extends BaseModItem implements IUnenchantable
 {
 	/** The price this item will fetch if sold to a villager */
-	private final int sellPrice;
+	protected final int sellPrice;
 
 	public ItemMiscZSS(int price) {
 		super();
@@ -56,7 +56,7 @@ public class ItemMiscZSS extends BaseModItem implements IUnenchantable
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
 			handleTrade(stack, player, (EntityVillager) entity);
 		}
 		return true;
@@ -74,7 +74,11 @@ public class ItemMiscZSS extends BaseModItem implements IUnenchantable
 	 */
 	protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
-		if (trades != null && sellPrice > 0) {
+		if (villager.isChild()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+		} else if (!villager.getClass().isAssignableFrom(EntityVillager.class)) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
+		} else if (trades != null && sellPrice > 0) {
 			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sellPrice));
 			if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
