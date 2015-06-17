@@ -68,6 +68,7 @@ import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
@@ -187,6 +188,7 @@ public class ZSSItems
 	masterOre,
 	jellyChu,
 	treasure,
+	skulltulaToken,
 	linksHouse;
 
 	//================ NO TAB ================//
@@ -292,6 +294,7 @@ public class ZSSItems
 	eggDarknut,
 	eggKeese,
 	eggOctorok,
+	eggSkulltula,
 	eggWizzrobe;
 
 	/**
@@ -597,6 +600,22 @@ public class ZSSItems
 		masterOre = new ItemMasterOre(24).setUnlocalizedName("master_ore");
 		jellyChu = new ItemChuJelly().setUnlocalizedName("jelly_chu");
 		treasure = new ItemTreasure().setUnlocalizedName("treasure");
+		skulltulaToken = (new ItemMiscZSS(20) {
+			@Override
+			protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
+				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
+				if (villager.getClass().isAssignableFrom(EntityVillager.class) && ("Cursed Man").equals(villager.getCustomNameTag())) {
+					villagerInfo.handleSkulltulaTrade(stack, player);
+				} else if (villager.isChild()) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+				} else if (villagerInfo.isHunter()) {
+					villagerInfo.addHunterTrade(player, new ItemStack(this), sellPrice);
+				} else {
+					int i = villager.getProfession();
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.skulltula_token.villager." + (i > 4 ? "custom" : i));
+				}
+			}
+		}).setUnlocalizedName("skulltula_token");
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "You must first clear this area of debris!").setUnlocalizedName("links_house");
 		instrument = new ItemInstrument();
 		bombFlowerSeed = new ItemBombFlowerSeed().setUnlocalizedName("seed_bomb_flower");
@@ -642,11 +661,12 @@ public class ZSSItems
 
 		//===================== SPAWN EGGS TAB =====================//
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("spawn_egg");
-		eggChu = new ItemCustomVariantEgg(EntityChu.class, "chu").setUnlocalizedName("eggChu");
-		eggDarknut = new ItemCustomVariantEgg(EntityDarknut.class, "darknut").setUnlocalizedName("eggDarknut");
-		eggKeese = new ItemCustomVariantEgg(EntityKeese.class, "keese").setUnlocalizedName("eggKeese");
-		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("eggOctorok");
-		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("eggWizzrobe");
+		eggChu = new ItemCustomVariantEgg(EntityChu.class, "chu").setUnlocalizedName("egg_chu");
+		eggDarknut = new ItemCustomVariantEgg(EntityDarknut.class, "darknut").setUnlocalizedName("egg_darknut");
+		eggKeese = new ItemCustomVariantEgg(EntityKeese.class, "keese").setUnlocalizedName("egg_keese");
+		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("egg_octorok");
+		eggSkulltula = new ItemCustomVariantEgg(EntitySkulltula.class, "skulltula").setUnlocalizedName("egg_skulltula");
+		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("egg_wizzrobe");
 	}
 
 	/**

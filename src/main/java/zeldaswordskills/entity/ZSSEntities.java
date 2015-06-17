@@ -70,6 +70,7 @@ import zeldaswordskills.client.render.entity.RenderEntityJar;
 import zeldaswordskills.client.render.entity.RenderEntityKeese;
 import zeldaswordskills.client.render.entity.RenderEntityMagicSpell;
 import zeldaswordskills.client.render.entity.RenderEntityOctorok;
+import zeldaswordskills.client.render.entity.RenderEntitySkulltula;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
 import zeldaswordskills.client.render.entity.RenderEntityWhip;
 import zeldaswordskills.client.render.entity.RenderEntityWizzrobe;
@@ -80,6 +81,7 @@ import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
@@ -138,6 +140,8 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityKeese.class, EnumCreatureType.AMBIENT, 4, 4, rate); // TODO should use monster type???
 		rate = config.get("Mob Spawns", "[Spawn Rate] Octorok spawn rate (0 to disable)[0+]", 8).getInt();
 		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.WATER_CREATURE, 2, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate] Skulltula spawn rate (0 to disable)[0+]", 8).getInt();
+		addSpawnableEntityData(EntitySkulltula.class, EnumCreatureType.MONSTER, 2, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
 		addSpawnableEntityData(EntityWizzrobe.class, EnumCreatureType.MONSTER, 1, 1, rate);
 		// ALLOWED BIOMES
@@ -207,6 +211,7 @@ public class ZSSEntities
 		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
 		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
 		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
+		addSpawnLocations(EntitySkulltula.class, EntitySkulltula.getDefaultBiomes());
 		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
 	}
 
@@ -243,6 +248,9 @@ public class ZSSEntities
 
 		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
+
+		EntityRegistry.registerModEntity(EntitySkulltula.class, "skulltula", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
+		CustomEntityList.addMapping(EntitySkulltula.class, "skulltula", 0x080808, 0xFFFF00, 0x080808, 0xE68A00);
 
 		EntityRegistry.registerModEntity(EntityWizzrobe.class, "wizzrobe", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityWizzrobe.class, "wizzrobe", 0x8B2500, 0xFF0000, 0x8B2500, 0x00B2EE, 0x8B2500, 0xEEEE00, 0x8B2500, 0x00EE76);
@@ -286,6 +294,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese(manager));
 		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy(manager));
 		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(manager, new ModelOctorok(), 0.7F));
+		RenderingRegistry.registerEntityRenderingHandler(EntitySkulltula.class, new RenderEntitySkulltula(manager));
 		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobe.class, new RenderEntityWizzrobe(manager, new ModelWizzrobe(), 1.0F));
 
 		// BOSSES

@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
@@ -36,11 +38,17 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
+import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TimedAddItem;
+import zeldaswordskills.util.TimedChatDialogue;
 
 /**
  * 
@@ -107,6 +115,60 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	/** Completes the mask trade, setting villager to no longer trade for masks */
 	public void onMaskTrade() {
 		desiredMask = NONE;
+	}
+
+	public void handleSkulltulaTrade(ItemStack stack, EntityPlayer player) {
+		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+		String s = "chat.zss.npc.cursed_man.";
+		if (villager.isChild()) {
+			PlayerUtils.sendTranslatedChat(player, s + "child");
+		} else if (info.canIncrementSkulltulaTokens()) {
+			if (info.incrementSkulltulaTokens()) {
+				int n = info.getSkulltulaTokens();
+				ItemStack reward = null;
+				switch (n) {
+				case 1: PlayerUtils.sendTranslatedChat(player, s + "token." + n); break;
+				case 10: reward = new ItemStack(ZSSItems.whip); break;
+				case 20: reward = new ItemStack(ZSSItems.tunicZoraChest); break;
+				case 30:
+					reward = new ItemStack(ZSSItems.bombBag);
+					((ItemBombBag) reward.getItem()).addBombs(reward, new ItemStack(ZSSItems.bomb, 10));
+					break;
+				case 40: reward = new ItemStack(ZSSItems.keyBig, 1, player.worldObj.rand.nextInt(BossType.values().length)); break;
+				case 50:
+					ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
+					for (SkillBase skill : SkillBase.getSkills()) {
+						if (skill.getId() != SkillBase.bonusHeart.getId() && skills.getSkillLevel(skill) < skill.getMaxLevel() && (reward == null || player.worldObj.rand.nextInt(4) == 0)) {
+							reward = new ItemStack(ZSSItems.skillOrb, 1, skill.getId());
+						}
+					}
+					if (reward == null) {
+						reward = new ItemStack(ZSSItems.arrowLight, 16);
+					}
+					break;
+				case 100:
+					reward = new ItemStack(Items.emerald, 64);
+					if (Config.getSkulltulaRewardRate() > 0) {
+						villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
+					}
+					break;
+				default: PlayerUtils.sendFormattedChat(player, s + "amount", n);
+				}
+				if (reward != null) {
+					new TimedChatDialogue(player, Arrays.asList(new String[]{StatCollector.translateToLocal(s + "token." + n), StatCollector.translateToLocalFormatted(s + "reward." + n, reward.getDisplayName())}));
+					new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
+				}
+			} else { // probably an impossible case
+				PlayerUtils.sendTranslatedChat(player, s + villager.worldObj.rand.nextInt(4));
+			}
+		} else if (Config.getSkulltulaRewardRate() > 0 && player.worldObj.getWorldTime() > villager.getEntityData().getLong("NextSkulltulaReward")) {
+			ItemStack reward = new ItemStack(Items.emerald, 64);
+			new TimedChatDialogue(player, Arrays.asList(new String[]{StatCollector.translateToLocal(s + "complete"), StatCollector.translateToLocalFormatted(s + "reward.100", reward.getDisplayName())}));
+			new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
+			villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
+		} else {
+			PlayerUtils.sendTranslatedChat(player, s + "complete");
+		}
 	}
 
 	/** Returns true if this villager is any type of Hunter */
