@@ -35,6 +35,7 @@ public class BlockTargetDirectional extends BlockTarget implements IVanillaRotat
 
 	public BlockTargetDirectional(Material material) {
 		super(material);
+		setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
 	}
 
 	@Override

@@ -78,7 +78,7 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 		Block block = state.getBlock();
 		stack.setTagCompound(new NBTTagCompound());
 		stack.getTagCompound().setInteger("blockId", Block.getIdFromBlock(block));
-		stack.getTagCompound().setInteger("metadata", block.getMetaFromState(state));
+		stack.getTagCompound().setInteger("metadata", state.getBlock().damageDropped(state));
 		stack.getTagCompound().setInteger("blockColor", block.getRenderColor(state));
 		if (gauntlets != null) {
 			stack.getTagCompound().setTag("gauntlets", gauntlets.writeToNBT(new NBTTagCompound()));
@@ -94,10 +94,11 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 
 	/** Returns the stored Block or stone if none available */
 	public Block getBlockFromStack(ItemStack stack) {
+		Block block = Blocks.stone;
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("blockId", Constants.NBT.TAG_INT)) {
-			return Block.getBlockById(stack.getTagCompound().getInteger("blockId"));
+			block = Block.getBlockById(stack.getTagCompound().getInteger("blockId"));
 		}
-		return Blocks.stone;
+		return (block == null ? Blocks.stone : block);
 	}
 
 	/** Returns the metadata value associated with the stored block */
@@ -257,7 +258,7 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		Block block = getBlockFromStack(stack);
+		ItemStack block = new ItemStack(getBlockFromStack(stack));
 		return (block != null ? block.getUnlocalizedName() : Blocks.stone.getUnlocalizedName());
 	}
 

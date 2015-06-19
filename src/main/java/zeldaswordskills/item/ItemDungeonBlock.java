@@ -29,6 +29,7 @@ import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -149,7 +150,7 @@ public class ItemDungeonBlock extends ItemBlockUnbreakable implements IDynamicIt
 						}
 					}
 				}
-				if (block.isOpaqueCube() || block instanceof BlockIce) {
+				if ((block.isOpaqueCube() || block instanceof BlockIce) && Item.getItemFromBlock(block) != null) {
 					if (!stack.hasTagCompound()) {
 						stack.setTagCompound(new NBTTagCompound());
 					}

@@ -47,6 +47,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
@@ -270,7 +271,7 @@ public class ZSSItemEvents
 		Block block = state.getBlock();
 		if (player.canPlayerEdit(pos, face, stack) || block instanceof ILiftable) {
 			boolean isLiftable = block instanceof ILiftable;
-			boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
+			boolean isValidBlock = (block.isOpaqueCube() || block instanceof BlockBreakable) && Item.getItemFromBlock(block) != null;
 			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, state, face)
 					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, state).weight;

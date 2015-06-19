@@ -67,6 +67,11 @@ public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBloc
 	}
 
 	@Override
+	public int damageDropped(IBlockState state) {
+		return state.getBlock().getMetaFromState(state);
+	}
+
+	@Override
 	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
 		return ((BlockHeavy.EnumType) state.getValue(VARIANT)).getWeight();
 	}
