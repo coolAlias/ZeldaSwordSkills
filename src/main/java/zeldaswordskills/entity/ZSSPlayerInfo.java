@@ -108,6 +108,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** [Hero's Bow] Part of the graphical glitch fix: Whether the player retrieved a bomb arrow via getAutoBombArrow */
 	public boolean hasAutoBombArrow = false;
 
+	/** [Slingshot] Current mode index */
+	public int slingshotMode = 0;
+
 	/** Reduces fall damage next impact; used for Rising Cut */
 	public float reduceFallAmount = 0.0F;
 
@@ -375,6 +378,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		compound.setInteger("lastBoots", Item.getIdFromItem(lastBootsWorn));
 		compound.setInteger("borrowedMask", borrowedMask != null ? Item.getIdFromItem(borrowedMask) : -1);
 		compound.setInteger("maskStage", maskStage);
+		compound.setInteger("slingshotMode", slingshotMode);
 	}
 
 	@Override
@@ -390,5 +394,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		int maskID = compound.getInteger("borrowedMask");
 		borrowedMask = maskID > -1 ? Item.getItemById(maskID) : null;
 		maskStage = compound.getInteger("maskStage");
+		slingshotMode = compound.getInteger("slingshotMode");
 	}
 }

@@ -32,7 +32,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -47,6 +46,7 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
@@ -68,8 +68,49 @@ import cpw.mods.fml.relauncher.SideOnly;
  * require a special type of slingshot (upgraded) to shoot properly.
  *
  */
-public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable, IZoom
+public class ItemSlingshot extends Item implements ICyclableItem, IFairyUpgrade, IUnenchantable, IZoom
 {
+	public static enum Mode {
+		/** Default Slingshot behavior searches for the first usable seed of any kind */
+		DEFAULT(null),
+		DEKU(SeedType.DEKU),
+		BOMB(SeedType.BOMB),
+		COCOA(SeedType.COCOA),
+		GRASS(SeedType.GRASS),
+		MELON(SeedType.MELON),
+		PUMPKIN(SeedType.PUMPKIN),
+		NETHERWART(SeedType.NETHERWART);
+		private ItemStack seedStack;
+		private final SeedType type;
+		private Mode(SeedType type) {
+			this.type = type;
+		}
+		/**
+		 * Returns the seed itemstack required for this mode
+		 */
+		public ItemStack getSeedStack() {
+			if (type != null) {
+				Item item = ItemSlingshot.typeToSeed.get(type);
+				if (item != null) {
+					seedStack = new ItemStack(item, 1, item == Items.dye ? 3 : 0);
+				}
+			}
+			return seedStack;
+		}
+		/**
+		 * Returns the next Mode by ordinal position
+		 */
+		public Mode next() {
+			return Mode.values()[(ordinal() + 1) % Mode.values().length];
+		}
+		/**
+		 * Returns the previous Mode by ordinal position
+		 */
+		public Mode prev() {
+			return Mode.values()[((ordinal() == 0 ? Mode.values().length : ordinal()) - 1) % Mode.values().length];
+		}
+	}
+
 	/** The number of seeds this slingshot will fire per shot */
 	protected final int seedsFired;
 
@@ -109,6 +150,56 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
+	}
+
+	public Mode getMode(EntityPlayer player) {
+		return Mode.values()[ZSSPlayerInfo.get(player).slingshotMode % Mode.values().length];
+	}
+
+	private void setMode(EntityPlayer player, Mode mode) {
+		ZSSPlayerInfo.get(player).slingshotMode = mode.ordinal();
+	}
+
+	@Override
+	public void nextItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(player, getMode(player).next());
+		}
+	}
+
+	@Override
+	public void prevItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(player, getMode(player).prev());
+		}
+	}
+
+	@Override
+	public int getCurrentMode(ItemStack stack, EntityPlayer player) {
+		return getMode(player).ordinal();
+	}
+
+	@Override
+	public void setCurrentMode(ItemStack stack, EntityPlayer player, int mode) {
+		setMode(player, Mode.values()[mode % Mode.values().length]);
+	}
+
+	@Override
+	public ItemStack getRenderStackForMode(ItemStack stack, EntityPlayer player) {
+		ItemStack ret = getMode(player).getSeedStack();
+		if (ret != null) {
+			ret.stackSize = 0;
+			for (ItemStack inv : player.inventory.mainInventory) {
+				if (inv != null && inv.getItem() == ret.getItem() && inv.getItemDamage() == ret.getItemDamage()) {
+					ret.stackSize += inv.stackSize;
+					if (ret.stackSize > 98) {
+						ret.stackSize = 99;
+						break;
+					}
+				}
+			}
+		}
+		return ret;
 	}
 
 	@Override
@@ -218,31 +309,23 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IUnenchantable
 	 */
 	protected boolean hasSeeds(EntityPlayer player) {
 		if (player.capabilities.isCreativeMode) { return true; }
-		for (ItemStack stack : player.inventory.mainInventory) {
-			if (stack != null) {
-				if (stack.getItem() instanceof ItemSeeds || stack.getItem() == ZSSItems.dekuNut) {
-					return true;
-				} else if (stack.getItem() == Items.dye && stack.getItemDamage() == 3) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return getSeedType(player) != SeedType.NONE;
 	}
 
 	/**
 	 * Returns the type of seed to be shot or NONE if no seed available
 	 */
 	protected SeedType getSeedType(EntityPlayer player) {
+		SeedType selected = getMode(player).type;
 		for (ItemStack stack : player.inventory.mainInventory) {
 			if (stack != null && seedToType.containsKey(stack.getItem())) {
 				SeedType type = seedToType.get(stack.getItem());
-				if (type != SeedType.COCOA || stack.getItemDamage() == 3) {
+				if ((type != SeedType.COCOA || stack.getItemDamage() == 3) && (selected == null || type == selected)) {
 					return type;
 				}
 			}
 		}
-		return (player.capabilities.isCreativeMode ? SeedType.GRASS : SeedType.NONE);
+		return (player.capabilities.isCreativeMode ? (selected == null ? SeedType.GRASS : selected) : SeedType.NONE);
 	}
 
 	@Override
