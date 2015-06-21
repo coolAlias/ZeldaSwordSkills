@@ -93,6 +93,9 @@ public class EntitySkulltula extends EntitySpider implements IEntityLootable, IE
 		dataWatcher.addObject(PERCHED_INDEX, (byte) 0);
 	}
 
+	/**
+	 * 0 for regular, 1 for Gold
+	 */
 	@Override
 	public IEntityVariant setType(int type) {
 		dataWatcher.updateObject(TYPE_INDEX, (type > 0 ? (byte) 1 : (byte) 0));
