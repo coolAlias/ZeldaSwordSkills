@@ -86,7 +86,7 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 			// once that is fixed, the bomb will render too high and will need to be adjusted accordingly
 			GlStateManager.translate(0.5F, 0.5F, 0.5F);
 			GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
-			GlStateManager.translate(-0.75F, -1.25F, 0.5F);
+			GlStateManager.translate(-0.75F, -0.5F, 0.5F);
 			if (isFlashing) {
 				GlStateManager.scale(1.2F, 1.2F, 1.2F);
 			}

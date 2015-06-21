@@ -135,8 +135,12 @@ public class ItemMagicMirror extends BaseModItem implements IUnenchantable
 	}
 
 	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return !ItemStack.areItemsEqual(oldStack, newStack);
+	}
+
+	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		// TODO causes 'NBT update' graphical glitch while item is held, which is annoying
 		if (!world.isRemote && world.provider.isSurfaceWorld() && world.getTotalWorldTime() % 10 == 0) {
 			boolean flag = (entity instanceof EntityPlayer && !((EntityPlayer) entity).isUsingItem());
 			if (flag && TargetUtils.canEntitySeeSky(world, entity)) {

@@ -154,6 +154,11 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 		}
 	}
 
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return !ItemStack.areItemsEqual(oldStack, newStack);
+	}
+
 	/**
 	 * @param slot inventory slot at which the item resides
 	 * @param isHeld true if the item is currently held
@@ -198,7 +203,6 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 			if (time % 20 == 0) {
 				world.playSoundAtEntity(entity, Sounds.BOMB_FUSE, 1.0F, 2.0F + entity.worldObj.rand.nextFloat() * 0.4F);
 			}
-			// TODO NBT update causes refresh, which causes model to render much lower than it actually is
 			boolean flag = world.provider.getDimensionId() == -1 && (type == BombType.BOMB_STANDARD || type == BombType.BOMB_FLOWER);
 			stack.getTagCompound().setInteger("time", flag ? Config.getBombFuseTime() : ++time);
 			if (time == Config.getBombFuseTime() && !world.isRemote) {
