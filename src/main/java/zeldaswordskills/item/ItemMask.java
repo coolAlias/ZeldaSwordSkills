@@ -117,31 +117,28 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 	/**
 	 * Used by the Blast Mask to cause an explosion; sets a short cooldown on the stack
 	 */
-	public void explode(ItemStack stack, World world, double x, double y, double z) {
+	public void explode(EntityPlayer player, ItemStack stack, World world, double x, double y, double z) {
 		if (this == ZSSItems.maskBlast) {
-			if (isCooling(stack)) {
+			if (!player.capabilities.isCreativeMode && isCooling(world, stack)) {
 				world.playSoundEffect(x, y, z, Sounds.CLICK, 0.3F, 0.6F);
 			} else {
 				CustomExplosion.createExplosion(new EntityBomb(world), world, x, y, z, 3.0F, 10.0F, false);
-				setCooldown(stack, 40);
+				setNextUse(world, stack, 40);
 			}
 		}
 	}
 
 	/** Returns true if this Mask is cooling down */
-	private boolean isCooling(ItemStack stack) {
-		return (stack.hasTagCompound() && stack.getTagCompound().getInteger("cooldown") > 0);
+	private boolean isCooling(World world, ItemStack stack) {
+		return (stack.hasTagCompound() && world.getWorldTime() < stack.getTagCompound().getInteger("nextUse"));
 	}
 
-	/** Decrements the stack's cooldown by one; must check NBT tags are valid beforehand */
-	private void decrementCooldown(ItemStack stack) {
-		stack.getTagCompound().setInteger("cooldown", stack.getTagCompound().getInteger("cooldown") - 1);
-	}
-
-	/** Sets the stack's cooldown to the time provided, in ticks */
-	private void setCooldown(ItemStack stack, int time) {
+	/**
+	 * Sets the time, in ticks, which must pass before the stack may be used again
+	 */
+	private void setNextUse(World world, ItemStack stack, int time) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("cooldown", time);
+		stack.getTagCompound().setLong("nextUse", world.getWorldTime() + time);
 	}
 
 	@Override
@@ -156,16 +153,8 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
 			info.setWearingHelm();
 		}
-		if (isCooling(stack)) {
-			decrementCooldown(stack);
-		}
 		if (tickingEffect != null && world.getWorldTime() % 50 == 0) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
-		}
-	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (isCooling(stack)) {
-			decrementCooldown(stack);
 		}
 	}
 

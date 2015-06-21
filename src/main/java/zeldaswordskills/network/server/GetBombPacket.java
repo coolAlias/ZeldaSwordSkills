@@ -44,7 +44,7 @@ public class GetBombPacket extends AbstractServerMessage<GetBombPacket>
 		ItemStack heldItem = player.getHeldItem();
 		ItemStack mask = player.getCurrentArmor(ArmorIndex.WORN_HELM);
 		if (mask != null && mask.getItem() == ZSSItems.maskBlast) {
-			((ItemMask) mask.getItem()).explode(mask, player.worldObj, player.posX, player.posY, player.posZ);
+			((ItemMask) mask.getItem()).explode(player, mask, player.worldObj, player.posX, player.posY, player.posZ);
 		} else if (player.isSneaking() && heldItem != null && heldItem.getItem() instanceof ItemBombBag) {
 			((ItemBombBag) heldItem.getItem()).emptyBag(heldItem, player);
 		} else {
