@@ -108,7 +108,9 @@ public class ItemMiscZSS extends Item implements IUnenchantable
 
 	private void handleMasterOre(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
-		if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
+		if (villager.isChild()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.child");
+		} else if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.smith");
 			if (player.inventory.hasItem(ZSSItems.swordMaster)) {
 				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {
@@ -127,7 +129,9 @@ public class ItemMiscZSS extends Item implements IUnenchantable
 
 	private void handleGenericTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
-		if (trades != null && sellPrice > 0) {
+		if (villager.isChild()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+		} else if (trades != null && sellPrice > 0) {
 			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sellPrice));
 			if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");

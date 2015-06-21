@@ -108,7 +108,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** Returns true if this villager is any type of Hunter */
 	public boolean isHunter() {
-		return villager.getProfession() == EnumVillager.BUTCHER.ordinal() && villager.getCustomNameTag() != null && villager.getCustomNameTag().contains("Hunter");
+		return !villager.isChild() && villager.getProfession() == EnumVillager.BUTCHER.ordinal() && villager.getCustomNameTag() != null && villager.getCustomNameTag().contains("Hunter");
 	}
 
 	/** Returns true if this villager is a Monster Hunter */
@@ -192,7 +192,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** Returns whether this villager deals at all in Chu Jellies */
 	public boolean isChuTrader() {
-		return villager.getProfession() == EnumVillager.LIBRARIAN.ordinal() && villager.getCustomNameTag().contains("Doc");
+		return !villager.isChild() && villager.getProfession() == EnumVillager.LIBRARIAN.ordinal() && villager.getCustomNameTag().contains("Doc");
 	}
 
 	/**

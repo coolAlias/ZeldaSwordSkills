@@ -23,6 +23,7 @@ import java.util.List;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -138,6 +139,10 @@ public class ItemTreasure extends Item implements IUnenchantable
 				boolean isBaseVillager = entity.getClass().isAssignableFrom(EntityVillager.class);
 				villager.playLivingSound();
 				if (treasure == Treasures.KNIGHTS_CREST && isBaseVillager && villager.getCustomNameTag().equals("Orca")) {
+					if (villager.isChild()) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+						return true;
+					}
 					EntityNpcOrca orca = new EntityNpcOrca(villager.worldObj);
 					orca.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 					orca.setCustomNameTag(villager.getCustomNameTag());
@@ -148,7 +153,9 @@ public class ItemTreasure extends Item implements IUnenchantable
 					PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 					ZSSPlayerSkills.get(player).giveCrest();
 				} else if (treasure == Treasures.ZELDAS_LETTER) {
-					if (isBaseVillager && villager.getCustomNameTag().contains("Mask Salesman")) {
+					if (villager.isChild()) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.name + ".child");
+					} else if (isBaseVillager && villager.getCustomNameTag().contains("Mask Salesman")) {
 						EntityNpcMaskTrader trader = new EntityNpcMaskTrader(villager.worldObj);
 						trader.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 						trader.setCustomNameTag(villager.getCustomNameTag());
@@ -201,7 +208,9 @@ public class ItemTreasure extends Item implements IUnenchantable
 					}
 				}
 			} else if (entity instanceof INpc) {
-				if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
+				if (entity instanceof EntityAgeable && ((EntityAgeable) entity).isChild()) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+				} else if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested + ".orca");
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested);
