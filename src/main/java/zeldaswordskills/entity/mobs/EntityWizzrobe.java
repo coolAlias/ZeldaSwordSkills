@@ -480,7 +480,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (teleportAI.getTeleBounds() == null && this.getEntityToAttack() == null && ++noTargetTime > 400) {
 			noTargetTime = 0;
 			Entity player = findPlayerToAttack();
-			if (player != null && canEntityBeSeen(player) && !worldObj.isRemote) {
+			if (player instanceof EntityPlayer && !worldObj.isRemote && canEntityBeSeen(player) && !((EntityPlayer) player).capabilities.disableDamage) {
 				setTarget(player);
 				for (int i = 0; i < 64; ++i) {
 					if (EntityAITeleport.teleportToEntity(worldObj, this, player, null, teleportAI.isGrounded)) {
