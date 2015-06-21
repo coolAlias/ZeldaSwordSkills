@@ -20,7 +20,6 @@ package zeldaswordskills.client.render.block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -49,7 +48,6 @@ public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 			GlStateManager.rotate(45F, 0.0F, 1.0F, 0.0F);
 			GlStateManager.rotate(30F, 1.0F, 0.0F, 0.0F);
 			GlStateManager.rotate((stack.getItem().isFull3D() ? 225.0F : 45.0F), 0.0F, 0.0F, 1.0F);
-			bindTexture(TextureMap.locationBlocksTexture);
 			renderItem.renderItemModel(stack);
 			GlStateManager.disableRescaleNormal();
 			GlStateManager.popMatrix();

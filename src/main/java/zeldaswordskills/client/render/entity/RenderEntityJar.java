@@ -49,7 +49,6 @@ public class RenderEntityJar extends Render
 		while (roll > 360) { roll -= 360; }
 		GlStateManager.rotate(roll, -0.25F, 0.1F, 0);
 		GlStateManager.scale(1.5F, 1.5F, 1.5F);
-		bindEntityTexture(entity);
 		renderItem.renderItemModel(jar);
 		GlStateManager.popMatrix();
 	}

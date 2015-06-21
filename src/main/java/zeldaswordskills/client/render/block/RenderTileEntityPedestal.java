@@ -20,7 +20,6 @@ package zeldaswordskills.client.render.block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -51,7 +50,6 @@ public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 			GlStateManager.scale(1F, 1F, 1F);
 			GlStateManager.rotate(pedestal.getOrientation() == 0 ? 0F : 90F, 0.0F, 1.0F, 0.0F);
 			GlStateManager.rotate(225.0F, 0.0F, 0.0F, 1.0F);
-			bindTexture(TextureMap.locationBlocksTexture);
 			renderItem.renderItemModel(sword);
 			GlStateManager.disableRescaleNormal();
 			GlStateManager.popMatrix();
