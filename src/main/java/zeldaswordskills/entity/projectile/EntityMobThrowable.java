@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity.projectile;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
@@ -75,7 +76,8 @@ public abstract class EntityMobThrowable extends EntityThrowable
 	public EntityLivingBase getThrower() {
 		EntityLivingBase thrower = super.getThrower();
 		if (thrower == null) {
-			return (EntityLivingBase) worldObj.getEntityByID(throwerId);
+			Entity entity = worldObj.getEntityByID(throwerId);
+			return (entity instanceof EntityLivingBase ? (EntityLivingBase) entity : null);
 		}
 		return thrower;
 	}
