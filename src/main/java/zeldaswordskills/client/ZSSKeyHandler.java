@@ -20,6 +20,7 @@ package zeldaswordskills.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -33,9 +34,11 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.GuiHandler;
+import zeldaswordskills.item.ICyclableItem;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.server.CycleItemModePacket;
 import zeldaswordskills.network.server.GetBombPacket;
 import zeldaswordskills.network.server.OpenGuiPacket;
 import zeldaswordskills.ref.Config;
@@ -56,16 +59,17 @@ public class ZSSKeyHandler
 	/** Key index for easy handling and retrieval of keys and key descriptions */
 	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
 			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_BOMB = 7,
-			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9, KEY_SKILLS_GUI = 10;
+			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9, KEY_SKILLS_GUI = 10,
+			KEY_PREV_MODE = 11, KEY_NEXT_MODE = 12;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
 	public static final String[] desc = { "activate","next","attack","left","right","down",
-		"block","bomb","toggleat","togglebuff", "skills_gui"};
+		"block","bomb","toggleat","togglebuff", "skills_gui", "prev_mode", "next_mode"};
 
 	/** Default key values */
 	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
 		Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_DOWN, Keyboard.KEY_RCONTROL,
-		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V, Keyboard.KEY_P};
+		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V, Keyboard.KEY_P, Keyboard.KEY_LBRACKET, Keyboard.KEY_RBRACKET};
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 
@@ -134,6 +138,17 @@ public class ZSSKeyHandler
 				}
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS));
+			} else if (kb == keys[KEY_PREV_MODE].getKeyCode() || kb == keys[KEY_NEXT_MODE].getKeyCode()) {
+				boolean next = kb == keys[KEY_NEXT_MODE].getKeyCode();
+				ItemStack stack = mc.thePlayer.getHeldItem();
+				if (stack != null && stack.getItem() instanceof ICyclableItem) {
+					if (next) {
+						((ICyclableItem) stack.getItem()).nextItemMode(stack, mc.thePlayer);
+					} else {
+						((ICyclableItem) stack.getItem()).prevItemMode(stack, mc.thePlayer);
+					}
+					PacketDispatcher.sendToServer(new CycleItemModePacket(next));
+				}
 			} else {
 				handleTargetingKeys(mc, kb, skills);
 			}

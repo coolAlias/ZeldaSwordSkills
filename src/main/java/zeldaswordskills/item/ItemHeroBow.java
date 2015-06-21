@@ -82,6 +82,7 @@ import com.google.common.collect.ImmutableBiMap;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.common.eventhandler.Event.Result;
+import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -98,8 +99,68 @@ import cpw.mods.fml.relauncher.SideOnly;
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.quiver.ISpecialBow", modid="battlegear2", striprefs=true)
 })
-public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantable, IZoom, IAllowItem, ISheathed, ISpecialBow
+public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade, IUnenchantable, IZoom, IAllowItem, ISheathed, ISpecialBow
 {
+	public static enum Mode {
+		/** Default Hero Bow behavior searches for the first usable arrow of any kind */
+		DEFAULT("", 0),
+		STANDARD("minecraft:arrow", 0),
+		BOMB_STANDARD(ModInfo.ID + ":zss.arrow_bomb", 1),
+		BOMB_FIRE(ModInfo.ID + ":zss.arrow_bomb_fire", 1),
+		BOMB_WATER(ModInfo.ID + ":zss.arrow_bomb_water", 1),
+		MAGIC_FIRE(ModInfo.ID + ":zss.arrow_fire", 2),
+		MAGIC_ICE(ModInfo.ID + ":zss.arrow_ice", 2),
+		MAGIC_LIGHT(ModInfo.ID + ":zss.arrow_light", 3);
+		private final String arrowName;
+		private Item arrowItem;
+		private final int level;
+		private Mode(String arrowName, int level) {
+			this.arrowName = arrowName;
+			this.level = level;
+		}
+		/**
+		 * Returns the arrow item required for this mode
+		 */
+		public Item getArrowItem() {
+			if (arrowItem == null && arrowName.length() > 0) {
+				String[] parts = arrowName.split(":");
+				arrowItem = GameRegistry.findItem(parts[0], parts[1]);
+			}
+			return arrowItem;
+		}
+		/**
+		 * Returns the next Mode by ordinal position
+		 */
+		public Mode next() {
+			return Mode.values()[(ordinal() + 1) % Mode.values().length];
+		}
+		/**
+		 * Returns the next mode whose level does not exceed that given
+		 */
+		public Mode next(int level) {
+			return cycle(level, true);
+		}
+		/**
+		 * Returns the previous Mode by ordinal position
+		 */
+		public Mode prev() {
+			return Mode.values()[((ordinal() == 0 ? Mode.values().length : ordinal()) - 1) % Mode.values().length];
+		}
+		/**
+		 * Returns the previous mode whose level does not exceed that given
+		 */
+		public Mode prev(int level) {
+			return cycle(level, false);
+		}
+		private Mode cycle(int level, boolean next) {
+			Mode mode = this;
+			do {
+				mode = (next ? mode.next() : mode.prev());
+			} while (mode != this && mode.level > level);
+			return mode;
+		}
+	}
+
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
 
@@ -140,6 +201,60 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	private void setLevel(ItemStack bow, int level) {
 		if (!bow.hasTagCompound()) { bow.setTagCompound(new NBTTagCompound()); }
 		bow.getTagCompound().setInteger("zssBowLevel", level);
+	}
+
+	public Mode getMode(ItemStack stack) {
+		if (!stack.hasTagCompound() || !stack.getTagCompound().hasKey("zssItemMode")) {
+			setMode(stack, Mode.DEFAULT);
+		}
+		return Mode.values()[stack.getTagCompound().getInteger("zssItemMode") % Mode.values().length];
+	}
+
+	private void setMode(ItemStack stack, Mode mode) {
+		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
+		stack.getTagCompound().setInteger("zssItemMode", mode.ordinal());
+	}
+
+	@Override
+	public void nextItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(stack, getMode(stack).next(getLevel(stack)));
+		}
+	}
+
+	@Override
+	public void prevItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(stack, getMode(stack).prev(getLevel(stack)));
+		}
+	}
+
+	@Override
+	public int getCurrentMode(ItemStack stack, EntityPlayer player) {
+		return getMode(stack).ordinal();
+	}
+
+	@Override
+	public void setCurrentMode(ItemStack stack, EntityPlayer player, int mode) {
+		setMode(stack, Mode.values()[mode % Mode.values().length]);
+	}
+
+	@Override
+	public ItemStack getRenderStackForMode(ItemStack stack, EntityPlayer player) {
+		Item item = getMode(stack).getArrowItem();
+		ItemStack ret = (item == null ? null : new ItemStack(item, 0));
+		if (ret != null) {
+			for (ItemStack inv : player.inventory.mainInventory) {
+				if (inv != null && inv.getItem() == ret.getItem()) {
+					ret.stackSize += inv.stackSize;
+					if (ret.stackSize > 98) {
+						ret.stackSize = 99;
+						break;
+					}
+				}
+			}
+		}
+		return ret;
 	}
 
 	/**
@@ -307,11 +422,20 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 	 * meaning that {@link #canShootArrow} returned true
 	 */
 	private ItemStack getArrowFromInventory(ItemStack bow, EntityPlayer player) {
+		Item modeArrow = getMode(bow).getArrowItem();
 		ItemStack arrow = null;
-		if (Config.enableAutoBombArrows() && player.isSneaking()) {
+		if (modeArrow == null && Config.enableAutoBombArrows() && player.isSneaking()) {
 			arrow = getAutoBombArrow(bow, player);
 		}
-		if (arrow == null) {
+		// Search specifically for the selected arrow type:
+		if (modeArrow != null && canShootArrow(player, bow, new ItemStack(modeArrow))) {
+			for (ItemStack stack : player.inventory.mainInventory) {
+				if (stack != null && stack.getItem() == modeArrow) {
+					arrow = stack;
+					break;
+				}
+			}
+		} else if (arrow == null) { // otherwise use default behavior
 			for (ItemStack stack : player.inventory.mainInventory) {
 				if (stack != null && canShootArrow(player, bow, stack)) {
 					arrow = stack;
@@ -321,7 +445,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IUnenchantabl
 		}
 
 		if (arrow == null && player.capabilities.isCreativeMode) {
-			arrow = new ItemStack(Items.arrow);
+			arrow = new ItemStack(modeArrow == null ? Items.arrow : modeArrow);
 		}
 
 		return arrow;
