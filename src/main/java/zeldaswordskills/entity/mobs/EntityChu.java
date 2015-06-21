@@ -439,7 +439,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 			if (t > 0) {
 				setShockTime(Math.max(0, t - rand.nextInt(100) - 50));
 			}
-			func_174815_a(this, target);
+			applyEnchantments(this, target);
 		}
 	}
 
