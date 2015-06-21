@@ -64,43 +64,51 @@ public class ItemTreasure extends Item implements IUnenchantable
 		EYE_DROPS("eye_drops"),
 		EYEBALL_FROG("eyeball_frog"),
 		GORON_SWORD("goron_sword"),
-		JELLY_BLOB("jelly_blob",true,32),
-		MONSTER_CLAW("monster_claw",true,24),
+		JELLY_BLOB("jelly_blob","default",true,32,64),
+		MONSTER_CLAW("monster_claw","default",true,24,64),
 		ODD_MUSHROOM("odd_mushroom"),
 		ODD_POTION("odd_potion"),
 		POACHER_SAW("poacher_saw"),
 		POCKET_EGG("pocket_egg"),
 		PRESCRIPTION("prescription"),
-		TENTACLE("tentacle",true,16),
+		TENTACLE("tentacle","default",true,16,64),
 		ZELDAS_LETTER("zeldas_letter"),
-		KNIGHTS_CREST("knights_crest","knights_crest",true,32);
+		KNIGHTS_CREST("knights_crest","knights_crest",true,32,64);
 
 		public final String name;
 		/** Unlocalized string used to retrieve chat comment when an NPC is not interested in trading */
 		public final String uninterested;
 		private final boolean canSell;
 		private final int value;
+		private final int maxStackSize;
 
 		private Treasures(String name) {
-			this(name, "default", false, 0);
+			this(name, "default", false, 0, 1);
 		}
 
 		private Treasures(String name, boolean canSell, int value) {
-			this(name, "default", canSell, value);
+			this(name, "default", canSell, value, 1);
 		}
 
-		private Treasures(String name, String uninterested, boolean canSell, int value) {
+		private Treasures(String name, String uninterested, boolean canSell, int value, int maxStackSize) {
 			this.name = name;
 			this.uninterested = uninterested;
 			this.canSell = canSell;
 			// this.value = value;
 			// TODO there is a vanilla bug that prevents distinguishing between subtypes for the items to buy
 			this.value = 24;
+			this.maxStackSize = maxStackSize;
 		}
 		/** Whether this treasure is salable (currently used only for monster parts) */
 		public boolean canSell() { return canSell; }
 		/** The price at which the hunter will buy this treasure */
 		public int getValue() { return value; }
+		/** The maximum stack size for this treasure */
+		public int getMaxStackSize() { return maxStackSize; }
+
+		public static Treasures byDamage(int damage) {
+			return values()[damage % values().length];
+		}
 	};
 
 	@SideOnly(Side.CLIENT)
@@ -115,9 +123,14 @@ public class ItemTreasure extends Item implements IUnenchantable
 	}
 
 	@Override
+	public int getItemStackLimit(ItemStack stack) {
+		return Treasures.byDamage(stack.getItemDamage()).getMaxStackSize();
+	}
+
+	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote) {
-			Treasures treasure = Treasures.values()[stack.getItemDamage() % Treasures.values().length];
+			Treasures treasure = Treasures.byDamage(stack.getItemDamage());
 			if (entity instanceof EntityVillager) {
 				EntityVillager villager = (EntityVillager) entity;
 				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
@@ -206,7 +219,7 @@ public class ItemTreasure extends Item implements IUnenchantable
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName() + "." + Treasures.values()[stack.getItemDamage() % Treasures.values().length].name;
+		return super.getUnlocalizedName() + "." + Treasures.byDamage(stack.getItemDamage()).name;
 	}
 
 	@Override
