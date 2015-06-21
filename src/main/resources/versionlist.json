@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8",
-			"modVersion":"3.0.1",
+			"modVersion":"3.0.2",
 			"changeLog": [
-	               "Hotfix for several issues",
+	               "Lots of bug fixes; Skulltulas",
 	               "See main mod page for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
