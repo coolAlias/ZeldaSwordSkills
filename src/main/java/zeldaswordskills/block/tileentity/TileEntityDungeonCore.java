@@ -37,6 +37,7 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.BlockWarpStone;
+import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -293,7 +294,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		} else if (block.getMaterial() == Material.lava) {
 			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
 			type = (rarity > 7 ? EntityKeese.KeeseType.FIRE.ordinal() : EntityKeese.KeeseType.CURSED.ordinal());
-		// START rarity 'switch', starting with most likely cases
+			// START rarity 'switch', starting with most likely cases
 		} else if (rarity > 50) {
 			mob = new EntityZombie(worldObj);
 		} else if (rarity > 40) {
@@ -392,9 +393,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called when core block is broken; re-verifies structure and/or sets all blocks to stone
 	 */
 	public void onBlockBroken() {
-		//LogHelper.finer(String.format("Verifying structure after core block broken at %d/%d/%d", xCoord, yCoord, zCoord));
 		if (!alreadyVerified) {
-			//LogHelper.finer("Wasn't already verified: removing structure after core block broken");
 			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			verifyStructure(true);
 		}
@@ -420,17 +419,12 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 							Block block = worldObj.getBlock(i, j, k);
 							if (replace) {
 								if (block == ZSSBlocks.secretStone) {
-									//LogHelper.finest(String.format("Replacing secret stone block at %d/%d/%d", i, j, k));
 									int meta = worldObj.getBlockMetadata(i, j, k);
 									worldObj.setBlock(i, j, k, BlockSecretStone.getBlockFromMeta(meta), 0, 2);
 								}
-							} else {
-								if (block != ZSSBlocks.secretStone && block != ZSSBlocks.dungeonCore) {
-									//LogHelper.finer(String.format("%s block at %d/%d/%d is invalid for this structure", block.getUnlocalizedName(), i, j, k));
-									if (++invalid > 2) {
-										//LogHelper.finer("Failed verification: the structure's integrity has been breached");
-										return false;
-									}
+							} else if (!(block instanceof IDungeonBlock)) {
+								if (++invalid > 2) {
+									return false;
 								}
 							}
 						}
