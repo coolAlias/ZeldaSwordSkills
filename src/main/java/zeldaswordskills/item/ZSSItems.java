@@ -38,6 +38,7 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.config.Configuration;
@@ -63,6 +64,7 @@ import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
@@ -125,6 +127,9 @@ public class ZSSItems
 	private static boolean allowGoldSmelting;
 	/** Enable crafting of the Wooden Hammer used to bypass wooden pegs */
 	private static boolean enableCraftingHammer;
+	/** Enable crafting throwing rocks from cobblestone and back */
+	private static boolean enableCraftingThrowingRock;
+
 
 	/** List of potential extra drops from tall grass when cut with a sword */
 	private static final List<ItemStack> grassDrops = new ArrayList<ItemStack>();
@@ -306,6 +311,7 @@ public class ZSSItems
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
+		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
 	}
 
 	/**
@@ -556,7 +562,18 @@ public class ZSSItems
 		heldBlock = new ItemHeldBlock().setUnlocalizedName("zss.held_block");
 		powerPiece = new ItemPickupOnly().setUnlocalizedName("zss.power_piece");
 		smallHeart = new ItemPickupOnly().setUnlocalizedName("zss.heart");
-		throwingRock = new Item().setUnlocalizedName("zss.throwing_rock").setTextureName(ModInfo.ID + ":throwing_rock").setMaxStackSize(16);
+		throwingRock = (new Item() {
+			@Override
+			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+				if (!player.capabilities.isCreativeMode) {
+					--stack.stackSize;
+				}
+				if (!world.isRemote) {
+					world.spawnEntityInWorld(new EntityThrowingRock(world, player));
+				}
+				return stack;
+			}
+		}).setUnlocalizedName("zss.throwing_rock").setTextureName(ModInfo.ID + ":throwing_rock").setMaxStackSize(18);
 
 		// Custom Spawn Eggs
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("zss.spawn_egg");
@@ -602,6 +619,10 @@ public class ZSSItems
 		if (enableCraftingHammer) {
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log, 's', Items.stick);
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log2, 's', Items.stick);
+		}
+		if (enableCraftingThrowingRock) {
+			GameRegistry.addShapelessRecipe(new ItemStack(throwingRock, 9), Blocks.cobblestone);
+			GameRegistry.addRecipe(new ItemStack(Blocks.cobblestone), "rrr", "rrr", "rrr", 'r', throwingRock);
 		}
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
