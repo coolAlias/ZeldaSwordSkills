@@ -73,11 +73,17 @@ public class DungeonLootLists
 	}
 
 	public static String
+	/** Standard loot that appears in all chests */
 	BASIC_LOOT = "zss.basic_chest_loot",
 	BOSS_LOOT = "zss.boss_chest_loot",
+	/** Loot table to use for non-special (e.g. ocean, lava, etc.) chests */
+	DEFAULT_LOOT = "zss.default_chest_loot",
 	JAR_DROPS = "zss.jar_drops",
+	LAVA_LOOT = "zss.lava_chest_loot",
 	LOCKED_LOOT = "zss.locked_chest_loot",
-	NETHER_LOOT = "zss.nether_chest_loot";
+	MOUNTAIN_LOOT = "zss.mountain_chest_loot",
+	NETHER_LOOT = "zss.nether_chest_loot",
+	OCEAN_LOOT = "zss.ocean_chest_loot";
 
 	/** List of droppable skill orb items as weighted chest contents, not including the bonus heart */
 	private static WeightedRandomChestContent[] skillOrbLootList;
@@ -88,9 +94,13 @@ public class DungeonLootLists
 	public static void init() {
 		initBasicConsumables();
 		initBossLoot();
+		initDefaultLoot();
 		initJarDrops();
+		initLavaLoot();
 		initLockedLoot();
+		initMountainLoot();
 		initNetherLoot();
+		initOceanLoot();
 		initSkillOrbLoot();
 	}
 
@@ -103,13 +113,13 @@ public class DungeonLootLists
 		int n = rand.nextInt(3);
 		if (n > 0 && (isLockedChest || rand.nextInt(4) == 0)) {
 			if (room.inLava) {
-				WeightedRandomChestContent.generateChestContents(rand, lavaLoot, chest, n);
+				WeightedRandomChestContent.generateChestContents(rand, ChestGenHooks.getInfo(LAVA_LOOT).getItems(rand), chest, n);
 			} else if (room.inOcean) {
-				WeightedRandomChestContent.generateChestContents(rand, oceanLoot, chest, n);
+				WeightedRandomChestContent.generateChestContents(rand, ChestGenHooks.getInfo(OCEAN_LOOT).getItems(rand), chest, n);
 			} else if (room.inMountain) {
-				WeightedRandomChestContent.generateChestContents(rand, mountainLoot, chest, n);
+				WeightedRandomChestContent.generateChestContents(rand, ChestGenHooks.getInfo(MOUNTAIN_LOOT).getItems(rand), chest, n);
 			} else {
-				WeightedRandomChestContent.generateChestContents(rand, regularLoot, chest, n);
+				WeightedRandomChestContent.generateChestContents(rand, ChestGenHooks.getInfo(DEFAULT_LOOT).getItems(rand), chest, n);
 			}
 		}
 		if (room.inNether) {
@@ -220,6 +230,19 @@ public class DungeonLootLists
 		});
 	}
 
+	private static void initDefaultLoot() {
+		setCategoryStats(ChestGenHooks.getInfo(DEFAULT_LOOT), 1, 2, new WeightedRandomChestContent[] {
+			getLoot(Items.diamond_horse_armor, 1, 1, 1),
+			getLoot(Items.golden_horse_armor, 1, 1, 1),
+			getLoot(Items.iron_horse_armor, 1, 1, 2),
+			getLoot(Items.saddle, 1, 1, 3),
+			getLoot(ZSSItems.arrowBomb, 2, 5, 3),
+			getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 3, Config.getBombWeight()),
+			getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1),
+			getLoot(ZSSItems.swordKokiri, 1, 1, 1)
+		});
+	}
+
 	private static void initJarDrops() {
 		setCategoryStats(ChestGenHooks.getInfo(JAR_DROPS), 1, 1, new WeightedRandomChestContent[] {
 			getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 1, 1),
@@ -232,16 +255,18 @@ public class DungeonLootLists
 		});
 	}
 
-	private static final WeightedRandomChestContent[] lavaLoot = {
-		getLoot(Items.nether_wart, 1, 2, 1),
-		getLoot(Items.potionitem, LibPotionID.FIRERESIST.id, 1, 1, 2),
-		getLoot(Items.fire_charge, 1, 2, 3),
-		getLoot(ZSSItems.arrowBombFire, 2, 5, 3),
-		getLoot(ZSSItems.bomb, BombType.BOMB_FIRE.ordinal(), 1, 2, Config.getBombWeight() * 2),
-		getLoot(ZSSItems.tunicGoronHelm, 1, 1, 1),
-		getLoot(ZSSItems.tunicGoronChest, 1, 1, 1),
-		getLoot(ZSSItems.tunicGoronLegs, 1, 1, 1)
-	};
+	private static void initLavaLoot() {
+		setCategoryStats(ChestGenHooks.getInfo(LAVA_LOOT), 1, 2, new WeightedRandomChestContent[] {
+			getLoot(Items.nether_wart, 1, 2, 1),
+			getLoot(Items.potionitem, LibPotionID.FIRERESIST.id, 1, 1, 2),
+			getLoot(Items.fire_charge, 1, 2, 3),
+			getLoot(ZSSItems.arrowBombFire, 2, 5, 3),
+			getLoot(ZSSItems.bomb, BombType.BOMB_FIRE.ordinal(), 1, 2, Config.getBombWeight() * 2),
+			getLoot(ZSSItems.tunicGoronHelm, 1, 1, 1),
+			getLoot(ZSSItems.tunicGoronChest, 1, 1, 1),
+			getLoot(ZSSItems.tunicGoronLegs, 1, 1, 1)
+		});
+	}
 
 	private static void initLockedLoot() {
 		setCategoryStats(ChestGenHooks.getInfo(LOCKED_LOOT), 1, 3, new WeightedRandomChestContent[] {
@@ -262,15 +287,17 @@ public class DungeonLootLists
 		});
 	}
 
-	private static final WeightedRandomChestContent[] mountainLoot = {
-		getLoot(Items.potionitem, LibPotionID.STRENGTH_II.id, 1, 1, 1),
-		getLoot(Items.potionitem, LibPotionID.STRENGTH.id, 1, 1, 3),
-		getLoot(Items.diamond, 1, 3, 3),
-		getLoot(ZSSItems.arrowBomb, 2, 5, 3),
-		getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight() * 2),
-		getLoot(ZSSItems.rocsFeather, 1, 1, 1),
-		getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1)
-	};
+	private static void initMountainLoot() {
+		setCategoryStats(ChestGenHooks.getInfo(MOUNTAIN_LOOT), 1, 2, new WeightedRandomChestContent[] {
+			getLoot(Items.potionitem, LibPotionID.STRENGTH_II.id, 1, 1, 1),
+			getLoot(Items.potionitem, LibPotionID.STRENGTH.id, 1, 1, 3),
+			getLoot(Items.diamond, 1, 3, 3),
+			getLoot(ZSSItems.arrowBomb, 2, 5, 3),
+			getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight() * 2),
+			getLoot(ZSSItems.rocsFeather, 1, 1, 1),
+			getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1)
+		});
+	}
 
 	private static void initNetherLoot() {
 		setCategoryStats(ChestGenHooks.getInfo(NETHER_LOOT), 1, 2, new WeightedRandomChestContent[] {
@@ -285,27 +312,19 @@ public class DungeonLootLists
 		});
 	}
 
-	private static final WeightedRandomChestContent[] oceanLoot = {
-		getLoot(Items.fishing_rod, 1, 1, 2),
-		getLoot(Items.fish, 1, 2, 4),
-		getLoot(Items.potionitem, LibPotionID.WATER_BREATHING.id, 1, 1, 3),
-		getLoot(ZSSItems.arrowBombWater, 2, 5, 3),
-		getLoot(ZSSItems.bomb, BombType.BOMB_WATER.ordinal(), 1, 2, Config.getBombWeight() * 2),
-		getLoot(ZSSItems.tunicZoraHelm, 1, 1, 1),
-		getLoot(ZSSItems.tunicZoraChest, 1, 1, 1),
-		getLoot(ZSSItems.tunicZoraLegs, 1, 1, 1)
-	};
-
-	private static final WeightedRandomChestContent[] regularLoot = {
-		getLoot(Items.diamond_horse_armor, 1, 1, 1),
-		getLoot(Items.golden_horse_armor, 1, 1, 1),
-		getLoot(Items.iron_horse_armor, 1, 1, 2),
-		getLoot(Items.saddle, 1, 1, 3),
-		getLoot(ZSSItems.arrowBomb, 2, 5, 3),
-		getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 3, Config.getBombWeight()),
-		getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordOrdon), 1, 1, 1),
-		getLoot(ZSSItems.swordKokiri, 1, 1, 1)
-	};
+	private static void initOceanLoot() {
+		setCategoryStats(ChestGenHooks.getInfo(OCEAN_LOOT), 1, 2, new WeightedRandomChestContent[] {
+			getLoot(Items.fishing_rod, 1, 1, 2),
+			getLoot(Items.fish, 1, 2, 4),
+			getLoot(Items.potionitem, LibPotionID.WATER_BREATHING.id, 1, 1, 3),
+			getLoot(ZSSItems.arrowBombWater, 2, 5, 3),
+			getLoot(ZSSItems.bomb, BombType.BOMB_WATER.ordinal(), 1, 2, Config.getBombWeight() * 2),
+			getLoot(ZSSItems.tunicZoraHelm, 1, 1, 1),
+			getLoot(ZSSItems.tunicZoraChest, 1, 1, 1),
+			getLoot(ZSSItems.tunicZoraLegs, 1, 1, 1),
+			getLoot(ZSSItems.tunicZoraBoots, 1, 1, 1)
+		});
+	}
 
 	private static void initSkillOrbLoot() {
 		List<WeightedRandomChestContent> lootTable = new ArrayList<WeightedRandomChestContent>(SkillBase.getNumSkills());

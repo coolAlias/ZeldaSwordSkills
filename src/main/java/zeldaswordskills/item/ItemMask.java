@@ -162,20 +162,6 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 		if (tickingEffect != null && world.getWorldTime() % 50 == 0) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
 		}
-		if (this == ZSSItems.maskZora) {
-			player.setAir(300);
-		} else if (this == ZSSItems.maskCouples) {
-			if (world.getWorldTime() % 64 == 0) {
-				List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.boundingBox.expand(8.0D, 3.0D, 8.0D));
-				for (EntityVillager villager : villagers) {
-					if (world.rand.nextFloat() < 0.5F) {
-						ZSSVillagerInfo.get(villager).setMating();
-					}
-				}
-			}
-		}
-	}
-
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
 		if (isCooling(stack)) {

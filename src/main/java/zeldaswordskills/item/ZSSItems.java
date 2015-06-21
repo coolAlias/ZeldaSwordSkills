@@ -27,6 +27,9 @@ import java.util.Random;
 
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.material.Material;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -60,6 +63,7 @@ import zeldaswordskills.client.render.item.RenderItemCustomBow;
 import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityDarknut;
@@ -454,7 +458,22 @@ public class ZSSItems
 		tunicGoronChest = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setUnlocalizedName("zss.goron_tunic_chest");
 		tunicGoronLegs = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.goron_tunic_legs");
 
-		tunicZoraHelm = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.zora_tunic_helm");
+		tunicZoraHelm = (new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM) {
+			@Override
+			@SideOnly(Side.CLIENT)
+			public void getSubItems(Item item, CreativeTabs tab, List list) {
+				ItemStack helm = new ItemStack(item);
+				helm.addEnchantment(Enchantment.respiration, 3);
+				list.add(helm);
+			}
+			@Override
+			public WeightedRandomChestContent getChestGenBase(ChestGenHooks chest, Random rnd, WeightedRandomChestContent original) {
+				ItemStack helm = new ItemStack(this);
+				helm.addEnchantment(Enchantment.respiration, 3);
+				original.theItemId = helm;
+				return original;
+			}
+		}).setUnlocalizedName("zss.zora_tunic_helm");
 		tunicZoraChest = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setEffect(new PotionEffect(Potion.waterBreathing.getId(), 90, 0)).setUnlocalizedName("zss.zora_tunic_chest");
 		tunicZoraLegs = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.zora_tunic_legs");
 		tunicZoraBoots = (new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS) {
@@ -551,7 +570,20 @@ public class ZSSItems
 		// MASK TAB ITEMS
 		maskBlast = new ItemMask(ArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_blast");
 		maskBunny = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(1, 64).setUnlocalizedName("zss.mask_bunny");
-		maskCouples = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(40, 32).setUnlocalizedName("zss.mask_couples");
+		maskCouples = (new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")) {
+			@Override
+			public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
+				super.onArmorTick(world, player, stack);
+				if (world.getWorldTime() % 64 == 0) {
+					List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.boundingBox.expand(8.0D, 3.0D, 8.0D));
+					for (EntityVillager villager : villagers) {
+						if (world.rand.nextFloat() < 0.5F) {
+							ZSSVillagerInfo.get(villager).setMating();
+						}
+					}
+				}
+			}
+		}).setPrice(40, 32).setUnlocalizedName("zss.mask_couples");
 		maskGerudo = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_gerudo");
 		maskGiants = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_giants");
 		maskGibdo = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_gibdo");
@@ -564,7 +596,7 @@ public class ZSSItems
 		maskTruth = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
 		maskDeku = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_deku");
 		maskGoron = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_goron");
-		maskZora = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_zora");
+		maskZora = new ItemMaskZora(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_zora");
 		maskFierce = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_fierce");
 		maskMajora = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.wither.getId(), 100, 1)).setUnlocalizedName("zss.mask_majora");
 
@@ -658,10 +690,12 @@ public class ZSSItems
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Items.brick);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument,1,ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Items.clay_ball, 'r', Items.reeds);
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronHelm), tunicHeroHelm, new ItemStack(Items.dye,1,1));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Items.dye,1,1));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraHelm), tunicHeroHelm, new ItemStack(Items.dye,1,4));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Items.dye,1,4));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Items.dye, 1, 1));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicZoraLegs, new ItemStack(Items.dye, 1, 1));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Items.dye, 1, 4));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicGoronLegs, new ItemStack(Items.dye, 1, 4));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicGoronLegs, new ItemStack(Items.dye, 1, 2));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicZoraLegs, new ItemStack(Items.dye, 1, 2));
 	}
 
 	/**
