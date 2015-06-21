@@ -44,6 +44,7 @@ import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
+import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.IModItem;
 import zeldaswordskills.item.ZSSItems;
@@ -70,6 +71,7 @@ public class ClientProxy extends CommonProxy
 		registerVariants();
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new GuiBuffBar());
+		MinecraftForge.EVENT_BUS.register(new GuiItemModeOverlay());
 		MinecraftForge.EVENT_BUS.register(new ZSSClientEvents());
 		FMLCommonHandler.instance().bus().register(new TargetingTickHandler());
 		FMLCommonHandler.instance().bus().register(new ZSSKeyHandler());

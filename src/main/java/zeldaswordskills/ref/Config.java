@@ -65,6 +65,10 @@ public class Config
 	private static boolean allowVanillaControls;
 	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
 	private static boolean doubleTap;
+	/** [Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen */
+	private static boolean isItemModeTop;
+	/** [Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen */
+	private static boolean isItemModeLeft;
 	/** [Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100] */
 	private static int resetNotesInterval;
 	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
@@ -340,6 +344,8 @@ public class Config
 		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
 		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
 		doubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
+		isItemModeTop = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen", true).getBoolean(true);
+		isItemModeLeft = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen", true).getBoolean(true);
 		resetNotesInterval = MathHelper.clamp_int(config.get(category, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
 		enableHookshotSound = config.get(category, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
 		autoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
@@ -508,6 +514,8 @@ public class Config
 	public static boolean isBuffBarEnabled() { return isBuffBarEnabled; }
 	public static boolean isBuffBarHorizontal() { return isBuffBarHorizontal; }
 	public static boolean isBuffBarLeft() { return isBuffBarLeft; }
+	public static boolean isItemModeTop() { return isItemModeTop; }
+	public static boolean isItemModeLeft() { return isItemModeLeft; }
 	public static boolean showSecretMessage() { return showSecretMessage; }
 	public static boolean isComboHudEnabled() { return enableComboHud; }
 	public static int getHitsToDisplay() { return hitsToDisplay; }
