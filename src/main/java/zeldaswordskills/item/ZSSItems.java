@@ -63,6 +63,7 @@ import zeldaswordskills.client.render.item.RenderItemCustomBow;
 import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityChu;
@@ -70,6 +71,8 @@ import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.projectile.EntitySeedShot;
+import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.item.ItemInstrument.Instrument;
@@ -77,6 +80,7 @@ import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.world.gen.structure.LinksHouse;
 import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -446,7 +450,16 @@ public class ZSSItems
 		// SKILL TAB ITEMS
 		skillOrb = new ItemSkillOrb().setUnlocalizedName("zss.skillorb");
 		heartPiece = new ItemMiscZSS(12).setUnlocalizedName("zss.heartpiece").setCreativeTab(ZSSCreativeTabs.tabSkills);
-		skillWiper = new ItemMiscZSS(0).setUnlocalizedName("zss.skill_wiper").setCreativeTab(ZSSCreativeTabs.tabSkills);
+		skillWiper = (new ItemMiscZSS(0) {
+			@Override
+			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+				if (!world.isRemote) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.skill.reset");
+					ZSSPlayerSkills.get(player).resetSkills();
+				}
+				return stack;
+			}
+		}).setUnlocalizedName("zss.skill_wiper").setCreativeTab(ZSSCreativeTabs.tabSkills);
 
 		// COMBAT TAB ITEMS
 		tunicHeroHelm = new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.hero_tunic_helm");
@@ -603,10 +616,23 @@ public class ZSSItems
 		// MISCELLANEOUS TAB ITEMS
 		pendant = new ItemPendant().setUnlocalizedName("zss.pendant");
 		crystalSpirit = new ItemMiscZSS(0).setUnlocalizedName("zss.spirit_crystal_empty").setMaxStackSize(1).setCreativeTab(ZSSCreativeTabs.tabTools);
-		masterOre = new ItemMiscZSS(24).setUnlocalizedName("zss.masterore");
+		masterOre = new ItemMasterOre(24).setUnlocalizedName("zss.masterore");
 		rocsFeather = new ItemMiscZSS(12).setUnlocalizedName("zss.rocs_feather").setCreativeTab(ZSSCreativeTabs.tabTools);
 		dekuLeaf = new ItemDekuLeaf().setUnlocalizedName("zss.deku_leaf");
-		dekuNut = new ItemMiscZSS(2).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
+		dekuNut = (new ItemMiscZSS(2) {
+			@Override
+			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+				EntitySeedShot seedShot = new EntitySeedShot(world, player, 0.5F, 1, 0).setType(SeedType.DEKU);
+				seedShot.setDamage(2.5F);
+				if (!player.capabilities.isCreativeMode) {
+					--stack.stackSize;
+				}
+				if (!world.isRemote) {
+					world.spawnEntityInWorld(seedShot);
+				}
+				return stack;
+			}
+		}).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
 		jellyChu = new ItemChuJelly().setUnlocalizedName("zss.jelly_chu");
 		treasure = new ItemTreasure().setUnlocalizedName("zss.treasure");
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "You must first clear this area of debris!", "deku_nut").setUnlocalizedName("zss.links_house");
