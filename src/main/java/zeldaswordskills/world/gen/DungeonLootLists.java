@@ -187,6 +187,7 @@ public class DungeonLootLists
 			getLoot(Items.melon_seeds, 1, 3, 2),
 			getLoot(Items.pumpkin_seeds, 1, 3, 2),
 			getLoot(ZSSItems.dekuNut, 1, 3, 2),
+			getLoot(ZSSItems.skulltulaToken, 1, 1, 1), // TODO remove if Skulltulas are added
 			getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 2, Config.getBombWeight()),
 			getLoot(ZSSItems.bombBag, 1, 1, (Config.getBombBagWeight() > 5 ? 2 : 1)),
 			getLoot(ZSSItems.keySmall, 1, 1, Config.getSmallKeyWeight()),

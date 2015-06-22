@@ -111,6 +111,8 @@ public class Config
 	private static int keeseSwarmSize;
 	/** [Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30] */
 	private static int sacredRefreshRate;
+	/** [Skulltula Tokens] Number of days between each recurring reward for completing the quest (0 to disable recurring reward) [0-30] */
+	private static int skulltulaRewardRate;
 	/** [Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs */
 	private static boolean disableVanillaBuffs;
 	/** [NPC] Sets whether Zelda NPCs are invulnerable or not */
@@ -367,6 +369,7 @@ public class Config
 		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt(), 0, 100);
 		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt(), 4, 16);
 		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt(), 0, 30);
+		skulltulaRewardRate = MathHelper.clamp_int(config.get("General", "[Skulltula Tokens] Number of days between each recurring reward for completing the quest (0 to disable recurring reward) [0-30]", 7).getInt(), 0, 30);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
 		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
 		naviRange = MathHelper.clamp_int(config.get("General", "Range at which Navi can sense secret rooms, in blocks (0 to disable) [0-10]", 4).getInt(), 0, 10);
@@ -540,6 +543,7 @@ public class Config
 	public static int getNumBosses() { return bossNumber; }
 	public static boolean doJarsUpdate() { return enableJarUpdates; }
 	public static int getSacredFlameRefreshRate() { return sacredRefreshRate; }
+	public static int getSkulltulaRewardRate() { return skulltulaRewardRate; }
 	public static boolean areVanillaBuffsDisabled() { return disableVanillaBuffs; }
 	public static boolean areNpcsInvulnerable() { return npcsAreInvulnerable; }
 	public static int getNaviRange() { return naviRange; }

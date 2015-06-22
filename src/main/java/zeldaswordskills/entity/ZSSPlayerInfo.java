@@ -44,6 +44,7 @@ import zeldaswordskills.network.client.AttackBlockedPacket;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
 import zeldaswordskills.network.client.SyncPlayerInfoPacket;
+import zeldaswordskills.util.PlayerUtils;
 
 public class ZSSPlayerInfo implements IExtendedEntityProperties
 {
@@ -101,6 +102,12 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/** Current stage in the Mask trading sequence */
 	private int maskStage = 0;
+
+	/** Maximum number of skulltula tokens which can be turned in */
+	public static final int MAX_SKULLTULA_TOKENS = 100;
+
+	/** Number of Gold Skulltula Tokens this player has turned in */
+	private int skulltulaTokens = 0;
 
 	/** [Hero's Bow] Stores the currently nocked arrow in order to avoid the graphical glitch caused by writing to the stack's NBT */
 	private ItemStack arrowStack = null;
@@ -257,6 +264,31 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	/**
+	 * Returns true if the player is able to turn in more Skulltula Tokens
+	 */
+	public boolean canIncrementSkulltulaTokens() {
+		return skulltulaTokens < MAX_SKULLTULA_TOKENS;
+	}
+
+	/**
+	 * Returns number of skulltula tokens this player has given to the Cursed Man
+	 */
+	public int getSkulltulaTokens() {
+		return skulltulaTokens;
+	}
+
+	/**
+	 * Attempts to turn in (i.e. consume) a skulltula token, returning true on success.
+	 */
+	public boolean incrementSkulltulaTokens() {
+		if (canIncrementSkulltulaTokens() && PlayerUtils.consumeHeldItem(player, ZSSItems.skulltulaToken, 1)) {
+			++skulltulaTokens;
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Returns the currently nocked arrow for the Hero's Bow, possibly null
 	 */
 	public ItemStack getNockedArrow() {
@@ -379,6 +411,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		compound.setInteger("borrowedMask", borrowedMask != null ? Item.getIdFromItem(borrowedMask) : -1);
 		compound.setInteger("maskStage", maskStage);
 		compound.setInteger("slingshotMode", slingshotMode);
+		compound.setInteger("skulltulaTokens", skulltulaTokens);
+
 	}
 
 	@Override
@@ -395,5 +429,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		borrowedMask = maskID > -1 ? Item.getItemById(maskID) : null;
 		maskStage = compound.getInteger("maskStage");
 		slingshotMode = compound.getInteger("slingshotMode");
+		skulltulaTokens = compound.getInteger("skulltulaTokens");
 	}
 }

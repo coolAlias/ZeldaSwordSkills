@@ -195,6 +195,7 @@ public class ZSSItems
 	masterOre,
 	jellyChu,
 	treasure,
+	skulltulaToken,
 	linksHouse;
 
 	//================ NO TAB ================//
@@ -635,6 +636,22 @@ public class ZSSItems
 		}).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
 		jellyChu = new ItemChuJelly().setUnlocalizedName("zss.jelly_chu");
 		treasure = new ItemTreasure().setUnlocalizedName("zss.treasure");
+		skulltulaToken = (new ItemMiscZSS(20) {
+			@Override
+			protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
+				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
+				if (villager.getClass().isAssignableFrom(EntityVillager.class) && ("Cursed Man").equals(villager.getCustomNameTag())) {
+					villagerInfo.handleSkulltulaTrade(stack, player);
+				} else if (villager.isChild()) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+				} else if (villagerInfo.isHunter()) {
+					villagerInfo.addHunterTrade(player, new ItemStack(this), sellPrice);
+				} else {
+					int i = villager.getProfession();
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.skulltula_token.villager." + (i > 4 ? "custom" : i));
+				}
+			}
+		}).setUnlocalizedName("zss.skulltula_token");
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "You must first clear this area of debris!", "deku_nut").setUnlocalizedName("zss.links_house");
 		instrument = new ItemInstrument();
 		bombFlowerSeed = new ItemBombFlowerSeed().setUnlocalizedName("zss.seed_bomb_flower");

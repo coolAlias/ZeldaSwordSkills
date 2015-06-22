@@ -27,7 +27,6 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -44,7 +43,6 @@ import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
@@ -192,14 +190,7 @@ public class ItemTreasure extends Item implements IUnenchantable
 						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : ""));
 					}
 				} else if (treasure.canSell() && villagerInfo.isHunter()) {
-					ItemStack treasureStack = new ItemStack(ZSSItems.treasure,1,treasure.ordinal());
-					int price = villagerInfo.isMonsterHunter() ? treasure.getValue() + treasure.getValue() / 2 : treasure.getValue();
-					if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(treasureStack, new ItemStack(Items.emerald, price)))) {
-						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.new", treasureStack.getDisplayName());
-					} else {
-						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.old", treasureStack.getDisplayName());
-					}
+					villagerInfo.addHunterTrade(player, new ItemStack(ZSSItems.treasure,1,treasure.ordinal()), treasure.getValue());
 				} else {
 					if (villagerInfo.isFinalTrade(treasure, stack)) {
 						PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".wait");

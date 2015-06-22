@@ -131,6 +131,16 @@ public class ZSSEntityEvents
 			if (!event.entityPlayer.worldObj.isRemote && !villager.isChild()) {
 				if (("Barnes").equals(villager.getCustomNameTag())) {
 					flag2 = EntityNpcBarnes.convertFromVillager(villager, event.entityPlayer, stack);
+				} else if (("Cursed Man").equals(villager.getCustomNameTag())) {
+					if (stack == null || stack.getItem() != ZSSItems.skulltulaToken) {
+						int tokens = ZSSPlayerInfo.get(event.entityPlayer).getSkulltulaTokens();
+						if (tokens > 0) {
+							PlayerUtils.sendFormattedChat(event.entityPlayer, "chat.zss.npc.cursed_man.amount", tokens);
+						} else {
+							PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man." + event.entity.worldObj.rand.nextInt(4));
+						}
+						flag2 = true;
+					}
 				} else if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
 					if (flag2) {
 						PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me");

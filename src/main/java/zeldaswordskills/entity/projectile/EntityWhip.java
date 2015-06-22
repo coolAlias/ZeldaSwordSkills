@@ -29,6 +29,7 @@ import net.minecraft.block.BlockTorch;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -50,6 +51,7 @@ import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemWhip;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.network.server.FallDistancePacket;
@@ -356,6 +358,10 @@ public class EntityWhip extends EntityThrowable
 		if (rand.nextFloat() < lootChance) {
 			ItemStack loot = (lootable != null ? lootable.getEntityLoot(player, getType())
 					: LootableEntityRegistry.getEntityLoot(target.getClass()));
+			// TODO remove the following if Skulltulas are added:
+			if (target instanceof EntitySpider && rand.nextInt(25) == 0) {
+				loot = new ItemStack(ZSSItems.skulltulaToken);
+			}
 			if (loot != null) {
 				EntityItem item = new EntityItem(worldObj, posX, posY + 1, posZ, loot);
 				double dx = player.posX - posX;
@@ -369,7 +375,7 @@ public class EntityWhip extends EntityThrowable
 				wasItemStolen = true;
 			}
 		}
-		
+
 		if (lootable == null || lootable.onLootStolen(player, wasItemStolen)) {
 			if (!worldObj.isRemote) {
 				target.getEntityData().setBoolean("LootableEntityFlag", true);
