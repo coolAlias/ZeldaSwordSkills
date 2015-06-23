@@ -13,9 +13,9 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.2.6",
+			"modVersion":"2.2.7",
 			"changeLog": [
-	               "Two new blocks; Orca spars; bug fixes and changes",
+	               "Switchable item modes, various changes and fixes",
 	               "See website for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
