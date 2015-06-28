@@ -24,6 +24,7 @@ import java.util.UUID;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -205,8 +206,10 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 				}
 			} else if (entity instanceof EntityNpcMaskTrader) {
 				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".salesman");
+			} else if (entity instanceof INpc) {
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".custom");
 			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + itemRand.nextInt(4));
+				return false;
 			}
 		}
 		return true;
