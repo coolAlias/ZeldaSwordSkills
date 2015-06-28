@@ -145,8 +145,8 @@ public class Parry extends SkillActive
 	 * @return	Combined total of all entity and item disarm modifiers
 	 */
 	public static float getDisarmModifier(EntityLivingBase defender, EntityLivingBase attacker) {
-		ItemStack defStack = defender.getEquipmentInSlot(0);
-		ItemStack offStack = (attacker != null ? attacker.getEquipmentInSlot(0) : null);
+		ItemStack defStack = defender.getHeldItem();
+		ItemStack offStack = (attacker != null ? attacker.getHeldItem() : null);
 		float modifier = 0.0F;
 		// DEFENDER
 		if (defender instanceof EntityPlayer) {

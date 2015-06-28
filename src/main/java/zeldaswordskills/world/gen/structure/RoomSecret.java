@@ -104,13 +104,13 @@ public class RoomSecret extends RoomBase
 		if (type != null) {
 			switch(type) {
 			case HELL: metadata = 2; break; // nether brick
-			case OCEAN: metadata = (inWater ? 6 : 0); break; // gravel or stone
+			case OCEAN: metadata = (inWater ? 6 : 0); break; // cobblestone
 			default: metadata = 0;
 			}
 		} else if (world.provider.getDimensionName().equals("Nether")) {
 			metadata = 2; // nether brick
 		} else {
-			metadata = (inWater ? 6 : 0); 
+			metadata = (inWater ? 6 : 0);
 		}
 		if (door != null) {
 			metadata |= 8;

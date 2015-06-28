@@ -29,5 +29,6 @@ public interface IEntityVariant {
 	 * in such cases, it's best to get the Enum type and pass that to another setter method.
 	 * @param type	The damage value of the ItemStack, denoting the mob's type
 	 */
-	public IEntityVariant setType(int type);
+	IEntityVariant setType(int type);
+
 }

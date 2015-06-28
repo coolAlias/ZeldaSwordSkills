@@ -179,11 +179,11 @@ public class ZSSItems
 	potionGreen,
 	potionBlue,
 	potionYellow,
-	rocsFeather,
-	instrument;
+	rocsFeather;
 
 	//================ TREASURES TAB ================//
 	public static Item
+	instrument,
 	pendant,
 	masterOre,
 	jellyChu,

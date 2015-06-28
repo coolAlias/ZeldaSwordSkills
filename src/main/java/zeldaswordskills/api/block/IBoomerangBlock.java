@@ -30,6 +30,6 @@ public interface IBoomerangBlock {
 	 * the block) should be handled here, as the default interactions will not occur.
 	 * @return true to cause the boomerang to reverse course after hitting the block
 	 */
-	public boolean onBoomerangCollided(World world, BlockPos pos, IBlockState state, EntityBoomerang boomerang);
+	boolean onBoomerangCollided(World world, BlockPos pos, IBlockState state, EntityBoomerang boomerang);
 
 }

@@ -517,7 +517,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		compound.setByte("pickup", (byte) canBePickedUp);
 		compound.setDouble("damage", getDamage());
 		compound.setInteger("arrowId", Item.getIdFromItem(arrowItem));
-		if ((shooterName == null || shooterName.length() == 0) && shootingEntity != null && shootingEntity instanceof EntityPlayer) {
+		if ((shooterName == null || shooterName.length() == 0) && shootingEntity instanceof EntityPlayer) {
 			shooterName = shootingEntity.getCommandSenderName();
 		}
 		compound.setString("shooter", shooterName == null ? "" : shooterName);

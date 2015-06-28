@@ -425,10 +425,10 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.updateObject(HIT_POS_Y, compound.getFloat("hitPosY"));
 		dataWatcher.updateObject(HIT_POS_Z, compound.getFloat("hitPosZ"));
 		dataWatcher.updateObject(SIDE_HIT, compound.getInteger("sideHit"));
+		dataWatcher.updateObject(IN_GROUND_INDEX, compound.getByte("customInGround"));
 		reachedHook = (compound.getByte("reachedHook") == 1);
 		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
 		dataWatcher.updateObject(SHOTTYPE_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);
 		dataWatcher.updateObject(TARGET_INDEX, compound.getInteger("shotTarget"));
-		dataWatcher.updateObject(IN_GROUND_INDEX, compound.getByte("customInGround"));
 	}
 }

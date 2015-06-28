@@ -81,8 +81,10 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 {
 	/** The type of magic this rod uses (e.g. FIRE, ICE, etc.) */
 	private final MagicType magicType;
+
 	/** The amount of damage inflicted by the rod's projectile spell */
 	private final float damage;
+
 	/** Amount of exhaustion to add each tick */
 	private final float fatigue;
 

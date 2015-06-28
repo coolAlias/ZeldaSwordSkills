@@ -68,7 +68,7 @@ public enum MagicType {
 	 * depending on the current game rule settings for mob griefing
 	 */
 	public boolean affectsBlocks(World world, EntityLivingBase caster) {
-		return affectsBlocks && (this != FIRE || caster instanceof EntityPlayer || world.getGameRules().getGameRuleBooleanValue("mobGriefing"));
+		return affectsBlocks && (caster instanceof EntityPlayer || world.getGameRules().getGameRuleBooleanValue("mobGriefing"));
 	}
 
 	/**

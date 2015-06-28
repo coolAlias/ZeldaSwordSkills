@@ -281,6 +281,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		compound.setInteger("magicType", getType().ordinal());
 		compound.setFloat("areaOfEffect", getArea());
 		compound.setFloat("reflectChance", reflectChance);
+		compound.setBoolean("bypassesArmor", bypassesArmor);
 	}
 
 	@Override
@@ -289,6 +290,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 		setType(MagicType.values()[compound.getInteger("magicType") % MagicType.values().length]);
 		setArea(compound.getFloat("areaOfEffect"));
 		reflectChance = compound.getFloat("reflectChance");
+		bypassesArmor = compound.getBoolean("bypassesArmor");
 	}
 
 	@Override

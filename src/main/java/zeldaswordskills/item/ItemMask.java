@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -63,8 +64,10 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
+
 	/** Number of rupees to pay back to the Happy Mask Salesman */
 	private int buyPrice;
+
 	/** Number of rupees a villager will pay for this mask */
 	private int sellPrice;
 
@@ -197,8 +200,10 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 				}
 			} else if (entity instanceof EntityNpcMaskTrader) {
 				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".salesman");
+			} else if (entity instanceof INpc) {
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".custom");
 			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + itemRand.nextInt(4));
+				return false;
 			}
 		}
 		return true;

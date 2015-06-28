@@ -44,12 +44,16 @@ public class ItemDekuLeaf extends BaseModItem implements IUnenchantable
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/** Returns the next time this stack may be used */
+	/**
+	 * Returns the next time this stack may be used
+	 */
 	private long getNextUseTime(ItemStack stack) {
 		return (stack.hasTagCompound() ? stack.getTagCompound().getLong("next_use") : 0);
 	}
 
-	/** Sets the next time this stack may be used to the current world time plus a number of ticks */
+	/**
+	 * Sets the next time this stack may be used to the current world time plus a number of ticks
+	 */
 	private void setNextUseTime(ItemStack stack, World world, int ticks) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
 		stack.getTagCompound().setLong("next_use", (world.getWorldTime() + ticks));
@@ -79,7 +83,7 @@ public class ItemDekuLeaf extends BaseModItem implements IUnenchantable
 					WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));
 					if (!player.capabilities.isCreativeMode) {
-						setNextUseTime(stack, world, 100);
+						setNextUseTime(stack, world, 20);
 					}
 				}
 			} else {

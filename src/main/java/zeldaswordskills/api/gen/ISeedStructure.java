@@ -35,6 +35,6 @@ public interface ISeedStructure {
 	 * @param face	The face of the block clicked
 	 * @return		True if the structure generated successfully
 	 */
-	public boolean generate(World world, EntityPlayer player, BlockPos pos, EnumFacing face);
+	boolean generate(World world, EntityPlayer player, BlockPos pos, EnumFacing face);
 
 }

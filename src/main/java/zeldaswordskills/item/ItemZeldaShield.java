@@ -41,6 +41,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
@@ -160,6 +161,7 @@ ISwapModel, ISwingSpeed, IUnenchantable
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
+					ForgeEventFactory.onPlayerDestroyItem(player, shield);
 					/*
 					// TODO
 					if (ZSSMain.isBG2Enabled && BattlegearUtils.isPlayerInBattlemode(player)) {

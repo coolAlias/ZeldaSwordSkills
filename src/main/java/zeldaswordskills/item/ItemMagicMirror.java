@@ -161,7 +161,7 @@ public class ItemMagicMirror extends BaseModItem implements IUnenchantable
 		if (!player.isUsingItem()) {
 			return models.get(0);
 		}
-		int i = (ticksRemaining < 20 ? 3 : ticksRemaining < 60 ? 2 : ticksRemaining < 120 ? 1 : 0);
+		int i = (ticksRemaining < 30 ? 3 : ticksRemaining < 70 ? 2 : ticksRemaining < 110 ? 1 : 0);
 		return models.get(i);
 	}
 

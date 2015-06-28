@@ -47,7 +47,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityLootable;
-import zeldaswordskills.api.entity.IEntityTeleport;
+import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;

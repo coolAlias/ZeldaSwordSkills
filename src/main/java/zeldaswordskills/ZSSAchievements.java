@@ -126,14 +126,14 @@ public class ZSSAchievements
 		heavyLifter = new Achievement("hammer.golden", "zss.hammer.golden", dx - 3, dy + 6, ZSSItems.hammerMegaton, hardHitter).setSpecial().registerAchievement();
 
 		// BOMB->ZELDA'S LETTER TREE
-		maskTrader = new Achievement("mask.trader", "zss.mask.trader", dx, dy + 3, new ItemStack(ZSSItems.treasure,1,Treasures.ZELDAS_LETTER.ordinal()), bombsAway).registerAchievement();
+		maskTrader = new Achievement("mask.trader", "zss.mask.trader", dx, dy + 3, new ItemStack(ZSSItems.treasure, 1, Treasures.ZELDAS_LETTER.ordinal()), bombsAway).registerAchievement();
 		maskSold = new Achievement("mask.sold", "zss.mask.sold", dx, dy + 5, ZSSItems.maskKeaton, maskTrader).registerAchievement();
 		maskShop = new Achievement("mask.shop", "zss.mask.shop", dx, dy + 7, ZSSItems.maskTruth, maskSold).setSpecial().registerAchievement();
 
 		// SKILL TREE
 		dx = 5;
 		dy = 1;
-		skillBasic = new Achievement("skill.basic", "zss.skill.basic", dx, dy, new ItemStack(ZSSItems.skillOrb,1,SkillBase.swordBasic.getId()), null).registerAchievement();
+		skillBasic = new Achievement("skill.basic", "zss.skill.basic", dx, dy, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.swordBasic.getId()), null).registerAchievement();
 
 		// SKILL->COMBO TREE
 		comboBasic = new Achievement("combo.basic", "zss.combo.basic", dx + 2, dy, Items.wooden_sword, skillBasic).registerAchievement();
@@ -141,21 +141,21 @@ public class ZSSAchievements
 		comboLegend = new Achievement("combo.legend", "zss.combo.legend", dx + 3, dy + 2, Items.diamond_sword, comboPerfect).setSpecial().registerAchievement();
 
 		// SKILL->PROGRESSION TREE
-		skillGain = new Achievement("skill.gain", "zss.skill.gain", dx + 1, dy - 3, new ItemStack(ZSSItems.skillOrb,1,SkillBase.parry.getId()), skillBasic).registerAchievement();
-		skillMortal = new Achievement("skill.mortal", "zss.skill.mortal", dx + 1, dy - 5, new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.getId()), skillGain).setSpecial().registerAchievement();
-		skillMaster = new Achievement("skill.master", "zss.skill.master", dx + 3, dy - 3, new ItemStack(ZSSItems.skillOrb,1,SkillBase.dodge.getId()), skillGain).registerAchievement();
-		skillMasterAll = new Achievement("skill.master_all", "zss.skill.master_all", dx + 5, dy - 3, new ItemStack(ZSSItems.skillOrb,1,SkillBase.armorBreak.getId()), skillMaster).setSpecial().registerAchievement();
+		skillGain = new Achievement("skill.gain", "zss.skill.gain", dx + 1, dy - 3, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.parry.getId()), skillBasic).registerAchievement();
+		skillMortal = new Achievement("skill.mortal", "zss.skill.mortal", dx + 1, dy - 5, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.mortalDraw.getId()), skillGain).setSpecial().registerAchievement();
+		skillMaster = new Achievement("skill.master", "zss.skill.master", dx + 3, dy - 3, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.dodge.getId()), skillGain).registerAchievement();
+		skillMasterAll = new Achievement("skill.master_all", "zss.skill.master_all", dx + 5, dy - 3, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.armorBreak.getId()), skillMaster).setSpecial().registerAchievement();
 
 		// SKILL->HEARTS TREE
 		skillHeart = new Achievement("skill.heart", "zss.skill.heart", dx, dy + 2, ZSSItems.smallHeart, skillBasic).registerAchievement();
-		skillHeartBar = new Achievement("skill.heartbar", "zss.skill.heartbar", dx, dy + 4, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), skillHeart).registerAchievement();
-		skillHeartsGalore = new Achievement("skill.hearts_galore", "zss.skill.hearts_galore", dx, dy + 6, new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), skillHeartBar).setSpecial().registerAchievement();
+		skillHeartBar = new Achievement("skill.heartbar", "zss.skill.heartbar", dx, dy + 4, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), skillHeart).registerAchievement();
+		skillHeartsGalore = new Achievement("skill.hearts_galore", "zss.skill.hearts_galore", dx, dy + 6, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), skillHeartBar).setSpecial().registerAchievement();
 		fairyBoomerang = new Achievement("fairy.boomerang", "zss.fairy.boomerang", dx - 2, dy + 4, ZSSItems.boomerangMagic, skillHeartBar).setSpecial().registerAchievement();
 
 		// HEART->BIGGORON TREE
-		swordBroken = new Achievement("sword.broken", "zss.sword.broken", dx + 3, dy + 4, new ItemStack(ZSSItems.swordBroken,1,Item.getIdFromItem(ZSSItems.swordGiant)), skillHeartBar).registerAchievement();
-		treasureFirst = new Achievement("treasure.first", "zss.treasure.first", dx + 3, dy + 6, new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal()), swordBroken).registerAchievement();
-		treasureSecond = new Achievement("treasure.second", "zss.treasure.second", dx + 3, dy + 8, new ItemStack(ZSSItems.treasure,1,Treasures.POCKET_EGG.ordinal()), treasureFirst).registerAchievement();
+		swordBroken = new Achievement("sword.broken", "zss.sword.broken", dx + 3, dy + 4, new ItemStack(ZSSItems.swordBroken, 1, Item.getIdFromItem(ZSSItems.swordGiant)), skillHeartBar).registerAchievement();
+		treasureFirst = new Achievement("treasure.first", "zss.treasure.first", dx + 3, dy + 6, new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal()), swordBroken).registerAchievement();
+		treasureSecond = new Achievement("treasure.second", "zss.treasure.second", dx + 3, dy + 8, new ItemStack(ZSSItems.treasure, 1, Treasures.POCKET_EGG.ordinal()), treasureFirst).registerAchievement();
 		treasureBiggoron = new Achievement("treasure.biggoron", "zss.treasure.biggoron", dx + 1, dy + 8, ZSSItems.swordBiggoron, treasureSecond).setSpecial().registerAchievement();
 
 		// ORCA'S QUEST TREE
@@ -166,16 +166,16 @@ public class ZSSAchievements
 		orcaRequest = new Achievement("orca.request", "zss.orca.request", dx - 2, dy + 4, new ItemStack(Items.writable_book), orcaDeknighted).registerAchievement();
 		orcaFirstLesson = new Achievement("orca.first", "zss.orca.first", dx - 2, dy + 6, new ItemStack(Items.stick), orcaRequest).registerAchievement();
 		orcaCanOpener = new Achievement("orca.canopener", "zss.orca.canopener", dx, dy + 6, Items.iron_chestplate, orcaFirstLesson).registerAchievement();
-		orcaSecondLesson = new Achievement("orca.second", "zss.orca.second", dx - 2, dy + 8, new ItemStack(ZSSItems.skillOrb,1,SkillBase.superSpinAttack.getId()), orcaFirstLesson).registerAchievement();
+		orcaSecondLesson = new Achievement("orca.second", "zss.orca.second", dx - 2, dy + 8, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.superSpinAttack.getId()), orcaFirstLesson).registerAchievement();
 		orcaMaster = new Achievement("orca.master", "zss.orca.master", dx - 3, dy + 9, ZSSItems.swordDarknut, orcaSecondLesson).setSpecial().registerAchievement();
 
 		// OCARINA TREE
 		dx = 3;
 		dy = 0;
-		ocarinaCraft = new Achievement("ocarina.craft", "zss.ocarina.craft", dx, dy, new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_FAIRY.ordinal()), null).registerAchievement();
+		ocarinaCraft = new Achievement("ocarina.craft", "zss.ocarina.craft", dx, dy, new ItemStack(ZSSItems.instrument, 1, Instrument.OCARINA_FAIRY.ordinal()), null).registerAchievement();
 		ocarinaSong = new Achievement("ocarina.song", "zss.ocarina.song", dx, dy - 2, Items.writable_book, ocarinaCraft).registerAchievement();
 		ocarinaScarecrow = new Achievement("ocarina.scarecrow", "zss.ocarina.scarecrow", dx - 1, dy - 4, Item.getItemFromBlock(Blocks.pumpkin), ocarinaSong).registerAchievement().setSpecial();
-		ocarinaMaestro = new Achievement("ocarina.maestro", "zss.ocarina.maestro", dx, dy - 6, new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_TIME.ordinal()), ocarinaSong).registerAchievement().setSpecial();
+		ocarinaMaestro = new Achievement("ocarina.maestro", "zss.ocarina.maestro", dx, dy - 6, new ItemStack(ZSSItems.instrument, 1, Instrument.OCARINA_TIME.ordinal()), ocarinaSong).registerAchievement().setSpecial();
 
 		page = new AchievementPage("Zelda",
 				bombsAway,

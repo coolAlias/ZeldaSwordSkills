@@ -181,9 +181,8 @@ public class ItemArmorTunic extends ItemModArmor
 			}
 			int time = 50 + (50 * EnchantmentHelper.getRespiration(player)) + (helm != null && helm.getItem() == ZSSItems.tunicZoraHelm ? 100 : 0);
 			return (m == Material.water && world.getWorldTime() % time == 0);
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	@Override

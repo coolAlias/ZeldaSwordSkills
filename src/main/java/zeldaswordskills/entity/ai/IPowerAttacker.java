@@ -29,29 +29,29 @@ public interface IPowerAttacker {
 	/**
 	 * Called when the entity first begins charging up the power attack
 	 */
-	public void beginPowerAttack();
+	void beginPowerAttack();
 
 	/**
 	 * Called when the power attack AI resets, whether after successful execution or prematurely
 	 */
-	public void cancelPowerAttack();
+	void cancelPowerAttack();
 
 	/**
 	 * Number of ticks required to charge up the power attack; i.e. the time that
 	 * must pass since beginPowerAttack until performPowerAttack
 	 */
-	public int getChargeTime();
+	int getChargeTime();
 
 	/**
 	 * Called when the target has been struck and damage should be dealt,
 	 * similar to {@link EntityLivingBase#attackEntityAsMob}
 	 * @target	Guaranteed to be within reach and visible, but no other position checking is done
 	 */
-	public void performPowerAttack(EntityLivingBase target);
+	void performPowerAttack(EntityLivingBase target);
 
 	/**
 	 * Called when target was out of range at the time the power attack was performed
 	 */
-	public void onAttackMissed();
+	void onAttackMissed();
 
 }

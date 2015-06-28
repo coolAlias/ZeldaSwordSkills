@@ -374,7 +374,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 			attackTime = Math.max(attackTime, 5); // don't allow attacks until parry animation finishes
 			if (entity instanceof EntityLivingBase && !source.isProjectile()) {
 				EntityLivingBase attacker = (EntityLivingBase) entity;
-				if (attacker.getEquipmentInSlot(0) != null) {
+				if (attacker.getHeldItem() != null) {
 					WorldUtils.playSoundAtEntity(this, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 					float disarmChance = Parry.getDisarmModifier(this, attacker);
 					if (rand.nextFloat() < disarmChance) {

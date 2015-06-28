@@ -27,7 +27,9 @@ import net.minecraft.village.Village;
  */
 public interface IVillageDefender {
 
-	/** Returns the village to defend; typically the entity's home */
-	public Village getVillageToDefend();
+	/**
+	 * Returns the village to defend; typically the entity's home
+	 */
+	Village getVillageToDefend();
 
 }

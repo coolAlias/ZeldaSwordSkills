@@ -45,6 +45,6 @@ public interface ISpawnParticles {
 	 * @param lookVector the normalized look vector from the original player who caused the particles
 	 */
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector);
+	void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector);
 
 }

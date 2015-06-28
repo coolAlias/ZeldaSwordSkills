@@ -21,6 +21,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import zeldaswordskills.block.BlockWarpStone;
@@ -62,7 +63,8 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 	/**
 	 * Return true if the block at the target position is a valid spot to teleport
 	 */
-	protected boolean isBlockValid(World world, IBlockState state) {
+	protected boolean isBlockValid(World world, BlockPos pos) {
+		IBlockState state = world.getBlockState(pos);
 		return (state.getBlock() instanceof BlockWarpStone && ((BlockWarpStone.EnumWarpSong) state.getValue(BlockWarpStone.WARP_SONG)).getWarpSong() == this);
 	}
 
@@ -93,8 +95,7 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 			}
 			boolean noBlock = true; // true if warp block not found
 			boolean noAir = false; // true if new position is not suitable
-			IBlockState state = player.worldObj.getBlockState(warp.pos);
-			if (isBlockValid(player.worldObj, state)) {
+			if (isBlockValid(player.worldObj, warp.pos)) {
 				noBlock = false;
 				if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.pos.getX() + 0.5D, warp.pos.getY() + 1, (double) warp.pos.getZ() + 0.5D, null, true, false)) {
 					noAir = true;

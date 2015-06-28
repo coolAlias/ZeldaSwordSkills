@@ -237,13 +237,11 @@ public class MapGenSongPillar extends ZSSMapGenBase
 						if (!block2.getMaterial().isSolid() || block2.getMaterial() == Material.leaves) {
 							return false;
 						}
-					} else {
-						if (block2.getMaterial().isSolid()) {
-							if (!block.getMaterial().isSolid()) {
-								block = block2;
-							} else if (block != block2) {
-								return false;
-							}
+					} else if (block2.getMaterial().isSolid()) {
+						if (!block.getMaterial().isSolid()) {
+							block = block2;
+						} else if (block != block2) {
+							return false;
 						}
 					}
 				}

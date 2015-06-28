@@ -248,7 +248,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 		 * Returns the block dropped when this type is broken
 		 */
 		public Block getDroppedBlock() {
-			switch(meta) {
+			switch (meta) {
 			case 0: return Blocks.stone;
 			case 1: return Blocks.sandstone;
 			case 2: return Blocks.nether_brick;
@@ -272,15 +272,12 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 		 * Returns the stair block to use for this type
 		 */
 		public Block getStairBlock() {
-			switch(meta) {
-			case 0: return Blocks.stone_brick_stairs;
-			case 4:
-			case 6: return Blocks.stone_stairs;
+			switch (meta) {
+			case 0:
+			case 3: return Blocks.stone_brick_stairs;
 			case 1: return Blocks.sandstone_stairs;
 			case 2: return Blocks.nether_brick_stairs;
-			case 3: return Blocks.stone_brick_stairs;
 			case 5:
-				//case 6:
 			case 7: return Blocks.quartz_stairs;
 			default: return Blocks.stone_stairs;
 			}
