@@ -125,7 +125,7 @@ public class ItemBombBag extends BaseModItem implements ISwapModel, IUnenchantab
 	 */
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (isHeld && getBombsHeld(stack) < getCapacity(stack) && entity instanceof EntityPlayer) {
+		if (!world.isRemote && isHeld && getBombsHeld(stack) < getCapacity(stack) && entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) entity;
 			for (int i = 0; i < player.inventory.getSizeInventory(); ++i) {
 				ItemStack invStack = player.inventory.getStackInSlot(i);
