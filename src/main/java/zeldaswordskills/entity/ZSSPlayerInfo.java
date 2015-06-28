@@ -408,6 +408,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		compound.setIntArray("zssStats", ArrayUtils.toPrimitive(playerStats.values().toArray(new Integer[playerStats.size()])));
 		compound.setByte("ZSSGearReceived", receivedGear);
 		compound.setInteger("lastBoots", Item.getIdFromItem(lastBootsWorn));
+		compound.setInteger("lastHelm", Item.getIdFromItem(lastHelmWorn));
 		compound.setInteger("borrowedMask", borrowedMask != null ? Item.getIdFromItem(borrowedMask) : -1);
 		compound.setInteger("maskStage", maskStage);
 		compound.setInteger("slingshotMode", slingshotMode);
@@ -425,6 +426,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		}
 		receivedGear = compound.getByte("ZSSGearReceived");
 		lastBootsWorn = Item.getItemById(compound.getInteger("lastBoots"));
+		lastHelmWorn = Item.getItemById(compound.getInteger("lastHelm"));
 		int maskID = compound.getInteger("borrowedMask");
 		borrowedMask = maskID > -1 ? Item.getItemById(maskID) : null;
 		maskStage = compound.getInteger("maskStage");
