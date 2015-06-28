@@ -231,9 +231,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			if (dungeonType != null) {
-				if (dungeonType.warpSong != null) {
-					placeWarpStone();
-				}
+				clearDungeon();
 				info.addStat(Stats.STAT_BOSS_ROOMS, 1 << dungeonType.ordinal());
 				player.triggerAchievement(ZSSAchievements.bossBattle);
 				// TODO == 127 (or 255 if the End boss room ever gets made)
@@ -328,34 +326,37 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 	}
 
 	/**
-	 * Places the Warp Stone after the boss battle has finished
+	 * Opens dungeon door after the boss battle has finished; places Warp Stone if available
 	 */
-	private void placeWarpStone() {
-		BlockWarpStone.EnumWarpSong warpSong = BlockWarpStone.EnumWarpSong.bySong(dungeonType.warpSong);
-		if (warpSong != null) {
-			if (doorSide == null) {
-				doorSide = EnumFacing.EAST;
+	private void clearDungeon() {
+		if (doorSide == null) {
+			doorSide = EnumFacing.EAST;
+		}
+		Vec3i center = box.getCenter();
+		int x = center.getX();
+		int z = center.getZ();
+		switch(doorSide) {
+		case SOUTH: z = box.maxZ - 1; break;
+		case NORTH: z = box.minZ + 1; break;
+		case EAST: x = box.maxX - 1; break;
+		case WEST: x = box.minX + 1; break;
+		default: // UP and DOWN not possible
+		}
+		BlockPos base = new BlockPos(x, box.minY, z);
+		// remove webs blocking door for forest temple
+		if (worldObj.getBlockState(base.up()).getBlock() == Blocks.web) {
+			worldObj.setBlockToAir(base.up());
+		}
+		if (worldObj.getBlockState(base.up(2)).getBlock() == Blocks.web) {
+			worldObj.setBlockToAir(base.up(2));
+		}
+		placeOpenDoor((worldObj.getBlockState(base.up()).getBlock().getMaterial().isLiquid() ? 2 : 1));
+		// Place warp stone
+		if (dungeonType.warpSong != null) {
+			BlockWarpStone.EnumWarpSong warpSong = BlockWarpStone.EnumWarpSong.bySong(dungeonType.warpSong);
+			if (warpSong != null) {
+				worldObj.setBlockState(base, ZSSBlocks.warpStone.getDefaultState().withProperty(BlockWarpStone.WARP_SONG, warpSong), 2);
 			}
-			Vec3i center = box.getCenter();
-			int x = center.getX();
-			int z = center.getZ();
-			switch(doorSide) {
-			case SOUTH: z = box.maxZ - 1; break;
-			case NORTH: z = box.minZ + 1; break;
-			case EAST: x = box.maxX - 1; break;
-			case WEST: x = box.minX + 1; break;
-			default: // UP and DOWN not possible
-			}
-			BlockPos base = new BlockPos(x, box.minY, z);
-			worldObj.setBlockState(base, ZSSBlocks.warpStone.getDefaultState().withProperty(BlockWarpStone.WARP_SONG, warpSong), 2);
-			// remove webs blocking door for forest temple
-			if (worldObj.getBlockState(base.up()).getBlock() == Blocks.web) {
-				worldObj.setBlockToAir(base.up());
-			}
-			if (worldObj.getBlockState(base.up(2)).getBlock() == Blocks.web) {
-				worldObj.setBlockToAir(base.up(2));
-			}
-			placeOpenDoor((worldObj.getBlockState(base.up()).getBlock().getMaterial().isLiquid() ? 2 : 1));
 		}
 	}
 
