@@ -242,8 +242,7 @@ public enum BossType
 		new ItemStack(ZSSItems.bootsHeavy),
 		new ItemStack(ZSSItems.maskStone),
 		new ItemStack(ZSSItems.slingshot),
-		new ItemStack(ZSSItems.tunicZoraChest),
-		new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_SHORT.ordinal())
+		new ItemStack(ZSSItems.tunicZoraChest)
 	};
 	private static final ItemStack[] swampItems = {
 		new ItemStack(ZSSItems.bootsRubber),

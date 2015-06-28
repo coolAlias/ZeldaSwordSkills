@@ -83,8 +83,10 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 {
 	/** The type of magic this rod uses (e.g. FIRE, ICE, etc.) */
 	private final MagicType magicType;
+
 	/** The amount of damage inflicted by the rod's projectile spell */
 	private final float damage;
+
 	/** Amount of exhaustion to add each tick */
 	private final float fatigue;
 
@@ -119,12 +121,16 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 		stack.getTagCompound().setLong("next_use", (world.getWorldTime() + ticks));
 	}
 
-	/** Returns whether the rod has absorbed its associated sacred flame */
+	/**
+	 * Returns whether the rod has absorbed its associated sacred flame
+	 */
 	private boolean hasAbsorbedFlame(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getBoolean("absorbedFlame"));
 	}
 
-	/** Returns true if the rod is upgraded to the 'Nice' version */
+	/**
+	 * Returns true if the rod is upgraded to the 'Nice' version
+	 */
 	private boolean isUpgraded(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getBoolean("isUpgraded"));
 	}

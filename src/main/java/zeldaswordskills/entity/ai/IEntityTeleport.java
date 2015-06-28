@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.api.entity;
+package zeldaswordskills.entity.ai;
 
 import zeldaswordskills.entity.ai.EntityAITeleport;
 

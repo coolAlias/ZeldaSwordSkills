@@ -44,13 +44,13 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityLootable;
-import zeldaswordskills.api.entity.IEntityTeleport;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ai.EntityAINearestAttackableTargetNight;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
 import zeldaswordskills.entity.ai.EntityAITeleport;
+import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.entity.ai.IMagicUser;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
@@ -510,7 +510,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	 */
 	private ItemStack getRareDrop(int rarity, int modifier) {
 		if (rarity > 0) {
-			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+			return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
 		}
 		if (rand.nextInt(8) == 0) {
 			ItemStack book = new ItemStack(Items.book);
@@ -533,7 +533,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
 		if (rand.nextInt(10 - whip.ordinal()) == 0) {
-			return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+			return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
 		}
 		return getRareDrop(0, (3 * (whip.ordinal() + 1)));
 	}

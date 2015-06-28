@@ -52,12 +52,12 @@ public class Sounds {
 	public static final String WEB_SPLAT = ModInfo.ID + ":web_splat";
 
 	// ENTITY SOUNDS
-	public static final String DARKNUT_DIE = ModInfo.ID + ":armor_die";
-	public static final String DARKNUT_HIT = ModInfo.ID + ":armor_hit";
-	public static final String DARKNUT_LIVING = ModInfo.ID + ":armor_move";
 	public static final String BOMB_FUSE = ModInfo.ID + ":bomb_fuse";
 	public static final String BOMB_WHISTLE = ModInfo.ID + ":bomb_whistle";
 	public static final String CHU_MERGE = ModInfo.ID + ":chu_merge";
+	public static final String DARKNUT_DIE = ModInfo.ID + ":armor_die";
+	public static final String DARKNUT_HIT = ModInfo.ID + ":armor_hit";
+	public static final String DARKNUT_LIVING = ModInfo.ID + ":armor_move";
 	public static final String FAIRY_BLESSING = ModInfo.ID + ":fairy_blessing";
 	public static final String FAIRY_LAUGH = ModInfo.ID + ":fairy_laugh";
 	public static final String FAIRY_LIVING = ModInfo.ID + ":fairy_living";

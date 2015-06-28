@@ -70,9 +70,9 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(Items.chainmail_helmet));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_LEGS, new ItemStack(Items.chainmail_leggings));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS, new ItemStack(Items.chainmail_boots));
-		ItemStack sword = getEquipmentInSlot(0);
+		ItemStack sword = getHeldItem();
 		if (sword != null) {
-			switch(worldObj.difficultySetting) {
+			switch (worldObj.difficultySetting) {
 			case NORMAL:
 				sword.addEnchantment(Enchantment.sharpness, 2);
 				break;
@@ -87,7 +87,7 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		super.dropFewItems(recentlyHit, lootingLevel);
-		entityDropItem(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), 0.0F);
+		entityDropItem(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), 0.0F);
 	}
 
 	@Override

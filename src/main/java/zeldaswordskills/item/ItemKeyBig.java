@@ -65,7 +65,7 @@ public class ItemKeyBig extends Item implements IUnenchantable
 	public static ItemStack getKeyForBiome(World world, int x, int z) {
 		BossType type = BossType.getBossType(world, x, z);
 		if (type != null) {
-			return new ItemStack(ZSSItems.keyBig,1,type.ordinal());
+			return new ItemStack(ZSSItems.keyBig, 1, type.ordinal());
 		} else {
 			return null;
 		}

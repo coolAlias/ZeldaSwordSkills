@@ -33,7 +33,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  * A crop is considered 'mature' when bonemeal cannot be applied, i.e. when 
  * {@code IGrowable#func_149851_a} returns FALSE. If the block is not an
- * {@code IGrowable}, then metadata of 7 (ignoring bit 8) is considered 'mature'. 
+ * {@code IGrowable}, then metadata of 7 (ignoring higher bits) is considered 'mature'.
  * 
  * Does not render anything in the inventory, as crops are expected to have a seed item.
  *

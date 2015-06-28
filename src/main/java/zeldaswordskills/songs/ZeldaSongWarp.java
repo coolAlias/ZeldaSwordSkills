@@ -62,7 +62,9 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 	/**
 	 * Return true if the block at the target position is a valid spot to teleport
 	 */
-	protected boolean isBlockValid(World world, int x, int y, int z, Block block, int meta) {
+	protected boolean isBlockValid(World world, int x, int y, int z) {
+		Block block = world.getBlock(x, y, z);
+		int meta = world.getBlockMetadata(x, y, z);
 		return (block instanceof BlockWarpStone && BlockWarpStone.warpBlockSongs.get(meta) == this);
 	}
 
@@ -93,9 +95,7 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 			}
 			boolean noBlock = true; // true if warp block not found
 			boolean noAir = false; // true if new position is not suitable
-			Block block = player.worldObj.getBlock(warp.x, warp.y, warp.z);
-			int meta = player.worldObj.getBlockMetadata(warp.x, warp.y, warp.z);
-			if (isBlockValid(player.worldObj, warp.x, warp.y, warp.z, block, meta)) {
+			if (isBlockValid(player.worldObj, warp.x, warp.y, warp.z)) {
 				noBlock = false;
 				if (!EntityAITeleport.teleportTo(player.worldObj, player, (double) warp.x + 0.5D, warp.y + 1, (double) warp.z + 0.5D, null, true, false)) {
 					noAir = true;

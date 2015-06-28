@@ -251,7 +251,7 @@ public class EntityCyclone extends EntityMobThrowable
 			j = chunkposition.chunkPosY;
 			k = chunkposition.chunkPosZ;
 			Material m = worldObj.getBlock(i, j, k).getMaterial();
-			if ((m == Material.leaves && canGrief && Config.canDekuDenude()) || m == Material.plants || m == Material.vine || m == Material.web) {
+			if ((m == Material.leaves && Config.canDekuDenude()) || m == Material.plants || m == Material.vine || m == Material.web) {
 				// func_147480_a is destroyBlock
 				worldObj.func_147480_a(i, j, k, true);
 			}

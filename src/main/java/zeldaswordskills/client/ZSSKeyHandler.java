@@ -107,9 +107,8 @@ public class ZSSKeyHandler
 					KeyBinding.setKeyBindState(kb, false);
 				}
 			} else if (kb == keys[KEY_SKILL_ACTIVATE].getKeyCode()) {
-				SkillBase skill = skills.getPlayerSkill(SkillBase.swordBasic);
-				if (skill != null && skill.getLevel() > 0) {
-					PacketDispatcher.sendToServer(new ActivateSkillPacket(skill));
+				if (skills.hasSkill(SkillBase.swordBasic)) {
+					PacketDispatcher.sendToServer(new ActivateSkillPacket(SkillBase.swordBasic));
 				}
 			} else if (kb == keys[KEY_BOMB].getKeyCode()) {
 				// prevent player from holding RMB while getting bombs, as it can crash the game

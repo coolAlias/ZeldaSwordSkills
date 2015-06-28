@@ -67,8 +67,10 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
+
 	/** Number of rupees to pay back to the Happy Mask Salesman */
 	private int buyPrice;
+
 	/** Number of rupees a villager will pay for this mask */
 	private int sellPrice;
 

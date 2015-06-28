@@ -172,6 +172,7 @@ public class ZSSItems
 	crystalNayru,
 	dekuLeaf,
 	dekuNut,
+	bombFlowerSeed,
 	gauntletsSilver,
 	gauntletsGolden,
 	hookshot,
@@ -185,12 +186,11 @@ public class ZSSItems
 	potionGreen,
 	potionBlue,
 	potionYellow,
-	rocsFeather,
-	instrument,
-	bombFlowerSeed;
+	rocsFeather;
 
 	//================ TREASURES TAB ================//
 	public static Item
+	instrument,
 	pendant,
 	masterOre,
 	jellyChu,

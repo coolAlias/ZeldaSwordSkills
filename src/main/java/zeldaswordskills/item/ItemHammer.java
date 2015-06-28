@@ -69,8 +69,10 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
+
 	/** Amount of damage this hammer inflicts */
 	private final float weaponDamage;
+
 	/** Percentage of damage that ignores armor */
 	private final float ignoreArmorAmount;
 

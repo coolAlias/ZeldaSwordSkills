@@ -84,7 +84,7 @@ public final class SongAPI {
 	 * If an instance is required, retrieve it after registration.
 	 */
 	public static void registerSong(AbstractZeldaSong song) {}
-	
+
 	/**
 	 * Returns true if the player knows the song.
 	 */

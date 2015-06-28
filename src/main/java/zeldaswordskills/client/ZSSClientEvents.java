@@ -162,7 +162,6 @@ public class ZSSClientEvents
 					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
 				} else if (!skills.canInteract() || ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN)) {
-					//LogHelper.info("Skills could not interact during left click - canceling");
 					event.setCanceled(true);
 				} else {
 					Item heldItem = (mc.thePlayer.getHeldItem() != null ? mc.thePlayer.getHeldItem().getItem() : null);
@@ -183,7 +182,6 @@ public class ZSSClientEvents
 				// mouse attack will always be canceled while locked on, as the click has been handled
 				if (Config.allowVanillaControls()) {
 					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
-						//LogHelper.info("MouseEvent - no skill handled attack key press, performing combo attack");
 						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
 					}
@@ -192,7 +190,6 @@ public class ZSSClientEvents
 						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					}
 				}
-
 				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
 				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
