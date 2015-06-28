@@ -58,6 +58,7 @@ import zeldaswordskills.entity.ai.EntityAIPowerAttack;
 import zeldaswordskills.entity.ai.IPowerAttacker;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Parry;
@@ -688,6 +689,11 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	@Override
 	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
 		return false;
+	}
+
+	@Override
+	public boolean getCanSpawnHere() {
+		return super.getCanSpawnHere() && worldObj.getWorldTime() > Config.getTimeToSpawnDarknut();
 	}
 
 	@Override

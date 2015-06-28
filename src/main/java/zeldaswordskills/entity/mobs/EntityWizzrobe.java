@@ -550,7 +550,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 
 	@Override
 	public boolean getCanSpawnHere() {
-		return !worldObj.isDaytime() && super.getCanSpawnHere();
+		return !worldObj.isDaytime() && super.getCanSpawnHere() && worldObj.getWorldTime() > Config.getTimeToSpawnWizzrobe();
 	}
 
 	@Override
