@@ -227,9 +227,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			if (dungeonType != null) {
-				if (dungeonType.warpSong != null) {
-					placeWarpStone();
-				}
+				clearDungeon();
 				info.addStat(Stats.STAT_BOSS_ROOMS, 1 << dungeonType.ordinal());
 				player.triggerAchievement(ZSSAchievements.bossBattle);
 				// TODO == 127 (or 255 if the End boss room ever gets made)
@@ -320,28 +318,31 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	}
 
 	/**
-	 * Places the Warp Stone after the boss battle has finished
+	 * Opens dungeon door after the boss battle has finished; places Warp Stone if available
 	 */
-	private void placeWarpStone() {
-		Integer meta = BlockWarpStone.reverseLookup.get(dungeonType.warpSong);
-		if (meta != null) {
-			int x = box.getCenterX();
-			int z = box.getCenterZ();
-			switch(doorSide) {
-			case RoomBoss.SOUTH: z = box.maxZ - 1; break;
-			case RoomBoss.NORTH: z = box.minZ + 1; break;
-			case RoomBoss.EAST: x = box.maxX - 1; break;
-			case RoomBoss.WEST: x = box.minX + 1; break;
+	private void clearDungeon() {
+		int x = box.getCenterX();
+		int z = box.getCenterZ();
+		switch(doorSide) {
+		case RoomBoss.SOUTH: z = box.maxZ - 1; break;
+		case RoomBoss.NORTH: z = box.minZ + 1; break;
+		case RoomBoss.EAST: x = box.maxX - 1; break;
+		case RoomBoss.WEST: x = box.minX + 1; break;
+		}
+		// remove webs blocking door for forest temple
+		if (worldObj.getBlock(x, box.minY + 1, z) == Blocks.web) {
+			worldObj.setBlockToAir(x, box.minY + 1, z);
+		}
+		if (worldObj.getBlock(x, box.minY + 2, z) == Blocks.web) {
+			worldObj.setBlockToAir(x, box.minY + 2, z);
+		}
+		placeOpenDoor((worldObj.getBlock(x, box.minY + 1, z).getMaterial().isLiquid() ? 2 : 1));
+		// Place warp stone
+		if (dungeonType.warpSong != null) {
+			Integer meta = BlockWarpStone.reverseLookup.get(dungeonType.warpSong);
+			if (meta != null) {
+				worldObj.setBlock(x, box.minY, z, ZSSBlocks.warpStone, meta, 2);
 			}
-			worldObj.setBlock(x, box.minY, z, ZSSBlocks.warpStone, meta, 2);
-			// remove webs blocking door for forest temple
-			if (worldObj.getBlock(x, box.minY + 1, z) == Blocks.web) {
-				worldObj.setBlockToAir(x, box.minY + 1, z);
-			}
-			if (worldObj.getBlock(x, box.minY + 2, z) == Blocks.web) {
-				worldObj.setBlockToAir(x, box.minY + 2, z);
-			}
-			placeOpenDoor((worldObj.getBlock(x, box.minY + 1, z).getMaterial().isLiquid() ? 2 : 1));
 		}
 	}
 
