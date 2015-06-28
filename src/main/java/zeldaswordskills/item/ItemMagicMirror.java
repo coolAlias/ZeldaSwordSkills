@@ -72,7 +72,7 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
-		return 32000;
+		return USE_TIME;
 	}
 
 	@Override
@@ -87,23 +87,22 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 	}
 
 	@Override
-	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		int minTicks = (getMaxItemUseDuration(stack) - (USE_TIME / 2));
-		if (!world.isRemote && ticksRemaining < minTicks) {
-			switch(player.dimension) {
+	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+		if (count == 1 && !player.worldObj.isRemote) {
+			switch (player.dimension) {
 			case -1:
-				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, new TeleporterNoPortal((WorldServer) world));
+				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, new TeleporterNoPortal((WorldServer) player.worldObj));
 				TeleporterNoPortal.adjustPosY(player);
 				break;
 			case 0:
 				double[] coordinates = getLastPosition(stack);
-				if (coordinates != null && !TargetUtils.canEntitySeeSky(world, player)) {
+				if (coordinates != null && !TargetUtils.canEntitySeeSky(player.worldObj, player)) {
 					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
 				}
 				break;
 			default: break;
 			}
-
+			stack.damageItem(1, player);
 			stack.damageItem(1, player);
 			if (stack.stackSize == 0 || stack.getItemDamage() == stack.getMaxDamage()) {
 				player.destroyCurrentEquippedItem();
@@ -149,18 +148,11 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
-		if (usingItem == null) { return iconArray[0]; }
-		int ticksInUse = stack.getMaxItemUseDuration() - useRemaining;
-
-		if ((ticksInUse * 2) > USE_TIME) {
-			return iconArray[3];
-		} else if ((ticksInUse * 3) > USE_TIME) {
-			return iconArray[2];
-		} else if ((ticksInUse * 7) > USE_TIME) {
-			return iconArray[1];
-		} else {
+		if (!player.isUsingItem()) {
 			return iconArray[0];
 		}
+		int i = (useRemaining < 30 ? 3 : useRemaining < 70 ? 2 : useRemaining < 110 ? 1 : 0);
+		return iconArray[i];
 	}
 
 	@Override

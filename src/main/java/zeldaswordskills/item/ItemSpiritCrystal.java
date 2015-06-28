@@ -90,7 +90,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
-		return 72000;
+		return timeToUse;
 	}
 
 	@Override
@@ -128,16 +128,15 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	}
 
 	@Override
-	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		if (getMaxItemUseDuration(stack) - ticksRemaining > timeToUse) {
+	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+		if (count == 1) {
 			int cost = 0;
 			switch(spiritType) {
-			case BlockSacredFlame.DIN: cost = handleDin(stack, world, player); break;
-			case BlockSacredFlame.FARORE: cost = handleFarore(stack, world, player); break;
+			case BlockSacredFlame.DIN: cost = handleDin(stack, player.worldObj, player); break;
+			case BlockSacredFlame.FARORE: cost = handleFarore(stack, player.worldObj, player); break;
 			case BlockSacredFlame.NAYRU: break;
 			default: ZSSMain.logger.warn("Invalid spirit type " + spiritType + " while using spirit crystal");
 			}
-
 			if (damageStack(stack, player, cost)) {
 				player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalSpirit));
 			}
