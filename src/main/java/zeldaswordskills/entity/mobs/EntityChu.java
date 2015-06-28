@@ -140,6 +140,9 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 	/** Data watcher index for shock time so entity can render appropriately */
 	private static final int SHOCK_INDEX = 18;
 
+	/** Number of times this Chu has merged */
+	private int timesMerged;
+
 	public EntityChu(World world) {
 		super(world);
 		setType(ChuType.RED);
@@ -156,7 +159,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 	protected EntityChu createInstance() {
 		EntityChu chu = new EntityChu(worldObj);
 		chu.setType(getType());
-		chu.getEntityData().setInteger("timesMerged", rand.nextInt(4) + 1 + this.getEntityData().getInteger("timesMerged"));
+		chu.timesMerged = this.timesMerged;
 		return chu;
 	}
 
@@ -499,7 +502,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		if (canChuTypeShock()) {
 			updateShockState();
 		}
-		if (onGround && getEntityData().getInteger("timesMerged") < 4) {
+		if (onGround && timesMerged < 4) {
 			attemptMerge();
 		}
 	}
@@ -675,7 +678,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 					newChu.setSlimeSize(i * 2);
 					newChu.setType(this.getType().ordinal() < chu.getType().ordinal() ? chu.getType() : this.getType());
 					newChu.setLocationAndAngles((this.posX + chu.posX) / 2, posY + 0.5D, (this.posZ + chu.posZ) / 2 , rand.nextFloat() * 360.0F, 0.0F);
-					newChu.getEntityData().setInteger("timesMerged", rand.nextInt(4) + 1 + this.getEntityData().getInteger("timesMerged"));
+					newChu.timesMerged = rand.nextInt(4) + 1 + this.timesMerged;
 					worldObj.spawnEntityInWorld(newChu);
 					chu.isDead = true;
 					this.isDead = true;
@@ -717,11 +720,13 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setInteger("ChuType", getType().ordinal());
+		compound.setInteger("timesMerged", timesMerged);
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		dataWatcher.updateObject(CHU_TYPE_INDEX, (byte) compound.getInteger("ChuType"));
+		timesMerged = compound.getInteger("timesMerged");
 	}
 }
