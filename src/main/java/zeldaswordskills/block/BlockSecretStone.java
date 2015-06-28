@@ -183,7 +183,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	 * Returns the block ID associated with the given metadata value; bit8 is ignored
 	 */
 	public static Block getBlockFromMeta(int meta) {
-		switch(meta & ~0x8) {
+		switch (meta & ~0x8) {
 		case 0: return Blocks.stone;
 		case 1: return Blocks.sandstone;
 		case 2: return Blocks.nether_brick;
@@ -200,15 +200,12 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	 * Returns the stair block ID associated with the given metadata value; bit8 is ignored
 	 */
 	public static Block getStairsFromMeta(int meta) {
-		switch(meta & ~0x8) {
-		case 0: return Blocks.stone_brick_stairs;
-		case 4:
-		case 6: return Blocks.stone_stairs;
+		switch (meta & ~0x8) {
+		case 0:
+		case 3: return Blocks.stone_brick_stairs;
 		case 1: return Blocks.sandstone_stairs;
 		case 2: return Blocks.nether_brick_stairs;
-		case 3: return Blocks.stone_brick_stairs;
 		case 5:
-			//case 6:
 		case 7: return Blocks.quartz_stairs;
 		default: return Blocks.stone_stairs;
 		}

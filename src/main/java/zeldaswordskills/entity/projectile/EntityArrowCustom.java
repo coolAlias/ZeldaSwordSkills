@@ -397,60 +397,6 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	}
 
 	/**
-	 * Returns MovingObjectPosition of Entity or Block impacted, or null if nothing was struck
-	 */
-	/*
-	protected MovingObjectPosition checkForImpact() {
-		Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
-		Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-		// func_147447_a is the ray_trace method
-		MovingObjectPosition mop = worldObj.func_147447_a(vec3, vec31, false, true, false);
-		vec3 = Vec3.createVectorHelper(posX, posY, posZ);
-		vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-
-		if (mop != null) {
-			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
-		}
-
-		Entity entity = null;
-		List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox.addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
-		double d0 = 0.0D;
-		double hitBox = 0.3D;
-		// make sure shootingEntity is correct, e.g. if loaded from NBT
-		shootingEntity = getShooter();
-
-		for (int i = 0; i < list.size(); ++i) {
-			Entity entity1 = (Entity) list.get(i);
-			if (entity1.canBeCollidedWith() && (entity1 != shootingEntity || ticksInAir >= 5)) {
-				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
-				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
-				if (mop1 != null) {
-					double d1 = vec3.distanceTo(mop1.hitVec);
-					if (d1 < d0 || d0 == 0.0D) {
-						entity = entity1;
-						d0 = d1;
-					}
-				}
-			}
-		}
-
-		if (entity != null) {
-			mop = new MovingObjectPosition(entity);
-		}
-
-		if (mop != null && mop.entityHit instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) mop.entityHit;
-			if (player.capabilities.disableDamage || (shootingEntity instanceof EntityPlayer
-					&& !((EntityPlayer) shootingEntity).canAttackPlayer(player)))
-			{
-				mop = null;
-			}
-		}
-
-		return mop;
-	}*/
-
-	/**
 	 * Called when custom arrow impacts an entity or block
 	 */
 	protected void onImpact(MovingObjectPosition mop) {
@@ -571,7 +517,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		compound.setByte("pickup", (byte) canBePickedUp);
 		compound.setDouble("damage", getDamage());
 		compound.setInteger("arrowId", Item.getIdFromItem(arrowItem));
-		if ((shooterName == null || shooterName.length() == 0) && shootingEntity != null && shootingEntity instanceof EntityPlayer) {
+		if ((shooterName == null || shooterName.length() == 0) && shootingEntity instanceof EntityPlayer) {
 			shooterName = shootingEntity.getCommandSenderName();
 		}
 		compound.setString("shooter", shooterName == null ? "" : shooterName);

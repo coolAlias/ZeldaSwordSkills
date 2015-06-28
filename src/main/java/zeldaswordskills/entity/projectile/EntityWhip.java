@@ -323,12 +323,10 @@ public class EntityWhip extends EntityThrowable
 						while (yaw >= 360.0F) { yaw -= 360.0F; }
 						while (yaw < 0.0F) { yaw += 360.0F; }
 						yaw = Math.abs(Math.abs(yaw) - 180.0F);
-						//LogHelper.info("Target Yaw: " + target.rotationYaw + " | Player Yaw: " + player.rotationYaw + " | Difference: " + yaw);
 						// should be impossible to disarm from more than 90 degrees to either side
 						// however, rotationYaw does not seem to be the most reliable, but it's close enough
 						float mod = 0.5F - (0.25F * (yaw / 45.0F));
 						chance = 0.05F + (chance * mod); // max chance is 0.3F, min is 0.05F
-						//LogHelper.info("Modifier to disarm chance: " + mod + " | Total chance: " + chance);
 						if (worldObj.rand.nextFloat() < chance) {
 							WorldUtils.dropHeldItem(target);
 							inflictDamage = false;

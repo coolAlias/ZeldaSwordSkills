@@ -237,14 +237,13 @@ public class RoomBoss extends RoomBase
 		int x = bBox.getCenterX();
 		int y = bBox.minY + (submerged ? 2 : 1);
 		int z = bBox.getCenterZ();
-		switch(doorSide) {
+		switch (doorSide) {
 		case SOUTH: z = bBox.maxZ; break;
 		case NORTH: z = bBox.minZ; break;
 		case EAST: x = bBox.maxX; break;
 		case WEST: x = bBox.minX; break;
 		default: ZSSMain.logger.warn("Placing Boss door with invalid door side");
 		}
-
 		world.setBlock(x, y, z, ZSSBlocks.doorLocked, type.ordinal() & ~0x8, 2);
 		world.setBlock(x, y + 1, z, ZSSBlocks.doorLocked, type.ordinal() | 0x8, 2);
 	}
@@ -267,7 +266,7 @@ public class RoomBoss extends RoomBase
 		placeHinderBlock(world);
 
 		boolean hasChest = false;
-		switch(type) {
+		switch (type) {
 		case DESERT:
 		case OCEAN:
 		case MOUNTAIN: placeChest(world, rand, true); hasChest = true; break;
@@ -291,7 +290,7 @@ public class RoomBoss extends RoomBase
 			int x = bBox.getCenterX();
 			int y = bBox.maxY - 1;
 			int z = bBox.getCenterZ();
-			switch(type) {
+			switch (type) {
 			case OCEAN:
 				world.setBlock(x + 1, y, z + 1, Blocks.glowstone, 0, 2);
 				world.setBlock(x + 1, y, z - 1, Blocks.glowstone, 0, 2);

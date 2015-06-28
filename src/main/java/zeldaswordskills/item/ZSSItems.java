@@ -158,8 +158,8 @@ public class ZSSItems
 	//================ KEYS TAB ================//
 	public static Item
 	keyBig,
-	keySkeleton,
-	keySmall;
+	keySmall,
+	keySkeleton;
 
 	//================ TOOLS TAB ================//
 	public static Item
@@ -724,21 +724,21 @@ public class ZSSItems
 		}
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
-		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.gossipStone), " s ","sos"," s ", 's', Blocks.stone, 'o', new ItemStack(ZSSItems.instrument,1,Instrument.OCARINA_FAIRY.ordinal()));
+		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.gossipStone), " s ","sos"," s ", 's', Blocks.stone, 'o', new ItemStack(ZSSItems.instrument, 1, Instrument.OCARINA_FAIRY.ordinal()));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTarget), " c ","bab"," b ", 'a', Items.redstone, 'b', Blocks.stone, 'c', Blocks.iron_bars);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTargetAll), "bcb", "cac", "bcb", 'a', Items.redstone, 'b', Blocks.stone, 'c', Blocks.iron_bars);
-		GameRegistry.addShapelessRecipe(new ItemStack(arrowBomb), new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), Items.arrow);
-		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombFire), new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), Items.arrow);
-		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombWater), new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBomb), new ItemStack(bomb, 1, BombType.BOMB_STANDARD.ordinal()), Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombFire), new ItemStack(bomb, 1, BombType.BOMB_FIRE.ordinal()), Items.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombWater), new ItemStack(bomb, 1, BombType.BOMB_WATER.ordinal()), Items.arrow);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Items.brick);
-		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
-		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument,1,ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Items.clay_ball, 'r', Items.reeds);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument, 1, ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Items.clay_ball, 'r', Items.reeds);
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Items.dye, 1, 1));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicZoraLegs, new ItemStack(Items.dye, 1, 1));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Items.dye, 1, 4));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicGoronLegs, new ItemStack(Items.dye, 1, 4));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicGoronLegs, new ItemStack(Items.dye, 1, 2));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicZoraLegs, new ItemStack(Items.dye, 1, 2));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicGoronLegs, new ItemStack(Items.dye, 1, 4));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Items.dye, 1, 4));
 	}
 
 	/**
@@ -746,7 +746,7 @@ public class ZSSItems
 	 */
 	private static void addVanillaDungeonLoot() {
 		if (enableBombLoot) {
-			addLootToAll(new WeightedRandomChestContent(new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight()), true, true);
+			addLootToAll(new WeightedRandomChestContent(new ItemStack(bomb, 1, BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight()), true, true);
 		}
 		if (enableBombBagLoot) {
 			addLootToAll(new WeightedRandomChestContent(new ItemStack(bombBag), 1, 1, Config.getBombBagWeight()), true, false);

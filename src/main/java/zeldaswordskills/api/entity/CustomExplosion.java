@@ -406,7 +406,9 @@ public class CustomExplosion extends Explosion
 
 	/** Returns map of affected players */
 	@Override
-	public Map func_77277_b() { return affectedPlayers; }
+	public Map func_77277_b() {
+		return affectedPlayers;
+	}
 
 	/**
 	 * Returns either the entity that placed the explosive block, the entity that caused the explosion,

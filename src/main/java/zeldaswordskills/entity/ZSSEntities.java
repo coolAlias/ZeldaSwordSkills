@@ -113,6 +113,19 @@ public class ZSSEntities
 	private static final Map<Class<? extends EntityLiving>, SpawnableEntityData> spawnableEntityData = new HashMap<Class<? extends EntityLiving>, SpawnableEntityData>();
 
 	/**
+	 * Registers all entities, entity eggs, and populates default spawn biome lists
+	 */
+	public static void preInit() {
+		registerEntities();
+		addSpawnLocations(EntityChu.class, EntityChu.getDefaultBiomes());
+		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
+		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
+		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
+		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
+		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
+	}
+
+	/**
 	 * Initializes entity spawn rates, spawn locations, and adds spawns.
 	 */
 	public static void postInit(Configuration config) {
@@ -186,19 +199,6 @@ public class ZSSEntities
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Registers all entities, entity eggs, and populates default spawn biome lists
-	 */
-	public static void preInit() {
-		registerEntities();
-		addSpawnLocations(EntityChu.class, EntityChu.getDefaultBiomes());
-		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
-		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
-		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
-		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
-		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
 	}
 
 	private static void registerEntities() {

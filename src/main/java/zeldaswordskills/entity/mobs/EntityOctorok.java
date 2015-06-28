@@ -353,7 +353,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	protected void dropRareDrop(int rarity) {
 		switch(rarity) {
 		case 1:
-			entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal()), 0.0F);
+			entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal()), 0.0F);
 			break;
 		default:
 			if (getType() == 1) {

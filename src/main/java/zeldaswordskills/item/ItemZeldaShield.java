@@ -45,6 +45,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
@@ -156,6 +157,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
+					ForgeEventFactory.onPlayerDestroyItem(player, shield);
 					if (ZSSMain.isBG2Enabled && BattlegearUtils.isPlayerInBattlemode(player)) {
 						BattlegearUtils.setPlayerOffhandItem(player, null);
 					} else {

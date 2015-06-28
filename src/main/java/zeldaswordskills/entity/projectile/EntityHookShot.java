@@ -259,7 +259,6 @@ public class EntityHookShot extends EntityThrowable
 					setDead();
 				}
 			}
-
 			if (!worldObj.isRemote) {
 				worldObj.playSoundAtEntity(this, block.stepSound.getStepResourcePath(), 1.0F, 1.0F);
 			} else {
@@ -410,10 +409,10 @@ public class EntityHookShot extends EntityThrowable
 		dataWatcher.updateObject(HIT_POS_X, compound.getFloat("hitPosX"));
 		dataWatcher.updateObject(HIT_POS_Y, compound.getFloat("hitPosY"));
 		dataWatcher.updateObject(HIT_POS_Z, compound.getFloat("hitPosZ"));
+		dataWatcher.updateObject(IN_GROUND_INDEX, compound.getByte("customInGround"));
 		reachedHook = (compound.getByte("reachedHook") == 1);
 		dataWatcher.updateObject(THROWER_INDEX, compound.getString("ownerName"));
 		dataWatcher.updateObject(SHOTTYPE_INDEX, HookshotType.values()[compound.getByte("shotType") % HookshotType.values().length]);
 		dataWatcher.updateObject(TARGET_INDEX, compound.getInteger("shotTarget"));
-		dataWatcher.updateObject(IN_GROUND_INDEX, compound.getByte("customInGround"));
 	}
 }

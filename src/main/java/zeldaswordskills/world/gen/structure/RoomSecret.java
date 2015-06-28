@@ -64,7 +64,7 @@ public class RoomSecret extends RoomBase
 		if (y < bBox.maxY) {
 			return false;
 		}
-		inNether = (world.provider.isHellWorld);
+		inNether = world.provider.isHellWorld;
 		bBox.offset(x, y - bBox.maxY, z);
 		int worldHeight = (inNether ? 128 : world.getHeightValue(bBox.getCenterX(), bBox.getCenterZ()));
 		if (bBox.maxY > worldHeight) {
@@ -96,13 +96,13 @@ public class RoomSecret extends RoomBase
 		if (type != null) {
 			switch(type) {
 			case HELL: metadata = 2; break; // nether brick
-			case OCEAN: metadata = (inWater ? 6 : 0); break; // gravel or stone
+			case OCEAN: metadata = (inWater ? 6 : 0); break; // cobblestone
 			default: metadata = 0;
 			}
 		} else if (world.provider.isHellWorld) {
 			metadata = 2; // nether brick
 		} else {
-			metadata = (inWater ? 6 : 0); 
+			metadata = (inWater ? 6 : 0);
 		}
 		if (door != null) {
 			metadata |= 8;

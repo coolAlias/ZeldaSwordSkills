@@ -249,6 +249,7 @@ public class EntityFairy extends EntityAmbientCreature
 		rotationYaw += f1;
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public int getBrightnessForRender(float par1) {
 		int i = super.getBrightnessForRender(par1);

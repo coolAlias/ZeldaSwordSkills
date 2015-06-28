@@ -203,15 +203,12 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				removeCoreBlock();
 			}
 		} else if (shouldUpdate()) {
-			//LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
-				//ZSSMain.logger.info(String.format("Structure at %d/%d/%d failed verification during its update tick - replacing all blocks", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				alreadyVerified = true;
 				if (isBossRoom) {
 					isOpened = true;
 				} else {
-					//ZSSMain.logger.info("Structure was not a Boss Dungeon - removing core block now");
 					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 					removeCoreBlock();
 				}
@@ -226,7 +223,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called only when validation fails during an update, not when block broken
 	 */
 	protected void removeCoreBlock() {
-		//LogHelper.fine(String.format("Removing core block from update at %d/%d/%d", xCoord, yCoord, zCoord));
 		EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 2.5D, zCoord + 0.5D, 16.0D);
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
@@ -245,7 +241,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				}
 			} else {
 				info.addStat(Stats.STAT_SECRET_ROOMS, 1);
-				//LogHelper.fine("Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
 				player.triggerAchievement(ZSSAchievements.bombsAway);
 				if (info.getStat(Stats.STAT_SECRET_ROOMS) > 49) {
 					player.triggerAchievement(ZSSAchievements.bombJunkie);

@@ -52,27 +52,25 @@ public class RenderItemBombBag implements IItemRenderer
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type == ItemRenderType.INVENTORY) {
-			Tessellator tessellator = Tessellator.instance;
-			GL11.glPushMatrix();
-			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-			GL11.glEnable(GL11.GL_ALPHA_TEST);
-			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-			zLevel = 50.0F;
-			for (int i = 0; i < 3; ++i) {
-				if (i > 0) {
-					zLevel = 100.0F;
-				}
-				IIcon icon = item.getItem().getIcon(item, i);
-				tessellator.startDrawingQuads();
-				tessellator.addVertexWithUV(0, 16, zLevel, icon.getMinU(), icon.getMaxV());
-				tessellator.addVertexWithUV(16, 16, zLevel, icon.getMaxU(), icon.getMaxV());
-				tessellator.addVertexWithUV(16, 0, zLevel, icon.getMaxU(), icon.getMinV());
-				tessellator.addVertexWithUV(0, 0, zLevel, icon.getMinU(), icon.getMinV());
-				tessellator.draw();
+		Tessellator tessellator = Tessellator.instance;
+		GL11.glPushMatrix();
+		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+		GL11.glEnable(GL11.GL_ALPHA_TEST);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		zLevel = 50.0F;
+		for (int i = 0; i < 3; ++i) {
+			if (i > 0) {
+				zLevel = 100.0F;
 			}
-			GL11.glPopAttrib();
-			GL11.glPopMatrix();
+			IIcon icon = item.getItem().getIcon(item, i);
+			tessellator.startDrawingQuads();
+			tessellator.addVertexWithUV(0, 16, zLevel, icon.getMinU(), icon.getMaxV());
+			tessellator.addVertexWithUV(16, 16, zLevel, icon.getMaxU(), icon.getMaxV());
+			tessellator.addVertexWithUV(16, 0, zLevel, icon.getMaxU(), icon.getMinV());
+			tessellator.addVertexWithUV(0, 0, zLevel, icon.getMinU(), icon.getMinV());
+			tessellator.draw();
 		}
+		GL11.glPopAttrib();
+		GL11.glPopMatrix();
 	}
 }

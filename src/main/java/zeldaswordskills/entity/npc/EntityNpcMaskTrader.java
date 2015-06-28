@@ -26,7 +26,6 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
@@ -49,6 +48,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 
 	/** Mapping of masks to give for each quest stage */
 	private static final Map<Integer, Item> maskMap = new HashMap<Integer, Item>();
+
 	/** Number of stages per mask */
 	private static final int NUM_STAGES = 3;
 
@@ -125,11 +125,8 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
 							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.1")));
 				} else {
-					int x = MathHelper.floor_double(posX);
-					int y = MathHelper.floor_double(posY);
-					int z = MathHelper.floor_double(posZ);
 					this.customer = player;
-					player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, x, y, z);
+					player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, 0, 0, 0);
 				}
 			} else {
 				Item mask = maskMap.get(maskStage / NUM_STAGES);
