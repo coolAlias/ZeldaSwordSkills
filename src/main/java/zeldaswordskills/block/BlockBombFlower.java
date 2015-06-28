@@ -118,7 +118,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 			return false; // this lets bonemeal do its thing
 		} else if (!world.isRemote) {
 			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FLOWER.ordinal()));
-			world.setBlockToAir(pos);
+			world.setBlockState(pos, getDefaultState());
 		}
 		return true;
 	}
@@ -241,7 +241,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 	 */
 	private void disperseSeeds(World world, BlockPos pos, boolean isGriefing) {
 		if (!world.isRemote) {
-			world.setBlockToAir(pos);
+			world.setBlockState(pos, getDefaultState());
 			EntityBomb bomb = new EntityBomb(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D).setType(BombType.BOMB_FLOWER).setTime(64);
 			if (!isGriefing) {
 				bomb.setNoGrief();
