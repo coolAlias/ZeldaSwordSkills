@@ -140,6 +140,9 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 	/** the time between each jump of the slime */
 	private int slimeJumpDelay;
 
+	/** Number of times this Chu has merged */
+	private int timesMerged;
+
 	public EntityChu(World world) {
 		super(world);
 		yOffset = 0.0F;
@@ -545,7 +548,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 		if (getShockTime() % 8 > 5 && rand.nextInt(4) == 0) {
 			worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 		}
-		if (onGround && getEntityData().getInteger("timesMerged") < 4) {
+		if (onGround && timesMerged < 4) {
 			attemptMerge();
 		}
 	}
@@ -562,11 +565,10 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 				chu.setSize(i / 2);
 				chu.setType(getType());
 				chu.setLocationAndAngles(posX + (double) f, posY + 0.5D, posZ + (double) f1, rand.nextFloat() * 360.0F, 0.0F);
-				chu.getEntityData().setInteger("timesMerged", this.getEntityData().getInteger("timesMerged"));
+				chu.timesMerged = this.timesMerged;
 				worldObj.spawnEntityInWorld(chu);
 			}
 		}
-
 		super.setDead();
 	}
 
@@ -591,7 +593,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 					newChu.setSize(i * 2);
 					newChu.setType(this.getType().ordinal() < chu.getType().ordinal() ? chu.getType() : this.getType());
 					newChu.setLocationAndAngles((this.posX + chu.posX) / 2, posY + 0.5D, (this.posZ + chu.posZ) / 2 , rand.nextFloat() * 360.0F, 0.0F);
-					newChu.getEntityData().setInteger("timesMerged", rand.nextInt(4) + 1 + this.getEntityData().getInteger("timesMerged"));
+					newChu.timesMerged = rand.nextInt(4) + 1 + this.timesMerged;
 					worldObj.spawnEntityInWorld(newChu);
 					chu.isDead = true;
 					this.isDead = true;
@@ -634,6 +636,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 		super.writeEntityToNBT(compound);
 		compound.setInteger("Size", getSize() - 1);
 		compound.setInteger("ChuType", getType().ordinal());
+		compound.setInteger("timesMerged", timesMerged);
 	}
 
 	@Override
@@ -641,5 +644,6 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 		super.readEntityFromNBT(compound);
 		setSize(compound.getInteger("Size") + 1);
 		dataWatcher.updateObject(CHU_TYPE_INDEX, (byte) compound.getInteger("ChuType"));
+		timesMerged = compound.getInteger("timesMerged");
 	}
 }
