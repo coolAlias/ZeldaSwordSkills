@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,6 @@ public interface IDamageType {
 	/**
 	 * Returns a list of all custom enumerated damage types associated with this DamageSource
 	 */
-	public Set<EnumDamageType> getEnumDamageTypes();
+	Set<EnumDamageType> getEnumDamageTypes();
 	
 }

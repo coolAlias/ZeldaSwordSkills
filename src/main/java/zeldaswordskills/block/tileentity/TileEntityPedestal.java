@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.Packet132TileEntityData;
+import net.minecraft.util.MathHelper;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.item.ItemPendant;
+import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -51,6 +52,16 @@ public class TileEntityPedestal extends TileEntityInventory
 
 	public TileEntityPedestal() {
 		inventory = new ItemStack[3];
+	}
+
+	/**
+	 * Returns the amount of redstone power provided by the implanted sword, if any
+	 */
+	public int getPowerLevel() {
+		if (sword != null && sword.getItem() instanceof ItemZeldaSword && ((ItemZeldaSword) sword.getItem()).isMasterSword()) {
+			return sword.getItem() == ZSSItems.swordMaster || Config.getMasterSwordsProvidePower() ? 15 : 0;
+		}
+		return 0;
 	}
 
 	/**
@@ -114,22 +125,16 @@ public class TileEntityPedestal extends TileEntityInventory
 				WorldUtils.playSoundAt(worldObj, xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 				sword = stack.copy();
 			}
-			orientation = 0;
+			if (player != null) {
+				int facing = MathHelper.floor_double((double)((player.rotationYaw * 4F) / 360f) + 0.5D) & 3;
+				orientation = (byte)(facing == 0 || facing == 2 ? 0 : 1);
+			}
 			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, worldObj.getBlockId(xCoord, yCoord, zCoord));
 			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 			return true;
 		} else {
 			return false;
 		}
-	}
-
-	/**
-	 * Called from client side packet to update sword and orientation
-	 */
-	@SideOnly(Side.CLIENT)
-	public void setSword(ItemStack stack, byte orientation) {
-		this.sword = stack;
-		this.orientation = orientation;
 	}
 
 	/**

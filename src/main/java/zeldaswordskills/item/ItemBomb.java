@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,31 +24,28 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
-import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.BombTickPacket;
-import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.network.server.BombTickPacket;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -66,25 +63,12 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 {
-	/*========================== RENDER RESOURCE LOCATIONS =========================*/
-	/** Standard bomb textures */
-	public static final ResourceLocation bombBase = new ResourceLocation(ModInfo.ID, "textures/entity/bomb.png");
-	public static final ResourceLocation bombFlash = new ResourceLocation(ModInfo.ID, "textures/entity/bombflash.png");
-	/** Water bomb textures */
-	public static final ResourceLocation waterBase = new ResourceLocation(ModInfo.ID, "textures/entity/bombwater.png");
-	public static final ResourceLocation waterFlash = new ResourceLocation(ModInfo.ID, "textures/entity/bombwaterflash.png");
-	/** Fire bomb textures */
-	public static final ResourceLocation fireBase = new ResourceLocation(ModInfo.ID, "textures/entity/bombfire.png");
-	public static final ResourceLocation fireFlash = new ResourceLocation(ModInfo.ID, "textures/entity/bombfireflash.png");
-	
-	public static final String[] bombNames = {"Bomb","Water Bomb","Fire Bomb"};
-	
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
-	
+
 	/** Blast radius for bombs (Creeper is 3.0F) */
 	public static final float RADIUS = 3.0F;
-	
+
 	public ItemBomb(int par1) {
 		super(par1);
 		setMaxDamage(0);
@@ -93,71 +77,58 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 		setFull3D();
 	}
-	
+
 	/** Shortcut method; returns this bomb's enum Type from stack damage value */
 	public static BombType getType(ItemStack stack) {
 		return getType(stack.getItemDamage());
 	}
-	
+
 	/**
 	 * Returns this bomb's enum Type from stack damage value
 	 */
 	public static BombType getType(int damage) {
 		return (damage < BombType.values().length ? BombType.values()[damage] : BombType.BOMB_STANDARD);
 	}
-	
+
 	/**
 	 * Return blast radius for this bomb type
 	 */
 	public static float getRadius(BombType type) {
 		return (type == BombType.BOMB_WATER ? (RADIUS * 0.75F) : RADIUS);
 	}
-	
+
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
-			int extraTime = Config.getBombFuseTime();
-			if (extraTime == 0) { extraTime = 56; }
-			world.spawnEntityInWorld(new EntityBomb(world, player).setType(getType(stack)).addTime(extraTime - stack.getTagCompound().getInteger("time")));
+			int fuseTime = (Config.getBombFuseTime() > 0 ? Config.getBombFuseTime() : 56);
+			// subtract any ticks which passed while held
+			fuseTime -= (stack.hasTagCompound() ? stack.getTagCompound().getInteger("time") : 0);
+			world.spawnEntityInWorld(new EntityBomb(world, player).setType(getType(stack)).addTime(fuseTime));
 		}
 		player.destroyCurrentEquippedItem();
 		return stack;
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (entity instanceof EntityNpcBarnes) {
 			if (!player.worldObj.isRemote) {
-				EntityVillager villager = (EntityVillager) entity;
-				MerchantRecipeList trades = villager.getRecipes(player);
-				BombType bombType = getType(stack);
-				ItemStack chest = player.getCurrentArmor(ArmorIndex.WORN_CHEST);
-				if (villager.getProfession() == 2) {
-					if (chest != null && chest.getItem() == ZSSItems.tunicZoraChest && bombType != BombType.BOMB_FIRE) {
-						MerchantRecipe waterBombTrade = new MerchantRecipe(new ItemStack(ZSSItems.bomb,1,BombType.BOMB_STANDARD.ordinal()), new ItemStack(Item.emerald, 5), new ItemStack(ZSSItems.bomb,1,BombType.BOMB_WATER.ordinal()));
-						MerchantRecipeHelper.addToListWithCheck(trades, waterBombTrade);
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.zora"));
-					} else if (Config.enableTradeBombBag() && trades.size() >= Config.getFriendTradesRequired()) {
-						MerchantRecipe bombBagTrade = new MerchantRecipe(new ItemStack(Item.emerald, Math.min(64, Config.getMinBombBagPrice() + player.worldObj.rand.nextInt(16))), new ItemStack(ZSSItems.bombBag));
-						MerchantRecipeHelper.addToListWithCheck(trades, bombBagTrade);
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.initiate"));
-					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.failure"));
-					}
-				} else if (villager.getProfession() == 3 && chest != null && chest.getItem() == ZSSItems.tunicGoronChest && bombType != BombType.BOMB_WATER) {
-					MerchantRecipe fireBombTrade = new MerchantRecipe(new ItemStack(ZSSItems.bomb,1,BombType.BOMB_STANDARD.ordinal()), new ItemStack(Item.emerald, 10), new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FIRE.ordinal()));
-					MerchantRecipeHelper.addToListWithCheck(trades, fireBombTrade);
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.goron"));
+				if (((EntityNpcBarnes) entity).addBombBagTrade()) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.add");
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.bomb.failure"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.careful");
 				}
 			}
 			return true;
-		} else {
-			return (entity instanceof EntityVillager || super.onLeftClickEntity(stack, player, entity));
+		} else if (entity instanceof INpc) {
+			if (!player.worldObj.isRemote) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.careful");
+			}
+			return true;
 		}
+		return super.onLeftClickEntity(stack, player, entity);
 	}
-	
+
 	@Override
 	public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
 		for (ItemStack invStack : player.inventory.mainInventory) {
@@ -170,7 +141,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void onItemTossed(EntityItem item, EntityPlayer player) {
 		ItemStack stack = item.getEntityItem();
@@ -178,7 +149,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 			stack.getTagCompound().setInteger("time", 0);
 		}
 	}
-	
+
 	/**
 	 * @param slot inventory slot at which the item resides
 	 * @param isHeld true if the item is currently held
@@ -190,54 +161,70 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
-		
-		if (isHeld) {
+
+		if (isHeld || getType(stack) == BombType.BOMB_FLOWER) {
 			if (entity instanceof EntityPlayer) {
 				if (world.isRemote && Minecraft.getMinecraft().currentScreen == null) {
-					PacketDispatcher.sendPacketToServer(new BombTickPacket().makePacket());
+					PacketDispatcher.sendPacketToServer(new BombTickPacket(slot).makePacket());
 				}
 			} else {
-				tickBomb(stack, world, entity);
+				tickBomb(stack, world, entity, slot);
 			}
 		} else {
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
 	}
-	
+
 	/**
 	 * Increments bomb's timer and causes explosion if time is out; stack must be held by entity
 	 */
-	public void tickBomb(ItemStack stack, World world, Entity entity) {
+	public void tickBomb(ItemStack stack, World world, Entity entity, int slot) {
 		if (!stack.hasTagCompound()) {
 			stack.setTagCompound(new NBTTagCompound());
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
-		
+
 		BombType type = getType(stack);
 		if (type != BombType.BOMB_WATER && world.getBlockMaterial((int) entity.posX, (int) entity.posY + 1, (int) entity.posZ) == Material.water) {
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", true);
+		} else if (stack.getTagCompound().getBoolean("inWater")) {
+			stack.getTagCompound().setBoolean("inWater", false);
 		}
 		if (canTick(world, type, stack.getTagCompound().getBoolean("inWater"))) {
 			int time = stack.getTagCompound().getInteger("time");
 			if (time % 20 == 0) {
 				world.playSoundAtEntity(entity, Sounds.BOMB_FUSE, 1.0F, 2.0F + entity.worldObj.rand.nextFloat() * 0.4F);
 			}
-			stack.getTagCompound().setInteger("time", ((world.provider.dimensionId == -1 && type == BombType.BOMB_STANDARD) ? Config.getBombFuseTime() : ++time));
-			if (time == Config.getBombFuseTime() && !world.isRemote) {
-				entity.setCurrentItemOrArmor(0, null);
-				CustomExplosion.createExplosion(world, entity.posX, entity.posY, entity.posZ, getRadius(type), type);
+			boolean flag = world.provider.isHellWorld && (type == BombType.BOMB_STANDARD || type == BombType.BOMB_FLOWER);
+			stack.getTagCompound().setInteger("time", flag ? Config.getBombFuseTime() : ++time);
+			int fuse = Config.getBombFuseTime();
+			if (fuse == 0 && type == BombType.BOMB_FLOWER) {
+				fuse = 56;
+			}
+			if (time == fuse && !world.isRemote) {
+				EntityBomb bomb = null;
+				if (entity instanceof EntityPlayer) {
+					((EntityPlayer) entity).inventory.setInventorySlotContents(slot, null);
+					bomb = new EntityBomb(world, (EntityPlayer) entity).setType(type);
+				} else {
+					entity.setCurrentItemOrArmor(slot, null);
+					bomb = new EntityBomb(world).setType(type);
+				}
+				CustomExplosion.createExplosion(bomb, world, entity.posX, entity.posY, entity.posZ, getRadius(type), 0.0F, true);
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns true if this type of bomb can tick this update
 	 */
 	private boolean canTick(World world, BombType type, boolean inWater) {
-		if (Config.getBombFuseTime() > 0) {
+		if (type == BombType.BOMB_FLOWER) {
+			return !inWater;
+		} else if (Config.getBombFuseTime() > 0) {
 			switch(type) {
 			case BOMB_WATER: return (world.provider.dimensionId != -1);
 			default: return (!inWater);
@@ -246,7 +233,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 			return false;
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIconFromDamage(int type) {
@@ -255,7 +242,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName() + "." + stack.getItemDamage();
+		return getUnlocalizedName() + "." + getType(stack).unlocalizedName;
 	}
 
 	@Override
@@ -270,11 +257,12 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
 		iconArray = new Icon[BombType.values().length];
+		String s = ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_";
 		for (int i = 0; i < BombType.values().length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + (getUnlocalizedName().substring(9) + (i + 1)));
+			iconArray[i] = register.registerIcon(s + getType(i).unlocalizedName);
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {

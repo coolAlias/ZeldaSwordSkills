@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -73,15 +73,15 @@ public class DesertBattle extends BossBattle {
 				for (int k = minZ; k < maxZ; ++k) {
 					if (activate) {
 						if (world.getBlockId(i, j, k) == Block.dispenser.blockID && world.rand.nextInt(9 - (2 * difficulty)) == 0) { 
-							Block.blocksList[Block.dispenser.blockID].updateTick(world, i, j, k, world.rand);
+							TileEntity te = world.getBlockTileEntity(i, j, k);
+							if (te instanceof IInventory) {
+								WorldUtils.addItemToInventory(new ItemStack(Item.arrow), (IInventory) te);
+								Block.blocksList[Block.dispenser.blockID].updateTick(world, i, j, k, world.rand);
+							}
 						}
 					} else {
 						world.setBlock(i, j, k, Block.dispenser.blockID);
 						world.setBlockMetadataWithNotify(i, j, k, RoomBoss.facingToOrientation[(side + 2) % 4], 2);
-						TileEntity te = world.getBlockTileEntity(i, j, k);
-						if (te instanceof IInventory) {
-							WorldUtils.addItemToInventory(new ItemStack(Item.arrow, (difficulty == 3 ? 24 : 16)), (IInventory) te);
-						}
 					}
 				}
 			}

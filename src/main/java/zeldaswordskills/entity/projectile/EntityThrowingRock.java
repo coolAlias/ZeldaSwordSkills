@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,12 @@
 
 package zeldaswordskills.entity.projectile;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
@@ -70,11 +73,15 @@ public class EntityThrowingRock extends EntityMobThrowable
 		for (int l = 0; l < 4; ++l) {
 			worldObj.spawnParticle("crit", posX, posY, posZ, 0.0D, 0.0D, 0.0D);
 		}
-
-		if (mop.entityHit != null) {
+		if (mop.typeOfHit == EnumMovingObjectType.TILE) {
+			int blockId = worldObj.getBlockId(mop.blockX, mop.blockY, mop.blockZ);
+			Block block = (blockId > 0 ? Block.blocksList[blockId] : null);
+			if (block != null && block.blockMaterial != Material.air) {
+				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+			}
+		} else if (mop.entityHit != null) {
 			mop.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, getThrower()), getDamage());
 		}
-
 		if (!worldObj.isRemote) {
 			setDead();
 		}

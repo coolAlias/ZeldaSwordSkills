@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,24 +27,29 @@ package zeldaswordskills.api.entity;
  *
  */
 public interface IEntityBomb {
-	
+
 	/** Get this bomb's {@link BombType} */
-	public BombType getType();
-	
+	BombType getType();
+
 	/** Factor by which affected entity's motion will be multiplied */
-	public float getMotionFactor();
+	float getMotionFactor();
 
 	/**
 	 * Factor by which to modify the radius of block destruction:
 	 * below 1.0F restricts the radius; above 1.0F expands the radius
 	 * Maximum radius * destruction factor is capped at 16.0F, which is mighty big.
 	 */
-	public float getDestructionFactor();
+	float getDestructionFactor();
 
 	/**
 	 * Return false to restrict this bomb's destruction in Adventure Mode,
 	 * allowing it to affect only {@link IExplodable} blocks
 	 */
-	// TODO public boolean canGriefAdventureMode();
+	// TODO boolean canGriefAdventureMode();
+
+	/**
+	 * Return true if {@link BombType#postExplosionEffect} should be called
+	 */
+	boolean hasPostExplosionEffect();
 
 }

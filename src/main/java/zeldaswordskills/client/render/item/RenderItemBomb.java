@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.client.model.ModelBomb;
+import zeldaswordskills.client.render.entity.RenderEntityBomb;
 import zeldaswordskills.item.ItemBomb;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -91,10 +92,7 @@ public class RenderItemBomb implements IItemRenderer
 	}
 	
 	private ResourceLocation getTexture(BombType type, boolean isFlashing) {
-		switch(type) {
-		case BOMB_FIRE: return isFlashing ? ItemBomb.fireFlash : ItemBomb.fireBase;
-		case BOMB_WATER: return isFlashing ? ItemBomb.waterFlash : ItemBomb.waterBase;
-		default: return isFlashing ? ItemBomb.bombFlash : ItemBomb.bombBase;
-		}
+		int i = type.ordinal();
+		return (isFlashing) ? RenderEntityBomb.flashTextures[i] : RenderEntityBomb.bombTextures[i];
 	}
 }

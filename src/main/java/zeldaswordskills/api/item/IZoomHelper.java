@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,13 +28,13 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 public interface IZoomHelper {
-	
+
 	/**
 	 * When this item is equipped in one of the vanilla armor slots and an
 	 * item in use modifies the field of view, the fov will be magnified by
 	 * this amount; negative values will zoom out
 	 */
 	@SideOnly(Side.CLIENT)
-	public float getMagnificationFactor();
+	float getMagnificationFactor();
 
 }

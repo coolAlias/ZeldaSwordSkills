@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,11 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import mods.battlegear2.api.ISheathed;
+import mods.battlegear2.api.core.BattlegearUtils;
 import mods.battlegear2.api.core.InventoryPlayerBattle;
 import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
-import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -34,6 +34,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.item.EnumAction;
+import net.minecraft.item.EnumToolMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -45,9 +46,12 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
+import zeldaswordskills.api.damage.IDamageAoE;
+import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
@@ -73,10 +77,21 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ItemZeldaShield extends Item implements IDashItem, IFairyUpgrade,
 ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
+	/**
+	 * Material used in construction determines various properties:
+	 * WOOD: Can catch arrows, vulnerable to fire; EMERALD: Reflects projectiles
+	 */
+	protected final EnumToolMaterial toolMaterial;
+
+	/** Percent of damage from magical AoE attacks that is blocked, if any */
+	private final float magicReduction;
+
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;
+
 	/** Rate at which BG2 stamina bar will decay per tick */
 	private final float bg2DecayRate;
+
 	/** Rate at which BG2 stamina bar will recover per tick; 0.012F takes 5 seconds */
 	private final float bg2RecoveryRate;
 
@@ -88,8 +103,10 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	 * @param decayRate number of seconds it will take the BG2 stamina bar to deplete
 	 * @param recoveryRate number of seconds until BG2 stamina bar will completely replenish
 	 */
-	public ItemZeldaShield(int id, int recoveryTime, float decayRate, float recoveryRate) {
+	public ItemZeldaShield(int id, EnumToolMaterial material, float magicReduction, int recoveryTime, float decayRate, float recoveryRate) {
 		super(id);
+		this.toolMaterial = material;
+		this.magicReduction = magicReduction;
 		this.recoveryTime = recoveryTime;
 		this.bg2DecayRate = 1F / decayRate / 20F;
 		this.bg2RecoveryRate = 1F / recoveryRate / 20F;
@@ -109,37 +126,49 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	 */
 	public boolean canBlockDamage(ItemStack shield, DamageSource source) {
 		boolean flag = source.isUnblockable() && !(source instanceof DamageSourceArmorBreak);
-		if (this == ZSSItems.shieldDeku) {
+		if (toolMaterial == EnumToolMaterial.WOOD) {
 			return !flag;
 		}
-		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && this == ZSSItems.shieldMirror);
+		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && toolMaterial == EnumToolMaterial.EMERALD);
 	}
 
 	/**
 	 * Called when the shield blocks an attack when held in the normal fashion (i.e. non-BG2)
 	 * used by Deku Shield to damage / destroy the stack and by Mirror Shield to reflect projectiles
 	 */
-	public void onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
+	public float onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
 		ZSSPlayerInfo.get(player).onAttackBlocked(shield, damage);
 		WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
-		if (this == ZSSItems.shieldDeku) {
-			if (source.isProjectile() && source.getSourceOfDamage() instanceof IProjectile) {
-                if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
-                    if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
-                        ((InventoryPlayerBattle) player.inventory).hasChanged = true;
-                    }
-                }
-            }
+		float damageBlocked = damage;
+		if (toolMaterial == EnumToolMaterial.WOOD) {
+			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
+				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
+					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
+						((InventoryPlayerBattle) player.inventory).hasChanged = true;
+					}
+				}
+			} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
+				damageBlocked *= magicReduction;
+			}
 			int dmg = Math.round(source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
-					player.destroyCurrentEquippedItem();
+					ForgeEventFactory.onPlayerDestroyItem(player, shield);
+					if (ZSSMain.isBG2Enabled && BattlegearUtils.isPlayerInBattlemode(player)) {
+						player.inventory.setInventorySlotContents(player.inventory.currentItem + 3, null);
+					} else {
+						player.destroyCurrentEquippedItem();
+					}
 				}
 			}
-		} else if (this == ZSSItems.shieldMirror) {
+		} else if (toolMaterial == EnumToolMaterial.EMERALD) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
-				if (player.worldObj.rand.nextFloat() < (source.isMagicDamage() ? (1F / 3F) : 1.0F)) {
+				float chance = (source.isMagicDamage() ? (1F / 3F) : 1.0F);
+				if (source.getSourceOfDamage() instanceof IReflectable) {
+					((IReflectable) source.getSourceOfDamage()).getReflectChance(shield, player, source.getEntity());
+				}
+				if (player.worldObj.rand.nextFloat() < chance) {
 					Entity projectile = null;
 					try {
 						projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj); 
@@ -150,6 +179,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 						NBTTagCompound data = new NBTTagCompound();
 						source.getSourceOfDamage().writeToNBT(data);
 						projectile.readFromNBT(data);
+						projectile.getEntityData().setBoolean("isReflected", true);
 						projectile.posX -= projectile.motionX;
 						projectile.posY -= projectile.motionY;
 						projectile.posZ -= projectile.motionZ;
@@ -157,11 +187,19 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 						double motionZ = (double)(MathHelper.cos(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
 						double motionY = (double)(-MathHelper.sin(player.rotationPitch / 180.0F * (float) Math.PI));
 						TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, 2.0F + (20.0F * player.worldObj.rand.nextFloat()), false);
+						if (projectile instanceof IReflectable) {
+							((IReflectable) projectile).onReflected(shield, player, source.getEntity(), source.getSourceOfDamage());
+						}
 						player.worldObj.spawnEntityInWorld(projectile);
 					}
+				} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) { // failed to reflect projectile
+					damageBlocked *= magicReduction;
 				}
 			}
+		} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
+			damageBlocked *= magicReduction; // default shield behavior blocks half damage from AoE magic attacks
 		}
+		return (damage - damageBlocked);
 	}
 
 	@Override
@@ -204,7 +242,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	@Override
 	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
 		if (this == ZSSItems.shieldMirror) {
-			if (player.getItemInUse() != null && ZSSPlayerInfo.get(player).canBlock()) {
+			if (player.getHeldItem() != null && ZSSPlayerInfo.get(player).canBlock()) {
 				Vec3 vec3 = player.getLookVec();
 				double dx = player.posX + vec3.xCoord * 2.0D;
 				double dy = player.posY + player.getEyeHeight() + vec3.yCoord * 2.0D;
@@ -214,6 +252,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 				for (EntityFireball fireball : list) {
 					DamageSource source = DamageSource.causeFireballDamage(fireball, fireball.shootingEntity);
 					if (canBlockDamage(stack, source) && fireball.attackEntityFrom(DamageSource.causePlayerDamage(player), 1.0F)) {
+						fireball.getEntityData().setBoolean("isReflected", true);
 						ZSSPlayerInfo.get(player).onAttackBlocked(stack, 1.0F);
 						WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 						break;
@@ -230,7 +269,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	@Override
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack stack) {
-		return this == ZSSItems.shieldDeku && stack.getItem() == Item.itemsList[Block.planks.blockID];
+		return toRepair.isItemStackDamageable() && stack.itemID == toolMaterial.getToolCraftingMaterial();
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -260,7 +299,7 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.sword"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.sword");
 		}
 	}
 
@@ -339,13 +378,12 @@ ISwingSpeed, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 	@Method(modid="battlegear2")
 	@Override
 	public void blockAnimation(EntityPlayer player, float amount) {
-		// TODO BG2 sends a BattlegearShieldFlashPacket to all around; not sure what that does
 		player.worldObj.playSoundAtEntity(player, "battlegear2:shield", 1, 1);
 	}
 
 	@Method(modid="battlegear2")
 	@Override
 	public float getDamageReduction(ItemStack shield, DamageSource source) {
-		return (this == ZSSItems.shieldDeku ? (source.isFireDamage() ? -10.0F : 2.0F) : Float.MAX_VALUE);
+		return (toolMaterial == EnumToolMaterial.WOOD ? (source.isFireDamage() ? -10.0F : 2.0F) : Float.MAX_VALUE);
 	}
 }

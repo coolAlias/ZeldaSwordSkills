@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -47,6 +47,24 @@ public class MerchantRecipeHelper {
 
 		return (recipe == null);
 	}
+
+	/**
+	 * Returns true if a MerchantRecipe (trade) containing the same items already
+	 * exists in the merchant's list; not stack-size or NBT sensitive
+	 * @return returns false if the trade is null or no similar trade was found
+	 */
+	public static boolean hasSimilarTrade(MerchantRecipeList trades, MerchantRecipe trade) {
+		if (trade == null || trades == null) {
+			return false;
+		}
+		for (int i = 0; i < trades.size(); ++i) {
+			MerchantRecipe trade1 = (MerchantRecipe) trades.get(i);
+			if (haveSameTradeItems(trade, trade1)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * Adds a trade to the merchant's list only if a similar trade does not already exist
@@ -73,19 +91,16 @@ public class MerchantRecipeHelper {
 	 * @return returns true if the new trade was added or replaced a current trade
 	 */
 	public static boolean addToListWithCheck(MerchantRecipeList list, MerchantRecipe trade, boolean replaceExistingTrade) {
-		for (int i = 0; i < list.size(); ++i)
-		{
+		for (int i = 0; i < list.size(); ++i) {
 			MerchantRecipe merchantrecipe1 = (MerchantRecipe) list.get(i);
 			if (haveSameTradeItems(trade, merchantrecipe1)) {
 				if (replaceExistingTrade) {
 					list.set(i, trade);
 					return true;
 				}
-
 				return false;
 			}
 		}
-
 		list.add(trade);
 		return true;
 	}

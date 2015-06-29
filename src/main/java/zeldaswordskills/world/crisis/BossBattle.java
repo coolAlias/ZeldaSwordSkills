@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
@@ -60,8 +60,10 @@ public class BossBattle extends AbstractCrisis
 {
 	/** The dungeon core in which the battle is occurring */
 	protected final TileEntityDungeonCore core;
+
 	/** The bounding box of the associated boss dungeon*/
 	protected final StructureBoundingBox box;
+
 	/** The difficulty setting in effect when the battle was begun */
 	protected int difficulty = -1;
 
@@ -91,7 +93,7 @@ public class BossBattle extends AbstractCrisis
 		// TODO play boss battle music
 		difficulty = world.difficultySetting;
 		fillAllGaps(world);
-		generateBossMobs(world, Config.getNumBosses());
+		generateBossMobs(world, getNumBosses());
 		core.removeHinderBlock();
 	}
 
@@ -209,13 +211,20 @@ public class BossBattle extends AbstractCrisis
 	 * Spawns the dungeon's boss or mini-boss
 	 * @param number the number of boss entities to spawn
 	 */
-	public final void generateBossMobs(World world, int number) {
+	protected void generateBossMobs(World world, int number) {
 		for (int i = 0; i < number; ++i) {
 			Entity mob = core.getBossType().getNewMob(world);
 			if (mob != null) {
 				spawnMobInCorner(world, mob, i, true, true);
 			}
 		}
+	}
+
+	/**
+	 * Return the number of bosses to spawn; default returns Config setting
+	 */
+	protected int getNumBosses() {
+		return Config.getNumBosses();
 	}
 
 	/**

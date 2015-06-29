@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package zeldaswordskills.entity.buff;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import zeldaswordskills.network.UpdateBuffPacket;
+import zeldaswordskills.network.client.UpdateBuffPacket;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
@@ -124,7 +124,7 @@ public class BuffBase
 	 * Removes any effects that may have been applied when the buff is removed,
 	 * updating the client player if needsUpdate is true
 	 */
-	private void onRemoved(EntityLivingBase entity, boolean needsUpdate) {
+	public void onRemoved(EntityLivingBase entity, boolean needsUpdate) {
 		if (!entity.worldObj.isRemote) {
 			buff.onRemoved(entity, amplifier);
 			if (needsUpdate && entity instanceof EntityPlayer) {

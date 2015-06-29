@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -116,12 +116,9 @@ public class ContainerPedestal extends Container
 	protected boolean mergeItemStack(ItemStack itemstack, int start, int end, boolean backwards)
 	{
 		boolean flag1 = false;
-		int k = start;
+		int k = (backwards ? end - 1 : start);
 		Slot slot;
 		ItemStack itemstack1;
-
-		if (backwards) { k = end - 1; }
-
 		if (itemstack.isStackable()) {
 			while (itemstack.stackSize > 0 && (!backwards && k < end || backwards && k >= start))
 			{
@@ -129,13 +126,13 @@ public class ContainerPedestal extends Container
 				itemstack1 = slot.getStack();
 
 				if (!slot.isItemValid(itemstack)) {
+					k += (backwards ? -1 : 1);
 					continue;
 				}
 
 				if (itemstack1 != null && itemstack1.itemID == itemstack.itemID && (!itemstack.getHasSubtypes() || itemstack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1))
 				{
 					int l = itemstack1.stackSize + itemstack.stackSize;
-
 					if (l <= itemstack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
 						itemstack.stackSize = 0;
 						itemstack1.stackSize = l;
@@ -148,27 +145,18 @@ public class ContainerPedestal extends Container
 						flag1 = true;
 					}
 				}
-
-				if (backwards) { --k; }
-
-				else { ++k; }
+				k += (backwards ? -1 : 1);
 			}
 		}
-
-		if (itemstack.stackSize > 0)
-		{
-			if (backwards) { k = end - 1; }
-
-			else { k = start; }
-
+		if (itemstack.stackSize > 0) {
+			k = (backwards ? end - 1 : start);
 			while (!backwards && k < end || backwards && k >= start) {
 				slot = (Slot) inventorySlots.get(k);
 				itemstack1 = slot.getStack();
-				
 				if (!slot.isItemValid(itemstack)) {
+					k += (backwards ? -1 : 1);
 					continue;
 				}
-
 				if (itemstack1 == null) {
 					int l = itemstack.stackSize;
 
@@ -185,13 +173,9 @@ public class ContainerPedestal extends Container
 						flag1 = true;
 					}
 				}
-
-				if (backwards) { --k; }
-
-				else { ++k; }
+				k += (backwards ? -1 : 1);
 			}
 		}
-
 		return flag1;
 	}
 }

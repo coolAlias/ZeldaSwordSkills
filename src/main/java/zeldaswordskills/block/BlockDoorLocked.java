@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,31 +21,33 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Like normal doors, these always come in a two-block pair, but may only be removed by
- * using the matching Big Key.
- * 
- * Metadata 0x0 to 0x7 are the key type required to open the door, and 0x8 flags top or bottom.
+ * Unbreakable door that can be removed via small key. Bit 8 flags the upper block.
  *
  */
 public class BlockDoorLocked extends Block implements IDungeonBlock
 {
 	@SideOnly(Side.CLIENT)
-	private Icon iconTop;
+	protected Icon iconEmpty;
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconsUpper;
+	protected Icon iconTop;
 	@SideOnly(Side.CLIENT)
-	private Icon[] iconsLower;
+	protected Icon iconUpper;
+	@SideOnly(Side.CLIENT)
+	protected Icon iconLower;
 
 	public BlockDoorLocked(int id, Material material) {
 		super(id, material);
@@ -55,13 +57,13 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
-	public boolean isOpaqueCube() {
-		return false;
+	public int getMobilityFlag() {
+		return 2;
 	}
 
 	@Override
-	public int getMobilityFlag() {
-		return 2;
+	public boolean isOpaqueCube() {
+		return false;
 	}
 
 	@Override
@@ -69,17 +71,33 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 		return y >= 255 ? false : world.doesBlockHaveSolidTopSurface(x, y - 1, z) && super.canPlaceBlockAt(world, x, y, z) && super.canPlaceBlockAt(world, x, y + 1, z);
 	}
 
+	/**
+	 * Return true if the player's held item was succesfully used to unlock this door
+	 */
+	protected boolean canUnlock(EntityPlayer player, int meta) {
+		ItemStack key = player.getHeldItem();
+		if (key != null) {
+			if (key.getItem() == ZSSItems.keySmall) {
+				return PlayerUtils.consumeHeldItem(player, ZSSItems.keySmall, 1);
+			} else if (key.getItem() == ZSSItems.keySkeleton) {
+				key.damageItem(1, player);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if (!world.isRemote) {
-			if (player.getHeldItem() != null && player.getHeldItem().getItem() == ZSSItems.keySkeleton && player.inventory.consumeInventoryItem(ZSSItems.keySkeleton.itemID)) {
+			if (canUnlock(player, world.getBlockMetadata(x, y, z))) {
 				world.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 				world.setBlockToAir(x, y, z);
 			} else {
 				world.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 			}
 		}
-		return false;
+		return false; // returning true here prevents any held item from processing onItemUse
 	}
 
 	@Override
@@ -91,20 +109,25 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
+	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+		return new ItemStack(ZSSItems.doorLockedSmall);
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIcon(int side, int meta) {
-		return (side == 1 ? iconTop : meta > 0x7 ? iconsUpper[meta % 8] : iconsLower[meta % 8]);
+		if ((side == 0 && meta > 0x7) || (side == 1 && meta < 0x8)) {
+			return iconEmpty;
+		}
+		return (meta > 0x7 ? (side == 1 ? iconTop : iconUpper) : (side == 0 ? iconTop : iconLower));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
-		iconTop = register.registerIcon(ModInfo.ID + ":door_locked_top");
-		iconsUpper = new Icon[8];
-		iconsLower = new Icon[8];
-		for (int i = 0; i < 8; ++i) {
-			iconsUpper[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_upper" + i);
-			iconsLower[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_lower" + i);
-		}
+		iconEmpty = register.registerIcon(ModInfo.ID + ":empty");
+		iconTop = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top");
+		iconUpper = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_upper");
+		iconLower = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_lower");
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,6 @@ import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.GuiHandler;
-import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -174,10 +173,7 @@ public class BlockPedestal extends BlockContainer
 	public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side) {
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te instanceof TileEntityPedestal) {
-			ItemStack sword = ((TileEntityPedestal) te).getSword();
-			if (sword != null && sword.getItem() == ZSSItems.swordMaster) {
-				return 15;
-			}
+			return ((TileEntityPedestal) te).getPowerLevel();
 		}
 		return 0;
 	}

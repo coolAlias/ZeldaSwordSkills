@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package zeldaswordskills.entity.projectile;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -69,7 +70,7 @@ public class EntityCyclone extends EntityMobThrowable
 	private List<ItemStack> capturedItems = new ArrayList<ItemStack>();
 	/** Whether this cyclone can destroy blocks */
 	private boolean canGrief = true;
-	
+
 	public EntityCyclone(World world) {
 		super(world);
 		setSize(1.0F, 2.0F);
@@ -119,30 +120,30 @@ public class EntityCyclone extends EntityMobThrowable
 	protected DamageSource getDamageSource() {
 		return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
 	}
-	
+
 	@Override
 	public void applyEntityCollision(Entity entity) {}
-	
+
 	@Override
 	public boolean handleWaterMovement() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean handleLavaMovement() {
 		return false;
 	}
-	
+
 	@Override
 	protected float getGravityVelocity() {
 		return 0.0F;
 	}
-	
+
 	@Override
 	protected float func_70182_d() {
 		return 0.75F;
 	}
-	
+
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -215,7 +216,7 @@ public class EntityCyclone extends EntityMobThrowable
 			}
 		}
 	}
-	
+
 	/**
 	 * Scans for and captures nearby EntityItems
 	 */
@@ -224,12 +225,14 @@ public class EntityCyclone extends EntityMobThrowable
 			double d = Math.max(0.5D, getArea() - 1.0D);
 			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(d, d, d));
 			for (EntityItem item : items) {
-				capturedItems.add(item.getEntityItem());
-				item.setDead();
+				if (item.isEntityAlive()) {
+					capturedItems.add(item.getEntityItem());
+					item.setDead();
+				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Releases all captured drops into the world as dropped items
 	 */
@@ -238,18 +241,18 @@ public class EntityCyclone extends EntityMobThrowable
 			WorldUtils.spawnItemWithRandom(worldObj, stack, posX, posY, posZ);
 		}
 	}
-	
+
 	/**
 	 * Checks for and destroys leaves each update tick
 	 */
 	private void destroyLeaves() {
-		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(worldObj, rand, getArea(), posX, posY, posZ, -1));
-		Iterator iterator;
+		Set<ChunkPosition> affectedBlockPositions = WorldUtils.getAffectedBlocksList(worldObj, rand, getArea(), posX, posY, posZ, -1);
+		Iterator<ChunkPosition> iterator = affectedBlockPositions.iterator();
 		ChunkPosition chunkposition;
 		int i, j, k;
 		iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
-			chunkposition = (ChunkPosition)iterator.next();
+			chunkposition = iterator.next();
 			i = chunkposition.x;
 			j = chunkposition.y;
 			k = chunkposition.z;
@@ -259,17 +262,17 @@ public class EntityCyclone extends EntityMobThrowable
 			}
 		}
 	}
-	
+
 	/** Updates the cyclone swirling angles and spawns a new ring of particles. */
 	@SideOnly(Side.CLIENT)
 	private void spawnParticleRing() {
 		yaw += yawVelocity;
 		if (yaw > 2*Math.PI)
 			yaw -= 2*Math.PI;
-		
+
 		if (Math.random() < 0.1) {
 			//if (pitchVelocity < 0.01)
-				pitchVelocity = 0.2f;
+			pitchVelocity = 0.2f;
 		}
 		pitch += pitchVelocity;
 		if (pitch > maxPitch)
@@ -284,18 +287,18 @@ public class EntityCyclone extends EntityMobThrowable
 		} else {
 			pitch = 0;
 		}
-		
+
 		// This was left from when Cyclone had a predetermined duration in Dota 2 Items:
 		/*if (duration - elapsed < 0.5f && alpha > 0) {
 			alpha -= 0.05f;
 		}*/
 		//TODO: when destroying the cyclone, set the particles to start fading
-		
+
 		EffectRenderer effectRenderer = Minecraft.getMinecraft().effectRenderer;
 		FXCycloneRing ring = new FXCycloneRing(worldObj, posX, posY + 0.1D, posZ, motionX, motionY, motionZ, yaw, pitch, 0.7f, effectRenderer);
 		effectRenderer.addEffect(ring);
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);

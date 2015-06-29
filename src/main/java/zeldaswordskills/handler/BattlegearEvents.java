@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import mods.battlegear2.api.quiver.IArrowContainer2;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
 import mods.battlegear2.enchantments.BaseEnchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.ForgeSubscribe;
@@ -40,9 +41,16 @@ public class BattlegearEvents {
 	@ForgeSubscribe
 	public void onBlocked(ShieldBlockEvent event) {
 		if (event.shield.getItem() instanceof ItemZeldaShield) {
-			((ItemZeldaShield) event.shield.getItem()).onBlock(event.entityPlayer, event.shield, event.source, event.ammount);
+			float damageRemaining = ((ItemZeldaShield) event.shield.getItem()).onBlock(event.entityPlayer, event.shield, event.source, event.ammount);
 			event.performAnimation = false;
 			event.damageShield = false;
+			// Hack to allow remaining damage to go through (BG2 cancels the hurt event):
+			if (damageRemaining > 0.0F) {
+				damageRemaining = DirtyEntityAccessor.getModifiedDamage(event.entityPlayer, event.source, damageRemaining);
+				if (damageRemaining > 0.0F) {
+					DirtyEntityAccessor.damageEntity(event.entityPlayer, event.source, damageRemaining);
+				}
+			}
 		}
 	}
 

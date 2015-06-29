@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -60,6 +60,9 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 
 	/** Watchable object index for target entity's id */
 	private static final int TARGET_DATAWATCHER_INDEX = 24;
+
+	/** Shooter's name, if shooter is a player - based on EntityThrowable's code */
+	private String shooterName = null;
 
 	/** Private fields from EntityArrow are now protected instead */
 	protected int xTile = -1, yTile = -1, zTile = -1, inTile, inData;
@@ -129,6 +132,16 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	public void setHomingArrow(boolean isHoming) {
 		dataWatcher.updateObject(HOMING_DATAWATCHER_INDEX, Byte.valueOf((byte)(isHoming ? 1 : 0)));
+	}
+
+	/**
+	 * Returns the shootingEntity, or if null, tries to get the shooting player from the world based on shooterName, if available
+	 */
+	public Entity getShooter() {
+		if (shootingEntity == null && shooterName != null) {
+			shootingEntity = worldObj.getPlayerEntityByName(shooterName);
+		}
+		return shootingEntity;
 	}
 
 	/**
@@ -392,31 +405,32 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	protected void onImpactEntity(MovingObjectPosition mop) {
 		if (mop.entityHit != null) {
-			int dmg = calculateDamage(mop.entityHit);
-			if (isBurning() && canTargetEntity(mop.entityHit)) {
-				mop.entityHit.setFire(5);
-			}
-
-			if (mop.entityHit.attackEntityFrom(getDamageSource(mop.entityHit), (float) dmg)) {
-				if (mop.entityHit instanceof EntityLivingBase) {
-					handlePostDamageEffects((EntityLivingBase) mop.entityHit);
-
-					if (shootingEntity instanceof EntityPlayerMP && mop.entityHit != shootingEntity && mop.entityHit instanceof EntityPlayer) {
-						((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(6, 0));
+			// make sure shootingEntity is correct, e.g. if loaded from NBT
+			shootingEntity = getShooter();
+			float dmg = calculateDamage(mop.entityHit);
+			if (dmg > 0) {
+				if (isBurning() && canTargetEntity(mop.entityHit)) {
+					mop.entityHit.setFire(5);
+				}
+				if (mop.entityHit.attackEntityFrom(getDamageSource(mop.entityHit), dmg)) {
+					if (mop.entityHit instanceof EntityLivingBase) {
+						handlePostDamageEffects((EntityLivingBase) mop.entityHit);
+						if (shootingEntity instanceof EntityPlayerMP && mop.entityHit != shootingEntity && mop.entityHit instanceof EntityPlayer) {
+							((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(6, 0));
+						}
 					}
+					playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+					if (canTargetEntity(mop.entityHit)) {
+						setDead();
+					}
+				} else {
+					motionX *= -0.10000000149011612D;
+					motionY *= -0.10000000149011612D;
+					motionZ *= -0.10000000149011612D;
+					rotationYaw += 180.0F;
+					prevRotationYaw += 180.0F;
+					ticksInAir = 0;
 				}
-
-				playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-				if (canTargetEntity(mop.entityHit)) {
-					setDead();
-				}
-			} else {
-				motionX *= -0.10000000149011612D;
-				motionY *= -0.10000000149011612D;
-				motionZ *= -0.10000000149011612D;
-				rotationYaw += 180.0F;
-				prevRotationYaw += 180.0F;
-				ticksInAir = 0;
 			}
 		}
 	}
@@ -450,11 +464,11 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	/**
 	 * Returns amount of damage arrow will inflict to entity impacted
 	 */
-	protected int calculateDamage(Entity entityHit) {
+	protected float calculateDamage(Entity entityHit) {
 		float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-		int dmg = MathHelper.ceiling_double_int((double) velocity * getDamage());
+		float dmg = (float)(velocity * getDamage());
 		if (getIsCritical()) {
-			dmg += rand.nextInt(dmg / 2 + 2);
+			dmg += rand.nextInt(MathHelper.ceiling_double_int(dmg) / 2 + 2);
 		}
 		return dmg;
 	}
@@ -495,6 +509,10 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		compound.setByte("pickup", (byte) canBePickedUp);
 		compound.setDouble("damage", getDamage());
 		compound.setInteger("arrowId", arrowItemId);
+		if ((shooterName == null || shooterName.length() == 0) && shootingEntity instanceof EntityPlayer) {
+			shooterName = ((EntityPlayer) shootingEntity).getCommandSenderName();
+		}
+		compound.setString("shooter", shooterName == null ? "" : shooterName);
 		compound.setInteger("target", getTarget() != null ? getTarget().entityId : -1);
 	}
 
@@ -513,6 +531,10 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		setDamage(compound.getDouble("damage"));
 		canBePickedUp = compound.getByte("pickup");
 		arrowItemId = (compound.hasKey("arrowId") ? compound.getInteger("arrowId") : Item.arrow.itemID);
+		shooterName = compound.getString("shooter");
+		if (shooterName != null && shooterName.length() == 0) {
+			shooterName = null;
+		}
 		dataWatcher.updateObject(TARGET_DATAWATCHER_INDEX, compound.hasKey("target") ? compound.getInteger("target") : -1);
 	}
 

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 public interface ISpawnParticles {
-	
+
 	/**
 	 * Method that is called on each client world upon receiving an ISpawnParticlesPacket
 	 * Any particles to be spawned should be spawned from this method.
@@ -45,6 +45,6 @@ public interface ISpawnParticles {
 	 * @param lookVector the normalized look vector from the original player who caused the particles
 	 */
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector);
+	void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector);
 
 }

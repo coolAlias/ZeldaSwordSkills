@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,12 +27,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityLeapingBlow;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
@@ -116,13 +117,13 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return !isActive() && !player.onGround && PlayerUtils.isUsingItem(player);
+		return !isActive() && !player.onGround && PlayerUtils.isBlocking(player) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
@@ -160,7 +161,7 @@ public class LeapingBlow extends SkillActive
 	 * @param distance distance fallen, passed from Forge fall Event
 	 */
 	public void onImpact(EntityPlayer player, float distance) {
-		SwordBasic swordSkill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
+		SwordBasic swordSkill = (SwordBasic) ZSSPlayerSkills.get(player).getPlayerSkill(swordBasic);
 		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isHoldingSword(player)) {
 			if (player.worldObj.isRemote) {
 				if (distance < 1.0F) {

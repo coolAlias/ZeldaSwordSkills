@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,8 @@ public interface IEntityVariant {
 	/**
 	 * Sets the Entity's sub-type, where type is often the ordinal value of an Enum set;
 	 * in such cases, it's best to get the Enum type and pass that to another setter method.
+	 * @param type	The damage value of the ItemStack, denoting the mob's type
 	 */
-	public void setType(int type);
+	IEntityVariant setType(int type);
+
 }

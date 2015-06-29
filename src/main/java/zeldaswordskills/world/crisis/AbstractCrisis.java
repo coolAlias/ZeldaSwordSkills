@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ public abstract class AbstractCrisis
 {
 	/** Event timer; when it reaches zero, the crisis is finished */
 	protected int eventTimer = 0;
+
 	/** Crisis update tick will be called when eventTimer reaches this value */
 	protected int nextTick = 0;
 

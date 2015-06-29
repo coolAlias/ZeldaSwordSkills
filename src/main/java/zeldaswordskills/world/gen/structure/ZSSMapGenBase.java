@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ public abstract class ZSSMapGenBase
 	 * generation, the structure generator can avoid generating structures that intersect ones that have already been
 	 * placed. Each chunk coordinate pair key returns a list of bounding boxes.
 	 */
-	protected Map structureMap = new HashMap();
+	protected Map<Long, Object> structureMap = new HashMap<Long, Object>();
 
 	/** This world object. */
 	protected World worldObj;
@@ -78,14 +78,12 @@ public abstract class ZSSMapGenBase
 	protected final void loadOrCreateData(World world) {
 		if (roomData == null) {
 			roomData = (RoomGenData) world.perWorldStorage.loadData(RoomGenData.class, getTagName());
-
 			if (roomData == null) {
 				roomData = new RoomGenData(getTagName());
 				world.perWorldStorage.setData(getTagName(), roomData);
 			} else {
 				NBTTagCompound compound = roomData.getRoomData();
 				Iterator iterator = compound.getTags().iterator();
-
 				while (iterator.hasNext()) {
 					NBTBase nbtbase = (NBTBase) iterator.next();
 					if (nbtbase.getId() == 10) {

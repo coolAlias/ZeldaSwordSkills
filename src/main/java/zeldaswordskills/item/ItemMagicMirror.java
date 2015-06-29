@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
@@ -39,7 +38,9 @@ import net.minecraft.world.WorldServer;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
+import zeldaswordskills.world.TeleporterNoPortal;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -53,24 +54,29 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemMagicMirror extends Item
 {
+	/** Ticks required to be in use before effect will occur */
+	private static final int USE_TIME = 140;
+
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
 
 	public ItemMagicMirror(int par1) {
 		super(par1);
-		setMaxStackSize(1);
+		setFull3D();
 		setMaxDamage(16);
+		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/**
-	 * Returns time required before mirror's effect occurs
-	 */
 	@Override
-	public int getMaxItemUseDuration(ItemStack stack) { return 140; }
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return USE_TIME;
+	}
 
 	@Override
-	public EnumAction getItemUseAction(ItemStack stack) { return EnumAction.block; }
+	public EnumAction getItemUseAction(ItemStack stack) {
+		return EnumAction.block;
+	}
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -79,23 +85,22 @@ public class ItemMagicMirror extends Item
 	}
 
 	@Override
-	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		if (!world.isRemote && ticksRemaining < (getMaxItemUseDuration(stack) / 2)) {
-			switch(player.dimension) {
+	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
+		if (count == 1 && !player.worldObj.isRemote) {
+			switch (player.dimension) {
 			case -1:
-				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, ((WorldServer) world).getDefaultTeleporter());
-				double dy = player.worldObj.getHeightValue(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posZ));
-				player.setPositionAndUpdate(player.posX, dy + 1, player.posZ);
+				((EntityPlayerMP) player).mcServer.getConfigurationManager().transferPlayerToDimension((EntityPlayerMP) player, 0, new TeleporterNoPortal((WorldServer) player.worldObj));
+				TeleporterNoPortal.adjustPosY(player);
 				break;
 			case 0:
 				double[] coordinates = getLastPosition(stack);
-				if (coordinates != null && !TargetUtils.canEntitySeeSky(world, player)) {
+				if (coordinates != null && !TargetUtils.canEntitySeeSky(player.worldObj, player)) {
 					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
 				}
 				break;
 			default: break;
 			}
-
+			stack.damageItem(1, player);
 			stack.damageItem(1, player);
 			if (stack.stackSize == 0 || stack.getItemDamage() == stack.getMaxDamage()) {
 				player.destroyCurrentEquippedItem();
@@ -111,12 +116,12 @@ public class ItemMagicMirror extends Item
 			if (villager.getProfession() == 1 && trades != null) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 8));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;
@@ -134,18 +139,11 @@ public class ItemMagicMirror extends Item
 	@Override
 	@SideOnly(Side.CLIENT)
 	public Icon getIcon(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining) {
-		if (usingItem == null) { return iconArray[0]; }
-		int ticksInUse = stack.getMaxItemUseDuration() - useRemaining;
-
-		if (ticksInUse > getMaxItemUseDuration(stack) / 2) {
-			return iconArray[3];
-		} else if (ticksInUse > getMaxItemUseDuration(stack) / 3) {
-			return iconArray[2];
-		} else if (ticksInUse > getMaxItemUseDuration(stack) / 7) {
-			return iconArray[1];
-		} else {
+		if (!player.isUsingItem()) {
 			return iconArray[0];
 		}
+		int i = (useRemaining < 30 ? 3 : useRemaining < 70 ? 2 : useRemaining < 110 ? 1 : 0);
+		return iconArray[i];
 	}
 
 	@Override

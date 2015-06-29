@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -105,7 +105,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			for (int j = room.chunkZ - range; j <= room.chunkZ + range; ++j) {
 				if (structureMap.containsKey(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)))) {
 					BossType type = ((RoomBoss) room).getBossType();
-					if (type != null && type.ordinal() == getBossTypeFor(i, j)) {
+					if (type != null && (Config.areBossDungeonsRandom() || type.ordinal() == getBossTypeFor(i, j))) {
 						//LogHelper.log(Level.INFO, "Boss room of same type found within " + range + " chunks of " + room.chunkX + "/" + room.chunkZ);
 						return true;
 					} else if (((room.chunkX - i) * (room.chunkX - i) + (room.chunkZ - j) * (room.chunkZ - j)) < (range * range) / 2) {

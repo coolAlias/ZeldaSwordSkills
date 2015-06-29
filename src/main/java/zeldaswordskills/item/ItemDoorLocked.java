@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,17 +17,12 @@
 
 package zeldaswordskills.item;
 
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
 import net.minecraft.world.World;
-import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
@@ -40,14 +35,14 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemDoorLocked extends Item
 {
-	@SideOnly(Side.CLIENT)
-	private Icon[] iconArray;
+	private final Block doorBlock;
 
-	public ItemDoorLocked(int id) {
+	public ItemDoorLocked(int id, Block block) {
 		super(id);
+		this.doorBlock = block;
 		setMaxDamage(0);
 		setHasSubtypes(true);
-		setCreativeTab(ZSSCreativeTabs.tabBlocks);
+		setCreativeTab(ZSSCreativeTabs.tabKeys);
 	}
 
 	@Override
@@ -56,12 +51,11 @@ public class ItemDoorLocked extends Item
 			return false;
 		} else {
 			++y;
-			Block block = ZSSBlocks.doorLocked;
 			if (player.canPlayerEdit(x, y, z, side, stack) && player.canPlayerEdit(x, y + 1, z, side, stack)) {
-				if (!block.canPlaceBlockAt(world, x, y, z)) {
+				if (!doorBlock.canPlaceBlockAt(world, x, y, z)) {
 					return false;
 				} else {
-					placeDoorBlock(world, x, y, z, stack.getItemDamage(), block);
+					placeDoorBlock(world, x, y, z, stack.getItemDamage());
 					--stack.stackSize;
 					return true;
 				}
@@ -70,37 +64,21 @@ public class ItemDoorLocked extends Item
 			}
 		}
 	}
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tab, List list) {
-		for (int i = 0; i < 8; ++i) {
-			list.add(new ItemStack(itemID, 1, i));
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
-		return iconArray[par1 % 8];
-	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {
-		iconArray = new Icon[8];
-		for (int i = 0; i < iconArray.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9).toLowerCase() + i);
-		}
+		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
 	}
 
 	/**
 	 * Places first the bottom then the top block with correct metadata values
 	 */
-	public static void placeDoorBlock(World world, int x, int y, int z, int meta, Block block) {
-		world.setBlock(x, y, z, block.blockID, meta, 2);
-		world.setBlock(x, y + 1, z, block.blockID, meta | 0x8, 2);
-		world.notifyBlocksOfNeighborChange(x, y, z, block.blockID);
-		world.notifyBlocksOfNeighborChange(x, y + 1, z, block.blockID);
+	private void placeDoorBlock(World world, int x, int y, int z, int meta) {
+		meta &= 0x7;
+		world.setBlock(x, y, z, doorBlock.blockID, meta, 2);
+		world.setBlock(x, y + 1, z, doorBlock.blockID, meta | 0x8, 2);
+		world.notifyBlocksOfNeighborChange(x, y, z, doorBlock.blockID);
+		world.notifyBlocksOfNeighborChange(x, y + 1, z, doorBlock.blockID);
 	}
 }

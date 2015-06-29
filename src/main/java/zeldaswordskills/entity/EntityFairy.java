@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -137,16 +137,22 @@ public class EntityFairy extends EntityAmbientCreature
 	protected boolean interact(EntityPlayer player) {
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.itemID == Item.glassBottle.itemID) {
-			player.triggerAchievement(ZSSAchievements.fairyCatcher);
-			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.fairyBottle));
-			if (stack.stackSize > 1) {
-				stack.splitStack(1);
-				if (!player.inventory.addItemStackToInventory(stack)) {
-					player.worldObj.spawnEntityInWorld(new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, stack));
+			if (!worldObj.isRemote) { 
+				player.triggerAchievement(ZSSAchievements.fairyCatcher);
+				ItemStack fairyBottle = new ItemStack(ZSSItems.fairyBottle);
+				if (hasCustomNameTag()) {
+					fairyBottle.setItemName(getCustomNameTag());
 				}
+				player.setCurrentItemOrArmor(0, fairyBottle);
+				if (stack.stackSize > 1) {
+					stack.splitStack(1);
+					if (!player.inventory.addItemStackToInventory(stack)) {
+						player.worldObj.spawnEntityInWorld(new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, stack));
+					}
+				}
+				worldObj.playSoundAtEntity(player, Sounds.CORK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				setDead();
 			}
-			worldObj.playSoundAtEntity(player, Sounds.CORK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
-			setDead();
 			return true;
 		} else {
 			return false;
@@ -157,7 +163,7 @@ public class EntityFairy extends EntityAmbientCreature
 	public void onUpdate() {
 		super.onUpdate();
 		motionY *= 0.6000000238418579D;
-		if (!worldObj.isRemote) {
+		if (!worldObj.isRemote && canDespawn()) {
 			if (worldObj.provider.dimensionId == -1 && ticksExisted > 60) {
 				// TODO terrible scream sound
 				setDead();
@@ -200,6 +206,7 @@ public class EntityFairy extends EntityAmbientCreature
 		rotationYaw += f1;
 	}
 
+	@Override
 	@SideOnly(Side.CLIENT)
 	public int getBrightnessForRender(float par1) {
 		int i = super.getBrightnessForRender(par1);
@@ -209,6 +216,7 @@ public class EntityFairy extends EntityAmbientCreature
 		return j | k << 16;
 	}
 
+	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setBoolean("hasHome", home != null);
@@ -217,6 +225,7 @@ public class EntityFairy extends EntityAmbientCreature
 		}
 	}
 
+	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		if (compound.getBoolean("hasHome")) {

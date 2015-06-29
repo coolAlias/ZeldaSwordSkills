@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,14 @@ public abstract class AbstractInventory implements IInventory
 	protected ItemStack[] inventory;
 
 	@Override
-	public int getSizeInventory() { return inventory.length; }
+	public int getSizeInventory() {
+		return inventory.length;
+	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot) { return inventory[slot]; }
+	public ItemStack getStackInSlot(int slot) {
+		return inventory[slot];
+	}
 
 	@Override
 	public ItemStack decrStackSize(int slot, int amount) {

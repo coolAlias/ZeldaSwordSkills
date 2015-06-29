@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,6 @@ import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
@@ -51,6 +50,7 @@ import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
@@ -64,15 +64,18 @@ import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.api.item.ILiftBlock;
 import zeldaswordskills.api.item.ISmashBlock;
+import zeldaswordskills.block.IGrowable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityKeese;
-import zeldaswordskills.entity.EntityOctorok;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.UnpressKeyPacket;
+import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -89,6 +92,12 @@ public class ZSSItemEvents
 {
 	/** Mapping of mobs to skill orb drops */
 	private static final Map<Class<? extends EntityLivingBase>, ItemStack> dropsList = new HashMap<Class<? extends EntityLivingBase>, ItemStack>();
+
+	public ZSSItemEvents() {
+		if (dropsList.isEmpty()) {
+			ZSSItemEvents.init();
+		}
+	}
 
 	/** Adds a mob-class to skill orb mapping */
 	private static void addDrop(Class<? extends EntityLivingBase> mobClass, SkillBase skill) {
@@ -121,12 +130,13 @@ public class ZSSItemEvents
 			EntityPlayer player = (EntityPlayer) event.source.getEntity();
 			EntityLivingBase mob = event.entityLiving;
 			boolean isBoss = mob instanceof IBossDisplayData;
-			boolean flag = ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.mortalDraw) == SkillBase.mortalDraw.getMaxLevel();
+			boolean flag = ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.mortalDraw) == SkillBase.mortalDraw.getMaxLevel();
 			ItemStack orb = (isBoss && !flag ? new ItemStack(ZSSItems.skillOrb,1,SkillBase.mortalDraw.getId()) : getOrbDrop(mob, isBoss));
 			if (orb != null && Config.areOrbDropsEnabled()) {
 				ItemStack helm = (player).getCurrentArmor(ArmorIndex.WORN_HELM);
 				float f = (helm != null && helm.getItem() == ZSSItems.maskTruth ? 0.01F : 0.0F);
-				if (isBoss || mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel))) {
+				float baseChance = Config.getDropChance(orb.getItem() == ZSSItems.heartPiece ? SkillBase.bonusHeart.getId() : orb.getItemDamage());
+				if (baseChance > 0.0F && (isBoss || mob.worldObj.rand.nextFloat() < (Config.getDropChance(orb.getItemDamage()) + f + (0.005F * event.lootingLevel)))) {
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, orb.copy()));
 					mob.worldObj.playSoundEffect(mob.posX, mob.posY, mob.posZ, Sounds.SPECIAL_DROP, 1.0F, 1.0F);
 					player.triggerAchievement(ZSSAchievements.skillGain);
@@ -160,6 +170,17 @@ public class ZSSItemEvents
 					event.drops.add(new ItemStack(ZSSItems.masterOre));
 					event.harvester.worldObj.playSoundEffect(event.harvester.posX, event.harvester.posY, event.harvester.posZ, Sounds.SPECIAL_DROP, 1.0F, 1.0F);
 				}
+			}
+		}
+	}
+
+	@ForgeSubscribe
+	public void onApplyBonemeal(BonemealEvent event) {
+		Block block = (event.ID > 0 ? Block.blocksList[event.ID]: null);
+		if (block instanceof IGrowable) {
+			event.setResult(((IGrowable) block).applyBonemeal(event.world, event.X, event.Y, event.Z));
+			if (event.getResult() == Result.DENY) {
+				event.setCanceled(true);
 			}
 		}
 	}
@@ -217,8 +238,10 @@ public class ZSSItemEvents
 		case LEFT_CLICK_BLOCK:
 			if (stack != null && stack.getItem() instanceof ISmashBlock && event.entityPlayer.attackTime == 0) {
 				if (blockWasSmashed(event.entityPlayer.worldObj, event.entityPlayer, stack, event.x, event.y, event.z, event.face)) {
-					ZSSCombatEvents.setPlayerAttackTime(event.entityPlayer);
-					PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) event.entityPlayer);
+					if (event.entityPlayer instanceof Player) {
+						ZSSCombatEvents.setPlayerAttackTime(event.entityPlayer);
+						PacketDispatcher.sendPacketToPlayer(new UnpressKeyPacket(UnpressKeyPacket.LMB).makePacket(), (Player) event.entityPlayer);
+					}
 					event.useBlock = Result.DENY;
 				}
 			}
@@ -245,23 +268,23 @@ public class ZSSItemEvents
 			int meta = world.getBlockMetadata(x, y, z);
 			boolean isLiftable = block instanceof ILiftable;
 			boolean isValidBlock = block.isOpaqueCube() || block instanceof BlockBreakable;
-			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta)
+			BlockWeight weight = (isLiftable ? ((ILiftable) block).getLiftWeight(player, stack, meta, side)
 					: (Config.canLiftVanilla() ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
 			if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (isLiftable || !block.hasTileEntity(meta))) {
-				// make a copy for ILiftable#onLifted
-				ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack.copy(), block, meta);
-				if (returnStack != null && returnStack.stackSize <= 0) {
-					returnStack = null;
-				}
 				if (!world.isRemote) {
-					player.setCurrentItemOrArmor(0, ItemHeldBlock.getBlockStack(block, meta, returnStack));
+					ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack, block, meta);
+					if (returnStack != null && returnStack.stackSize <= 0) {
+						returnStack = null;
+					}
+					ItemStack heldBlock = ItemHeldBlock.getBlockStack(block, meta, returnStack);
+					if (isLiftable) {
+						((ILiftable) block).onLifted(world, player, heldBlock, x, y, z, meta);
+					}
+					player.setCurrentItemOrArmor(0, heldBlock);
 					world.playSoundEffect((double)(x + 0.5D), (double)(y + 0.5D), (double)(z + 0.5D),
 							block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
-					if (isLiftable) {
-						((ILiftable) block).onLifted(world, player, stack, x, y, z, meta);
-					}
 					world.setBlockToAir(x, y, z);
 				}
 				return true;
@@ -284,7 +307,7 @@ public class ZSSItemEvents
 		if (id > 0 && (player.canPlayerEdit(x, y, z, side, stack) || isSmashable)) {
 			Block block = Block.blocksList[id];
 			int meta = world.getBlockMetadata(x, y, z);
-			BlockWeight weight = (isSmashable ? ((ISmashable) block).getSmashWeight(player, stack, meta)
+			BlockWeight weight = (isSmashable ? ((ISmashable) block).getSmashWeight(player, stack, meta, side)
 					: (Config.canSmashVanilla() || isVanillaBlockSmashable(block) ? null : BlockWeight.IMPOSSIBLE));
 			float strength = ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, block, meta).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(null, world, x, y, z, x, y, z) * 5.0F/3.0F));
@@ -295,7 +318,9 @@ public class ZSSItemEvents
 					if (!(block instanceof BlockBreakable)) {
 						world.playSoundAtEntity(player, Sounds.ROCK_FALL, 1.0F, 1.0F);
 					}
-					world.destroyBlock(x, y, z, false);
+					if (!world.isRemote) {
+						world.destroyBlock(x, y, z, false);
+					}
 					wasDestroyed = true;
 				}
 			}
@@ -308,24 +333,25 @@ public class ZSSItemEvents
 		return block.blockMaterial == Material.glass || block.blockMaterial == Material.ice;
 	}
 
-	public static void load() {
-		addDrop(EntityZombie.class, SkillBase.swordBasic);
-		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
-		addDrop(EntityEnderman.class, SkillBase.dodge);
-		addDrop(EntityKeese.class, SkillBase.dodge);
+	private static void init() {
+		addDrop(EntityCreeper.class, SkillBase.armorBreak);
+		addDrop(EntityIronGolem.class, SkillBase.armorBreak);
 		addDrop(EntitySilverfish.class, SkillBase.dash);
 		addDrop(EntityHorse.class, SkillBase.dash);
-		addDrop(EntityPigZombie.class, SkillBase.parry);
-		addDrop(EntityOcelot.class, SkillBase.parry);
+		addDrop(EntityEnderman.class, SkillBase.dodge);
+		addDrop(EntityKeese.class, SkillBase.dodge);
 		addDrop(EntitySpider.class, SkillBase.endingBlow);
 		addDrop(EntityCaveSpider.class, SkillBase.leapingBlow);
 		addDrop(EntityMagmaCube.class, SkillBase.leapingBlow);
+		addDrop(EntityPigZombie.class, SkillBase.parry);
+		addDrop(EntityOcelot.class, SkillBase.parry);
+		addDrop(EntityOctorok.class, SkillBase.risingCut);
 		addDrop(EntityBlaze.class, SkillBase.spinAttack);
-		addDrop(EntityBat.class, SkillBase.spinAttack);
-		addDrop(EntityCreeper.class, SkillBase.armorBreak);
-		addDrop(EntityIronGolem.class, SkillBase.armorBreak);
+		addDrop(EntityDarknut.class, SkillBase.spinAttack);
+		addDrop(EntityZombie.class, SkillBase.swordBasic);
+		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
 		addDrop(EntityGhast.class, SkillBase.swordBeam);
 		addDrop(EntityWitch.class, SkillBase.swordBeam);
-		addDrop(EntityOctorok.class, SkillBase.risingCut);
+		addDrop(EntityWizzrobe.class, SkillBase.swordBreak);
 	}
 }

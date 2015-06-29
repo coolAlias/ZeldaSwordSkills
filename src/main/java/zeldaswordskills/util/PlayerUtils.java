@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,17 +17,25 @@
 
 package zeldaswordskills.util;
 
+import java.util.UUID;
+
 import mods.battlegear2.api.core.IBattlePlayer;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.network.packet.Packet103SetSlot;
+import net.minecraft.util.StatCollector;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.ISkillItem;
 import zeldaswordskills.api.item.ISword;
 import zeldaswordskills.item.ItemZeldaSword;
-import zeldaswordskills.network.PlaySoundPacket;
+import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 
@@ -38,16 +46,29 @@ import cpw.mods.fml.common.network.Player;
  */
 public class PlayerUtils
 {
+	/** Copy of Item#field_111210_e which is the UUID used to store weapon damage modifiers */
+	public static final UUID itemDamageUUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
+
 	/**
-	 * Returns whether the player is using an item, accounting for possibility of Battlegear2 offhand item use
+	 * Returns whether the player is blocking with the currently held item, accounting for possibility of Battlegear2 offhand shield use
 	 */
-	public static boolean isUsingItem(EntityPlayer player) {
-		if (player.isUsingItem()) {
+	public static boolean isBlocking(EntityPlayer player) {
+		ItemStack stack = player.getHeldItem();
+		if (stack != null && player.isUsingItem() && stack.getItem().getItemUseAction(stack) == EnumAction.block) {
 			return true;
 		} else if (ZSSMain.isBG2Enabled) {
 			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
 		}
 		return false;
+	}
+
+	/**
+	 * Returns true if the player is holding any type of item which grants a damage bonus,
+	 * including from tools such as axes, shovels, etc.
+	 */
+	public static boolean isHoldingWeapon(EntityPlayer player) {
+		AttributeModifier itemDamage = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.attackDamage).getModifier(itemDamageUUID);
+		return itemDamage != null && itemDamage.getAmount() > 0;
 	}
 
 	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} */
@@ -139,6 +160,43 @@ public class PlayerUtils
 	}
 
 	/**
+	 * Attempts to consume the amount given from the player's held item stack only;
+	 * does not check stack damage. In Creative, acts like hasItem (does not consume).
+	 */
+	public static boolean consumeHeldItem(EntityPlayer player, Item item, int amount) {
+		return consumeHeldItem(player, item, -1, amount);
+	}
+
+	/**
+	 * Attempts to consume the amount given from the player's held item stack only.
+	 * In Creative, acts like hasItem (does not consume).
+	 * @param damage Required stack damage to match, or -1 to not check damage
+	 */
+	public static boolean consumeHeldItem(EntityPlayer player, Item item, int damage, int amount) {
+		if (amount < 1) {
+			return false;
+		}
+		ItemStack stack = player.getHeldItem();
+		if (stack == null || stack.getItem() != item || stack.stackSize < amount) {
+			return false;
+		} else if (damage > -1 && stack.getItemDamage() != damage) {
+			return false;
+		} else if (player.capabilities.isCreativeMode) {
+			return true;
+		} else {
+			stack.stackSize -= amount;
+			if (stack.stackSize < 1) {
+				stack = null;
+				player.setCurrentItemOrArmor(0, null);
+			}
+			if (player instanceof Player) {
+				PacketDispatcher.sendPacketToPlayer(new Packet103SetSlot(player.openContainer.windowId, player.inventory.currentItem, stack), (Player) player);
+			}
+			return true;
+		}
+	}
+
+	/**
 	 * Returns true if the required number of item were removed from the player's inventory;
 	 * if the entire quantity is not present, then no items are removed.
 	 */
@@ -155,32 +213,62 @@ public class PlayerUtils
 
 	/**
 	 * A metadata-sensitive version of {@link InventoryPlayer#consumeInventoryItem(int)}
+	 * In Creative, acts like hasItem (does not consume).
 	 * @param item	The type of item to consume
 	 * @param meta	The required damage value of the stack
 	 * @param required	The number of such items to consume
 	 * @return	True if the entire amount was consumed; if this is not possible, no items are consumed and it returns false
 	 */
 	public static boolean consumeInventoryItem(EntityPlayer player, Item item, int meta, int required) {
+		if (required < 1) {
+			return false;
+		}
 		// decremented until it reaches zero, meaning the entire required amount was consumed
 		int consumed = required;
 		for (int i = 0; i < player.inventory.getSizeInventory() && consumed > 0; ++i) {
 			ItemStack invStack = player.inventory.getStackInSlot(i);
 			if (invStack != null && invStack.getItem() == item && invStack.getItemDamage() == meta) {
+				Slot slot = player.openContainer.getSlotFromInventory(player.inventory, i);
 				if (invStack.stackSize <= consumed) {
 					consumed -= invStack.stackSize;
-					player.inventory.setInventorySlotContents(i, null);
+					if (!player.capabilities.isCreativeMode) {
+						player.inventory.setInventorySlotContents(i, null);
+						if (player instanceof Player) {
+							PacketDispatcher.sendPacketToPlayer(new Packet103SetSlot(player.openContainer.windowId, slot.slotNumber, null), (Player) player);
+						}
+					}
 				} else {
-					player.inventory.setInventorySlotContents(i, invStack.splitStack(invStack.stackSize - consumed));
+					if (!player.capabilities.isCreativeMode) {
+						invStack = invStack.splitStack(invStack.stackSize - consumed);
+						player.inventory.setInventorySlotContents(i, invStack);
+						if (player instanceof Player) {
+							PacketDispatcher.sendPacketToPlayer(new Packet103SetSlot(player.openContainer.windowId, slot.slotNumber, invStack), (Player) player);
+						}
+					}
 					consumed = 0;
-					break;
 				}
 			}
 		}
-		if (consumed > 0) {
+		if (consumed > 0 && !player.capabilities.isCreativeMode) {
 			player.inventory.addItemStackToInventory(new ItemStack(item, required - consumed, meta));
 		}
 
 		return consumed == 0;
+	}
+
+	/** Sends a pre-translated chat message to the player */
+	public static void sendChat(EntityPlayer player, String message) {
+		player.addChatMessage(message);
+	}
+
+	/** Sends a translated chat message to the player */
+	public static void sendTranslatedChat(EntityPlayer player, String message) {
+		sendChat(player, StatCollector.translateToLocal(message));
+	}
+
+	/** Sends a formatted, translated chat message to the player */
+	public static void sendFormattedChat(EntityPlayer player, String message, Object... args) {
+		sendChat(player, StatCollector.translateToLocalFormatted(message, args));
 	}
 
 	/**

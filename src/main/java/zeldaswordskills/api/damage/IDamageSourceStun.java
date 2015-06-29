@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,10 +25,14 @@ package zeldaswordskills.api.damage;
  */
 public interface IDamageSourceStun extends IPostDamageEffect {
 
-	/** Whether this damage source can stun players */
-	public boolean canStunPlayers();
-	
-	/** Whether this damage source always stuns the target, regardless of immunity or config settings */
-	public boolean alwaysStuns();
+	/**
+	 * Whether this damage source can stun players
+	 */
+	boolean canStunPlayers();
+
+	/**
+	 * Whether this damage source always stuns the target, regardless of immunity or config settings
+	 */
+	boolean alwaysStuns();
 
 }

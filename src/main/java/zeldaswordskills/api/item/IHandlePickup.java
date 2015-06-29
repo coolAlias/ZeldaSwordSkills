@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import net.minecraft.item.ItemStack;
  *
  */
 public interface IHandlePickup {
-	
+
 	/**
 	 * This method is called when the item is picked up; if the stack's size is
 	 * less than the original size after the method is called, the event will be
@@ -34,6 +34,6 @@ public interface IHandlePickup {
 	 * be sent to nearby players
 	 * @return returning false will cancel the event without picking up the item
 	 */
-	public boolean onPickupItem(ItemStack stack, EntityPlayer player);
+	boolean onPickupItem(ItemStack stack, EntityPlayer player);
 
 }

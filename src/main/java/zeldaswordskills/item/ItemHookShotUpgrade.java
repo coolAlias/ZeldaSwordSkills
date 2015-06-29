@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -38,6 +38,7 @@ import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -71,7 +72,7 @@ public class ItemHookShotUpgrade extends Item
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.use.fail.0"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.use.fail.0");
 		}
 		return stack;
 	}
@@ -137,18 +138,17 @@ public class ItemHookShotUpgrade extends Item
 				MerchantRecipe trade = getHookShotTradeFromInventory(stack, player, trades);
 				if (trade != null && trades.size() >= Config.getFriendTradesRequired()) {
 					MerchantRecipeHelper.addUniqueTrade(trades, trade);
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.new.0"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.new.0");
 				} else {
 					trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
-					if (MerchantRecipeHelper.doesListContain(trades, trade) || player.worldObj.rand.nextFloat() < 0.2F) {// && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-						MerchantRecipeHelper.addUniqueTrade(trades, trade);
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+					if (MerchantRecipeHelper.addToListWithCheck(trades, trade) || player.worldObj.rand.nextFloat() < 0.5F) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
 					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 					}
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 	}

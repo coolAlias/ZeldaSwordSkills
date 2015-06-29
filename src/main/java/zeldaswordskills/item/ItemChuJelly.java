@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,8 +34,8 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityChu.ChuType;
 import zeldaswordskills.entity.ZSSVillagerInfo;
+import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
@@ -47,7 +47,7 @@ public class ItemChuJelly extends Item
 {
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
-	
+
 	private static final Map<ChuType, Item> jellyMap = new EnumMap<ChuType, Item>(ChuType.class);
 
 	public ItemChuJelly(int id) {
@@ -56,12 +56,12 @@ public class ItemChuJelly extends Item
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
-	
+
 	/** Safe method for obtaining chu type from the stack, regardless of stack damage value */
 	private ChuType getType(ItemStack stack) {
 		return ChuType.values()[stack.getItemDamage() % ChuType.values().length];
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
@@ -72,7 +72,7 @@ public class ItemChuJelly extends Item
 			entityVillager.playLivingSound();
 			if (villager != null && villager.isChuTrader() && jellyMap.containsKey(type)) {
 				if (villager.getJelliesReceived(type) == 0) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.jelly.first"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.first");
 					villager.addJelly(type, 1);
 					--stack.stackSize;
 				} else if (villager.canSellType(type, stack)) {
@@ -80,20 +80,20 @@ public class ItemChuJelly extends Item
 							new ItemStack(Item.emerald, (type.ordinal() + 1) * 8), new ItemStack(jellyMap.get(type)));
 					if (MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 						player.worldObj.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.jelly.new_stock"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.new_stock");
 						PlayerUtils.addItemToInventory(player, new ItemStack(jellyMap.get(type)));
 					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.jelly.in_stock"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.in_stock");
 					}
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.jelly.need_more"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.need_more");
 				}
 
 				if (stack.stackSize == 0) {
 					player.setCurrentItemOrArmor(0, null);
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.jelly.gross"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.jelly.gross");
 			}
 		}
 		return true;
@@ -126,13 +126,13 @@ public class ItemChuJelly extends Item
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + i);
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.jelly_chu.desc.0"));
 	}
-	
+
 	public static void initializeJellies() {
 		jellyMap.put(ChuType.RED, ZSSItems.potionRed);
 		jellyMap.put(ChuType.GREEN, ZSSItems.potionGreen);

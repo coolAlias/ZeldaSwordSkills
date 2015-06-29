@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package zeldaswordskills.world.crisis;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.lib.Sounds;
@@ -34,6 +35,12 @@ public class OceanBattle extends BossBattle {
 		super.beginCrisis(world);
 		eventTimer = 6000 - (600 * difficulty);
 		scheduleUpdateTick(-(1200 - eventTimer)); // one minute of falling sand
+	}
+
+	@Override
+	protected void endCrisis(World world) {
+		super.endCrisis(world);
+		StructureGenUtils.replaceMaterialWith(world, box.minX + 1, box.maxX, box.minY + 1, box.maxY, box.minZ + 1, box.maxZ, Material.sand, Block.waterStill.blockID, 0);
 	}
 
 	@Override

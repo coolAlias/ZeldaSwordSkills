@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,13 +28,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.entity.BombType;
-import zeldaswordskills.api.item.HookshotType;
 import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
 import cpw.mods.fml.common.registry.VillagerRegistry;
 import cpw.mods.fml.common.registry.VillagerRegistry.IVillageTradeHandler;
 
@@ -67,10 +66,10 @@ public class TradeHandler implements IVillageTradeHandler
 				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.EXTENSION.ordinal()),
 						new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal())));
-		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()),
+		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()),
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.EXTENSION.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal())));
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal())));
 		addTradeToMap(AddonType.EXTENSION, new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal()),
 				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.EXTENSION.ordinal()),
@@ -79,18 +78,18 @@ public class TradeHandler implements IVillageTradeHandler
 		addTradeToMap(AddonType.STONECLAW, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()), 
 				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.STONECLAW.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal())));
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal())));
 		addTradeToMap(AddonType.STONECLAW, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal()),
 				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.STONECLAW.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal())));
+						new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal())));
 
-		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()), 
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT.ordinal()),
+		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()), 
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.MULTI.ordinal()),
 						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal())));
-		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.STONE_SHOT_EXT.ordinal()),
+		addTradeToMap(AddonType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal()),
+				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal()),
 						new ItemStack(ZSSItems.hookshotAddon,1,AddonType.MULTI.ordinal()),
 						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT_EXT.ordinal())));
 
@@ -106,16 +105,8 @@ public class TradeHandler implements IVillageTradeHandler
 			}
 			return;
 		}
-		if (villager.getCustomNameTag().equalsIgnoreCase("Barnes")) {
-			for (BombType bomb : BombType.values()) {
-				addTrade(trades, rand, 1F, new MerchantRecipe(new ItemStack(Item.emerald, 8 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
-			}
-		}
 		switch(EnumVillager.values()[villager.getProfession()]) {
 		case FARMER:
-			if (Config.enableTradeBomb()) {
-				addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 10 + rand.nextInt(6)), new ItemStack(ZSSItems.bomb)));
-			}
 			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 10), new ItemStack(ZSSItems.tunicHeroBoots)));
 			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Item.emerald, 10), new ItemStack(ZSSItems.tunicHeroHelm)));
 			break;
@@ -124,9 +115,6 @@ public class TradeHandler implements IVillageTradeHandler
 		case PRIEST:
 			break;
 		case BLACKSMITH:
-			if (Config.enableTradeBomb()) {
-				addTrade(trades, rand, 0.6F, new MerchantRecipe(new ItemStack(Item.emerald, 5 + rand.nextInt(4)), new ItemStack(Item.gunpowder, 4), new ItemStack(ZSSItems.bomb)));
-			}
 			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Item.emerald, 16), new ItemStack(ZSSItems.swordKokiri)));
 			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Item.emerald, 16), new ItemStack(ZSSItems.shieldDeku)));
 			break;

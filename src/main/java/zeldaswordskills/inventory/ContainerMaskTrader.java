@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.network.BorrowMaskPacket;
+import zeldaswordskills.network.server.BorrowMaskPacket;
 import cpw.mods.fml.common.network.PacketDispatcher;
 
 public class ContainerMaskTrader extends Container

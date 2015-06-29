@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -35,12 +35,13 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
@@ -114,14 +115,14 @@ public class ItemBoomerang extends Item implements IFairyUpgrade, IBattlegearWea
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
-		if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart) >= Config.getMaxBonusHearts() / 2) {
+		if (ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart) >= Config.getMaxBonusHearts() / 2) {
 			item.setDead();
 			player.triggerAchievement(ZSSAchievements.fairyBoomerang);
 			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.boomerangMagic), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 

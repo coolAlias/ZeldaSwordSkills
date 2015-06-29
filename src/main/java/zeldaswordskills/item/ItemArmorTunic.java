@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -46,6 +47,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -98,9 +100,9 @@ public class ItemArmorTunic extends ItemArmor
 			if (stack.getItemDamage() > 0) {
 				MerchantRecipe trade = new MerchantRecipe(new ItemStack(ZSSItems.tunicGoronChest), new ItemStack(Item.emerald, 8), new ItemStack(ZSSItems.tunicGoronChest));
 				MerchantRecipeHelper.addToListWithCheck(((EntityVillager) entity).getRecipes(player), trade);
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.goron.tunic.repair"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.goron.tunic.repair");
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.goron.tunic.undamaged"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.goron.tunic.undamaged");
 			}
 		}
 		return true;
@@ -124,20 +126,21 @@ public class ItemArmorTunic extends ItemArmor
 	public static boolean onFireDamage(EntityLivingBase entity, float damage) {
 		ItemStack stack = entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST);
 		if (!entity.worldObj.isRemote && stack != null && stack.getItem() == ZSSItems.tunicGoronChest) {
-			PotionEffect resist = entity.getActivePotionEffect(Potion.fireResistance);
-			if (resist != null && resist.duration > 0) {
-				return false;
+			if (entity.isPotionActive(Potion.fireResistance.getId())) {
+				return true;
+			}
+			damage *= 1.0F + (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
+			damage *= 1.0F - (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
+			if (damage < 0.1F) {
+				entity.extinguish();
+				return true;
 			}
 			if (!stack.hasTagCompound()) {
 				stack.setTagCompound(new NBTTagCompound());
 			}
 			if (!stack.getTagCompound().hasKey("lastDamaged") || entity.worldObj.getTotalWorldTime() > (stack.getTagCompound().getLong("lastDamaged") + 20)) {
 				stack.getTagCompound().setLong("lastDamaged", entity.worldObj.getTotalWorldTime());
-				damage *= 1.0F + (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
-				damage *= 1.0F - (ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
-				if (damage > 0) {
-					((ItemArmorTunic) stack.getItem()).damageStack(stack, entity, Math.max((int) damage / 4, 1));
-				}
+				((ItemArmorTunic) stack.getItem()).damageStack(stack, entity, Math.max((int) damage / 4, 1));
 				entity.extinguish();
 			}
 
@@ -163,10 +166,17 @@ public class ItemArmorTunic extends ItemArmor
 	private boolean shouldDamageArmor(World world, EntityPlayer player, ItemStack stack, int effectID) {
 		Material m = world.getBlockMaterial((int) player.posX, (int) player.posY + 1, (int) player.posZ);
 		if (effectID == Potion.waterBreathing.id) {
-			return (m == Material.water && world.getWorldTime() % 50 == 0);
-		} else {
-			return false;
+			if (player.isPotionActive(Potion.waterBreathing.getId())) {
+				return false;
+			}
+			ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
+			if (helm != null && helm.getItem() == ZSSItems.maskZora) {
+				return false;
+			}
+			int time = 50 + (50 * EnchantmentHelper.getRespiration(player)) + (helm != null && helm.getItem() == ZSSItems.tunicZoraHelm ? 100 : 0);
+			return (m == Material.water && world.getWorldTime() % time == 0);
 		}
+		return false;
 	}
 
 	@Override
@@ -200,18 +210,9 @@ public class ItemArmorTunic extends ItemArmor
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		if (stack.getItem() == ZSSItems.tunicHeroChest) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.kokiri.desc.0"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.kokiri.desc.1"));
-		} else if (stack.getItem() == ZSSItems.tunicGoronChest) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.goron.desc.0"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.goron.desc.1"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.goron.desc.2"));
-		} else if (stack.getItem() == ZSSItems.tunicZoraChest) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.zora.desc.0"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.zora.desc.1"));
-		} else {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.tunic.generic.desc.0"));
+		String[] tooltips = StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc").split("\\\\n");
+		for (String tooltip : tooltips) {
+			list.add(EnumChatFormatting.ITALIC + tooltip);
 		}
 	}
 }

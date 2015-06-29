@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.entity.CustomEntityList;
 import zeldaswordskills.entity.IEntityVariant;
+import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.LogHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -60,7 +61,7 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 	public String getItemDisplayName(ItemStack stack) {
 		String s = ("" + StatCollector.translateToLocal("item.zss.spawn_egg.name")).trim();
 		if (entityName != null) {
-			s = s + " " + StatCollector.translateToLocal("entity." + entityName + ".name." + stack.getItemDamage());
+			s = s + " " + StatCollector.translateToLocal("entity." + ModInfo.ID + "." + entityName + ".name." + stack.getItemDamage());
 		}
 		return s;
 	}
@@ -76,7 +77,6 @@ public class ItemCustomVariantEgg extends ItemCustomEgg
 	@Override
 	public Entity spawnCreature(World world, int subtype, double x, double y, double z) {
 		Entity entity = null;
-
 		if (CustomEntityList.entityEggs.containsKey(classToSpawn)) {
 			entity = CustomEntityList.createEntity(classToSpawn, world);
 			if (entity instanceof EntityLiving) {

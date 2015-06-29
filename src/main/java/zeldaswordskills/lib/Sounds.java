@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,8 @@ public class Sounds {
 	public static final String GLASS_BREAK = "random.glass";
 	public static final String MOB_ATTACK = "mob.attack";
 	public static final String POP = "random.pop";
+	public static final String SLIME_ATTACK = "mob.slime.attack";
+	public static final String SPLASH = "random.splash";
 	public static final String VILLAGER_DEATH = "mob.villager.death";
 	public static final String VILLAGER_HAGGLE = "mob.villager.haggle";
 	public static final String VILLAGER_HIT = "mob.villager.hit";
@@ -53,11 +55,15 @@ public class Sounds {
 	// 1.7.2 sound: public static final String BOMB_FUSE = ModInfo.ID + ":bomb_fuse";
 	public static final String BOMB_WHISTLE = ModInfo.ID + ":bomb_whistle";
 	public static final String CHU_MERGE = ModInfo.ID + ":chu_merge";
+	public static final String DARKNUT_DIE = ModInfo.ID + ":armor_die";
+	public static final String DARKNUT_HIT = ModInfo.ID + ":armor_hit";
+	public static final String DARKNUT_LIVING = ModInfo.ID + ":armor_move";
 	public static final String FAIRY_BLESSING = ModInfo.ID + ":fairy_blessing";
 	public static final String FAIRY_LAUGH = ModInfo.ID + ":fairy_laugh";
 	public static final String FAIRY_LIVING = ModInfo.ID + ":fairy_living";
 	public static final String FAIRY_SKILL = ModInfo.ID + ":fairy_skill";
 	public static final String SHOCK = ModInfo.ID + ":shock";
+	public static final String WHIP_CRACK = ModInfo.ID + ":whip_crack";
 	public static final String WHIRLWIND = ModInfo.ID + ":whirlwind";
 
 	// PLAYER SOUNDS
@@ -70,6 +76,8 @@ public class Sounds {
 	public static final String MAGIC_FAIL = ModInfo.ID + ":magic_failure";
 	public static final String MAGIC_FIRE = ModInfo.ID + ":magic_fire";
 	public static final String MAGIC_ICE = ModInfo.ID + ":magic_ice";
+	public static final String OCARINA = ModInfo.ID + ":ocarina";
+	public static final String WHIP = ModInfo.ID + ":whip";
 	public static final String WHOOSH = ModInfo.ID + ":whoosh";
 
 	// SPECIAL EVENT SOUNDS

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package zeldaswordskills.block;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -29,12 +30,14 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.Event.Result;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
+import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.Config;
@@ -50,7 +53,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Metadata bit 0x8 flags whether the block is completely indestructible or not
  *
  */
-public class BlockSecretStone extends Block implements IDungeonBlock, IExplodable, ISmashable
+public class BlockSecretStone extends Block implements IDungeonBlock, IExplodable, ILiftable, ISmashable
 {
 	/** List of all currently available secret blocks */
 	public static final String[] names = {"stone","sandstone_normal","nether_brick","stonebrick","cobblestone_mossy","ice","quartz_block_chiseled","end_stone"};
@@ -70,7 +73,24 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
+		return (meta > 7 || !Config.canLiftSecretStone() ? BlockWeight.IMPOSSIBLE : null);
+	}
+
+	@Override
+	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta) {
+		NBTTagCompound tag = stack.getTagCompound();
+		if (tag != null) {
+			tag.setInteger("blockId", BlockSecretStone.getIdFromMeta(meta));
+			tag.setInteger("metadata", 0);
+		}
+	}
+
+	@Override
+	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta) {}
+
+	@Override
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return (meta < 0x8 ? BlockWeight.VERY_HEAVY : BlockWeight.IMPOSSIBLE);
 	}
 
@@ -107,6 +127,13 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	@Override
 	public int idDropped(int meta, Random rand, int fortune) {
 		return getIdFromMeta(meta);
+	}
+
+	@Override
+	public ArrayList<ItemStack> getBlockDropped(World world, int x, int y, int z, int meta, int fortune) {
+		ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
+		drops.add(new ItemStack(idDropped(meta, world.rand, fortune), 1, 0));
+		return drops;
 	}
 
 	@Override
@@ -159,7 +186,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 		case 3: return Block.stoneBrick.blockID;
 		case 4: return Block.cobblestoneMossy.blockID;
 		case 5: return Block.ice.blockID;
-		case 6: return Block.blockNetherQuartz.blockID;
+		case 6: return Block.cobblestone.blockID;
 		case 7: return Block.whiteStone.blockID;
 		default: return 0;
 		}
@@ -170,13 +197,11 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	 */
 	public static int getStairIdFromMeta(int meta) {
 		switch(meta & ~0x8) {
-		case 0: return Block.stairsStoneBrick.blockID;
-		case 4: return Block.stairsCobblestone.blockID;
+		case 0:
+		case 3: return Block.stairsStoneBrick.blockID;
 		case 1: return Block.stairsSandStone.blockID;
 		case 2: return Block.stairsNetherBrick.blockID;
-		case 3: return Block.stairsStoneBrick.blockID;
 		case 5:
-		case 6:
 		case 7: return Block.stairsNetherQuartz.blockID;
 		default: return Block.stairsCobblestone.blockID;
 		}

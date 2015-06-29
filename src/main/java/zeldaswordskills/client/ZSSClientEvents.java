@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -31,12 +31,13 @@ import net.minecraftforge.event.ForgeSubscribe;
 
 import org.lwjgl.opengl.GL11;
 
+import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemHeldBlock;
@@ -46,6 +47,7 @@ import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -149,13 +151,16 @@ public class ZSSClientEvents
 		if (event.dwheel == 0 && (event.button == -1 || (!isAttackKey && !isUseKey))) {
 			return;
 		}
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
 		// check pre-conditions for attacking and item use (not stunned, etc.):
 		if (event.buttonstate || event.dwheel != 0) {
 			if (isAttackKey) {
 				// hack for spin attack: allows key press information to be received while animating
 				if (skills.isSkillActive(SkillBase.spinAttack) && skills.getActiveSkill(SkillBase.spinAttack).isAnimating()) {
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
+					event.setCanceled(true);
+				} else if (skills.isSkillActive(SkillBase.backSlice) && skills.getActiveSkill(SkillBase.backSlice).isAnimating()) {
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					event.setCanceled(true);
 				} else if (!skills.canInteract() || ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN)) {
 					event.setCanceled(true);
@@ -186,7 +191,6 @@ public class ZSSClientEvents
 						skills.getActiveSkill(SkillBase.armorBreak).keyPressed(mc, mc.gameSettings.keyBindAttack, mc.thePlayer);
 					}
 				}
-
 				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
 				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
@@ -230,6 +234,11 @@ public class ZSSClientEvents
 
 	@ForgeSubscribe
 	public void onLoadSound(SoundLoadEvent event) {
+		// Register all songs as records (i.e. streaming)
+		for (AbstractZeldaSong song : SongAPI.getRegisteredSongs()) {
+			event.manager.addStreaming(song.getSoundString() + ".ogg");
+		}
+
 		// the following sounds have only 1 file each
 		event.manager.addSound(Sounds.BOMB_WHISTLE + ".ogg");
 		event.manager.addSound(Sounds.BOSS_BATTLE + ".ogg");
@@ -238,6 +247,7 @@ public class ZSSClientEvents
 		event.manager.addSound(Sounds.HOOKSHOT + ".ogg");
 		event.manager.addSound(Sounds.CHU_MERGE + ".ogg");
 		event.manager.addSound(Sounds.CORK + ".ogg");
+		event.manager.addSound(Sounds.DARKNUT_DIE + ".ogg");
 		event.manager.addSound(Sounds.FAIRY_BLESSING + ".ogg");
 		event.manager.addSound(Sounds.FAIRY_LAUGH + ".ogg");
 		event.manager.addSound(Sounds.FAIRY_LIVING + ".ogg");
@@ -251,14 +261,18 @@ public class ZSSClientEvents
 		event.manager.addSound(Sounds.MAGIC_FIRE + ".ogg");
 		event.manager.addSound(Sounds.MAGIC_ICE + ".ogg");
 		event.manager.addSound(Sounds.MASTER_SWORD + ".ogg");
+		event.manager.addSound(Sounds.OCARINA + ".ogg");
 		event.manager.addSound(Sounds.SECRET_MEDLEY + ".ogg");
 		event.manager.addSound(Sounds.SPECIAL_DROP + ".ogg");
 		event.manager.addSound(Sounds.SUCCESS + ".ogg");
 		event.manager.addSound(Sounds.WEB_SPLAT + ".ogg");
 		event.manager.addSound(Sounds.WHOOSH + ".ogg");
+		event.manager.addSound(Sounds.WHIP + ".ogg");
 
 		// the following have 2
 		for (int i = 1; i < 3; ++i) {
+			event.manager.addSound(Sounds.DARKNUT_HIT + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.DARKNUT_LIVING + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.MORTAL_DRAW + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.ROCK_FALL + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.WHIRLWIND + String.valueOf(i) + ".ogg");
@@ -283,6 +297,7 @@ public class ZSSClientEvents
 			event.manager.addSound(Sounds.SWORD_CUT + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.SWORD_MISS + String.valueOf(i) + ".ogg");
 			event.manager.addSound(Sounds.SWORD_STRIKE + String.valueOf(i) + ".ogg");
+			event.manager.addSound(Sounds.WHIP_CRACK + String.valueOf(i) + ".ogg");
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import java.util.List;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,13 +35,12 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityGoron;
-import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
+import zeldaswordskills.entity.npc.EntityNpcOrca;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
@@ -61,31 +61,51 @@ public class ItemTreasure extends Item
 		EYE_DROPS("eye_drops"),
 		EYEBALL_FROG("eyeball_frog"),
 		GORON_SWORD("goron_sword"),
-		JELLY_BLOB("jelly_blob",true,32),
-		MONSTER_CLAW("monster_claw",true,24),
+		JELLY_BLOB("jelly_blob","default",true,32,64),
+		MONSTER_CLAW("monster_claw","default",true,24,64),
 		ODD_MUSHROOM("odd_mushroom"),
 		ODD_POTION("odd_potion"),
 		POACHER_SAW("poacher_saw"),
 		POCKET_EGG("pocket_egg"),
 		PRESCRIPTION("prescription"),
-		TENTACLE("tentacle",true,16),
-		ZELDAS_LETTER("zeldas_letter");
+		TENTACLE("tentacle","default",true,16,64),
+		ZELDAS_LETTER("zeldas_letter"),
+		KNIGHTS_CREST("knights_crest","knights_crest",true,32,64);
 
 		public final String name;
+		/** Unlocalized string used to retrieve chat comment when an NPC is not interested in trading */
+		public final String uninterested;
 		private final boolean canSell;
 		private final int value;
-		private Treasures(String name) { this(name, false, 0); }
+		private final int maxStackSize;
+
+		private Treasures(String name) {
+			this(name, "default", false, 0, 1);
+		}
+
 		private Treasures(String name, boolean canSell, int value) {
+			this(name, "default", canSell, value, 1);
+		}
+
+		private Treasures(String name, String uninterested, boolean canSell, int value, int maxStackSize) {
 			this.name = name;
+			this.uninterested = uninterested;
 			this.canSell = canSell;
 			// this.value = value;
 			// TODO there is a vanilla bug that prevents distinguishing between subtypes for the items to buy
 			this.value = 24;
+			this.maxStackSize = maxStackSize;
 		}
 		/** Whether this treasure is salable (currently used only for monster parts) */
 		public boolean canSell() { return canSell; }
 		/** The price at which the hunter will buy this treasure */
 		public int getValue() { return value; }
+		/** The maximum stack size for this treasure */
+		public int getMaxStackSize() { return maxStackSize; }
+
+		public static Treasures byDamage(int damage) {
+			return values()[damage % values().length];
+		}
 	};
 
 	@SideOnly(Side.CLIENT)
@@ -100,17 +120,25 @@ public class ItemTreasure extends Item
 	}
 
 	@Override
+	public int getItemStackLimit(ItemStack stack) {
+		return Treasures.byDamage(stack.getItemDamage()).getMaxStackSize();
+	}
+
+	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote) {
+			Treasures treasure = Treasures.byDamage(stack.getItemDamage());
 			if (entity instanceof EntityVillager) {
 				EntityVillager villager = (EntityVillager) entity;
 				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
-				Treasures treasure = Treasures.values()[stack.getItemDamage() % Treasures.values().length];
 				MerchantRecipe trade = ZSSVillagerInfo.getTreasureTrade(treasure);
+				boolean isBaseVillager = entity.getClass().isAssignableFrom(EntityVillager.class);
 				villager.playLivingSound();
 				if (treasure == Treasures.ZELDAS_LETTER) {
-					if (!(entity instanceof EntityGoron) && villager.getCustomNameTag().contains("Mask Salesman")) {
-						EntityMaskTrader trader = new EntityMaskTrader(villager.worldObj);
+					if (villager.isChild()) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.name + ".child");
+					} else if (isBaseVillager && villager.getCustomNameTag().contains("Mask Salesman")) {
+						EntityNpcMaskTrader trader = new EntityNpcMaskTrader(villager.worldObj);
 						trader.setLocationAndAngles(villager.posX, villager.posY, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 						trader.setCustomNameTag(villager.getCustomNameTag());
 						if (!trader.worldObj.isRemote) {
@@ -126,43 +154,42 @@ public class ItemTreasure extends Item
 							}
 							new TimedChatDialogue(player, chat);
 						} else {
-							player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".already_open"));
+							PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.name + ".already_open");
 						}
 						player.setCurrentItemOrArmor(0, null);
 					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".fail"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.name + ".fail");
 					}
 				} else if (trade != null && villagerInfo.isInterested(treasure, stack)) {
 					ItemStack required = trade.getSecondItemToBuy();
 					if (required == null || PlayerUtils.consumeInventoryItem(player, required, required.stackSize)) {
 						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.setCurrentItemOrArmor(0, trade.getItemToSell());
-						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".give"));
-						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.received", trade.getItemToSell().getDisplayName()));
+						PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".give");
+						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.received", trade.getItemToSell().getDisplayName());
 						if (villagerInfo.onTradedTreasure(player, treasure, player.getHeldItem())) {
-							player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".next"));
+							PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".next");
 						}
 					} else {
-						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : "")));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.trade.fail", required.stackSize, required.getDisplayName(), (required.stackSize > 1 ? "s" : ""));
 					}
 				} else if (treasure.canSell() && villagerInfo.isHunter()) {
-					ItemStack treasureStack = new ItemStack(ZSSItems.treasure,1,treasure.ordinal());
-					int price = villagerInfo.isMonsterHunter() ? treasure.getValue() + treasure.getValue() / 2 : treasure.getValue();
-					if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(treasureStack, new ItemStack(Item.emerald, price)))) {
-						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.new", treasureStack.getDisplayName()));
-					} else {
-						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.treasure.hunter.old", treasureStack.getDisplayName()));
-					}
+					villagerInfo.addHunterTrade(player, new ItemStack(ZSSItems.treasure, 1, treasure.ordinal()), treasure.getValue());
 				} else {
 					if (villagerInfo.isFinalTrade(treasure, stack)) {
-						player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName(stack).substring(5) + ".wait"));
+						PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".wait");
 					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure.uninterested"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested);
 					}
 				}
 			} else if (entity instanceof INpc) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.treasure.uninterested"));
+				if (entity instanceof EntityAgeable && ((EntityAgeable) entity).isChild()) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+				} else if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested + ".orca");
+				} else {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested);
+				}
 			}
 		}
 		return true;
@@ -176,7 +203,7 @@ public class ItemTreasure extends Item
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName() + "." + Treasures.values()[stack.getItemDamage() % Treasures.values().length].name;
+		return super.getUnlocalizedName() + "." + Treasures.byDamage(stack.getItemDamage()).name;
 	}
 
 	@Override

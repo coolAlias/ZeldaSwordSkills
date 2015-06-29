@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillBase;
 
@@ -37,7 +37,7 @@ public class ContainerSkills extends Container
 	private final InventoryBasic inventory;
 
 	public ContainerSkills(EntityPlayer player) {
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(player);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 		inventory = new InventoryBasic("", true, SkillBase.getNumSkills());
 		boolean flag = false;
 		int x, y, i1;
@@ -56,12 +56,15 @@ public class ContainerSkills extends Container
 				continue;
 			}
 
+			int bottom = 3;
+			int sideBar = 5;
+			int rightSide = bottom + sideBar;
 			i1 = (flag ? i - 1 : i);
-			if (i1 > 4) {
-				x = (i1 > 8 ? 108 : 22);
-				y = 99 - (i1 > 8 ? (i1 - 9) : (i1 - 5)) * 21;
+			if (i1 > bottom) {
+				x = (i1 > rightSide ? 108 : 22);
+				y = 120 - (i1 > rightSide ? (i1 - (rightSide + 1)) : (i1 - (sideBar - 1))) * 21;
 			} else {
-				x = 32 + (i1 - 1) * 22;
+				x = 44 + (i1 - 1) * 21;
 				y = 120;
 			}
 

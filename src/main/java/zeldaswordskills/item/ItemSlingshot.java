@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package zeldaswordskills.item;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,6 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -48,6 +48,7 @@ import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.lib.Config;
@@ -71,24 +72,74 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattlegearWeapon
+public class ItemSlingshot extends Item implements ICyclableItem, IFairyUpgrade, IZoom, IBattlegearWeapon
 {
+	public static enum Mode {
+		/** Default Slingshot behavior searches for the first usable seed of any kind */
+		DEFAULT(null),
+		DEKU(SeedType.DEKU),
+		BOMB(SeedType.BOMB),
+		COCOA(SeedType.COCOA),
+		GRASS(SeedType.GRASS),
+		MELON(SeedType.MELON),
+		PUMPKIN(SeedType.PUMPKIN),
+		NETHERWART(SeedType.NETHERWART);
+		private ItemStack seedStack;
+		private final SeedType type;
+		private Mode(SeedType type) {
+			this.type = type;
+		}
+		/**
+		 * Returns the seed itemstack required for this mode
+		 */
+		public ItemStack getSeedStack() {
+			if (type != null) {
+				Item item = ItemSlingshot.typeToSeed.get(type);
+				if (item != null) {
+					seedStack = new ItemStack(item, 1, item == Item.dyePowder ? 3 : 0);
+				}
+			}
+			return seedStack;
+		}
+		/**
+		 * Returns the next Mode by ordinal position
+		 */
+		public Mode next() {
+			return Mode.values()[(ordinal() + 1) % Mode.values().length];
+		}
+		/**
+		 * Returns the previous Mode by ordinal position
+		 */
+		public Mode prev() {
+			return Mode.values()[((ordinal() == 0 ? Mode.values().length : ordinal()) - 1) % Mode.values().length];
+		}
+	}
+
 	/** The number of seeds this slingshot will fire per shot */
 	protected final int seedsFired;
 
 	/** The angle between each seed fragment */
 	protected final float spread;
 
+	/** Maps seed Items to seed Type (dye item must also check damage value) */
+	private static final Map<Item, SeedType> seedToType = new HashMap<Item, SeedType>();
+
 	/** Maps the seed types to seed Items for consuming seed shot */
-	private static final Map<SeedType, Item> typeToSeed = new EnumMap(SeedType.class);
+	private static final Map<SeedType, Item> typeToSeed = new EnumMap<SeedType, Item>(SeedType.class);
 
 	public static void initializeSeeds(){
-		typeToSeed.put(SeedType.COCOA, Item.dyePowder);
-		typeToSeed.put(SeedType.DEKU, ZSSItems.dekuNut);
-		typeToSeed.put(SeedType.GRASS, Item.seeds);
-		typeToSeed.put(SeedType.MELON, Item.melonSeeds);
-		typeToSeed.put(SeedType.NETHERWART, Item.netherStalkSeeds);
-		typeToSeed.put(SeedType.PUMPKIN, Item.pumpkinSeeds);
+		addSeedMapping(SeedType.BOMB, ZSSItems.bombFlowerSeed);
+		addSeedMapping(SeedType.COCOA, Item.dyePowder);
+		addSeedMapping(SeedType.DEKU, ZSSItems.dekuNut);
+		addSeedMapping(SeedType.GRASS, Item.seeds);
+		addSeedMapping(SeedType.MELON, Item.melonSeeds);
+		addSeedMapping(SeedType.NETHERWART, Item.netherStalkSeeds);
+		addSeedMapping(SeedType.PUMPKIN, Item.pumpkinSeeds);
+	}
+
+	private static void addSeedMapping(SeedType type, Item item) {
+		seedToType.put(item, type);
+		typeToSeed.put(type, item);
 	}
 
 	public ItemSlingshot(int id) {
@@ -103,6 +154,56 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
+	}
+
+	public Mode getMode(EntityPlayer player) {
+		return Mode.values()[ZSSPlayerInfo.get(player).slingshotMode % Mode.values().length];
+	}
+
+	private void setMode(EntityPlayer player, Mode mode) {
+		ZSSPlayerInfo.get(player).slingshotMode = mode.ordinal();
+	}
+
+	@Override
+	public void nextItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(player, getMode(player).next());
+		}
+	}
+
+	@Override
+	public void prevItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(player, getMode(player).prev());
+		}
+	}
+
+	@Override
+	public int getCurrentMode(ItemStack stack, EntityPlayer player) {
+		return getMode(player).ordinal();
+	}
+
+	@Override
+	public void setCurrentMode(ItemStack stack, EntityPlayer player, int mode) {
+		setMode(player, Mode.values()[mode % Mode.values().length]);
+	}
+
+	@Override
+	public ItemStack getRenderStackForMode(ItemStack stack, EntityPlayer player) {
+		ItemStack ret = getMode(player).getSeedStack();
+		if (ret != null) {
+			ret.stackSize = 0;
+			for (ItemStack inv : player.inventory.mainInventory) {
+				if (inv != null && inv.getItem() == ret.getItem() && inv.getItemDamage() == ret.getItemDamage()) {
+					ret.stackSize += inv.stackSize;
+					if (ret.stackSize > 98) {
+						ret.stackSize = 99;
+						break;
+					}
+				}
+			}
+		}
+		return ret;
 	}
 
 	@Override
@@ -212,40 +313,23 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 	 */
 	protected boolean hasSeeds(EntityPlayer player) {
 		if (player.capabilities.isCreativeMode) { return true; }
-		for (ItemStack stack : player.inventory.mainInventory) {
-			if (stack != null) {
-				if (stack.getItem() instanceof ItemSeeds || stack.getItem() == ZSSItems.dekuNut) {
-					return true;
-				} else if (stack.getItem() == Item.dyePowder && stack.getItemDamage() == 3) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return getSeedType(player) != SeedType.NONE;
 	}
 
 	/**
 	 * Returns the type of seed to be shot or NONE if no seed available
 	 */
 	protected SeedType getSeedType(EntityPlayer player) {
+		SeedType selected = getMode(player).type;
 		for (ItemStack stack : player.inventory.mainInventory) {
-			if (stack != null) {
-				if (stack.getItem() == Item.seeds) {
-					return SeedType.GRASS;
-				} else if (stack.getItem() == Item.melonSeeds) {
-					return SeedType.MELON;
-				} else if (stack.getItem() == Item.netherStalkSeeds) {
-					return SeedType.NETHERWART;
-				} else if (stack.getItem() == Item.pumpkinSeeds) {
-					return SeedType.PUMPKIN;
-				} else if (stack.getItem() == Item.dyePowder && stack.getItemDamage() == 3) {
-					return SeedType.COCOA;
-				} else if (stack.getItem() == ZSSItems.dekuNut) {
-					return SeedType.DEKU;
+			if (stack != null && seedToType.containsKey(stack.getItem())) {
+				SeedType type = seedToType.get(stack.getItem());
+				if ((type != SeedType.COCOA || stack.getItemDamage() == 3) && (selected == null || type == selected)) {
+					return type;
 				}
 			}
 		}
-		return (player.capabilities.isCreativeMode ? SeedType.GRASS : SeedType.NONE);
+		return (player.capabilities.isCreativeMode ? (selected == null ? SeedType.GRASS : selected) : SeedType.NONE);
 	}
 
 	@Override
@@ -290,7 +374,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 	 * Checks for and adds any applicable fairy enchantments to the slingshot
 	 */
 	private void addFairyEnchantments(ItemStack stack, EntityPlayer player, TileEntityDungeonCore core) {
-		int hearts = ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart);
+		int hearts = ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart);
 		int divisor = (seedsFired == 1 ? 5 : seedsFired < 4 ? 7 : 10);
 		int newLvl = Math.min((hearts / divisor), Enchantment.power.getMaxLevel());
 		int lvl = newLvl;
@@ -334,7 +418,7 @@ public class ItemSlingshot extends Item implements IFairyUpgrade, IZoom, IBattle
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
 		} else {
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 

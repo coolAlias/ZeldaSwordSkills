@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package zeldaswordskills.api.block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import zeldaswordskills.item.ItemHeldBlock;
 
 
 /**
@@ -39,16 +40,19 @@ public interface ILiftable {
 	 * otherwise unbreakable blocks to be handled efficiently
 	 * @param stack the itemstack used to lift the block
 	 * @param meta the block metadata
+	 * @param side the side (face) of the block the player is trying to lift
+	 * @return return null to use the block's explosion resistance as its weight
 	 */
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta);
+	BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side);
 
 	/**
 	 * Called after the block is picked up by a player, but before it is set to air,
-	 * allowing tile entity data to be stored in the player's held item stack
-	 * @param stack the stack used to lift the block is always an ILiftBlock
+	 * allowing the ItemHeldBlock stack's NBT tag to be manipulated, e.g. by storing a
+	 * tile entity inside. See {@link ItemHeldBlock#getBlockStack} for more information.
+	 * @param stack the ItemHeldBlock stack containing the ILiftBlock stack used to pick up the block
 	 * @param meta the metadata of the block before it was picked up
 	 */
-	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta);
+	void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta);
 
 	/**
 	 * Called when a liftable block is placed from the held block stack, allowing tile entity
@@ -56,6 +60,6 @@ public interface ILiftable {
 	 * @param stack the ItemHeldBlock that was created when the block was lifted
 	 * @param meta the metadata returned from the block's onBlockPlaced method
 	 */
-	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta);
+	void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta);
 
 }

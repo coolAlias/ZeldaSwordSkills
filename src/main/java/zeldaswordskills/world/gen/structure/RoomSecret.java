@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.ChestGenHooks;
+import zeldaswordskills.block.BlockDoorLocked;
 import zeldaswordskills.block.BlockPeg;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -59,8 +60,10 @@ public class RoomSecret extends RoomBase
 	
 	@Override
 	public boolean generate(ZSSMapGenBase mapGen, World world, Random rand, int x, int y, int z) {
-		if (y < bBox.maxY) { return false; }
-		inNether = (world.provider.dimensionId == -1);
+		if (y < bBox.maxY) {
+			return false;
+		}
+		inNether = world.provider.isHellWorld;
 		bBox.offset(x, y - bBox.maxY, z);
 		int worldHeight = (inNether ? 128 : world.getHeightValue(bBox.getCenterX(), bBox.getCenterZ()));
 		if (bBox.maxY > worldHeight) {
@@ -87,7 +90,7 @@ public class RoomSecret extends RoomBase
 	
 	@Override
 	protected void setMetadata(World world, int x, int z) {
-		BossType type = BossType.getBossType(world, x, z);
+		BossType type = (Config.areBossDungeonsRandom() ? null : BossType.getBossType(world, x, z));
 		boolean inWater = inOcean || StructureGenUtils.getNumBlocksOfMaterial(world, bBox, Material.water, 1) > 0;
 		if (type != null) {
 			switch(type) {
@@ -95,9 +98,10 @@ public class RoomSecret extends RoomBase
 			case OCEAN: metadata = (inWater ? 1 : 0); break; // sandstone or stone
 			default: metadata = 0;
 			}
+		} else if (world.provider.isHellWorld) {
+			metadata = 2; // nether brick
 		} else {
-			//BiomeGenBase biome = world.getBiomeGenForCoords(x, z);
-			metadata = (inWater ? 1 : 0); // biome != null && biome.biomeName.toLowerCase().contains("beach") && 
+			metadata = (inWater ? 1 : 0); 
 		}
 		if (door != null) {
 			metadata |= 8;
@@ -150,11 +154,18 @@ public class RoomSecret extends RoomBase
 		if (submerged && bBox.getXSize() > 3) {
 			--bBox.minY;
 		}
-		if (!submerged && bBox.getXSize() > 5 && rand.nextFloat() < Config.getBarredRoomChance()) {
-			if (rand.nextInt(4) == 0) {
-				door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
-			} else {
-				door = (rand.nextInt(4) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
+		if (bBox.getXSize() > 5 && rand.nextFloat() < Config.getBarredRoomChance()) {
+			if (rand.nextInt(16) == 0) {
+				door = (submerged && rand.nextInt(3) == 0 ? ZSSBlocks.doorLockedSmall : ZSSBlocks.doorLockedSmall); // TODO ZSSBlocks.timeBlock);
+			} else if (!submerged) {
+				// Wooden Pegs > Light Barriers > Rusty Pegs > Heavy Barriers
+				if (rand.nextInt(3) == 0) {
+					door = (rand.nextInt(3) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
+				} else if (rand.nextInt(3) == 0) {
+					door = ZSSBlocks.doorLockedSmall;
+				} else {
+					door = (rand.nextInt(3) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
+				}
 			}
 			side = rand.nextInt(4);
 		}
@@ -193,11 +204,18 @@ public class RoomSecret extends RoomBase
 		int k1 = StructureGenUtils.getZWithOffset(bBox, x, z);
 		if (bBox.isVecInside(i1, j1, k1) && !StructureGenUtils.isBlockChest(world, i1, j1, k1)) {
 			Block chestBlock = (rand.nextFloat() < Config.getLockedChestChance() ? ZSSBlocks.chestLocked : Block.chest);
+			// TODO door != ZSSBlocks.timeBlock && 
+			if (!first && rand.nextFloat() < Config.getLockedChestChance()) {
+				chestBlock = ZSSBlocks.chestInvisible;
+			}
 			world.setBlock(i1, j1, k1, chestBlock.blockID, 0, 2);
 			TileEntity te = world.getBlockTileEntity(i1, j1, k1);
 			if (te instanceof IInventory) {
 				IInventory chest = (IInventory) te;
 				DungeonLootLists.generateChestContents(world, rand, chest, this, chestBlock == ZSSBlocks.chestLocked);
+				if ((first || chestBlock == ZSSBlocks.chestInvisible) && rand.nextFloat() < Config.getHeartPieceChance()) {
+					WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
+				}
 				if (first && rand.nextFloat() < Config.getHeartPieceChance()) {
 					WorldUtils.addItemToInventoryAtRandom(rand, new ItemStack(ZSSItems.heartPiece), chest, 3);
 				}
@@ -243,7 +261,7 @@ public class RoomSecret extends RoomBase
 		case WEST: x = bBox.minX; break;
 		}
 		world.setBlock(x, y, z, door.blockID, 0, 2);
-		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? 0 : door.blockID), 0, 2);
+		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? 0 : door.blockID), (door instanceof BlockDoorLocked ? 8 : 0), 2);
 	}
 	
 	/**

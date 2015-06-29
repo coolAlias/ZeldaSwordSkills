@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import zeldaswordskills.lib.Config;
 
 /**
  * 
@@ -42,7 +43,7 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 
 	@Override
 	public boolean canUpdate() {
-		return true;
+		return Config.doJarsUpdate();
 	}
 
 	@Override
@@ -51,6 +52,9 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 			List<EntityItem> list = worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().
 					getAABB(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1).expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : list) {
+				if (!item.isEntityAlive() || item.ticksExisted < Math.max(item.delayBeforeCanPickup, 40)) {
+					continue;
+				}
 				ItemStack stack;
 				if (item.getEntityItem().stackSize > 64) {
 					stack = item.getEntityItem().splitStack(64);

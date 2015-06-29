@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -41,6 +41,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.api.item.ISwingSpeed;
@@ -70,10 +71,16 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFairyUpgrade, ISacredFlame, ISwingSpeed
+public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed
 {
 	/** Whether this sword requires two hands */
 	protected final boolean twoHanded;
+
+	/** Additional swing time */
+	protected final int swingSpeed;
+
+	/** Additional exhaustion added each swing */
+	protected final float exhaustion;
 
 	/** Original ItemSword's field is private, but this has the same functionality */
 	protected final float weaponDamage;
@@ -91,16 +98,29 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	/** Whether this sword will give the 'broken' version when it breaks */
 	protected boolean givesBrokenItem = true;
 
+	/**
+	 * Default constructor for single-handed weapons with no swing speed or exhaustion penalties 
+	 */
 	public ItemZeldaSword(int id, EnumToolMaterial material, float bonusDamage) {
-		this(id, material, bonusDamage, false);
+		this(id, material, bonusDamage, false, 0, 0.0F);
 	}
 
+	/**
+	 * Default constructor for two-handed weapons; if two-handed, default values of
+	 * 15 and 0.3F are used for swing speed and exhaustion, respectively.
+	 */
 	public ItemZeldaSword(int id, EnumToolMaterial material, float bonusDamage, boolean twoHanded) {
+		this(id, material, bonusDamage, twoHanded, (twoHanded ? 15 : 0), (twoHanded ? 0.3F : 0.0F));
+	}
+
+	public ItemZeldaSword(int id, EnumToolMaterial material, float bonusDamage, boolean twoHanded, int swingSpeed, float exhaustion) {
 		super(id, material);
 		this.setNoRepair();
 		this.toolMaterial = material;
 		this.weaponDamage = 4.0F + bonusDamage + material.getDamageVsEntity();
 		this.twoHanded = twoHanded;
+		this.swingSpeed = Math.max(0, swingSpeed);
+		this.exhaustion = Math.max(0.0F, exhaustion);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
 
@@ -127,13 +147,23 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	}
 
 	@Override
+	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return (twoHanded ? 0.25F : 0.0F);
+	}
+
+	@Override
+	public float getDefensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return 0;
+	}
+
+	@Override
 	public float getExhaustion() {
-		return 0.0F;
+		return exhaustion;
 	}
 
 	@Override
 	public int getSwingSpeed() {
-		return (twoHanded ? 15 : 0);
+		return swingSpeed;
 	}
 
 	@Override
@@ -178,8 +208,8 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
-		return (par1 == -1 ? brokenIcon : itemIcon);
+	public Icon getIconFromDamage(int damage) {
+		return (damage == -1 ? brokenIcon : itemIcon);
 	}
 
 	@Override
@@ -218,11 +248,11 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 			item.setDead();
 			WorldUtils.spawnItemWithRandom(core.worldObj, new ItemStack(ZSSItems.swordGolden), core.xCoord, core.yCoord + 2, core.zCoord);
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_BLESSING, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sword.blessing"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.sword.blessing");
 			player.triggerAchievement(ZSSAchievements.swordGolden);
 		} else {
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 
@@ -264,19 +294,19 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 				tag.setInteger("SacredFlames", tag.getInteger("SacredFlames") | type);
 				stack.setTagCompound(tag);
 				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
-				player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.new",
-						getItemDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type)));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.new",
+						getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type));
 				player.triggerAchievement(ZSSAchievements.swordFlame);
 				addSacredFlameEnchantments(stack, type);
 				return true;
 			} else {
-				player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.old.same", getItemDisplayName(stack)));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.old.same", getItemStackDisplayName(stack));
 			}
 		} else {
 			if (isActive) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.incorrect.sword"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.incorrect.sword");
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.inactive");
 			}
 		}
 		WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);

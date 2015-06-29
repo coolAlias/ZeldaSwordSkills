@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,10 +28,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
@@ -122,7 +122,7 @@ public class ArmorBreak extends SkillActive
 
 	/** Returns true if the skill is still charging up; always false on the server, as charge is handled client-side */
 	public boolean isCharging(EntityPlayer player) {
-		ILockOnTarget target = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ILockOnTarget target = ZSSPlayerSkills.get(player).getTargetingSkill();
 		return charge > 0 && target != null && target.isLockedOn();
 	}
 
@@ -183,7 +183,7 @@ public class ArmorBreak extends SkillActive
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 1; // needs to be active for hurt event to process correctly
 		// Attack first so skill still active upon impact, then set timer to zero
-		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
 			player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 		}
@@ -215,7 +215,7 @@ public class ArmorBreak extends SkillActive
 					if (requiresReset) { // activated by vanilla attack key: manually unset the key state (fix for mouse event issues)
 						KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack.keyCode, false);
 					}
-					SwordBasic skill = (SwordBasic) ZSSPlayerInfo.get(player).getPlayerSkill(swordBasic);
+					SwordBasic skill = (SwordBasic) ZSSPlayerSkills.get(player).getPlayerSkill(swordBasic);
 					if (skill != null && skill.onAttack(player)) {
 						PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this, true).makePacket());
 					}

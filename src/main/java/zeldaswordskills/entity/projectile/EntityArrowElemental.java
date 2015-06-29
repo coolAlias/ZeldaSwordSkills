@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -33,10 +33,12 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceHoly;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceHolyIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
+import zeldaswordskills.api.damage.EnumDamageType;
+import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
@@ -119,11 +121,11 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected DamageSource getDamageSource(Entity entity) {
 		switch(getType()) {
-		case FIRE: return new DamageSourceIndirect("arrow.fire", this, shootingEntity).setFireDamage().setProjectile().setMagicDamage();
+		case FIRE: return new DamageSourceFireIndirect("arrow.fire", this, shootingEntity).setFireDamage().setProjectile().setMagicDamage();
 		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, shootingEntity, 50, 1).setProjectile().setMagicDamage();
 		case LIGHT: return (entity instanceof EntityEnderman
-				? new DamageSourceHoly("arrow.light", (shootingEntity != null ? shootingEntity : this)).setDamageBypassesArmor().setProjectile().setMagicDamage()
-						: new DamageSourceHolyIndirect("arrow.light", this, shootingEntity).setDamageBypassesArmor().setProjectile().setMagicDamage());
+				? new DamageSourceBaseDirect("arrow.light", (shootingEntity != null ? shootingEntity : this), EnumDamageType.HOLY).setDamageBypassesArmor().setProjectile().setMagicDamage()
+						: new DamageSourceBaseIndirect("arrow.light", this, shootingEntity, EnumDamageType.HOLY).setDamageBypassesArmor().setProjectile().setMagicDamage());
 		}
 		return super.getDamageSource(entity);
 	}
@@ -202,10 +204,19 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	@Override
+	protected float calculateDamage(Entity entityHit) {
+		float dmg = super.calculateDamage(entityHit);
+		if (getType() == ElementType.LIGHT && entityHit instanceof IEntityEvil) {
+			dmg = ((IEntityEvil) entityHit).getLightArrowDamage(dmg);
+		}
+		return dmg;
+	}
+
+	@Override
 	protected void handlePostDamageEffects(EntityLivingBase entity) {
 		super.handlePostDamageEffects(entity);
 		if (!entity.isDead && getType() == ElementType.ICE) {
-			ZSSEntityInfo.get(entity).stun(calculateDamage(entity) * 10, true);
+			ZSSEntityInfo.get(entity).stun(MathHelper.ceiling_float_int(calculateDamage(entity)) * 10, true);
 			int i = MathHelper.floor_double(entity.posX);
 			int j = MathHelper.floor_double(entity.posY);
 			int k = MathHelper.floor_double(entity.posZ);
@@ -219,6 +230,9 @@ public class EntityArrowElemental extends EntityArrowCustom
 	 * Returns true if the light arrow can kill this entity in one hit (endermen and wither skeletons)
 	 */
 	private boolean canOneHitKill(Entity entity) {
+		if (entity instanceof IEntityEvil) {
+			return ((IEntityEvil) entity).isLightArrowFatal();
+		}
 		boolean flag = (entity instanceof EntitySkeleton && ((EntitySkeleton) entity).getSkeletonType() == 1);
 		return (!(entity instanceof IBossDisplayData)) && (flag || entity instanceof EntityEnderman);
 	}

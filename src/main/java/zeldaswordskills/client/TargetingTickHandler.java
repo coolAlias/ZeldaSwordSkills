@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,15 +21,12 @@ import java.util.EnumSet;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.render.EntityRendererAlt;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.lib.Config;
-import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
@@ -54,12 +51,6 @@ public class TargetingTickHandler implements ITickHandler
 	/** Allows swapping entity renderer for camera viewpoint when transformed */
 	private EntityRenderer renderer, prevRenderer;
 
-	/** The currently animating skill, if any */
-	private SkillActive skillToAnimate = null;
-
-	/** Whether the left movement key has been pressed; used every tick */
-	boolean isLeftPressed;
-
 	public TargetingTickHandler() {
 		this.mc = Minecraft.getMinecraft();
 	}
@@ -76,59 +67,18 @@ public class TargetingTickHandler implements ITickHandler
 
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
-		if (mc.thePlayer != null && ZSSPlayerInfo.get(mc.thePlayer) != null) {
+		if (mc.thePlayer != null && ZSSPlayerSkills.get(mc.thePlayer) != null) {
 			updateRenderer();
+			ZSSPlayerSkills.get(mc.thePlayer).onRenderTick((Float) tickData[0]);
 			// Hack for magic rods, since the item's update tick isn't called frequently enough
 			if (mc.thePlayer.getItemInUse() != null && mc.thePlayer.getItemInUse().getItem() instanceof ItemMagicRod) {
 				mc.thePlayer.swingProgress = 0.5F;
-			}
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
-			// flags whether a skill is currently animating
-			boolean flag = false;
-			skillToAnimate = skills.getCurrentlyAnimatingSkill();
-			if (skillToAnimate != null) {
-				if (skillToAnimate.isAnimating()) {
-					flag = skillToAnimate.onRenderTick(mc.thePlayer);
-				} else if (!skillToAnimate.isActive()) {
-					skills.setCurrentlyAnimatingSkill(null);
-				}
-			}
-			ILockOnTarget skill = skills.getTargetingSkill();
-			if (skill != null && skill.isLockedOn()) {
-				if (!flag) {
-					((SkillActive) skill).onRenderTick(mc.thePlayer);
-				}
-				// Handle vanilla movement keys here, since KeyHandler doesn't fire for vanilla keys
-				if (skills.canInteract() && !skills.isNayruActive()) {
-					if (isVanillaKeyPressed(mc.gameSettings.keyBindJump)) {
-						skills.onKeyPressed(mc, mc.gameSettings.keyBindJump);
-					} else if (isVanillaKeyPressed(mc.gameSettings.keyBindForward)) {
-						skills.onKeyPressed(mc, mc.gameSettings.keyBindForward);
-					} else if (Config.allowVanillaControls()) {
-						isLeftPressed = isVanillaKeyPressed(mc.gameSettings.keyBindLeft);
-						if (isLeftPressed || isVanillaKeyPressed(mc.gameSettings.keyBindRight)) {
-							skills.onKeyPressed(mc, (isLeftPressed ? mc.gameSettings.keyBindLeft : mc.gameSettings.keyBindRight));
-						} else if (isVanillaKeyPressed(mc.gameSettings.keyBindBack)) {
-							skills.onKeyPressed(mc, mc.gameSettings.keyBindBack);
-						}
-					}
-				}
 			}
 		}
 	}
 
 	@Override
 	public void tickEnd(EnumSet<TickType> type, Object... tickData) {}
-
-	/**
-	 * Returns true if a vanilla keybinding is both pressed and isPressed()
-	 * This is necessary to prevent skills from being activated as soon as locking on to a target,
-	 * (when isPressed() is still true) or while the key is held down (pressed is true).
-	 */
-	@SideOnly(Side.CLIENT)
-	private boolean isVanillaKeyPressed(KeyBinding key) {
-		return key.isPressed() && key.pressed;
-	}
 
 	/**
 	 * Updates the camera entity renderer for Giant's Mask or other transformations

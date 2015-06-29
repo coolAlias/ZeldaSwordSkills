@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,13 @@
 package zeldaswordskills.block.tileentity;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.monster.EntityCaveSpider;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySpider;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.INetworkManager;
@@ -27,10 +34,18 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo.Stats;
+import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.LogHelper;
@@ -168,7 +183,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				EntityPlayer closestPlayer = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, (double)(box.getXSize() - 2) / 2.0D);
 				if (closestPlayer != null && box.isVecInside(MathHelper.floor_double(closestPlayer.posX), MathHelper.floor_double(closestPlayer.posY), MathHelper.floor_double(closestPlayer.posZ))) {
 					if (!isOpened) { // player got in somehow other than the door:
-						closestPlayer.addChatMessage("Ganon: Thought you could sneak in, eh? Mwa ha ha ha!");
+						closestPlayer.addChatMessage("chat.zss.dungeon.sneak_in");
 						verifyStructure(true);
 						alreadyVerified = true;
 					}
@@ -183,19 +198,15 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 			bossBattle.onUpdate(worldObj);
 			if (bossBattle.isFinished()) {
 				bossBattle = null;
-				//LogHelper.fine(String.format("Boss battle is finished, removing core block at %d/%d/%d", xCoord, yCoord, zCoord));
 				removeCoreBlock();
 			}
 		} else if (shouldUpdate()) {
-			//LogHelper.finest(String.format("Verifying structure during update at %d/%d/%d", xCoord, yCoord, zCoord));
 			if (!alreadyVerified && box != null && !verifyStructure(false)) {
-				//LogHelper.finer(String.format("Failed verification at %d/%d/%d; setting blocks to stone", xCoord, yCoord, zCoord));
 				verifyStructure(true);
 				alreadyVerified = true;
 				if (isBossRoom) {
 					isOpened = true;
 				} else {
-					//LogHelper.finer("Calling removeCoreBlock after all blocks set to stone");
 					worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 					removeCoreBlock();
 				}
@@ -210,11 +221,11 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called only when validation fails during an update, not when block broken
 	 */
 	protected void removeCoreBlock() {
-		//LogHelper.fine(String.format("Removing core block from update at %d/%d/%d", xCoord, yCoord, zCoord));
 		EntityPlayer player = worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 2.5D, zCoord + 0.5D, 16.0D);
 		if (player != null) {
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			if (dungeonType != null) {
+				clearDungeon();
 				info.addStat(Stats.STAT_BOSS_ROOMS, 1 << dungeonType.ordinal());
 				player.triggerAchievement(ZSSAchievements.bossBattle);
 				// TODO == 127 (or 255 if the End boss room ever gets made)
@@ -226,10 +237,12 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				}
 			} else {
 				info.addStat(Stats.STAT_SECRET_ROOMS, 1);
-				//LogHelper.fine("Added stat for secret rooms; current total: " + info.getStat(Stats.STAT_SECRET_ROOMS));
 				player.triggerAchievement(ZSSAchievements.bombsAway);
 				if (info.getStat(Stats.STAT_SECRET_ROOMS) > 49) {
 					player.triggerAchievement(ZSSAchievements.bombJunkie);
+				}
+				if (worldObj.rand.nextFloat() < Config.getRoomSpawnMobChance()) {
+					spawnRandomMob();
 				}
 			}
 		}
@@ -251,6 +264,101 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		int z = box.getCenterZ() + (doorSide == RoomBoss.SOUTH ? 1 : (doorSide == RoomBoss.NORTH ? -1 : 0));
 		int y = (worldObj.getBlockId(x, box.minY + 2, z) == ZSSBlocks.secretStone.blockID ? box.minY + 2 : box.minY + 3);
 		worldObj.setBlockToAir(x, y, z);
+	}
+
+	/**
+	 * Spawns a mob inside of non-boss secret rooms (call when breached)
+	 * Only allows spawning for rooms size 5+ (at least a 3x3x3 space inside)
+	 */
+	private void spawnRandomMob() {
+		if (worldObj.isRemote || box == null || box.getXSize() < 5) {
+			return;
+		}
+		// get the block above the tile to check for liquids
+		Material material = worldObj.getBlockMaterial(xCoord, yCoord + 1, zCoord);
+		EntityLiving mob = null;
+		int rarity = worldObj.rand.nextInt(64) - (worldObj.difficultySetting * 2);
+		int type = -1; // for IEntityVariants to set a specific type
+		if (material == Material.water) {
+			mob = new EntityOctorok(worldObj);
+			type = (rarity < 8 ? 1 : 0);
+		} else if (material == Material.lava) {
+			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
+			type = (rarity > 7 ? EntityKeese.KeeseType.FIRE.ordinal() : EntityKeese.KeeseType.CURSED.ordinal());
+			// START rarity 'switch', starting with most likely cases
+		} else if (rarity > 50) {
+			mob = new EntityZombie(worldObj);
+		} else if (rarity > 40) {
+			mob = new EntitySkeleton(worldObj);
+		} else if (rarity > 30) {
+			mob = (worldObj.rand.nextInt(8) > 1 ? new EntitySpider(worldObj) : new EntityCaveSpider(worldObj));
+		} else if (rarity > 20) {
+			mob = new EntityCreeper(worldObj);
+		} else if (rarity > 10) {
+			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
+		} else if (rarity > 4) {
+			mob = new EntityChu(worldObj);
+		} else if (rarity > -2) {
+			mob = new EntityWizzrobe(worldObj);
+			//((EntityWizzrobe) mob).getTeleportAI().setTeleBounds(box);
+		} else {
+			mob = new EntityDarknut(worldObj);
+		}
+		if (mob != null) {
+			mob.setPosition(xCoord + 0.5D, yCoord + 1.5D, zCoord + 0.5D);
+			mob.onSpawnWithEgg(null);
+			if (type > -1 && mob instanceof IEntityVariant) {
+				((IEntityVariant) mob).setType(type);
+			}
+			worldObj.spawnEntityInWorld(mob);
+			mob.playLivingSound();
+		}
+	}
+
+	/**
+	 * Opens dungeon door after the boss battle has finished; places Warp Stone if available
+	 */
+	private void clearDungeon() {
+		int x = box.getCenterX();
+		int z = box.getCenterZ();
+		switch(doorSide) {
+		case RoomBoss.SOUTH: z = box.maxZ - 1; break;
+		case RoomBoss.NORTH: z = box.minZ + 1; break;
+		case RoomBoss.EAST: x = box.maxX - 1; break;
+		case RoomBoss.WEST: x = box.minX + 1; break;
+		}
+		// remove webs blocking door for forest temple
+		if (worldObj.getBlockId(x, box.minY + 1, z) == Block.web.blockID) {
+			worldObj.setBlockToAir(x, box.minY + 1, z);
+		}
+		if (worldObj.getBlockId(x, box.minY + 2, z) == Block.web.blockID) {
+			worldObj.setBlockToAir(x, box.minY + 2, z);
+		}
+		placeOpenDoor((worldObj.getBlockMaterial(x, box.minY + 1, z).isLiquid() ? 2 : 1));
+		// Place warp stone
+		if (dungeonType.warpSong != null) {
+			Integer meta = BlockWarpStone.reverseLookup.get(dungeonType.warpSong);
+			if (meta != null) {
+				worldObj.setBlock(x, box.minY, z, ZSSBlocks.warpStone.blockID, meta, 2);
+			}
+		}
+	}
+
+	/**
+	 * Sets 2 air blocks where door used to be, after dungeon defeated
+	 * @param dy	Amount to adjust y position above box.minY; usually either 1 or 2
+	 */
+	private void placeOpenDoor(int dy) {
+		int x = box.getCenterX();
+		int z = box.getCenterZ();
+		switch(doorSide) {
+		case RoomBoss.SOUTH: z = box.maxZ; break;
+		case RoomBoss.NORTH: z = box.minZ; break;
+		case RoomBoss.EAST: x = box.maxX; break;
+		case RoomBoss.WEST: x = box.minX; break;
+		}
+		worldObj.setBlockToAir(x, box.minY + dy, z);
+		worldObj.setBlockToAir(x, box.minY + dy + 1, z);
 	}
 
 	/**
@@ -279,9 +387,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Called when core block is broken; re-verifies structure and/or sets all blocks to stone
 	 */
 	public void onBlockBroken() {
-		//LogHelper.finer(String.format("Verifying structure after core block broken at %d/%d/%d", xCoord, yCoord, zCoord));
 		if (!alreadyVerified) {
-			//LogHelper.finer("Wasn't already verified: removing structure after core block broken");
 			worldObj.playSoundEffect(xCoord + 0.5D, yCoord + 1, zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 			verifyStructure(true);
 		}
@@ -307,16 +413,13 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 							int id = worldObj.getBlockId(i, j, k);
 							if (replace) {
 								if (id == ZSSBlocks.secretStone.blockID) {
-									//LogHelper.finest(String.format("Replacing secret stone block at %d/%d/%d", i, j, k));
 									int meta = worldObj.getBlockMetadata(i, j, k);
 									worldObj.setBlock(i, j, k, BlockSecretStone.getIdFromMeta(meta), 0, 2);
 								}
 							} else {
 								Block block = (id > 0 ? Block.blocksList[id] : null);
 								if (!(block instanceof IDungeonBlock)) {
-									//LogHelper.finer(String.format("Block %s with id %d at %d/%d/%d with is invalid for this structure", block, id, i, j, k));
 									if (++invalid > 2) {
-										//LogHelper.finer("Too many invalid blocks during verification; returning false");
 										return false;
 									}
 								}
@@ -380,18 +483,13 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 			this.box = new StructureBoundingBox(tag.getIntArray("boxBounds"));
 		}
 		alreadyVerified = tag.hasKey("verified") ? tag.getBoolean("verified") : false;
-		// TODO change to just getBoolean("isBossRoom") after everyone updates
-		isBossRoom = tag.hasKey("isBossRoom") ? tag.getBoolean("isBossRoom") : tag.getBoolean("isLocked");
+		isBossRoom = tag.getBoolean("isBossRoom");
 		if (isBossRoom) {
-			if (tag.hasKey("dungeonName")) {
-				dungeonType = BossType.getBossType(tag.getString("dungeonName"));
-			} else {
-				// TODO remove after all previous worlds update to String storage:
-				LogHelper.warning(String.format("Detected old boss dungeon save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
-				dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
-			}
+			dungeonType = BossType.getBossType(tag.getString("dungeonName"));
 			isOpened = tag.getBoolean("isOpened");
-			if (tag.getBoolean("hasBossBattle")) {
+			if (dungeonType == null) {
+				LogHelper.severe(String.format("Error retrieving Boss Type from string %s while loading Dungeon Core from NBT at %d/%d/%d", tag.getString("dungeonName"), xCoord, yCoord, zCoord));
+			} else if (tag.getBoolean("hasBossBattle")) {
 				bossBattle = dungeonType.getBossBattle(this);
 				if (bossBattle != null) {
 					bossBattle.readFromNBT(tag);
@@ -404,18 +502,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 			int id = tag.getInteger("doorBlockId");
 			door = id > 0 ? Block.blocksList[id] : null;
 			doorSide = tag.getInteger("doorSide");
-		}
-		// TODO workaround for backwards compatibility:
-		if (tag.getBoolean("isSpawner")) {
-			LogHelper.warning(String.format("Detected old fairy spawner save format at %d/%d/%d - if you still see this message after saving and reloading near this location, please contact the mod author", xCoord, yCoord, zCoord));
-			NBTTagCompound spawnerData = new NBTTagCompound();
-			spawnerData.setInteger("maxFairies", tag.getInteger("maxFairies"));
-			spawnerData.setInteger("spawned", tag.getInteger("spawned"));
-			spawnerData.setInteger("nextResetDate", tag.getInteger("nextResetDate"));
-			spawnerData.setInteger("itemUpdate", tag.getInteger("itemUpdate"));
-			spawnerData.setInteger("rupees", tag.getInteger("rupees"));
-			spawnerData.setString("playerName", tag.getString("playerName"));
-			tag.setTag("FairySpawner", spawnerData);
 		}
 		if (tag.hasKey("FairySpawner")) {
 			fairySpawner = new FairySpawner(this);

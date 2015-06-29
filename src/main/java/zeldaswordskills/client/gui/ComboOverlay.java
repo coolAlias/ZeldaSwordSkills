@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,9 +27,9 @@ import net.minecraft.util.StatCollector;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.event.ForgeSubscribe;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.network.EndComboPacket;
+import zeldaswordskills.network.server.EndComboPacket;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -69,9 +69,13 @@ public class ComboOverlay extends Gui
 	/** Length of time combo pop-up will display */
 	private static final long DISPLAY_TIME = 5000;
 
+	/** Whether combo overlay should display */
+	public static boolean shouldDisplay;
+
 	public ComboOverlay() {
 		super();
 		this.mc = Minecraft.getMinecraft();
+		shouldDisplay = Config.isComboHudEnabled();
 	}
 
 	@ForgeSubscribe
@@ -79,7 +83,7 @@ public class ComboOverlay extends Gui
 		if (event.type != ElementType.HOTBAR) {
 			return;
 		}
-		ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
 		if (skills != null) {
 			displayComboText(skills, event.resolution);
 			ILockOnTarget skill = skills.getTargetingSkill();
@@ -92,7 +96,7 @@ public class ComboOverlay extends Gui
 	/**
 	 * Displays current combo data if applicable
 	 */
-	private void displayComboText(ZSSPlayerInfo skills, ScaledResolution resolution) {
+	private void displayComboText(ZSSPlayerSkills skills, ScaledResolution resolution) {
 		ICombo iCombo = skills.getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (combo != iCombo.getCombo()) {
@@ -114,13 +118,15 @@ public class ComboOverlay extends Gui
 			}
 			// TODO make display look nice
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
-				String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
-				mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
-				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
-				mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
-				List<Float> damageList = combo.getDamageList();
-				for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-					mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+				if (shouldDisplay) {
+					String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
+					mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
+					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getSize() + "/" + combo.getMaxSize(), 10, 20, 0xFFFFFF, true);
+					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
+					List<Float> damageList = combo.getDamageList();
+					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
+						mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+					}
 				}
 				// for Ending Blow, use canUse instead of canExecute to determine whether notification should be displayed
 				if (skills.getActiveSkill(SkillBase.endingBlow) != null && skills.getActiveSkill(SkillBase.endingBlow).canUse(mc.thePlayer)) {

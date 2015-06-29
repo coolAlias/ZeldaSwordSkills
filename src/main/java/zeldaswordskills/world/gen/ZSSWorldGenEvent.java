@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,11 +24,13 @@ import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import zeldaswordskills.lib.Config;
+import zeldaswordskills.world.gen.feature.WorldGenBombFlowers;
 import zeldaswordskills.world.gen.feature.WorldGenJars;
 import zeldaswordskills.world.gen.structure.MapGenBossRoom;
 import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoom;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoomNether;
+import zeldaswordskills.world.gen.structure.MapGenSongPillar;
 
 public class ZSSWorldGenEvent
 {
@@ -36,55 +38,15 @@ public class ZSSWorldGenEvent
 	private MapGenSecretRoomNether netherRoomGen = new MapGenSecretRoomNether();
 	private MapGenBossRoom bossRoomGen = new MapGenBossRoom();
 	private MapGenBossRoomNether netherBossGen = new MapGenBossRoomNether();
-
-	/*
-	@ForgeSubscribe
-	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		switch(event.world.provider.dimensionId) {
-		case -1: // the Nether
-			if (event.type == EventType.GLOWSTONE) {
-				if (Config.getNetherAttemptsPerChunk() > 0) {
-					netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-				if (Config.areBossDungeonsEnabled()) {
-					netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-			}
-			break;
-		case 0: // the Overworld
-			if (event.type == EventType.ICE) {
-				if (Config.getAttemptsPerChunk() > 0) {
-					secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-				if (Config.areBossDungeonsEnabled()) {
-					bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-				}
-			} else if (event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-				event.setResult(Result.DENY);
-			}
-			break;
-		default: break;
-		}
-	}
-	 */
+	private MapGenSongPillar pillarGen = new MapGenSongPillar();
+	private WorldGenJars jarGen = new WorldGenJars();
+	private WorldGenBombFlowers bombGen = new WorldGenBombFlowers();
 
 	// TERRAIN_GEN_BUS event
 	@ForgeSubscribe(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		switch(event.world.provider.dimensionId) {
-		case -1: // the Nether
-			if (event.type == EventType.GLOWSTONE) {
-				netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-			}
-			break;
-		case 0: // the Overworld
-			if (event.type == EventType.ICE) {
-				bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-			} else if (event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-				event.setResult(Result.DENY);
-			}
-			break;
-		default: break;
+		if (event.world.provider.isSurfaceWorld() && event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
+			event.setResult(Result.DENY);
 		}
 	}
 
@@ -93,14 +55,18 @@ public class ZSSWorldGenEvent
 	public void postPopulate(PopulateChunkEvent.Post event) {
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
+			netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			if (Config.getNetherAttemptsPerChunk() > 0) {
 				netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
 			break;
 		case 0: // the Overworld
+			bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			if (Config.getAttemptsPerChunk() > 0) {
 				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
+			pillarGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			bombGen.generate(event.world, event.rand, event.chunkX, event.chunkZ);
 			break;
 		default: break;
 		}
@@ -113,11 +79,11 @@ public class ZSSWorldGenEvent
 			if (event.world.provider.isHellWorld) {
 				for (int n = 0; n < Config.getJarClustersPerChunkNether(); ++n) {
 					if (event.rand.nextFloat() < Config.getJarGenChanceNether()) {
-						(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerClusterNether(), true);
+						jarGen.doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerClusterNether(), true);
 					}
 				}
 			} else if (event.rand.nextFloat() < Config.getJarGenChance() && event.rand.nextInt(4) == 0) {
-				(new WorldGenJars()).doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerCluster(), false);
+				jarGen.doJarGen(event.world, event.rand, event.chunkX, event.chunkZ, Config.getJarsPerCluster(), false);
 			}
 		} catch (Exception e) {
 			Throwable cause = e.getCause();
@@ -142,7 +108,7 @@ public class ZSSWorldGenEvent
 						int j = event.rand.nextInt(48) + event.rand.nextInt(48);
 						int k = event.chunkZ + event.rand.nextInt(16) + 8;
 						if (j < 60) {
-							(new WorldGenJars()).generate2(event.world, event.rand, i, j, k, Config.getJarsPerClusterSub(), true);
+							jarGen.generate2(event.world, event.rand, i, j, k, Config.getJarsPerClusterSub(), true);
 						}
 					}
 				}

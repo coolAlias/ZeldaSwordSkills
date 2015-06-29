@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import java.util.Set;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -41,22 +40,24 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceDirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFire;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
+import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityCyclone;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
-import zeldaswordskills.entity.projectile.EntityMagicSpell.MagicType;
 import zeldaswordskills.entity.projectile.EntityMobThrowable;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.PacketISpawnParticles;
+import zeldaswordskills.network.client.PacketISpawnParticles;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -79,8 +80,10 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 {
 	/** The type of magic this rod uses (e.g. FIRE, ICE, etc.) */
 	private final MagicType magicType;
+
 	/** The amount of damage inflicted by the rod's projectile spell */
 	private final float damage;
+
 	/** Amount of exhaustion to add each tick */
 	private final float fatigue;
 
@@ -100,23 +103,31 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/** Returns the current cooldown on this stack */
-	private int getCooldown(ItemStack stack) {
-		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("cooldown") : 0);
+	/**
+	 * Returns the next time this stack may be used
+	 */
+	private long getNextUseTime(ItemStack stack) {
+		return (stack.hasTagCompound() ? stack.getTagCompound().getLong("next_use") : 0);
 	}
 
-	/** Sets the cooldown on this stack */
-	private void setCooldown(ItemStack stack, int cooldown) {
+	/**
+	 * Sets the next time this stack may be used to the current world time plus a number of ticks
+	 */
+	private void setNextUseTime(ItemStack stack, World world, int ticks) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("cooldown", cooldown);
+		stack.getTagCompound().setLong("next_use", (world.getWorldTime() + ticks));
 	}
 
-	/** Returns whether the rod has absorbed its associated sacred flame */
+	/**
+	 * Returns whether the rod has absorbed its associated sacred flame
+	 */
 	private boolean hasAbsorbedFlame(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getBoolean("absorbedFlame"));
 	}
 
-	/** Returns true if the rod is upgraded to the 'Nice' version */
+	/**
+	 * Returns true if the rod is upgraded to the 'Nice' version
+	 */
 	private boolean isUpgraded(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getBoolean("isUpgraded"));
 	}
@@ -139,7 +150,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (player.capabilities.isCreativeMode || (getCooldown(stack) == 0 && player.getFoodStats().getFoodLevel() > 0)) {
+		if (player.capabilities.isCreativeMode || (world.getWorldTime() > getNextUseTime(stack) && player.getFoodStats().getFoodLevel() > 0)) {
 			player.swingItem();
 			if (player.isSneaking()) {
 				boolean isUpgraded = isUpgraded(stack);
@@ -156,7 +167,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 				}
 				player.addExhaustion(fatigue);
 				if (!player.capabilities.isCreativeMode) {
-					setCooldown(stack, 30);
+					setNextUseTime(stack, world, 30);
 				}
 			} else {
 				player.addExhaustion(fatigue / 8.0F);
@@ -170,13 +181,6 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 			player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 		}
 		return stack;
-	}
-
-	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (getCooldown(stack) > 0) {
-			setCooldown(stack, getCooldown(stack) - 1);
-		}
 	}
 
 	@Override
@@ -220,16 +224,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 				}
 			}
 		}
-		switch(magicType) {
-		case ICE:
-			if (ticksInUse % 4 == 0) {
-				world.playSoundAtEntity(player, Sounds.MAGIC_ICE, 0.5F + world.rand.nextFloat(), world.rand.nextFloat() * 0.4F + 0.8F);
-			}
-			break;
-		default:
-			if (ticksInUse % 12 == 0) {
-				world.playSoundAtEntity(player, Sounds.MAGIC_FIRE, 1.0F + world.rand.nextFloat(), world.rand.nextFloat() * 0.7F + 0.3F);
-			}
+		if (ticksInUse % magicType.getSoundFrequency() == 0) {
+			world.playSoundAtEntity(player, magicType.getMovingSound(), magicType.getSoundVolume(world.rand), magicType.getSoundPitch(world.rand));
 		}
 	}
 
@@ -292,6 +288,8 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 					world.setBlock(position.x, position.y, position.z, Block.fire.blockID);
 					world.playSoundEffect(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D,
 							Sounds.FIRE_IGNITE, 1.0F, world.rand.nextFloat() * 0.4F + 0.8F);
+				} else if (blockId == ZSSBlocks.bombFlower.blockID) {
+					ZSSBlocks.bombFlower.onBlockExploded(world, position.x, position.y, position.z, null);
 				}
 				break;
 			case ICE:
@@ -321,22 +319,21 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	/** Only used for Fire and Ice Rods */
 	private DamageSource getDamageSource(EntityPlayer player) {
 		switch(magicType) {
-		case ICE: return new DamageSourceIce("blast.ice", player, 60, 1);
-		default: return new DamageSourceDirect("blast.fire", player).setFireDamage();
+		case ICE: return new DamageSourceIce("blast.ice", player, 60, 1, true);
+		default: return new DamageSourceFire("blast.fire", player, true);
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector) {
-		String particle = (magicType == MagicType.FIRE ? "flame" : "snowshovel");
 		y += 1.62D;
 		for (float f = 0; f < r; f += 0.5F) {
 			x += lookVector.xCoord;
 			y += lookVector.yCoord;
 			z += lookVector.zCoord;
 			for (int i = 0; i < 4; ++i) {
-				world.spawnParticle(particle,
+				world.spawnParticle(magicType.getTrailingParticle(),
 						x + 0.5F - world.rand.nextFloat(),
 						y + 0.5F - world.rand.nextFloat(),
 						z + 0.5F - world.rand.nextFloat(),
@@ -386,7 +383,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive) {
 		if (!world.isRemote) {
 			if (hasAbsorbedFlame(stack)) {
-				player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.old.any", getItemDisplayName(stack)));
+				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.old.any", getItemStackDisplayName(stack));
 			} else if (isActive) {
 				boolean canAbsorb = false;
 				switch(magicType) {
@@ -400,14 +397,14 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 					}
 					stack.getTagCompound().setBoolean("absorbedFlame", true);
 					world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
-					player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.sacred_flame.new",
-							getItemDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type)));
+					PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.new",
+							getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type));
 					return true;
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.random"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.random");
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.inactive");
 			}
 			WorldUtils.playSoundAtEntity(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
 		}
@@ -425,7 +422,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 		} else {
 			core.worldObj.playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.fairy.laugh.unworthy"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
 		}
 	}
 

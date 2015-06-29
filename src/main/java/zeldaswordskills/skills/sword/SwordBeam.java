@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,15 +23,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
@@ -108,7 +111,9 @@ public class SwordBeam extends SkillActive
 
 	/** The percent of base sword damage that should be inflicted, as an integer */
 	private int getDamageFactor(EntityPlayer player) {
-		return 30 + (level * 10);
+		ItemStack mask = player.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM);
+		int base = (mask != null && mask.getItem() == ZSSItems.maskFierce) ? 55 : 30;
+		return base + (level * 10);
 	}
 
 	/** Returns player's base damage (with sword) plus 1.0F per level */
@@ -175,7 +180,7 @@ public class SwordBeam extends SkillActive
 		if (missTimer > 0 && !player.worldObj.isRemote) {
 			--missTimer;
 			if (missTimer == 0) {
-				ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
+				ICombo combo = ZSSPlayerSkills.get(player).getComboSkill();
 				if (combo != null && combo.isComboInProgress()) {
 					combo.getCombo().endCombo(player);
 				}

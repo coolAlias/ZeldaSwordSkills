@@ -350,14 +350,14 @@ combo.label.11=Coup de maître
 combo.label.12=Légendaire
 combo.ending=TERMINE LE !!!!
 
-creativetab.zss.block=Zelda : Blocks
-creativetab.zss.combat=Zelda : Combat
-creativetab.zss.eggs=Zelda : Oeufs de Spawn
-creativetab.zss.keys=Zelda : Clés
-creativetab.zss.masks=Zelda : Masques
-creativetab.zss.misc=Zelda : Trésors
-creativetab.zss.skill=Zelda : Compétences
-creativetab.zss.tools=Zelda : Objets
+itemGroup.zss.block=Zelda : Blocks
+itemGroup.zss.combat=Zelda : Combat
+itemGroup.zss.eggs=Zelda : Oeufs de Spawn
+itemGroup.zss.keys=Zelda : Clés
+itemGroup.zss.masks=Zelda : Masques
+itemGroup.zss.misc=Zelda : Trésors
+itemGroup.zss.skill=Zelda : Compétences
+itemGroup.zss.tools=Zelda : Objets
 
 death.attack.armorBreak=%1L'armure de $s a été percée par %2$s
 death.attack.armorBreak.item=%1L'armure de $s a été percée par %2$s avec un %3$s

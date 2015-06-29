@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,20 @@
 
 package zeldaswordskills.inventory;
 
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.item.ZSSItems;
 
-public class InventoryMaskTrader extends AbstractInventory {
-	
+public class InventoryMaskTrader extends AbstractInventory
+{
+	private static ItemStack zoraMask;
+	static {
+		zoraMask = new ItemStack(ZSSItems.maskZora);
+		zoraMask.addEnchantment(Enchantment.respiration, 3);
+	}
+
 	private static final ItemStack[] masks = {
 		new ItemStack(ZSSItems.maskBunny),
 		new ItemStack(ZSSItems.maskCouples),
@@ -35,7 +42,7 @@ public class InventoryMaskTrader extends AbstractInventory {
 		new ItemStack(ZSSItems.maskDeku),
 		new ItemStack(ZSSItems.maskGoron),
 		new ItemStack(ZSSItems.maskGerudo),
-		new ItemStack(ZSSItems.maskZora),
+		InventoryMaskTrader.zoraMask,
 		new ItemStack(ZSSItems.maskFierce)
 	};
 

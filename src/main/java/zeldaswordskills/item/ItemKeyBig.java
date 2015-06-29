@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -32,13 +32,11 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
-import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.MerchantRecipeHelper;
-import zeldaswordskills.util.WorldUtils;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -58,19 +56,19 @@ public class ItemKeyBig extends Item
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabKeys);
 	}
-	
+
 	/**
 	 * Returns the appropriate big key for biome found at given coordinates, or null
 	 */
 	public static ItemStack getKeyForBiome(World world, int x, int z) {
 		BossType type = BossType.getBossType(world, x, z);
 		if (type != null) {
-			return new ItemStack(ZSSItems.keyBig.itemID,1,type.ordinal());
+			return new ItemStack(ZSSItems.keyBig.itemID, 1, type.ordinal());
 		} else {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
@@ -79,36 +77,23 @@ public class ItemKeyBig extends Item
 			if (trades != null) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;
 	}
-	
-	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-		if (world.getBlockId(x, y, z) == ZSSBlocks.doorLocked.blockID) {
-			if (stack.getItemDamage() == (world.getBlockMetadata(x, y, z) & ~0x8)) {
-				--stack.stackSize;
-				WorldUtils.playSoundAtEntity(player, Sounds.LOCK_DOOR, 0.4F, 0.5F);
-				world.setBlockToAir(x, y, z);
-				return true;
-			}
-		}
-		return false;
-	}
-	
+
 	@Override
 	public String getItemDisplayName(ItemStack stack) {
 		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name",
 				BossType.values()[stack.getItemDamage() % BossType.values().length].getDisplayName());
 	}
-	
+
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		return getUnlocalizedName().substring(9) + stack.getItemDamage();
@@ -136,7 +121,7 @@ public class ItemKeyBig extends Item
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":key_" + BossType.values()[i].getUnlocalizedName());
 		}
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {

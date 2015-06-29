@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package zeldaswordskills.block.tileentity;
 
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -29,10 +29,13 @@ import net.minecraft.tileentity.TileEntity;
  * disallows update ticks by default, so re-override canUpdate if needed
  *
  */
-public abstract class TileEntityInventory extends TileEntity implements IInventory
+public abstract class TileEntityInventory extends TileEntity implements ISidedInventory
 {
 	/** The tile entity's inventory slots need to be initialized during construction */
 	protected ItemStack[] inventory;
+
+	/** Dummy array to return for {@link ISidedInventory#getAccessibleSlotsFromSide} */
+	private static final int[] availableSlots = new int[]{0};
 
 	@Override
 	public boolean canUpdate() {
@@ -113,4 +116,18 @@ public abstract class TileEntityInventory extends TileEntity implements IInvento
 	@Override
 	public void closeChest() {}
 
+	@Override
+	public int[] getAccessibleSlotsFromSide(int side) {
+		return availableSlots;
+	}
+
+	@Override
+	public boolean canInsertItem(int slot, ItemStack stack, int side) {
+		return false;
+	}
+
+	@Override
+	public boolean canExtractItem(int slot, ItemStack stack, int side) {
+		return false;
+	}
 }

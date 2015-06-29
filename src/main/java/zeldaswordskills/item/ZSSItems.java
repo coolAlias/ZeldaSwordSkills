@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,10 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.material.Material;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.EnumToolMaterial;
@@ -36,7 +40,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.Configuration;
@@ -44,6 +50,7 @@ import net.minecraftforge.common.EnumHelper;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
@@ -55,17 +62,26 @@ import zeldaswordskills.client.render.item.RenderItemCustomBow;
 import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityChu;
-import zeldaswordskills.entity.EntityKeese;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.projectile.EntityMagicSpell.MagicType;
+import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.projectile.EntitySeedShot;
+import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
+import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.handler.TradeHandler;
+import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.LogHelper;
+import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.world.gen.structure.LinksHouse;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -121,20 +137,10 @@ public class ZSSItems
 	/*================== RECIPES =====================*/
 	/** Whether smelting gold swords into ingots is allowed */
 	private static boolean allowGoldSmelting;
-
-	/*================== STARTING GEAR =====================*/
-	/** Whether starting gear will be granted */
-	private static boolean enableStartingGear;
-	/** Whether starting gear is automatically equipped when granted */
-	private static boolean enableAutoEquip;
-	/** Grants a single Basic Sword skill orb */
-	private static boolean enableOrb;
-	/** Grants the full set of Kokiri clothing: hat, tunic, trousers, boots */
-	private static boolean enableFullSet;
-	/** Grants only the Kokiri Tunic */
-	private static boolean enableTunic;
-	/** Grants the Kokiri sword (a named wooden sword) */
-	private static boolean enableSword;
+	/** Enable crafting of the Wooden Hammer used to bypass wooden pegs */
+	private static boolean enableCraftingHammer;
+	/** Enable crafting throwing rocks from cobblestone and back */
+	private static boolean enableCraftingThrowingRock;
 
 	/** List of potential extra drops from tall grass when cut with a sword */
 	private static final List<ItemStack> grassDrops = new ArrayList<ItemStack>();
@@ -143,9 +149,6 @@ public class ZSSItems
 	public static final EnumArmorMaterial WOOD = EnumHelper.addArmorMaterial("Wood", 5, new int[] {1,3,2,1}, 5);
 
 	/* Creative Tabs are sorted in the order that Items are declared */
-
-	//================ BLOCKS TAB ================//
-	public static Item doorLocked;
 
 	//================ SKILLS TAB ================//
 	public static Item
@@ -156,8 +159,11 @@ public class ZSSItems
 	//================ KEYS TAB ================//
 	public static Item
 	keyBig,
-	keySkeleton,
-	keySmall;
+	keySmall,
+	keySkeleton;
+
+	//================ BLOCKS TAB ================//
+	public static Item doorLocked, doorLockedSmall;
 
 	//================ TOOLS TAB ================//
 	public static Item
@@ -170,10 +176,12 @@ public class ZSSItems
 	crystalNayru,
 	dekuLeaf,
 	dekuNut,
+	bombFlowerSeed,
 	gauntletsSilver,
 	gauntletsGolden,
 	hookshot,
 	hookshotAddon,
+	whip,
 	rodFire,
 	rodIce,
 	rodTornado,
@@ -186,10 +194,13 @@ public class ZSSItems
 
 	//================ TREASURES TAB ================//
 	public static Item
+	instrument,
 	pendant,
 	masterOre,
 	jellyChu,
-	treasure;
+	treasure,
+	skulltulaToken,
+	linksHouse;
 
 	//================ NO TAB ================//
 	public static Item
@@ -213,8 +224,8 @@ public class ZSSItems
 
 	tunicZoraHelm,
 	tunicZoraChest,
-	tunicZoraLegs;
-	//tunicZoraBoots; // flippers?
+	tunicZoraLegs,
+	tunicZoraBoots;
 
 	/** Special Boots */
 	public static Item
@@ -239,7 +250,8 @@ public class ZSSItems
 	swordMaster,
 	swordTempered,
 	swordGolden,
-	swordMasterTrue;
+	swordMasterTrue,
+	swordDarknut;
 
 	/** Other Melee Weapons */
 	public static Item
@@ -290,13 +302,15 @@ public class ZSSItems
 	public static Item
 	eggSpawner, // for all Entities with only one type
 	eggChu,
+	eggDarknut,
 	eggKeese,
-	eggOctorok;
+	eggOctorok,
+	eggWizzrobe;
 
 	/**
 	 * Initializes mod item indices from configuration file
 	 */
-	public static void init(Configuration config) {
+	public static void initConfig(Configuration config) {
 		modItemIndex = config.getItem("modItemIndex", MOD_ITEM_INDEX_DEFAULT).getInt() - 256;
 
 		/*================== GRASS DROPS =====================*/
@@ -311,32 +325,38 @@ public class ZSSItems
 
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
-
-		/*================== STARTING GEAR =====================*/
-		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", false).getBoolean(false);
-		enableAutoEquip = config.get("Bonus Gear", "Automatically equip starting equipment", true).getBoolean(true);
-		enableOrb = config.get("Bonus Gear", "Grants a single Basic Sword skill orb", true).getBoolean(true);
-		enableFullSet = config.get("Bonus Gear", "Grants a full set of Kokiri clothing: hat, tunic, trousers, boots", true).getBoolean(true);
-		enableTunic = config.get("Bonus Gear", "Grants only a Kokiri Tunic (if full set is disabled)", true).getBoolean(true);
-		enableSword = config.get("Bonus Gear", "Grants a Kokiri sword (a named wooden sword)", true).getBoolean(true);
+		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
+		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
 	}
 
 	/**
 	 * Call during FMLPreInitializationEvent to initialize and register all items.
-	 * Also calls various initialization methods for special Items, registers recipes,
-	 * adds loot to vanilla chests, trades, dispenser behavior, and adds drops.
 	 */
-	public static void init() {
+	public static void preInit() {
 		ZSSItems.initItems();
 		ZSSItems.registerItems();
 		ItemChuJelly.initializeJellies();
 		ItemHeroBow.initializeArrows();
 		ItemSlingshot.initializeSeeds();
+		ZSSItems.addDispenserBehaviors();
+	}
+
+	/**
+	 * Call during FMLInitializationEvent to register all crafting recipes.
+	 */
+	public static void init() {
 		ZSSItems.registerRecipes();
+	}
+
+	/**
+	 * Call during FMLServerStartingEvent to register trades and add loot.
+	 * Delaying this until server start ensures that any block / item ID conflicts
+	 * caused by other mods being added or removed will have been resolved.
+	 */
+	public static void onServerStarting() {
+		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
 		TradeHandler.registerTrades();
-		ZSSItems.addGrassDrops();
-		ZSSItems.addDispenserBehaviors();
 	}
 
 	/**
@@ -351,6 +371,7 @@ public class ZSSItems
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.hammerSkull.itemID, new RenderBigItem(1.0F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordBiggoron.itemID, new RenderBigItem(0.75F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordGiant.itemID, new RenderBigItem(0.75F));
+		MinecraftForgeClient.registerItemRenderer(ZSSItems.swordDarknut.itemID, new RenderBigItem(0.9F));
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.heroBow.itemID, new RenderItemCustomBow());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldDeku.itemID, new RenderItemShield());
 		MinecraftForgeClient.registerItemRenderer(ZSSItems.shieldHylian.itemID, new RenderItemShield());
@@ -390,31 +411,42 @@ public class ZSSItems
 	 * Gives player appropriate starting gear or returns false
 	 */
 	public static boolean grantBonusGear(EntityPlayer player) {
-		if (!enableStartingGear) {
+		if (!Config.enableStartingGear) {
 			return false;
 		}
-		if (enableSword) {
-			player.inventory.addItemStackToInventory(new ItemStack(swordKokiri));
+
+		if (Config.enableLinksHouse) {
+			player.inventory.addItemStackToInventory(new ItemStack(linksHouse));
+		} else {
+			if (Config.enableSword) {
+				player.inventory.addItemStackToInventory(new ItemStack(swordKokiri));
+			}
+			if (Config.enableOrb) {
+				player.inventory.addItemStackToInventory(new ItemStack(skillOrb,1,SkillBase.swordBasic.getId()));
+			}
 		}
-		if (enableOrb) {
-			player.inventory.addItemStackToInventory(new ItemStack(skillOrb,1,SkillBase.swordBasic.getId()));
-		}
-		if (enableFullSet) {
+		if (Config.enableFullSet) {
 			ItemStack[] set = { new ItemStack(tunicHeroBoots),new ItemStack(tunicHeroLegs),
 					new ItemStack(tunicHeroChest),new ItemStack(tunicHeroHelm)};
 			for (int i = 0; i < set.length; ++i) {
-				if (enableAutoEquip && player.getCurrentArmor(i) == null) {
+				if (Config.enableAutoEquip && player.getCurrentArmor(i) == null) {
 					player.setCurrentItemOrArmor(i + 1, set[i]);
 				} else {
 					player.inventory.addItemStackToInventory(set[i]);
 				}
 			}
-		} else if (enableTunic) {
-			if (enableAutoEquip && player.getCurrentArmor(3) == null) {
+		} else if (Config.enableTunic) {
+			if (Config.enableAutoEquip && player.getCurrentArmor(3) == null) {
 				player.setCurrentItemOrArmor(3, new ItemStack(tunicHeroChest));
 			} else {
 				player.inventory.addItemStackToInventory(new ItemStack(tunicHeroChest));
 			}
+		}
+		if (Config.enableNavi) {
+			ItemStack navi = new ItemStack(fairyBottle);
+			navi.setItemName("Navi");
+			player.inventory.addItemStackToInventory(navi);
+
 		}
 		return true;
 	}
@@ -434,7 +466,22 @@ public class ZSSItems
 		tunicGoronLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.goron_tunic_legs");
 
 		tunicZoraChest = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_CHEST).setEffect(new PotionEffect(Potion.waterBreathing.id, 90, 0)).setUnlocalizedName("zss.zora_tunic_chest");
-		tunicZoraHelm = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.zora_tunic_helm");
+		tunicZoraHelm = (new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM) {
+			@Override
+			@SideOnly(Side.CLIENT)
+			public void getSubItems(int item, CreativeTabs tab, List list) {
+				ItemStack helm = new ItemStack(item, 1, 0);
+				helm.addEnchantment(Enchantment.respiration, 3);
+				list.add(helm);
+			}
+			@Override
+			public WeightedRandomChestContent getChestGenBase(ChestGenHooks chest, Random rnd, WeightedRandomChestContent original) {
+				ItemStack helm = new ItemStack(this);
+				helm.addEnchantment(Enchantment.respiration, 3);
+				original.theItemId = helm;
+				return original;
+			}
+		}).setUnlocalizedName("zss.zora_tunic_helm");
 		tunicZoraLegs = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.zora_tunic_legs");
 
 		tunicHeroBoots = new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS).setUnlocalizedName("zss.hero_tunic_boots");
@@ -456,7 +503,7 @@ public class ZSSItems
 		supershot = new ItemSlingshot(modItemIndex++, 5, 15F).setUnlocalizedName("zss.supershot");
 
 		// BLOCK TAB ITEMS
-		doorLocked = new ItemDoorLocked(modItemIndex++).setUnlocalizedName("zss.doorlocked");
+		doorLocked = new ItemDoorBoss(modItemIndex++).setUnlocalizedName("zss.doorlocked");
 
 		// MISCELLANEOUS TAB ITEMS
 		hookshot = new ItemHookShot(modItemIndex++).setUnlocalizedName("zss.hookshot");
@@ -464,17 +511,28 @@ public class ZSSItems
 		bombBag = new ItemBombBag(modItemIndex++).setUnlocalizedName("zss.bombbag");
 		bomb = new ItemBomb(modItemIndex++).setUnlocalizedName("zss.bomb");
 		pendant = new ItemPendant(modItemIndex++).setUnlocalizedName("zss.pendant");
-		masterOre = new ItemMiscZSS(modItemIndex++,24).setUnlocalizedName("zss.masterore");
+		masterOre = new ItemMasterOre(modItemIndex++,24).setUnlocalizedName("zss.masterore");
 		keySmall = new ItemMiscZSS(modItemIndex++,6).setUnlocalizedName("zss.keysmall").setFull3D().setCreativeTab(ZSSCreativeTabs.tabKeys);
 		keyBig = new ItemKeyBig(modItemIndex++).setUnlocalizedName("zss.keybig").setFull3D();
-		keySkeleton = new ItemMiscZSS(modItemIndex++,32).setUnlocalizedName("zss.keyskeleton").setFull3D().setMaxStackSize(1).setCreativeTab(ZSSCreativeTabs.tabKeys);
+		keySkeleton = new ItemMiscZSS(modItemIndex++,32).setUnlocalizedName("zss.keyskeleton").setFull3D().setMaxStackSize(1).setMaxDamage(Config.getNumSkelKeyUses()).setCreativeTab(ZSSCreativeTabs.tabKeys);
 		magicMirror = new ItemMagicMirror(modItemIndex++).setUnlocalizedName("zss.magicmirror");
 		fairyBottle = new ItemFairyBottle(modItemIndex++).setUnlocalizedName("zss.fairybottle");
 		rocsFeather = new ItemMiscZSS(modItemIndex++,12).setUnlocalizedName("zss.rocs_feather").setCreativeTab(ZSSCreativeTabs.tabTools);
 
 		// ITEMS WITH NO TAB
 		smallHeart = new ItemPickupOnly(modItemIndex++).setUnlocalizedName("zss.heart");
-		throwingRock = new Item(modItemIndex++).setUnlocalizedName("zss.throwing_rock").setTextureName(ModInfo.ID + ":throwing_rock").setMaxStackSize(16);
+		throwingRock = (new Item(modItemIndex++) {
+			@Override
+			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+				if (!player.capabilities.isCreativeMode) {
+					--stack.stackSize;
+				}
+				if (!world.isRemote) {
+					world.spawnEntityInWorld(new EntityThrowingRock(world, player));
+				}
+				return stack;
+			}
+		}).setUnlocalizedName("zss.throwing_rock").setTextureName(ModInfo.ID + ":throwing_rock").setMaxStackSize(18);
 
 		// 0.5.16 NEW ITEMS
 		heroBow = new ItemHeroBow(modItemIndex++).setUnlocalizedName("zss.bow_hero");
@@ -485,7 +543,20 @@ public class ZSSItems
 		arrowIce = new ItemZeldaArrow(modItemIndex++, "arrow_ice", true);
 		arrowLight = new ItemZeldaArrow(modItemIndex++, "arrow_light", true);
 
-		dekuNut = new ItemMiscZSS(modItemIndex++, 2).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
+		dekuNut = (new ItemMiscZSS(modItemIndex++, 2) {
+			@Override
+			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+				EntitySeedShot seedShot = new EntitySeedShot(world, player, 0.5F, 1, 0).setType(SeedType.DEKU);
+				seedShot.setDamage(2.5F);
+				if (!player.capabilities.isCreativeMode) {
+					--stack.stackSize;
+				}
+				if (!world.isRemote) {
+					world.spawnEntityInWorld(seedShot);
+				}
+				return stack;
+			}
+		}).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
 
 		maskHawkeye = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_hawkeye");
 		crystalSpirit = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.spirit_crystal_empty").setMaxStackSize(1).setCreativeTab(ZSSCreativeTabs.tabTools);
@@ -515,7 +586,20 @@ public class ZSSItems
 		maskBlast = new ItemMask(modItemIndex++, EnumArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_blast");
 		// can't use CLOTH as it expects an overlay and crashes when rendering
 		maskBunny = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(1, 64).setUnlocalizedName("zss.mask_bunny");
-		maskCouples = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(40, 32).setUnlocalizedName("zss.mask_couples");
+		maskCouples = (new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")) {
+			@Override
+			public void onArmorTickUpdate(World world, EntityPlayer player, ItemStack stack) {
+				super.onArmorTickUpdate(world, player, stack);
+				if (world.getWorldTime() % 64 == 0) {
+					List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.boundingBox.expand(8.0D, 3.0D, 8.0D));
+					for (EntityVillager villager : villagers) {
+						if (world.rand.nextFloat() < 0.5F) {
+							ZSSVillagerInfo.get(villager).setMating();
+						}
+					}
+				}
+			}
+		}).setPrice(40, 32).setUnlocalizedName("zss.mask_couples");
 		maskGerudo = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_gerudo");
 		maskGiants = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_giants");
 		maskGibdo = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_gibdo");
@@ -527,19 +611,28 @@ public class ZSSItems
 		maskTruth = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_truth");
 		maskDeku = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_deku");
 		maskGoron = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_goron");
-		maskZora = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_zora");
+		maskZora = new ItemMaskZora(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_zora");
 		maskFierce = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("zss.mask_fierce");
 
 		hammer = new ItemHammer(modItemIndex++, BlockWeight.VERY_LIGHT, 8.0F, 50.0F).setUnlocalizedName("zss.hammer");
 		hammerSkull = new ItemHammer(modItemIndex++, BlockWeight.MEDIUM, 12.0F, 50.0F).setUnlocalizedName("zss.hammer_skull");
 		hammerMegaton = new ItemHammer(modItemIndex++, BlockWeight.VERY_HEAVY, 16.0F, 50.0F).setUnlocalizedName("zss.hammer_megaton");
 
-		skillWiper = new ItemMiscZSS(modItemIndex++, 0).setUnlocalizedName("zss.skill_wiper").setCreativeTab(ZSSCreativeTabs.tabSkills);
+		skillWiper = (new ItemMiscZSS(modItemIndex++, 0) {
+			@Override
+			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+				if (!world.isRemote) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.skill.reset");
+					ZSSPlayerSkills.get(player).resetSkills();
+				}
+				return stack;
+			}
+		}).setUnlocalizedName("zss.skill_wiper").setCreativeTab(ZSSCreativeTabs.tabSkills);
 
 		// 0.6.1 new items
-		shieldDeku = new ItemZeldaShield(modItemIndex++, 30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
-		shieldHylian = new ItemZeldaShield(modItemIndex++, 18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
-		shieldMirror = new ItemZeldaShield(modItemIndex++, 24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
+		shieldDeku = new ItemZeldaShield(modItemIndex++, EnumToolMaterial.WOOD, 0.25F, 30, 3F, 5F).setUnlocalizedName("zss.shield_deku");
+		shieldHylian = new ItemZeldaShield(modItemIndex++, EnumToolMaterial.IRON, 0.5F, 18, 5F, 3.5F).setUnlocalizedName("zss.shield_hylian");
+		shieldMirror = new ItemZeldaShield(modItemIndex++, EnumToolMaterial.EMERALD, 0.75F, 24, 4F, 4F).setUnlocalizedName("zss.shield_mirror");
 
 		maskMajora = new ItemMask(modItemIndex++, WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.wither.id, 100, 1)).setUnlocalizedName("zss.mask_majora");
 
@@ -553,6 +646,53 @@ public class ZSSItems
 		eggChu = new ItemCustomVariantEgg(modItemIndex++, EntityChu.class, "chu").setUnlocalizedName("zss.eggChu");
 		eggKeese = new ItemCustomVariantEgg(modItemIndex++, EntityKeese.class, "keese").setUnlocalizedName("zss.eggKeese");
 		eggOctorok = new ItemCustomVariantEgg(modItemIndex++, EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
+
+		// Post v1.0 items:
+		whip = new ItemWhip(modItemIndex++).setUnlocalizedName("zss.whip");
+		tunicZoraBoots = (new ItemArmorTunic(modItemIndex++, ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_BOOTS) {
+			@Override
+			public void onArmorTickUpdate(World world, EntityPlayer player, ItemStack stack) {
+				int i = MathHelper.floor_double(player.posX);
+				int j = MathHelper.floor_double(player.boundingBox.minY);
+				int k = MathHelper.floor_double(player.posZ);
+				Material m = world.getBlockMaterial(i, j + 1, k);
+				if (m.isLiquid() && m != Material.lava && !player.onGround && !player.capabilities.isFlying) {
+					if (((player.motionX * player.motionX) + (player.motionZ * player.motionZ)) < 1.65D) {
+						player.motionX *= 1.115D;
+						player.motionZ *= 1.115D;
+					}
+				} else if (!m.isLiquid() && player.onGround && !player.capabilities.isFlying) {
+					player.motionX *= 0.125D;
+					player.motionZ *= 0.125D;
+					if (player.isSprinting()) {
+						player.setSprinting(false);
+					}
+				}
+			}
+		}).setUnlocalizedName("zss.zora_tunic_boots");
+		doorLockedSmall = new ItemDoorLocked(modItemIndex++, ZSSBlocks.doorLockedSmall).setUnlocalizedName("zss.door_locked_small");
+		linksHouse = new ItemBuilderSeed(modItemIndex++, LinksHouse.class, "You must first clear this area of debris!", "deku_nut").setUnlocalizedName("zss.links_house");
+		bombFlowerSeed = new ItemBombFlowerSeed(modItemIndex++).setUnlocalizedName("zss.seed_bomb_flower");
+		swordDarknut = new ItemZeldaSword(modItemIndex++, EnumToolMaterial.IRON, 1.0F, true, 20, 0.5F).setUnlocalizedName("zss.sword_darknut").setMaxDamage(768);
+		eggDarknut = new ItemCustomVariantEgg(modItemIndex++, EntityDarknut.class, "darknut").setUnlocalizedName("zss.eggDarknut");
+		eggWizzrobe = new ItemCustomVariantEgg(modItemIndex++, EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("zss.eggWizzrobe");
+		instrument = new ItemInstrument(modItemIndex++);
+		skulltulaToken = (new ItemMiscZSS(modItemIndex++, 20) {
+			@Override
+			protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
+				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
+				if (villager.getClass().isAssignableFrom(EntityVillager.class) && ("Cursed Man").equals(villager.getCustomNameTag())) {
+					villagerInfo.handleSkulltulaTrade(stack, player);
+				} else if (villager.isChild()) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+				} else if (villagerInfo.isHunter()) {
+					villagerInfo.addHunterTrade(player, new ItemStack(this), sellPrice);
+				} else {
+					int i = villager.getProfession();
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.skulltula_token.villager." + (i > 4 ? "custom" : i));
+				}
+			}
+		}).setUnlocalizedName("zss.skulltula_token");
 	}
 
 	/**
@@ -586,16 +726,30 @@ public class ZSSItems
 		if (allowGoldSmelting) {
 			FurnaceRecipes.smelting().addSmelting(Item.swordGold.itemID, new ItemStack(Item.ingotGold), 0.0F);
 		}
+		if (enableCraftingHammer) {
+			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Block.wood, 's', Item.stick);
+		}
+		if (enableCraftingThrowingRock) {
+			GameRegistry.addShapelessRecipe(new ItemStack(throwingRock, 9), Block.cobblestone);
+			GameRegistry.addRecipe(new ItemStack(Block.cobblestone), "rrr", "rrr", "rrr", 'r', throwingRock);
+		}
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Block.blockNetherQuartz, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
-		GameRegistry.addRecipe(new ItemStack(arrowBomb), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 'a', Item.arrow);
-		GameRegistry.addRecipe(new ItemStack(arrowBombFire), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_FIRE.ordinal()), 'a', Item.arrow);
-		GameRegistry.addRecipe(new ItemStack(arrowBombWater), "b","a", 'b', new ItemStack(bomb,1,BombType.BOMB_WATER.ordinal()), 'a', Item.arrow);
+		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Block.planks);
+		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.gossipStone), " s ","sos"," s ", 's', Block.stone, 'o', new ItemStack(ZSSItems.instrument, 1, Instrument.OCARINA_FAIRY.ordinal()));
+		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTarget), " c ","bab"," b ", 'a', Item.redstone, 'b', Block.stone, 'c', Block.fenceIron);
+		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.hookTargetAll), "bcb", "cac", "bcb", 'a', Item.redstone, 'b', Block.stone, 'c', Block.fenceIron);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBomb), new ItemStack(bomb, 1, BombType.BOMB_STANDARD.ordinal()), Item.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombFire), new ItemStack(bomb, 1, BombType.BOMB_FIRE.ordinal()), Item.arrow);
+		GameRegistry.addShapelessRecipe(new ItemStack(arrowBombWater), new ItemStack(bomb, 1, BombType.BOMB_WATER.ordinal()), Item.arrow);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Item.brick);
-		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronHelm), tunicHeroHelm, new ItemStack(Item.dyePowder,1,1));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Item.dyePowder,1,1));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraHelm), tunicHeroHelm, new ItemStack(Item.dyePowder,1,4));
-		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Item.dyePowder,1,4));
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument, 1, ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Item.clay, 'r', Item.reed);
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Item.dyePowder, 1, 1));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicZoraLegs, new ItemStack(Item.dyePowder, 1, 1));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicGoronLegs, new ItemStack(Item.dyePowder, 1, 2));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicZoraLegs, new ItemStack(Item.dyePowder, 1, 2));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicGoronLegs, new ItemStack(Item.dyePowder, 1, 4));
+		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Item.dyePowder, 1, 4));
 	}
 
 	/**
@@ -603,7 +757,7 @@ public class ZSSItems
 	 */
 	private static void addVanillaDungeonLoot() {
 		if (enableBombLoot) {
-			addLootToAll(new WeightedRandomChestContent(new ItemStack(bomb,1,BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight()), true, true);
+			addLootToAll(new WeightedRandomChestContent(new ItemStack(bomb, 1, BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight()), true, true);
 		}
 		if (enableBombBagLoot) {
 			addLootToAll(new WeightedRandomChestContent(new ItemStack(bombBag), 1, 1, Config.getBombBagWeight()), true, false);
@@ -635,7 +789,9 @@ public class ZSSItems
 	private static void addDispenserBehaviors() {
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggSpawner, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggChu, new BehaviorDispenseCustomMobEgg());
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggDarknut, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggKeese, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggOctorok, new BehaviorDispenseCustomMobEgg());
+		BlockDispenser.dispenseBehaviorRegistry.putObject(eggWizzrobe, new BehaviorDispenseCustomMobEgg());
 	}
 }

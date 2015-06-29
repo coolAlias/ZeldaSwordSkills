@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     @author original credits go to diesieben07
 
@@ -26,6 +26,40 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.DeactivateSkillPacket;
+import zeldaswordskills.network.bidirectional.LearnSongPacket;
+import zeldaswordskills.network.bidirectional.PlayRecordPacket;
+import zeldaswordskills.network.bidirectional.PlaySoundPacket;
+import zeldaswordskills.network.client.AttackBlockedPacket;
+import zeldaswordskills.network.client.InLiquidPacket;
+import zeldaswordskills.network.client.MortalDrawPacket;
+import zeldaswordskills.network.client.OpenGossipStoneEditorPacket;
+import zeldaswordskills.network.client.OpenSongGuiPacket;
+import zeldaswordskills.network.client.PacketISpawnParticles;
+import zeldaswordskills.network.client.SetItemModePacket;
+import zeldaswordskills.network.client.SetNockedArrowPacket;
+import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
+import zeldaswordskills.network.client.SyncConfigPacket;
+import zeldaswordskills.network.client.SyncEntityInfoPacket;
+import zeldaswordskills.network.client.SyncPlayerInfoPacket;
+import zeldaswordskills.network.client.SyncSkillPacket;
+import zeldaswordskills.network.client.UnpressKeyPacket;
+import zeldaswordskills.network.client.UpdateBuffPacket;
+import zeldaswordskills.network.client.UpdateComboPacket;
+import zeldaswordskills.network.server.AddExhaustionPacket;
+import zeldaswordskills.network.server.BombTickPacket;
+import zeldaswordskills.network.server.BorrowMaskPacket;
+import zeldaswordskills.network.server.CycleItemModePacket;
+import zeldaswordskills.network.server.DashImpactPacket;
+import zeldaswordskills.network.server.EndComboPacket;
+import zeldaswordskills.network.server.FallDistancePacket;
+import zeldaswordskills.network.server.GetBombPacket;
+import zeldaswordskills.network.server.OpenGuiPacket;
+import zeldaswordskills.network.server.RefreshSpinPacket;
+import zeldaswordskills.network.server.SetGossipStoneMessagePacket;
+import zeldaswordskills.network.server.TargetIdPacket;
+import zeldaswordskills.network.server.ZeldaSongPacket;
 import zeldaswordskills.util.LogHelper;
 
 import com.google.common.collect.BiMap;
@@ -43,30 +77,45 @@ public abstract class CustomPacket {
 	static {
 		ImmutableBiMap.Builder<Integer, Class<? extends CustomPacket>> builder = ImmutableBiMap.builder();
 		int i = 0;
+		// Bidirectional packets
 		builder.put(Integer.valueOf(i++), ActivateSkillPacket.class);
-		builder.put(Integer.valueOf(i++), AddExhaustionPacket.class);
-		builder.put(Integer.valueOf(i++), AttackBlockedPacket.class);
-		builder.put(Integer.valueOf(i++), BombTickPacket.class);
-		builder.put(Integer.valueOf(i++), BorrowMaskPacket.class);
-		builder.put(Integer.valueOf(i++), DashImpactPacket.class);
 		builder.put(Integer.valueOf(i++), DeactivateSkillPacket.class);
-		builder.put(Integer.valueOf(i++), EndComboPacket.class);
-		builder.put(Integer.valueOf(i++), GetBombPacket.class);
+		builder.put(Integer.valueOf(i++), LearnSongPacket.class);
+		builder.put(Integer.valueOf(i++), PlayRecordPacket.class);
+		builder.put(Integer.valueOf(i++), PlaySoundPacket.class);
+
+		// Packets handled on CLIENT
+		builder.put(Integer.valueOf(i++), AttackBlockedPacket.class);
 		builder.put(Integer.valueOf(i++), InLiquidPacket.class);
 		builder.put(Integer.valueOf(i++), MortalDrawPacket.class);
-		builder.put(Integer.valueOf(i++), OpenGuiPacket.class);
+		builder.put(Integer.valueOf(i++), OpenGossipStoneEditorPacket.class);
+		builder.put(Integer.valueOf(i++), OpenSongGuiPacket.class);
 		builder.put(Integer.valueOf(i++), PacketISpawnParticles.class);
-		builder.put(Integer.valueOf(i++), PlaySoundPacket.class);
-		builder.put(Integer.valueOf(i++), RefreshSpinPacket.class);
+		builder.put(Integer.valueOf(i++), SetItemModePacket.class);
 		builder.put(Integer.valueOf(i++), SetNockedArrowPacket.class);
 		builder.put(Integer.valueOf(i++), SpawnNayruParticlesPacket.class);
+		builder.put(Integer.valueOf(i++), SyncConfigPacket.class);
 		builder.put(Integer.valueOf(i++), SyncEntityInfoPacket.class);
 		builder.put(Integer.valueOf(i++), SyncPlayerInfoPacket.class);
 		builder.put(Integer.valueOf(i++), SyncSkillPacket.class);
-		builder.put(Integer.valueOf(i++), TargetIdPacket.class);
 		builder.put(Integer.valueOf(i++), UnpressKeyPacket.class);
 		builder.put(Integer.valueOf(i++), UpdateBuffPacket.class);
 		builder.put(Integer.valueOf(i++), UpdateComboPacket.class);
+
+		// Packets handled on SERVER
+		builder.put(Integer.valueOf(i++), AddExhaustionPacket.class);
+		builder.put(Integer.valueOf(i++), BombTickPacket.class);
+		builder.put(Integer.valueOf(i++), BorrowMaskPacket.class);
+		builder.put(Integer.valueOf(i++), CycleItemModePacket.class);
+		builder.put(Integer.valueOf(i++), DashImpactPacket.class);
+		builder.put(Integer.valueOf(i++), EndComboPacket.class);
+		builder.put(Integer.valueOf(i++), FallDistancePacket.class);
+		builder.put(Integer.valueOf(i++), GetBombPacket.class);
+		builder.put(Integer.valueOf(i++), OpenGuiPacket.class);
+		builder.put(Integer.valueOf(i++), RefreshSpinPacket.class);
+		builder.put(Integer.valueOf(i++), SetGossipStoneMessagePacket.class);
+		builder.put(Integer.valueOf(i++), TargetIdPacket.class);
+		builder.put(Integer.valueOf(i++), ZeldaSongPacket.class);
 		idMap = builder.build();
 	}
 
@@ -124,8 +173,21 @@ public abstract class CustomPacket {
 
 	public abstract void execute(EntityPlayer player, Side side) throws ProtocolException;
 
-	public void process(ByteArrayDataInput in, EntityPlayer player, Side side)
-			throws IOException, ProtocolException {
+	/**
+	 * If message is sent to the wrong side, an exception will be thrown during handling
+	 * @return True if the message is allowed to be handled on the given side
+	 */
+	protected boolean isValidOnSide(Side side) {
+		return true;
+	}
+
+	/**
+	 * Ensures the packet is valid on the given side, then reads and executes the packet
+	 */
+	public final void process(ByteArrayDataInput in, EntityPlayer player, Side side) throws IOException, ProtocolException {
+		if (!isValidOnSide(side)) {
+			throw new ProtocolException(getClass().getSimpleName() + " may only be sent to the " + (side.isClient() ? "SERVER" : "CLIENT"));
+		}
 		read(in);
 		execute(player, side);
 	}
@@ -148,13 +210,32 @@ public abstract class CustomPacket {
 	 */
 	public static NBTTagCompound readNBTTagCompound(ByteArrayDataInput in) throws IOException {
 		short short1 = in.readShort();
-
 		if (short1 < 0) {
 			return null;
 		} else {
 			byte[] abyte = new byte[short1];
 			in.readFully(abyte);
 			return CompressedStreamTools.decompress(abyte);
+		}
+	}
+
+	/**
+	 * Packet that is only valid when sent to the CLIENT
+	 */
+	public static abstract class CustomClientPacket extends CustomPacket {
+		@Override
+		protected boolean isValidOnSide(Side side) {
+			return side.isClient();
+		}
+	}
+
+	/**
+	 * Packet that is only valid when sent to the SERVER
+	 */
+	public static abstract class CustomServerPacket extends CustomPacket {
+		@Override
+		protected boolean isValidOnSide(Side side) {
+			return side.isServer();
 		}
 	}
 }

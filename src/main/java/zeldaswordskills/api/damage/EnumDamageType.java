@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -42,6 +42,8 @@ import zeldaswordskills.entity.buff.Buff;
 public enum EnumDamageType {
 	/** Cold damage inflicts a slow effect on the target, modified by total damage */
 	COLD,
+	/** Fire damage has no special effect beyond what vanilla does, but is useful for flagging AoE damage */
+	FIRE,
 	/** Holy damage is especially potent against undead creatures */
 	HOLY,
 	/** Shock damage may be resisted with the RESIST_SHOCK buff */
@@ -55,13 +57,13 @@ public enum EnumDamageType {
 	public void handleSecondaryEffects(IPostDamageEffect source, EntityLivingBase entity, float damage) {
 		switch(this) {
 		case COLD:
-			entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, (int)(damage * source.getDuration()), source.getAmplifier()));
+			entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, (int)(damage * source.getDuration(this)), source.getAmplifier(this)));
 			break;
 		case STUN:
 			if (source instanceof IDamageSourceStun) {
 				IDamageSourceStun stunSource = (IDamageSourceStun) source;
-				int stunTime = Math.max(source.getDuration(), 2);
-				int modifier = Math.max(source.getAmplifier(), 1);
+				int stunTime = Math.max(source.getDuration(this), 2);
+				int modifier = Math.max(source.getAmplifier(this), 1);
 				stunTime += entity.worldObj.rand.nextInt((int)(Math.max(damage, 1.0F) * modifier)) - entity.worldObj.rand.nextInt(stunTime / 2);
 				if (!(entity instanceof EntityPlayer) || stunSource.canStunPlayers()) {
 					ZSSEntityInfo.get(entity).stun(stunTime, stunSource.alwaysStuns());
@@ -78,6 +80,7 @@ public enum EnumDamageType {
 	public static final Map<EnumDamageType, Buff> damageWeaknessMap = new EnumMap<EnumDamageType, Buff>(EnumDamageType.class);
 	
 	static {
+		// do not include FIRE, since it is handled by isFireDamage()
 		damageResistMap.put(COLD, Buff.RESIST_COLD);
 		damageResistMap.put(HOLY, Buff.RESIST_HOLY);
 		damageResistMap.put(SHOCK, Buff.RESIST_SHOCK);

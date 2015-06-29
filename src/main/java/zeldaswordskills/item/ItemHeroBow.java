@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import mods.battlegear2.api.quiver.IArrowContainer2;
 import mods.battlegear2.api.quiver.IArrowFireHandler;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
+import mods.battlegear2.enchantments.BaseEnchantment;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -78,6 +79,7 @@ import com.google.common.collect.ImmutableBiMap;
 
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
+import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -90,8 +92,68 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattlegearWeapon
+public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade, IZoom, IBattlegearWeapon
 {
+	public static enum Mode {
+		/** Default Hero Bow behavior searches for the first usable arrow of any kind */
+		DEFAULT("", 0),
+		STANDARD("minecraft:arrow", 0),
+		BOMB_STANDARD(ModInfo.ID + ":zss.arrow_bomb", 1),
+		BOMB_FIRE(ModInfo.ID + ":zss.arrow_bomb_fire", 1),
+		BOMB_WATER(ModInfo.ID + ":zss.arrow_bomb_water", 1),
+		MAGIC_FIRE(ModInfo.ID + ":zss.arrow_fire", 2),
+		MAGIC_ICE(ModInfo.ID + ":zss.arrow_ice", 2),
+		MAGIC_LIGHT(ModInfo.ID + ":zss.arrow_light", 3);
+		private final String arrowName;
+		private Item arrowItem;
+		private final int level;
+		private Mode(String arrowName, int level) {
+			this.arrowName = arrowName;
+			this.level = level;
+		}
+		/**
+		 * Returns the arrow item required for this mode
+		 */
+		public Item getArrowItem() {
+			if (arrowItem == null && arrowName.length() > 0) {
+				String[] parts = arrowName.split(":");
+				arrowItem = (parts[0].equals("minecraft") ? Item.arrow : GameRegistry.findItem(parts[0], parts[1]));
+			}
+			return arrowItem;
+		}
+		/**
+		 * Returns the next Mode by ordinal position
+		 */
+		public Mode next() {
+			return Mode.values()[(ordinal() + 1) % Mode.values().length];
+		}
+		/**
+		 * Returns the next mode whose level does not exceed that given
+		 */
+		public Mode next(int level) {
+			return cycle(level, true);
+		}
+		/**
+		 * Returns the previous Mode by ordinal position
+		 */
+		public Mode prev() {
+			return Mode.values()[((ordinal() == 0 ? Mode.values().length : ordinal()) - 1) % Mode.values().length];
+		}
+		/**
+		 * Returns the previous mode whose level does not exceed that given
+		 */
+		public Mode prev(int level) {
+			return cycle(level, false);
+		}
+		private Mode cycle(int level, boolean next) {
+			Mode mode = this;
+			do {
+				mode = (next ? mode.next() : mode.prev());
+			} while (mode != this && mode.level > level);
+			return mode;
+		}
+	}
+
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
 
@@ -129,6 +191,60 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	private void setLevel(ItemStack bow, int level) {
 		if (!bow.hasTagCompound()) { bow.setTagCompound(new NBTTagCompound()); }
 		bow.getTagCompound().setInteger("zssBowLevel", level);
+	}
+
+	public Mode getMode(ItemStack stack) {
+		if (!stack.hasTagCompound() || !stack.getTagCompound().hasKey("zssItemMode")) {
+			setMode(stack, Mode.DEFAULT);
+		}
+		return Mode.values()[stack.getTagCompound().getInteger("zssItemMode") % Mode.values().length];
+	}
+
+	private void setMode(ItemStack stack, Mode mode) {
+		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
+		stack.getTagCompound().setInteger("zssItemMode", mode.ordinal());
+	}
+
+	@Override
+	public void nextItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(stack, getMode(stack).next(getLevel(stack)));
+		}
+	}
+
+	@Override
+	public void prevItemMode(ItemStack stack, EntityPlayer player) {
+		if (!player.isUsingItem()) {
+			setMode(stack, getMode(stack).prev(getLevel(stack)));
+		}
+	}
+
+	@Override
+	public int getCurrentMode(ItemStack stack, EntityPlayer player) {
+		return getMode(stack).ordinal();
+	}
+
+	@Override
+	public void setCurrentMode(ItemStack stack, EntityPlayer player, int mode) {
+		setMode(stack, Mode.values()[mode % Mode.values().length]);
+	}
+
+	@Override
+	public ItemStack getRenderStackForMode(ItemStack stack, EntityPlayer player) {
+		Item item = getMode(stack).getArrowItem();
+		ItemStack ret = (item == null ? null : new ItemStack(item, 0));
+		if (ret != null) {
+			for (ItemStack inv : player.inventory.mainInventory) {
+				if (inv != null && inv.getItem() == ret.getItem()) {
+					ret.stackSize += inv.stackSize;
+					if (ret.stackSize > 98) {
+						ret.stackSize = 99;
+						break;
+					}
+				}
+			}
+		}
+		return ret;
 	}
 
 	/**
@@ -205,7 +321,11 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		}
 		// This can only be reached if BG2 is not installed
 		if (nockArrowFromInventory(stack, player)) {
-			player.setItemInUse(stack, getMaxItemUseDuration(stack));
+			int duration = getMaxItemUseDuration(stack);
+			if (ZSSMain.isBG2Enabled) {
+				duration -= (EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.effectId, stack) * 20000);
+			}
+			player.setItemInUse(stack, duration);
 		}
 		return stack;
 	}
@@ -214,7 +334,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	public void onPlayerStoppedUsing(ItemStack bow, World world, EntityPlayer player, int ticksRemaining) {
 		ZSSPlayerInfo.get(player).hasAutoBombArrow = false;
 		int ticksInUse = getMaxItemUseDuration(bow) - ticksRemaining;
-
 		ArrowLooseEvent event = new ArrowLooseEvent(player, bow, ticksInUse);
 		if (ZSSMain.isBG2Enabled) { // 'fake' event:
 			event.setCanceled(BattlegearEvents.preArrowLoose(event));
@@ -230,7 +349,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 		// This code can only be reached if not using a quiver
 		ItemStack arrowStack = getArrow(player);
 		if (arrowStack != null) { // can be null when hot-swapping to an empty quiver slot
-			LogHelper.finer("Retrieved arrow player props: " + arrowStack);
 			if (canShootArrow(player, bow, arrowStack)) {
 				fireArrow(event, arrowStack, bow, player);
 			}
@@ -251,7 +369,6 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 */
 	@Method(modid="battlegear2")
 	public void bg2FireArrow(ArrowLooseEvent event, ItemStack quiverStack, ItemStack arrowStack) {
-		LogHelper.finer("Called BG2 fireArrow...");
 		if (!canShootArrow(event.entityPlayer, event.bow, arrowStack)) {
 			return; // prevents hot-swap firing, since we are bypassing the fire handlers
 		}
@@ -300,9 +417,7 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 * @param arrowStack	The stack retrieved from {@link ItemHeroBow#getArrow}, i.e. from the stack's NBT
 	 */
 	private void fireArrow(ArrowLooseEvent event, ItemStack arrowStack, ItemStack bow, EntityPlayer player) {
-		LogHelper.finer("Called standard fireArrow; no quiver action here.");
 		boolean flag = (player.capabilities.isCreativeMode || EnchantmentHelper.getEnchantmentLevel(Enchantment.infinity.effectId, bow) > 0);
-
 		if (flag || PlayerUtils.hasItem(player, arrowStack)) {
 			float charge = (float) event.charge / 20.0F;
 			charge = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
@@ -365,21 +480,30 @@ public class ItemHeroBow extends ItemBow implements IFairyUpgrade, IZoom, IBattl
 	 * meaning that {@link #canShootArrow} returned true
 	 */
 	private ItemStack getArrowFromInventory(ItemStack bow, EntityPlayer player) {
+		Item modeArrow = getMode(bow).getArrowItem();
 		ItemStack arrow = null;
-		for (ItemStack stack : player.inventory.mainInventory) {
-			if (stack != null && canShootArrow(player, bow, stack)) {
-				arrow = stack;
-				break;
+		if (modeArrow == null && Config.enableAutoBombArrows() && player.isSneaking()) {
+			arrow = getAutoBombArrow(bow, player);
+		}
+		// Search specifically for the selected arrow type:
+		if (modeArrow != null && canShootArrow(player, bow, new ItemStack(modeArrow))) {
+			for (ItemStack stack : player.inventory.mainInventory) {
+				if (stack != null && stack.getItem() == modeArrow) {
+					arrow = stack;
+					break;
+				}
+			}
+		} else if (arrow == null) { // otherwise use default behavior
+			for (ItemStack stack : player.inventory.mainInventory) {
+				if (stack != null && canShootArrow(player, bow, stack)) {
+					arrow = stack;
+					break;
+				}
 			}
 		}
 
 		if (arrow == null && player.capabilities.isCreativeMode) {
-			arrow = new ItemStack(Item.arrow);
-		}
-
-		if (arrow != null && arrow.getItem() == Item.arrow && Config.enableAutoBombArrows() && player.isSneaking()) {
-			ItemStack bombArrow = getAutoBombArrow(bow, player);
-			arrow = (bombArrow != null ? bombArrow : arrow);
+			arrow = new ItemStack(modeArrow == null ? Item.arrow : modeArrow);
 		}
 
 		return arrow;

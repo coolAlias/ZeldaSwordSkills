@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -53,17 +53,17 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 		setStepSound(soundStoneFootstep);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
-	
+
 	@Override
 	public int getMobilityFlag() {
 		return 2;
 	}
 
 	@Override
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return weight;
 	}
-	
+
 	@Override
 	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta) {
 		if (this == ZSSBlocks.barrierHeavy) {
@@ -72,20 +72,20 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 			player.triggerAchievement(ZSSAchievements.movingBlocks);
 		}
 	}
-	
+
 	@Override
 	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta) {}
-	
+
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return (stack.getItem() == ZSSItems.hammerMegaton && PlayerUtils.hasItem(player, ZSSItems.gauntletsGolden) ? weight : weight.next());
 	}
-	
+
 	@Override
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
 		return Result.DEFAULT;
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister register) {

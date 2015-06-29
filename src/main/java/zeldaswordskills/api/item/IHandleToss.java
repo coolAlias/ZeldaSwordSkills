@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,6 @@ public interface IHandleToss {
 	 * @param item the entity item that was thrown; setting this to dead will cancel the toss event
 	 * @param player the player who threw the item
 	 */
-	public void onItemTossed(EntityItem item, EntityPlayer player);
+	void onItemTossed(EntityItem item, EntityPlayer player);
 
 }

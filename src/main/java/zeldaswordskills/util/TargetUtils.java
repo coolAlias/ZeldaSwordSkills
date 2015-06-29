@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -227,11 +228,14 @@ public class TargetUtils
 	 * @param fov seeker's field of view; a wider angle returns true more often
 	 */
 	public static final boolean isTargetInFrontOf(Entity seeker, Entity target, float fov) {
+		// thanks again to Battlegear2 for the following code snippet
 		double dx = target.posX - seeker.posX;
 		double dz;
 		for (dz = target.posZ - seeker.posZ; dx * dx + dz * dz < 1.0E-4D; dz = (Math.random() - Math.random()) * 0.01D) {
 			dx = (Math.random() - Math.random()) * 0.01D;
 		}
+		while (seeker.rotationYaw > 360) { seeker.rotationYaw -= 360; }
+		while (seeker.rotationYaw < -360) { seeker.rotationYaw += 360; }
 		float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - seeker.rotationYaw;
 		yaw = yaw - 90;
 		while (yaw < -180) { yaw += 360; }
@@ -320,14 +324,32 @@ public class TargetUtils
 	 * Returns true if the entity has an unimpeded view of the sky
 	 */
 	public static boolean canEntitySeeSky(World world, Entity entity) {
-		int x = MathHelper.floor_double(entity.posX);
-		int z = MathHelper.floor_double(entity.posZ);
-		for (int y = MathHelper.floor_double(entity.posY) + 1; y < world.getActualHeight(); ++y) {
-			if (!world.isAirBlock(x, y, z)) {
+		ChunkCoordinates cc = getEntityCoordinates(entity);
+		for (int y = cc.posY + 1; y < world.getActualHeight(); ++y) {
+			if (!world.isAirBlock(cc.posX, y, cc.posZ)) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Returns the chunk coordinates for the entity's current position
+	 */
+	public static ChunkCoordinates getEntityCoordinates(Entity entity) {
+		int i = MathHelper.floor_double(entity.posX + 0.5D);
+		// pre-1.8 the client player.posY is higher by player.yOffset amount
+		int j = MathHelper.floor_double(entity.posY + 0.5D - (entity.worldObj.isRemote ? entity.yOffset : 0D));
+		int k = MathHelper.floor_double(entity.posZ + 0.5D);
+		return new ChunkCoordinates(i,j,k);
+	}
+
+	/**
+	 * Whether the entity is currently standing in any liquid
+	 */
+	public static boolean isInLiquid(Entity entity) {
+		ChunkCoordinates cc = getEntityCoordinates(entity);
+		return entity.worldObj.getBlockMaterial(cc.posX, cc.posY, cc.posZ).isLiquid();
 	}
 
 	/**

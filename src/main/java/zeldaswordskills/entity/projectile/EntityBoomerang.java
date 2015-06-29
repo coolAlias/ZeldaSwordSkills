@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,8 @@ import net.minecraft.util.EnumMovingObjectType;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceStunIndirect;
+import zeldaswordskills.api.block.IBoomerangBlock;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -131,7 +132,7 @@ public class EntityBoomerang extends EntityMobThrowable
 
 	/** Returns a boomerang damage source */
 	protected DamageSource getDamageSource() {
-		return new DamageSourceStunIndirect("boomerang", this, getThrower(), 200, 5).setCanStunPlayers().setProjectile();
+		return new DamageSourceBaseIndirect("boomerang", this, getThrower()).setStunDamage(200, 5, true).setProjectile();
 	}
 
 	@Override
@@ -152,7 +153,8 @@ public class EntityBoomerang extends EntityMobThrowable
 
 	@Override
 	public void onUpdate() {
-		if (--distance < -LIFESPAN && !worldObj.isRemote) {
+		--distance;
+		if (shouldDrop() && !worldObj.isRemote) {
 			worldObj.spawnEntityInWorld(new EntityItem(worldObj, posX, posY, posZ, getBoomerang()));
 			dropXpOrbs();
 			releaseDrops(null);
@@ -167,6 +169,13 @@ public class EntityBoomerang extends EntityMobThrowable
 			updateMotion();
 			super.onUpdate();
 		}
+	}
+
+	/**
+	 * Whether the boomerang should drop as an item this tick
+	 */
+	private boolean shouldDrop() {
+		return distance < -LIFESPAN || getThrower() == null || !getThrower().isEntityAlive();
 	}
 
 	/**
@@ -219,14 +228,18 @@ public class EntityBoomerang extends EntityMobThrowable
 			Block block = (blockId > 0 ? Block.blocksList[blockId] : null);
 			if (block != null) {
 				boolean flag = block.blockMaterial.blocksMovement();
-				float hardness = block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ);
-				block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-				if (block.blockMaterial != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
-					worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, true);
-				} else if (block instanceof BlockButton || (block instanceof BlockLever &&
-						getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
-					WorldUtils.activateButton(worldObj, blockId, mop.blockX, mop.blockY, mop.blockZ);
-					flag = true;
+				if (block instanceof IBoomerangBlock) {
+					flag = ((IBoomerangBlock) block).onBoomerangCollided(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+				} else {
+					float hardness = block.getBlockHardness(worldObj, mop.blockX, mop.blockY, mop.blockZ);
+					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
+					if (block.blockMaterial != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
+						worldObj.destroyBlock(mop.blockX, mop.blockY, mop.blockZ, true);
+					} else if (block instanceof BlockButton || (block instanceof BlockLever &&
+							getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
+						WorldUtils.activateButton(worldObj, blockId, mop.blockX, mop.blockY, mop.blockZ);
+						flag = true;
+					}
 				}
 				if (flag && !noClip) {
 					noClip = true;
@@ -238,21 +251,33 @@ public class EntityBoomerang extends EntityMobThrowable
 	}
 
 	/**
+	 * Attempts to add the item either as the currently riding entity, or as a
+	 * captured drop (in which case the item entity is set to dead)
+	 * @return true if the item was captured in one form or another
+	 */
+	public boolean captureItem(EntityItem item) {
+		if (item.isEntityAlive()) {
+			if (riddenByEntity == null) {
+				item.mountEntity(this);
+				return true;
+			} else if (captureAll && item != riddenByEntity) {
+				capturedItems.add(item.getEntityItem());
+				item.setDead();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Scans for and captures nearby EntityItems
 	 */
 	private void captureDrops() {
 		if (riddenByEntity == null || captureAll) {
 			List<EntityItem> items = worldObj.getEntitiesWithinAABB(EntityItem.class, boundingBox.expand(1.0D, 1.0D, 1.0D));
 			for (EntityItem item : items) {
-				if (riddenByEntity == null) {
-					item.mountEntity(this);
-				} else if (captureAll && item != riddenByEntity) {
-					ItemStack stack = item.getEntityItem();
-					// check for items that aren't supposed to be picked up
-					if (stack.getItem() != ZSSItems.powerPiece && stack.getItem() != ZSSItems.smallHeart) {
-						capturedItems.add(item.getEntityItem());
-						item.setDead();
-					}
+				if (captureItem(item) && !captureAll) {
+					return;
 				}
 			}
 		}

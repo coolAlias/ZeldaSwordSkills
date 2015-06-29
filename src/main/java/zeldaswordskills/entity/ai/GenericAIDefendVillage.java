@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.village.Village;
-import zeldaswordskills.entity.IVillageDefender;
 
 /**
  * 
@@ -32,6 +31,7 @@ public class GenericAIDefendVillage extends EntityAITarget
 {
 	/** The owner of this AI will defend the village from aggressors */
 	private EntityCreature defender;
+
 	/** The entity attacking the village will become the defender's attack target. */
 	private EntityLivingBase aggressor;
 

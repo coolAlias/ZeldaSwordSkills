@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,25 +26,31 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityWitch;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import zeldaswordskills.api.item.HookshotType;
+import net.minecraftforge.common.Configuration;
+import zeldaswordskills.api.block.IHookable.HookshotType;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityBlackKnight;
+import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
+import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.lib.Config;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.world.crisis.BossBattle;
 import zeldaswordskills.world.crisis.DesertBattle;
 import zeldaswordskills.world.crisis.EarthBattle;
 import zeldaswordskills.world.crisis.FireBattle;
 import zeldaswordskills.world.crisis.ForestBattle;
 import zeldaswordskills.world.crisis.OceanBattle;
+import zeldaswordskills.world.crisis.SwampBattle;
 
 /**
  * 
@@ -53,13 +59,13 @@ import zeldaswordskills.world.crisis.OceanBattle;
  */
 public enum BossType
 {
-	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, "hell"),
-	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, "desert", "deserthills"),
-	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, "forest", "foresthills"),
-	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, "taiga", "taigahills", "iceplains"),
-	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, "ocean", "frozenocean"),
-	SWAMP("temple_wind", BossBattle.class, EntityWitch.class, 4, "swampland"),
-	MOUNTAIN("temple_earth", EarthBattle.class, EntityZombie.class, 3, "extremehills", "extremehillsedge");
+	HELL("temple_fire", FireBattle.class, EntityBlaze.class, 7, ZeldaSongs.songWarpFire, "hell"),
+	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, ZeldaSongs.songWarpSpirit, "desert", "deserthills"),
+	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
+	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
+	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
+	SWAMP("temple_wind", SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
+	MOUNTAIN("temple_earth", EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
 	private final String unlocalizedName;
@@ -76,18 +82,22 @@ public enum BossType
 	/** Currently stores metadata value used by SecretStone for returning appropriate Block */
 	public final int metadata;
 
+	/** Song that may be used to warp to this dungeon, if any */
+	public final AbstractZeldaSong warpSong;
+
 	/** Unlocalized name to BossType mapping */
 	private static final Map<String, BossType> stringToTypeMap = new HashMap<String, BossType>();
 
 	/** Mapping of biome names to boss types */
 	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
 
-	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int block, String... defaultBiomes) {
+	private BossType(String name, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, AbstractZeldaSong warpSong, String... defaultBiomes) {
 		this.unlocalizedName = name;
 		this.defaultBiomes = defaultBiomes;
 		this.bossBattle = bossBattle;
 		this.bossMob = bossMob;
-		this.metadata = block;
+		this.metadata = meta;
+		this.warpSong = warpSong;
 	}
 
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
@@ -100,17 +110,20 @@ public enum BossType
 		return StatCollector.translateToLocal("dungeon.zss." + unlocalizedName + ".name");
 	}
 
-	/** Default biomes in which this dungeon can generate */
-	public String[] getDefaultBiomes() {
-		return defaultBiomes;
-	}
-
 	@Override
 	public String toString() {
-		return String.format("Name: %s BossMob: %s Block: %s", getUnlocalizedName(),
-				(bossMob != null ? bossMob.toString() : "NULL"), metadata);
+		return ("Name: " + getUnlocalizedName() + " BossMob: " + (bossMob != null ? bossMob.toString() : "NULL") + " Block: " + metadata);
 	}
-	
+
+	/**
+	 * Loads biome lists from config file during post initialization
+	 */
+	public static void postInit(Configuration config) {
+		for (BossType type : BossType.values()) {
+			addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.defaultBiomes).getStringList());
+		}
+	}
+
 	/**
 	 * Adds each biome name to the mapping for this BossType
 	 */
@@ -120,9 +133,10 @@ public enum BossType
 				continue;
 			}
 			biome = biome.toLowerCase().replace(" ", "");
-			if (bossBiomeList.containsKey(biome)) {
-				LogHelper.warning(String.format("Error while adding %s for %s: biome already mapped to %s",
-						biome, type.getDisplayName(), bossBiomeList.get(biome).getDisplayName()));
+			if (!BiomeType.isRealBiome(biome)) {
+				LogHelper.warning(String.format("%s is not a recognized biome! This entry will be ignored for BossType %s", biome, type.getDisplayName()));
+			} else if (bossBiomeList.containsKey(biome)) {
+				LogHelper.warning(String.format("Error while adding %s for %s: biome already mapped to %s", biome, type.getDisplayName(), bossBiomeList.get(biome).getDisplayName()));
 			} else {
 				bossBiomeList.put(biome, type);
 			}
@@ -140,7 +154,7 @@ public enum BossType
 		}
 		return stringToTypeMap.get(name.toLowerCase());
 	}
-	
+
 	/**
 	 * Returns the BossType for the biome at x/z, or null if no BossType exists for that biome
 	 */
@@ -149,6 +163,10 @@ public enum BossType
 		if (biome == null) {
 			LogHelper.warning("Null biome at " + x + "/" + z + " while getting Boss Type");
 			return null;
+		}
+		if (Config.areBossDungeonsRandom()) {
+			int i = world.rand.nextInt(BossType.values().length);
+			return BossType.values()[i];
 		}
 		return bossBiomeList.get(biome.biomeName.toLowerCase().replace(" ", ""));
 	}
@@ -198,10 +216,12 @@ public enum BossType
 		new ItemStack(ZSSItems.dekuLeaf),
 		new ItemStack(ZSSItems.heroBow),
 		new ItemStack(ZSSItems.hookshot, 1, HookshotType.WOOD_SHOT.ordinal()),
-		new ItemStack(ZSSItems.maskHawkeye)
+		new ItemStack(ZSSItems.maskHawkeye),
+		new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_SHORT.ordinal())
 	};
 	private static final ItemStack[] mountainItems = {
 		new ItemStack(ZSSItems.bootsPegasus),
+		new ItemStack(ZSSItems.hammer),
 		new ItemStack(ZSSItems.maskBlast),
 		new ItemStack(ZSSItems.hookshotAddon, 1, AddonType.STONECLAW.ordinal()),
 		new ItemStack(ZSSItems.swordBroken, 1, ZSSItems.swordGiant.itemID)

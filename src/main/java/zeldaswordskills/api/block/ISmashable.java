@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -46,9 +46,10 @@ public interface ISmashable {
 	 * whether it can be smashed or not by the item used
 	 * @param stack the itemstack used to smash the block
 	 * @param meta the block metadata
+	 * @param side the side (face) of the block that was hit
 	 */
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta);
-	
+	BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side);
+
 	/**
 	 * This method is called right before the block smash calculations occur,
 	 * allowing custom handling of the event by the block in question.
@@ -59,6 +60,6 @@ public interface ISmashable {
 	 * ALLOW prevents further processing and indicates a successful smash
 	 * DENY prevents further processing and indicates a failed smash attempt
 	 */
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
+	Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
 
 }

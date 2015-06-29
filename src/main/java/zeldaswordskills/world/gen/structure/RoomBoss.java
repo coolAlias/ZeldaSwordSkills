@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -47,10 +47,10 @@ public class RoomBoss extends RoomBase
 {
 	/** Mapping of cardinal direction to block-orientation values for blocks using 2,3,4,5 (containers, pistons, etc) */
 	public static final int[] facingToOrientation = {3,4,2,5};
-	
+
 	/** Side of the structure in which the door is located; use above directional values */
-	private int doorSide = SOUTH;
-	
+	private int doorSide = -1;
+
 	/** The type of dungeon this is, as determined by biome using BossType.getBossType */
 	private final BossType type;
 
@@ -59,10 +59,12 @@ public class RoomBoss extends RoomBase
 		isLocked = true;
 		type = bossType;
 	}
-	
+
 	/** Returns the BossType for this Boss Room */
-	public BossType getBossType() { return type; }
-	
+	public BossType getBossType() {
+		return type;
+	}
+
 	@Override
 	public boolean generate(ZSSMapGenBase mapGen, World world, Random rand, int x, int y, int z) {
 		if (initDungeon(world, x, y, z) && canGenerate(world)) {
@@ -72,28 +74,30 @@ public class RoomBoss extends RoomBase
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Performs initial set up and placement of the dungeon
 	 * @return false if anything went awry and generation should be canceled
 	 */
 	protected boolean initDungeon(World world, int x, int y, int z) {
 		bBox.offset(x, y, z);
-		if (type == null || y < bBox.getYSize() || y > (type == BossType.HELL ? 96 : 160)) {
+		if (type == null || y < bBox.getYSize() || y > (world.provider.isHellWorld ? 96 : 160)) {
 			return false;
 		}
-		
+		// allow all boss types to potentially generate in the Nether (for randomized locations config option)
+		if (world.provider.isHellWorld) {
+			inNether = true;
+			if (!placeInNether(world)) {
+				return false;
+			}
+		}
+
 		switch(type) {
 		case HELL:
-			inNether = true;
-			if (placeInNether(world)) {
-				doDefaultAdjustments(world);
-				if (world.rand.nextFloat() < 0.75F) {
-					submerged = true;
-					inLava = true;
-				}
-			} else {
-				return false;
+			doDefaultAdjustments(world);
+			if (world.rand.nextFloat() < 0.75F) {
+				submerged = true;
+				inLava = true;
 			}
 			break;
 		case OCEAN:
@@ -112,13 +116,13 @@ public class RoomBoss extends RoomBase
 		if (submerged) {
 			--bBox.minY;
 		}
-		
+
 		determineDoorSide(world);
 		setMetadata(world, x, z);
 		boolean flag = StructureGenUtils.getAverageDistanceToGround(world, bBox, 6) < 4;
 		return (doorSide != -1 && flag && (submerged || !isWaterAroundOrUnder(world)));
 	}
-	
+
 	/**
 	 * Makes default adjustments for surrounding materials such as dirt, air, etc.
 	 */
@@ -135,7 +139,7 @@ public class RoomBoss extends RoomBase
 		// adjust down one more so door is flush with ground
 		//bBox.offset(0, -1, 0); TODO add stairs or slabs up instead
 	}
-	
+
 	/**
 	 * Returns true if there are 2 or more blocks of water directly under the structure, 
 	 * or if there are 3 or more blocks of water next to any given side
@@ -154,12 +158,12 @@ public class RoomBoss extends RoomBase
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected void setMetadata(World world, int x, int z) {
 		metadata = type.metadata;
 	}
-	
+
 	/**
 	 * Adds the final touches: chests, dungeon core, pedestal, etc.
 	 */
@@ -174,6 +178,7 @@ public class RoomBoss extends RoomBase
 		placeParapet(world, meta);
 		placeLedge(world, rand, meta);
 		placeChestOnRoof(world, rand);
+		placeInvisibleChest(world, rand, rand.nextInt(3)); // very rarely may get 2 invisible chests
 		placeJars(world, rand, rand.nextInt(5), false);
 		placeJars(world, rand, rand.nextInt(5) + 3, true);
 		placeWindows(world);
@@ -193,7 +198,7 @@ public class RoomBoss extends RoomBase
 			core.setDoor(ZSSBlocks.doorLocked, doorSide);
 		}
 	}
-	
+
 	/**
 	 * Determines which side is most suitable for the door
 	 */
@@ -201,38 +206,28 @@ public class RoomBoss extends RoomBase
 		int x = bBox.getCenterX();
 		int y = bBox.minY + 1;
 		int z = bBox.getCenterZ();
-		
-		int id1 = world.getBlockId(x, y, bBox.maxZ + 1);
-		int id2 = world.getBlockId(x, y + 1, bBox.maxZ + 1);
-		if (!Block.opaqueCubeLookup[id1] && !Block.opaqueCubeLookup[id2]) {
-			doorSide = SOUTH;
-			return;
+		int dx, dz; 
+		doorSide = world.rand.nextInt(4);
+		for (int i = 0; i < 4; ++i) {
+			dx = x;
+			dz = z;
+			switch(doorSide) {
+			case SOUTH: dz = bBox.maxZ + 1; break;
+			case NORTH: dz = bBox.minZ - 1; break;
+			case EAST: dx = bBox.maxX + 1; break;
+			case WEST: dx = bBox.maxX - 1; break;
+			default: LogHelper.warning(String.format("Invalid boss door side %d at %d/%d/%d", doorSide, x, y, z));
+			}
+			int id1 = world.getBlockId(dx, y, dz);
+			int id2 = world.getBlockId(dx, y + 1, dz);
+			if (!Block.opaqueCubeLookup[id1] && !Block.opaqueCubeLookup[id2]) {
+				return;
+			}
+			doorSide = (doorSide == EAST ? SOUTH : doorSide + 1);
 		}
-		
-		id1 = world.getBlockId(x, y, bBox.minZ - 1);
-		id2 = world.getBlockId(x, y + 1, bBox.minZ - 1);
-		if (!Block.opaqueCubeLookup[id1] && !Block.opaqueCubeLookup[id2]) {
-			doorSide = NORTH;
-			return;
-		}
-		
-		id1 = world.getBlockId(bBox.maxX + 1, y, z);
-		id2 = world.getBlockId(bBox.maxX + 1, y + 1, z);
-		if (!Block.opaqueCubeLookup[id1] && !Block.opaqueCubeLookup[id2]) {
-			doorSide = EAST;
-			return;
-		}
-		
-		id1 = world.getBlockId(bBox.minX - 1, y, z);
-		id2 = world.getBlockId(bBox.minX - 1, y + 1, z);
-		if (!Block.opaqueCubeLookup[id1] && !Block.opaqueCubeLookup[id2]) {
-			doorSide = WEST;
-			return;
-		}
-		
 		doorSide = -1;
 	}
-	
+
 	/**
 	 * Actually places the door; use after determining door side for best results
 	 */
@@ -240,20 +235,17 @@ public class RoomBoss extends RoomBase
 		int x = bBox.getCenterX();
 		int y = bBox.minY + (submerged ? 2 : 1);
 		int z = bBox.getCenterZ();
-		
-		//determineDoorSide(world, true);
-		switch(doorSide) {
+		switch (doorSide) {
 		case SOUTH: z = bBox.maxZ; break;
 		case NORTH: z = bBox.minZ; break;
 		case EAST: x = bBox.maxX; break;
 		case WEST: x = bBox.minX; break;
 		default: LogHelper.warning("Placing Boss door with invalid door side");
 		}
-		
 		world.setBlock(x, y, z, ZSSBlocks.doorLocked.blockID, type.ordinal() & ~0x8, 2);
 		world.setBlock(x, y + 1, z, ZSSBlocks.doorLocked.blockID, type.ordinal() | 0x8, 2);
 	}
-	
+
 	/**
 	 * Places the center half-slabs and block for either a chest or a pedestal
 	 */
@@ -270,9 +262,9 @@ public class RoomBoss extends RoomBase
 		}
 		world.setBlock(bBox.getCenterX(), bBox.minY + (submerged && !inOcean ? 2 : 1), bBox.getCenterZ(), (type == BossType.TAIGA ? Block.blockNetherQuartz.blockID : BlockSecretStone.getIdFromMeta(getMetadata())), 0, 2);
 		placeHinderBlock(world);
-		
+
 		boolean hasChest = false;
-		switch(type) {
+		switch (type) {
 		case DESERT:
 		case OCEAN:
 		case MOUNTAIN: placeChest(world, rand, true); hasChest = true; break;
@@ -282,12 +274,12 @@ public class RoomBoss extends RoomBase
 		case TAIGA: placeFlame(world, BlockSacredFlame.NAYRU); break;
 		default:
 		}
-		
+
 		if (!hasChest) {
 			placeChest(world, rand, false);
 		}
 	}
-	
+
 	/**
 	 * Places the hanging chandelier only if height is sufficient
 	 */
@@ -296,13 +288,21 @@ public class RoomBoss extends RoomBase
 			int x = bBox.getCenterX();
 			int y = bBox.maxY - 1;
 			int z = bBox.getCenterZ();
-			if (type == BossType.OCEAN) {
+			switch (type) {
+			case OCEAN:
 				world.setBlock(x + 1, y, z + 1, Block.glowStone.blockID, 0, 2);
 				world.setBlock(x + 1, y, z - 1, Block.glowStone.blockID, 0, 2);
 				world.setBlock(x - 1, y, z + 1, Block.glowStone.blockID, 0, 2);
 				world.setBlock(x - 1, y, z - 1, Block.glowStone.blockID, 0, 2);
 				world.setBlock(x, y, z, Block.glowStone.blockID, 0, 2);
-			} else {
+				break;
+			case SWAMP:
+				world.setBlock(bBox.minX + 1, y, bBox.minZ + 1, Block.glowStone.blockID, 0, 2);
+				world.setBlock(bBox.minX + 1, y, bBox.maxZ - 1, Block.glowStone.blockID, 0, 2);
+				world.setBlock(bBox.maxX - 1, y, bBox.minZ + 1, Block.glowStone.blockID, 0, 2);
+				world.setBlock(bBox.maxX - 1, y, bBox.maxZ - 1, Block.glowStone.blockID, 0, 2);
+				break;
+			default:
 				world.setBlock(x, y, z, Block.fence.blockID, 0, 2);
 				world.setBlock(x + 1, y, z, Block.fence.blockID, 0, 2);
 				world.setBlock(x + 1, y, z, Block.fence.blockID, 0, 2);
@@ -321,7 +321,7 @@ public class RoomBoss extends RoomBase
 			}
 		}
 	}
-	
+
 	/**
 	 * Places and generates the contents of this dungeon's main chest
 	 */
@@ -341,7 +341,7 @@ public class RoomBoss extends RoomBase
 			DungeonLootLists.generateBossChestContents(world, rand, (IInventory) te, this);
 		}
 	}
-	
+
 	/**
 	 * Attempts to place a chest (unlocked, but with locked-level loot) in one of the four roof corners
 	 */
@@ -350,21 +350,47 @@ public class RoomBoss extends RoomBase
 			int x = (rand.nextFloat() < 0.5F ? bBox.minX : bBox.maxX);
 			int y = bBox.maxY + 1;
 			int z = (rand.nextFloat() < 0.5F ? bBox.minZ : bBox.maxZ);
-			world.setBlock(x, y, z, Block.chest.blockID);
-			TileEntity te = world.getBlockTileEntity(x, y, z);
-			if (te instanceof IInventory) {
-				DungeonLootLists.generateChestContents(world, rand, (IInventory) te, this, true);
+			placeChestAt(world, x, y, z, Block.chest, rand, true);
+		}
+	}
+
+	/**
+	 * Attempts to place n invisible chests, either on the roof or in the main room
+	 */
+	protected void placeInvisibleChest(World world, Random rand, int n) {
+		for (int i = 0; i < n; ++i) {
+			if (rand.nextFloat() < Config.getDoubleChestChance()) {
+				int x = bBox.minX + rand.nextInt(bBox.getXSize());
+				int y = (rand.nextFloat() < 0.5F ? bBox.minY + 1 : bBox.maxY + 1);
+				int z = bBox.minZ + rand.nextInt(bBox.getZSize());
+				if (bBox.isVecInside(x, y, z)) {
+					placeChestAt(world, x, y, z, ZSSBlocks.chestInvisible, rand, true);
+				}
 			}
 		}
 	}
-	
+
+	/**
+	 * Places the chest block at the given coordinates provided no other block exists,
+	 * and populates the chest with loot (locked level loot if goodLoot is true)
+	 */
+	protected void placeChestAt(World world, int x, int y, int z, Block chest, Random rand, boolean goodLoot) {
+		if (world.isAirBlock(x, y, z)) {
+			world.setBlock(x, y, z, chest.blockID);
+			TileEntity te = world.getBlockTileEntity(x, y, z);
+			if (te instanceof IInventory) {
+				DungeonLootLists.generateChestContents(world, rand, (IInventory) te, this, goodLoot);
+			}
+		}
+	}
+
 	/**
 	 * Places the designated Sacred Flame on the center block
 	 */
 	protected void placeFlame(World world, int meta) {
 		world.setBlock(bBox.getCenterX(), bBox.minY + (submerged ? 3 : 2), bBox.getCenterZ(), ZSSBlocks.sacredFlame.blockID, meta, 2);
 	}
-	
+
 	/**
 	 * Places a secret stone block between the chest and door to prevent early looting
 	 */
@@ -374,7 +400,7 @@ public class RoomBoss extends RoomBase
 		int z = bBox.getCenterZ() + (doorSide == SOUTH ? 1 : (doorSide == NORTH ? -1 : 0));
 		world.setBlock(x, y, z, ZSSBlocks.secretStone.blockID, getMetadata(), 2);
 	}
-	
+
 	/**
 	 * Adds n random breakable jars, either on the floor or on the roof
 	 */
@@ -389,13 +415,16 @@ public class RoomBoss extends RoomBase
 			}
 		}
 	}
-	
+
 	/**
 	 * Places a one-block wide ledge around the inside wall perimeter at centerY only
 	 * if certain conditions are met (sufficient y size, random)
 	 */
 	protected void placeLedge(World world, Random rand, int meta) {
-		if (type != BossType.OCEAN && bBox.getYSize() > 7 && rand.nextFloat() < (type == BossType.HELL ? 0.75F : 0.5F)) {
+		if (type == BossType.OCEAN || type == BossType.MOUNTAIN) {
+			return;
+		}
+		if (bBox.getYSize() > 7 && rand.nextFloat() < (type == BossType.HELL ? 0.75F : 0.5F)) {
 			int y = bBox.getCenterY();
 			int blockId = BlockSecretStone.getIdFromMeta(meta);
 			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 1, bBox.minX + 2, y, y + 1, bBox.minZ + 1, bBox.maxZ, blockId, 0, 3);
@@ -404,7 +433,7 @@ public class RoomBoss extends RoomBase
 			StructureGenUtils.fillWithoutReplace(world, bBox.minX + 2, bBox.maxX - 1, y, y + 1, bBox.maxZ - 1, bBox.maxZ, blockId, 0, 3);
 		}
 	}
-	
+
 	/**
 	 * Places parapet encircling the room's top
 	 */
@@ -416,7 +445,7 @@ public class RoomBoss extends RoomBase
 		int y = bBox.maxY;
 		int blockId = BlockSecretStone.getIdFromMeta(meta);
 		int stairId = BlockSecretStone.getStairIdFromMeta(meta);
-		
+
 		for (int i = x1; i <= x2; ++i) {
 			world.setBlock(i, y, z1, stairId, 6, 3);
 			world.setBlock(i, y + 1, z1, blockId, 0, 2);
@@ -427,7 +456,7 @@ public class RoomBoss extends RoomBase
 				world.setBlock(i, y + 2, z2, blockId, 0, 2);
 			}
 		}
-		
+
 		for (int i = z1; i <= z2; ++i) {
 			world.setBlock(x1, y, i, stairId, 4, 3);
 			world.setBlock(x1, y + 1, i, blockId, 0, 2);
@@ -443,26 +472,29 @@ public class RoomBoss extends RoomBase
 			}
 		}
 	}
-	
+
 	/**
 	 * Places pillars in the four corners of the dungeon with chance based on room size
 	 */
 	protected void placePillars(World world, int meta) {
-		if (type != BossType.DESERT && world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
+		if (type == BossType.DESERT || type == BossType.SWAMP || type == BossType.MOUNTAIN) {
+			return;
+		}
+		if (world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
 			int offset = (bBox.getXSize() < 11 ? 2 : 3);
 			int x1 = (bBox.getXSize() < 11 ? bBox.getCenterX() : bBox.minX) + offset;
 			int x2 = (bBox.getXSize() < 11 ? bBox.getCenterX() : bBox.maxX) - offset;
 			int z1 = (bBox.getZSize() < 11 ? bBox.getCenterZ() : bBox.minZ) + offset;
 			int z2 = (bBox.getZSize() < 11 ? bBox.getCenterZ() : bBox.maxZ) - offset;
 			int blockId = BlockSecretStone.getIdFromMeta(meta);
-			
+
 			for (int y = bBox.minY + 1; y < bBox.maxY; ++y) {
 				world.setBlock(x1, y, z1, blockId, 0, 2);
 				world.setBlock(x1, y, z2, blockId, 0, 2);
 				world.setBlock(x2, y, z1, blockId, 0, 2);
 				world.setBlock(x2, y, z2, blockId, 0, 2);
 			}
-			
+
 			if (bBox.getXSize() > 10 && world.rand.nextFloat() < 0.5F) {
 				placePillarLandings(world, blockId, x1, bBox.getCenterY(), z1, 0);
 				placePillarLandings(world, blockId, x2, bBox.getCenterY(), z1, 1);
@@ -471,7 +503,7 @@ public class RoomBoss extends RoomBase
 			}
 		}
 	}
-	
+
 	/**
 	 * Places one-block landings on two sides of the pillar, depending on facing
 	 * @param corner 0 NW, 1 NE, 2 SW, 3 SE
@@ -495,7 +527,7 @@ public class RoomBoss extends RoomBase
 			world.setBlock(x, y, z - 1, blockId);
 		}
 	}
-	
+
 	/**
 	 * Places 'windows' at regular intervals in the walls
 	 */
@@ -503,21 +535,62 @@ public class RoomBoss extends RoomBase
 		if (Config.areWindowsEnabled() && world.rand.nextFloat() < (bBox.getXSize() * 0.06F)) {
 			int interval = (bBox.getXSize() % 2 == 1 ? 2 : 3);
 			int j = bBox.getCenterY() + 1;
+			Block window = (world.rand.nextFloat() < 0.25F ? Block.fenceIron : null);
+			boolean hasVines = (type == BossType.FOREST || type == BossType.SWAMP);
 			for (int i = bBox.minX + 1; i < bBox.maxX; ++i) {
 				if (i % interval == 0) {
-					world.setBlockToAir(i, j, bBox.minZ);
-					world.setBlockToAir(i, j, bBox.maxZ);
+					if (window == null) {
+						world.setBlockToAir(i, j, bBox.minZ);
+						world.setBlockToAir(i, j, bBox.maxZ);
+					} else {
+						world.setBlock(i, j, bBox.minZ, window.blockID, 0, 2);
+						world.setBlock(i, j, bBox.maxZ, window.blockID, 0, 2);
+					}
+					if (hasVines) {
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, i, j - 1, bBox.minZ - 1, 1);
+						}
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, i, j - 1, bBox.maxZ + 1, 4);
+						}
+					}
 				}
 			}
 			for (int k = bBox.minZ + 1; k < bBox.maxZ; ++k) {
 				if (k % interval == 0) {
-					world.setBlockToAir(bBox.minX, j, k);
-					world.setBlockToAir(bBox.maxX, j, k);
+					if (window == null) {
+						world.setBlockToAir(bBox.minX, j, k);
+						world.setBlockToAir(bBox.maxX, j, k);
+					} else {
+						world.setBlock(bBox.minX, j, k, window.blockID, 0, 2);
+						world.setBlock(bBox.maxX, j, k, window.blockID, 0, 2);
+					}
+					if (hasVines) {
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, bBox.minX - 1, j - 1, k, 8);
+						}
+						if (world.rand.nextFloat() < 0.25F) {
+							placeVines(world, bBox.maxX + 1, j - 1, k, 2);
+						}
+					}
 				}
 			}
 		}
 	}
-	
+
+	/**
+	 * Places a random number of vines with the given metadata facing starting from y and moving downward
+	 */
+	protected void placeVines(World world, int x, int y, int z, int meta) {
+		int n = world.rand.nextInt(5) + 1;
+		for (int i = 0; i < n; ++i) {
+			if (!world.isAirBlock(x, y - i, z)) {
+				break;
+			}
+			world.setBlock(x, y - i, z, Block.vine.blockID, meta, 2);
+		}
+	}
+
 	@Override
 	protected boolean canReplaceBlockAt(int y, int id) {
 		boolean flag1 = (Block.blocksList[id] != null && !Block.blocksList[id].blockMaterial.blocksMovement());
@@ -525,7 +598,7 @@ public class RoomBoss extends RoomBase
 		boolean flag3 = (type == BossType.TAIGA && (id == Block.wood.blockID || (Block.blocksList[id] != null && Block.blocksList[id].blockMaterial == Material.ice)));
 		return (id == 0 || flag1 || flag2 || flag3 || super.canReplaceBlockAt(y, id));
 	}
-	
+
 	@Override
 	protected boolean placeInOcean(World world, boolean sink) {
 		if (type == BossType.OCEAN) {
@@ -536,7 +609,7 @@ public class RoomBoss extends RoomBase
 				bBox.offset(0, -1, 0);
 			}
 			if (world.getBlockMaterial(bBox.getCenterX(), bBox.minY, bBox.getCenterZ()) != Material.water &&
-				world.getBlockMaterial(bBox.getCenterX(), bBox.maxY, bBox.getCenterZ()) == Material.water) {
+					world.getBlockMaterial(bBox.getCenterX(), bBox.maxY, bBox.getCenterZ()) == Material.water) {
 				inOcean = true;
 				submerged = true;
 				StructureGenUtils.adjustCornersForMaterial(world, bBox, Material.water, 6, false, false);

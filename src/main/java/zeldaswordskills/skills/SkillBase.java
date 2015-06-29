@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package zeldaswordskills.skills;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +29,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.SyncSkillPacket;
+import zeldaswordskills.network.client.SyncSkillPacket;
 import zeldaswordskills.skills.sword.ArmorBreak;
+import zeldaswordskills.skills.sword.BackSlice;
 import zeldaswordskills.skills.sword.Dash;
 import zeldaswordskills.skills.sword.Dodge;
 import zeldaswordskills.skills.sword.EndingBlow;
@@ -63,6 +65,10 @@ public abstract class SkillBase
 	/** Map containing all registered skills */
 	private static final Map<Byte, SkillBase> skillsMap = new HashMap<Byte, SkillBase>();
 
+	/** List of registered skills' unlocalized names, for use in Commands */
+	// if the skillsMap was keyed by unlocalized name, could just return the key set
+	private static final List<String> skillNames = new ArrayList<String>();
+
 	/* ACTIVE SKILLS */
 	public static final SkillBase swordBasic = new SwordBasic("swordbasic").addDescriptions(1);
 	public static final SkillBase armorBreak = new ArmorBreak("armorbreak").addDescriptions(1);
@@ -82,6 +88,7 @@ public abstract class SkillBase
 	public static final SkillBase swordBreak = new SwordBreak("swordbreak").addDescriptions(1);
 	public static final SkillBase risingCut = new RisingCut("risingcut").addDescriptions(1);
 	public static final SkillBase endingBlow = new EndingBlow("endingblow").addDescriptions(1);
+	public static final SkillBase backSlice = new BackSlice("backslice").addDescriptions(1);
 
 	/** Unlocalized name for language registry */
 	private final String unlocalizedName;
@@ -102,7 +109,7 @@ public abstract class SkillBase
 	 * 					seems to always be true since skills are declared statically
 	 */
 	protected SkillBase(String name, boolean register) {
-		this.unlocalizedName = name;
+		this.unlocalizedName = name.toLowerCase();
 		this.id = skillIndex++;
 		if (register) {
 			if (skillsMap.containsKey(id)) {
@@ -110,6 +117,7 @@ public abstract class SkillBase
 						+ skillsMap.get(id).unlocalizedName + " while adding " + name);
 			}
 			skillsMap.put(id, this);
+			skillNames.add(unlocalizedName);
 		}
 	}
 
@@ -139,12 +147,29 @@ public abstract class SkillBase
 
 	/** Returns an iterable collection of all the skills in the map */
 	public static final Collection<SkillBase> getSkills() {
-		return skillsMap.values();
+		return Collections.unmodifiableCollection(skillsMap.values());
 	}
 
 	/** Returns the total number of registered skills */
 	public static final int getNumSkills() {
 		return skillsMap.size();
+	}
+
+	/** Returns all registered skills' unlocalized names as an array */
+	public static final String[] getSkillNames() {
+		return skillNames.toArray(new String[skillNames.size()]);
+	}
+
+	/**
+	 * Retrieves a skill by its unlocalized name, or null if not found
+	 */
+	public static final SkillBase getSkillByName(String name) {
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (name.equals(skill.getUnlocalizedName())) {
+				return skill;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -193,11 +218,16 @@ public abstract class SkillBase
 
 	/** Returns the translated skill name */
 	public final String getDisplayName() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name");
+		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".name");
+	}
+
+	/** Returns the unlocalized name with no prefix, exactly as the skill was registered */
+	public final String getUnlocalizedName() {
+		return unlocalizedName;
 	}
 
 	/** Returns the unlocalized name prefixed by 'skill.zss' */
-	public final String getUnlocalizedName() {
+	public final String getFullUnlocalizedName() {
 		return "skill.zss." + unlocalizedName;
 	}
 
@@ -274,7 +304,7 @@ public abstract class SkillBase
 	 */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getTranslatedTooltip(EntityPlayer player) {
-		List<String> desc = new ArrayList(tooltip.size());
+		List<String> desc = new ArrayList<String>(tooltip.size());
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}
@@ -287,7 +317,7 @@ public abstract class SkillBase
 	/** Returns the translated tooltip display */
 	@SideOnly(Side.CLIENT)
 	public final List<String> getDescription() {
-		List<String> desc = new ArrayList();
+		List<String> desc = new ArrayList<String>();
 		for (String s : tooltip) {
 			desc.add(StatCollector.translateToLocal(s));
 		}
@@ -304,7 +334,7 @@ public abstract class SkillBase
 
 	/** Returns the translated description of the skill's activation requirements (long version) */
 	public String getActivationDisplay() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.activate");
+		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".desc.activate");
 	}
 
 	/** Returns a translated description of the skill's AoE, using the value provided */
@@ -340,7 +370,7 @@ public abstract class SkillBase
 
 	/** Returns the translated description of the skill's effect (long version) */
 	public String getFullDescription() {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".desc.full");
+		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".desc.full");
 	}
 
 	/**

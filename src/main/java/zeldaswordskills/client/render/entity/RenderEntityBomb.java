@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,9 +25,10 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.client.model.ModelBomb;
 import zeldaswordskills.entity.projectile.EntityBomb;
-import zeldaswordskills.item.ItemBomb;
+import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -39,6 +40,18 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class RenderEntityBomb extends Render
 {
+	/** Base bomb textures */
+	public static final ResourceLocation[] bombTextures = new ResourceLocation[BombType.values().length];
+	/** Flashing bomb textures */
+	public static final ResourceLocation[] flashTextures = new ResourceLocation[BombType.values().length];
+
+	static {
+		for (BombType type : BombType.values()) {
+			bombTextures[type.ordinal()] = new ResourceLocation(ModInfo.ID, "textures/entity/bomb_" + type.unlocalizedName + ".png");
+			flashTextures[type.ordinal()] = new ResourceLocation(ModInfo.ID, "textures/entity/bomb_" + type.unlocalizedName + "_flash.png");
+		}
+	}
+
 	protected ModelBase model;
 
 	public RenderEntityBomb() {
@@ -47,12 +60,8 @@ public class RenderEntityBomb extends Render
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity bomb) {
-		boolean isFlashing = bomb.ticksExisted % 13 > 10;
-		switch(((EntityBomb) bomb).getType()) {
-		case BOMB_FIRE: return isFlashing ? ItemBomb.fireFlash : ItemBomb.fireBase;
-		case BOMB_WATER: return isFlashing ? ItemBomb.waterFlash : ItemBomb.waterBase;
-		default: return isFlashing ? ItemBomb.bombFlash : ItemBomb.bombBase;
-		}
+		int i = ((EntityBomb) bomb).getType().ordinal();
+		return (bomb.ticksExisted % 13 > 10) ? flashTextures[i] : bombTextures[i];
 	}
 
 	@Override

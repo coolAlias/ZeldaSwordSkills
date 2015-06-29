@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,11 +28,11 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.MortalDrawPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.client.MortalDrawPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
@@ -240,22 +240,22 @@ public class MortalDraw extends SkillActive
 	}
 
 	/**
-	 * Returns true if the player was able to draw a sword; always triggered first on
-	 * the server, whether when attacked or the timer runs out, and second on the
-	 * client after MortalDrawPacket is received.
-	 * @return	true if the sword was drawn; always false on the client, as the player
-	 * 			already drew the sword on the server
+	 * Returns true if the player was able to draw a sword
+	 * @return	true if the skill should be triggered (ignored on client)
 	 */
 	public boolean drawSword(EntityPlayer player, Entity attacker) {
 		boolean flag = false;
-		// don't allow drawing sword when current item is no longer null, from number keys or other means
-		if (!player.worldObj.isRemote) { // client player's held item synced automatically
-			if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItem() == null) {
-				player.setCurrentItemOrArmor(0, player.inventory.getStackInSlot(swordSlot));
+		// letting this run on both sides is fine - client will sync from server later anyway
+		if (swordSlot > -1 && swordSlot != player.inventory.currentItem && player.getHeldItem() == null) {
+			ItemStack sword = player.inventory.getStackInSlot(swordSlot);
+			if (!player.worldObj.isRemote) {
 				player.inventory.setInventorySlotContents(swordSlot, null);
-				ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
-				flag = (skill != null && skill.getCurrentTarget() == attacker);
 			}
+			player.setCurrentItemOrArmor(0, sword);
+			// attack will happen before entity#onUpdate refreshes equipment, so apply it now:
+			player.getAttributeMap().applyAttributeModifiers(sword.getAttributeModifiers());
+			ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
+			flag = (skill != null && skill.getCurrentTarget() == attacker);
 		}
 		swordSlot = -1;
 		return flag;

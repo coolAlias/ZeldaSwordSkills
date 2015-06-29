@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -33,12 +33,13 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
-import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -60,7 +61,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class ItemHookShot extends Item
 {
-	protected static final String[] shotNames = {"Hookshot","Stoneshot","Multishot"};
+	protected static final String[] shotNames = {"Hookshot","Clawshot","Multishot"};
 
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
@@ -78,21 +79,20 @@ public class ItemHookShot extends Item
 		return (damage < HookshotType.values().length ? HookshotType.values()[damage] : HookshotType.WOOD_SHOT);
 	}
 
-	/** Returns true if this hookshot is the extended version */
-	public boolean isExtended(int damage) {
-		return getType(damage).ordinal() % 2 == 1;
-	}
-
 	@Override
 	public EnumAction getItemUseAction(ItemStack par1ItemStack) {
 		return EnumAction.block;
 	}
 
 	@Override
-	public int getMaxItemUseDuration(ItemStack stack) { return 16000; }
+	public int getMaxItemUseDuration(ItemStack stack) {
+		return 16000;
+	}
 	
 	@Override
-	public boolean isItemTool(ItemStack stack) { return true; }
+	public boolean isItemTool(ItemStack stack) {
+		return true;
+	}
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -122,12 +122,12 @@ public class ItemHookShot extends Item
 			if (villager.getProfession() == 3) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;
@@ -171,8 +171,8 @@ public class ItemHookShot extends Item
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.10"));
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.11"));
 			break;
-		case STONE_SHOT:
-		case STONE_SHOT_EXT:
+		case CLAW_SHOT:
+		case CLAW_SHOT_EXT:
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.20"));
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.21"));
 			break;

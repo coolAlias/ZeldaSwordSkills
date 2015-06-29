@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,6 @@ package zeldaswordskills.block;
 import java.util.List;
 
 import net.minecraft.block.BlockContainer;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -54,21 +52,19 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class BlockSacredFlame extends BlockContainer
 {
 	public static final int DIN = 0x1, FARORE = 0x2, NAYRU = 0x4;
-	
-	public static final Material materialSacredFlame = new MaterialSacredFlame(MapColor.airColor);
-	
+
 	@SideOnly(Side.CLIENT)
 	private Icon[] iconArray;
 
 	public BlockSacredFlame(int id) {
-		super(id, materialSacredFlame);
+		super(id, ZSSBlockMaterials.sacredFlame);
 		disableStats();
 		setBlockUnbreakable();
 		setResistance(5000.0F);
 		setLightValue(1.0F);
 		setCreativeTab(ZSSCreativeTabs.tabBlocks);
 	}
-	
+
 	@Override
 	public TileEntity createNewTileEntity(World world) {
 		return new TileEntitySacredFlame();
@@ -78,7 +74,7 @@ public class BlockSacredFlame extends BlockContainer
 	public int damageDropped(int meta) {
 		return meta;
 	}
-	
+
 	@Override
 	public boolean isCollidable() {
 		return true;
@@ -159,7 +155,7 @@ public class BlockSacredFlame extends BlockContainer
 			}
 		}
 	}
-	
+
 	/**
 	 * Extinguishes the flames at this location, setting the block to air if flames are not renewable
 	 */
@@ -208,18 +204,5 @@ public class BlockSacredFlame extends BlockContainer
 	public Icon getIcon(int side, int meta) {
 		meta &= ~0x8;
 		return iconArray[(meta == DIN ? 0 : meta)];
-	}
-}
-
-/**
- * 
- * Simply a way to access protected method setNoPushMobility().
- *
- */
-class MaterialSacredFlame extends Material {
-
-	public MaterialSacredFlame(MapColor color) {
-		super(color);
-		setNoPushMobility();
 	}
 }

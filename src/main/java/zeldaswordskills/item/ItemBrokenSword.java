@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
@@ -39,10 +40,12 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityGoron;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 
 import com.google.common.collect.Multimap;
 
@@ -74,25 +77,31 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 			boolean isGoron = (entity instanceof EntityGoron);
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
+			Item brokenItem = Item.itemsList[stack.getItemDamage()];
+			if (!(brokenItem instanceof ItemSword) || (brokenItem instanceof ItemZeldaSword && !((ItemZeldaSword) brokenItem).givesBrokenItem)) {
+				LogHelper.warning("Broken sword contained an invalid item: " + brokenItem + "; defaulting to Ordon Sword");
+				brokenItem = ZSSItems.swordOrdon;
+				stack.setItemDamage(brokenItem.itemID);
+			}
 			if (villager.getProfession() == 3 || isGoron) {
-				if (stack.getItemDamage() != ZSSItems.swordGiant.itemID) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken"));
+				if (brokenItem != ZSSItems.swordGiant) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.broken");
 					MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 5), new ItemStack(stack.getItemDamage(), 1, 0)));
 				} else if (isGoron && villager.getCustomNameTag().equals("Medigoron")) {
-					if (ZSSPlayerInfo.get(player).getSkillLevel(SkillBase.bonusHeart) > 9) {
+					if (ZSSPlayerSkills.get(player).getSkillLevel(SkillBase.bonusHeart) > 9) {
 						player.triggerAchievement(ZSSAchievements.swordBroken);
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.1"));
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.broken.giant.2"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.broken.giant.1");
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.broken.giant.2");
 						MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 5), new ItemStack(stack.getItemDamage(), 1, 0)));
 					} else {
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.big"));
-						player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.later"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.big");
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.later");
 					}
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.sorry");
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.sword.sorry"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.sorry");
 			}
 
 			return true;
@@ -103,9 +112,9 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
-		if (Item.itemsList[par1] instanceof ItemZeldaSword) {
-			return Item.itemsList[par1].getIconFromDamage(-1);
+	public Icon getIconFromDamage(int damage) {
+		if (Item.itemsList[damage] instanceof ItemZeldaSword) {
+			return Item.itemsList[damage].getIconFromDamage(-1);
 		} else {
 			return itemIcon;
 		}
@@ -113,8 +122,9 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 
 	@Override
 	public String getItemDisplayName(ItemStack stack) {
-		String sword = stack.getItemDamage() > 0 ? (" " + StatCollector.translateToLocal(Item.itemsList[stack.getItemDamage()].getUnlocalizedName() + ".name")) : "";
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + sword;
+		Item sword = (stack.getItemDamage() > 0 ? Item.itemsList[stack.getItemDamage()] : null);
+		String name = (sword instanceof ItemZeldaSword && ((ItemZeldaSword) sword).givesBrokenItem) ? sword.getUnlocalizedName() : ZSSItems.swordOrdon.getUnlocalizedName();
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal(name + ".name");
 	}
 
 	@Override
@@ -123,6 +133,7 @@ public class ItemBrokenSword extends Item implements IBattlegearWeapon
 		list.add(new ItemStack(itemID, 1, ZSSItems.swordKokiri.itemID));
 		list.add(new ItemStack(itemID, 1, ZSSItems.swordOrdon.itemID));
 		list.add(new ItemStack(itemID, 1, ZSSItems.swordGiant.itemID));
+		list.add(new ItemStack(itemID, 1, ZSSItems.swordDarknut.itemID));
 	}
 
 	@Override

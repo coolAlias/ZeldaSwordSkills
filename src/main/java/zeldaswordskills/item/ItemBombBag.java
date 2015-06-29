@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -106,12 +107,12 @@ public class ItemBombBag extends Item
 			if (villager.getProfession() != 1 && trades != null) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;
@@ -124,7 +125,7 @@ public class ItemBombBag extends Item
 	 */
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (isHeld && getBombsHeld(stack) < getCapacity(stack) && entity instanceof EntityPlayer) {
+		if (!world.isRemote && isHeld && getBombsHeld(stack) < getCapacity(stack) && entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) entity;
 			for (int i = 0; i < player.inventory.getSizeInventory(); ++i) {
 				ItemStack invStack = player.inventory.getStackInSlot(i);
@@ -169,8 +170,11 @@ public class ItemBombBag extends Item
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.1"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bombbag.desc.2"));
-		String bombName = StatCollector.translateToLocal((getBombsHeld(stack) > 0 && getBagBombType(stack) > 0) ?  "item.zss.bomb." + getBagBombType(stack) + ".name" : "item.zss.bomb.0.name");
-		list.add(EnumChatFormatting.BOLD + StatCollector.translateToLocalFormatted("tooltip.zss.bombbag.desc.bombs", new Object[] {bombName,getBombsHeld(stack),getCapacity(stack)}));
+		int held = getBombsHeld(stack);
+		int i = getBagBombType(stack);
+		BombType type = (held > 0 && i > 0) ? BombType.values()[i % BombType.values().length] : BombType.BOMB_STANDARD;
+		String bombName = StatCollector.translateToLocal("item.zss.bomb." + type.unlocalizedName + ".name");
+		list.add(EnumChatFormatting.BOLD + StatCollector.translateToLocalFormatted("tooltip.zss.bombbag.desc.bombs", bombName, held, getCapacity(stack)));
 	}
 
 	/**
@@ -191,7 +195,9 @@ public class ItemBombBag extends Item
 	 * @return the number of bombs that wouldn't fit, if any (usually returns a negative value)
 	 */
 	public int addBombs(ItemStack bag, ItemStack bombs) {
-		if (areMatchingTypes(bag, bombs, true)) {
+		if (ItemBomb.getType(bombs) == BombType.BOMB_FLOWER) {
+			return bombs.stackSize; // can't put bomb flowers in bomb bags
+		} else if (areMatchingTypes(bag, bombs, true)) {
 			int remaining = addBombs(bag, bombs.stackSize);
 			setBagBombType(bag, ItemBomb.getType(bombs).ordinal());
 			return remaining;
@@ -245,7 +251,7 @@ public class ItemBombBag extends Item
 	 * Returns either the true NBT capacity for this bag, or the adjusted max capacity
 	 */
 	private int getCapacity(ItemStack stack, boolean trueCapacity) {
-		int capacity = (stack.hasTagCompound() ? stack.getTagCompound().getInteger("capacity") : 0);
+		int capacity = (stack.hasTagCompound() ? Math.max(BASE_CAPACITY, stack.getTagCompound().getInteger("capacity")) : BASE_CAPACITY);
 		int type = getBagBombType(stack);
 		return (trueCapacity || type == -1 || type == BombType.BOMB_STANDARD.ordinal()) ? capacity : capacity / 2;
 	}

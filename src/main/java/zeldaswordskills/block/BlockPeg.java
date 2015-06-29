@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,10 +20,10 @@ package zeldaswordskills.block;
 import java.util.Random;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
@@ -35,9 +35,10 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.block.ISmashable;
-import zeldaswordskills.api.item.HookshotType;
+import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import cpw.mods.fml.relauncher.Side;
@@ -52,15 +53,12 @@ import cpw.mods.fml.relauncher.SideOnly;
  * If not destroyed, the peg will eventually pop back up.
  *
  */
-public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmashable
+public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmashable, IWhipBlock
 {
 	/** The weight of this block, i.e. the difficulty of smashing this block */
 	private final BlockWeight weight;
 	/** Metadata value that signifies a fully smashed down peg */
 	private static final int MAX_STATE = 3;
-
-	public static final MaterialPeg pegWoodMaterial = new MaterialPeg(MapColor.woodColor);
-	public static final MaterialPeg pegRustyMaterial = new MaterialPeg(MapColor.ironColor);
 
 	@SideOnly(Side.CLIENT)
 	private Icon iconTop;
@@ -81,26 +79,29 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	/** Returns appropriate sound based on block material */
 	private String getHitSound() {
-		return blockMaterial == Material.iron ? Sounds.HIT_RUSTY : Sounds.HIT_PEG;
+		return blockMaterial == ZSSBlockMaterials.pegRustyMaterial ? Sounds.HIT_RUSTY : Sounds.HIT_PEG;
 	}
 
 	@Override
-	public boolean canAlwaysGrab(HookshotType type, World world, int x, int y, int z) {
-		return type == HookshotType.MULTI_SHOT || type == HookshotType.MULTI_SHOT_EXT;
+	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side) {
+		if (side == 0 || side == 1 || world.getBlockMetadata(x, y, z) > 0) {
+			return Result.DENY;
+		}
+		return (type.getBaseType() == HookshotType.MULTI_SHOT ? Result.ALLOW : Result.DEFAULT);
 	}
 
 	@Override
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z) {
+	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side) {
 		return Result.DENY;
 	}
 
 	@Override
 	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
-		return (blockMaterial == pegWoodMaterial ? Material.wood : Material.iron);
+		return (blockMaterial == ZSSBlockMaterials.pegWoodMaterial ? Material.wood : Material.iron);
 	}
 
 	@Override
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta) {
+	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side) {
 		return weight;
 	}
 
@@ -130,6 +131,25 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 			}
 		}
 		return Result.DENY;
+	}
+
+	@Override
+	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+		return false;
+	}
+
+	@Override
+	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side) {
+		return (side != 0 && side != 1 && world.getBlockMetadata(x, y, z) < MAX_STATE);
+	}
+
+	@Override
+	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround) {
+		if (world.getBlockMetadata(x, y, z) >= MAX_STATE) {
+			whip.setDead();
+			return Result.DENY;
+		}
+		return Result.DEFAULT;
 	}
 
 	@Override
@@ -195,14 +215,5 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_side");
 		iconTop = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_top");
 		iconBottom = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_bottom");
-	}
-}
-
-class MaterialPeg extends Material {
-	public MaterialPeg(MapColor color) {
-		super(color);
-		setRequiresTool();
-		setImmovableMobility();
-		setAdventureModeExempt();
 	}
 }

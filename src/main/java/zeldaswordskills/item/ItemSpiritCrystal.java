@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIndirect;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -45,8 +45,10 @@ import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.PacketISpawnParticles;
+import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.util.LogHelper;
+import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.WarpPoint;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -86,7 +88,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 
 	@Override
 	public int getMaxItemUseDuration(ItemStack stack) {
-		return 72000;
+		return timeToUse;
 	}
 
 	@Override
@@ -124,16 +126,15 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	}
 
 	@Override
-	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksRemaining) {
-		if (getMaxItemUseDuration(stack) - ticksRemaining > timeToUse) {
+	public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) {
+		if (count == 1) {
 			int cost = 0;
 			switch(spiritType) {
-			case BlockSacredFlame.DIN: cost = handleDin(stack, world, player); break;
-			case BlockSacredFlame.FARORE: cost = handleFarore(stack, world, player); break;
+			case BlockSacredFlame.DIN: cost = handleDin(stack, player.worldObj, player); break;
+			case BlockSacredFlame.FARORE: cost = handleFarore(stack, player.worldObj, player); break;
 			case BlockSacredFlame.NAYRU: break;
 			default: LogHelper.warning("Invalid spirit type " + spiritType + " while using spirit crystal");
 			}
-
 			if (damageStack(stack, player, cost)) {
 				player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.crystalSpirit));
 			}
@@ -150,7 +151,7 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		if (world.isRemote) {
 			return false;
 		} else if (stack.getItemDamage() == 0) {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.full"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.sacred_flame.full");
 		} else if (isActive) {
 			if (spiritType == type) {
 				int originalDamage = stack.getItemDamage();
@@ -158,10 +159,10 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 				world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 				return (world.rand.nextInt(stack.getMaxDamage()) < originalDamage);
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.sacred_flame.mismatch"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.sacred_flame.mismatch");
 			}
 		} else {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.sacred_flame.inactive"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.inactive");
 		}
 		return false;
 	}
@@ -202,14 +203,12 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	 * Affects all blocks in the radius with the effects of Din's Fire
 	 */
 	private void affectDinBlocks(World world, EntityPlayer player, float radius) {
-		List affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, -1));
-		Iterator iterator;
-		ChunkPosition chunkposition;
+		List<ChunkPosition> affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, -1));
 		int i, j, k, l;
-
-		iterator = affectedBlockPositions.iterator();
+		ChunkPosition chunkposition;
+		Iterator<ChunkPosition> iterator = affectedBlockPositions.iterator();
 		while (iterator.hasNext()) {
-			chunkposition = (ChunkPosition)iterator.next();
+			chunkposition = iterator.next();
 			i = chunkposition.x;
 			j = chunkposition.y;
 			k = chunkposition.z;
@@ -237,12 +236,12 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 		int l1 = MathHelper.floor_double(player.posY + (double) radius + 1.0D);
 		int i2 = MathHelper.floor_double(player.posZ - (double) radius - 1.0D);
 		int j2 = MathHelper.floor_double(player.posZ + (double) radius + 1.0D);
-		List list = world.getEntitiesWithinAABBExcludingEntity(player, AxisAlignedBB.getBoundingBox((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
+		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(player, AxisAlignedBB.getBoundingBox((double) i, (double) k, (double) i2, (double) j, (double) l1, (double) j2));
 		Vec3 vec3 = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
 
 		for (int k2 = 0; k2 < list.size(); ++k2)
 		{
-			Entity entity = (Entity) list.get(k2);
+			Entity entity = list.get(k2);
 			double d0 = entity.posX - player.posX;
 			double d1 = entity.posY + (double) entity.getEyeHeight() - player.posY;
 			double d2 = entity.posZ - player.posZ;
@@ -258,13 +257,11 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 				if (entity.isImmuneToFire()) {
 					amount *= 0.25F;
 				}
-
-				if (entity.attackEntityFrom(new DamageSourceIndirect("magic.din", player, player).setFireDamage().setMagicDamage(), amount) && !entity.isImmuneToFire()) {
+				if (entity.attackEntityFrom(new DamageSourceFireIndirect("magic.din", player, player, true).setMagicDamage(), amount) && !entity.isImmuneToFire()) {
 					if (world.rand.nextFloat() < d10) {
 						entity.setFire(10);
 					}
 				}
-
 				double d11 = EnchantmentProtection.func_92092_a(entity, d10);
 				entity.motionX += d0 * d11;
 				entity.motionY += d1 * d11;
@@ -309,27 +306,26 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	 */
 	private int handleFarore(ItemStack stack, World world, EntityPlayer player) {
 		if (canUse(stack)) {
-			double[] coordinates = getRecallCoordinates(stack);
-			if (coordinates != null) {
-				if (getDimension(stack) == player.worldObj.provider.dimensionId) {
-					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
+			WarpPoint warp = recall(stack);
+			if (warp != null) {
+				if (warp.dimensionId == player.worldObj.provider.dimensionId) {
+					player.setPositionAndUpdate(warp.x + 0.5D, warp.y + 0.5D, warp.z + 0.5D);
 					player.playSound(Sounds.SUCCESS, 1.0F, 1.0F);
 					return costToUse;
 				} else {
 					player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 					if (world.isRemote) {
-						player.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.spirit_crystal.farore.fail.dimension",
-								new Object[]{StatCollector.translateToLocal(getUnlocalizedName() + ".name")}));
+						PlayerUtils.sendFormattedChat(player, "chat.zss.spirit_crystal.farore.fail.dimension",
+								StatCollector.translateToLocal(getUnlocalizedName() + ".name"));
 					}
 				}
 			} else {
 				player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 				if (world.isRemote) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.spirit_crystal.farore.fail.mark"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.farore.fail.mark");
 				}
 			}
 		}
-
 		return 0;
 	}
 
@@ -346,37 +342,31 @@ public class ItemSpiritCrystal extends Item implements ISacredFlame, ISpawnParti
 	}
 
 	/**
-	 * Saves the player's current position and dimension into Farore's Wind
+	 * Saves the player's current position and dimension for Farore's Wind
 	 */
 	private void mark(ItemStack stack, World world, EntityPlayer player) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("zssFWdimension", world.provider.dimensionId);
-		stack.getTagCompound().setDouble("zssFWposX", player.posX);
-		stack.getTagCompound().setDouble("zssFWposY", player.posY);
-		stack.getTagCompound().setDouble("zssFWposZ", player.posZ);
+		WarpPoint warp = new WarpPoint(world.provider.dimensionId, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
+		stack.getTagCompound().setTag("zssRecallPoint", warp.writeToNBT());
 		world.playSoundAtEntity(player, Sounds.SUCCESS, 1.0F, 1.0F);
 	}
 
 	/**
-	 * Returns the dimension of the stored coordinates
+	 * Returns the saved warp coordinates for Farore's Wind
 	 */
-	private int getDimension(ItemStack stack) {
-		return (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssFWdimension") ?
-				stack.getTagCompound().getInteger("zssFWdimension") : Integer.MAX_VALUE);
-	}
-
-	/**
-	 * Returns the saved coordinates from Farore's Wind, or null if no position was marked
-	 */
-	private double[] getRecallCoordinates(ItemStack stack) {
-		double[] coordinates = null;
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssFWposX")) {
-			coordinates = new double[3];
-			coordinates[0] = stack.getTagCompound().getDouble("zssFWposX");
-			coordinates[1] = stack.getTagCompound().getDouble("zssFWposY");
-			coordinates[2] = stack.getTagCompound().getDouble("zssFWposZ");
+	private WarpPoint recall(ItemStack stack) {
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssRecallPoint")) {
+			return WarpPoint.readFromNBT(stack.getTagCompound().getCompoundTag("zssRecallPoint"));
 		}
-		return coordinates;
+		// for backwards compatibility:
+		else if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssFWdimension")) {
+			int dimension = stack.getTagCompound().getInteger("zssFWdimension");
+			double x = stack.getTagCompound().getDouble("zssFWposX");
+			double y = stack.getTagCompound().getDouble("zssFWposY");
+			double z = stack.getTagCompound().getDouble("zssFWposZ");
+			return new WarpPoint(dimension, MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+		}
+		return null;
 	}
 
 	@Override

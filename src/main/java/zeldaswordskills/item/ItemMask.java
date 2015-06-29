@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import java.util.UUID;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -43,12 +44,13 @@ import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.EntityMaskTrader;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -65,8 +67,10 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
+
 	/** Number of rupees to pay back to the Happy Mask Salesman */
 	private int buyPrice;
+
 	/** Number of rupees a villager will pay for this mask */
 	private int sellPrice;
 
@@ -116,31 +120,28 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 	/**
 	 * Used by the Blast Mask to cause an explosion; sets a short cooldown on the stack
 	 */
-	public void explode(ItemStack stack, World world, double x, double y, double z) {
+	public void explode(EntityPlayer player, ItemStack stack, World world, double x, double y, double z) {
 		if (this == ZSSItems.maskBlast) {
-			if (isCooling(stack)) {
+			if (!player.capabilities.isCreativeMode && isCooling(world, stack)) {
 				world.playSoundEffect(x, y, z, Sounds.CLICK, 0.3F, 0.6F);
 			} else {
 				CustomExplosion.createExplosion(new EntityBomb(world), world, x, y, z, 3.0F, 10.0F, false);
-				setCooldown(stack, 40);
+				setNextUse(world, stack, 40);
 			}
 		}
 	}
 
 	/** Returns true if this Mask is cooling down */
-	private boolean isCooling(ItemStack stack) {
-		return (stack.hasTagCompound() && stack.getTagCompound().getInteger("cooldown") > 0);
+	private boolean isCooling(World world, ItemStack stack) {
+		return (stack.hasTagCompound() && world.getWorldTime() < stack.getTagCompound().getInteger("nextUse"));
 	}
 
-	/** Decrements the stack's cooldown by one; must check NBT tags are valid beforehand */
-	private void decrementCooldown(ItemStack stack) {
-		stack.getTagCompound().setInteger("cooldown", stack.getTagCompound().getInteger("cooldown") - 1);
-	}
-
-	/** Sets the stack's cooldown to the time provided, in ticks */
-	private void setCooldown(ItemStack stack, int time) {
+	/**
+	 * Sets the time, in ticks, which must pass before the stack may be used again
+	 */
+	private void setNextUse(World world, ItemStack stack, int time) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("cooldown", time);
+		stack.getTagCompound().setLong("nextUse", world.getWorldTime() + time);
 	}
 
 	@Override
@@ -155,28 +156,8 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
 			info.setWearingHelm();
 		}
-		if (isCooling(stack)) {
-			decrementCooldown(stack);
-		}
 		if (tickingEffect != null && world.getWorldTime() % 50 == 0) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
-		}
-		if (this == ZSSItems.maskCouples) {
-			if (world.getWorldTime() % 1024 == 0) {
-				List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.boundingBox.expand(8.0D, 3.0D, 8.0D));
-				for (EntityVillager villager : villagers) {
-					if (world.rand.nextFloat() < 0.5F) {
-						ZSSVillagerInfo.get(villager).setMating();
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (isCooling(stack)) {
-			decrementCooldown(stack);
 		}
 	}
 
@@ -200,7 +181,7 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 				ZSSPlayerInfo.get(player).completeCurrentMaskStage();
 				player.setCurrentItemOrArmor(0, new ItemStack(Item.emerald, getSellPrice()));
 				PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.mask.sold." + player.worldObj.rand.nextInt(4)));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.mask.sold." + player.worldObj.rand.nextInt(4));
 				player.triggerAchievement(ZSSAchievements.maskSold);
 			}
 		}
@@ -220,10 +201,15 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 					new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.mask.desired.0"),
 							StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + "." + villager.getProfession()));
+					// Custom villager professions all use the same chat message
+					int p = villager.getProfession();
+					String s = (p < 0 || p > EnumVillager.values().length) ? "custom" : String.valueOf(p);
+					PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + "." + s);
 				}
-			} else if (entity instanceof EntityMaskTrader) {
-				player.addChatMessage(StatCollector.translateToLocal("chat." + getUnlocalizedName().substring(5) + ".salesman"));
+			} else if (entity instanceof EntityNpcMaskTrader) {
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".salesman");
+			} else if (entity instanceof INpc) {
+				PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName().substring(5) + ".custom");
 			} else {
 				return false;
 			}
@@ -260,6 +246,9 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 		if (buffInfo.isBuffPermanent(Buff.ATTACK_UP)) {
 			buffInfo.removeBuff(Buff.ATTACK_UP);
 		}
+		if (buffInfo.isBuffPermanent(Buff.RESIST_FIRE)) {
+			buffInfo.removeBuff(Buff.RESIST_FIRE);
+		}
 		if (player.getEntityData().hasKey("origWidth") && (stack == null || stack.getItem() != ZSSItems.maskGiants)) {
 			DirtyEntityAccessor.restoreOriginalSize(player);
 			if (player.worldObj.isRemote) {
@@ -279,6 +268,8 @@ public class ItemMask extends ItemArmor implements IZoomHelper
 				if (player.worldObj.isRemote) {
 					player.stepHeight += 1.0F;
 				}
+			} else if (stack.getItem() == ZSSItems.maskGoron) {
+				buffInfo.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 			} else if (stack.getItem() == ZSSItems.maskMajora) {
 				buffInfo.applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
 			}

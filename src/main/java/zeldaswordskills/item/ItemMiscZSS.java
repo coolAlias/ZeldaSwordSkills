@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,15 +29,10 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
-import net.minecraft.world.World;
-import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.entity.projectile.EntitySeedShot;
-import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
-import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -49,43 +44,19 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ItemMiscZSS extends Item
 {
 	/** The price this item will fetch if sold to a villager */
-	private final int sell_price;
+	protected final int sellPrice;
 
 	public ItemMiscZSS(int id, int price) {
 		super(id);
 		setMaxDamage(0);
-		sell_price = price;
+		sellPrice = price;
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
 
 	@Override
-	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (this == ZSSItems.dekuNut) {
-			EntitySeedShot seedShot = new EntitySeedShot(world, player, 0.5F, 1, 0).setType(SeedType.DEKU);
-			seedShot.setDamage(2.5F);
-			if (!player.capabilities.isCreativeMode) {
-				--stack.stackSize;
-			}
-			if (!world.isRemote) {
-				world.spawnEntityInWorld(seedShot);
-			}
-		} else if (this == ZSSItems.skillWiper) {
-			if (!world.isRemote) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.skill.reset"));
-				ZSSPlayerInfo.get(player).resetSkills();
-			}
-		}
-		return stack;
-	}
-
-	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
-			if (stack.getItem() == ZSSItems.masterOre) {
-				handleMasterOre(stack, player, (EntityVillager) entity);
-			} else {
-				handleGenericTrade(stack, player, (EntityVillager) entity);
-			}
+		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
+			handleTrade(stack, player, (EntityVillager) entity);
 		}
 		return true;
 	}
@@ -102,36 +73,23 @@ public class ItemMiscZSS extends Item
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 	}
 
-	private void handleMasterOre(ItemStack stack, EntityPlayer player, EntityVillager villager) {
+	/**
+	 * Called when left-clicking a villager with the item in hand
+	 * @param stack The player's currently held item (stack.getItem() is 'this')
+	 */
+	protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 		MerchantRecipeList trades = villager.getRecipes(player);
-		if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.smith"));
-			if (player.inventory.hasItem(ZSSItems.swordMaster.itemID)) {
-				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.new"));
-					player.triggerAchievement(ZSSAchievements.swordTempered);
-				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.old"));
-				}
-			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.unworthy"));
-			}
-		} else {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.masterore.villager"));
-		}
-	}
-
-	private void handleGenericTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
-		MerchantRecipeList trades = villager.getRecipes(player);
-		if (trades != null && sell_price > 0) {
-			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, sell_price));
+		if (villager.isChild()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+		} else if (trades != null && sellPrice > 0) {
+			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, sellPrice));
 			if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 			}
 		} else {
-			player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 		}
 	}
 }

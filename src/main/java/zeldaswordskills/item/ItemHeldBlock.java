@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -159,7 +159,7 @@ public class ItemHeldBlock extends Item implements IHandleToss {
 				entity.motionZ *= 0.25D;
 			}
 		} else {
-			if (entity instanceof EntityPlayer && dropHeldBlock(stack, world, (EntityPlayer) entity)) {
+			if (!world.isRemote && entity instanceof EntityPlayer && dropHeldBlock(stack, world, (EntityPlayer) entity)) {
 				ItemStack gauntlets = (stack.hasTagCompound() && stack.getTagCompound().hasKey("gauntlets") ?
 						ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("gauntlets")) : null);
 				((EntityPlayer) entity).inventory.setInventorySlotContents(slot, gauntlets);

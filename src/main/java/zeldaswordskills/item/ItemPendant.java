@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -57,6 +58,7 @@ public class ItemPendant extends Item
 	public ItemPendant(int id) {
 		super(id);
 		setMaxDamage(0);
+		setMaxStackSize(1);
 		setHasSubtypes(true);
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
@@ -66,10 +68,10 @@ public class ItemPendant extends Item
 		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
 			EntityVillager villager = (EntityVillager) entity;
 			if (villager.getProfession() == 2) {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.pendant.priest.0"));
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.pendant.priest.1"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.priest.0");
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.priest.1");
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.pendant.villager"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.villager");
 			}
 		}
 		return true;

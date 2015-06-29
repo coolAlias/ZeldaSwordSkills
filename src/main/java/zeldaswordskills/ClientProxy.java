@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,10 @@ import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
+import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
@@ -39,8 +41,10 @@ public class ClientProxy extends CommonProxy {
 		ZSSKeyHandler.init();
 		MinecraftForge.EVENT_BUS.register(new ComboOverlay());
 		MinecraftForge.EVENT_BUS.register(new GuiBuffBar());
+		MinecraftForge.EVENT_BUS.register(new GuiItemModeOverlay());
 		MinecraftForge.EVENT_BUS.register(new ZSSClientEvents());
 		TickRegistry.registerTickHandler(new TargetingTickHandler(), Side.CLIENT);
+		UnpressKeyPacket.init();
 	}
 
 	@Override

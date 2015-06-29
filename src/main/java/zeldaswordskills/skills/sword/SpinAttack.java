@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,11 +28,11 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.RefreshSpinPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.server.RefreshSpinPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
@@ -46,9 +46,6 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Activated by left or right arrow; player spins in designated direction attacking
  * all enemies within 360 arc (like Link's spin attack in Zelda). With the Super Spin
  * Attack, most attributes are doubled, but it may only be used at full health.
- * 
- * Note that spinning is handled client side only, so the skill doesn't need to be activated on
- * the server. The server only needs to be notified of any entities attacked.
  * 
  * Activation: Hold left or right arrow key to charge up until spin attack commences
  * Vanilla: Begin moving either left or right, then press the other direction to
@@ -110,8 +107,8 @@ public class SpinAttack extends SkillActive
 	public void addInformation(List<String> desc, EntityPlayer player) {
 		byte temp = level;
 		if (!isActive()) {
-			superLevel = (checkHealth(player) ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
-			level = ZSSPlayerInfo.get(player).getSkillLevel(spinAttack);
+			superLevel = (checkHealth(player) ? ZSSPlayerSkills.get(player).getSkillLevel(superSpinAttack) : 0);
+			level = ZSSPlayerSkills.get(player).getSkillLevel(spinAttack);
 		}
 		desc.add(getChargeDisplay(getChargeTime()));
 		desc.add(getRangeDisplay(getRange()));
@@ -245,7 +242,7 @@ public class SpinAttack extends SkillActive
 		currentSpin = 0F;
 		arc = 360F;
 		refreshed = 0;
-		superLevel = (checkHealth(player) ? ZSSPlayerInfo.get(player).getSkillLevel(superSpinAttack) : 0);
+		superLevel = (checkHealth(player) ? ZSSPlayerSkills.get(player).getSkillLevel(superSpinAttack) : 0);
 		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
 		startSpin(world, player);
 		return true;
@@ -253,6 +250,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	protected void onDeactivated(World world, EntityPlayer player) {
+		charge = 0;
 		currentSpin = 0.0F;
 		arc = 0.0F;
 	}
@@ -264,7 +262,7 @@ public class SpinAttack extends SkillActive
 	public void onUpdate(EntityPlayer player) {
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
-			if (player.worldObj.isRemote && isKeyPressed()) { 
+			if (PlayerUtils.isHoldingSkillItem(player) && player.worldObj.isRemote && isKeyPressed()) { 
 				if (charge < (getChargeTime() - 1)) {
 					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
 				}
@@ -282,7 +280,7 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (PlayerUtils.isHoldingSkillItem(player)) {
 			List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, (int)(getRange() + 0.5F), 1.0D);
 			for (EntityLivingBase target : list) {

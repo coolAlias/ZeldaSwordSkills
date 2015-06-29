@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,10 @@
 
 package zeldaswordskills.world.crisis;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.entity.mobs.EntityBlackKnight;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.lib.Sounds;
 
@@ -26,6 +28,20 @@ public class EarthBattle extends BossBattle {
 
 	public EarthBattle(TileEntityDungeonCore core) {
 		super(core);
+	}
+
+	@Override
+	protected int getNumBosses() {
+		return 1;
+	}
+
+	@Override
+	protected void generateBossMobs(World world, int number) {
+		Entity mob = core.getBossType().getNewMob(world);
+		if (mob instanceof EntityBlackKnight) { // already a boss-level mob, doesn't need boosting
+			((EntityBlackKnight) mob).addRandomArmor();
+			spawnMobInCorner(world, mob, world.rand.nextInt(4), false, false);
+		}
 	}
 
 	@Override

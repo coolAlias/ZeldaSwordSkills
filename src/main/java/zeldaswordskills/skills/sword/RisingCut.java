@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,8 +29,9 @@ import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
@@ -118,13 +119,13 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindJump) {
-			if (!isActive() && !PlayerUtils.isUsingItem(player) && player.isSneaking()) {
+			if (!isActive() && !PlayerUtils.isBlocking(player) && player.isSneaking()) {
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
 				return true;
 			}
 		} else if (canExecute(player)) {
 			PacketDispatcher.sendPacketToServer(new ActivateSkillPacket(this).makePacket());
-			ZSSClientEvents.performComboAttack(mc, ZSSPlayerInfo.get(player).getTargetingSkill());
+			ZSSClientEvents.performComboAttack(mc, ZSSPlayerSkills.get(player).getTargetingSkill());
 			return true;
 		}
 		return false;
@@ -167,7 +168,7 @@ public class RisingCut extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		player.swingProgress = 0.5F; // keep sword extended
 		return false; // return false so targeting camera remains locked on target
 	}

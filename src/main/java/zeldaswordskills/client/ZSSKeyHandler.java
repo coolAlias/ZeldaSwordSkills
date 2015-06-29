@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,24 +22,29 @@ import java.util.EnumSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 
 import org.lwjgl.input.Keyboard;
 
 import zeldaswordskills.api.item.ISwingSpeed;
+import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.inventory.ContainerSkills;
+import zeldaswordskills.item.ICyclableItem;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.lib.Config;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.GetBombPacket;
-import zeldaswordskills.network.OpenGuiPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.server.CycleItemModePacket;
+import zeldaswordskills.network.server.GetBombPacket;
+import zeldaswordskills.network.server.OpenGuiPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.TickType;
@@ -55,16 +60,17 @@ public class ZSSKeyHandler extends KeyHandler
 	/** Key index for easy handling and retrieval of keys and key descriptions */
 	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
 			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_BOMB = 7,
-			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9, KEY_SKILLS_GUI = 10;
+			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9, KEY_SKILLS_GUI = 10,
+			KEY_PREV_MODE = 11, KEY_NEXT_MODE = 12;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
 	public static final String[] desc = { "activate","next","attack","left","right","down",
-		"block","bomb","toggleat","togglebuff","skills_gui"};
+		"block","bomb","toggleat","togglebuff","skills_gui", "prev_mode", "next_mode"};
 
 	/** Default key values */
 	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
 		Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_DOWN, Keyboard.KEY_RCONTROL,
-		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V, Keyboard.KEY_P};
+		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V, Keyboard.KEY_P, Keyboard.KEY_LBRACKET, Keyboard.KEY_RBRACKET};
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 
@@ -98,7 +104,7 @@ public class ZSSKeyHandler extends KeyHandler
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
 		if (tickEnd && mc.thePlayer != null) {
-			ZSSPlayerInfo skills = ZSSPlayerInfo.get(mc.thePlayer);
+			ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
 			if (mc.inGameHasFocus && skills != null) {
 				if (kb == keys[KEY_SKILL_ACTIVATE]) {
 					if (skills.hasSkill(SkillBase.swordBasic)) {
@@ -112,16 +118,36 @@ public class ZSSKeyHandler extends KeyHandler
 					PacketDispatcher.sendPacketToServer(new GetBombPacket().makePacket());
 				} else if (kb == keys[KEY_TOGGLE_AUTOTARGET]) {
 					if (mc.thePlayer.isSneaking()) {
-						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggletp",
-								(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+						PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.toggletp",
+								(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable")
+										: StatCollector.translateToLocal("chat.zss.key.disable")));
 					} else {
-						mc.thePlayer.addChatMessage(StatCollector.translateToLocalFormatted("chat.zss.key.toggleat",
-								(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable") : StatCollector.translateToLocal("chat.zss.key.disable"))));
+						PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.toggleat",
+								(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable")
+										: StatCollector.translateToLocal("chat.zss.key.disable")));
 					}
 				} else if (kb == keys[KEY_TOGGLE_BUFFBAR]) {
-					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+					if (mc.thePlayer.isSneaking()) {
+						ComboOverlay.shouldDisplay = !ComboOverlay.shouldDisplay;
+						PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.togglehud",
+								(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("chat.zss.key.enable")
+										: StatCollector.translateToLocal("chat.zss.key.disable")));
+					} else {
+						GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+					}
 				} else if (kb == keys[KEY_SKILLS_GUI]) {
 					PacketDispatcher.sendPacketToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS).makePacket());
+				} else if (kb == keys[KEY_PREV_MODE] || kb == keys[KEY_NEXT_MODE]) {
+					boolean next = kb == keys[KEY_NEXT_MODE];
+					ItemStack stack = mc.thePlayer.getHeldItem();
+					if (stack != null && stack.getItem() instanceof ICyclableItem) {
+						if (next) {
+							((ICyclableItem) stack.getItem()).nextItemMode(stack, mc.thePlayer);
+						} else {
+							((ICyclableItem) stack.getItem()).prevItemMode(stack, mc.thePlayer);
+						}
+						PacketDispatcher.sendPacketToServer(new CycleItemModePacket(next).makePacket());
+					}
 				} else {
 					handleTargetingKeys(mc, kb, skills);
 				}
@@ -144,7 +170,7 @@ public class ZSSKeyHandler extends KeyHandler
 	/**
 	 * All ILockOnTarget skill related keys are handled here
 	 */
-	private static void handleTargetingKeys(Minecraft mc, KeyBinding kb, ZSSPlayerInfo skills) {
+	private static void handleTargetingKeys(Minecraft mc, KeyBinding kb, ZSSPlayerSkills skills) {
 		ILockOnTarget skill = skills.getTargetingSkill();
 		// key interaction is disabled if the player is stunned or a skill animation is in progress
 		boolean canInteract = skills.canInteract() && !ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN);
@@ -163,6 +189,9 @@ public class ZSSKeyHandler extends KeyHandler
 				// hack for Super Spin Attack, as it requires key press to be passed while animation is in progress
 				if (skills.isSkillActive(SkillBase.spinAttack)) {
 					skills.getActiveSkill(SkillBase.spinAttack).keyPressed(mc, kb, mc.thePlayer);
+					return;
+				} else if (skills.isSkillActive(SkillBase.backSlice)) {
+					skills.getActiveSkill(SkillBase.backSlice).keyPressed(mc, kb, mc.thePlayer);
 					return;
 				}
 			}

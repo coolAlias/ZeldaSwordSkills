@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -49,8 +49,9 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.ModInfo;
-import zeldaswordskills.network.InLiquidPacket;
+import zeldaswordskills.network.client.InLiquidPacket;
 import zeldaswordskills.util.MerchantRecipeHelper;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
@@ -115,12 +116,12 @@ public class ItemArmorBoots extends ItemArmor
 			if (villager.getProfession() == 3 && trades != null) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Item.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sell.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");
 				} else {
-					player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.1"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
 			} else {
-				player.addChatMessage(StatCollector.translateToLocal("chat.zss.trade.generic.sorry.0"));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;

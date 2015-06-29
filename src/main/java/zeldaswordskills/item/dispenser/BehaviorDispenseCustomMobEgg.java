@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -40,11 +40,9 @@ public class BehaviorDispenseCustomMobEgg extends BehaviorDefaultDispenseItem {
 		double d1 = block.getYInt() + 0.2D;
 		double d2 = block.getZ() + facing.getFrontOffsetZ();
 		Entity entity = ((ItemCustomEgg) stack.getItem()).spawnCreature(block.getWorld(), stack.getItemDamage(), d0, d1, d2);
-
 		if (entity instanceof EntityLivingBase && stack.hasDisplayName()) {
 			((EntityLiving) entity).setCustomNameTag(stack.getDisplayName());
 		}
-
 		stack.splitStack(1);
 		return stack;
 	}

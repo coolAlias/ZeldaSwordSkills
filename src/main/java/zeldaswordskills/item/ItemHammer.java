@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import mods.battlegear2.api.PlayerEventChild.OffhandAttackEvent;
-import mods.battlegear2.api.weapons.IBattlegearWeapon;
+import mods.battlegear2.api.IAllowItem;
+import mods.battlegear2.api.ISheathed;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -37,10 +37,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceStun;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
+import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.ISwingSpeed;
@@ -48,7 +48,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.PacketISpawnParticles;
+import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
@@ -58,13 +58,18 @@ import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawnParticles, ISwingSpeed, IBattlegearWeapon
+@Optional.InterfaceList(value={
+		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
+		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true)
+})
+public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IAllowItem, ISheathed
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
+
 	/** Amount of damage this hammer inflicts */
 	private final float weaponDamage;
+
 	/** Percentage of damage that ignores armor */
 	private final float ignoreArmorAmount;
 
@@ -78,10 +83,20 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
-	
+
 	@Override
 	public boolean canHarvestBlock(Block block) {
 		return block instanceof ISmashable || block instanceof BlockBreakable;
+	}
+
+	@Override
+	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return 0.4F;
+	}
+
+	@Override
+	public float getDefensiveModifier(EntityLivingBase entity, ItemStack stack) {
+		return 0;
 	}
 
 	@Override
@@ -163,7 +178,7 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);
 				WorldUtils.playSoundAtEntity(player, Sounds.LEAPING_BLOW, 0.4F, 0.5F);
-				DamageSource specialAttack = new DamageSourceStun("player", player, (int)(60 * charge), 5).setCanStunPlayers().setDamageBypassesArmor();
+				DamageSource specialAttack = new DamageSourceBaseDirect("player", player).setStunDamage((int)(60 * charge), 5, true).setDamageBypassesArmor();
 				float damage = (weaponDamage * charge) / 2.0F;
 				if (damage > 0.5F) {
 					List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, player.boundingBox.expand(4.0D, 0.0D, 4.0D));
@@ -228,41 +243,13 @@ public class ItemHammer extends Item implements IArmorBreak, ISmashBlock, ISpawn
 
 	@Method(modid="battlegear2")
 	@Override
+	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+		return offhand == null;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
 	public boolean sheatheOnBack(ItemStack stack) {
 		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean isOffhandHandDual(ItemStack stack) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
-		return false;
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package zeldaswordskills.client.render.entity;
 import net.minecraft.client.renderer.entity.RenderBat;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-import zeldaswordskills.entity.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;

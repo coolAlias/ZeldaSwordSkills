@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package zeldaswordskills.entity;
 
+import java.util.Arrays;
+
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentThorns;
 import net.minecraft.entity.Entity;
@@ -31,7 +33,6 @@ import net.minecraft.entity.ai.EntityAILookAtTradePlayer;
 import net.minecraft.entity.ai.EntityAIMoveThroughVillage;
 import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
 import net.minecraft.entity.ai.EntityAIMoveTowardsTarget;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIPlay;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITradePlayer;
@@ -42,26 +43,39 @@ import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
+import zeldaswordskills.api.entity.ISongEntity;
 import zeldaswordskills.entity.ai.GenericAIDefendVillage;
+import zeldaswordskills.entity.ai.IVillageDefender;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
+import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TimedAddItem;
+import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class EntityGoron extends EntityVillager implements IVillageDefender
+public class EntityGoron extends EntityVillager implements IVillageDefender, ISongEntity
 {
 	/** The Goron's village, since EntityVillager.villageObj cannot be accessed */
 	protected Village village;
+
 	/** Flag for handling attack timer during client-side health update */
 	private static final Byte ATTACK_FLAG = (byte) 4;
+
 	/** Timer for health regeneration, similar to players when satiated */
 	private int regenTimer;
+
 	/** Flag to allow attributes to update to adult status */
 	private boolean wasChild;
 
@@ -90,7 +104,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 		tasks.addTask(10, new EntityAIWatchClosest(this, EntityLiving.class, 8.0F));
 		targetTasks.addTask(1, new GenericAIDefendVillage(this));
 		targetTasks.addTask(2, new EntityAIHurtByTarget(this, true));
-		targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));
+		//targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));
 	}
 
 	@Override
@@ -178,14 +192,11 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 			return false;
 		} else if (super.attackEntityFrom(source, amount)) {
 			Entity entity = source.getEntity();
-			if (riddenByEntity != entity && ridingEntity != entity) {
-				if (entity != this) {
-					entityToAttack = entity;
-				}
-				return true;
-			} else {
-				return true;
+			if (entity != this && entity instanceof EntityLivingBase && riddenByEntity != entity && ridingEntity != entity) {
+				setAttackTarget((EntityLivingBase) entity);
+				entityToAttack = entity;
 			}
+			return true;
 		} else {
 			return false;
 		}
@@ -204,6 +215,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 
 	@Override
 	public boolean attackEntityAsMob(Entity entity) {
+		if (attackTime > 0) {
+			return false;
+		}
 		float amount = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int knockback = 0;
 		attackTime = 20; // set to 20 in EntityMob#attackEntity, but seems to be unnecessary due to AI
@@ -292,6 +306,33 @@ public class EntityGoron extends EntityVillager implements IVillageDefender
 	@Override
 	public Village getVillageToDefend() {
 		return village;
+	}
+
+	@Override
+	public boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
+		if (song == ZeldaSongs.songSaria) {
+			playLivingSound();
+			if (("Darunia").equals(getCustomNameTag())) {
+				if (ZSSPlayerSongs.get(player).hasCuredNpc("Darunia")) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");
+				} else if (power < 5) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.weak");
+				} else if (ZSSPlayerSongs.get(player).onCuredNpc("Darunia")) {
+					ItemStack gift = new ItemStack(ZSSItems.gauntletsSilver);
+					new TimedChatDialogue(player, Arrays.asList(
+							StatCollector.translateToLocal("chat.zss.song.saria.darunia.0"),
+							StatCollector.translateToLocal("chat.zss.song.saria.darunia.1"),
+							StatCollector.translateToLocalFormatted("chat.zss.song.saria.darunia.2", gift.getDisplayName())), 0, 1500);
+					new TimedAddItem(player, gift, 3000, Sounds.SUCCESS);
+				} else {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");
+				}
+			} else if (affected == 0) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.goron");
+			}
+			return true;
+		}
+		return false;
 	}
 
 	@Override

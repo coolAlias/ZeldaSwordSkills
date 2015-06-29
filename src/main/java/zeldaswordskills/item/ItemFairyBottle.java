@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.EntityFairy;
+import zeldaswordskills.entity.EntityNavi;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.lib.Sounds;
 import zeldaswordskills.util.WorldUtils;
@@ -60,7 +61,7 @@ public class ItemFairyBottle extends Item {
 	public static boolean onDeath(EntityPlayer player) {
 		for (int i = 0; i < InventoryPlayer.getHotbarSize(); ++i) {
 			ItemStack stack = player.inventory.getStackInSlot(i);
-			if (stack != null && stack.getItem() instanceof ItemFairyBottle) {
+			if (stack != null && stack.getItem() instanceof ItemFairyBottle && !stack.hasDisplayName()) {
 				WorldUtils.playSoundAtEntity(player, Sounds.FAIRY_LAUGH, 0.4F, 0.5F);
 				player.setHealth(10F);
 				player.inventory.setInventorySlotContents(i, new ItemStack(Item.glassBottle));
@@ -73,7 +74,19 @@ public class ItemFairyBottle extends Item {
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		boolean used = false;
-		if (player.isSneaking()) {
+		if (stack.hasDisplayName()) {
+			if (player.isSneaking()) {
+				used = true;
+				if (!world.isRemote) {
+					Vec3 vec3 = player.getLookVec();
+					EntityNavi navi = new EntityNavi(world);
+					navi.setOwner(player);
+					navi.setCustomNameTag(stack.getDisplayName());
+					navi.setPosition(player.posX + (vec3.xCoord * 2D), player.posY + 1.6D, player.posZ + (vec3.zCoord * 2D));
+					world.spawnEntityInWorld(navi);
+				}
+			}
+		} else if (player.isSneaking()) {
 			used = true;
 			if (!world.isRemote) {
 				Vec3 vec3 = player.getLookVec();

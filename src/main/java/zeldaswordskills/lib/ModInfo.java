@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ public class ModInfo {
 
 	public static final String ID = "zeldaswordskills";
 	public static final String NAME = "Zelda Sword Skills";
-	public static final String VERSION = "1.6.4-1.0";
+	public static final String VERSION = "1.1";
 	public static final String CHANNEL = "zss_channel";
 	public static final String CLIENT_PROXY = "zeldaswordskills.ClientProxy";
 	public static final String COMMON_PROXY = "zeldaswordskills.CommonProxy";

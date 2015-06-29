@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,24 +17,38 @@
 
 package zeldaswordskills.client.render.entity;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.RenderLiving;
+import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.BossStatus;
+import net.minecraft.entity.boss.IBossDisplayData;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
+import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.client.model.IModelBiped;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
- * Renderer for generic living entities whose animations are handled via the model
- * class methods {@link ModelBase#setRotationAngles(float, float, float, float, float, float, Entity) setRotationAngles}
- * and {@link ModelBase#setLivingAnimations(EntityLivingBase, float, float, float) setLivingAnimations}.
+ * Renderer for generic {@link EntityLivingBase} entities with a single texture and set scale.
  * 
- * If the entity has a child version, it will be rendered at half the adult scale.
+ * Animations are handled via the model methods:
+ * {@link ModelBase#setRotationAngles(float, float, float, float, float, float, Entity) setRotationAngles}
+ * {@link ModelBase#setLivingAnimations(EntityLivingBase, float, float, float) setLivingAnimations}.
+ * 
+ * Child versions of the entity are rendered at half scale.
  *
  */
 @SideOnly(Side.CLIENT)
@@ -55,6 +69,14 @@ public class RenderGenericLiving extends RenderLiving
 	}
 
 	@Override
+	public void doRenderLiving(EntityLiving entity, double dx, double dy, double dz, float yaw, float partialTick) {
+		if (entity instanceof IBossDisplayData) {
+			BossStatus.setBossStatus((IBossDisplayData) entity, true);
+		}
+		super.doRenderLiving(entity, dx, dy, dz, yaw, partialTick);
+	}
+
+	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		return texture;
 	}
@@ -66,5 +88,132 @@ public class RenderGenericLiving extends RenderLiving
 			f = (float)((double) f * 0.5D);
 		}
 		GL11.glScalef(f, f, f);
+	}
+
+	@Override
+	protected void renderEquippedItems(EntityLivingBase entity, float partialTick) {
+		GL11.glColor3f(1.0F, 1.0F, 1.0F);
+		ItemStack itemstack = entity.getHeldItem();
+		ItemStack helm = entity.getCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM);
+		Item item;
+		float f1;
+
+		if (mainModel instanceof ModelBiped) {
+			((ModelBiped) mainModel).heldItemRight = (itemstack == null ? 0 : 1);
+		} else if (mainModel instanceof IModelBiped) {
+			((IModelBiped) mainModel).setHeldItemValue(true, (itemstack == null ? 0 : 1));
+		}
+		if (helm != null) {
+			GL11.glPushMatrix();
+			if (mainModel instanceof ModelBiped) {
+				((ModelBiped) mainModel).bipedHead.postRender(0.0625F);
+			} else if (mainModel instanceof IModelBiped) {
+				((IModelBiped) mainModel).postRenderHead(0.0625F);
+			}
+
+			item = helm.getItem();
+			net.minecraftforge.client.IItemRenderer customRenderer = net.minecraftforge.client.MinecraftForgeClient.getItemRenderer(helm, net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED);
+			boolean is3D = (customRenderer != null && customRenderer.shouldUseRenderHelper(net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED, helm, net.minecraftforge.client.IItemRenderer.ItemRendererHelper.BLOCK_3D));
+
+			if (item instanceof ItemBlock) {
+				if (is3D || RenderBlocks.renderItemIn3d(Block.blocksList[item.itemID].getRenderType())) {
+					f1 = 0.625F;
+					GL11.glTranslatef(0.0F, -0.25F, 0.0F);
+					GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);
+					GL11.glScalef(f1, -f1, -f1);
+				}
+
+				renderManager.itemRenderer.renderItem(entity, helm, 0);
+			} else if (item == Item.skull) {
+				f1 = 1.0625F;
+				GL11.glScalef(f1, -f1, -f1);
+				String s = "";
+				if (helm.hasTagCompound() && helm.getTagCompound().hasKey("SkullOwner")) {
+					s = helm.getTagCompound().getString("SkullOwner");
+				}
+				TileEntitySkullRenderer.skullRenderer.func_82393_a(-0.5F, 0.0F, -0.5F, 1, 180.0F, helm.getItemDamage(), s);
+			}
+
+			GL11.glPopMatrix();
+		}
+
+		if (itemstack != null && itemstack.getItem() != null) {
+			item = itemstack.getItem();
+			GL11.glPushMatrix();
+
+			if (mainModel.isChild) {
+				f1 = 0.5F;
+				GL11.glTranslatef(0.0F, 0.625F, 0.0F);
+				GL11.glRotatef(-20.0F, -1.0F, 0.0F, 0.0F);
+				GL11.glScalef(f1, f1, f1);
+			}
+
+			if (mainModel instanceof ModelBiped) {
+				((ModelBiped) mainModel).bipedRightArm.postRender(0.0625F);
+			} else if (mainModel instanceof IModelBiped) {
+				((IModelBiped) mainModel).postRenderArm(true, 0.0625F);
+			}
+			GL11.glTranslatef(-0.0625F, 0.4375F, 0.0625F);
+
+			net.minecraftforge.client.IItemRenderer customRenderer = net.minecraftforge.client.MinecraftForgeClient.getItemRenderer(itemstack, net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED);
+			boolean is3D = (customRenderer != null && customRenderer.shouldUseRenderHelper(net.minecraftforge.client.IItemRenderer.ItemRenderType.EQUIPPED, itemstack, net.minecraftforge.client.IItemRenderer.ItemRendererHelper.BLOCK_3D));
+
+			if (item instanceof ItemBlock && (is3D || RenderBlocks.renderItemIn3d(Block.blocksList[item.itemID].getRenderType()))) {
+				f1 = 0.5F;
+				GL11.glTranslatef(0.0F, 0.1875F, -0.3125F);
+				f1 *= 0.75F;
+				GL11.glRotatef(20.0F, 1.0F, 0.0F, 0.0F);
+				GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+				GL11.glScalef(-f1, -f1, f1);
+			} else if (item == Item.bow) {
+				f1 = 0.625F;
+				GL11.glTranslatef(0.0F, 0.125F, 0.3125F);
+				GL11.glRotatef(-20.0F, 0.0F, 1.0F, 0.0F);
+				GL11.glScalef(f1, -f1, f1);
+				GL11.glRotatef(-100.0F, 1.0F, 0.0F, 0.0F);
+				GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+			} else if (item.isFull3D()) {
+				f1 = 0.625F;
+				if (item.shouldRotateAroundWhenRendering()) {
+					GL11.glRotatef(180.0F, 0.0F, 0.0F, 1.0F);
+					GL11.glTranslatef(0.0F, -0.125F, 0.0F);
+				}
+				GL11.glTranslatef(0.0F, 0.1875F, 0.0F);
+				GL11.glScalef(f1, -f1, f1);
+				GL11.glRotatef(-100.0F, 1.0F, 0.0F, 0.0F);
+				GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+			} else {
+				f1 = 0.375F;
+				GL11.glTranslatef(0.25F, 0.1875F, -0.1875F);
+				GL11.glScalef(f1, f1, f1);
+				GL11.glRotatef(60.0F, 0.0F, 0.0F, 1.0F);
+				GL11.glRotatef(-90.0F, 1.0F, 0.0F, 0.0F);
+				GL11.glRotatef(20.0F, 0.0F, 0.0F, 1.0F);
+			}
+
+			float f2;
+			int i;
+			float f5;
+
+			if (itemstack.getItem().requiresMultipleRenderPasses()) {
+				for (i = 0; i < itemstack.getItem().getRenderPasses(itemstack.getItemDamage()); ++i) {
+					int j = itemstack.getItem().getColorFromItemStack(itemstack, i);
+					f5 = (float)(j >> 16 & 255) / 255.0F;
+					f2 = (float)(j >> 8 & 255) / 255.0F;
+					float f3 = (float)(j & 255) / 255.0F;
+					GL11.glColor4f(f5, f2, f3, 1.0F);
+					renderManager.itemRenderer.renderItem(entity, itemstack, i);
+				}
+			} else {
+				i = itemstack.getItem().getColorFromItemStack(itemstack, 0);
+				float f4 = (float)(i >> 16 & 255) / 255.0F;
+				f5 = (float)(i >> 8 & 255) / 255.0F;
+				f2 = (float)(i & 255) / 255.0F;
+				GL11.glColor4f(f4, f5, f2, 1.0F);
+				renderManager.itemRenderer.renderItem(entity, itemstack, 0);
+			}
+
+			GL11.glPopMatrix();
+		}
 	}
 }

@@ -1,0 +1,255 @@
+/**
+    Copyright (C) <2015> <coolAlias>
+
+    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
+    you can redistribute it and/or modify it under the terms of the GNU
+    General Public License as published by the Free Software Foundation,
+    either version 3 of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package zeldaswordskills.item;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockPumpkin;
+import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.Icon;
+import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
+import zeldaswordskills.block.BlockSongInscription;
+import zeldaswordskills.block.BlockWarpStone;
+import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.handler.GuiHandler;
+import zeldaswordskills.lib.ModInfo;
+import zeldaswordskills.songs.AbstractZeldaSong;
+import zeldaswordskills.songs.ZeldaSongs;
+import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
+public class ItemInstrument extends Item
+{
+	public static enum Instrument {
+		OCARINA_FAIRY("ocarina_fairy", GuiHandler.GUI_OCARINA, 1),
+		OCARINA_TIME("ocarina_time", GuiHandler.GUI_OCARINA, 5);
+
+		private final String unlocalizedName;
+
+		private final int guiId;
+
+		/** Power level of songs performed with this instrument, 0 having no effect and 5 having maximum effect */
+		private final int power;
+
+		private Instrument(String name, int guiId, int power) {
+			this.unlocalizedName = name;
+			this.guiId = guiId;
+			this.power = Math.min(power, 5);
+		}
+
+		public String getUnlocalizedName() {
+			return unlocalizedName;
+		}
+
+		public int getGuiId() {
+			return guiId;
+		}
+
+		/** Returns power level of songs performed with this instrument, from 0 to 10 */
+		public int getPower() {
+			return power;
+		}
+	}
+
+	/** Map of teacher name->song taught, retrieved by the teacher's class */
+	private static final Map<Class<? extends EntityLiving>, Map<String, AbstractZeldaSong>> teachersForClass = new HashMap<Class<? extends EntityLiving>, Map<String, AbstractZeldaSong>>();
+
+	@SideOnly(Side.CLIENT)
+	private List<Icon> icons;
+
+	public ItemInstrument(int id) {
+		super(id);
+		setMaxDamage(0);
+		setHasSubtypes(true);
+		setMaxStackSize(1);
+		setUnlocalizedName("zss.instrument");
+		setCreativeTab(ZSSCreativeTabs.tabMisc);
+	}
+
+	public Instrument getInstrument(ItemStack stack) {
+		return Instrument.values()[stack.getItemDamage() % Instrument.values().length];
+	}
+
+	/**
+	 * Returns {@link Instrument#getPower} for determining effects of the {@link AbstractZeldaSong}
+	 */
+	public int getSongStrength(ItemStack stack) {
+		return getInstrument(stack).getPower();
+	}
+
+	@Override
+	public void onCreated(ItemStack stack, World world, EntityPlayer player) {
+		if (getInstrument(stack) == ItemInstrument.Instrument.OCARINA_FAIRY) {
+			player.triggerAchievement(ZSSAchievements.ocarinaCraft);
+		}
+	}
+
+	@Override
+	public boolean shouldPassSneakingClickToBlock(World world, int x, int y, int z) {
+		int blockId = world.getBlockId(x, y, z);
+		return blockId > 0 && (Block.blocksList[blockId] instanceof BlockWarpStone || Block.blocksList[blockId] instanceof BlockSongInscription);
+	}
+
+	@Override
+	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+		if (world.isRemote) { // instruments have client-side only Guis
+			// check if song to learn was set from entity interaction
+			if (ZSSPlayerSongs.get(player).songToLearn != null) {
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
+			} else {
+				player.openGui(ZSSMain.instance, getInstrument(stack).getGuiId(), world, 0, 0, 0);
+			}
+		}
+		return stack;
+	}
+
+	@Override
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+		if (world.isRemote) {
+			if (isScarecrowAt(world, x, y, z) && ZSSPlayerSongs.get(player).canOpenScarecrowGui(true)) {
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_SCARECROW, world, x, y, z);
+			} else {
+				player.openGui(ZSSMain.instance, getInstrument(stack).getGuiId(), world, x, y, z);
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		return true;
+	}
+
+	/**
+	 * Called from EntityInteractEvent when the player interacts with an entity while holding an instrument
+	 * @return	True to cancel any further interaction (e.g. villager trading gui)
+	 */
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, EntityLiving entity) {
+		if (entity.hasCustomNameTag() && teachersForClass.containsKey(entity.getClass())) {
+			Map<String, AbstractZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
+			AbstractZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
+			if (toLearn != null) {
+				if (toLearn == ZeldaSongs.songTime && getInstrument(stack).getPower() < 5) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.ocarina.toy");
+					return false;
+				}
+				if (player.worldObj.isRemote) {
+					// onItemRightClick still processes after this, despite canceling the interact event -.-
+					ZSSPlayerSongs.get(player).songToLearn = toLearn;
+					if (ZSSPlayerSongs.get(player).isSongKnown(toLearn)) {
+						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", toLearn.getDisplayName());
+					} else {
+						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", toLearn.getDisplayName());
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns true if the blocks around x/y/z form a scarecrow figure,
+	 * assuming that x/y/z is one of the central blocks (not the 'arms')
+	 */
+	private boolean isScarecrowAt(World world, int x, int y, int z) {
+		int i = 0;
+		while (i < 2 && world.getBlockId(x, y, z) == Block.hay.blockID) {
+			++i;
+			++y;
+		}
+		// should now always have the head
+		int blockId = world.getBlockId(x, y, z);
+		if (blockId > 0 && Block.blocksList[blockId] instanceof BlockPumpkin) {
+			--y;
+			for (int dy = i; dy < 2; ++dy) {
+				if (world.getBlockId(x, y - dy, z) != Block.hay.blockID) {
+					return false;
+				}
+			}
+			if (world.getBlockId(x + 1, y, z) == Block.hay.blockID && world.getBlockId(x - 1, y, z) == Block.hay.blockID) {
+				return true;
+			}
+			if (world.getBlockId(x, y, z + 1) == Block.hay.blockID && world.getBlockId(x, y, z - 1) == Block.hay.blockID) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public String getUnlocalizedName(ItemStack stack) {
+		return super.getUnlocalizedName() + "." + Instrument.values()[stack.getItemDamage() % Instrument.values().length].unlocalizedName;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Icon getIconFromDamage(int damage) {
+		return icons.get(damage % icons.size());
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void getSubItems(int item, CreativeTabs tab, List list) {
+		for (Instrument instrument : Instrument.values()) {
+			list.add(new ItemStack(item, 1, instrument.ordinal()));
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerIcons(IconRegister register) {
+		icons = new ArrayList<Icon>(Instrument.values().length);
+		for (Instrument instrument : Instrument.values()) {
+			icons.add(register.registerIcon(ModInfo.ID + ":" + instrument.getUnlocalizedName()));
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.instrument." + getInstrument(stack).getUnlocalizedName() + ".desc"));
+	}
+
+	static {
+		Map<String, AbstractZeldaSong> teacherSongs = new HashMap<String, AbstractZeldaSong>();
+		teacherSongs.put("Guru-Guru", ZeldaSongs.songStorms);
+		teacherSongs.put("Impa", ZeldaSongs.songZeldasLullaby);
+		teacherSongs.put("Malon", ZeldaSongs.songEpona);
+		teacherSongs.put("Saria", ZeldaSongs.songSaria);
+		teacherSongs.put("Zelda", ZeldaSongs.songTime);
+		teachersForClass.put(EntityVillager.class, teacherSongs);
+	}
+}

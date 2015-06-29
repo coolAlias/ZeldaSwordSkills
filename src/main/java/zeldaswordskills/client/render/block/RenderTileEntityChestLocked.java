@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import zeldaswordskills.block.BlockChestInvisible.TileEntityChestInvisible;
 import zeldaswordskills.block.tileentity.TileEntityChestLocked;
 import zeldaswordskills.lib.ModInfo;
 import cpw.mods.fml.relauncher.Side;
@@ -50,6 +51,9 @@ public class RenderTileEntityChestLocked extends TileEntitySpecialRenderer
 	 * Renders the TileEntity for the chest at a position.
 	 */
 	public void renderTileEntityChestAt(TileEntityChestLocked chest, double dx, double dy, double dz, float partialTick) {
+		if (chest instanceof TileEntityChestInvisible) {
+			return;
+		}
 		int meta = (chest.hasWorldObj() ? chest.getBlockMetadata() : 0);
 		bindTexture(texture);
 		GL11.glPushMatrix();

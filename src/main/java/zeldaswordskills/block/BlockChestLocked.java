@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,7 @@ import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -115,35 +116,8 @@ public class BlockChestLocked extends BlockContainer
 			player.displayGUIChest((IInventory) te);
 			return true;
 		} else if (canUnlock(player)) {
-			IInventory inv = (IInventory) te;
-			int meta = world.getBlockMetadata(x, y, z);
-			keepInventory = true;
-			world.setBlock(x, y, z, Block.chest.blockID);
-			keepInventory = false;
-
-			boolean isChest = world.getBlockId(x + 1, y, z) == Block.chest.blockID;
-			if (!isChest) {
-				isChest = world.getBlockId(x - 1, y, z) == Block.chest.blockID;
-			}
-			if (!isChest) {
-				isChest = world.getBlockId(x, y, z + 1) == Block.chest.blockID;
-			}
-			if (!isChest) {
-				isChest = world.getBlockId(x, y, z - 1) == Block.chest.blockID;
-			}
-			if (!isChest) {
-				world.setBlockMetadataWithNotify(x, y, z, meta, 3);
-			}
+			convertToChest((IInventory) te, world, x, y, z);
 			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_CHEST, 0.4F, 0.5F);
-
-			// copy the old inventory to the new chest
-			TileEntity chest = world.getBlockTileEntity(x, y, z);
-			if (chest instanceof TileEntityChest) {
-				IInventory inv2 = (IInventory) chest;
-				for (int i = 0; i < inv.getSizeInventory() && i < inv2.getSizeInventory(); ++i) {
-					inv2.setInventorySlotContents(i, inv.getStackInSlot(i));
-				}
-			}
 			return true;
 		} else {
 			WorldUtils.playSoundAtEntity(player, Sounds.LOCK_RATTLE, 0.4F, 0.5F);
@@ -151,9 +125,50 @@ public class BlockChestLocked extends BlockContainer
 		return false;
 	}
 
+	/**
+	 * Converts this locked chest block into a vanilla chest
+	 */
+	protected void convertToChest(IInventory inv, World world, int x, int y, int z) {
+		int meta = world.getBlockMetadata(x, y, z);
+		keepInventory = true;
+		world.setBlock(x, y, z, Block.chest.blockID);
+		keepInventory = false;
+
+		boolean isChest = world.getBlockId(x + 1, y, z) == Block.chest.blockID;
+		if (!isChest) {
+			isChest = world.getBlockId(x - 1, y, z) == Block.chest.blockID;
+		}
+		if (!isChest) {
+			isChest = world.getBlockId(x, y, z + 1) == Block.chest.blockID;
+		}
+		if (!isChest) {
+			isChest = world.getBlockId(x, y, z - 1) == Block.chest.blockID;
+		}
+		if (!isChest) {
+			world.setBlockMetadataWithNotify(x, y, z, meta, 3);
+		}
+
+		// copy the old inventory to the new chest
+		TileEntity chest = world.getBlockTileEntity(x, y, z);
+		if (chest instanceof TileEntityChest) {
+			IInventory inv2 = (IInventory) chest;
+			for (int i = 0; i < inv.getSizeInventory() && i < inv2.getSizeInventory(); ++i) {
+				inv2.setInventorySlotContents(i, inv.getStackInSlot(i));
+			}
+		}
+	}
+
 	private boolean canUnlock(EntityPlayer player) {
-		return (player.getHeldItem() != null && (player.getHeldItem().getItem() == ZSSItems.keySkeleton ||
-				(player.getHeldItem().getItem() == ZSSItems.keySmall && player.inventory.consumeInventoryItem(ZSSItems.keySmall.itemID))));
+		ItemStack key = player.getHeldItem();
+		if (key != null) {
+			if (key.getItem() == ZSSItems.keySmall) {
+				return PlayerUtils.consumeHeldItem(player, ZSSItems.keySmall, 1);
+			} else if (key.getItem() == ZSSItems.keySkeleton) {
+				key.damageItem(1, player);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

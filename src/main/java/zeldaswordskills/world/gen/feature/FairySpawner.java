@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -202,8 +202,7 @@ public class FairySpawner
 		NBTTagCompound data = compound.getCompoundTag("FairySpawner");
 		maxFairies = data.getInteger("maxFairies");
 		fairiesSpawned = data.getInteger("spawned");
-		// 4 is LONG; fixes class cast exception from changing types; TODO remove next update
-		nextResetDate = (data.getTag("nextResetDate").getId() == 4 ? data.getLong("nextResetDate") : 0);
+		nextResetDate = data.getLong("nextResetDate");
 		itemUpdate = data.getInteger("itemUpdate");
 		rupees = data.getInteger("rupees");
 		playerName = data.getString("playerName");

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,11 +29,11 @@ import net.minecraft.world.World;
 import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
@@ -121,7 +121,7 @@ public class EndingBlow extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		if (!isActive() && super.canUse(player) && PlayerUtils.isHoldingSkillItem(player)) {
-			ICombo skill = ZSSPlayerInfo.get(player).getComboSkill();
+			ICombo skill = ZSSPlayerSkills.get(player).getComboSkill();
 			if (skill != null && skill.isComboInProgress()) {
 				if (lastNumHits > 0) {
 					return skill.getCombo().getConsecutiveHits() > 1 && skill.getCombo().getSize() > lastNumHits + 2;
@@ -170,12 +170,12 @@ public class EndingBlow extends SkillActive
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 3; // gives server some time for client attack to occur
-		ICombo skill = ZSSPlayerInfo.get(player).getComboSkill();
+		ICombo skill = ZSSPlayerSkills.get(player).getComboSkill();
 		if (skill.getCombo() != null) {
 			lastNumHits = skill.getCombo().getSize();
 		}
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
-			ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), ZSSPlayerInfo.get(player).getTargetingSkill());
+			ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), ZSSPlayerSkills.get(player).getTargetingSkill());
 			ticksTilFail = 0;
 			keyPressed = 0;
 		}
@@ -205,7 +205,7 @@ public class EndingBlow extends SkillActive
 			if (entityHit != null && xp > 0) {
 				updateEntityState(player);
 			}
-			ICombo skill = ZSSPlayerInfo.get(player).getComboSkill();
+			ICombo skill = ZSSPlayerSkills.get(player).getComboSkill();
 			if (skill == null || !skill.isComboInProgress()) {
 				lastNumHits = 0;
 			}
@@ -243,8 +243,8 @@ public class EndingBlow extends SkillActive
 	@Override
 	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
 		activeTimer = 0;
-		ICombo combo = ZSSPlayerInfo.get(player).getComboSkill();
-		ILockOnTarget lock = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ICombo combo = ZSSPlayerSkills.get(player).getComboSkill();
+		ILockOnTarget lock = ZSSPlayerSkills.get(player).getTargetingSkill();
 		if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 			amount *= 1.0F + (level * 0.2F);
 			WorldUtils.playSoundAtEntity(player, Sounds.MORTAL_DRAW, 0.4F, 0.5F);

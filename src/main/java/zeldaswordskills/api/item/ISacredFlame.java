@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public interface ISacredFlame {
 	 * @param isActive true if the flame is currently active, i.e. has not been extinguished
 	 * @return true to extinguish the sacred flame block (based on Config settings may permanently destroy the block)
 	 */
-	public boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive);
+	boolean onActivatedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive);
 
 	/**
 	 * Called when a player left clicks a Sacred Flame Block.
@@ -46,6 +46,6 @@ public interface ISacredFlame {
 	 * @param isActive true if the flame is currently active, i.e. has not been extinguished
 	 * @return true to extinguish the sacred flame block (based on Config settings may permanently destroy the block)
 	 */
-	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive);
+	boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, int type, boolean isActive);
 
 }

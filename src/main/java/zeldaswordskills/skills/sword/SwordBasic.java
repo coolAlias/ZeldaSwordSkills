@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -30,9 +30,8 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.CustomPacket.ProtocolException;
-import zeldaswordskills.network.EndComboPacket;
-import zeldaswordskills.network.TargetIdPacket;
+import zeldaswordskills.network.server.EndComboPacket;
+import zeldaswordskills.network.server.TargetIdPacket;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
@@ -128,6 +127,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
+	public boolean canUse(EntityPlayer player) {
+		return level > 0;
+	}
+
+	@Override
 	public boolean isActive() {
 		return isActive;
 	}
@@ -199,7 +203,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		double dx = player.posX - currentTarget.posX;
 		double dz = player.posZ - currentTarget.posZ;
 		double angle = Math.atan2(dz, dx) * 180 / Math.PI;
@@ -225,15 +229,11 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	}
 
 	@Override
-	public void setCurrentTarget(Side side, Entity entity) throws ProtocolException {
-		if (side.isServer()) {
-			if (entity == null || entity instanceof EntityLivingBase) {
-				currentTarget = (EntityLivingBase) entity;
-			} else {
-				throw new ProtocolException("Sword combos can only target EntityLivingBase");
-			}
-		} else {
-			throw new ProtocolException("Target can only be directly set on the server side.");
+	public void setCurrentTarget(EntityPlayer player, Entity target) {
+		if (target instanceof EntityLivingBase) {
+			currentTarget = (EntityLivingBase) target;
+		} else { // null or invalid target, deactivate skill
+			deactivate(player);
 		}
 	}
 
@@ -331,7 +331,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
-		if (event.source.isProjectile()) { return; }
+		boolean addHitFlag = event.source.getDamageType().equals(DamageUtils.INDIRECT_COMBO);
+		if (event.source.isProjectile() && !addHitFlag) { return; }
 		if ((combo == null || combo.isFinished()) && !player.worldObj.isRemote) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit());
 		}
@@ -344,7 +345,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 				combo.add(player, event.entityLiving, damage);
 			}
 		}
-		if (event.source.damageType.equals("player")) {
+		if (addHitFlag || event.source.damageType.equals("player")) {
 			String sound = (PlayerUtils.isHoldingSword(player) ? Sounds.SWORD_CUT : Sounds.HURT_FLESH);
 			WorldUtils.playSoundAtEntity(player, sound, 0.4F, 0.5F);
 		}

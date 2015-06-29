@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity.projectile;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
@@ -30,6 +31,9 @@ import net.minecraft.world.World;
  */
 public abstract class EntityMobThrowable extends EntityThrowable
 {
+	/** The throwing entity's ID, in case it is not a player. Only used after loading from NBT */
+	private int throwerId;
+
 	/** Usually the damage this entity will cause upon impact */
 	private float damage;
 
@@ -44,7 +48,7 @@ public abstract class EntityMobThrowable extends EntityThrowable
 	public EntityMobThrowable(World world, double x, double y, double z) {
 		super(world, x, y, z);
 	}
-	
+
 	/**
 	 * Constructs a throwable entity heading towards target's initial position with given velocity, with possible abnormal trajectory;
 	 * @param wobble amount of deviation from base trajectory, used by Skeletons and the like; set to 0.0F for no x/z deviation
@@ -53,7 +57,7 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		super(world, shooter);
 		this.posY = shooter.posY + (double) shooter.getEyeHeight() - 0.10000000149011612D;
 		double d0 = target.posX - shooter.posX;
-		double d1 = target.boundingBox.minY + (double) target.height - this.posY;
+		double d1 = target.boundingBox.minY + (double)(target.height / 3.0F) - this.posY;
 		double d2 = target.posZ - shooter.posZ;
 		double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d2 * d2);
 
@@ -68,12 +72,22 @@ public abstract class EntityMobThrowable extends EntityThrowable
 			setThrowableHeading(d0, d1 + (double) f4, d2, velocity, wobble);
 		}
 	}
-	
+
+	@Override
+	public EntityLivingBase getThrower() {
+		EntityLivingBase thrower = super.getThrower();
+		if (thrower == null) {
+			Entity entity = worldObj.getEntityByID(throwerId);
+			return (entity instanceof EntityLivingBase ? (EntityLivingBase) entity : null);
+		}
+		return thrower;
+	}
+
 	/** Returns the amount of damage this entity will cause upon impact */
 	public float getDamage() {
 		return damage;
 	}
-	
+
 	/**
 	 * Sets the damage this entity will cause upon impact
 	 */
@@ -81,16 +95,18 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		this.damage = amount;
 		return this;
 	}
-	
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
+		compound.setInteger("throwerId", (getThrower() == null ? -1 : getThrower().entityId));
 		compound.setFloat("damage", damage);
 	}
-	
+
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
+		throwerId = compound.getInteger("throwerId");
 		damage = compound.getFloat("damage");
 	}
 }

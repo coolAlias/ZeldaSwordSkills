@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -36,11 +36,11 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
-import zeldaswordskills.network.DashImpactPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.server.DashImpactPacket;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
@@ -67,7 +67,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class Dash extends SkillActive
 {
 	/** Player's base movement speed */
-	private static final double BASE_MOVE = 0.10000000149011612D;
+	public static final double BASE_MOVE = 0.10000000149011612D;
 
 	/** True when Slam is used and while the player is in motion towards the target */
 	private boolean isActive = false;
@@ -122,7 +122,7 @@ public class Dash extends SkillActive
 
 	@Override
 	protected float getExhaustion() {
-		return 1.0F - (0.1F * level);
+		return 1.0F - (0.05F * level);
 	}
 
 	/** Damage is base damage plus one per level */
@@ -149,7 +149,7 @@ public class Dash extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean canExecute(EntityPlayer player) {
-		return player.onGround && PlayerUtils.isUsingItem(player) && canUse(player);
+		return player.onGround && PlayerUtils.isBlocking(player) && canUse(player);
 	}
 
 	@Override
@@ -172,7 +172,7 @@ public class Dash extends SkillActive
 	protected boolean onActivated(World world, EntityPlayer player) {
 		isActive = true;
 		initialPosition = Vec3.createVectorHelper(player.posX, player.posY, player.posZ);
-		ILockOnTarget skill = ZSSPlayerInfo.get(player).getTargetingSkill();
+		ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
 		if (skill != null && skill.isLockedOn()) {
 			target = skill.getCurrentTarget();
 		} else {
@@ -277,7 +277,7 @@ public class Dash extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
 		if (target instanceof EntityLivingBase && trajectory != null) {
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - BASE_MOVE;
 			double dfactor = (1.0D + (speed) + (speed * (1.0D - ((getRange() - distance) / getRange()))));

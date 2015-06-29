@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,6 @@ public class WorldGenJars extends WorldGenerator {
 			int i = x + rand.nextInt(4) - rand.nextInt(4);
 			int j = y + rand.nextInt(4) - rand.nextInt(4);
 			int k = z + rand.nextInt(4) - rand.nextInt(4);
-
 			if (canPlaceBlockAt(world, i, j, k, isUnderground) && (!world.provider.hasNoSky || j < 127) && Block.blocksList[ZSSBlocks.ceramicJar.blockID].canBlockStay(world, i, j, k)) {
 				world.setBlock(i, j, k, ZSSBlocks.ceramicJar.blockID, 0, 2);
 				--n;

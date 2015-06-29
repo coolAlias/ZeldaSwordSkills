@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,10 +25,14 @@ package zeldaswordskills.api.damage;
  */
 public interface IPostDamageEffect {
 
-	/** Returns the maximum duration of the effect */
-	public int getDuration();
-	
-	/** Returns the amplitude of this effect */
-	public int getAmplifier();
-	
+	/**
+	 * Returns the maximum duration of the effect for the given damage type
+	 */
+	int getDuration(EnumDamageType type);
+
+	/**
+	 * Returns the amplitude of this effect for the given damage type
+	 */
+	int getAmplifier(EnumDamageType type);
+
 }

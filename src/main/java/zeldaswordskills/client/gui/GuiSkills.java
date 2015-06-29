@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import net.minecraft.util.StatCollector;
 import org.lwjgl.input.Mouse;
 
 import zeldaswordskills.client.RenderHelperQ;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.inventory.ContainerSkills;
 import zeldaswordskills.lib.ModInfo;
 import zeldaswordskills.skills.SkillBase;
@@ -201,7 +201,7 @@ public class GuiSkills extends GuiContainer
 				// clear the current description so it refreshes next time the screen draws
 				desc.clear();
 			}
-			currentSkill = ZSSPlayerInfo.get(mc.thePlayer).getPlayerSkill((byte) id);
+			currentSkill = ZSSPlayerSkills.get(mc.thePlayer).getPlayerSkill((byte) id);
 		}
 	}
 

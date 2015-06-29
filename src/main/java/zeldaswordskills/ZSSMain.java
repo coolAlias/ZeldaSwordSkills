@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import net.minecraftforge.common.MinecraftForge;
 import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.command.ZSSCommands;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.handler.GuiHandler;
@@ -35,14 +36,14 @@ import zeldaswordskills.network.ZSSPacketHandler;
 import zeldaswordskills.util.LogHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
+import zeldaswordskills.world.gen.feature.WorldGenGossipStones;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 
@@ -61,7 +62,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
  */
 public class ZSSMain
 {
-	@Instance(ModInfo.ID)
+	@Mod.Instance(ModInfo.ID)
 	public static ZSSMain instance;
 
 	@SidedProxy(clientSide = ModInfo.CLIENT_PROXY, serverSide = ModInfo.COMMON_PROXY)
@@ -72,42 +73,50 @@ public class ZSSMain
 	/** Whether Battlegear2 mod is loaded */
 	public static boolean isBG2Enabled;
 
-	@EventHandler
+	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		LogHelper.init(Level.INFO);
 		Config.init(event);
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
-		ZSSBlocks.init();
-		ZSSItems.init();
-		ZSSEntities.init();
-		ZSSAchievements.init();
-		DungeonLootLists.init();
+		ZSSBlocks.preInit();
+		ZSSItems.preInit();
+		ZSSEntities.preInit();
+		ZSSAchievements.preInit();
 		proxy.initialize();
+	}
 
+	@Mod.EventHandler
+	public void load(FMLInitializationEvent event) {
+		proxy.registerRenderers();
+		ZSSItems.init();
+		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
+		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
+		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
+		NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
 		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
 		MinecraftForge.EVENT_BUS.register(dungeonGen);
 		if (Config.areBossDungeonsEnabled()) {
 			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
 		}
+		if (Config.getGossipStoneRate() > 0) {
+			MinecraftForge.EVENT_BUS.register(WorldGenGossipStones.INSTANCE);
+		}
 	}
 
-	@EventHandler
-	public void load(FMLInitializationEvent event) {
-		proxy.registerRenderers();
-		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
-		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
-		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
-		ZSSItemEvents.load();
-		NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
-	}
-
-	@EventHandler
+	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Config.postInit();
 		if (isBG2Enabled) {
 			ItemHeroBow.registerBG2();
 			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
+		DungeonLootLists.init();
+	}
+
+	@Mod.EventHandler
+	public void onServerStarting(FMLServerStartingEvent event) {
+		ZSSItems.onServerStarting();
+		ZSSCommands.registerCommands(event);
 	}
 }

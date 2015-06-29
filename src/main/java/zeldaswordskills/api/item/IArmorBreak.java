@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,10 @@ package zeldaswordskills.api.item;
  * 
  */
 public interface IArmorBreak {
-	
+
 	/**
 	 * The percentage of damage inflicted that ignores armor (0 to 100)
 	 */
-	public float getPercentArmorIgnored();
+	float getPercentArmorIgnored();
 
 }

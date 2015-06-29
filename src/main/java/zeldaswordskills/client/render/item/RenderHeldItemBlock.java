@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -60,11 +60,6 @@ public class RenderHeldItemBlock implements IItemRenderer
 					GL11.glScalef(1.0F, 1.0F, -1.0F);
 					GL11.glRotatef(210.0F, 1.0F, 0.0F, 0.0F);
 					GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-					int i1 = Item.itemsList[block.blockID].getColorFromItemStack(stack, 0);
-					float f = (float)(i1 >> 16 & 255) / 255.0F;
-					float f1 = (float)(i1 >> 8 & 255) / 255.0F;
-					float f2 = (float)(i1 & 255) / 255.0F;
-					GL11.glColor4f(f, f1, f2, 1.0F);
 					GL11.glRotatef(-90.0F, 0.0F, 1.0F, 0.0F);
 					blockRenderer.renderBlockAsItem(block, ((ItemHeldBlock) item).getMetaFromStack(stack), 1.0F);
 					GL11.glPopMatrix();

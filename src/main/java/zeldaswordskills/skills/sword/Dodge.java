@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2014> <coolAlias>
+    Copyright (C) <2015> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,20 +22,19 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.lib.Config;
 import zeldaswordskills.lib.Sounds;
-import zeldaswordskills.network.ActivateSkillPacket;
+import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.network.PacketDispatcher;
@@ -137,7 +136,7 @@ public class Dodge extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && ZSSPlayerInfo.get(player).isSkillActive(swordBasic);
+		return super.canUse(player) && !isActive() && ZSSPlayerSkills.get(player).isSkillActive(swordBasic);
 	}
 
 	@Override
@@ -209,17 +208,17 @@ public class Dodge extends SkillActive
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public boolean onRenderTick(EntityPlayer player) {
-		double d = 0.05D;
-		if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
-			d = 0.01D;
+	public boolean onRenderTick(EntityPlayer player, float partialTickTime) {
+		double speed = 1.0D + 10.0D * (player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue() - Dash.BASE_MOVE);
+		if (speed > 1.0D) {
+			speed = 1.0D;
 		}
+		double d = 0.15D * speed * speed;
 		Vec3 vec3 = player.getLookVec();
-		if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || (Config.allowVanillaControls()
-				&& keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight)) {
-			player.addVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
+		if (keyPressed == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] || keyPressed == Minecraft.getMinecraft().gameSettings.keyBindRight) {
+			player.setVelocity(-vec3.zCoord * d, 0.0D, vec3.xCoord * d);
 		} else {
-			player.addVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
+			player.setVelocity(vec3.zCoord * d, 0.0D, -vec3.xCoord * d);
 		}
 		return true;
 	}
