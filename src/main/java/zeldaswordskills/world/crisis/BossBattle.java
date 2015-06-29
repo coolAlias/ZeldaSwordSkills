@@ -62,8 +62,10 @@ public class BossBattle extends AbstractCrisis
 {
 	/** The dungeon core in which the battle is occurring */
 	protected final TileEntityDungeonCore core;
+
 	/** The bounding box of the associated boss dungeon*/
 	protected final StructureBoundingBox box;
+
 	/** The difficulty setting in effect when the battle was begun */
 	protected int difficulty = -1;
 

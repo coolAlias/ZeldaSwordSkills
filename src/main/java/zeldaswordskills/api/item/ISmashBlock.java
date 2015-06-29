@@ -53,7 +53,7 @@ public interface ISmashBlock {
 	 * @param block the block that was struck
 	 * @param meta the metadata of the block struck
 	 */
-	public BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta);
+	BlockWeight getSmashStrength(EntityPlayer player, ItemStack stack, Block block, int meta);
 
 	/**
 	 * Called after the player has attempted to smash a block with the stack,
@@ -61,6 +61,6 @@ public interface ISmashBlock {
 	 * @param meta the metadata of the block before it was smashed
 	 * @param wasSmashed true if the smash was considered successful
 	 */
-	public void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed);
+	void onBlockSmashed(EntityPlayer player, ItemStack stack, Block block, int meta, boolean wasSmashed);
 
 }

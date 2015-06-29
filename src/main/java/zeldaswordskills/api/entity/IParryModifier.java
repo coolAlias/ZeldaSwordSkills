@@ -33,7 +33,7 @@ public interface IParryModifier {
 	 * @param stack		ItemStack which may be disarmed: either the instance of IParryModifier, or the item held by the entity
 	 * @return	Positive value decreases the likelihood of being disarmed (e.g. 0.5F reduces likelihood by 50%)
 	 */
-	public float getOffensiveModifier(EntityLivingBase entity, ItemStack stack);
+	float getOffensiveModifier(EntityLivingBase entity, ItemStack stack);
 
 	/**
 	 * Modifier applied to the chance to disarm an opponent when defending against an attack
@@ -41,6 +41,6 @@ public interface IParryModifier {
 	 * @param stack		ItemStack being used to disarm: either the instance of IParryModifier, or the item held by the entity
 	 * @return	Positive value increases the likelihood of disarming the attacker (e.g. 0.5F increases likelihood by 50%)
 	 */
-	public float getDefensiveModifier(EntityLivingBase entity, ItemStack stack);
+	float getDefensiveModifier(EntityLivingBase entity, ItemStack stack);
 
 }

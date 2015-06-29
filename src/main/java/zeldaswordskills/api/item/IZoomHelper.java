@@ -35,6 +35,6 @@ public interface IZoomHelper {
 	 * this amount; negative values will zoom out
 	 */
 	@SideOnly(Side.CLIENT)
-	public float getMagnificationFactor();
+	float getMagnificationFactor();
 
 }

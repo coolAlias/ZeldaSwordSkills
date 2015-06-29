@@ -32,7 +32,7 @@ public interface IMagicUser {
 	/**
 	 * Called each tick to check if caster can continue casting
 	 */
-	public boolean canContinueCasting();
+	boolean canContinueCasting();
 
 	/**
 	 * Called from {@link EntityAIRangedMagic} when a spell is about to begin charging.
@@ -42,7 +42,7 @@ public interface IMagicUser {
 	 * @return			The time it will take for the spell being cast to fully charge;
 	 * 					returning 0 will prevent casting a spell at this time
 	 */
-	public int beginSpellCasting(EntityLivingBase target);
+	int beginSpellCasting(EntityLivingBase target);
 
 	/**
 	 * Called after charging a spell from EntityAIPassiveMagic for spells that target the self
@@ -50,7 +50,7 @@ public interface IMagicUser {
 	// TODO EntityAIPassiveMagic would need to query entity for shouldExecute and continueExecuting,
 	// as the AI will not know if effect(s) is already active or not
 	// TODO make part of IPassiveMagicUser, which also has methods for interacting with EntityAIPassiveMagic
-	public void castPassiveSpell();
+	void castPassiveSpell();
 
 	/**
 	 * Called after spell done charging to actually cast it
@@ -60,10 +60,11 @@ public interface IMagicUser {
 	 * 					approaches zero as caster nears the target's position.
 	 * @return			Return the next maximum time before another spell may be cast
 	 */
-	public void castRangedSpell(EntityLivingBase target, float range);
+	void castRangedSpell(EntityLivingBase target, float range);
 
 	/**
 	 * Called from {@link EntityAIRangedMagic} when the task is reset
 	 */
-	public void stopCasting();
+	void stopCasting();
+
 }

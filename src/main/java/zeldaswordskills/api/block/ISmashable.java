@@ -48,8 +48,8 @@ public interface ISmashable {
 	 * @param meta the block metadata
 	 * @param side the side (face) of the block that was hit
 	 */
-	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side);
-	
+	BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, int meta, int side);
+
 	/**
 	 * This method is called right before the block smash calculations occur,
 	 * allowing custom handling of the event by the block in question.
@@ -60,6 +60,6 @@ public interface ISmashable {
 	 * ALLOW prevents further processing and indicates a successful smash
 	 * DENY prevents further processing and indicates a failed smash attempt
 	 */
-	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
+	Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side);
 
 }

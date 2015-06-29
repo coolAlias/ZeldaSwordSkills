@@ -33,6 +33,6 @@ public interface ISeedStructure {
 	 * @param side	The side of the block clicked
 	 * @return		True if the structure generated successfully
 	 */
-	public boolean generate(World world, EntityPlayer player, int x, int y, int z, int side);
+	boolean generate(World world, EntityPlayer player, int x, int y, int z, int side);
 
 }

@@ -29,5 +29,6 @@ public interface IEntityTeleport {
 	/**
 	 * Returns the entity's Teleportation AI
 	 */
-	public EntityAITeleport getTeleportAI();
+	EntityAITeleport getTeleportAI();
+
 }

@@ -38,6 +38,6 @@ public interface ISongBlock {
 	 * @param affected	Number of blocks already affected by the song
 	 * @return			True if the block was affected
 	 */
-	public boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, AbstractZeldaSong song, int power, int affected);
+	boolean onSongPlayed(World world, int x, int y, int z, EntityPlayer player, AbstractZeldaSong song, int power, int affected);
 
 }

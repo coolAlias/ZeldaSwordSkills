@@ -40,7 +40,7 @@ public interface IReflectable extends IProjectile {
 	 * @param shooter	Shooter of the projectile, possibly null
 	 * @return Chance that the projectile will be reflected, between 0.0F and 1.0F inclusive
 	 */
-	public float getReflectChance(ItemStack shield, EntityPlayer player, Entity shooter);
+	float getReflectChance(ItemStack shield, EntityPlayer player, Entity shooter);
 
 	/**
 	 * Called using the new projectile instance, just before it is spawned into the world
@@ -49,5 +49,6 @@ public interface IReflectable extends IProjectile {
 	 * @param shooter	Shooter of the original projectile, possibly null
 	 * @param oldEntity	Original projectile entity
 	 */
-	public void onReflected(ItemStack shield, EntityPlayer player, Entity shooter, Entity oldEntity);
+	void onReflected(ItemStack shield, EntityPlayer player, Entity shooter, Entity oldEntity);
+
 }

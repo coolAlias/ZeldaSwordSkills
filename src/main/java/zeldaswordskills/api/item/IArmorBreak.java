@@ -27,6 +27,6 @@ public interface IArmorBreak {
 	/**
 	 * The percentage of damage inflicted that ignores armor (0 to 100)
 	 */
-	public float getPercentArmorIgnored();
+	float getPercentArmorIgnored();
 
 }

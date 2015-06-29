@@ -33,14 +33,14 @@ public interface IEntityBackslice {
 	 * @param attacker	Attacking player
 	 * @return			True to allow damage multiplier, false for standard attack damage
 	 */
-	public boolean allowDamageMultiplier(EntityPlayer player);
+	boolean allowDamageMultiplier(EntityPlayer player);
 
 	/**
 	 * Return true for default handling of disarmorment, or false to prevent any further processing
 	 * (random note: this is a deliberate misspelling of 'disarmament')
 	 * @param damage Damage has already been modified by {@link #onBackDamaged} at this point
 	 */
-	public boolean allowDisarmorment(EntityPlayer player, float damage);
+	boolean allowDisarmorment(EntityPlayer player, float damage);
 
 	/**
 	 * Called when an entity is damaged in the back by a player using a skill such as {@link BackSlice}
@@ -51,6 +51,6 @@ public interface IEntityBackslice {
 	 * @param damage	Amount of damage to be inflicted after skill modifier has been applied (if allowed)
 	 * @return			New amount of damage to be dealt; 0 will cancel the damage
 	 */
-	public float onBackSliced(EntityPlayer attacker, int level, float damage);
+	float onBackSliced(EntityPlayer attacker, int level, float damage);
 
 }

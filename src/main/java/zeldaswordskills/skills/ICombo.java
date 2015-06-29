@@ -29,14 +29,20 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public interface ICombo {
 
-	/** Returns the Combo instance for associated class */
-	public Combo getCombo();
+	/**
+	 * Returns the Combo instance for associated class
+	 */
+	Combo getCombo();
 
-	/** Should assign the instance of Combo retrieved from getCombo() to the argument combo */
-	public void setCombo(Combo combo);
+	/**
+	 * Should assign the instance of Combo retrieved from getCombo() to the argument combo
+	 */
+	void setCombo(Combo combo);
 
-	/** Returns true if a combo is currently in progress */
-	public boolean isComboInProgress();
+	/**
+	 * Returns true if a combo is currently in progress
+	 */
+	boolean isComboInProgress();
 
 	/**
 	 * Should be called every time the player attacks (e.g. using MouseEvent for left click attack.)
@@ -44,7 +50,7 @@ public interface ICombo {
 	 * @return true if the attack should continue as normal (i.e. the player will hit the target)
 	 */
 	@SideOnly(Side.CLIENT)
-	public boolean onAttack(EntityPlayer player);
+	boolean onAttack(EntityPlayer player);
 
 	/**
 	 * Should be called when an EntityPlayer actively using a Combo damages an entity, creating a new
@@ -52,7 +58,7 @@ public interface ICombo {
 	 * LivingHurtEvent is only called server side, but Combo will update itself automatically.
 	 * @param player should be gotten from '(EntityPlayer) event.source.getEntity()' if event.source.getEntity() is correct type
 	 */
-	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event);
+	void onHurtTarget(EntityPlayer player, LivingHurtEvent event);
 
 	/**
 	 * Should be called when a player actively using a Combo receives damage. Useful for ending a
@@ -60,5 +66,6 @@ public interface ICombo {
 	 * on the server side, but Combo class will self-update if endCombo(player) is called.
 	 * @param player should be gotten from '(EntityPlayer) event.entity' if event.entity is correct type
 	 */
-	public void onPlayerHurt(EntityPlayer player, LivingHurtEvent event);
+	void onPlayerHurt(EntityPlayer player, LivingHurtEvent event);
+
 }

@@ -33,6 +33,6 @@ public interface IHandleToss {
 	 * @param item the entity item that was thrown; setting this to dead will cancel the toss event
 	 * @param player the player who threw the item
 	 */
-	public void onItemTossed(EntityItem item, EntityPlayer player);
+	void onItemTossed(EntityItem item, EntityPlayer player);
 
 }

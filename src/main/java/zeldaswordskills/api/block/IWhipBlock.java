@@ -55,14 +55,14 @@ public interface IWhipBlock
 	 * @param thrower Not likely to be null, but it is conceivable
 	 * @param side	The side of the block that was hit
 	 */
-	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
+	boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
 
 	/**
 	 * Return true if the type of whip is able to attach to this specific block.
 	 * @param thrower Not likely to be null, but it is conceivable
 	 * @param side	The side of the block that was hit
 	 */
-	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
+	boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, int x, int y, int z, int side);
 
 	/**
 	 * Allows for special interactions, such as pulling levers, rather than swinging.
@@ -71,6 +71,6 @@ public interface IWhipBlock
 	 * @param ticksInGround	Useful if the action requires a certain amount of time to perform
 	 * @return ALLOW to swing, DENY to not swing, and DEFAULT to use standard behavior.
 	 */
-	public Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround);
+	Result shouldSwing(EntityWhip whip, World world, int x, int y, int z, int ticksInGround);
 
 }

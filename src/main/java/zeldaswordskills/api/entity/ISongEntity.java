@@ -37,6 +37,6 @@ public interface ISongEntity {
 	 * @param affected	Number of entities already affected by the song
 	 * @return			True if the entity was affected
 	 */
-	public boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected);
+	boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected);
 
 }

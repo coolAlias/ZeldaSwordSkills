@@ -34,6 +34,6 @@ public interface IHandlePickup {
 	 * be sent to nearby players
 	 * @return returning false will cancel the event without picking up the item
 	 */
-	public boolean onPickupItem(ItemStack stack, EntityPlayer player);
+	boolean onPickupItem(ItemStack stack, EntityPlayer player);
 
 }

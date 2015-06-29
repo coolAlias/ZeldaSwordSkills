@@ -17,10 +17,10 @@
 
 package zeldaswordskills.api.block;
 
-import zeldaswordskills.item.ItemHeldBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import zeldaswordskills.item.ItemHeldBlock;
 
 
 /**
@@ -43,7 +43,7 @@ public interface ILiftable {
 	 * @param side the side (face) of the block the player is trying to lift
 	 * @return return null to use the block's explosion resistance as its weight
 	 */
-	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side);
+	BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, int meta, int side);
 
 	/**
 	 * Called after the block is picked up by a player, but before it is set to air,
@@ -52,7 +52,7 @@ public interface ILiftable {
 	 * @param stack the ItemHeldBlock stack containing the ILiftBlock stack used to pick up the block
 	 * @param meta the metadata of the block before it was picked up
 	 */
-	public void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta);
+	void onLifted(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int meta);
 
 	/**
 	 * Called when a liftable block is placed from the held block stack, allowing tile entity
@@ -60,6 +60,6 @@ public interface ILiftable {
 	 * @param stack the ItemHeldBlock that was created when the block was lifted
 	 * @param meta the metadata returned from the block's onBlockPlaced method
 	 */
-	public void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta);
+	void onHeldBlockPlaced(World world, ItemStack stack, int x, int y, int z, int meta);
 
 }

@@ -28,13 +28,13 @@ public interface IEntityEvil {
 	 * Return true if this entity may be instantly killed by Light Arrows.
 	 * If false, {@link #getLightArrowDamage} will be inflicted instead.
 	 */
-	public boolean isLightArrowFatal();
+	boolean isLightArrowFatal();
 
 	/**
 	 * Return the amount of damage to inflict when {@link #isLightArrowFatal} returns false
 	 * @param amount	Initial damage amount that would be dealt
 	 * @return			Amount of damage to inflict
 	 */
-	public float getLightArrowDamage(float amount);
+	float getLightArrowDamage(float amount);
 
 }

@@ -81,7 +81,7 @@ public interface IHookable
 	 * 			Result.ALLOW will allow the block to be destroyed
 	 * 			Result.DENY will prevent the block from being destroyed
 	 */
-	public Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side);
+	Result canDestroyBlock(HookshotType type, World world, int x, int y, int z, int side);
 
 	/**
 	 * Return true if the type of hookshot is able to attach to this specific block.
@@ -91,7 +91,7 @@ public interface IHookable
 	 * 			Result.ALLOW will allow the hookshot to attach to the block
 	 * 			Result.DENY will prevent the hookshot from attaching to the block
 	 */
-	public Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side);
+	Result canGrabBlock(HookshotType type, World world, int x, int y, int z, int side);
 
 	/**
 	 * Returns the Material type that should be used to determine which, if
@@ -100,6 +100,6 @@ public interface IHookable
 	 * {@link #canDestroyBlock} and {@link #canGrabBlock} return {@link Result#DEFAULT}
 	 * @param type the type of hookshot attempting to grapple the block
 	 */
-	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z);
+	Material getHookableMaterial(HookshotType type, World world, int x, int y, int z);
 
 }

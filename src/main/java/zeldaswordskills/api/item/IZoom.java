@@ -32,13 +32,13 @@ public interface IZoom {
 	 * as a float value (vanilla bow is 20.0F)
 	 */
 	@SideOnly(Side.CLIENT)
-	public float getMaxZoomTime();
+	float getMaxZoomTime();
 
 	/**
 	 * The factor by which the field of view will be modified;
 	 * vanilla bow uses 0.15F, with higher values giving higher magnification
 	 */
 	@SideOnly(Side.CLIENT)
-	public float getZoomFactor();
+	float getZoomFactor();
 
 }

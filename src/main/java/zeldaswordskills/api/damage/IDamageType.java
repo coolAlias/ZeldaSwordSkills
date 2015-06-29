@@ -36,6 +36,6 @@ public interface IDamageType {
 	/**
 	 * Returns a list of all custom enumerated damage types associated with this DamageSource
 	 */
-	public Set<EnumDamageType> getEnumDamageTypes();
-	
+	Set<EnumDamageType> getEnumDamageTypes();
+
 }

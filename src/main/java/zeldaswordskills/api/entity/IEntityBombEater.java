@@ -17,8 +17,9 @@
 
 package zeldaswordskills.api.entity;
 
-import cpw.mods.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.projectile.EntityBomb;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -27,6 +28,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
  *
  */
 public interface IEntityBombEater {
+
 	/**
 	 * Method called from {@link EntityBomb} when it collides with a bomb-eating entity
 	 * @return
@@ -34,7 +36,7 @@ public interface IEntityBombEater {
 	 * Result.ALLOW if the bomb was ingested using custom handling
 	 * Result.DENY to prevent the bomb from being ingested
 	 */
-	public Result ingestBomb(IEntityBombIngestible bomb);
+	Result ingestBomb(IEntityBombIngestible bomb);
 
 	/**
 	 * This method is called when an ingested bomb is about to explode inside the
@@ -45,16 +47,16 @@ public interface IEntityBombEater {
 	 * @return TRUE to continue with standard processing, i.e. check if the ingested
 	 * 			bomb should explode and whether it is fatal
 	 */
-	public boolean onBombIndigestion(IEntityBombIngestible bomb);
+	boolean onBombIndigestion(IEntityBombIngestible bomb);
 
 	/**
 	 * Return TRUE to cause the standard explosion of ingested bombs, or FALSE for no explosion
 	 */
-	public boolean doesIngestedBombExplode(IEntityBombIngestible bomb);
+	boolean doesIngestedBombExplode(IEntityBombIngestible bomb);
 
 	/**
 	 * Return TRUE if the ingested bomb is fatal to this entity
 	 */
-	public boolean isIngestedBombFatal(IEntityBombIngestible bomb);
+	boolean isIngestedBombFatal(IEntityBombIngestible bomb);
 
 }
