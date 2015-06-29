@@ -37,6 +37,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockSongInscription;
 import zeldaswordskills.block.BlockWarpStone;
@@ -107,6 +108,13 @@ public class ItemInstrument extends Item
 	 */
 	public int getSongStrength(ItemStack stack) {
 		return getInstrument(stack).getPower();
+	}
+
+	@Override
+	public void onCreated(ItemStack stack, World world, EntityPlayer player) {
+		if (getInstrument(stack) == ItemInstrument.Instrument.OCARINA_FAIRY) {
+			player.triggerAchievement(ZSSAchievements.ocarinaCraft);
+		}
 	}
 
 	@Override
