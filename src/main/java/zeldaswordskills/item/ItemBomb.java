@@ -197,6 +197,8 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 		if (type != BombType.BOMB_WATER && world.getBlockState(new BlockPos(entity).up()).getBlock().getMaterial() == Material.water) {
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", true);
+		} else if (stack.getTagCompound().getBoolean("inWater")) {
+			stack.getTagCompound().setBoolean("inWater", false);
 		}
 		if (canTick(world, type, stack.getTagCompound().getBoolean("inWater"))) {
 			int time = stack.getTagCompound().getInteger("time");
@@ -205,13 +207,20 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 			}
 			boolean flag = world.provider.getDimensionId() == -1 && (type == BombType.BOMB_STANDARD || type == BombType.BOMB_FLOWER);
 			stack.getTagCompound().setInteger("time", flag ? Config.getBombFuseTime() : ++time);
-			if (time == Config.getBombFuseTime() && !world.isRemote) {
+			int fuse = Config.getBombFuseTime();
+			if (fuse == 0 && type == BombType.BOMB_FLOWER) {
+				fuse = 56;
+			}
+			if (time == fuse && !world.isRemote) {
+				EntityBomb bomb = null;
 				if (entity instanceof EntityPlayer) {
 					((EntityPlayer) entity).inventory.setInventorySlotContents(slot, null);
+					bomb = new EntityBomb(world, (EntityPlayer) entity).setType(type);
 				} else {
 					entity.setCurrentItemOrArmor(slot, null);
+					bomb = new EntityBomb(world).setType(type);
 				}
-				CustomExplosion.createExplosion(world, entity.posX, entity.posY, entity.posZ, getRadius(type), type);
+				CustomExplosion.createExplosion(bomb, world, entity.posX, entity.posY, entity.posZ, getRadius(type), 0.0F, true);
 			}
 		}
 	}
@@ -220,7 +229,9 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 	 * Returns true if this type of bomb can tick this update
 	 */
 	private boolean canTick(World world, BombType type, boolean inWater) {
-		if (Config.getBombFuseTime() > 0) {
+		if (type == BombType.BOMB_FLOWER) {
+			return !inWater;
+		} else if (Config.getBombFuseTime() > 0) {
 			switch (type) {
 			case BOMB_WATER: return (world.provider.getDimensionId() != -1);
 			default: return (!inWater);
