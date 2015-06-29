@@ -47,15 +47,19 @@ public class ItemDekuLeaf extends Item implements IUnenchantable
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/** Returns the current cooldown on this stack */
-	private int getCooldown(ItemStack stack) {
-		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("cooldown") : 0);
+	/**
+	 * Returns the next time this stack may be used
+	 */
+	private long getNextUseTime(ItemStack stack) {
+		return (stack.hasTagCompound() ? stack.getTagCompound().getLong("next_use") : 0);
 	}
 
-	/** Sets the cooldown on this stack */
-	private void setCooldown(ItemStack stack, int cooldown) {
+	/**
+	 * Sets the next time this stack may be used to the current world time plus a number of ticks
+	 */
+	private void setNextUseTime(ItemStack stack, World world, int ticks) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("cooldown", cooldown);
+		stack.getTagCompound().setLong("next_use", (world.getWorldTime() + ticks));
 	}
 
 	@Override
@@ -70,9 +74,6 @@ public class ItemDekuLeaf extends Item implements IUnenchantable
 				}
 			}
 		}
-		if (!world.isRemote && getCooldown(stack) > 0) {
-			setCooldown(stack, getCooldown(stack) - 1);
-		}
 	}
 
 	@Override
@@ -80,12 +81,12 @@ public class ItemDekuLeaf extends Item implements IUnenchantable
 		player.swingItem();
 		if (player.getFoodStats().getFoodLevel() > 0) {
 			if (player.onGround) {
-				if (!world.isRemote && getCooldown(stack) == 0) {
+				if (!world.isRemote && world.getWorldTime() > getNextUseTime(stack)) {
 					player.addExhaustion(2.0F);
 					WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));
 					if (!player.capabilities.isCreativeMode) {
-						setCooldown(stack, 15);
+						setNextUseTime(stack, world, 20);
 					}
 				}
 			} else {
