@@ -191,6 +191,8 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 		if (type != BombType.BOMB_WATER && world.getBlock((int) entity.posX, (int) entity.posY + 1, (int) entity.posZ).getMaterial() == Material.water) {
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", true);
+		} else if (stack.getTagCompound().getBoolean("inWater")) {
+			stack.getTagCompound().setBoolean("inWater", false);
 		}
 		if (canTick(world, type, stack.getTagCompound().getBoolean("inWater"))) {
 			int time = stack.getTagCompound().getInteger("time");
@@ -199,13 +201,20 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 			}
 			boolean flag = world.provider.isHellWorld && (type == BombType.BOMB_STANDARD || type == BombType.BOMB_FLOWER);
 			stack.getTagCompound().setInteger("time", flag ? Config.getBombFuseTime() : ++time);
-			if (time == Config.getBombFuseTime() && !world.isRemote) {
+			int fuse = Config.getBombFuseTime();
+			if (fuse == 0 && type == BombType.BOMB_FLOWER) {
+				fuse = 56;
+			}
+			if (time == fuse && !world.isRemote) {
+				EntityBomb bomb = null;
 				if (entity instanceof EntityPlayer) {
 					((EntityPlayer) entity).inventory.setInventorySlotContents(slot, null);
+					bomb = new EntityBomb(world, (EntityPlayer) entity).setType(type);
 				} else {
 					entity.setCurrentItemOrArmor(slot, null);
+					bomb = new EntityBomb(world).setType(type);
 				}
-				CustomExplosion.createExplosion(world, entity.posX, entity.posY, entity.posZ, getRadius(type), type);
+				CustomExplosion.createExplosion(bomb, world, entity.posX, entity.posY, entity.posZ, getRadius(type), 0.0F, true);
 			}
 		}
 	}
