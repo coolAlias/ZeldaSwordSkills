@@ -159,9 +159,12 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 * Updates all active buffs, removing any whose duration reaches zero
 	 */
 	protected void updateBuffs() {
-		for (BuffBase buff : activeBuffs.values()) {
+		Iterator<BuffBase> iterator = activeBuffs.values().iterator();
+		while (iterator.hasNext()) {
+			BuffBase buff = iterator.next();
 			if (buff.onUpdate(entity)) {
-				removeBuff(buff.getBuff());
+				buff.onRemoved(entity);
+				iterator.remove();
 			}
 		}
 	}
