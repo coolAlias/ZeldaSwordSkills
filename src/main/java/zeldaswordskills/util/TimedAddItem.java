@@ -51,11 +51,13 @@ public class TimedAddItem {
 	class AddItemTask extends TimerTask {
 		@Override
 		public void run() {
-			float pitch = 1.0F;
-			if (("random.pop").equals(sound)) {
-				pitch = ((player.worldObj.rand.nextFloat() - player.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F;
+			if (sound != null) {
+				float pitch = 1.0F;
+				if (("random.pop").equals(sound)) {
+					pitch = ((player.worldObj.rand.nextFloat() - player.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F;
+				}
+				PlayerUtils.playSound(player, sound, 1.0F, pitch);
 			}
-			PlayerUtils.playSound(player, sound, 1.0F, pitch);
 			PlayerUtils.addItemToInventory(player, stack);
 			timer.cancel();
 		}
