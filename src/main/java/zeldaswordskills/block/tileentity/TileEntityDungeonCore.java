@@ -493,7 +493,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				dungeonType = BossType.values()[tag.getInteger("dungeonType") % BossType.values().length];
 			}
 			isOpened = tag.getBoolean("isOpened");
-			if (tag.getBoolean("hasBossBattle")) {
+			if (dungeonType == null) {
+				ZSSMain.logger.error(String.format("Error retrieving Boss Type from string %s while loading Dungeon Core from NBT at %d/%d/%d", tag.getString("dungeonName"), xCoord, yCoord, zCoord));
+			} else if (tag.getBoolean("hasBossBattle")) {
 				bossBattle = dungeonType.getBossBattle(this);
 				if (bossBattle != null) {
 					bossBattle.readFromNBT(tag);
