@@ -278,6 +278,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 
 	@Override
 	public boolean attackEntityAsMob(Entity entity) {
+		attackTime = 20;
 		float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int i = 0;
 
@@ -314,10 +315,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	protected void attackEntity(Entity entity, float distance) {
 		if (attackTime <= 0) {
 			if (distance < 2.0F && entity.boundingBox.maxY > boundingBox.minY && entity.boundingBox.minY < boundingBox.maxY) {
-				attackTime = 20;
 				attackEntityAsMob(entity);
 			} else if (rand.nextInt(60) == 0 && entity instanceof EntityLivingBase) {
-				attackTime = 20;
+				attackTime = rand.nextInt(20) + rand.nextInt(20) + 20;
 				float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 				Entity projectile;
 				int difficulty = worldObj.difficultySetting.getDifficultyId();
