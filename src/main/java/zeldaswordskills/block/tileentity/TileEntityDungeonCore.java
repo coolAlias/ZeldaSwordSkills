@@ -503,7 +503,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 		if (isBossRoom) {
 			dungeonType = BossType.getBossType(tag.getString("dungeonName"));
 			isOpened = tag.getBoolean("isOpened");
-			if (tag.getBoolean("hasBossBattle")) {
+			if (dungeonType == null) {
+				ZSSMain.logger.error(String.format("Error retrieving Boss Type from string %s while loading Dungeon Core from NBT at %d/%d/%d", tag.getString("dungeonName"), pos.getX(), pos.getY(), pos.getZ()));
+			} else if (tag.getBoolean("hasBossBattle")) {
 				bossBattle = dungeonType.getBossBattle(this);
 				if (bossBattle != null) {
 					bossBattle.readFromNBT(tag);
