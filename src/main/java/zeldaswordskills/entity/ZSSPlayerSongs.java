@@ -31,7 +31,6 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
@@ -370,7 +369,7 @@ public class ZSSPlayerSongs
 			for (int i = 0; i < scarecrowNotes.size(); ++i) {
 				notes[i] = scarecrowNotes.get(i).ordinal();
 			}
-			compound.setTag("ScarecrowNotes", new NBTTagIntArray(notes));
+			compound.setIntArray("ScarecrowNotes", notes);
 		}
 
 		compound.setLong("ScarecrowTime", scarecrowTime);
