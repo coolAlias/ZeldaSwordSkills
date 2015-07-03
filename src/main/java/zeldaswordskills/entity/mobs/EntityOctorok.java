@@ -299,7 +299,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	 * Attack entity with ranged attack
 	 */
 	protected void attackEntityWithRangedAttack(EntityLivingBase entity) {
-		attackTime = 20;
+		attackTime = rand.nextInt(20) + rand.nextInt(20) + 20;
 		float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		Entity projectile;
 		int difficulty = worldObj.getDifficulty().getDifficultyId();
