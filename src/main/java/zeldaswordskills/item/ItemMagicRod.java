@@ -23,7 +23,6 @@ import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -104,23 +103,31 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/** Returns the current cooldown on this stack */
-	private int getCooldown(ItemStack stack) {
-		return (stack.hasTagCompound() ? stack.getTagCompound().getInteger("cooldown") : 0);
+	/**
+	 * Returns the next time this stack may be used
+	 */
+	private long getNextUseTime(ItemStack stack) {
+		return (stack.hasTagCompound() ? stack.getTagCompound().getLong("next_use") : 0);
 	}
 
-	/** Sets the cooldown on this stack */
-	private void setCooldown(ItemStack stack, int cooldown) {
+	/**
+	 * Sets the next time this stack may be used to the current world time plus a number of ticks
+	 */
+	private void setNextUseTime(ItemStack stack, World world, int ticks) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("cooldown", cooldown);
+		stack.getTagCompound().setLong("next_use", (world.getWorldTime() + ticks));
 	}
 
-	/** Returns whether the rod has absorbed its associated sacred flame */
+	/**
+	 * Returns whether the rod has absorbed its associated sacred flame
+	 */
 	private boolean hasAbsorbedFlame(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getBoolean("absorbedFlame"));
 	}
 
-	/** Returns true if the rod is upgraded to the 'Nice' version */
+	/**
+	 * Returns true if the rod is upgraded to the 'Nice' version
+	 */
 	private boolean isUpgraded(ItemStack stack) {
 		return (stack.hasTagCompound() && stack.getTagCompound().getBoolean("isUpgraded"));
 	}
@@ -143,7 +150,7 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (player.capabilities.isCreativeMode || (getCooldown(stack) == 0 && player.getFoodStats().getFoodLevel() > 0)) {
+		if (player.capabilities.isCreativeMode || (world.getWorldTime() > getNextUseTime(stack) && player.getFoodStats().getFoodLevel() > 0)) {
 			player.swingItem();
 			if (player.isSneaking()) {
 				boolean isUpgraded = isUpgraded(stack);
@@ -160,7 +167,7 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 				}
 				player.addExhaustion(fatigue);
 				if (!player.capabilities.isCreativeMode) {
-					setCooldown(stack, 30);
+					setNextUseTime(stack, world, 30);
 				}
 			} else {
 				player.addExhaustion(fatigue / 8.0F);
@@ -174,13 +181,6 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 			player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 		}
 		return stack;
-	}
-
-	@Override
-	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (getCooldown(stack) > 0) {
-			setCooldown(stack, getCooldown(stack) - 1);
-		}
 	}
 
 	@Override
