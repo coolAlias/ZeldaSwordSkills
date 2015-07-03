@@ -30,7 +30,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import zeldaswordskills.block.IDungeonBlock;
+import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -151,7 +151,7 @@ public class EntityNavi extends EntityFairy implements IEntityOwnable
 		for (int i = x - r; i <= x + r && search; ++i) {
 			for (int j = y - ry; j <= y + ry && search; ++j) {
 				for (int k = z - r; k <= z + r && search; ++k) {
-					if (worldObj.getBlockState(new BlockPos(i, j, k)).getBlock() instanceof IDungeonBlock) {
+					if (worldObj.getBlockState(new BlockPos(i, j, k)).getBlock() instanceof BlockSecretStone) {
 						double d = owner.getDistanceSq((double) i + 0.5D, (double) j + 0.5D, (double) k + 0.5D);
 						if (d <= r2) {
 							float f = (float)(Math.sqrt(d) / (double) r);
