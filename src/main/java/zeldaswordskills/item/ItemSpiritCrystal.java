@@ -37,6 +37,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
@@ -50,6 +51,7 @@ import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.WarpPoint;
 import zeldaswordskills.util.WorldUtils;
 
 /**
@@ -291,10 +293,10 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	 */
 	private int handleFarore(ItemStack stack, World world, EntityPlayer player) {
 		if (canUse(stack)) {
-			double[] coordinates = getRecallCoordinates(stack);
-			if (coordinates != null) {
-				if (getDimension(stack) == player.worldObj.provider.getDimensionId()) {
-					player.setPositionAndUpdate(coordinates[0], coordinates[1], coordinates[2]);
+			WarpPoint warp = recall(stack);
+			if (warp != null) {
+				if (warp.dimensionId == player.worldObj.provider.getDimensionId()) {
+					player.setPositionAndUpdate(warp.pos.getX() + 0.5D, warp.pos.getY() + 0.5D, warp.pos.getZ() + 0.5D);
 					player.playSound(Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 					return costToUse;
 				} else {
@@ -328,37 +330,31 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	}
 
 	/**
-	 * Saves the player's current position and dimension into Farore's Wind
+	 * Saves the player's current position and dimension for Farore's Wind
 	 */
 	private void mark(ItemStack stack, World world, EntityPlayer player) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("zssFWdimension", world.provider.getDimensionId());
-		stack.getTagCompound().setDouble("zssFWposX", player.posX);
-		stack.getTagCompound().setDouble("zssFWposY", player.posY);
-		stack.getTagCompound().setDouble("zssFWposZ", player.posZ);
+		WarpPoint warp = new WarpPoint(world.provider.getDimensionId(), new BlockPos(player));
+		stack.getTagCompound().setTag("zssRecallPoint", warp.writeToNBT());
 		world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 	}
 
 	/**
-	 * Returns the dimension of the stored coordinates
+	 * Returns the saved warp coordinates for Farore's Wind
 	 */
-	private int getDimension(ItemStack stack) {
-		return (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssFWdimension") ?
-				stack.getTagCompound().getInteger("zssFWdimension") : Integer.MAX_VALUE);
-	}
-
-	/**
-	 * Returns the saved coordinates from Farore's Wind, or null if no position was marked
-	 */
-	private double[] getRecallCoordinates(ItemStack stack) {
-		double[] coordinates = null;
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssFWposX")) {
-			coordinates = new double[3];
-			coordinates[0] = stack.getTagCompound().getDouble("zssFWposX");
-			coordinates[1] = stack.getTagCompound().getDouble("zssFWposY");
-			coordinates[2] = stack.getTagCompound().getDouble("zssFWposZ");
+	private WarpPoint recall(ItemStack stack) {
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssRecallPoint", Constants.NBT.TAG_COMPOUND)) {
+			return WarpPoint.readFromNBT(stack.getTagCompound().getCompoundTag("zssRecallPoint"));
 		}
-		return coordinates;
+		// for backwards compatibility:
+		else if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssFWdimension")) {
+			int dimension = stack.getTagCompound().getInteger("zssFWdimension");
+			double x = stack.getTagCompound().getDouble("zssFWposX");
+			double y = stack.getTagCompound().getDouble("zssFWposY");
+			double z = stack.getTagCompound().getDouble("zssFWposZ");
+			return new WarpPoint(dimension, new BlockPos(x, y, z));
+		}
+		return null;
 	}
 
 	@Override
