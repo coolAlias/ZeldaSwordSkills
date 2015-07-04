@@ -41,6 +41,7 @@ import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.client.render.block.RenderSpecialCrop;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
@@ -140,7 +141,10 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 			world.setBlockMetadataWithNotify(x, y, z, 15, 2);
 			world.scheduleBlockUpdate(x, y, z, this, 5);
 		} else if (meta < 7) {
-			super.onBlockExploded(world, x, y, z, explosion);
+			Entity exploder = (explosion instanceof CustomExplosion ? ((CustomExplosion) explosion).exploder : null);
+			if (!(exploder instanceof IEntityBomb) || ((IEntityBomb) exploder).getType() != BombType.BOMB_FLOWER) {
+				super.onBlockExploded(world, x, y, z, explosion);
+			}
 		}
 		// meta 8+ do nothing, these will explode on their own next update tick
 	}
