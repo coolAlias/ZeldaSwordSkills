@@ -49,6 +49,7 @@ import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.entity.projectile.EntityWhip;
@@ -143,7 +144,10 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 			world.setBlockState(pos, state.withProperty(EXPLODE, Boolean.valueOf(true)), 2);
 			world.scheduleUpdate(pos, this, 5);
 		} else {
-			super.onBlockExploded(world, pos, explosion);
+			Entity exploder = (explosion instanceof CustomExplosion ? ((CustomExplosion) explosion).exploder : null);
+			if (!(exploder instanceof IEntityBomb) || ((IEntityBomb) exploder).getType() != BombType.BOMB_FLOWER) {
+				super.onBlockExploded(world, pos, explosion);
+			}
 		}
 	}
 
