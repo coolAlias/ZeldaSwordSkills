@@ -25,6 +25,7 @@ import net.minecraft.stats.Achievement;
 import net.minecraftforge.common.AchievementPage;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
+import zeldaswordskills.item.ItemBrokenSword;
 import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
@@ -153,7 +154,7 @@ public class ZSSAchievements
 		fairyBoomerang = new Achievement("fairy.boomerang", "zss.fairy.boomerang", dx - 2, dy + 4, ZSSItems.boomerangMagic, skillHeartBar).setSpecial().registerAchievement();
 
 		// HEART->BIGGORON TREE
-		swordBroken = new Achievement("sword.broken", "zss.sword.broken", dx + 3, dy + 4, new ItemStack(ZSSItems.swordBroken, 1, Item.getIdFromItem(ZSSItems.swordGiant)), skillHeartBar).registerAchievement();
+		swordBroken = new Achievement("sword.broken", "zss.sword.broken", dx + 3, dy + 4, ItemBrokenSword.getBrokenSwordFor(ZSSItems.swordGiant), skillHeartBar).registerAchievement();
 		treasureFirst = new Achievement("treasure.first", "zss.treasure.first", dx + 3, dy + 6, new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal()), swordBroken).registerAchievement();
 		treasureSecond = new Achievement("treasure.second", "zss.treasure.second", dx + 3, dy + 8, new ItemStack(ZSSItems.treasure, 1, Treasures.POCKET_EGG.ordinal()), treasureFirst).registerAchievement();
 		treasureBiggoron = new Achievement("treasure.biggoron", "zss.treasure.biggoron", dx + 1, dy + 8, ZSSItems.swordBiggoron, treasureSecond).setSpecial().registerAchievement();
