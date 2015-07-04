@@ -293,7 +293,7 @@ public class RoomSecret extends RoomBase
 		case WEST: x = bBox.minX; break;
 		default: // UP and DOWN not possible
 		}
-		world.setBlockState(new BlockPos(x, y, z), door.getDefaultState(), 2);
+		world.setBlockState(new BlockPos(x, y, z), door.getStateFromMeta(doorMeta), 2);
 		doorMeta = (door instanceof BlockDoorLocked ? (doorMeta | 8) : doorMeta); // upper part of door
 		world.setBlockState(new BlockPos(x, y + 1, z), (door instanceof BlockPeg ? Blocks.air.getDefaultState() : door.getStateFromMeta(doorMeta)), 2);
 	}
