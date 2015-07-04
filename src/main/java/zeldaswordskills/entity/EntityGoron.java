@@ -214,6 +214,25 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 	}
 
 	@Override
+	public boolean interact(EntityPlayer player) {
+		if (worldObj.isRemote) {
+			return super.interact(player);
+		}
+		boolean isDarunia = ("Darunia").equals(getCustomNameTag());
+		boolean isCured = ZSSPlayerSongs.get(player).hasCuredNpc("Darunia");
+		if ((isDarunia && !isCured) || rand.nextInt(4) == 0) {
+			String chat = (("Darunia").equals(getCustomNameTag()) ? "chat.zss.darunia." : "chat.zss.goron.");
+			if (isCured) {
+				PlayerUtils.sendTranslatedChat(player, chat + "cured." + rand.nextInt(4));
+			} else {
+				PlayerUtils.sendTranslatedChat(player, chat + "depressed." + rand.nextInt(4));
+			}
+			return true;
+		}
+		return super.interact(player);
+	}
+
+	@Override
 	public boolean attackEntityAsMob(Entity entity) {
 		if (attackTime > 0) {
 			return false;
@@ -310,9 +329,9 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 
 	@Override
 	public boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
-		if (song == ZeldaSongs.songSaria) {
+		if (("Darunia").equals(getCustomNameTag())) {
 			playLivingSound();
-			if (("Darunia").equals(getCustomNameTag())) {
+			if (song == ZeldaSongs.songSaria) {
 				if (ZSSPlayerSongs.get(player).hasCuredNpc("Darunia")) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");
 				} else if (power < 5) {
@@ -327,8 +346,18 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");
 				}
-			} else if (affected == 0) {
+			} else if (ZSSPlayerSongs.get(player).hasCuredNpc("Darunia")) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.darunia.cured.wrong");
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.darunia.wrong");
+			}
+			return true;
+		} else if (song == ZeldaSongs.songSaria && affected == 0) {
+			playLivingSound();
+			if (ZSSPlayerSongs.get(player).hasCuredNpc("Darunia")) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.goron");
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.goron.depressed");
 			}
 			return true;
 		}
