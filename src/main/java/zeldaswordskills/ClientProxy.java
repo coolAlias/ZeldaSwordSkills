@@ -50,6 +50,7 @@ import zeldaswordskills.item.IModItem;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
 import com.google.common.collect.Maps;
 
@@ -85,6 +86,7 @@ public class ClientProxy extends CommonProxy
 	public void init() {
 		registerRenderers();
 		ZSSEntities.registerRenderers();
+		AntiqueAtlasHelper.registerTextures();
 		Object o = ReflectionHelper.getPrivateValue(EffectRenderer.class, Minecraft.getMinecraft().effectRenderer, 6);
 		if (o instanceof Map) {
 			particleFactoryMap = (Map<Integer, IParticleFactory>) o;

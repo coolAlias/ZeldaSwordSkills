@@ -28,8 +28,10 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
+import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
 /**
  * 
@@ -146,7 +148,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 	 * Updates the structure map and adds the appropriate nbt compound to the room data
 	 */
 	protected void onStructureGenerated(World world, RoomBoss room) {
-		// TODO AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + room.getBossType().ordinal(), room.chunkX, room.chunkZ);
+		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + room.getBossType().ordinal(), room.chunkX, room.chunkZ);
 		structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(room.chunkX, room.chunkZ)), room.getBossType().ordinal());
 		NBTTagCompound compound = new NBTTagCompound();
 		compound.setInteger("bossType", room.getBossType().ordinal());

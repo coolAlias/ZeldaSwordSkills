@@ -21,6 +21,12 @@ version = "3.0.2"
 group = "com.google.coolalias.zeldaswordskills" 
 archivesBaseName = "1.8-zeldaswordskills"
 
+dependencies {
+	compile files (
+		"eclipse/libs/antiqueatlas-4.2.4-1.8-deobf.jar",
+	)
+}
+
 minecraft {
     version = "1.8-11.14.3.1464"
     runDir = "eclipse"

@@ -17,6 +17,8 @@
 
 package zeldaswordskills.world.gen;
 
+import hunternif.mc.atlas.api.AtlasAPI;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -44,7 +46,7 @@ public class AntiqueAtlasHelper
 	public static void placeCustomTile(World world, String tileName, int chunkX, int chunkZ) {
 		if (ZSSMain.isAtlasEnabled && !world.isRemote) {
 			try {
-				// TODO AtlasAPI.getTileAPI().putCustomGlobalTile(world, tileName, chunkX, chunkZ);
+				AtlasAPI.getTileAPI().putCustomGlobalTile(world, tileName, chunkX, chunkZ);
 			} catch (Exception e) {
 				ZSSMain.logger.error("Unable to add Atlas data: " + e.getLocalizedMessage());
 			}
@@ -60,8 +62,8 @@ public class AntiqueAtlasHelper
 			try {
 				for (BossType type : BossType.values()) {
 					String name = ModInfo.ATLAS_DUNGEON_ID + type.ordinal();
-					// TODO AtlasAPI.getTileAPI().setCustomTileTexture(name, new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + ".png"));
-					// AtlasAPI.getTileAPI().setCustomTileTexture(name + "_fin", new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + "_fin.png"));
+					AtlasAPI.getTileAPI().setCustomTileTexture(name, new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + ".png"));
+					AtlasAPI.getTileAPI().setCustomTileTexture(name + "_fin", new ResourceLocation(ModInfo.ID, "textures/atlas/" + name + "_fin.png"));
 				}
 			} catch (Exception e) {
 				ZSSMain.logger.error(e.getLocalizedMessage());
