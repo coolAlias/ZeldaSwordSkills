@@ -47,13 +47,13 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityLootable;
-import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ai.EntityAINearestAttackableTargetNight;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
 import zeldaswordskills.entity.ai.EntityAITeleport;
+import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.entity.ai.IMagicUser;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
@@ -548,7 +548,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 
 	@Override
 	public boolean getCanSpawnHere() {
-		return !worldObj.isDaytime() && super.getCanSpawnHere();
+		return !worldObj.isDaytime() && super.getCanSpawnHere() && worldObj.getWorldTime() > Config.getTimeToSpawnWizzrobe();
 	}
 
 	@Override
