@@ -84,19 +84,14 @@ public class ItemBombBag extends Item implements IUnenchantable
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (!player.isSneaking() || !increaseCapacity(player, stack)) {
-			if (player.capabilities.isCreativeMode || removeBomb(stack)) {
-				if (!player.inventory.addItemStackToInventory(stack)) {
-					player.dropPlayerItemWithRandomChoice(stack, false);
-				}
-				int type = getBagBombType(stack);
-				return new ItemStack(ZSSItems.bomb, 1, (type > 0 ? type : 0));
-			} else {
-				return stack;
+		if (player.capabilities.isCreativeMode || removeBomb(stack)) {
+			if (!player.inventory.addItemStackToInventory(stack)) {
+				player.dropPlayerItemWithRandomChoice(stack, false);
 			}
-		} else {
-			return stack;
+			int type = getBagBombType(stack);
+			return new ItemStack(ZSSItems.bomb, 1, (type > 0 ? type : 0));
 		}
+		return stack;
 	}
 
 	@Override
@@ -181,15 +176,21 @@ public class ItemBombBag extends Item implements IUnenchantable
 
 	/**
 	 * Attempts to add an amount of bombs to the bag, returning any that wouldn't fit
-	 * @return the number of bombs that wouldn't fit, if any (usually returns a negative value)
+	 * @param amount can be either positive or negative
+	 * @return the number of bombs that could not be added / removed, if any
 	 */
-	private int addBombs(ItemStack stack, int amount) {
-		int bombs = getBombsHeld(stack);
-		if (bombs <= getCapacity(stack)) {
-			verifyNBT(stack);
-			stack.getTagCompound().setInteger("bombs", Math.min(bombs + amount, getCapacity(stack)));
+	public int addBombs(ItemStack stack, int amount) {
+		int bombs = getBombsHeld(stack) + amount;
+		if (amount < 0) {
+			stack.getTagCompound().setInteger("bombs", Math.max(0, bombs));
+			if (bombs < 1) {
+				setBagBombType(stack, -1);
+			}
+			return -Math.min(0, bombs);
 		}
-		return (amount - (getCapacity(stack) - bombs));
+		int capacity = getCapacity(stack);
+		stack.getTagCompound().setInteger("bombs", Math.min(bombs, capacity));
+		return -Math.min(0, capacity - bombs);
 	}
 
 	/**
@@ -230,13 +231,12 @@ public class ItemBombBag extends Item implements IUnenchantable
 		if (type < 0 || n < 1) { return; }
 		ItemStack newBag = new ItemStack(ZSSItems.bombBag);
 		setCapacity(newBag, getCapacity(stack));
-
 		if (player.inventory.addItemStackToInventory(newBag)) {
 			player.setCurrentItemOrArmor(0, null);
 			while (n-- > 0) {
-				ItemStack bomb = new ItemStack(ZSSItems.bomb,1,type);
+				ItemStack bomb = new ItemStack(ZSSItems.bomb, 1, type);
 				if (!player.inventory.addItemStackToInventory(bomb)) {
-					WorldUtils.spawnItemWithRandom(player.worldObj, bomb, (int) player.posX, (int) player.posY, (int) player.posZ);
+					WorldUtils.spawnItemWithRandom(player.worldObj, bomb, player.posX, player.posY, player.posZ);
 				}
 			}
 		}
@@ -252,7 +252,7 @@ public class ItemBombBag extends Item implements IUnenchantable
 	/**
 	 * Returns either the true NBT capacity for this bag, or the adjusted max capacity
 	 */
-	private int getCapacity(ItemStack stack, boolean trueCapacity) {
+	public int getCapacity(ItemStack stack, boolean trueCapacity) {
 		int capacity = (stack.hasTagCompound() ? Math.max(BASE_CAPACITY, stack.getTagCompound().getInteger("capacity")) : BASE_CAPACITY);
 		int type = getBagBombType(stack);
 		return (trueCapacity || type == -1 || type == BombType.BOMB_STANDARD.ordinal()) ? capacity : capacity / 2;
@@ -261,7 +261,7 @@ public class ItemBombBag extends Item implements IUnenchantable
 	/**
 	 * Set's the stacks capacity to 'size' or MAX_CAPACITY, whichever is smaller
 	 */
-	private void setCapacity(ItemStack stack, int size) {
+	public void setCapacity(ItemStack stack, int size) {
 		verifyNBT(stack);
 		stack.getTagCompound().setInteger("capacity", Math.min(size, MAX_CAPACITY));
 	}
@@ -289,7 +289,7 @@ public class ItemBombBag extends Item implements IUnenchantable
 	/**
 	 * Sets the bags current type
 	 */
-	private void setBagBombType(ItemStack bag, int type) {
+	public void setBagBombType(ItemStack bag, int type) {
 		verifyNBT(bag);
 		bag.getTagCompound().setInteger("type", type);
 	}
@@ -312,33 +312,13 @@ public class ItemBombBag extends Item implements IUnenchantable
 	}
 
 	/**
-	 * Attempts to increase the capacity of the bomb bag by combining with another other bomb
-	 * bag in the player's inventory, adding the contents as well
-	 * @param player player using the itemstack
-	 * @param stack itemstack that was used
-	 * @return true if itemstack's capacity increased
+	 * Returns true if the two stacks can be combined into one bomb bag with increased capacity
 	 */
-	private boolean increaseCapacity(EntityPlayer player, ItemStack stack) {
-		int capacity = getCapacity(stack, true);
-		if (capacity < MAX_CAPACITY) {
-			for (int i = 0; i < player.inventory.getSizeInventory(); ++i) {
-				ItemStack invStack = player.inventory.getStackInSlot(i);
-				if (invStack != null && invStack != stack && areMatchingTypes(stack, invStack, false)) {
-					int newCapacity = capacity + getCapacity(invStack, true);
-					if (newCapacity <= MAX_CAPACITY) {
-						setCapacity(stack, newCapacity);
-						addBombs(stack, getBombsHeld(invStack));
-						if (getBagBombType(stack) == -1) {
-							setBagBombType(stack, getBagBombType(invStack));
-						}
-						player.inventory.setInventorySlotContents(i, null);
-						break;
-					}
-				}
-			}
+	public boolean canCombine(ItemStack bag, ItemStack stack) {
+		if (stack == null || stack == bag || !areMatchingTypes(bag, stack, false)) {
+			return false;
 		}
-
-		return getCapacity(stack, true) > capacity;
+		return (getCapacity(bag, true) + getCapacity(stack, true)) <= MAX_CAPACITY;
 	}
 
 	/**
