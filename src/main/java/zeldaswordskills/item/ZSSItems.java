@@ -75,6 +75,8 @@ import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.item.ItemInstrument.Instrument;
+import zeldaswordskills.item.crafting.RecipeBagToBombArrows;
+import zeldaswordskills.item.crafting.RecipeCombineBombBag;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -714,6 +716,8 @@ public class ZSSItems
 			GameRegistry.addShapelessRecipe(new ItemStack(throwingRock, 9), Blocks.cobblestone);
 			GameRegistry.addRecipe(new ItemStack(Blocks.cobblestone), "rrr", "rrr", "rrr", 'r', throwingRock);
 		}
+		GameRegistry.addRecipe(new RecipeBagToBombArrows());
+		GameRegistry.addRecipe(new RecipeCombineBombBag());
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq", "qpq", "qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b", "b", "b", 'b', Blocks.planks);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.gossipStone), " s ", "sos", " s ", 's', Blocks.stone, 'o', new ItemStack(ZSSItems.instrument, 1, Instrument.OCARINA_FAIRY.ordinal()));
