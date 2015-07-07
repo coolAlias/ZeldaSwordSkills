@@ -17,6 +17,10 @@
 
 package zeldaswordskills.entity.mobs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -44,11 +48,22 @@ import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.TargetUtils;
 
 // TODO switch attack logic to use AI system
 public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootable, IEntityVariant
 {
+	/**
+	 * Returns array of default biomes in which this entity may spawn naturally
+	 */
+	public static String[] getDefaultBiomes() {
+		List<String> biomes = new ArrayList<String>();
+		biomes.addAll(Arrays.asList(BiomeType.BEACH.defaultBiomes));
+		biomes.addAll(Arrays.asList(BiomeType.OCEAN.defaultBiomes));
+		return biomes.toArray(new String[biomes.size()]);
+	}
+
 	/** Squid type data watcher index (skeleton's use 13) */
 	private static final int OCTOROK_TYPE_INDEX = 13;
 

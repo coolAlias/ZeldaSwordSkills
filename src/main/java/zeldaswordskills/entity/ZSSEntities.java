@@ -212,7 +212,7 @@ public class ZSSEntities
 		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
 		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
 		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
-		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
+		addSpawnLocations(EntityOctorok.class, EntityOctorok.getDefaultBiomes());
 		addSpawnLocations(EntitySkulltula.class, EntitySkulltula.getDefaultBiomes());
 		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
 	}
