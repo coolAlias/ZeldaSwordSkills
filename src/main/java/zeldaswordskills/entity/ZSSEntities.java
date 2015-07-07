@@ -27,6 +27,8 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLiving.SpawnPlacementType;
+import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
@@ -236,24 +238,31 @@ public class ZSSEntities
 		// NATURALLY SPAWNING MOBS
 		EntityRegistry.registerModEntity(EntityDarknut.class, "darknut", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityDarknut.class, "darknut", 0x1E1E1E, 0x8B2500, 0x1E1E1E, 0xFB2500);
+		EntitySpawnPlacementRegistry.setPlacementType(EntityDarknut.class, SpawnPlacementType.ON_GROUND);
 
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 80, 0xADFF2F, 0xFFFF00);
+		EntitySpawnPlacementRegistry.setPlacementType(EntityFairy.class, SpawnPlacementType.ON_GROUND);
 		EntityRegistry.registerModEntity(EntityNavi.class, "navi", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 
 		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
+		EntitySpawnPlacementRegistry.setPlacementType(EntityChu.class, SpawnPlacementType.ON_GROUND);
 
 		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityKeese.class, "keese", 0x000000, 0x555555, 0x000000, 0xFF4500, 0x000000, 0x40E0D0, 0x000000, 0xFFD700, 0x000000, 0x800080);
+		EntitySpawnPlacementRegistry.setPlacementType(EntityKeese.class, SpawnPlacementType.ON_GROUND);
 
 		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
+		EntitySpawnPlacementRegistry.setPlacementType(EntityOctorok.class, SpawnPlacementType.IN_WATER);
 
 		EntityRegistry.registerModEntity(EntitySkulltula.class, "skulltula", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntitySkulltula.class, "skulltula", 0x080808, 0xFFFF00, 0x080808, 0xE68A00);
+		EntitySpawnPlacementRegistry.setPlacementType(EntitySkulltula.class, SpawnPlacementType.ON_GROUND);
 
 		EntityRegistry.registerModEntity(EntityWizzrobe.class, "wizzrobe", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityWizzrobe.class, "wizzrobe", 0x8B2500, 0xFF0000, 0x8B2500, 0x00B2EE, 0x8B2500, 0xEEEE00, 0x8B2500, 0x00EE76);
+		EntitySpawnPlacementRegistry.setPlacementType(EntityWizzrobe.class, SpawnPlacementType.ON_GROUND);
 
 		// BOSSES
 		registerEntity(EntityBlackKnight.class, "darknut_boss", ++modEntityIndex, 80, 0x1E1E1E, 0x000000);
@@ -261,6 +270,7 @@ public class ZSSEntities
 
 		// NPCS
 		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 80, 0xB8860B, 0x8B5A00);
+		EntitySpawnPlacementRegistry.setPlacementType(EntityGoron.class, SpawnPlacementType.ON_GROUND);
 		registerEntity(EntityNpcBarnes.class, "npc.barnes", ++modEntityIndex, 80, 0x8B8378, 0xED9121);
 		registerEntity(EntityNpcMaskTrader.class, "npc.mask_trader", ++modEntityIndex, 80, 0x0000EE, 0x00C957);
 		registerEntity(EntityNpcOrca.class, "npc.orca", ++modEntityIndex, 80, 0x0000EE, 0x9A32CD);
