@@ -47,6 +47,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.ILiftable;
@@ -152,9 +153,21 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 		}
 	}
 
+	// TODO remove if Mojang's stupid code ever gets fixed
+	@Override
+	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+		if (!((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue()) {
+			super.onBlockExploded(world, pos, explosion);
+		}
+	}
+
 	@Override
 	public float getExplosionResistance(World world, BlockPos pos, Entity entity, Explosion explosion) {
-		return (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
+		IBlockState state = world.getBlockState(pos);
+		if (state.getBlock() != this) {
+			return state.getBlock().getExplosionResistance(world, pos, entity, explosion);
+		}
+		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
 	}
 
 	@Override

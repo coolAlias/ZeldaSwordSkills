@@ -118,9 +118,21 @@ public class BlockPedestal extends Block implements IBlockItemVariant, ICustomSt
 		return (((Boolean) world.getBlockState(pos).getValue(UNLOCKED)).booleanValue() ? blockHardness : -1.0F);
 	}
 
+	// TODO remove if Mojang's stupid code ever gets fixed
+	@Override
+	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
+		if (((Boolean) world.getBlockState(pos).getValue(UNLOCKED)).booleanValue()) {
+			super.onBlockExploded(world, pos, explosion);
+		}
+	}
+
 	@Override
 	public float getExplosionResistance(World world, BlockPos pos, Entity entity, Explosion explosion) {
-		return (((Boolean) world.getBlockState(pos).getValue(UNLOCKED)).booleanValue() ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
+		IBlockState state = world.getBlockState(pos);
+		if (state.getBlock() != this) {
+			return state.getBlock().getExplosionResistance(world, pos, entity, explosion);
+		}
+		return (((Boolean) state.getValue(UNLOCKED)).booleanValue() ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 
 	@Override
