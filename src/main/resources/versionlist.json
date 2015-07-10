@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8",
-			"modVersion":"3.0.2",
+			"modVersion":"3.0.3",
 			"changeLog": [
-	               "Lots of bug fixes; Skulltulas",
+	               "Antique Atlas support; lots of bug fixes",
 	               "See main mod page for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
