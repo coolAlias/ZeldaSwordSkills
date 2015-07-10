@@ -17,13 +17,13 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "2.2.7"
+version = "2.2.8"
 group = "com.google.coolalias.zeldaswordskills" 
 archivesBaseName = "1.7.10-zeldaswordskills"
 
 dependencies {
 	compile files (
-		"eclipse/libs/antiqueatlas-4.2.1-1.7.10-deobf.jar",
+		"eclipse/libs/antiqueatlas-4.2.4-1.7.10-deobf.jar",
 		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.7.0.jar"
 	)
 }
