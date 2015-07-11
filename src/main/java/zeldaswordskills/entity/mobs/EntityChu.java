@@ -238,8 +238,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 
 	/** Returns max time affected entities will be stunned when shocked */
 	protected int getMaxStunTime() {
-		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
-		return (getSlimeSize() * MathHelper.floor_double(f * 10));
+		return (getSlimeSize() * worldObj.getDifficulty().getDifficultyId() * 10);
 	}
 
 	/** Random interval between shocks */
@@ -617,8 +616,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		if (getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
 			EntityPlayer player = worldObj.getClosestPlayerToEntity(this, 16.0D);
 			if (player != null && (recentlyHit > 0 || rand.nextInt(getShockInterval()) == 0)) {
-				float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
-				setShockTime(rand.nextInt(getSlimeSize() * 50) + MathHelper.floor_double(f * (rand.nextInt(20) + 10)));
+				setShockTime(rand.nextInt(getSlimeSize() * 50) + (worldObj.getDifficulty().getDifficultyId() * (rand.nextInt(20) + 10)));
 			}
 		}
 		if (getShockTime() % 8 > 5 && rand.nextInt(4) == 0) {

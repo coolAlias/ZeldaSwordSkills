@@ -42,7 +42,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyInstance;
@@ -270,8 +269,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public int getTotalArmorValue() {
-		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
-		return Math.min(20, super.getTotalArmorValue() + MathHelper.floor_double(2 * f));
+		return Math.min(20, super.getTotalArmorValue() + (2 * worldObj.getDifficulty().getDifficultyId()));
 	}
 
 	public boolean isWearingCape() {
@@ -301,7 +299,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
 		boolean isPlayer = source.getEntity() instanceof EntityPlayer;
-		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
+		int difficulty = worldObj.getDifficulty().getDifficultyId();
 		if (isEntityInvulnerable(source) || isSpinning()) {
 			return false;
 		} else if (source.isUnblockable() || (isPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.armorBreak))) {
@@ -317,7 +315,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 			}
 			return false;
 		} else if (source.isExplosion() && isArmored()) {
-			amount = damageDarknutArmor(amount * (1.25F - (0.25F * f)));
+			amount = damageDarknutArmor(amount * (1.25F - (0.25F * difficulty)));
 			if (amount < 0.5F) {
 				return false;
 			} // otherwise, allow extra damage to bleed through
@@ -330,7 +328,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 					// Allow attack to go through for BackSlice, otherwise it will never trigger
 					if (isPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.backSlice)) {
 						return super.attackEntityFrom(source, amount);
-					} else if (amount > (f * 2.0F)) {
+					} else if (amount > (difficulty * 2.0F)) {
 						WorldUtils.playSoundAtEntity(this, Sounds.ARMOR_BREAK, 0.4F, 0.5F);
 						damageDarknutArmor(amount * 0.5F);
 					}
@@ -538,8 +536,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	 */
 	@Override
 	public int getChargeTime() {
-		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
-		return 28 - MathHelper.floor_double(f * 5);
+		return 28 - (worldObj.getDifficulty().getDifficultyId() * 5);
 	}
 
 	@Override

@@ -24,8 +24,6 @@ import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -88,8 +86,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 
 	@Override
 	public int getTotalArmorValue() {
-		float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
-		return super.getTotalArmorValue() + MathHelper.floor_double(f * 4);
+		return super.getTotalArmorValue() + (worldObj.getDifficulty().getDifficultyId() * 4);
 	}
 
 	@Override

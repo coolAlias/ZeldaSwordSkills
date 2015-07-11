@@ -239,8 +239,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	 */
 	private DamageSource getDamageSource() {
 		if (getShockTime() > 0) {
-			float f = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
-			return new DamageSourceShock("shock", this, MathHelper.floor_double(f * 50), 1.0F);
+			return new DamageSourceShock("shock", this, worldObj.getDifficulty().getDifficultyId() * 50, 1.0F);
 		}
 		switch(getType()) {
 		case FIRE: return new EntityDamageSource("mob", this).setFireDamage();
@@ -404,8 +403,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 				setIsBatHanging(true);
 			} else if (canShock() && getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
 				if (attackingPlayer != null && ((recentlyHit > 0 && rand.nextInt(20) == 0) || rand.nextInt(300) == 0)) {
-					float difficulty = worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
-					setShockTime(rand.nextInt(50) + MathHelper.floor_double(difficulty * (rand.nextInt(20) + 10)));
+					setShockTime(rand.nextInt(50) + (worldObj.getDifficulty().getDifficultyId() * (rand.nextInt(20) + 10)));
 				}
 			}
 		}

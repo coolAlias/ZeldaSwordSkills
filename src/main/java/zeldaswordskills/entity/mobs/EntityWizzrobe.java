@@ -41,7 +41,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -406,7 +405,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		if (target == null) {
 			return 0;
 		}
-		int castTime = getBaseCastingTime() - MathHelper.floor_double((worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty() * 10));
+		int castTime = getBaseCastingTime() - (worldObj.getDifficulty().getDifficultyId() * 10);
 		castTime += (rand.nextInt(castTime) - rand.nextInt(castTime)) / 2;
 		setMaxCastingTime(castTime);
 		setCurrentCastingTime(castTime);
@@ -419,7 +418,6 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	@Override
 	public void castRangedSpell(EntityLivingBase target, float range) {
 		float difficulty = (float) worldObj.getDifficulty().getDifficultyId();
-		// TODO plus additional difficulty: worldObj.getDifficultyForLocation(new BlockPos(this)).getClampedAdditionalDifficulty();
 		EntityMagicSpell spell = new EntityMagicSpell(worldObj, this, target, 0.8F + (0.25F * difficulty), (float)(14 - (difficulty * 4)));
 		spell.setType(getMagicType());
 		spell.setArea(getSpellAoE());
