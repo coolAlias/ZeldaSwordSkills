@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -42,6 +43,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyInstance;
@@ -50,6 +52,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
+import zeldaswordskills.api.damage.IDamageAoE;
 import zeldaswordskills.api.entity.IEntityBackslice;
 import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.api.entity.IEntityLootable;
@@ -302,12 +305,17 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		int difficulty = worldObj.getDifficulty().getDifficultyId();
 		if (isEntityInvulnerable(source) || isSpinning()) {
 			return false;
+		} else if (source == DamageSource.inWall && ticksExisted > 10) {
+			breakEnclosingBlocks(); // fall through to allow damage
 		} else if (source.isUnblockable() || (isPlayer && ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.armorBreak))) {
 			if (parryAttack(source)) {
 				return false;
 			}
 			return super.attackEntityFrom(source, amount);
 		} else if (source.getEntity() == null || source.isMagicDamage()) {
+			if (isArmored() && (source == DamageSource.cactus || source == DamageSource.fallingBlock)) {
+				return false; // don't allow cacti or falling blocks to damage Darknut while armored
+			} // all other vanilla null-entity damage sources should damage Darknut; can't handle modded ones
 			return super.attackEntityFrom(source, amount);
 		} else if (isWearingCape()) {
 			if (source.isFireDamage()) {
@@ -359,12 +367,41 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	/**
+	 * Tries to break out of suffocating blocks
+	 */
+	protected void breakEnclosingBlocks() {
+		BlockPos eyePos = new BlockPos(posX, posY + getEyeHeight(), posZ);
+		boolean flag = false;
+		// smash all blocks in a 3x3x3 area around the Darknut's head
+		for (int i = -1; i < 2; ++i) {
+			for (int j = -1; j < 2; ++j) {
+				for (int k = -1; k < 2; ++k) {
+					BlockPos pos = eyePos.add(i, j, k);
+					Block block = worldObj.getBlockState(pos).getBlock();
+					float hardness = block.getBlockHardness(worldObj, pos);
+					if (block.isVisuallyOpaque() && hardness >= 0.0F && hardness < 20.0F && block.canEntityDestroy(worldObj, pos, this)) {
+						flag = true;
+						if (!worldObj.isRemote) {
+							worldObj.destroyBlock(pos, true);
+						}
+					}
+				}
+			}
+		}
+		if (flag) {
+			swingItem();
+			attackTime = 20;
+			worldObj.playSoundEffect(posX, posY, posZ, Sounds.ROCK_FALL, 1.0F, 1.0F);
+		}
+	}
+
+	/**
 	 * Returns true if the Darknut was able to parry the source of damage, and
 	 * may also disarm the attacker, if any
 	 */
 	protected boolean parryAttack(DamageSource source) {
 		Entity entity = source.getEntity();
-		if (entity == null || source.isExplosion()) {
+		if (entity == null || source.isExplosion() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
 			return false;
 		} else if (TargetUtils.isTargetInFrontOf(this, entity, 90) && rand.nextFloat() < (0.5F - (parryTimer * 0.05F))) {
 			worldObj.setEntityState(this, PARRY_FLAG);
