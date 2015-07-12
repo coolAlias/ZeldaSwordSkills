@@ -89,6 +89,8 @@ public class ZSSItems
 	/** Map Item to internal ID index for Creative Tab comparator sorting to force even old saves to have correct order */
 	private static final Map<Item, Integer> itemList = new HashMap<Item, Integer>(256);
 	private static int sortId = 0;
+	/** List of items added by other mods that are scheduled to have comparator mappings added */
+	private static final List<Item> addonItems = new ArrayList<Item>();
 	private static Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
 		public int compare(Item a, Item b) {
@@ -344,6 +346,10 @@ public class ZSSItems
 		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
 		TradeHandler.registerTrades();
+		// Register mappings for all addon items now, so ZSS items always appear first
+		for (Item item : addonItems) {
+			ZSSItems.registerItemComparatorMapping(item);
+		}
 	}
 
 	private static void addGrassDrops() {
@@ -672,11 +678,29 @@ public class ZSSItems
 	}
 
 	/**
+	 * Adds a comparator mapping for a non-ZSS item
+	 */
+	public static void addItemComparatorMapping(Item item) {
+		addonItems.add(item);
+	}
+
+	/**
+	 * Actually adds the item comparator mapping
+	 */
+	private static void registerItemComparatorMapping(Item item) {
+		if (itemList.containsKey(item)) {
+			ZSSMain.logger.warn("Item already has a comparator mapping: " + (item == null ? "NULL" : item.getUnlocalizedName()));
+		} else {
+			itemList.put(item, sortId++);
+		}
+	}
+
+	/**
 	 * Registers an ItemBlock to the item sorter for creative tabs sorting
 	 */
 	public static void registerItemBlock(Item block) {
 		if (block instanceof ItemBlock) {
-			itemList.put(block, sortId++);
+			ZSSItems.registerItemComparatorMapping(block);
 		} else {
 			ZSSMain.logger.warn("Tried to register a non-ItemBlock item for " + (block == null ? "NULL" : block.getUnlocalizedName()));
 		}
@@ -688,7 +712,7 @@ public class ZSSItems
 				if (Item.class.isAssignableFrom(f.getType())) {
 					Item item = (Item) f.get(null);
 					if (item != null) {
-						itemList.put(item, sortId++);
+						ZSSItems.registerItemComparatorMapping(item);
 						String name = item.getUnlocalizedName();
 						GameRegistry.registerItem(item, name.substring(name.lastIndexOf(".") + 1));
 						if (item instanceof ICustomDispenserBehavior) {
