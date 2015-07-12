@@ -117,7 +117,11 @@ public class BlockGiantLever extends BlockLever implements IWhipBlock
 
 	@Override
 	public float getBlockHardness(World world, BlockPos pos) {
-		return (((Boolean) world.getBlockState(pos).getValue(POWERED)).booleanValue() ? blockHardness : -1);
+		IBlockState state = world.getBlockState(pos);
+		if (state.getBlock() != this) {
+			return state.getBlock().getBlockHardness(world, pos);
+		}
+		return (((Boolean) state.getValue(POWERED)).booleanValue() ? blockHardness : -1.0F);
 	}
 
 	@Override

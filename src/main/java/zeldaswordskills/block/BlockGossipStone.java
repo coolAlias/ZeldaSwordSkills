@@ -176,7 +176,11 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 
 	@Override
 	public float getBlockHardness(World world, BlockPos pos) {
-		return (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue() ? -1.0F : blockHardness);
+		IBlockState state = world.getBlockState(pos);
+		if (state.getBlock() != this) {
+			return state.getBlock().getBlockHardness(world, pos);
+		}
+		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? -1.0F : blockHardness);
 	}
 
 	@Override

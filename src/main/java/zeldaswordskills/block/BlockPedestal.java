@@ -115,7 +115,11 @@ public class BlockPedestal extends Block implements IBlockItemVariant, ICustomSt
 
 	@Override
 	public float getBlockHardness(World world, BlockPos pos) {
-		return (((Boolean) world.getBlockState(pos).getValue(UNLOCKED)).booleanValue() ? blockHardness : -1.0F);
+		IBlockState state = world.getBlockState(pos);
+		if (state.getBlock() != this) {
+			return state.getBlock().getBlockHardness(world, pos);
+		}
+		return (((Boolean) state.getValue(UNLOCKED)).booleanValue() ? blockHardness : -1.0F);
 	}
 
 	// TODO remove if Mojang's stupid code ever gets fixed

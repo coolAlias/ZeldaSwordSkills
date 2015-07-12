@@ -82,8 +82,6 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 		GlStateManager.pushMatrix();
 		switch (cameraTransformType) {
 		case FIRST_PERSON:
-			// TODO the NBT updating causes the 1st person rendering to occur much lower than normal
-			// once that is fixed, the bomb will render too high and will need to be adjusted accordingly
 			GlStateManager.translate(0.5F, 0.5F, 0.5F);
 			GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
 			GlStateManager.translate(-0.75F, -0.5F, 0.5F);

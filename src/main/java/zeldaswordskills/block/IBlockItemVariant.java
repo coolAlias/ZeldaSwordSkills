@@ -17,6 +17,7 @@
 
 package zeldaswordskills.block;
 
+import zeldaswordskills.item.IModItem;
 
 /**
  * 

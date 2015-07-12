@@ -482,7 +482,7 @@ public class WorldUtils
 			entityitem.motionX = (-0.5F + world.rand.nextGaussian()) * f;
 			entityitem.motionY = (4 + world.rand.nextGaussian()) * f;
 			entityitem.motionZ = (-0.5F + world.rand.nextGaussian()) * f;
-			entityitem.setPickupDelay(10);
+			entityitem.setDefaultPickupDelay();
 			world.spawnEntityInWorld(entityitem);
 		}
 	}

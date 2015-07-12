@@ -137,7 +137,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
-		return (face != EnumFacing.UP && face != EnumFacing.DOWN && ((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue() < MAX_HITS);
+		return (face.getAxis().isHorizontal() && ((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue() < MAX_HITS);
 	}
 
 	@Override
