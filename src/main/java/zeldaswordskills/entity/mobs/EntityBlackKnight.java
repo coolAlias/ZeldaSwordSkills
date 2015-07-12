@@ -43,6 +43,7 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		setArmorDamage(60.0F);
+		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
 		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(300.0D);
 		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(9.0D); // unarmed
 		setWearingCape((byte) 120);
@@ -66,7 +67,6 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 	@Override
 	public void addRandomArmor() {
 		super.addRandomArmor();
-		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(Items.chainmail_helmet));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_LEGS, new ItemStack(Items.chainmail_leggings));
 		setCurrentItemOrArmor(ArmorIndex.EQUIPPED_BOOTS, new ItemStack(Items.chainmail_boots));
