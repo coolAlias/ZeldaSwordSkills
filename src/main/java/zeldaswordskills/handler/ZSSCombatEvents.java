@@ -36,6 +36,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
+import zeldaswordskills.api.damage.IDamageAoE;
 import zeldaswordskills.api.damage.IDamageType;
 import zeldaswordskills.api.damage.IPostDamageEffect;
 import zeldaswordskills.api.item.ArmorIndex;
@@ -140,10 +141,10 @@ public class ZSSCombatEvents
 			}
 		} else if (amount < 0.1F) {
 			event.setCanceled(true);
-		} else if (!event.isCanceled() && event.source.getEntity() != null) {
+		} else if (!event.isCanceled() && event.source.getEntity() != null && (!(event.source instanceof IDamageAoE) || !((IDamageAoE) event.source).isAoEDamage())) {
 			EntityLivingBase entity = event.entityLiving;
 			float evade = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
-			if (evade > 0.0F) {
+			if (evade > 0.0F && !ZSSEntityInfo.get(entity).isBuffActive(Buff.STUN)) {
 				float penalty = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_DOWN) * 0.01F;
 				if (entity.worldObj.rand.nextFloat() < evade - penalty) {
 					WorldUtils.playSoundAtEntity(entity, Sounds.SWORD_MISS, 0.4F, 0.5F);
