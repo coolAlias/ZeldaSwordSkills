@@ -148,6 +148,17 @@ public class PacketDispatcher
 	}
 
 	/**
+	 * Sends this message to players provided. SERVER->CLIENT only.
+	 */
+	public static void sendToPlayers(IMessage message, Collection<EntityPlayer> players) {
+		for (EntityPlayer player : players) {
+			if (player instanceof EntityPlayerMP) {
+				PacketDispatcher.dispatcher.sendTo(message, (EntityPlayerMP) player);
+			}
+		}
+	}
+
+	/**
 	 * Send this message to everyone.
 	 * See {@link SimpleNetworkWrapper#sendToAll(IMessage)}
 	 */
@@ -172,11 +183,11 @@ public class PacketDispatcher
 	}
 
 	/**
-	 * Sends a message to everyone within a certain range of the player provided.
+	 * Sends a message to everyone within a certain range of the entity provided.
 	 * Shortcut to {@link SimpleNetworkWrapper#sendToAllAround(IMessage, NetworkRegistry.TargetPoint)}
 	 */
-	public static final void sendToAllAround(IMessage message, EntityPlayer player, double range) {
-		PacketDispatcher.sendToAllAround(message, player.worldObj.provider.getDimensionId(), player.posX, player.posY, player.posZ, range);
+	public static final void sendToAllAround(IMessage message, Entity entity, double range) {
+		PacketDispatcher.sendToAllAround(message, entity.worldObj.provider.getDimensionId(), entity.posX, entity.posY, entity.posZ, range);
 	}
 
 	/**

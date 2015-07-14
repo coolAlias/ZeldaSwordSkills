@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.IThreadListener;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -110,14 +109,11 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements I
 	 * Ensures that the message is being handled on the main thread
 	 */
 	private static final <T extends AbstractMessage<T>> void checkThreadAndEnqueue(final AbstractMessage<T> msg, final MessageContext ctx) {
-		IThreadListener thread = ZSSMain.proxy.getThreadFromContext(ctx);
-		if (!thread.isCallingFromMinecraftThread()) {
-			thread.addScheduledTask(new Runnable() {
-				public void run() {
-					msg.process(ZSSMain.proxy.getPlayerEntity(ctx), ctx.side);
-				}
-			});
-		}
+		ZSSMain.proxy.getThreadFromContext(ctx).addScheduledTask(new Runnable() {
+			public void run() {
+				msg.process(ZSSMain.proxy.getPlayerEntity(ctx), ctx.side);
+			}
+		});
 	}
 
 	/**

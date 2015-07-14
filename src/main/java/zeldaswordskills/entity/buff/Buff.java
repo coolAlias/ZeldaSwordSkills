@@ -60,7 +60,7 @@ public enum Buff
 	/** Multiplies stun time by a factor of (1.0F - (amplifier * 0.01F)) */
 	RESIST_STUN("buff.zss.resist_stun", false, 6),
 	/** Prevents affected entity from acting for the duration */
-	STUN("buff.zss.stun", true, false, 6),
+	STUN("buff.zss.stun", true, false, 6, true),
 	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
 	WEAKNESS_COLD("buff.zss.weakness_cold", true, 2),
 	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
@@ -81,16 +81,23 @@ public enum Buff
 	public final boolean displayArrow;
 	/** Icon's texture sheet index; 0 and 1 are the buff and debuff icons */
 	public final int iconIndex;
+	/** Whether this Buff needs to be synchronized to the client(s) when applied to non-player entities */
+	public final boolean syncNonPlayerEntity;
 
 	private Buff(String name, boolean isDebuff, int index) {
 		this(name, isDebuff, true, index);
 	}
 
 	private Buff(String name, boolean isDebuff, boolean displayArrow, int index) {
+		this(name, isDebuff, displayArrow, index, false);
+	}
+
+	private Buff(String name, boolean isDebuff, boolean displayArrow, int index, boolean syncNonPlayerEntity) {
 		this.unlocalizedName = name;
 		this.isDebuff = isDebuff;
 		this.displayArrow = displayArrow;
 		this.iconIndex = index;
+		this.syncNonPlayerEntity = syncNonPlayerEntity;
 	}
 
 	/** Returns this buff's localized name */
