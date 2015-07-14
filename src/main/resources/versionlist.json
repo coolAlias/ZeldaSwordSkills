@@ -13,9 +13,9 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.2.8",
+			"modVersion":"2.2.8b",
 			"changeLog": [
-	               "Various changes and fixes",
+	               "API change for latest Addon version",
 	               "See website for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
