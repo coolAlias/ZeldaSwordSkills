@@ -19,6 +19,8 @@ package zeldaswordskills.network.client;
 
 import java.io.IOException;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -40,31 +42,51 @@ public class UpdateBuffPacket extends AbstractClientMessage<UpdateBuffPacket>
 	/** Whether to apply or remove the specified buff */
 	private boolean remove;
 
+	/** ID of entity to update, or -1 for the player */
+	private int entityId;
+
 	public UpdateBuffPacket() {}
 
+	/**
+	 * Constructs update packet for a player entity
+	 */
 	public UpdateBuffPacket(BuffBase buff, boolean remove) {
+		this(buff, null, remove);
+	}
+
+	/**
+	 * Constructs update packet for any EntityLivingBase
+	 */
+	public UpdateBuffPacket(BuffBase buff, EntityLivingBase entity, boolean remove) {
 		this.buff = buff;
 		this.remove = remove;
+		this.entityId = (entity == null ? -1 : entity.getEntityId());
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
 		this.buff = BuffBase.readFromNBT(buffer.readNBTTagCompoundFromBuffer());
 		this.remove = buffer.readBoolean();
+		this.entityId = buffer.readInt();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
 		buffer.writeNBTTagCompoundToBuffer(buff.writeToNBT(new NBTTagCompound()));
 		buffer.writeBoolean(remove);
+		buffer.writeInt(entityId);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
+		Entity entity = (entityId < 0 ? player : player.worldObj.getEntityByID(entityId));
+		if (!(entity instanceof EntityLivingBase)) {
+			return;
+		}
 		if (remove) {
-			ZSSEntityInfo.get(player).getActiveBuffsMap().remove(buff.getBuff());
+			ZSSEntityInfo.get((EntityLivingBase) entity).getActiveBuffsMap().remove(buff.getBuff());
 		} else {
-			ZSSEntityInfo.get(player).getActiveBuffsMap().put(buff.getBuff(), buff);
+			ZSSEntityInfo.get((EntityLivingBase) entity).getActiveBuffsMap().put(buff.getBuff(), buff);
 		}
 	}
 }
