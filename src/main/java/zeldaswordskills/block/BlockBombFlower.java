@@ -155,7 +155,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 	public boolean onBoomerangCollided(World world, BlockPos pos, IBlockState state, EntityBoomerang boomerang) {
 		if (!world.isRemote && ((Integer) state.getValue(AGE)).intValue() == 7) {
 			boolean captured = false;
-			world.setBlockToAir(pos);
+			world.setBlockState(pos, getDefaultState());
 			EntityItem bomb = new EntityItem(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FLOWER.ordinal()));
 			world.spawnEntityInWorld(bomb);
 			if (boomerang.captureItem(bomb)) {
