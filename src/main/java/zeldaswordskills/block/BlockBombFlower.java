@@ -153,7 +153,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	public boolean onBoomerangCollided(World world, int x, int y, int z, EntityBoomerang boomerang) {
 		if (!world.isRemote && world.getBlockMetadata(x, y, z) == 7) {
 			boolean captured = false;
-			world.setBlockToAir(x, y, z);
+			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
 			EntityItem bomb = new EntityItem(world, x + 0.5D, y + 0.5D, z + 0.5D, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FLOWER.ordinal()));
 			world.spawnEntityInWorld(bomb);
 			if (boomerang.captureItem(bomb)) {
