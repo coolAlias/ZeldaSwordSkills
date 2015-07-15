@@ -29,17 +29,23 @@ public class RecipeCombineBombBag implements IRecipe {
 	@Override
 	public boolean matches(InventoryCrafting grid, World world) {
 		ItemStack bag = null;
+		boolean flag = false;
+		int found = 0;
 		for (int i = 0; i < grid.getSizeInventory(); ++i) {
 			ItemStack stack = grid.getStackInSlot(i);
-			if (stack != null && stack.getItem() instanceof ItemBombBag) {
-				if (bag == null) {
-					bag = stack;
-				} else {
-					return ((ItemBombBag) bag.getItem()).areMatchingTypes(bag, stack, false);
+			if (stack != null) {
+				if (++found > 2) {
+					return false;
+				} else if (stack.getItem() instanceof ItemBombBag) {
+					if (bag == null) {
+						bag = stack;
+					} else {
+						flag = ((ItemBombBag) bag.getItem()).areMatchingTypes(bag, stack, false);
+					}
 				}
 			}
 		}
-		return false;
+		return found == 2 && flag;
 	}
 
 	@Override

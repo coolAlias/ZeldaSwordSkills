@@ -33,9 +33,11 @@ public class RecipeBagToBombArrows implements IRecipe {
 	public boolean matches(InventoryCrafting grid, World world) {
 		boolean hasArrows = false;
 		boolean hasBag = false;
+		int found = 0;
 		for (int i = 0; i < grid.getSizeInventory(); ++i) {
 			ItemStack stack = grid.getStackInSlot(i);
 			if (stack != null) {
+				++found;
 				if (!hasArrows) {
 					hasArrows = stack.getItem() == Items.arrow;
 				}
@@ -44,7 +46,7 @@ public class RecipeBagToBombArrows implements IRecipe {
 				}
 			}
 		}
-		return hasBag && hasArrows;
+		return found == 2 && hasBag && hasArrows;
 	}
 
 	@Override
