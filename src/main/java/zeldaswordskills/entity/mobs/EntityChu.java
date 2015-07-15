@@ -204,18 +204,19 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 	 * Applies traits based on Chu's type
 	 */
 	private void applyTypeTraits() {
-		ZSSEntityInfo.get(this).removeAllBuffs();
+		ZSSEntityInfo info = ZSSEntityInfo.get(this);
+		info.removeAllBuffs();
 		switch(getType()) {
 		case RED:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
+			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
 			break;
 		case BLUE:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
+			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
 			break;
 		case YELLOW:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
 			break;
 		default:
 		}

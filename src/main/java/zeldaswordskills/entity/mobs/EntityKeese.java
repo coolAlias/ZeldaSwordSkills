@@ -174,27 +174,28 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	 * Applies traits based on Keese's type
 	 */
 	private void applyTypeTraits() {
-		ZSSEntityInfo.get(this).removeAllBuffs();
-		ZSSEntityInfo.get(this).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 50);
+		ZSSEntityInfo info = ZSSEntityInfo.get(this);
+		info.removeAllBuffs();
+		info.applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 50);
 		switch(getType()) {
 		case CURSED:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
-			ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_HOLY, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.WEAKNESS_HOLY, Integer.MAX_VALUE, 100);
 			experienceValue = 7;
 			break;
 		case FIRE:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
-			ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
 			isImmuneToFire = true;
 			experienceValue = 3;
 			break;
 		case ICE:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
-			ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 100);
 			experienceValue = 3;
 			break;
 		case THUNDER:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
 			experienceValue = 5;
 			break;
 		default: experienceValue = 1;
