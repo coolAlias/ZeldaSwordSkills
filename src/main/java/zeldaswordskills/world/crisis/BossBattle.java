@@ -48,10 +48,12 @@ import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
 import zeldaswordskills.util.WorldUtils;
+import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
 /**
  * 
@@ -112,7 +114,7 @@ public class BossBattle extends AbstractCrisis
 		if (world.getDifficulty() != EnumDifficulty.PEACEFUL) {
 			WorldUtils.spawnXPOrbsWithRandom(world, world.rand, center.getX(), center.getY(), center.getZ(), 1000 * difficulty);
 		}
-		// TODO AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", core.getPos());
+		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", (center.getX() << 4), (center.getZ() << 4));
 	}
 
 	@Override
