@@ -22,11 +22,9 @@ import java.util.Iterator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -40,7 +38,7 @@ import zeldaswordskills.ref.ModInfo;
  *
  */
 @SideOnly(Side.CLIENT)
-public class GuiBuffBar extends Gui
+public class GuiBuffBar extends Gui implements IGuiOverlay
 {
 	/** Whether the buff bar should be displayed */
 	public static boolean shouldDisplay;
@@ -54,19 +52,21 @@ public class GuiBuffBar extends Gui
 	private static final int ICON_SPACING = ICON_SIZE + 2;
 	private static final int ICONS_PER_ROW = 8;
 
-	public GuiBuffBar() {
+	public GuiBuffBar(Minecraft mc) {
 		super();
 		shouldDisplay = Config.isBuffBarEnabled();
-		this.mc = Minecraft.getMinecraft();
+		this.mc = mc;
 		this.textures = new ResourceLocation(ModInfo.ID, "textures/gui/bufficons.png");
 	}
 
-	@SubscribeEvent
-	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
-		if (!shouldDisplay || event.type != ElementType.EXPERIENCE) {
-			return;
-		}
-		int xPos = Config.isBuffBarLeft() ? 2 : event.resolution.getScaledWidth() - (ICON_SPACING + 2);
+	@Override
+	public boolean shouldRender() {
+		return shouldDisplay;
+	}
+
+	@Override
+	public void renderOverlay(ScaledResolution resolution) {
+		int xPos = Config.isBuffBarLeft() ? 2 : resolution.getScaledWidth() - (ICON_SPACING + 2);
 		int yPos = 2;
 		int offset = 0;
 		int increment = Config.isBuffBarHorizontal() && !Config.isBuffBarLeft() ? -ICON_SPACING : ICON_SPACING;
