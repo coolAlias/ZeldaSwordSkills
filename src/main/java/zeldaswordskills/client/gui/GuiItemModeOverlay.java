@@ -41,7 +41,7 @@ public class GuiItemModeOverlay extends Gui implements IGuiOverlay
 	@Override
 	public boolean shouldRender() {
 		this.stack = mc.thePlayer.getHeldItem();
-		return this.stack != null && this.stack.getItem() instanceof ICyclableItem;
+		return Config.isItemModeEnabled && this.stack != null && this.stack.getItem() instanceof ICyclableItem;
 	}
 
 	@Override

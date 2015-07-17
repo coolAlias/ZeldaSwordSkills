@@ -326,10 +326,14 @@ public class ItemSlingshot extends BaseModItem implements ICyclableItem, IFairyU
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.slingshot.desc.0"));
 		if (seedsFired > 1) {
 			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.slingshot.desc.1", seedsFired));
+		}
+		ItemStack mode = getMode(player).getSeedStack();
+		if (mode != null) {
+			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.mode", mode.getDisplayName()));
 		}
 	}
 
