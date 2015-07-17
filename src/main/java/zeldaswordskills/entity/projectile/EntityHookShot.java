@@ -306,7 +306,7 @@ public class EntityHookShot extends EntityThrowable
 		}
 		if (canUpdate()) {
 			if ((ticksExisted > getMaxDistance() && !isInGround() && getTarget() == null) || ticksExisted > (getMaxDistance() * 8)) {
-				if (worldObj.isRemote && getThrower() instanceof EntityPlayer && Config.enableHookshotMissSound()) {
+				if (worldObj.isRemote && getThrower() instanceof EntityPlayer && Config.enableHookshotSound) {
 					((EntityPlayer) getThrower()).playSound(Sounds.WOOD_CLICK, 1.0F, 1.0F);
 				}
 				setDead();

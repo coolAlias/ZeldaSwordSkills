@@ -143,7 +143,7 @@ public class BlockDungeonStone extends Block implements ICustomStateMapper, IDun
 	@Override
 	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
 		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
-			if (Config.showSecretMessage()) {
+			if (Config.showSecretMessage) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.secret");
 			}
 			world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));

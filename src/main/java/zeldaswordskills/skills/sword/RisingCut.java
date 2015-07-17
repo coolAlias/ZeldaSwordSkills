@@ -108,7 +108,7 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
 		return (key == mc.gameSettings.keyBindJump || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK]
-				|| (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+				|| (Config.allowVanillaControls && key == mc.gameSettings.keyBindAttack));
 	}
 
 	/**

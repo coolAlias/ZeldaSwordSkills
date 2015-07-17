@@ -283,7 +283,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 		}
 		if (!isTargetValid(player, currentTarget)) {
 			currentTarget = null;
-			if (Config.autoTargetEnabled()) {
+			if (Config.enableAutoTarget) {
 				getNextTarget(player);
 			}
 		}
@@ -297,7 +297,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	private boolean isTargetValid(EntityPlayer player, EntityLivingBase target) {
 		return (target != null && !target.isDead && target.getHealth() > 0F &&
 				player.getDistanceToEntity(target) < (float) getRange() && !target.isInvisible() &&
-				(Config.canTargetPlayers() || !(target instanceof EntityPlayer)));
+				(Config.canTargetPlayers || !(target instanceof EntityPlayer)));
 	}
 
 	@Override

@@ -34,8 +34,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
 import zeldaswordskills.api.item.ISwingSpeed;
-import zeldaswordskills.client.gui.ComboOverlay;
-import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
@@ -130,12 +128,12 @@ public class ZSSKeyHandler
 				}
 			} else if (kb == keys[KEY_TOGGLE_BUFFBAR].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
-					ComboOverlay.shouldDisplay = !ComboOverlay.shouldDisplay;
+					Config.isComboHudEnabled = !Config.isComboHudEnabled;
 					PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.togglehud",
-							(ComboOverlay.shouldDisplay ? StatCollector.translateToLocal("chat.zss.key.enable")
+							(Config.isComboHudEnabled ? StatCollector.translateToLocal("chat.zss.key.enable")
 									: StatCollector.translateToLocal("chat.zss.key.disable")));
 				} else {
-					GuiBuffBar.shouldDisplay = !GuiBuffBar.shouldDisplay;
+					Config.isBuffBarEnabled = !Config.isBuffBarEnabled;
 				}
 			} else if (kb == keys[KEY_SKILLS_GUI].getKeyCode()) {
 				PacketDispatcher.sendToServer(new OpenGuiPacket(GuiHandler.GUI_SKILLS));
@@ -229,7 +227,7 @@ public class ZSSKeyHandler
 			return mc.gameSettings.keyBindForward;
 		} else if (keyCode == mc.gameSettings.keyBindJump.getKeyCode()) {
 			return mc.gameSettings.keyBindJump;
-		} else if (Config.allowVanillaControls()) {
+		} else if (Config.allowVanillaControls) {
 			if (keyCode == mc.gameSettings.keyBindLeft.getKeyCode()) {
 				return mc.gameSettings.keyBindLeft;
 			} else if (keyCode == mc.gameSettings.keyBindRight.getKeyCode()) {

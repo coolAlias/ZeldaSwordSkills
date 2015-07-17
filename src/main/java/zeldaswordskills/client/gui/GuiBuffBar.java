@@ -40,9 +40,6 @@ import zeldaswordskills.ref.ModInfo;
 @SideOnly(Side.CLIENT)
 public class GuiBuffBar extends Gui implements IGuiOverlay
 {
-	/** Whether the buff bar should be displayed */
-	public static boolean shouldDisplay;
-
 	private final Minecraft mc;
 
 	/** Buff icons texture sheet */
@@ -54,22 +51,21 @@ public class GuiBuffBar extends Gui implements IGuiOverlay
 
 	public GuiBuffBar(Minecraft mc) {
 		super();
-		shouldDisplay = Config.isBuffBarEnabled();
 		this.mc = mc;
 		this.textures = new ResourceLocation(ModInfo.ID, "textures/gui/bufficons.png");
 	}
 
 	@Override
 	public boolean shouldRender() {
-		return shouldDisplay;
+		return Config.isBuffBarEnabled;
 	}
 
 	@Override
 	public void renderOverlay(ScaledResolution resolution) {
-		int xPos = Config.isBuffBarLeft() ? 2 : resolution.getScaledWidth() - (ICON_SPACING + 2);
+		int xPos = Config.isBuffBarLeft ? 2 : resolution.getScaledWidth() - (ICON_SPACING + 2);
 		int yPos = 2;
 		int offset = 0;
-		int increment = Config.isBuffBarHorizontal() && !Config.isBuffBarLeft() ? -ICON_SPACING : ICON_SPACING;
+		int increment = Config.isBuffBarHorizontal && !Config.isBuffBarLeft ? -ICON_SPACING : ICON_SPACING;
 		Collection<BuffBase> collection = ZSSEntityInfo.get(mc.thePlayer).getActiveBuffsMap().values();
 		if (!collection.isEmpty()) {
 			GlStateManager.pushAttrib();
@@ -84,8 +80,8 @@ public class GuiBuffBar extends Gui implements IGuiOverlay
 			{
 				BuffBase buff = iterator.next();
 				int index = buff.getIconIndex();
-				xPos += (Config.isBuffBarHorizontal() ? offset : 0);
-				yPos += (Config.isBuffBarHorizontal() ? 0 : offset);
+				xPos += (Config.isBuffBarHorizontal ? offset : 0);
+				yPos += (Config.isBuffBarHorizontal ? 0 : offset);
 				drawTexturedModalRect(xPos, yPos, index % ICONS_PER_ROW * ICON_SIZE,
 						index / ICONS_PER_ROW * ICON_SIZE, ICON_SIZE, ICON_SIZE);
 				if (buff.displayArrow()) {

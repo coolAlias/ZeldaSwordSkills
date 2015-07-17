@@ -151,7 +151,7 @@ public class Dodge extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return ((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
+		return ((Config.allowVanillaControls && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
 				key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT] || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT]);
 	}
 
@@ -159,7 +159,7 @@ public class Dodge extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
+			if (Config.requireDoubleTap) {
 				if (ticksTilFail > 0 && key == keyPressed) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;

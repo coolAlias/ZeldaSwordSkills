@@ -195,10 +195,10 @@ public class BackSlice extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
 		if (isActive()) {
-			return (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindAttack));
+			return (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] || (Config.allowVanillaControls && key == mc.gameSettings.keyBindAttack));
 		}
 		return key == mc.gameSettings.keyBindForward || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT] || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT] ||
-				((Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
+				((Config.allowVanillaControls && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)));
 	}
 
 	@Override
