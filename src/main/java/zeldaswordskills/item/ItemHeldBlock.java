@@ -79,8 +79,12 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 		stack.setTagCompound(new NBTTagCompound());
 		stack.getTagCompound().setInteger("blockId", Block.getIdFromBlock(block));
 		stack.getTagCompound().setInteger("metadata", state.getBlock().damageDropped(state));
-		stack.getTagCompound().setInteger("blockColor", block.getRenderColor(state));
 		if (gauntlets != null) {
+			// Hack to allow server to contain the client-side block color information (see HeldBlockColorPacket)
+			if (gauntlets.hasTagCompound() && gauntlets.getTagCompound().hasKey("blockColor")) {
+				stack.getTagCompound().setInteger("blockColor", gauntlets.getTagCompound().getInteger("blockColor"));
+				gauntlets.getTagCompound().removeTag("blockColor");
+			}
 			stack.getTagCompound().setTag("gauntlets", gauntlets.writeToNBT(new NBTTagCompound()));
 		}
 		return stack;
@@ -113,6 +117,11 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 			return stack.getTagCompound().getInteger("blockColor");
 		}
 		return super.getColorFromItemStack(stack, renderPass);
+	}
+
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return !ItemStack.areItemsEqual(oldStack, newStack);
 	}
 
 	/**
@@ -226,7 +235,7 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 		} else if (world.canBlockBePlaced(blockToPlace, pos, false, side, null, stack)) {
 			int meta = getMetaFromStack(stack);
 			IBlockState state = blockToPlace.onBlockPlaced(world, pos, side, hitX, hitY, hitZ, meta, player);
-			if (placeBlockAt(stack, player, world, pos, side, state)) {
+			if (!world.isRemote && placeBlockAt(stack, player, world, pos, side, state)) {
 				world.playSoundEffect((pos.getX() + 0.5D), (pos.getY() + 0.5D), (pos.getZ() + 0.5D), blockToPlace.stepSound.getBreakSound(), (blockToPlace.stepSound.getVolume() + 1.0F) / 2.0F, blockToPlace.stepSound.getFrequency() * 0.8F);
 				ItemStack gauntlets = (stack.hasTagCompound() && stack.getTagCompound().hasKey("gauntlets") ?
 						ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("gauntlets")) : null);
@@ -247,7 +256,7 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 		}
 		Block block = world.getBlockState(pos).getBlock();
 		if (block == state.getBlock()) {
-			ItemBlock.setTileEntityNBT(world, pos, stack);
+			ItemBlock.setTileEntityNBT(world, pos, stack, player);
 			block.onBlockPlacedBy(world, pos, state, player, stack);
 			if (block instanceof ILiftable) {
 				((ILiftable) block).onHeldBlockPlaced(world, stack, pos, state);

@@ -84,6 +84,7 @@ import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.UnpressKeyPacket;
+import zeldaswordskills.network.server.HeldBlockColorPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
@@ -277,7 +278,9 @@ public class ZSSItemEvents
 			float strength = ((ILiftBlock) stack.getItem()).getLiftStrength(player, stack, state).weight;
 			float resistance = (weight != null ? weight.weight : (block.getExplosionResistance(world, pos, null, null) * 5.0F/3.0F));
 			if (isValidBlock && weight != BlockWeight.IMPOSSIBLE && strength >= resistance && (isLiftable || !block.hasTileEntity(state))) {
-				if (!world.isRemote) {
+				if (world.isRemote) { // Send block's render color to server so held block can render correctly
+					PacketDispatcher.sendToServer(new HeldBlockColorPacket(block.colorMultiplier(world, pos)));
+				} else {
 					ItemStack returnStack = ((ILiftBlock) stack.getItem()).onLiftBlock(player, stack, state);
 					if (returnStack != null && returnStack.stackSize <= 0) {
 						returnStack = null;

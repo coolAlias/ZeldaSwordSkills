@@ -48,6 +48,8 @@ import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonStone;
 import zeldaswordskills.client.ISwapModel;
 import zeldaswordskills.client.render.item.ModelDynamicItemBlock;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.server.HeldBlockColorPacket;
 import zeldaswordskills.ref.ModInfo;
 
 import com.google.common.collect.Lists;
@@ -128,35 +130,41 @@ public class ItemDungeonBlock extends ItemBlockUnbreakable implements IDynamicIt
 	}
 
 	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return !ItemStack.areItemsEqual(oldStack, newStack);
+	}
+
+	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing face, float hitX, float hitY, float hitZ) {
 		if (player.isSneaking()) {
-			if (!world.isRemote) {
-				IBlockState state = world.getBlockState(pos);
-				Block block = state.getBlock();
-				int meta = block.getMetaFromState(state);
-				if (block instanceof BlockSecretStone) {
-					block = ((BlockSecretStone.EnumType) state.getValue(BlockSecretStone.VARIANT)).getDroppedBlock();
-					meta = state.getBlock().getMetaFromState(state);
-				} else if (block instanceof BlockDungeonStone) {
-					TileEntity te = world.getTileEntity(pos);
-					if (te instanceof TileEntityDungeonStone) {
-						IBlockState render = ((TileEntityDungeonStone) te).getRenderState();
-						if (render == null) {
-							render = ((BlockDungeonStone) block).getDefaultRenderState(stack.getItemDamage() > 7);
-						}
-						if (render != null) {
-							block = render.getBlock();
-							meta = block.getMetaFromState(render);
-						}
+			IBlockState state = world.getBlockState(pos);
+			Block block = state.getBlock();
+			int meta = block.getMetaFromState(state);
+			if (block instanceof BlockSecretStone) {
+				block = ((BlockSecretStone.EnumType) state.getValue(BlockSecretStone.VARIANT)).getDroppedBlock();
+				meta = state.getBlock().getMetaFromState(state);
+			} else if (block instanceof BlockDungeonStone) {
+				TileEntity te = world.getTileEntity(pos);
+				if (te instanceof TileEntityDungeonStone) {
+					IBlockState render = ((TileEntityDungeonStone) te).getRenderState();
+					if (render == null) {
+						render = ((BlockDungeonStone) block).getDefaultRenderState(stack.getItemDamage() > 7);
+					}
+					if (render != null) {
+						block = render.getBlock();
+						meta = block.getMetaFromState(render);
 					}
 				}
-				if ((block.isOpaqueCube() || block instanceof BlockIce) && Item.getItemFromBlock(block) != null) {
+			}
+			if ((block.isOpaqueCube() || block instanceof BlockIce) && Item.getItemFromBlock(block) != null) {
+				if (world.isRemote) { // Send block's render color to server so held block can render correctly
+					PacketDispatcher.sendToServer(new HeldBlockColorPacket(block.colorMultiplier(world, pos)));
+				} else {
 					if (!stack.hasTagCompound()) {
 						stack.setTagCompound(new NBTTagCompound());
 					}
 					stack.getTagCompound().setInteger("renderBlock", Block.getIdFromBlock(block));
 					stack.getTagCompound().setInteger("metadata", meta);
-					stack.getTagCompound().setInteger("blockColor", block.colorMultiplier(world, pos));
 				}
 			}
 			return false;

@@ -61,6 +61,7 @@ import zeldaswordskills.network.server.DashImpactPacket;
 import zeldaswordskills.network.server.EndComboPacket;
 import zeldaswordskills.network.server.FallDistancePacket;
 import zeldaswordskills.network.server.GetBombPacket;
+import zeldaswordskills.network.server.HeldBlockColorPacket;
 import zeldaswordskills.network.server.OpenGuiPacket;
 import zeldaswordskills.network.server.RefreshSpinPacket;
 import zeldaswordskills.network.server.SetGossipStoneMessagePacket;
@@ -118,6 +119,7 @@ public class PacketDispatcher
 		registerMessage(EndComboPacket.class);
 		registerMessage(FallDistancePacket.class);
 		registerMessage(GetBombPacket.class);
+		registerMessage(HeldBlockColorPacket.class);
 		registerMessage(OpenGuiPacket.class);
 		registerMessage(RefreshSpinPacket.class);
 		registerMessage(SetGossipStoneMessagePacket.class);
