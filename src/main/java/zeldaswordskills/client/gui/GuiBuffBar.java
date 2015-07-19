@@ -22,9 +22,8 @@ import java.util.Iterator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
 import org.lwjgl.opengl.GL11;
 
@@ -32,7 +31,6 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -42,7 +40,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  *
  */
 @SideOnly(Side.CLIENT)
-public class GuiBuffBar extends Gui
+public class GuiBuffBar extends Gui implements IGuiOverlay
 {
 	/** Whether the buff bar should be displayed */
 	public static boolean shouldDisplay;
@@ -56,20 +54,21 @@ public class GuiBuffBar extends Gui
 	private static final int ICON_SPACING = ICON_SIZE + 2;
 	private static final int ICONS_PER_ROW = 8;
 
-	public GuiBuffBar() {
+	public GuiBuffBar(Minecraft mc) {
 		super();
 		shouldDisplay = Config.isBuffBarEnabled();
-		this.mc = Minecraft.getMinecraft();
+		this.mc = mc;
 		this.textures = new ResourceLocation(ModInfo.ID, "textures/gui/bufficons.png");
 	}
 
-	@SubscribeEvent
-	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
-		if (!shouldDisplay || event.type != ElementType.EXPERIENCE) {
-			return;
-		}
+	@Override
+	public boolean shouldRender() {
+		return shouldDisplay;
+	}
 
-		int xPos = Config.isBuffBarLeft() ? 2 : event.resolution.getScaledWidth() - (ICON_SPACING + 2);
+	@Override
+	public void renderOverlay(ScaledResolution resolution) {
+		int xPos = Config.isBuffBarLeft() ? 2 : resolution.getScaledWidth() - (ICON_SPACING + 2);
 		int yPos = 2;
 		int offset = 0;
 		int increment = Config.isBuffBarHorizontal() && !Config.isBuffBarLeft() ? -ICON_SPACING : ICON_SPACING;

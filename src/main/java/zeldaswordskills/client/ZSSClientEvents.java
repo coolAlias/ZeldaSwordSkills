@@ -17,6 +17,9 @@
 
 package zeldaswordskills.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -26,6 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 
 import org.lwjgl.opengl.GL11;
@@ -34,6 +38,10 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
+import zeldaswordskills.client.gui.ComboOverlay;
+import zeldaswordskills.client.gui.GuiBuffBar;
+import zeldaswordskills.client.gui.GuiItemModeOverlay;
+import zeldaswordskills.client.gui.IGuiOverlay;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
@@ -58,17 +66,39 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ZSSClientEvents
 {
 	private final Minecraft mc;
+
+	/** List of all GUI Overlays that may need rendering */
+	private final List<IGuiOverlay> overlays = new ArrayList<IGuiOverlay>();
+
 	/** True when openGL matrix needs to be popped */
 	private boolean needsPop;
+
 	/** Store the current key code for mouse buttons */
 	private int mouseKey;
+
 	/** Whether the button during mouse event is Minecraft's keyBindAttack */
 	private boolean isAttackKey;
+
 	/** Whether the button during mouse event is Minecraft's keyBindUseItem*/
 	private boolean isUseKey;
 
 	public ZSSClientEvents() {
 		this.mc = Minecraft.getMinecraft();
+		overlays.add(new ComboOverlay(mc));
+		overlays.add(new GuiBuffBar(mc));
+		overlays.add(new GuiItemModeOverlay(mc));
+	}
+
+	@SubscribeEvent
+	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
+		if (event.type != RenderGameOverlayEvent.ElementType.EXPERIENCE) {
+			return;
+		}
+		for (IGuiOverlay overlay : overlays) {
+			if (overlay.shouldRender()) {
+				overlay.renderOverlay(event.resolution);
+			}
+		}
 	}
 
 	/**

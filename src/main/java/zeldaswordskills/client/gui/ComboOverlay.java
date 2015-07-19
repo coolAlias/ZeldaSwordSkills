@@ -24,8 +24,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.StatCollector;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.EndComboPacket;
@@ -34,7 +32,6 @@ import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -44,7 +41,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * 
  */
 @SideOnly(Side.CLIENT)
-public class ComboOverlay extends Gui
+public class ComboOverlay extends Gui implements IGuiOverlay
 {
 	private final Minecraft mc;
 
@@ -72,20 +69,22 @@ public class ComboOverlay extends Gui
 	/** Whether combo overlay should display */
 	public static boolean shouldDisplay;
 
-	public ComboOverlay() {
+	public ComboOverlay(Minecraft mc) {
 		super();
-		this.mc = Minecraft.getMinecraft();
+		this.mc = mc;
 		shouldDisplay = Config.isComboHudEnabled();
 	}
 
-	@SubscribeEvent
-	public void onRenderExperienceBar(RenderGameOverlayEvent.Post event) {
-		if (event.type != ElementType.HOTBAR) {
-			return;
-		}
+	@Override
+	public boolean shouldRender() {
+		return true;
+	}
+
+	@Override
+	public void renderOverlay(ScaledResolution resolution) {
 		ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
 		if (skills != null) {
-			displayComboText(skills, event.resolution);
+			displayComboText(skills, resolution);
 			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill != null && skill.isLockedOn()) {
 				//displayTargetingOverlay(event, skill.getCurrentTarget());
