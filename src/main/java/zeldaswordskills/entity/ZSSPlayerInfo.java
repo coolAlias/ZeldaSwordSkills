@@ -34,11 +34,14 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ItemMask;
+import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.AttackBlockedPacket;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
 import zeldaswordskills.network.client.SyncPlayerInfoPacket;
@@ -195,7 +198,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * @param damage only used server side to calculate exhaustion: 0.3F * damage
 	 */
 	public void onAttackBlocked(ItemStack shield, float damage) {
-		/*
 		ZSSCombatEvents.setPlayerAttackTime(player);
 		blockTime = (shield.getItem() instanceof ItemZeldaShield ? ((ItemZeldaShield) shield.getItem()).getRecoveryTime() : 20);
 		player.clearItemInUse();
@@ -203,7 +205,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			PacketDispatcher.sendTo(new AttackBlockedPacket(shield), (EntityPlayerMP) player);
 			player.addExhaustion(0.3F * damage);
 		}
-		 */
 	}
 
 	/**
