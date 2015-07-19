@@ -65,6 +65,8 @@ public class Config
 	public static boolean allowVanillaControls;
 	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
 	public static boolean requireDoubleTap;
+	/** [Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip) */
+	public static boolean isItemModeEnabled;
 	/** [Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen */
 	public static boolean isItemModeTop;
 	/** [Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen */
@@ -349,6 +351,7 @@ public class Config
 		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
 		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
 		requireDoubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
+		isItemModeEnabled = config.get(category, "[Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)", true).getBoolean(true);
 		isItemModeTop = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen", true).getBoolean(true);
 		isItemModeLeft = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen", true).getBoolean(true);
 		resetNotesInterval = MathHelper.clamp_int(config.get(category, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
