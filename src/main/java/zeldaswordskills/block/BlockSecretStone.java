@@ -144,7 +144,7 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 		if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
 			if (!world.isRemote) {
 				world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
-			} else if (Config.showSecretMessage()) {
+			} else if (Config.showSecretMessage) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.secret");
 			}
 		}

@@ -188,14 +188,14 @@ public class Parry extends SkillActive
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyListener(Minecraft mc, KeyBinding key) {
-		return (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_DOWN] || (Config.allowVanillaControls() && key == mc.gameSettings.keyBindBack));
+		return (key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_DOWN] || (Config.allowVanillaControls && key == mc.gameSettings.keyBindBack));
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (canExecute(player)) {
-			if (Config.requiresDoubleTap()) {
+			if (Config.requireDoubleTap) {
 				if (ticksTilFail > 0) {
 					PacketDispatcher.sendToServer(new ActivateSkillPacket(this));
 					ticksTilFail = 0;

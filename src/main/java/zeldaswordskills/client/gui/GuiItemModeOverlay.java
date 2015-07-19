@@ -53,8 +53,8 @@ public class GuiItemModeOverlay extends Gui implements IGuiOverlay
 	public void renderOverlay(ScaledResolution resolution) {
 		stack = ((ICyclableItem) stack.getItem()).getRenderStackForMode(stack, mc.thePlayer);
 		if (stack != null) {
-			int xPos = (Config.isItemModeLeft() ? 2 : resolution.getScaledWidth() - 18);
-			int yPos = (Config.isItemModeTop() ? 2 : resolution.getScaledHeight() - 18);
+			int xPos = (Config.isItemModeLeft ? 2 : resolution.getScaledWidth() - 18);
+			int yPos = (Config.isItemModeTop ? 2 : resolution.getScaledHeight() - 18);
 			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GL11.glDisable(GL11.GL_LIGHTING);

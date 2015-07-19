@@ -210,7 +210,7 @@ public class ZSSClientEvents
 		if (skill != null && skill.isLockedOn() && !skills.isNayruActive()) {
 			if (isAttackKey) {
 				// mouse attack will always be canceled while locked on, as the click has been handled
-				if (Config.allowVanillaControls()) {
+				if (Config.allowVanillaControls) {
 					if (!skills.onKeyPressed(mc, mc.gameSettings.keyBindAttack)) {
 						// no skill activated - perform a 'standard' attack
 						performComboAttack(mc, skill);
@@ -223,7 +223,7 @@ public class ZSSClientEvents
 				// if vanilla controls not enabled, mouse click is ignored (i.e. canceled)
 				// if vanilla controls enabled, mouse click was already handled - cancel
 				event.setCanceled(true);
-			} else if (isUseKey && Config.allowVanillaControls()) {
+			} else if (isUseKey && Config.allowVanillaControls) {
 				if (!skills.canInteract()) {
 					event.setCanceled(true);
 				}

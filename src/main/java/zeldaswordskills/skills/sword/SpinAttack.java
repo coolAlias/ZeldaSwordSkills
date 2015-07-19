@@ -192,7 +192,7 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private boolean isKeyPressed() {
 		return ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT].getIsKeyPressed() || ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT].getIsKeyPressed()
-				|| (Config.allowVanillaControls() && (Minecraft.getMinecraft().gameSettings.keyBindLeft.getIsKeyPressed()
+				|| (Config.allowVanillaControls && (Minecraft.getMinecraft().gameSettings.keyBindLeft.getIsKeyPressed()
 						&& Minecraft.getMinecraft().gameSettings.keyBindRight.getIsKeyPressed()));
 	}
 
@@ -202,7 +202,7 @@ public class SpinAttack extends SkillActive
 		// attack key is handled separately in order to intercept the key before it may be passed
 		// to other skills; this is necessary to prevent another skill activating while spin attack is active
 		return (//key == mc.gameSettings.keyBindAttack || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK] ||
-				(Config.allowVanillaControls() && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
+				(Config.allowVanillaControls && (key == mc.gameSettings.keyBindLeft || key == mc.gameSettings.keyBindRight)) ||
 				key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_LEFT] || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_RIGHT]);
 	}
 

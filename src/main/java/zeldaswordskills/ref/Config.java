@@ -50,33 +50,33 @@ public class Config
 	public static Configuration config;
 	/*================== CLIENT SIDE SETTINGS  =====================*/
 	/** [Buff HUD] Whether the buff bar should be displayed by default */
-	private static boolean isBuffBarEnabled;
+	public static boolean isBuffBarEnabled;
 	/** [Buff HUD] Whether the buff bar should be displayed horizontally */
-	private static boolean isBuffBarHorizontal;
+	public static boolean isBuffBarHorizontal;
 	/** [Buff HUD] Whether the buff bar should be displayed on the left side of the screen */
-	private static boolean isBuffBarLeft;
+	public static boolean isBuffBarLeft;
 	/** [Chat] Whether to show a chat message when striking secret blocks */
-	private static boolean showSecretMessage;
+	public static boolean showSecretMessage;
 	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
-	private static boolean enableComboHud;
+	public static boolean isComboHudEnabled;
 	/** [Combo HUD] Number of combo hits to display */
 	private static int hitsToDisplay;
 	/** [Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry */
-	private static boolean allowVanillaControls;
+	public static boolean allowVanillaControls;
 	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
-	private static boolean doubleTap;
+	public static boolean requireDoubleTap;
 	/** [Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen */
-	private static boolean isItemModeTop;
+	public static boolean isItemModeTop;
 	/** [Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen */
-	private static boolean isItemModeLeft;
+	public static boolean isItemModeLeft;
 	/** [Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100] */
 	private static int resetNotesInterval;
 	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
-	private static boolean enableHookshotSound;
+	public static boolean enableHookshotSound;
 	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
-	private static boolean autoTarget;
+	public static boolean enableAutoTarget;
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
-	private static boolean enablePlayerTarget;
+	public static boolean canTargetPlayers;
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
 	private static boolean enableOffhandMaster;
@@ -345,16 +345,16 @@ public class Config
 		isBuffBarHorizontal = config.get(category, "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
 		isBuffBarLeft = config.get(category, "[Buff HUD] Whether the buff bar should be displayed on the left side of the screen", false).getBoolean(false);
 		showSecretMessage = config.get(category, "[Chat] Whether to show a chat message when striking secret blocks", false).getBoolean(false);
-		enableComboHud = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
+		isComboHudEnabled = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
 		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
 		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
-		doubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
+		requireDoubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
 		isItemModeTop = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen", true).getBoolean(true);
 		isItemModeLeft = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen", true).getBoolean(true);
 		resetNotesInterval = MathHelper.clamp_int(config.get(category, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
 		enableHookshotSound = config.get(category, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
-		autoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
-		enablePlayerTarget = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
+		enableAutoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
+		canTargetPlayers = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
 		/*================== GENERAL =====================*/
@@ -520,21 +520,9 @@ public class Config
 	}
 
 	/*================== CLIENT SIDE SETTINGS  =====================*/
-	public static boolean isBuffBarEnabled() { return isBuffBarEnabled; }
-	public static boolean isBuffBarHorizontal() { return isBuffBarHorizontal; }
-	public static boolean isBuffBarLeft() { return isBuffBarLeft; }
-	public static boolean isItemModeTop() { return isItemModeTop; }
-	public static boolean isItemModeLeft() { return isItemModeLeft; }
-	public static boolean showSecretMessage() { return showSecretMessage; }
-	public static boolean isComboHudEnabled() { return enableComboHud; }
 	public static int getHitsToDisplay() { return hitsToDisplay; }
-	public static boolean allowVanillaControls() { return allowVanillaControls; }
-	public static boolean requiresDoubleTap() { return doubleTap; }
-	public static boolean autoTargetEnabled() { return autoTarget; }
-	public static boolean toggleAutoTarget() { autoTarget = !autoTarget; return autoTarget; }
-	public static boolean canTargetPlayers() { return enablePlayerTarget; }
-	public static boolean toggleTargetPlayers() { enablePlayerTarget = !enablePlayerTarget; return enablePlayerTarget; }
-	public static boolean enableHookshotMissSound() { return enableHookshotSound; }
+	public static boolean toggleAutoTarget() { enableAutoTarget = !enableAutoTarget; return enableAutoTarget; }
+	public static boolean toggleTargetPlayers() { canTargetPlayers = !canTargetPlayers; return canTargetPlayers; }
 	public static int getNoteResetInterval() { return resetNotesInterval; }
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	public static boolean allowOffhandMaster() { return enableOffhandMaster; }

@@ -66,13 +66,9 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 	/** Length of time combo pop-up will display */
 	private static final long DISPLAY_TIME = 5000;
 
-	/** Whether combo overlay should display */
-	public static boolean shouldDisplay;
-
 	public ComboOverlay(Minecraft mc) {
 		super();
 		this.mc = mc;
-		shouldDisplay = Config.isComboHudEnabled();
 	}
 
 	@Override
@@ -117,7 +113,7 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 			}
 			// TODO make display look nice
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
-				if (shouldDisplay) {
+				if (Config.isComboHudEnabled) {
 					String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
 					mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
 					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getNumHits() + "/" + combo.getMaxNumHits(), 10, 20, 0xFFFFFF, true);

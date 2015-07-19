@@ -168,7 +168,7 @@ public class ArmorBreak extends SkillActive
 	 */
 	@SideOnly(Side.CLIENT)
 	public boolean isKeyPressed() {
-		return (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].getIsKeyPressed() || (Config.allowVanillaControls() && Minecraft.getMinecraft().gameSettings.keyBindAttack.getIsKeyPressed()));
+		return (ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK].getIsKeyPressed() || (Config.allowVanillaControls && Minecraft.getMinecraft().gameSettings.keyBindAttack.getIsKeyPressed()));
 	}
 
 	/**
