@@ -26,7 +26,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -219,36 +218,15 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 	 * Applies or removes attribute modifiers for masks when equipped or unequipped
 	 */
 	public static void applyAttributeModifiers(ItemStack stack, EntityPlayer player) {
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
-		info.setFlag(ZSSPlayerInfo.MOBILITY, false);
-		IAttributeInstance movement = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-		if (movement.getModifier(bunnyHoodMoveBonusUUID) != null) {
-			movement.removeModifier(bunnyHoodMoveBonus);
-		}
-		ZSSEntityInfo buffInfo = ZSSEntityInfo.get(player);
-		if (buffInfo.isBuffPermanent(Buff.EVADE_UP)) {
-			buffInfo.removeBuff(Buff.EVADE_UP);
-		}
-		if (buffInfo.isBuffPermanent(Buff.ATTACK_UP)) {
-			buffInfo.removeBuff(Buff.ATTACK_UP);
-		}
-		if (buffInfo.isBuffPermanent(Buff.RESIST_FIRE)) {
-			buffInfo.removeBuff(Buff.RESIST_FIRE);
-		}
-		if (player.getEntityData().hasKey("origWidth") && (stack == null || stack.getItem() != ZSSItems.maskGiants)) {
-			DirtyEntityAccessor.restoreOriginalSize(player);
-			if (player.worldObj.isRemote) {
-				player.stepHeight -= 1.0F;
-			}
-		}
-		if (stack != null && info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
+		if (stack != null && ZSSPlayerInfo.get(player).getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
+			ItemMask.removeAttributeModifiers(stack, player);
 			if (((ItemMask) stack.getItem()).tickingEffect != null) {
 				player.addPotionEffect(new PotionEffect(((ItemMask) stack.getItem()).tickingEffect));
 			}
 			if (stack.getItem() == ZSSItems.maskBunny) {
-				movement.applyModifier(bunnyHoodMoveBonus);
-				info.setFlag(ZSSPlayerInfo.MOBILITY, true);
-				buffInfo.applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
+				player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(bunnyHoodMoveBonus);
+				ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
+				ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
 			} else if (stack.getItem() == ZSSItems.maskGiants) {
 				/*
 				// TODO
@@ -258,10 +236,34 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 				}
 				 */
 			} else if (stack.getItem() == ZSSItems.maskGoron) {
-				buffInfo.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
+				ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 			} else if (stack.getItem() == ZSSItems.maskMajora) {
-				buffInfo.applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
+				ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
 			}
+		}
+	}
+
+	/**
+	 * Remove modifiers provided by the given stack
+	 * @param stack ItemMask being unequipped
+	 */
+	public static void removeAttributeModifiers(ItemStack stack, EntityPlayer player) {
+		if (stack == null) { return; }
+		if (stack.getItem() == ZSSItems.maskBunny) {
+			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(bunnyHoodMoveBonus);
+			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
+			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
+		} else if (stack.getItem() == ZSSItems.maskGiants) {
+			if (player.getEntityData().hasKey("origWidth")) {
+				DirtyEntityAccessor.restoreOriginalSize(player);
+				if (player.worldObj.isRemote) {
+					player.stepHeight -= 1.0F;
+				}
+			}
+		} else if (stack.getItem() == ZSSItems.maskGoron) {
+			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_FIRE);
+		} else if (stack.getItem() == ZSSItems.maskMajora) {
+			ZSSEntityInfo.get(player).removeBuff(Buff.ATTACK_UP);
 		}
 	}
 }
