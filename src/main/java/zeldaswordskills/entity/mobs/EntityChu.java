@@ -199,18 +199,19 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 	 * Applies traits based on Chu's type
 	 */
 	private void applyTypeTraits() {
-		ZSSEntityInfo.get(this).removeAllBuffs();
+		ZSSEntityInfo info = ZSSEntityInfo.get(this);
+		info.removeAllBuffs();
 		switch(getType()) {
 		case RED:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
+			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
 			break;
 		case BLUE:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
+			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
 			break;
 		case YELLOW:
-			ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
 			break;
 		default:
 		}
@@ -389,7 +390,7 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 				} else if (source instanceof IDamageSourceStun) {
 					setShockTime(0);
 				}
-			// Hack to prevent infinite loop when attacked by other electrified mobs (other chus, keese, etc)
+				// Hack to prevent infinite loop when attacked by other electrified mobs (other chus, keese, etc)
 			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
 				source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
 				worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
