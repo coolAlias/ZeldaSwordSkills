@@ -66,6 +66,9 @@ public class ModelDynamicItemBlock implements ISmartItemModel {
 			if (renderState != null) {
 				Block block = renderState.getBlock();
 				ItemStack itemBlock = new ItemStack(block, 1, block.getMetaFromState(renderState));
+				if (itemBlock.getItem() == null) {
+					return defaultModel;
+				}
 				IBakedModel renderModel =  mc.getRenderItem().getItemModelMesher().getItemModel(itemBlock);
 				return (stack.getItem() instanceof ItemHeldBlock ? new ItemHeldBlockPerspectiveModel(renderModel) : renderModel);
 			}
