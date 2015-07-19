@@ -1049,6 +1049,7 @@ tile.zss.warp_stone.name=Warp Stone
 tooltip.zss.damage=%s%s Damage
 tooltip.zss.area=%s Block Radius
 tooltip.zss.range=%s Block Range
+tooltip.zss.mode=Selected: %s
 
 tooltip.zss.block.core.desc.0=Can be mined with normal tools
 tooltip.zss.block.dungeon.desc.0=Cannot be mined, but may be exploded
