@@ -29,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+import net.minecraftforge.common.util.Constants;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -89,10 +90,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	MOBILITY = 8;
 
 	/** Last equipped special boots */
-	private Item lastBootsWorn;
+	private ItemStack lastBootsWorn;
 
 	/** Last equipped special helm (used for masks) */
-	private Item lastHelmWorn;
+	private ItemStack lastHelmWorn;
 
 	/** Current amount of time hovered */
 	public int hoverTime = 0;
@@ -219,9 +220,14 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void setWearingBoots() {
 		ItemStack boots = player.getCurrentArmor(ArmorIndex.WORN_BOOTS);
 		setFlag(IS_WEARING_BOOTS, (boots != null && boots.getItem() instanceof ItemArmorBoots));
-		lastBootsWorn = (boots != null ? boots.getItem() : null);
-		ItemArmorBoots.applyAttributeModifiers(boots, player);
-		if (!getFlag(IS_WEARING_BOOTS) && getFlag(IS_WEARING_HELM)) {
+		if (lastBootsWorn != null) {
+			ItemArmorBoots.removeAttributeModifiers(lastBootsWorn, player);
+		}
+		lastBootsWorn = boots;
+		if (boots != null) {
+			ItemArmorBoots.applyAttributeModifiers(boots, player);
+		}
+		if (getFlag(IS_WEARING_HELM)) {
 			ItemMask.applyAttributeModifiers(player.getCurrentArmor(ArmorIndex.WORN_HELM), player);
 		}
 	}
@@ -233,9 +239,14 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void setWearingHelm() {
 		ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
 		setFlag(IS_WEARING_HELM, (helm != null && helm.getItem() instanceof ItemMask));
-		lastHelmWorn = (helm != null ? helm.getItem() : null);
-		ItemMask.applyAttributeModifiers(helm, player);
-		if (!getFlag(IS_WEARING_HELM) && getFlag(IS_WEARING_BOOTS)) {
+		if (lastHelmWorn != null) {
+			ItemMask.removeAttributeModifiers(lastHelmWorn, player);
+		}
+		lastHelmWorn = helm;
+		if (helm != null) {
+			ItemMask.applyAttributeModifiers(helm, player);
+		}
+		if (getFlag(IS_WEARING_BOOTS)) {
 			ItemArmorBoots.applyAttributeModifiers(player.getCurrentArmor(ArmorIndex.WORN_BOOTS), player);
 		}
 	}
@@ -318,11 +329,11 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			updateNayru();
 		}
 		if (getFlag(IS_WEARING_BOOTS) && (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) == null
-				|| player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() != lastBootsWorn)) {
+				|| (lastBootsWorn != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == lastBootsWorn.getItem()))) {
 			setWearingBoots();
 		}
 		if (getFlag(IS_WEARING_HELM) && (player.getCurrentArmor(ArmorIndex.WORN_HELM) == null
-				|| player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != lastHelmWorn)) {
+				|| (lastHelmWorn != null && player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == lastHelmWorn.getItem()))) {
 			setWearingHelm();
 		}
 		if (getFlag(MOBILITY) && !player.onGround && Math.abs(player.motionY) > 0.05D
@@ -407,8 +418,14 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		playerSongs.saveNBTData(compound);
 		compound.setIntArray("zssStats", ArrayUtils.toPrimitive(playerStats.values().toArray(new Integer[playerStats.size()])));
 		compound.setByte("ZSSGearReceived", receivedGear);
-		compound.setInteger("lastBoots", Item.getIdFromItem(lastBootsWorn));
-		compound.setInteger("lastHelm", Item.getIdFromItem(lastHelmWorn));
+		if (lastBootsWorn != null) {
+			NBTTagCompound tag = new NBTTagCompound();
+			compound.setTag("lastBootsWorn", lastBootsWorn.writeToNBT(tag));
+		}
+		if (lastHelmWorn != null) {
+			NBTTagCompound tag = new NBTTagCompound();
+			compound.setTag("lastHelmWorn", lastHelmWorn.writeToNBT(tag));
+		}
 		compound.setInteger("borrowedMask", borrowedMask != null ? Item.getIdFromItem(borrowedMask) : -1);
 		compound.setInteger("maskStage", maskStage);
 		compound.setInteger("slingshotMode", slingshotMode);
@@ -425,8 +442,21 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			playerStats.put(Stats.values()[i], stats[i]);
 		}
 		receivedGear = compound.getByte("ZSSGearReceived");
-		lastBootsWorn = Item.getItemById(compound.getInteger("lastBoots"));
-		lastHelmWorn = Item.getItemById(compound.getInteger("lastHelm"));
+		if (compound.hasKey("lastBootsWorn", Constants.NBT.TAG_COMPOUND)) {
+			lastBootsWorn = ItemStack.loadItemStackFromNBT(compound.getCompoundTag("lastBootsWorn"));
+		}
+		if (compound.hasKey("lastHelmWorn", Constants.NBT.TAG_COMPOUND)) {
+			lastHelmWorn = ItemStack.loadItemStackFromNBT(compound.getCompoundTag("lastHelmWorn"));
+		}
+		// For backwards compatibility:
+		Item boots = Item.getItemById(compound.getInteger("lastBoots"));
+		if (boots != null) {
+			lastBootsWorn = new ItemStack(boots);
+		}
+		Item helm = Item.getItemById(compound.getInteger("lastHelm"));
+		if (helm != null) {
+			lastHelmWorn = new ItemStack(helm);
+		}
 		int maskID = compound.getInteger("borrowedMask");
 		borrowedMask = maskID > -1 ? Item.getItemById(maskID) : null;
 		maskStage = compound.getInteger("maskStage");

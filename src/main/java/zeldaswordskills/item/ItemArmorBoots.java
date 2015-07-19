@@ -30,7 +30,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -182,42 +181,38 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 	 * @param stack Either the currently equipped boots or NULL
 	 */
 	public static void applyAttributeModifiers(ItemStack stack, EntityPlayer player) {
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
-		info.setFlag(ZSSPlayerInfo.MOBILITY, false);
-		IAttributeInstance knockback = player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance);
-		IAttributeInstance movement = player.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
-
-		if (knockback.getModifier(heavyBootsKnockbackModifierUUID) != null) {
-			knockback.removeModifier(heavyBootsKnockbackModifier);
-		}
-		if (movement.getModifier(heavyBootsMovePenaltyUUID) != null) {
-			movement.removeModifier(heavyBootsMovePenalty);
-		}
-		if (movement.getModifier(pegasusBootsMoveBonusUUID) != null) {
-			movement.removeModifier(pegasusBootsMoveBonus);
-		}
-		ZSSEntityInfo buffInfo = ZSSEntityInfo.get(player);
-		if (buffInfo.isBuffPermanent(Buff.EVADE_DOWN)) {
-			buffInfo.removeBuff(Buff.EVADE_DOWN);
-		}
-		if (buffInfo.isBuffPermanent(Buff.EVADE_UP)) {
-			buffInfo.removeBuff(Buff.EVADE_UP);
-		}
-		if (buffInfo.isBuffPermanent(Buff.RESIST_SHOCK)) {
-			buffInfo.removeBuff(Buff.RESIST_SHOCK);
-		}
-		if (stack != null && info.getFlag(ZSSPlayerInfo.IS_WEARING_BOOTS)) {
+		if (stack != null && ZSSPlayerInfo.get(player).getFlag(ZSSPlayerInfo.IS_WEARING_BOOTS)) {
+			ItemArmorBoots.removeAttributeModifiers(stack, player);
 			if (stack.getItem() == ZSSItems.bootsHeavy) {
-				knockback.applyModifier(heavyBootsKnockbackModifier);
-				movement.applyModifier(heavyBootsMovePenalty);
-				buffInfo.applyBuff(Buff.EVADE_DOWN, Integer.MAX_VALUE, 50);
+				player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).applyModifier(heavyBootsKnockbackModifier);
+				player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(heavyBootsMovePenalty);
+				ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, Integer.MAX_VALUE, 50);
 			} else if (stack.getItem() == ZSSItems.bootsPegasus) {
-				info.setFlag(ZSSPlayerInfo.MOBILITY, true);
-				movement.applyModifier(pegasusBootsMoveBonus);
-				buffInfo.applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
+				player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(pegasusBootsMoveBonus);
+				ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
+				ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
 			} else if (stack.getItem() == ZSSItems.bootsRubber) {
-				buffInfo.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+				ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
 			}
+		}
+	}
+
+	/**
+	 * Remove modifiers provided by the given stack
+	 * @param stack ItemBoots being unequipped
+	 */
+	public static void removeAttributeModifiers(ItemStack stack, EntityPlayer player) {
+		if (stack == null) { return; }
+		if (stack.getItem() == ZSSItems.bootsHeavy) {
+			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).removeModifier(heavyBootsKnockbackModifier);
+			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(heavyBootsMovePenalty);
+			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_DOWN);
+		} else if (stack.getItem() == ZSSItems.bootsPegasus) {
+			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(pegasusBootsMoveBonus);
+			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, false);
+			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
+		} else if (stack.getItem() == ZSSItems.bootsRubber) {
+			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_SHOCK);
 		}
 	}
 
