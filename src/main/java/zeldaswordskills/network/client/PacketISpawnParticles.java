@@ -20,9 +20,9 @@ package zeldaswordskills.network.client;
 import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.item.ISpawnParticles;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
@@ -36,60 +36,42 @@ import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
  */
 public class PacketISpawnParticles extends AbstractClientMessage<PacketISpawnParticles>
 {
-	/** The Item class which will spawn the particles; must implement ISpawnParticles */
-	private Item item;
+	/** The ItemStack spawning the particles; Item must implement ISpawnParticles */
+	private ItemStack stack;
 
-	/** Center of AoE */
-	private double x, y, z;
+	/** The name of the player that caused the particles to be spawned */
+	private String commandSenderName;
 
 	/** Radius buffer which to spawn the particles */
 	private float r;
 
-	/** Storage for the normalized look vector of the original player */
-	private double lookX, lookY, lookZ;
-
 	public PacketISpawnParticles() {}
 
-	public PacketISpawnParticles(EntityPlayer player, Item item, float radius) {
-		this.item = item;
-		x = player.posX;
-		y = player.posY;
-		z = player.posZ;
+	public PacketISpawnParticles(EntityPlayer player, float radius) {
+		this.commandSenderName = player.getCommandSenderName();
+		this.stack = player.getHeldItem();
 		r = radius;
-		lookX = player.getLookVec().xCoord;
-		lookY = player.getLookVec().yCoord;
-		lookZ = player.getLookVec().zCoord;
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
-		item = Item.getItemById(buffer.readInt());
-		x = buffer.readDouble();
-		y = buffer.readDouble();
-		z = buffer.readDouble();
+		commandSenderName = ByteBufUtils.readUTF8String(buffer);
+		stack = ByteBufUtils.readItemStack(buffer);
 		r = buffer.readFloat();
-		lookX = buffer.readDouble();
-		lookY = buffer.readDouble();
-		lookZ = buffer.readDouble();
 	}
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
-		buffer.writeInt(Item.getIdFromItem(item));
-		buffer.writeDouble(x);
-		buffer.writeDouble(y);
-		buffer.writeDouble(z);
+		ByteBufUtils.writeUTF8String(buffer, commandSenderName);
+		ByteBufUtils.writeItemStack(buffer, stack);
 		buffer.writeFloat(r);
-		buffer.writeDouble(lookX);
-		buffer.writeDouble(lookY);
-		buffer.writeDouble(lookZ);
 	}
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		if (item instanceof ISpawnParticles) {
-			Vec3 vec3 = new Vec3(lookX, lookY, lookZ);
-			((ISpawnParticles) item).spawnParticles(player.worldObj, x, y, z, r, vec3);
+		EntityPlayer commandSender = player.worldObj.getPlayerEntityByName(commandSenderName);
+		if (commandSender != null && stack != null && stack.getItem() instanceof ISpawnParticles) {
+			((ISpawnParticles) stack.getItem()).spawnParticles(player.worldObj, commandSender, stack, player.posX, player.posY, player.posZ, r);
 		}
 	}
 }

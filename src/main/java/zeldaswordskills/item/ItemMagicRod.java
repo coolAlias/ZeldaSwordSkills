@@ -213,7 +213,7 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 		if (isUpgraded(stack)) {
 			r *= 1.5F;
 		}
-		PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, this, r), player, 64.0D);
+		PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, r), player, 64.0D);
 		if (ticksInUse % 4 == 3) {
 			affectBlocks(world, player, r);
 			List<EntityLivingBase> targets = TargetUtils.acquireAllLookTargets(player, Math.round(r), 1.0F);
@@ -313,20 +313,21 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector) {
-		y += 1.62D;
+	public void spawnParticles(World world, EntityPlayer player, ItemStack stack, double x, double y, double z, float r) {
+		y += player.getEyeHeight();
+		Vec3 look = player.getLookVec();
 		for (float f = 0; f < r; f += 0.5F) {
-			x += lookVector.xCoord;
-			y += lookVector.yCoord;
-			z += lookVector.zCoord;
+			x += look.xCoord;
+			y += look.yCoord;
+			z += look.zCoord;
 			for (int i = 0; i < 4; ++i) {
 				world.spawnParticle(magicType.getTrailingParticle(),
 						x + 0.5F - world.rand.nextFloat(),
 						y + 0.5F - world.rand.nextFloat(),
 						z + 0.5F - world.rand.nextFloat(),
-						lookVector.xCoord * (0.5F * world.rand.nextFloat()),
-						lookVector.yCoord * 0.15D,
-						lookVector.zCoord * (0.5F * world.rand.nextFloat()));
+						look.xCoord * (0.5F * world.rand.nextFloat()),
+						look.yCoord * 0.15D,
+						look.zCoord * (0.5F * world.rand.nextFloat()));
 			}
 		}
 	}

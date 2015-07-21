@@ -35,7 +35,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -174,7 +173,7 @@ public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifi
 			player.addExhaustion(charge * 2.0F);
 			if (charge > 0.25F) {
 				if (!player.worldObj.isRemote) {
-					PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, this, 4.0F), player, 64.0D);
+					PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, 4.0F), player, 64.0D);
 				}
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);
@@ -195,7 +194,7 @@ public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifi
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double x, double y, double z, float radius, Vec3 lookVector) {
+	public void spawnParticles(World world, EntityPlayer player, ItemStack stack, double x, double y, double z, float radius) {
 		int r = MathHelper.ceiling_float_int(radius);
 		for (int i = 0; i < r; ++i) {
 			for (int k = 0; k < r; ++k) {

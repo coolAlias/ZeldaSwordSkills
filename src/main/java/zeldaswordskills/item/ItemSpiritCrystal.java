@@ -191,7 +191,7 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	private int handleDin(ItemStack stack, World world, EntityPlayer player) {
 		float radius = 5.0F;
 		if (!world.isRemote) {
-			PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, this, radius), player, 64.0D);
+			PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, radius), player, 64.0D);
 			affectDinBlocks(world, player, radius);
 		}
 		affectDinEntities(world, player, radius);
@@ -259,7 +259,7 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double posX, double posY, double posZ, float radius, Vec3 lookVector) {
+	public void spawnParticles(World world, EntityPlayer player, ItemStack stack, double posX, double posY, double posZ, float radius) {
 		int i1 = MathHelper.floor_double(posX + radius);
 		int j1 = MathHelper.floor_double(posY + radius);
 		int k1 = MathHelper.floor_double(posZ + radius);
