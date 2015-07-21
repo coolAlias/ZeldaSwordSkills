@@ -21,6 +21,8 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -46,8 +48,11 @@ import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.AttackBlockedPacket;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
+import zeldaswordskills.network.client.SyncCurrentMagicPacket;
 import zeldaswordskills.network.client.SyncPlayerInfoPacket;
 import zeldaswordskills.network.client.SyncQuestsPacket;
+import zeldaswordskills.network.server.RequestCurrentMagicPacket;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.PlayerUtils;
 
 public class ZSSPlayerInfo implements IExtendedEntityProperties
@@ -59,6 +64,11 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	private final ZSSPlayerSkills playerSkills;
 
 	private final ZSSPlayerSongs playerSongs;
+
+	/** Current magic points */
+	private float mp;
+
+	public static final IAttribute maxMagic = (new RangedAttribute(null, "zss.maxMagic", 100.0D, 0.0D, Double.MAX_VALUE)).setDescription("Max Magic").setShouldWatch(true);
 
 	/** Last ridden entity so it can be set after player is no longer riding */
 	private Entity lastRidden;
@@ -133,8 +143,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
-		playerSkills = new ZSSPlayerSkills(this, player);
+		playerSkills = new ZSSPlayerSkills(player);
 		playerSongs = new ZSSPlayerSongs(player);
+		player.getAttributeMap().registerAttribute(maxMagic).setBaseValue(50.0D);
+		mp = getMaxMagic(); // don't use setter here: don't want to send packet
 		initStats();
 	}
 
@@ -145,6 +157,96 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		for (Stats stat : Stats.values()) {
 			playerStats.put(stat, 0);
 		}
+	}
+
+	/**
+	 * Returns the player's current MP
+	 */
+	public float getCurrentMagic() {
+		if (mp > getMaxMagic()) {
+			setCurrentMagic(getMaxMagic());
+		}
+		return mp;
+	}
+
+	/**
+	 * Restores the given amount of MP
+	 */
+	public void restoreMagic(float amount) {
+		setCurrentMagic(getCurrentMagic() + amount);
+	}
+
+	/**
+	 * Sets the player's current MP
+	 */
+	public void setCurrentMagic(float value) {
+		this.mp = MathHelper.clamp_float(value, 0.0F, getMaxMagic());
+		if (player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncCurrentMagicPacket(player), (EntityPlayerMP) player);
+		}
+	}
+
+	/**
+	 * Sets the player's current MP upon first joining the world (since max MP attribute not yet synced)
+	 */
+	public void setInitialMagic(float value) {
+		this.mp = Math.max(0.0F, value);
+	}
+
+	/**
+	 * Returns the player's current maximum magic points
+	 */
+	public float getMaxMagic() {
+		return (float) player.getAttributeMap().getAttributeInstance(maxMagic).getAttributeValue();
+	}
+
+	/**
+	 * Sets the player's maximum magic points
+	 */
+	public void setMaxMagic(float value) {
+		value = MathHelper.clamp_float(value, 0.0F, (float)Config.getMaxMagicPoints());
+		player.getAttributeMap().getAttributeInstance(maxMagic).setBaseValue(value);
+		if (getCurrentMagic() > getMaxMagic()) {
+			setCurrentMagic(getMaxMagic());
+		}
+	}
+
+	/**
+	 * Depletes the magic bar by the amount whether the player has enough magic or not
+	 * @return True if the player had sufficient magic for the amount
+	 */
+	public boolean consumeMagic(float amount) {
+		return (canUseMagic() ? useMagic(amount, true) : false);
+	}
+
+	/**
+	 * Depletes the magic bar by the amount only if the player has sufficient magic
+	 * @return True if the player had sufficient magic for the amount
+	 */
+	public boolean useMagic(float amount) {
+		return (canUseMagic() ? useMagic(amount, false) : false);
+	}
+
+	/**
+	 * Returns true if current magic is at least equal to the amount to use
+	 * @param consume true to deplete magic bar even if magic is insufficient
+	 */
+	private boolean useMagic(float amount, boolean consume) {
+		if (player.capabilities.isCreativeMode) {
+			return true;
+		}
+		boolean sufficient = amount <= getCurrentMagic();
+		if (sufficient || consume) {
+			setCurrentMagic(getCurrentMagic() - amount);
+		}
+		return sufficient;
+	}
+
+	/**
+	 * Returns whether the player is currently allowed to use magic
+	 */
+	public boolean canUseMagic() {
+		return player.capabilities.isCreativeMode || (getMaxMagic() > 0 && !isNayruActive());
 	}
 
 	/** Gets the player's current stat value */
@@ -398,13 +500,12 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	private void updateNayru() {
 		player.hurtResistantTime = player.maxHurtResistantTime;
-		if (player.ticksExisted % 16 == 0) {
-			player.addExhaustion(3.0F);
-		}
-		if (player.getFoodStats().getFoodLevel() == 0) {
-			setFlag(IS_NAYRU_ACTIVE, false);
-		} else {
-			PacketDispatcher.sendToAllAround(new SpawnNayruParticlesPacket(player), player, 64.0D);
+		if (player.ticksExisted % 4 == 0) {
+			if (!useMagic(0.5F, true)) { // call private method directly to circumvent canUseMagic()
+				setFlag(IS_NAYRU_ACTIVE, false);
+			} else if (player instanceof EntityPlayerMP) {
+				PacketDispatcher.sendToAllAround(new SpawnNayruParticlesPacket(player), player, 64.0D);
+			}
 		}
 	}
 
@@ -437,6 +538,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			playerSkills.verifyMaxHealth();
 			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
 			PacketDispatcher.sendTo(new SyncQuestsPacket(ZSSQuests.get(player)), (EntityPlayerMP) player);
+		} else { // Re-request current mana (truncated by attribute having incorrect value initially)
+			PacketDispatcher.sendToServer(new RequestCurrentMagicPacket());
 		}
 	}
 
@@ -456,6 +559,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void saveNBTData(NBTTagCompound compound) {
 		playerSkills.saveNBTData(compound);
 		playerSongs.saveNBTData(compound);
+		compound.setFloat("zssCurrentMagic", mp);
 		compound.setIntArray("zssStats", ArrayUtils.toPrimitive(playerStats.values().toArray(new Integer[playerStats.size()])));
 		compound.setByte("ZSSGearReceived", receivedGear);
 		if (lastBootsWorn != null) {
@@ -474,6 +578,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void loadNBTData(NBTTagCompound compound) {
 		playerSkills.loadNBTData(compound);
 		playerSongs.loadNBTData(compound);
+		mp = compound.getFloat("zssCurrentMagic");
 		int[] stats = compound.getIntArray("zssStats");
 		for (int i = 0; i < stats.length; ++i) {
 			playerStats.put(Stats.values()[i], stats[i]);

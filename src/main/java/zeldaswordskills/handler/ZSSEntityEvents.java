@@ -185,11 +185,12 @@ public class ZSSEntityEvents
 
 	@SubscribeEvent
 	public void onEntityJoinWorld(EntityJoinWorldEvent event) {
+		if (event.entity instanceof EntityPlayer) {
+			ZSSEntityInfo.get((EntityPlayer) event.entity).onJoinWorld();
+			ZSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
+		}
 		if (!event.entity.worldObj.isRemote) {
-			if (event.entity instanceof EntityPlayer) {
-				ZSSEntityInfo.get((EntityPlayer) event.entity).onJoinWorld();
-				ZSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
-			} else if (event.entity.getClass() == EntityVillager.class) {
+			if (event.entity.getClass() == EntityVillager.class) {
 				EntityGoron.doVillagerSpawn((EntityVillager) event.entity, event.entity.worldObj);
 			}
 			if (!Config.areVanillaBuffsDisabled() && event.entity instanceof EntityLivingBase) {
@@ -223,7 +224,7 @@ public class ZSSEntityEvents
 	 * Applies permanent buffs / debuffs to vanilla mobs
 	 */
 	private void initBuffs(EntityLivingBase entity) {
-		if (!ZSSEntityInfo.get(entity).getActiveBuffsMap().isEmpty()) {
+		if (!ZSSEntityInfo.get(entity).getActiveBuffs().isEmpty()) {
 			return;
 		}
 		// double damage from cold effects, highly resistant to fire damage

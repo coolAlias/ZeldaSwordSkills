@@ -25,12 +25,15 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ICyclableItem;
 import zeldaswordskills.ref.Config;
 
 @SideOnly(Side.CLIENT)
 public class GuiItemModeOverlay extends Gui implements IGuiOverlay
 {
+	private static final int ICON_SIZE = 18;
+	public static final int ICON_SPACING = ICON_SIZE + 2;
 	private final Minecraft mc;
 	private ItemStack stack;
 
@@ -48,8 +51,27 @@ public class GuiItemModeOverlay extends Gui implements IGuiOverlay
 	public void renderOverlay(ScaledResolution resolution) {
 		stack = ((ICyclableItem) stack.getItem()).getRenderStackForMode(stack, mc.thePlayer);
 		if (stack != null) {
-			int xPos = (Config.isItemModeLeft ? 2 : resolution.getScaledWidth() - 18);
-			int yPos = (Config.isItemModeTop ? 2 : resolution.getScaledHeight() - 18);
+			int xPos = (Config.isItemModeLeft ? 2 : resolution.getScaledWidth() - ICON_SIZE);
+			int yPos = (Config.isItemModeTop ? 2 : resolution.getScaledHeight() - ICON_SIZE);
+			// Adjust for Magic Meter
+			if ((Config.isMagicMeterEnabled || Config.isMagicMeterTextEnabled) && Config.isItemModeTop == Config.isMagicMeterTop && Config.isItemModeLeft == Config.isMagicMeterLeft) {
+				if ((Config.isItemModeLeft ? GuiMagicMeter.getLeftX(resolution) < ICON_SPACING : GuiMagicMeter.getRightX(resolution) > xPos) 
+						&& (Config.isItemModeTop ? GuiMagicMeter.getTopY(resolution) < ICON_SPACING : GuiMagicMeter.getBottomY(resolution) > yPos)) {
+					if (Config.isMagicMeterHorizontal) { // move up or down
+						yPos = (Config.isItemModeTop ? GuiMagicMeter.getBottomY(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2) : GuiMagicMeter.getTopY(resolution) - ICON_SPACING);
+					} else { // move right or left
+						xPos = (Config.isItemModeLeft ? GuiMagicMeter.getRightX(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2) : GuiMagicMeter.getLeftX(resolution) - ICON_SPACING); 
+					}
+				}
+			}
+			// Adjust for Buff Bar
+			if (Config.isItemModeTop && Config.isBuffBarEnabled && Config.isItemModeLeft == Config.isBuffBarLeft && !ZSSEntityInfo.get(mc.thePlayer).getActiveBuffs().isEmpty()) {
+				if (Config.isBuffBarHorizontal) {
+					yPos += GuiBuffBar.ICON_SPACING;
+				} else {
+					xPos += GuiBuffBar.ICON_SPACING;
+				}
+			}
 			GlStateManager.pushAttrib();
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 			GlStateManager.disableLighting();

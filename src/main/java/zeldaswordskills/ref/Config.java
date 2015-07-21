@@ -81,6 +81,27 @@ public class Config
 	public static boolean enableAutoTarget;
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
 	public static boolean canTargetPlayers;
+	/*================== MAGIC METER (CLIENT SIDE) =====================*/
+	/** Enable text display of current Magic Points */
+	public static boolean isMagicMeterTextEnabled;
+	/** Enable the Magic Meter HUD display */
+	public static boolean isMagicMeterEnabled;
+	/** [Offset: X] Moves the Meter left (-) or right (+) this number of pixels */
+	public static int magicMeterOffsetX;
+	/** [Offset: Y] Moves the Meter up (-) or down (+) this number of pixels */
+	public static int magicMeterOffsetY;
+	/** [Orientation] True for a horizontal magic meter, or false for a vertical one */
+	public static boolean isMagicMeterHorizontal;
+	/** [Position: Centered] Whether the horizontal position is relative to the center of the screen (+ is to the right, - is to the left) */
+	public static boolean isMagicMeterCenteredX;
+	/** [Position: Left] Whether the horizontal position is relative to the left side of the screen (offsetX should be negative if false) */
+	public static boolean isMagicMeterLeft;
+	/** [Position: Top] Whether the vertical position is relative to the top of the screen (offsetY should be negative if false) */
+	public static boolean isMagicMeterTop;
+	/** [Width: Max] Maximum width of the magic meter [25-100] */
+	public static int magicMeterWidth;
+	/** [Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10] */
+	public static int magicMeterIncrements;
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
 	private static boolean enableOffhandMaster;
@@ -207,6 +228,8 @@ public class Config
 	private static float disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
 	private static float disarmPenalty;
+	/** [Magic] Maximum magic points attainable [50-1000] */
+	private static int maxMagicPoints;
 	/** [SYNC] [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
 	private static boolean requireFullHealth;
 	/*================== SONGS =====================*/
@@ -380,6 +403,31 @@ public class Config
 		enableHookshotSound = config.get(category, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
 		enableAutoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
 		canTargetPlayers = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
+		/*================== MAGIC METER (CLIENT SIDE) =====================*/
+		category = "Magic Meter";
+		config.addCustomCategoryComment(category,
+				"Magic meter can be configured to display anywhere on the screen using the offset X and Y." +
+				"\nOffsets are in relation to its initial position, which is either in one of the four corners" +
+				"\nof the screen, or at the top or bottom with the left-most edge at the center of the screen." +
+				"\n\nDefault maximum width is 75 which is the same width as the hunger bar when the player has" +
+				"\ngained magic points equal to or greater than 50 times the number of increments required." +
+				"\nE.g., at 2 increments, the meter for a player with 100 mp will be at maximum width." +
+				"\n===============================================" + 
+				"\nCommon Settings" + 
+				"\n===============================================" + 
+				"\nAbove Hunger Bar, from right to left: x=91, y=-40, orientation=true, centered=true, left=false, top=false" +
+				"\nAbove Hunger Bar, from left to right: x=10, y=-40, orientation=true, centered=true, left=true, top=false" + 
+				"\nAny Corner: x=0, y=0, centered=false (top, left, and orientation may be any value)");
+		isMagicMeterTextEnabled = config.get(category, "Enable text display of current Magic Points", false).getBoolean(false);
+		isMagicMeterEnabled = config.get(category, "Enable the Magic Meter HUD display", true).getBoolean(true);
+		magicMeterOffsetX = config.get(category, "[Offset: X] Moves the Meter left (-) or right (+) this number of pixels", 91).getInt();
+		magicMeterOffsetY = config.get(category, "[Offset: Y] Moves the Meter up (-) or down (+) this number of pixels", -40).getInt();
+		isMagicMeterHorizontal = config.get(category, "[Orientation] True for a horizontal magic meter, or false for a vertical one", true).getBoolean(true);
+		isMagicMeterCenteredX = config.get(category, "[Position: Centered] Whether the horizontal position is relative to the center of the screen (+ is to the right, - is to the left)", true).getBoolean(true);
+		isMagicMeterLeft = config.get(category, "[Position: Left] Whether the horizontal position is relative to the left side of the screen (offsetX should usually be negative if false)", false).getBoolean(false);
+		isMagicMeterTop = config.get(category, "[Position: Top] Whether the vertical position is relative to the top of the screen (offsetY should be negative if false)", false).getBoolean(false);
+		magicMeterWidth = config.get(category, "[Width: Max] Maximum width of the magic meter [25-100]", 75).getInt();
+		magicMeterIncrements = config.get(category, "[Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10]", 2).getInt();
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
 		/*================== WEAPON REGISTRY =====================*/
@@ -457,6 +505,7 @@ public class Config
 		allowDisarmorPlayer = config.get("Skills", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
 		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 15);
 		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
+		maxMagicPoints = MathHelper.clamp_int(config.get("Skills", "[Magic] Maximum magic points attainable [50-1000]", 250).getInt(), 50, 1000);
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
@@ -628,6 +677,7 @@ public class Config
 	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
 	public static float getDisarmPenalty() { return disarmPenalty; }
 	public static float getDisarmTimingBonus() { return disarmTimingBonus; }
+	public static int getMaxMagicPoints() { return maxMagicPoints; }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {
 		return (requireFullHealth ? 0.0F : (0.6F * level));

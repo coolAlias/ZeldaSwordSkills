@@ -73,8 +73,6 @@ public class ZSSPlayerSkills
 
 	private final EntityPlayer player;
 
-	private final ZSSPlayerInfo playerInfo;
-
 	/** Stores information on the player's Attributes and Passive Skills */
 	private final Map<Byte, SkillBase> skills;
 
@@ -91,8 +89,7 @@ public class ZSSPlayerSkills
 	/** Number of crests given to Orca, implying number of Hurricane Spin orbs received */
 	private int crestsGiven = 0;
 
-	public ZSSPlayerSkills(ZSSPlayerInfo playerInfo, EntityPlayer player) {
-		this.playerInfo = playerInfo;
+	public ZSSPlayerSkills(EntityPlayer player) {
 		this.player = player;
 		this.skills = new HashMap<Byte, SkillBase>(SkillBase.getNumSkills());
 	}
@@ -176,11 +173,6 @@ public class ZSSPlayerSkills
 		if (player.getHealth() > player.getMaxHealth()) {
 			player.setHealth(player.getMaxHealth());
 		}
-	}
-
-	/** Wrapper method, since Nayru is often checked along with skills stuff */
-	public boolean isNayruActive() {
-		return playerInfo.isNayruActive();
 	}
 
 	/** Returns true if the player has at least one level in the specified skill */
