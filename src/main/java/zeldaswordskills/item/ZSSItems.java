@@ -482,10 +482,10 @@ public class ZSSItems
 		}).setUnlocalizedName("zora_tunic_boots");
 
 		// BOOTS
-		bootsHeavy = new ItemArmorBoots(ArmorMaterial.IRON, ZSSMain.proxy.addArmor("boots"), "minecraft:textures/models/armor/iron_layer_1.png").setUnlocalizedName("boots_heavy");
-		bootsHover = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/mask_hawkeye_layer_1.png").setUnlocalizedName("boots_hover");
-		bootsPegasus = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/hero_tunic_layer_1.png").setUnlocalizedName("boots_pegasus");
-		bootsRubber = new ItemArmorBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/boots_rubber_layer_1.png").setUnlocalizedName("boots_rubber");
+		bootsHeavy = new ItemArmorBoots.ItemHeavyBoots(ArmorMaterial.IRON, ZSSMain.proxy.addArmor("boots"), "minecraft:textures/models/armor/iron_layer_1.png").setUnlocalizedName("boots_heavy");
+		bootsHover = new ItemArmorBoots.ItemHoverBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/mask_hawkeye_layer_1.png").setUnlocalizedName("boots_hover");
+		bootsPegasus = new ItemArmorBoots.ItemPegasusBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/hero_tunic_layer_1.png").setUnlocalizedName("boots_pegasus");
+		bootsRubber = new ItemArmorBoots.ItemRubberBoots(ArmorMaterial.CHAIN, ZSSMain.proxy.addArmor("boots"), ModInfo.ID + ":textures/armor/boots_rubber_layer_1.png").setUnlocalizedName("boots_rubber");
 
 		// SHIELDS
 		shieldDeku = new ItemZeldaShield(ToolMaterial.WOOD, 0.25F, 30, 3F, 5F).setUnlocalizedName("shield_deku");
@@ -571,26 +571,13 @@ public class ZSSItems
 		whip = new ItemWhip().setUnlocalizedName("whip");
 
 		//===================== MASK TAB =====================//
-		maskBlast = new ItemMask(ArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_blast");
-		maskBunny = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(1, 64).setUnlocalizedName("mask_bunny");
-		maskCouples = (new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")) {
-			@Override
-			public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
-				super.onArmorTick(world, player, stack);
-				if (world.getWorldTime() % 64 == 0) {
-					List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D));
-					for (EntityVillager villager : villagers) {
-						if (world.rand.nextFloat() < 0.5F) {
-							ZSSVillagerInfo.get(villager).setMating();
-						}
-					}
-				}
-			}
-		}).setPrice(40, 32).setUnlocalizedName("mask_couples");
+		maskBlast = new ItemMask.ItemMaskBlast(ArmorMaterial.IRON, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_blast");
+		maskBunny = new ItemMask.ItemMaskBunny(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(1, 64).setUnlocalizedName("mask_bunny");
+		maskCouples = new ItemMask.ItemMaskCouples(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(40, 32).setUnlocalizedName("mask_couples");
 		maskGerudo = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_gerudo");
-		maskGiants = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_giants");
+		maskGiants = new ItemMask.ItemMaskGiants(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_giants");
 		maskGibdo = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_gibdo");
-		maskHawkeye = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_hawkeye");
+		maskHawkeye = new ItemMask.ItemMaskHawkeye(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_hawkeye");
 		maskKeaton = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(8, 16).setUnlocalizedName("mask_keaton");
 		maskScents = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(32, 32).setUnlocalizedName("mask_scents");
 		maskSkull = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setPrice(20, 10).setUnlocalizedName("mask_skull");
@@ -598,10 +585,10 @@ public class ZSSItems
 		maskStone = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.invisibility.getId(), 100, 0)).setUnlocalizedName("mask_stone");
 		maskTruth = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_truth");
 		maskDeku = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_deku");
-		maskGoron = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_goron");
+		maskGoron = new ItemMask.ItemMaskGoron(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_goron");
 		maskZora = new ItemMaskZora(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_zora");
 		maskFierce = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setUnlocalizedName("mask_fierce");
-		maskMajora = new ItemMask(WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.wither.getId(), 100, 1)).setUnlocalizedName("mask_majora");
+		maskMajora = new ItemMask.ItemMaskMajora(WOOD, ZSSMain.proxy.addArmor("mask")).setEffect(new PotionEffect(Potion.wither.getId(), 100, 1)).setUnlocalizedName("mask_majora");
 
 		//===================== MISCELLANEOUS TAB =====================//
 		pendant = new ItemPendant().setUnlocalizedName("pendant");

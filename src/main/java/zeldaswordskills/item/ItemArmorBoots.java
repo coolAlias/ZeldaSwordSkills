@@ -73,18 +73,6 @@ import zeldaswordskills.util.WorldUtils;
  */
 public class ItemArmorBoots extends ItemModArmor implements IUnenchantable
 {
-	/** Bonus to knockback resistance when wearing Heavy Boots */
-	private static final UUID heavyBootsKnockbackModifierUUID = UUID.fromString("71AF0F88-82E5-49DE-B9CC-844048E33D69");
-	private static final AttributeModifier heavyBootsKnockbackModifier = (new AttributeModifier(heavyBootsKnockbackModifierUUID, "Heavy Boots Knockback Resistance", 1.0D, 0)).setSaved(false);
-
-	/** Movement penalty for wearing Heavy Boots applies at all times */
-	private static final UUID heavyBootsMovePenaltyUUID = UUID.fromString("B6C8CCB6-AE7B-4F14-908A-2F41BDB4D720");
-	private static final AttributeModifier heavyBootsMovePenalty = (new AttributeModifier(heavyBootsMovePenaltyUUID, "Heavy Boots Movement penalty", -0.6D, 1)).setSaved(false);
-
-	/** Movement bonus for wearing Pegasus Boots */
-	private static final UUID pegasusBootsMoveBonusUUID = UUID.fromString("36A0FC05-50EB-460B-8961-615633A6D813");
-	private static final AttributeModifier pegasusBootsMoveBonus = (new AttributeModifier(pegasusBootsMoveBonusUUID, "Pegasus Boots Speed Bonus", 0.3D, 2)).setSaved(false);
-
 	/** Armor model texture resource location */
 	private final String resourceLocation;
 
@@ -132,82 +120,27 @@ public class ItemArmorBoots extends ItemModArmor implements IUnenchantable
 	public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_BOOTS)) {
-			info.setWearingBoots();
-		}
-		if (this == ZSSItems.bootsHeavy) {
-			WorldUtils.reverseMaterialAcceleration(world, player.getEntityBoundingBox().expand(0.0D, -0.4000000059604645D, 0.0D).contract(0.001D, 0.001D, 0.001D), Material.water, player);
-			if (!world.isRemote) {
-				BlockPos pos = new BlockPos(player);
-				Material m = world.getBlockState(pos).getBlock().getMaterial();
-				if (m.isLiquid()) {
-					PacketDispatcher.sendTo(new InLiquidPacket(m == Material.lava), (EntityPlayerMP) player);
-				}
-				Material m1 = world.getBlockState(pos.down()).getBlock().getMaterial();
-				if ((m1 == Material.glass || m1 == Material.ice) && world.getWorldTime() % 2 == 0) {
-					if ((!player.isSneaking() && world.rand.nextFloat() < 0.15F) || world.rand.nextFloat() < 0.01F) {
-						world.destroyBlock(pos.down(), false);
-					}
-				}
-			}
-		} else if (this == ZSSItems.bootsHover) {
-			Block block = world.getBlockState(new BlockPos(player).down()).getBlock();
-			boolean flag = !block.getMaterial().blocksMovement() || block.slipperiness > 0.6F || block instanceof BlockSoulSand;
-			if (flag && player.isSprinting() && player.motionY < 0.0D && ++info.hoverTime < 40 ) {
-				player.posY += -player.motionY;
-				player.motionY = 0.0D;
-				player.fallDistance = 0.0F;
-				if (info.hoverTime % 3 == 0) {
-					world.spawnParticle(EnumParticleTypes.CLOUD, player.posX, player.posY - 1, player.posZ, -player.motionX, player.motionY, -player.motionZ);
-				}
-			} else if (info.hoverTime > 0) {
-				info.hoverTime = 0;
-				player.setSprinting(false);
-				if (world.isRemote && Minecraft.getMinecraft().gameSettings.keyBindSprint.isKeyDown()) {
-					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
-				}
-			}
+			info.setWearingBoots(stack);
 		}
 	}
 
 	/**
-	 * Applies or removes attribute modifiers for boots when equipped or unequipped
-	 * @param stack Either the currently equipped boots or NULL
+	 * Applies modifiers for boots when equipped, calling {@link #removeModifiers} followed by {@link #applyCustomModifiers}
 	 */
-	public static void applyAttributeModifiers(ItemStack stack, EntityPlayer player) {
-		if (stack != null && ZSSPlayerInfo.get(player).getFlag(ZSSPlayerInfo.IS_WEARING_BOOTS)) {
-			ItemArmorBoots.removeAttributeModifiers(stack, player);
-			if (stack.getItem() == ZSSItems.bootsHeavy) {
-				player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).applyModifier(heavyBootsKnockbackModifier);
-				player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(heavyBootsMovePenalty);
-				ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, Integer.MAX_VALUE, 50);
-			} else if (stack.getItem() == ZSSItems.bootsPegasus) {
-				player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(pegasusBootsMoveBonus);
-				ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
-				ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
-			} else if (stack.getItem() == ZSSItems.bootsRubber) {
-				ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
-			}
-		}
+	public final void applyModifiers(ItemStack stack, EntityPlayer player) {
+		removeModifiers(stack, player);
+		applyCustomModifiers(stack, player);
 	}
 
 	/**
-	 * Remove modifiers provided by the given stack
-	 * @param stack ItemBoots being unequipped
+	 * Called from {@link #applyModifiers} to add any special modifiers when equipped
 	 */
-	public static void removeAttributeModifiers(ItemStack stack, EntityPlayer player) {
-		if (stack == null) { return; }
-		if (stack.getItem() == ZSSItems.bootsHeavy) {
-			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).removeModifier(heavyBootsKnockbackModifier);
-			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(heavyBootsMovePenalty);
-			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_DOWN);
-		} else if (stack.getItem() == ZSSItems.bootsPegasus) {
-			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(pegasusBootsMoveBonus);
-			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, false);
-			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
-		} else if (stack.getItem() == ZSSItems.bootsRubber) {
-			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_SHOCK);
-		}
-	}
+	protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {}
+
+	/**
+	 * Called when a pair of boots is unequipped to remove any modifiers
+	 */
+	public void removeModifiers(ItemStack stack, EntityPlayer player) {}
 
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
@@ -231,4 +164,113 @@ public class ItemArmorBoots extends ItemModArmor implements IUnenchantable
 		return multimap;
 	}
 	 */
+
+	//======================================================================//
+	//	Static inner classes for Masks with custom behaviors				//
+	//======================================================================//
+	public static class ItemHeavyBoots extends ItemArmorBoots
+	{
+		/** Bonus to knockback resistance when wearing Heavy Boots */
+		private static final UUID heavyBootsKnockbackModifierUUID = UUID.fromString("71AF0F88-82E5-49DE-B9CC-844048E33D69");
+		private static final AttributeModifier heavyBootsKnockbackModifier = (new AttributeModifier(heavyBootsKnockbackModifierUUID, "Heavy Boots Knockback Resistance", 1.0D, 0)).setSaved(false);
+
+		/** Movement penalty for wearing Heavy Boots applies at all times */
+		private static final UUID heavyBootsMovePenaltyUUID = UUID.fromString("B6C8CCB6-AE7B-4F14-908A-2F41BDB4D720");
+		private static final AttributeModifier heavyBootsMovePenalty = (new AttributeModifier(heavyBootsMovePenaltyUUID, "Heavy Boots Movement penalty", -0.6D, 1)).setSaved(false);
+
+		public ItemHeavyBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
+			super(material, renderIndex, resourceLocation);
+		}
+		@Override
+		public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
+			super.onArmorTick(world, player, stack);
+			WorldUtils.reverseMaterialAcceleration(world, player.getEntityBoundingBox().expand(0.0D, -0.4000000059604645D, 0.0D).contract(0.001D, 0.001D, 0.001D), Material.water, player);
+			if (!world.isRemote) {
+				BlockPos pos = new BlockPos(player);
+				Material m = world.getBlockState(pos).getBlock().getMaterial();
+				if (m.isLiquid()) {
+					PacketDispatcher.sendTo(new InLiquidPacket(m == Material.lava), (EntityPlayerMP) player);
+				}
+				Material m1 = world.getBlockState(pos.down()).getBlock().getMaterial();
+				if ((m1 == Material.glass || m1 == Material.ice) && world.getWorldTime() % 2 == 0) {
+					if ((!player.isSneaking() && world.rand.nextFloat() < 0.15F) || world.rand.nextFloat() < 0.01F) {
+						world.destroyBlock(pos.down(), false);
+					}
+				}
+			}
+		}
+		@Override
+		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).applyModifier(heavyBootsKnockbackModifier);
+			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(heavyBootsMovePenalty);
+			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, Integer.MAX_VALUE, 50);
+		}
+		@Override
+		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).removeModifier(heavyBootsKnockbackModifier);
+			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(heavyBootsMovePenalty);
+			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_DOWN);
+		}
+	}
+	public static class ItemHoverBoots extends ItemArmorBoots {
+		public ItemHoverBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
+			super(material, renderIndex, resourceLocation);
+		}
+		@Override
+		public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
+			super.onArmorTick(world, player, stack);
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+			Block block = world.getBlockState(new BlockPos(player).down()).getBlock();
+			boolean flag = !block.getMaterial().blocksMovement() || block.slipperiness > 0.6F || block instanceof BlockSoulSand;
+			if (flag && player.isSprinting() && player.motionY < 0.0D && ++info.hoverTime < 40 ) {
+				player.posY += -player.motionY;
+				player.motionY = 0.0D;
+				player.fallDistance = 0.0F;
+				if (info.hoverTime % 3 == 0) {
+					world.spawnParticle(EnumParticleTypes.CLOUD, player.posX, player.posY - 1, player.posZ, -player.motionX, player.motionY, -player.motionZ);
+				}
+			} else if (info.hoverTime > 0) {
+				info.hoverTime = 0;
+				player.setSprinting(false);
+				if (world.isRemote && Minecraft.getMinecraft().gameSettings.keyBindSprint.isKeyDown()) {
+					KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSprint.getKeyCode(), false);
+				}
+			}
+		}
+	}
+	public static class ItemPegasusBoots extends ItemArmorBoots
+	{
+		/** Movement bonus for wearing Pegasus Boots */
+		private static final UUID pegasusBootsMoveBonusUUID = UUID.fromString("36A0FC05-50EB-460B-8961-615633A6D813");
+		private static final AttributeModifier pegasusBootsMoveBonus = (new AttributeModifier(pegasusBootsMoveBonusUUID, "Pegasus Boots Speed Bonus", 0.3D, 2)).setSaved(false);
+
+		public ItemPegasusBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
+			super(material, renderIndex, resourceLocation);
+		}
+		@Override
+		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(pegasusBootsMoveBonus);
+			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
+			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
+		}
+		@Override
+		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(pegasusBootsMoveBonus);
+			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, false);
+			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
+		}
+	}
+	public static class ItemRubberBoots extends ItemArmorBoots {
+		public ItemRubberBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
+			super(material, renderIndex, resourceLocation);
+		}
+		@Override
+		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+			ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+		}
+		@Override
+		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_SHOCK);
+		}
+	}
 }
