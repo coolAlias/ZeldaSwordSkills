@@ -17,40 +17,60 @@
 
 package zeldaswordskills.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 
 public class TimedChatDialogue
 {
 	Timer timer;
 	/** The player which should receive the chat */
 	final EntityPlayer player;
-	/** The list of Strings to send */
-	final List<String> chat;
+	/** The list of chat components to send */
+	final List<IChatComponent> chat = new ArrayList<IChatComponent>();
+
+	/**
+	 * Shortcut for sending literal strings as chat messages to a player, line by line,
+	 * with no initial delay and 1250 milliseconds between each line.
+	 * @param player the player to receive the chat
+	 * @param lines literal strings to be sent as chat messages
+	 */
+	public TimedChatDialogue(EntityPlayer player, String... lines) {
+		this.player = player;
+		for (String line : lines) {
+			chat.add(new ChatComponentText(line));
+		}
+		timer = new Timer();
+		timer.schedule(new ChatTask(), 0, 1250);
+	}
 
 	/**
 	 * Use to send multiple chat messages to a player, one line at a time, with no initial
 	 * delay and a standardized delay between each line (1250 milliseconds)
 	 * @param player the player to receive the chat
-	 * @param chat a complete list of all dialogue, line-by-line and pre-translated
+	 * @param components chat components to send, in order
 	 */
-	public TimedChatDialogue(EntityPlayer player, List<String> chat) {
-		this(player, chat, 0, 1250);
+	public TimedChatDialogue(EntityPlayer player, IChatComponent... components) {
+		this(player, 0, 1250, components);
 	}
 
 	/**
 	 * Use to send multiple chat messages to a player, one line at a time
 	 * @param player the player to receive the chat
-	 * @param chat a complete list of all dialogue, line-by-line and pre-translated
 	 * @param start the delay, in milliseconds, before the first chat message is sent
 	 * @param delay the delay, in milliseconds, between each subsequent chat message
+	 * @param components chat components to send, in order
 	 */
-	public TimedChatDialogue(EntityPlayer player, List<String> chat, int start, int delay) {
+	public TimedChatDialogue(EntityPlayer player, int start, int delay, IChatComponent... components) {
 		this.player = player;
-		this.chat = chat;
+		for (IChatComponent line : components) {
+			chat.add(line);
+		}
 		timer = new Timer();
 		timer.schedule(new ChatTask(), start, delay);
 	}
@@ -61,7 +81,7 @@ public class TimedChatDialogue
 			if (i == chat.size()) {
 				timer.cancel();
 			} else {
-				PlayerUtils.sendChat(player, chat.get(i++));
+				player.addChatMessage(chat.get(i++));
 			}
 		}
 	}

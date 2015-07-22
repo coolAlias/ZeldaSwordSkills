@@ -17,7 +17,6 @@
 
 package zeldaswordskills.entity.npc;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,8 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
@@ -97,16 +97,16 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 					// instrument doesn't matter when reviewing a known song
 					songs.songToLearn = ZeldaSongs.songHealing;
 					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
-				} else if (stack.getItemDamage() == ItemInstrument.Instrument.OCARINA_TIME.ordinal()) {
-					new TimedChatDialogue(player, Arrays.asList(
-							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.0"),
-							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.found.1")));
+				} else if (((ItemInstrument) stack.getItem()).getInstrument(stack) == ItemInstrument.Instrument.OCARINA_TIME) {
+					new TimedChatDialogue(player,
+							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.found.0"),
+							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.found.1"));
 					songs.songToLearn = ZeldaSongs.songHealing;
 					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
 				} else {
-					new TimedChatDialogue(player, Arrays.asList(
-							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.lost.0"),
-							StatCollector.translateToLocal("chat.zss.npc.mask_trader.ocarina.lost.1")));
+					new TimedChatDialogue(player,
+							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.lost.0"),
+							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.lost.1"));
 				}
 			}
 		} else if (!player.worldObj.isRemote) {
@@ -121,9 +121,9 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 					PlayerUtils.playSound(player, Sounds.POP, 1.0F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.returned");
 				} else if (mask != null) {
-					new TimedChatDialogue(player, Arrays.asList(
-							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
-							StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.borrowed.1")));
+					new TimedChatDialogue(player,
+							new ChatComponentTranslation("chat.zss.npc.mask_trader.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
+							new ChatComponentTranslation("chat.zss.npc.mask_trader.borrowed.1"));
 				} else {
 					this.customer = player;
 					player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, 0, 0, 0);
@@ -132,21 +132,21 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 				Item mask = maskMap.get(maskStage / NUM_STAGES);
 				switch(maskStage % NUM_STAGES) {
 				case 0: // new mask
-					String[] chat;
+					IChatComponent[] chat;
 					if (maskStage == 0) {
-						chat = new String[] {
-								StatCollector.translateToLocal("chat.zss.npc.mask_trader.intro.0"),
-								StatCollector.translateToLocal("chat.zss.npc.mask_trader.intro.1"),
-								StatCollector.translateToLocal("chat.zss.npc.mask_trader.intro.2"),
-								StatCollector.translateToLocal("chat.zss.npc.mask_trader.intro.3")
+						chat = new IChatComponent[] {
+								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.0"),
+								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.1"),
+								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.2"),
+								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.3")
 						};
 					} else {
-						chat = new String[] {
-								StatCollector.translateToLocal("chat.zss.npc.mask_trader.next_mask.0"),
-								StatCollector.translateToLocal("chat.zss.npc.mask_trader.next_mask.1")
+						chat = new IChatComponent[] {
+								new ChatComponentTranslation("chat.zss.npc.mask_trader.next_mask.0"),
+								new ChatComponentTranslation("chat.zss.npc.mask_trader.next_mask.1")
 						};
 					}
-					new TimedChatDialogue(player, Arrays.asList(chat));
+					new TimedChatDialogue(player, chat);
 					if (mask != null) {
 						new TimedAddItem(player, new ItemStack(mask), maskStage == 0 ? 4000 : 2000);
 					}
@@ -161,10 +161,10 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 						PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
 						info.completeCurrentMaskStage();
 						if (info.getCurrentMaskStage() == (maskMap.size() * NUM_STAGES)) {
-							new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.0"),
-									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.1"),
-									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.2"),
-									StatCollector.translateToLocal("chat.zss.npc.mask_trader.reward.3")));
+							new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.0"),
+									new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.1"),
+									new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.2"),
+									new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.3"));
 							new TimedAddItem(player, new ItemStack(ZSSItems.maskTruth), 4000);
 							info.setBorrowedMask(ZSSItems.maskTruth);
 							player.triggerAchievement(ZSSAchievements.maskShop);
@@ -172,8 +172,8 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 							PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.sold");
 						}
 					} else {
-						new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.npc.mask_trader.penniless.0"),
-								StatCollector.translateToLocalFormatted("chat.zss.npc.mask_trader.penniless.1", price)));
+						new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.npc.mask_trader.penniless.0"),
+								new ChatComponentTranslation("chat.zss.npc.mask_trader.penniless.1", price));
 					}
 					break;
 				}

@@ -17,7 +17,6 @@
 
 package zeldaswordskills.item;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +33,7 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -197,8 +197,8 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 			if (entity instanceof EntityVillager) {
 				EntityVillager villager = (EntityVillager) entity;
 				if (entity.getClass().isAssignableFrom(EntityVillager.class) && this == ZSSVillagerInfo.get(villager).getMaskDesired()) {
-					new TimedChatDialogue(player, Arrays.asList(StatCollector.translateToLocal("chat.zss.mask.desired.0"),
-							StatCollector.translateToLocalFormatted("chat.zss.mask.desired.1", getSellPrice())));
+					new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.mask.desired.0"),
+							new ChatComponentTranslation("chat.zss.mask.desired.1", getSellPrice()));
 				} else {
 					// Custom villager professions all use the same chat message
 					int p = villager.getProfession();

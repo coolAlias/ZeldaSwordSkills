@@ -18,11 +18,10 @@
 package zeldaswordskills.client.gui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.LearnSongPacket;
@@ -74,15 +73,13 @@ public class GuiOcarina extends GuiMusicBase
 	public void initGui() {
 		super.initGui();
 		if (scarecrowFirst) {
-			new TimedChatDialogue(mc.thePlayer, Arrays.asList(
-					StatCollector.translateToLocal("chat.zss.song.scarecrow.greet.0"),
-					StatCollector.translateToLocal("chat.zss.song.scarecrow.greet.1")),
-					0, 1600);
+			new TimedChatDialogue(mc.thePlayer, 0, 1600,
+					new ChatComponentTranslation("chat.zss.song.scarecrow.greet.0"),
+					new ChatComponentTranslation("chat.zss.song.scarecrow.greet.1"));
 		} else if (scarecrowNotes != null && !scarecrowNotes.isEmpty()) {
-			new TimedChatDialogue(mc.thePlayer, Arrays.asList(
-					StatCollector.translateToLocal("chat.zss.song.scarecrow.last.0"),
-					StatCollector.translateToLocal("chat.zss.song.scarecrow.last.1")),
-					0, 1600);
+			new TimedChatDialogue(mc.thePlayer, 0, 1600,
+					new ChatComponentTranslation("chat.zss.song.scarecrow.last.0"),
+					new ChatComponentTranslation("chat.zss.song.scarecrow.last.1"));
 		}
 	}
 
@@ -147,17 +144,10 @@ public class GuiOcarina extends GuiMusicBase
 						flag = (scarecrowNotes.get(i) == melody.get(i));
 					}
 					if (flag) {
-						if (scarecrowFirst) {
-							new TimedChatDialogue(mc.thePlayer, Arrays.asList(
-									StatCollector.translateToLocal("chat.zss.song.scarecrow.first.0"),
-									StatCollector.translateToLocal("chat.zss.song.scarecrow.first.1")),
-									0, 1600);
-						} else {
-							new TimedChatDialogue(mc.thePlayer, Arrays.asList(
-									StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.0"),
-									StatCollector.translateToLocal("chat.zss.song.scarecrow.learn.1")),
-									0, 1600);
-						}
+						String chat = (scarecrowFirst ? "first" : "learn");
+						new TimedChatDialogue(mc.thePlayer, 0, 1600,
+								new ChatComponentTranslation("chat.zss.song.scarecrow." + chat + ".0"),
+								new ChatComponentTranslation("chat.zss.song.scarecrow." + chat + ".1"));
 						song = ZeldaSongs.songScarecrow;
 						mc.thePlayer.playSound(Sounds.SUCCESS, 0.3F, 1.0F);
 						ticksSinceLastNote = 0;

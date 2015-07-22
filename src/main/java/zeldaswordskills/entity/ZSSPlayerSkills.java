@@ -18,7 +18,6 @@
 package zeldaswordskills.entity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,7 +35,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -430,13 +430,13 @@ public class ZSSPlayerSkills
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.orca.master." + player.worldObj.rand.nextInt(4));
 		} else if (PlayerUtils.consumeInventoryItem(player, ZSSItems.treasure, Treasures.KNIGHTS_CREST.ordinal(), 1)) {
 			++crestsGiven;
-			List<String> chat = new ArrayList<String>();
-			chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.redeem." + player.worldObj.rand.nextInt(4)));
+			List<IChatComponent> chat = new ArrayList<IChatComponent>();
+			chat.add(new ChatComponentTranslation("chat.zss.npc.orca.redeem." + player.worldObj.rand.nextInt(4)));
 			if (crestsGiven == 1) {
-				new TimedChatDialogue(player, Arrays.asList(
-						StatCollector.translateToLocal("chat.zss.npc.orca.begin.0"),
-						StatCollector.translateToLocal("chat.zss.npc.orca.begin.1"),
-						StatCollector.translateToLocal("chat.zss.npc.orca.begin.2")));
+				new TimedChatDialogue(player,
+						new ChatComponentTranslation("chat.zss.npc.orca.begin.0"),
+						new ChatComponentTranslation("chat.zss.npc.orca.begin.1"),
+						new ChatComponentTranslation("chat.zss.npc.orca.begin.2"));
 				player.triggerAchievement(ZSSAchievements.orcaRequest);
 				return; // prevent other timed chat message
 			} else if (crestsGiven > 19 && (crestsGiven % 20) == 0) {
@@ -444,15 +444,15 @@ public class ZSSPlayerSkills
 				boolean flag = true; // for timed give item timing
 				if (crestsGiven == 100) {
 					player.triggerAchievement(ZSSAchievements.orcaMaster);
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.final.0"));
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.final.1"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.hurricane.final.0"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.hurricane.final.1"));
 				} else if (crestsGiven == 20) {
 					player.triggerAchievement(ZSSAchievements.orcaSecondLesson);
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.first.0"));
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.first.1"));
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.first.2"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.hurricane.first.0"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.hurricane.first.1"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.hurricane.first.2"));
 				} else {
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.hurricane.train"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.hurricane.train"));
 					flag = false;
 				}
 				new TimedAddItem(player, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.superSpinAttack.getId()), (flag ? 4000 : 3000), Sounds.SUCCESS);
@@ -460,23 +460,22 @@ public class ZSSPlayerSkills
 				// Every 10 crests Orca will teach one more level of Back Slice
 				boolean flag = true; // for timed give item timing
 				if (crestsGiven == 90) {
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.final.0"));
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.final.1"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.backslice.final.0"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.backslice.final.1"));
 				} else if (crestsGiven == 10) {
 					player.triggerAchievement(ZSSAchievements.orcaFirstLesson);
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.first.0"));
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.first.1"));
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.first.2"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.backslice.first.0"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.backslice.first.1"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.backslice.first.2"));
 				} else {
-					chat.add(StatCollector.translateToLocal("chat.zss.npc.orca.backslice.train"));
+					chat.add(new ChatComponentTranslation("chat.zss.npc.orca.backslice.train"));
 					flag = false;
 				}
 				new TimedAddItem(player, new ItemStack(ZSSItems.skillOrb, 1, SkillBase.backSlice.getId()), (flag ? 4000 : 3000), Sounds.SUCCESS);
 			} else {
-				chat.add(StatCollector.translateToLocalFormatted("chat.zss.npc.orca.more." + player.worldObj.rand.nextInt(4), crestsGiven));
+				chat.add(new ChatComponentTranslation("chat.zss.npc.orca.more." + player.worldObj.rand.nextInt(4), crestsGiven));
 			}
-
-			new TimedChatDialogue(player, chat);
+			new TimedChatDialogue(player, chat.toArray(new IChatComponent[chat.size()]));
 		}
 	}
 

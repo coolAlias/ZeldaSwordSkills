@@ -17,7 +17,6 @@
 
 package zeldaswordskills.block;
 
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -172,7 +171,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 			if (helm != null && helm.getItem() == ZSSItems.maskTruth) {
 				String msg = ((TileEntityGossipStone) te).getMessage();
 				String messages[] = StringUtils.wrapString(msg, TileEntityGossipStone.LINE_LENGTH, 5);
-				new TimedChatDialogue(player, Arrays.asList(messages));
+				new TimedChatDialogue(player, messages);
 			} else {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.gossip_stone.silent");
 			}

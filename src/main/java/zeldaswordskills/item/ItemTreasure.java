@@ -17,7 +17,6 @@
 
 package zeldaswordskills.item;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -29,7 +28,9 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
@@ -164,9 +165,9 @@ public class ItemTreasure extends Item implements IUnenchantable
 						PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
 						player.triggerAchievement(ZSSAchievements.maskTrader);
 						if (ZSSPlayerInfo.get(player).getCurrentMaskStage() == 0) {
-							List<String> chat = new ArrayList<String>(5);
+							IChatComponent[] chat = new IChatComponent[5];
 							for (int i = 0; i < 5; ++i) {
-								chat.add(StatCollector.translateToLocal("chat.zss.treasure." + treasure.name + ".success." + i));
+								chat[i] = new ChatComponentTranslation("chat.zss.treasure." + treasure.name + ".success." + i);
 							}
 							new TimedChatDialogue(player, chat);
 						} else {
