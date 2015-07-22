@@ -17,8 +17,6 @@
 
 package zeldaswordskills.entity.npc;
 
-import java.util.Arrays;
-
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -45,9 +43,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -354,10 +352,10 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.weak");
 				} else if (ZSSPlayerSongs.get(player).onCuredNpc("Darunia")) {
 					ItemStack gift = new ItemStack(ZSSItems.gauntletsSilver);
-					new TimedChatDialogue(player, Arrays.asList(
-							StatCollector.translateToLocal("chat.zss.song.saria.darunia.0"),
-							StatCollector.translateToLocal("chat.zss.song.saria.darunia.1"),
-							StatCollector.translateToLocalFormatted("chat.zss.song.saria.darunia.2", gift.getDisplayName())), 0, 1500);
+					new TimedChatDialogue(player,  0, 1500,
+							new ChatComponentTranslation("chat.zss.song.saria.darunia.0"),
+							new ChatComponentTranslation("chat.zss.song.saria.darunia.1"),
+							new ChatComponentTranslation("chat.zss.song.saria.darunia.2", gift.getDisplayName()));
 					new TimedAddItem(player, gift, 3000, Sounds.SUCCESS);
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");

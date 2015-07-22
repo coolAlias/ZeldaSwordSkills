@@ -31,7 +31,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.api.item.ISkillItem;
 import zeldaswordskills.api.item.ISword;
 import zeldaswordskills.item.ItemZeldaSword;
@@ -258,12 +258,12 @@ public class PlayerUtils
 
 	/** Sends a translated chat message to the player */
 	public static void sendTranslatedChat(EntityPlayer player, String message) {
-		sendChat(player, StatCollector.translateToLocal(message));
+		player.addChatMessage(new ChatComponentTranslation(message));
 	}
 
 	/** Sends a formatted, translated chat message to the player */
 	public static void sendFormattedChat(EntityPlayer player, String message, Object... args) {
-		sendChat(player, StatCollector.translateToLocalFormatted(message, args));
+		player.addChatMessage(new ChatComponentTranslation(message, args));
 	}
 
 	/**

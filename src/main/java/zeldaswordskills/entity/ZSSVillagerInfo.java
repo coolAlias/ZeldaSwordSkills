@@ -17,7 +17,6 @@
 
 package zeldaswordskills.entity;
 
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
@@ -155,7 +154,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 				default: PlayerUtils.sendFormattedChat(player, s + "amount", n);
 				}
 				if (reward != null) {
-					new TimedChatDialogue(player, Arrays.asList(new String[]{StatCollector.translateToLocal(s + "token." + n), StatCollector.translateToLocalFormatted(s + "reward." + n, reward.getDisplayName())}));
+					new TimedChatDialogue(player, new ChatComponentTranslation(s + "token." + n), new ChatComponentTranslation(s + "reward." + n, reward.getDisplayName()));
 					new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
 				}
 			} else { // probably an impossible case
@@ -163,7 +162,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			}
 		} else if (Config.getSkulltulaRewardRate() > 0 && player.worldObj.getWorldTime() > villager.getEntityData().getLong("NextSkulltulaReward")) {
 			ItemStack reward = new ItemStack(Items.emerald, 64);
-			new TimedChatDialogue(player, Arrays.asList(new String[]{StatCollector.translateToLocal(s + "complete"), StatCollector.translateToLocalFormatted(s + "reward.100", reward.getDisplayName())}));
+			new TimedChatDialogue(player, new ChatComponentTranslation(s + "complete"), new ChatComponentTranslation(s + "reward.100", reward.getDisplayName()));
 			new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
 			villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
 		} else {
