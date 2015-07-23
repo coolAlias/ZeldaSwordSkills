@@ -216,38 +216,45 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/**
 	 * Sets whether player is wearing special boots based on currently equipped gear
+	 * and applies / removes modifiers as appropriate
+	 * @param boots Currently equipped boots (null if none worn)
 	 */
-	public void setWearingBoots() {
-		ItemStack boots = player.getCurrentArmor(ArmorIndex.WORN_BOOTS);
-		setFlag(IS_WEARING_BOOTS, (boots != null && boots.getItem() instanceof ItemArmorBoots));
-		if (lastBootsWorn != null) {
-			ItemArmorBoots.removeAttributeModifiers(lastBootsWorn, player);
+	public void setWearingBoots(ItemStack boots) {
+		if (lastBootsWorn != null && lastBootsWorn.getItem() instanceof ItemArmorBoots) {
+			((ItemArmorBoots) lastBootsWorn.getItem()).removeModifiers(lastBootsWorn, player);
 		}
 		lastBootsWorn = boots;
-		if (boots != null) {
-			ItemArmorBoots.applyAttributeModifiers(boots, player);
+		setFlag(IS_WEARING_BOOTS, (boots != null && boots.getItem() instanceof ItemArmorBoots));
+		if (getFlag(IS_WEARING_BOOTS)) {
+			((ItemArmorBoots) boots.getItem()).applyModifiers(boots, player);
 		}
 		if (getFlag(IS_WEARING_HELM)) {
-			ItemMask.applyAttributeModifiers(player.getCurrentArmor(ArmorIndex.WORN_HELM), player);
+			ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
+			if (helm != null && helm.getItem() instanceof ItemMask) {
+				((ItemMask) helm.getItem()).applyModifiers(helm, player);
+			}
 		}
 	}
 
 	/**
 	 * Checks whether player is wearing a special helm based on currently equipped gear
 	 * and applies / removes modifiers as appropriate
+	 * @param helm Currently equipped helm (null if none worn)
 	 */
-	public void setWearingHelm() {
-		ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
-		setFlag(IS_WEARING_HELM, (helm != null && helm.getItem() instanceof ItemMask));
+	public void setWearingHelm(ItemStack helm) {
 		if (lastHelmWorn != null) {
-			ItemMask.removeAttributeModifiers(lastHelmWorn, player);
+			((ItemMask) lastHelmWorn.getItem()).removeModifiers(lastHelmWorn, player);
 		}
 		lastHelmWorn = helm;
-		if (helm != null) {
-			ItemMask.applyAttributeModifiers(helm, player);
+		setFlag(IS_WEARING_HELM, (helm != null && helm.getItem() instanceof ItemMask));
+		if (getFlag(IS_WEARING_HELM)) {
+			((ItemMask) helm.getItem()).applyModifiers(helm, player);
 		}
 		if (getFlag(IS_WEARING_BOOTS)) {
-			ItemArmorBoots.applyAttributeModifiers(player.getCurrentArmor(ArmorIndex.WORN_BOOTS), player);
+			ItemStack boots = player.getCurrentArmor(ArmorIndex.WORN_BOOTS);
+			if (boots != null && boots.getItem() instanceof ItemArmorBoots) {
+				((ItemArmorBoots) boots.getItem()).applyModifiers(boots, player);
+			}
 		}
 	}
 
@@ -328,13 +335,17 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		if (getFlag(IS_NAYRU_ACTIVE)) {
 			updateNayru();
 		}
-		if (getFlag(IS_WEARING_BOOTS) && (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) == null
-				|| (lastBootsWorn != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == lastBootsWorn.getItem()))) {
-			setWearingBoots();
+		if (getFlag(IS_WEARING_BOOTS)) {
+			ItemStack boots = player.getCurrentArmor(ArmorIndex.WORN_BOOTS);
+			if (boots == null || (lastBootsWorn != null && boots.getItem() != lastBootsWorn.getItem())) {
+				setWearingBoots(boots);
+			}
 		}
-		if (getFlag(IS_WEARING_HELM) && (player.getCurrentArmor(ArmorIndex.WORN_HELM) == null
-				|| (lastHelmWorn != null && player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == lastHelmWorn.getItem()))) {
-			setWearingHelm();
+		if (getFlag(IS_WEARING_HELM)) {
+			ItemStack helm = player.getCurrentArmor(ArmorIndex.WORN_HELM);
+			if (helm == null || (lastHelmWorn != null && helm.getItem() != lastHelmWorn.getItem())) {
+				setWearingHelm(helm);
+			}
 		}
 		if (getFlag(MOBILITY) && !player.onGround && Math.abs(player.motionY) > 0.05D
 				&& !player.capabilities.isFlying && player.worldObj.getWorldTime() % 2 == 0) {
