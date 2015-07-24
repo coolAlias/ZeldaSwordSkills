@@ -569,9 +569,9 @@ public class ZSSItems
 		potionGreen = new ItemZeldaPotion(20, 40.0F, 0.0F).setUnlocalizedName("potion_green");
 		potionBlue = new ItemZeldaPotion(20, 40.0F, 40.0F).setUnlocalizedName("potion_blue");
 		potionYellow = new ItemZeldaPotion().setBuffEffect(Buff.RESIST_SHOCK, 6000, 100, 1.0F).setUnlocalizedName("potion_yellow");
-		rodFire = new ItemMagicRod(MagicType.FIRE, 8.0F, 8.0F).setUnlocalizedName("rod_fire");
-		rodIce = new ItemMagicRod(MagicType.ICE, 6.0F, 8.0F).setUnlocalizedName("rod_ice");
-		rodTornado = new ItemMagicRod(MagicType.WIND, 4.0F, 4.0F).setUnlocalizedName("rod_tornado");
+		rodFire = new ItemMagicRod(MagicType.FIRE, 8.0F, 10.0F).setUnlocalizedName("rod_fire");
+		rodIce = new ItemMagicRod(MagicType.ICE, 6.0F, 10.0F).setUnlocalizedName("rod_ice");
+		rodTornado = new ItemMagicRod(MagicType.WIND, 4.0F, 10.0F).setUnlocalizedName("rod_tornado");
 		whip = new ItemWhip().setUnlocalizedName("whip");
 
 		//===================== MASK TAB =====================//

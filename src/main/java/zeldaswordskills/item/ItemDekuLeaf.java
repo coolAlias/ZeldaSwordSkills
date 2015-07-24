@@ -30,6 +30,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityCyclone;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
@@ -61,13 +62,13 @@ public class ItemDekuLeaf extends BaseModItem implements IUnenchantable
 
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		EntityPlayer player = (entity instanceof EntityPlayer ? (EntityPlayer) entity : null);
-		if (isHeld && entity.fallDistance > 1.0F && entity.motionY < 0) {
-			if (player == null || (player.getFoodStats().getFoodLevel() > 0 && !player.capabilities.isFlying)) {
-				entity.motionY = (entity.motionY < -0.05D ? -0.05D : entity.motionY);
-				entity.fallDistance = 1.0F;
-				if (player != null && !player.capabilities.isCreativeMode) {
-					player.addExhaustion(0.1F);
+		if (isHeld && entity instanceof EntityPlayer && entity.fallDistance > 1.0F && entity.motionY < 0) {
+			EntityPlayer player = (EntityPlayer) entity;
+			if (!player.capabilities.isFlying && ZSSPlayerInfo.get(player).getCurrentMagic() > 0) {
+				player.motionY = (player.motionY < -0.05D ? -0.05D : player.motionY);
+				player.fallDistance = 1.0F;
+				if (world.getWorldTime() % 4 == 0) { // 1 MP per 2 seconds
+					ZSSPlayerInfo.get(player).consumeMagic(0.1F);
 				}
 			}
 		}
@@ -76,20 +77,20 @@ public class ItemDekuLeaf extends BaseModItem implements IUnenchantable
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		player.swingItem();
-		if (player.getFoodStats().getFoodLevel() > 0) {
-			if (player.onGround) {
-				if (!world.isRemote && world.getTotalWorldTime() > getNextUseTime(stack)) {
-					player.addExhaustion(2.0F);
+		if (player.onGround) {
+			if (world.getTotalWorldTime() > getNextUseTime(stack) && ZSSPlayerInfo.get(player).useMagic(10.0F)) {
+				if (!world.isRemote) {
 					WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));
 					if (!player.capabilities.isCreativeMode) {
 						setNextUseTime(stack, world, 20);
 					}
 				}
-			} else {
-				player.addExhaustion(0.1F);
-				player.motionY += 0.175D;
+			} else if (!world.isRemote) {
+				WorldUtils.playSoundAtEntity(player, Sounds.GRUNT, 0.3F, 0.8F);
 			}
+		} else if (ZSSPlayerInfo.get(player).useMagic(0.25F)) {
+			player.motionY += 0.175D;
 		}
 		return stack;
 	}

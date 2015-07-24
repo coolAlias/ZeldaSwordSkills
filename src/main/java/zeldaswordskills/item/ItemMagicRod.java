@@ -70,7 +70,7 @@ import zeldaswordskills.util.WorldUtils;
  * 
  * A variety of magical rods are available throughout Link's adventures.
  * Each rod has two abilities: the first is a continuous effect activated while the rod is in
- * use - note that exhaustion will be added each tick; the second is activated by using the
+ * use - note that magic is consumed each tick; the second is activated by using the
  * item while sneaking, shooting a single projectile per use.
  * 
  * All magic rods can be upgraded by first bathing in the appropriate Sacred Flame, and then
@@ -85,19 +85,19 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 	/** The amount of damage inflicted by the rod's projectile spell */
 	private final float damage;
 
-	/** Amount of exhaustion to add each tick */
-	private final float fatigue;
+	/** Amount of magic consumed when used; magic / 50 is added per 4 ticks of use */
+	private final float magic_cost;
 
 	/**
 	 * @param magicType	The type of magic this rod uses (e.g. FIRE, ICE, etc.)
 	 * @param damage	The amount of damage inflicted by the rod's projectile spell
-	 * @param fatigue	Amount of exhaustion added when used; fatigue / 20 is added per tick in use
+	 * @param magic_cost	Amount of magic consumed when used; magic / 50 is added per 4 ticks of use
 	 */
-	public ItemMagicRod(MagicType magicType, float damage, float fatigue) {
+	public ItemMagicRod(MagicType magicType, float damage, float magic_cost) {
 		super();
 		this.magicType = magicType;
 		this.damage = damage;
-		this.fatigue = fatigue;
+		this.magic_cost = magic_cost;
 		setFull3D();
 		setMaxDamage(0);
 		setMaxStackSize(1);
@@ -151,10 +151,13 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (player.capabilities.isCreativeMode || (world.getTotalWorldTime() > getNextUseTime(stack) && player.getFoodStats().getFoodLevel() > 0)) {
-			player.swingItem();
+		float mp = (player.isSneaking() ? magic_cost : magic_cost / 20.0F);
+		boolean isUpgraded = isUpgraded(stack);
+		if (isUpgraded) {
+			mp *= 1.5F;
+		}
+		if (player.capabilities.isCreativeMode || (world.getTotalWorldTime() > getNextUseTime(stack) && ZSSPlayerInfo.get(player).useMagic(mp))) {
 			if (player.isSneaking()) {
-				boolean isUpgraded = isUpgraded(stack);
 				EntityMobThrowable magic;
 				if (magicType == MagicType.WIND) {
 					magic = new EntityCyclone(world, player).setArea(isUpgraded(stack) ? 3.0F : 2.0F);
@@ -166,12 +169,9 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 					WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(magic);
 				}
-				player.addExhaustion(fatigue);
-				if (!player.capabilities.isCreativeMode) {
-					setNextUseTime(stack, world, 30);
-				}
+				setNextUseTime(stack, world, 10); // prevents use during swing animation
+				player.swingItem();
 			} else {
-				player.addExhaustion(fatigue / 8.0F);
 				player.setItemInUse(stack, getMaxItemUseDuration(stack));
 				if (this == ZSSItems.rodTornado) {
 					ZSSPlayerInfo.get(player).reduceFallAmount += (isUpgraded(stack) ? 8.0F : 4.0F);
@@ -190,18 +190,16 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 			player.fallDistance = 0.0F;
 		}
 		if (!player.worldObj.isRemote) {
-			player.addExhaustion(fatigue / 20.0F);
-			if (player.getFoodStats().getFoodLevel() < 1) {
+			int ticksInUse = getMaxItemUseDuration(stack) - count;
+			float mp = (magic_cost / 50.0F) * (isUpgraded(stack) ? 1.5F : 1.0F);
+			if (ticksInUse % 4 == 0 && !ZSSPlayerInfo.get(player).consumeMagic(mp)) {
 				player.clearItemInUse();
-			} else {
-				int ticksInUse = getMaxItemUseDuration(stack) - count;
-				if (this == ZSSItems.rodTornado) {
-					if (ticksInUse % 10 == 0) {
-						player.worldObj.spawnEntityInWorld(new EntityCyclone(player.worldObj, player.posX, player.posY, player.posZ).disableGriefing());
-					}
-				} else {
-					handleUpdateTick(stack, player.worldObj, player, ticksInUse);
+			} else if (this == ZSSItems.rodTornado) {
+				if (ticksInUse % 10 == 0) {
+					player.worldObj.spawnEntityInWorld(new EntityCyclone(player.worldObj, player.posX, player.posY, player.posZ).disableGriefing());
 				}
+			} else {
+				handleUpdateTick(stack, player.worldObj, player, ticksInUse);
 			}
 		}
 	}

@@ -31,7 +31,6 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
@@ -63,8 +62,8 @@ import zeldaswordskills.util.WorldUtils;
  * 
  * Din's Fire: AoE centered on player engulfs all nearby targets in flames
  * Farore's Wind: Sneak + right-click to mark a location, use to teleport to a marked location in same dimension
- * Nayru's Love: Become impervious to damage until hunger reaches zero or certain amount of time passes;
- * 		constantly drains hunger and prevents the use of other magic skills
+ * Nayru's Love: Become impervious to damage until magic is depleted or certain amount of time passes;
+ * 		constantly drains magic points and prevents the use of other magic skills
  *
  */
 public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpawnParticles
@@ -105,24 +104,27 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+		if (!ZSSPlayerInfo.get(player).canUseMagic()) {
+			player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
+			return stack;
+		}
 		int cost = 0;
-		if (!ZSSPlayerInfo.get(player).isNayruActive()) {
-			if (spiritType == BlockSacredFlame.EnumType.FARORE && player.isSneaking()) {
+		if (spiritType == BlockSacredFlame.EnumType.FARORE && player.isSneaking()) {
+			if (ZSSPlayerInfo.get(player).useMagic(2.0F)) { // magic_cost / 5
 				mark(stack, world, player);
 				cost = 1;
-			} else if (spiritType == BlockSacredFlame.EnumType.NAYRU) {
-				cost = handleNayru(stack, world, player);
 			} else {
-				player.setItemInUse(stack, getMaxItemUseDuration(stack));
-				String sound = (spiritType == BlockSacredFlame.EnumType.DIN ? Sounds.SUCCESS_MAGIC : Sounds.FLAME_ABSORB);
-				player.playSound(sound, 1.0F, 1.0F);
+				player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 			}
-
-			if (damageStack(stack, player, cost)) {
-				stack = new ItemStack(ZSSItems.crystalSpirit);
-			}
+		} else if (spiritType == BlockSacredFlame.EnumType.NAYRU) {
+			cost = handleNayru(stack, world, player);
 		} else {
-			player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
+			player.setItemInUse(stack, getMaxItemUseDuration(stack));
+			String sound = (spiritType == BlockSacredFlame.EnumType.DIN ? Sounds.SUCCESS_MAGIC : Sounds.FLAME_ABSORB);
+			player.playSound(sound, 1.0F, 1.0F);
+		}
+		if (damageStack(stack, player, cost)) {
+			stack = new ItemStack(ZSSItems.crystalSpirit);
 		}
 		return stack;
 	}
@@ -190,6 +192,10 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	 * Processes right-click for Din's Fire; returns amount of damage to apply to stack
 	 */
 	private int handleDin(ItemStack stack, World world, EntityPlayer player) {
+		if (!ZSSPlayerInfo.get(player).useMagic(40.0F)) {
+			player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
+			return 0;
+		}
 		float radius = 5.0F;
 		if (!world.isRemote) {
 			PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, radius), player, 64.0D);
@@ -293,28 +299,23 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	 * Processes right-click for Farore's Wind; returns amount of damage to apply to stack
 	 */
 	private int handleFarore(ItemStack stack, World world, EntityPlayer player) {
+		String fail = null;
 		if (canUse(stack)) {
 			WarpPoint warp = recall(stack);
-			if (warp != null) {
-				if (warp.dimensionId == player.worldObj.provider.getDimensionId()) {
-					player.setPositionAndUpdate(warp.pos.getX() + 0.5D, warp.pos.getY() + 0.5D, warp.pos.getZ() + 0.5D);
-					player.playSound(Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
-					return costToUse;
-				} else {
-					player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
-					if (world.isRemote) {
-						PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.farore.fail.dimension",
-								new ChatComponentTranslation(getUnlocalizedName() + ".name"));
-					}
-				}
-			} else {
-				player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
-				if (world.isRemote) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.farore.fail.mark");
-				}
-			}
+			if (warp == null) {
+				fail = "chat.zss.spirit_crystal.farore.fail.mark";
+			} else if (warp.dimensionId != player.worldObj.provider.getDimensionId()) {
+				fail = "chat.zss.spirit_crystal.farore.fail.dimension";
+			} else if (ZSSPlayerInfo.get(player).useMagic(10.0F)) {
+				player.setPositionAndUpdate(warp.pos.getX() + 0.5D, warp.pos.getY() + 0.5D, warp.pos.getZ() + 0.5D);
+				player.playSound(Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
+				return costToUse;
+			} // else 'magic fail' sound played below
 		}
-
+		player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
+		if (fail != null && !world.isRemote) {
+			PlayerUtils.sendTranslatedChat(player, fail);
+		}
 		return 0;
 	}
 
@@ -322,7 +323,7 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	 * Processes right-click for Nayru's Love; returns amount of damage to apply to stack
 	 */
 	private int handleNayru(ItemStack stack, World world, EntityPlayer player) {
-		if (canUse(stack)) {
+		if (canUse(stack) && ZSSPlayerInfo.get(player).useMagic(25.0F)) {
 			ZSSPlayerInfo.get(player).activateNayru();
 			world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 			return costToUse;
