@@ -1254,6 +1254,7 @@ skill.zss.swordbeam.name=Sword Beam
 skill.zss.swordbeam.desc.activate=While wielding a sword and locked on, first crouch by sneaking, then attack.
 skill.zss.swordbeam.desc.full=By channeling vital energy through the sword, one can unleash a powerful attack capable of striking foes from afar.\nDamage is a percentage of the sword's attack bonus; however, the beam's attack power diminishes with each target struck.\nIn order to perform such a technique, one must be at or near full health.
 skill.zss.swordbeam.desc.info.1=Max Missing Hearts: %f
+skill.zss.swordbeam.desc.info.2=Magic Cost: %f
 skill.zss.swordbeam.desc.tooltip.1=Shoot a powerful beam of energy
 skill.zss.swordbreak.name=Sword Break
 skill.zss.swordbreak.desc.activate=Tap 'down' or 'back' while blocking just as the foe's strike is about to land.

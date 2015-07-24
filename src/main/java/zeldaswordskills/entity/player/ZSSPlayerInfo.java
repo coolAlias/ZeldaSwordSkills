@@ -68,7 +68,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Current magic points */
 	private float mp, lastMp;
 
-	public static final IAttribute maxMagic = (new RangedAttribute(null, "zss.maxMagic", 100.0D, 0.0D, Double.MAX_VALUE)).setDescription("Max Magic").setShouldWatch(true);
+	public static final IAttribute maxMagic = (new RangedAttribute(null, "zss.max_magic", 50.0D, 0.0D, Double.MAX_VALUE)).setDescription("Max Magic").setShouldWatch(true);
 
 	/** Last ridden entity so it can be set after player is no longer riding */
 	private Entity lastRidden;

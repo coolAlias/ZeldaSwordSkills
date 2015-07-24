@@ -52,13 +52,14 @@ import zeldaswordskills.util.WorldUtils;
  * Effect: Shoots a ranged beam capable of damaging one or possibly more targets
  * Damage: 30 + (level * 10) percent of the base sword damage (without other bonuses)
  * Range: Approximately 12 blocks, plus one block per level
- * Exhaustion: 2.0F - (0.1F * level)
+ * Magic: 10.0F regardless of level
  * Special:
  * 	- May only be used while locked on to a target
  *  - Amount of health required decreases with skill level, down to 1-1/2 hearts below max
  *  - Hitting a target with the beam counts as a direct strike for combos
  *  - Using the Master Sword will shoot a beam that can penetrate multiple targets
  *  - Each additional target receives 20% less damage than the previous
+ *  - Cannot unleash a second beam until the previous beam expires or strikes a target
  * 
  * Sword beam shot from Link's sword when at full health. Inflicts the sword's full
  * base damage, not including enchantment or other bonuses, to the first entity struck.
@@ -92,12 +93,12 @@ public class SwordBeam extends SkillActive
 		desc.add(getRangeDisplay(12 + level));
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1),
 				String.format("%.1f", Config.getHealthAllowance(level) / 2.0F)));
-		desc.add(getExhaustionDisplay(getExhaustion()));
+		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), String.format("%.2f", getMagicCost())));
 	}
 
 	@Override
 	public boolean isActive() {
-		return false;
+		return missTimer > 0;
 	}
 
 	@Override
@@ -107,12 +108,16 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	protected float getExhaustion() {
-		return 2.0F - (0.1F * level);
+		return 0.0F;
+	}
+
+	private float getMagicCost() {
+		return 10.0F;
 	}
 
 	/** Returns true if players current health is within the allowed limit */
 	private boolean checkHealth(EntityPlayer player) {
-		return player.capabilities.isCreativeMode || PlayerUtils.getHealthMissing(player) <= Config.getHealthAllowance(level);
+		return PlayerUtils.getHealthMissing(player) <= Config.getHealthAllowance(level);
 	}
 
 	/** The percent of base sword damage that should be inflicted, as an integer */
@@ -129,7 +134,11 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && ZSSPlayerInfo.get(player).canAttack() && PlayerUtils.isSword(player.getHeldItem());
+		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+		if (super.canUse(player) && !isActive() && info.canUseMagic() && PlayerUtils.isSword(player.getHeldItem())) {
+			return (player.capabilities.isCreativeMode || (info.canAttack() && info.getCurrentMagic() >= getMagicCost() && checkHealth(player)));
+		}
+		return false;
 	}
 
 	/**
@@ -159,7 +168,11 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
+		player.swingItem();
 		if (!world.isRemote) {
+			if (!ZSSPlayerInfo.get(player).useMagic(getMagicCost())) {
+				return false;
+			}
 			missTimer = 12 + level;
 			WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 			Vec3 vec3 = player.getLookVec();
@@ -168,9 +181,6 @@ public class SwordBeam extends SkillActive
 			beam.setMasterSword(PlayerUtils.isHoldingMasterSword(player));
 			beam.setPosition(beam.posX + vec3.xCoord * 2, beam.posY + vec3.yCoord * 2, beam.posZ + vec3.zCoord * 2);
 			world.spawnEntityInWorld(beam);
-		} else {
-			player.swingItem();
-			ZSSPlayerInfo.get(player).setAttackTime((player.capabilities.isCreativeMode ? 0 : 20 - level));
 		}
 		return true;
 	}
