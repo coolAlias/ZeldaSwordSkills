@@ -519,12 +519,12 @@ public class ZSSItems
 
 		// BOWS & ARROWS
 		heroBow = new ItemHeroBow().setUnlocalizedName("bow_hero");
-		arrowBomb = new ItemZeldaArrow("arrow_bomb", false);
-		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire", false);
-		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water", false);
-		arrowFire = new ItemZeldaArrow("arrow_fire", true);
-		arrowIce = new ItemZeldaArrow("arrow_ice", true);
-		arrowLight = new ItemZeldaArrow("arrow_light", true);
+		arrowBomb = new ItemZeldaArrow("arrow_bomb");
+		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire");
+		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water");
+		arrowFire = new ItemZeldaArrow.ItemMagicArrow("arrow_fire", 2.5F);
+		arrowIce = new ItemZeldaArrow.ItemMagicArrow("arrow_ice", 2.5F);
+		arrowLight = new ItemZeldaArrow.ItemMagicArrow("arrow_light", 5.0F);
 
 		// SLINGSHOTS
 		slingshot = new ItemSlingshot().setUnlocalizedName("slingshot");

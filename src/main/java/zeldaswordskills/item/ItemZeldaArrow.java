@@ -17,9 +17,11 @@
 
 package zeldaswordskills.item;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.api.item.IMagicArrow;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 
 /**
@@ -30,23 +32,34 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
  */
 public class ItemZeldaArrow extends BaseModItem
 {
-	/** Whether this arrow should glow as if enchanted */
-	private final boolean isMagic;
-
 	/**
 	 * @param name Unlocalized name
-	 * @param isMagic Gives this arrow the enchanted glow if true
 	 */
-	public ItemZeldaArrow(String name, boolean isMagic) {
+	public ItemZeldaArrow(String name) {
 		super();
-		this.isMagic = isMagic;
 		setUnlocalizedName(name);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack) {
-		return isMagic;
+	public static class ItemMagicArrow extends ItemZeldaArrow implements IMagicArrow
+	{
+		/** Magic cost to shoot this arrow */
+		private final float magic;
+
+		public ItemMagicArrow(String name, float magic) {
+			super(name);
+			this.magic = magic;
+		}
+
+		@Override
+		public float getMagicCost(ItemStack arrow, EntityPlayer player) {
+			return magic;
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public boolean hasEffect(ItemStack stack) {
+			return true;
+		}
 	}
 }
