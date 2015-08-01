@@ -34,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.TargetUtils;
@@ -137,6 +138,9 @@ public class EntityFairy extends EntityAmbientCreature
 	protected void collideWithEntity(Entity entity) {
 		if (entity instanceof EntityLivingBase) {
 			((EntityLivingBase) entity).heal(1.0F);
+		}
+		if (entity instanceof EntityPlayer) {
+			ZSSPlayerInfo.get((EntityPlayer) entity).restoreMagic(0.5F);
 		}
 	}
 

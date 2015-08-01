@@ -66,7 +66,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	private final ZSSPlayerSongs playerSongs;
 
 	/** Current magic points */
-	private float mp;
+	private float mp, lastMp;
 
 	public static final IAttribute maxMagic = (new RangedAttribute(null, "zss.maxMagic", 100.0D, 0.0D, Double.MAX_VALUE)).setDescription("Max Magic").setShouldWatch(true);
 
@@ -181,9 +181,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void setCurrentMagic(float value) {
 		this.mp = MathHelper.clamp_float(value, 0.0F, getMaxMagic());
-		if (player instanceof EntityPlayerMP) {
-			PacketDispatcher.sendTo(new SyncCurrentMagicPacket(player), (EntityPlayerMP) player);
-		}
 	}
 
 	/**
@@ -454,6 +451,13 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 */
 	public void onUpdate() {
 		playerSkills.onUpdate();
+		// keeps MP packet count down to maximum of 1 per tick
+		if (!player.worldObj.isRemote && lastMp != mp) {
+			lastMp = mp;
+			if (player instanceof EntityPlayerMP) {
+				PacketDispatcher.sendTo(new SyncCurrentMagicPacket(player), (EntityPlayerMP) player);
+			}
+		}
 		if (attackTime > 0) {
 			--attackTime;
 		}
