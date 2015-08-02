@@ -21,6 +21,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 
 /**
  * 
@@ -36,5 +41,27 @@ public abstract class ItemPickupOnly extends BaseModItem implements IHandlePicku
 	public ItemPickupOnly() {
 		super();
 		setMaxStackSize(1);
+		setCreativeTab(ZSSCreativeTabs.tabTools);
+	}
+
+	public static class ItemMagicJar extends ItemPickupOnly
+	{
+		/** Amount of magic to restore */
+		private final int restoreMp;
+		public ItemMagicJar(int restoreMp) {
+			super();
+			this.restoreMp = restoreMp;
+		}
+		@Override
+		public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+			if (info.getCurrentMagic() < info.getMaxMagic() || Config.alwaysPickupHearts()) {
+				--stack.stackSize;
+				info.restoreMagic(restoreMp);
+				PlayerUtils.playSound(player, Sounds.SUCCESS_MAGIC, 0.6F, 1.0F);
+				return true;
+			}
+			return false;
+		}
 	}
 }

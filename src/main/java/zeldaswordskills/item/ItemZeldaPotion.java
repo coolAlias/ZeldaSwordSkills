@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,16 +19,11 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumAction;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -37,83 +32,64 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.entity.buff.BuffBase;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 
-public class ItemZeldaPotion extends ItemFood implements IModItem, IUnenchantable
+public class ItemZeldaPotion extends ItemDrinkable implements IUnenchantable
 {
 	/** Amount of HP to restore when consumed */
 	private final float restoreHP;
-	/** Id of the buff to add, if any */
-	private Buff buff;
-	/** Duration the buff will last */
-	private int buffDuration;
-	/** Amplifier of the buff, similar to vanilla potions */
-	private int buffAmplifier;
+
+	/** Amount of MP to restore when consumed */
+	private final float restoreMP;
+
+	/** The buff to add, if any */
+	private BuffBase buff;
+
+	/** Duration in minutes, with any remainder in seconds */
+	private int minutes, seconds;
+
 	/** Probability of the set buff effect occurring */
 	private float buffProbability;
 
 	/** Creates a potion with no healing or hunger-restoring properties */
-	public ItemZeldaPotion() {
-		this(0, 0.0F, 0.0F);
+	public ItemZeldaPotion(String name) {
+		this(name, 0.0F, 0.0F);
 	}
 
-	public ItemZeldaPotion(int restoreHunger, float saturationModifier, float healAmount) {
-		super(restoreHunger, saturationModifier, false);
-		restoreHP = healAmount;
-		setAlwaysEdible();
+	/**
+	 * @param restoreHP amount of HP drinking this potion immediately restores
+	 * @param restoreMP amount of MP drinking this potion immediately restores
+	 */
+	public ItemZeldaPotion(String name, float restoreHP, float restoreMP) {
+		super(name);
+		this.restoreHP = restoreHP;
+		this.restoreMP = restoreMP;
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	/**
-	 * Returns "item.zss.unlocalized_name" for translation purposes
-	 */
-	@Override
-	public String getUnlocalizedName() {
-		return super.getUnlocalizedName().replaceFirst("item.", "item.zss.");
-	}
-
-	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName();
-	}
-
-	@Override
-	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.DRINK;
-	}
-
 	@Override
 	public ItemStack onItemUseFinish(ItemStack stack, World world, EntityPlayer player) {
-		// Copy but avoid calling super method in order to allow addition of glass bottle to inventory
-		player.getFoodStats().addStats(this, stack);
+		if (!player.capabilities.isCreativeMode) {
+			--stack.stackSize;
+		}
 		world.playSoundAtEntity(player, "random.burp", 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
 		player.heal(restoreHP);
-		onFoodEaten(stack, world, player);
-		if (!player.capabilities.isCreativeMode) {
-			if (--stack.stackSize <= 0) {
-				return new ItemStack(Items.glass_bottle);
-			}
-			player.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
-		}
-		return stack;
-	}
-
-	@Override
-	protected void onFoodEaten(ItemStack stack, World world, EntityPlayer player) {
-		super.onFoodEaten(stack, world, player);
+		ZSSPlayerInfo.get(player).restoreMagic(restoreMP);
 		if (buff != null && world.rand.nextFloat() < buffProbability) {
-			ZSSEntityInfo.get(player).applyBuff(buff, buffDuration, buffAmplifier);
+			ZSSEntityInfo.get(player).applyBuff(new BuffBase(buff));
 		}
+		return super.onItemUseFinish(stack, world, player);
 	}
 
 	/**
 	 * Sets the Buff that this potion will grant when consumed
 	 */
 	public ItemZeldaPotion setBuffEffect(Buff buffEnum, int duration, int amplifier, float probability) {
-		buff = buffEnum;
-		buffDuration = duration;
-		buffAmplifier = amplifier;
+		buff = new BuffBase(buffEnum, duration, amplifier);
+		minutes = duration / 1200;
+		seconds = duration % 1200;
 		buffProbability = probability;
 		return this;
 	}
@@ -132,45 +108,18 @@ public class ItemZeldaPotion extends ItemFood implements IModItem, IUnenchantabl
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
-	}
-
-	/**
-	 * Default behavior returns NULL to not register any variants
-	 */
-	@Override
-	public String[] getVariants() {
-		return null;
-	}
-
-	/**
-	 * Default implementation suggested by {@link IModItem#registerVariants()}
-	 */
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerVariants() {
-		String[] variants = getVariants();
-		if (variants != null) {
-			ModelBakery.addVariantName(this, variants);
+		if (restoreHP > 0) {
+			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.restore_hp", String.format("%.0f", restoreHP / 2.0F)));
 		}
-	}
-
-	/**
-	 * Register all of this Item's renderers here, including for any subtypes.
-	 * Default behavior registers a single inventory-based mesher for each variant
-	 * returned by {@link #getVariants() getVariants}.
-	 * If no variants are available, "mod_id:" plus the item's unlocalized name is used.
-	 */
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
-		String[] variants = getVariants();
-		if (variants == null || variants.length < 1) {
-			String name = getUnlocalizedName();
-			variants = new String[]{ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1)};
+		if (restoreMP > 0) {
+			list.add(EnumChatFormatting.GREEN + StatCollector.translateToLocalFormatted("tooltip.zss.restore_mp", MathHelper.floor_float(restoreMP)));
 		}
-		for (int i = 0; i < variants.length; ++i) {
-			mesher.register(this, i, new ModelResourceLocation(variants[i], "inventory"));
+		if (buff != null) {
+			list.add(EnumChatFormatting.GRAY + StatCollector.translateToLocalFormatted("tooltip.zss.buff", buff.getBuff().getName(), minutes, String.format("%02d", seconds)));
+			if (buffProbability < 1.0F) {
+				list.add(EnumChatFormatting.GREEN + StatCollector.translateToLocalFormatted("tooltip.zss.buff_chance", String.format("%.1f", buffProbability * 100)));
+			}
+			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.buff_amplifier", buff.getAmplifier()));
 		}
 	}
 }
