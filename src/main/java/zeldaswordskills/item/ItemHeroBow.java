@@ -428,7 +428,10 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 			arrow = getAutoBombArrow(bow, player);
 		}
 		// Search specifically for the selected arrow type:
-		if (modeArrow != null && canShootArrow(player, bow, new ItemStack(modeArrow))) {
+		if (modeArrow != null) {
+			if (!canShootArrow(player, bow, new ItemStack(modeArrow))) {
+				return null; // can't shoot this arrow type
+			}
 			for (ItemStack stack : player.inventory.mainInventory) {
 				if (stack != null && stack.getItem() == modeArrow) {
 					arrow = stack;
