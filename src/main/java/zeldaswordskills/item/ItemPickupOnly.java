@@ -17,20 +17,17 @@
 
 package zeldaswordskills.item;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IUnenchantable;
-import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -38,35 +35,46 @@ import cpw.mods.fml.relauncher.SideOnly;
  * sort of effect when picked up (i.e. collided with)
  *
  */
-public class ItemPickupOnly extends Item implements IHandlePickup, IUnenchantable
+/**
+ * 
+ * A class for Items that cannot be stored in the inventory, but have some
+ * sort of effect when picked up (i.e. collided with).
+ * 
+ * For the item to have an effect, it must extend this class (or use an anonymous class)
+ * that provides an implementation for {@link #onPickupItem(ItemStack, EntityPlayer)}
+ *
+ */
+public abstract class ItemPickupOnly extends Item implements IHandlePickup, IUnenchantable
 {
-	public ItemPickupOnly() {
+	/**
+	 * @param name Used as texture name; unlocalized name is 'zss.name'
+	 */
+	public ItemPickupOnly(String name) {
 		super();
 		setMaxStackSize(1);
+		setUnlocalizedName("zss." + name);
+		setTextureName(ModInfo.ID + ":" + name);
+		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
-	@Override
-	public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
-		if (this == ZSSItems.smallHeart) {
-			if (player.getHealth() < player.getMaxHealth() || Config.alwaysPickupHearts()) {
-				player.heal(1.0F);
-			} else {
-				return false;
-			}
-		} else if (this == ZSSItems.powerPiece) {
-			PlayerUtils.playSound(player, Sounds.SUCCESS_MAGIC, 0.6F, 1.0F);
-			ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_UP, 600, 100);
-			ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_UP, 600, 25);
-			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, 600, 25);
-			ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_STUN, 600, 100);
+	public static class ItemMagicJar extends ItemPickupOnly
+	{
+		/** Amount of magic to restore */
+		private final int restoreMp;
+		public ItemMagicJar(String name, int restoreMp) {
+			super(name);
+			this.restoreMp = restoreMp;
 		}
-		stack.stackSize = 0;
-		return true;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
+		@Override
+		public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+			if (info.getCurrentMagic() < info.getMaxMagic() || Config.alwaysPickupHearts()) {
+				--stack.stackSize;
+				info.restoreMagic(restoreMp);
+				PlayerUtils.playSound(player, Sounds.SUCCESS_MAGIC, 0.6F, 1.0F);
+				return true;
+			}
+			return false;
+		}
 	}
 }

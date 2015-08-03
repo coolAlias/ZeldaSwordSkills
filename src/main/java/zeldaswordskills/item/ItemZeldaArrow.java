@@ -17,12 +17,14 @@
 
 package zeldaswordskills.item;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import zeldaswordskills.api.item.IMagicArrow;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -32,24 +34,35 @@ import zeldaswordskills.ref.ModInfo;
  */
 public class ItemZeldaArrow extends Item
 {
-	/** Whether this arrow should glow as if enchanted */
-	private final boolean isMagic;
-
 	/**
 	 * @param name Used as texture name; unlocalized name is 'zss.name'
-	 * @param isMagic Gives this arrow the enchanted glow if true
 	 */
-	public ItemZeldaArrow(String name, boolean isMagic) {
+	public ItemZeldaArrow(String name) {
 		super();
-		this.isMagic = isMagic;
 		setUnlocalizedName("zss." + name);
 		setTextureName(ModInfo.ID + ":" + name);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean hasEffect(ItemStack stack, int pass) {
-		return isMagic;
+	public static class ItemMagicArrow extends ItemZeldaArrow implements IMagicArrow
+	{
+		/** Magic cost to shoot this arrow */
+		private final float magic;
+
+		public ItemMagicArrow(String name, float magic) {
+			super(name);
+			this.magic = magic;
+		}
+
+		@Override
+		public float getMagicCost(ItemStack arrow, EntityPlayer player) {
+			return magic;
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public boolean hasEffect(ItemStack stack) {
+			return true;
+		}
 	}
 }

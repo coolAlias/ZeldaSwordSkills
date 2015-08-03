@@ -84,9 +84,9 @@ public class UpdateBuffPacket extends AbstractClientMessage<UpdateBuffPacket>
 			return;
 		}
 		if (remove) {
-			ZSSEntityInfo.get((EntityLivingBase) entity).getActiveBuffsMap().remove(buff.getBuff());
+			ZSSEntityInfo.get((EntityLivingBase) entity).removeBuff(buff.getBuff());
 		} else {
-			ZSSEntityInfo.get((EntityLivingBase) entity).getActiveBuffsMap().put(buff.getBuff(), buff);
+			ZSSEntityInfo.get((EntityLivingBase) entity).applyBuff(buff);
 		}
 	}
 }

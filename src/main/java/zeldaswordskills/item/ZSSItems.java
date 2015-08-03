@@ -48,6 +48,7 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.util.EnumHelper;
+import net.minecraftforge.oredict.RecipeSorter;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
@@ -64,6 +65,7 @@ import zeldaswordskills.client.render.item.RenderItemCustomBow;
 import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityChu;
@@ -81,6 +83,7 @@ import zeldaswordskills.item.crafting.RecipeCombineBombBag;
 import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.world.gen.structure.LinksHouse;
@@ -192,6 +195,9 @@ public class ZSSItems
 	potionGreen,
 	potionBlue,
 	potionYellow,
+	potionPurple,
+	magicJar,
+	magicJarBig,
 	rocsFeather;
 
 	//================ TREASURES TAB ================//
@@ -551,12 +557,12 @@ public class ZSSItems
 		boomerangMagic = new ItemBoomerang(6.0F, 24).setCaptureAll().setUnlocalizedName("zss.boomerang_magic");
 
 		heroBow = new ItemHeroBow().setUnlocalizedName("zss.bow_hero");
-		arrowBomb = new ItemZeldaArrow("arrow_bomb", false);
-		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire", false);
-		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water", false);
-		arrowFire = new ItemZeldaArrow("arrow_fire", true);
-		arrowIce = new ItemZeldaArrow("arrow_ice", true);
-		arrowLight = new ItemZeldaArrow("arrow_light", true);
+		arrowBomb = new ItemZeldaArrow("arrow_bomb");
+		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire");
+		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water");
+		arrowFire = new ItemZeldaArrow.ItemMagicArrow("arrow_fire", 2.5F);
+		arrowIce = new ItemZeldaArrow.ItemMagicArrow("arrow_ice", 2.5F);
+		arrowLight = new ItemZeldaArrow.ItemMagicArrow("arrow_light", 5.0F);
 
 		slingshot = new ItemSlingshot().setUnlocalizedName("zss.slingshot");
 		scattershot = new ItemSlingshot(3, 30F).setUnlocalizedName("zss.scattershot");
@@ -583,13 +589,16 @@ public class ZSSItems
 		gauntletsGolden = new ItemPowerGauntlets(BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.gauntlets_golden");
 		magicMirror = new ItemMagicMirror().setUnlocalizedName("zss.magicmirror");
 		fairyBottle = new ItemFairyBottle().setUnlocalizedName("zss.fairybottle");
-		potionRed = new ItemZeldaPotion(0, 0.0F, 20.0F).setUnlocalizedName("zss.potion_red");
-		potionGreen = new ItemZeldaPotion(20, 40.0F, 0.0F).setUnlocalizedName("zss.potion_green");
-		potionBlue = new ItemZeldaPotion(20, 40.0F, 40.0F).setUnlocalizedName("zss.potion_blue");
-		potionYellow = new ItemZeldaPotion().setBuffEffect(Buff.RESIST_SHOCK, 6000, 100, 1.0F).setUnlocalizedName("zss.potion_yellow");
-		rodFire = new ItemMagicRod(MagicType.FIRE, 8.0F, 8.0F).setUnlocalizedName("zss.rod_fire");
-		rodIce = new ItemMagicRod(MagicType.ICE, 6.0F, 8.0F).setUnlocalizedName("zss.rod_ice");
-		rodTornado = new ItemMagicRod(MagicType.WIND, 4.0F, 4.0F).setUnlocalizedName("zss.rod_tornado");
+		potionRed = new ItemZeldaPotion("potion_red", 20.0F, 0.0F);
+		potionGreen = new ItemZeldaPotion("potion_green", 0.0F, 100.0F);
+		potionBlue = new ItemZeldaPotion("potion_blue", 40.0F, 100.0F);
+		potionYellow = new ItemZeldaPotion("potion_yellow").setBuffEffect(Buff.RESIST_SHOCK, 6000, 100, 1.0F);
+		potionPurple = new ItemDrinkable.ItemPotionPurple("potion_purple", 20, 40.0F);
+		magicJar = new ItemPickupOnly.ItemMagicJar("magic_jar", 10);
+		magicJarBig = new ItemPickupOnly.ItemMagicJar("magic_jar_big", 250);
+		rodFire = new ItemMagicRod(MagicType.FIRE, 8.0F, 10.0F).setUnlocalizedName("zss.rod_fire");
+		rodIce = new ItemMagicRod(MagicType.ICE, 6.0F, 10.0F).setUnlocalizedName("zss.rod_ice");
+		rodTornado = new ItemMagicRod(MagicType.WIND, 4.0F, 10.0F).setUnlocalizedName("zss.rod_tornado");
 		whip = new ItemWhip().setUnlocalizedName("zss.whip");
 
 		// MASK TAB ITEMS
@@ -656,8 +665,30 @@ public class ZSSItems
 
 		// ITEMS WITH NO TAB
 		heldBlock = new ItemHeldBlock().setUnlocalizedName("zss.held_block");
-		powerPiece = new ItemPickupOnly().setUnlocalizedName("zss.power_piece");
-		smallHeart = new ItemPickupOnly().setUnlocalizedName("zss.heart");
+		powerPiece = (new ItemPickupOnly("power_piece") {
+			@Override
+			public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
+				PlayerUtils.playSound(player, Sounds.SUCCESS_MAGIC, 0.6F, 1.0F);
+				ZSSEntityInfo buffs = ZSSEntityInfo.get(player);
+				buffs.applyBuff(Buff.ATTACK_UP, 600, 100);
+				buffs.applyBuff(Buff.DEFENSE_UP, 600, 25);
+				buffs.applyBuff(Buff.EVADE_UP, 600, 25);
+				buffs.applyBuff(Buff.RESIST_STUN, 600, 100);
+				--stack.stackSize;
+				return true;
+			}
+		});
+		smallHeart = (new ItemPickupOnly("heart") {
+			@Override
+			public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
+				if (player.getHealth() < player.getMaxHealth() || Config.alwaysPickupHearts()) {
+					player.heal(1.0F);
+					--stack.stackSize;
+					return true;
+				}
+				return false;
+			}
+		});
 		throwingRock = (new Item() {
 			@Override
 			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
@@ -748,6 +779,7 @@ public class ZSSItems
 			GameRegistry.addRecipe(new ItemStack(Blocks.cobblestone), "rrr", "rrr", "rrr", 'r', throwingRock);
 		}
 		GameRegistry.addRecipe(new RecipeCombineBombBag());
+		RecipeSorter.register(ModInfo.ID + ":combinebombbag", RecipeCombineBombBag.class, RecipeSorter.Category.SHAPELESS, "");
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.gossipStone), " s ","sos"," s ", 's', Blocks.stone, 'o', new ItemStack(ZSSItems.instrument, 1, Instrument.OCARINA_FAIRY.ordinal()));

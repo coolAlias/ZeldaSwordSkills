@@ -60,6 +60,7 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.IMagicArrow;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -373,7 +374,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 			if (arrowEntity == null && ZSSMain.isBG2Enabled) { // try to construct BG2 arrow
 				arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, player.worldObj, player, charge * 2.0F);
 			}
-			if (arrowEntity != null) {
+			if (arrowEntity != null && confirmArrowShot(arrowStack, player)) {
 				applyArrowSettings(arrowEntity, bow, charge);
 				if (arrowEntity instanceof EntityArrowCustom) {
 					applyCustomArrowSettings(event.entityPlayer, event.bow, arrowStack, (EntityArrowCustom) arrowEntity, charge);
@@ -394,6 +395,17 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	}
 
 	/**
+	 * Returns true if the player truly can fire this arrow; used to consume MP for magic arrows
+	 */
+	private boolean confirmArrowShot(ItemStack arrow, EntityPlayer player) {
+		if (arrow != null && arrow.getItem() instanceof IMagicArrow) {
+			float mp = ((IMagicArrow) arrow.getItem()).getMagicCost(arrow, player);
+			return ZSSPlayerInfo.get(player).consumeMagic(mp);
+		}
+		return true;
+	}
+
+	/**
 	 * Returns true if this bow's level is capable of shooting the given arrow
 	 */
 	public boolean canShootArrow(EntityPlayer player, ItemStack bow, ItemStack arrowStack) {
@@ -401,6 +413,10 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		if (arrowMap.containsKey(arrowItem)) {
 			if (player.capabilities.isCreativeMode) {
 				return true;
+			} else if (arrowItem instanceof IMagicArrow) {
+				if (!ZSSPlayerInfo.get(player).canUseMagic() || ZSSPlayerInfo.get(player).getCurrentMagic() < ((IMagicArrow) arrowItem).getMagicCost(arrowStack, player)) {
+					return false;
+				}
 			}
 			if (elementalArrowMap.containsKey(arrowItem)) {
 				if (ZSSPlayerInfo.get(player).isNayruActive()) {
@@ -411,7 +427,6 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 					return (n == 2 && elementalArrowMap.get(arrowItem) != ElementType.LIGHT);
 				}
 			}
-
 			return true;
 		}
 		// allow hero's bow to fire arrows registered with BG2
@@ -747,7 +762,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 			ItemStack bow = player.getHeldItem();
 			if (bow != null && (bow.getItem() instanceof ItemHeroBow || player.capabilities.isCreativeMode)) {
 				EntityArrowCustom arrowEntity = ItemHeroBow.getArrowEntity(arrow, world, player, charge);
-				if (arrowEntity != null) {
+				if (arrowEntity != null && (!(bow.getItem() instanceof ItemHeroBow) || ((ItemHeroBow) bow.getItem()).confirmArrowShot(arrow, player))) {
 					// vanilla arrow settings will be applied by BG2's arrow loose event
 					ItemHeroBow.applyCustomArrowSettings(player, bow, arrow, arrowEntity, charge);
 				}

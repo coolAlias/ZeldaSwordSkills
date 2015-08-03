@@ -48,7 +48,7 @@ public class GuiBuffBar extends Gui implements IGuiOverlay
 	private final ResourceLocation textures;
 
 	private static final int ICON_SIZE = 18;
-	private static final int ICON_SPACING = ICON_SIZE + 2;
+	public static final int ICON_SPACING = ICON_SIZE + 2;
 	private static final int ICONS_PER_ROW = 8;
 
 	public GuiBuffBar(Minecraft mc) {
@@ -59,27 +59,34 @@ public class GuiBuffBar extends Gui implements IGuiOverlay
 
 	@Override
 	public boolean shouldRender() {
-		return Config.isBuffBarEnabled;
+		return Config.isBuffBarEnabled && !ZSSEntityInfo.get(mc.thePlayer).getActiveBuffs().isEmpty();
 	}
 
 	@Override
 	public void renderOverlay(ScaledResolution resolution) {
 		int xPos = Config.isBuffBarLeft ? 2 : resolution.getScaledWidth() - (ICON_SPACING + 2);
 		int yPos = 2;
+		// Adjust for Magic Meter
+		if ((Config.isMagicMeterEnabled || Config.isMagicMeterTextEnabled) && Config.isMagicMeterTop && Config.isBuffBarLeft == Config.isMagicMeterLeft) {
+			if ((Config.isBuffBarLeft ? GuiMagicMeter.getLeftX(resolution) < ICON_SPACING : GuiMagicMeter.getRightX(resolution) > xPos) && GuiMagicMeter.getBottomY(resolution) > yPos) {
+				if (Config.isMagicMeterHorizontal) { // move down
+					yPos = GuiMagicMeter.getBottomY(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2);
+				} else { // move right or left
+					xPos = (Config.isBuffBarLeft ? GuiMagicMeter.getRightX(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2) : GuiMagicMeter.getLeftX(resolution) - ICON_SPACING); 
+				}
+			}
+		}
 		int offset = 0;
 		int increment = Config.isBuffBarHorizontal && !Config.isBuffBarLeft ? -ICON_SPACING : ICON_SPACING;
-		Collection<BuffBase> collection = ZSSEntityInfo.get(mc.thePlayer).getActiveBuffsMap().values();
-		if (!collection.isEmpty()) {
+		Collection<BuffBase> buffs = ZSSEntityInfo.get(mc.thePlayer).getActiveBuffs();
+		if (!buffs.isEmpty()) {
 			GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GL11.glDisable(GL11.GL_LIGHTING);
-			// alpha test and blend needed due to vanilla or Forge rendering bug
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
 			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			mc.getTextureManager().bindTexture(textures);
-			for (Iterator<BuffBase> iterator = ZSSEntityInfo.get(mc.thePlayer).getActiveBuffsMap().values().iterator();
-					iterator.hasNext(); offset = increment)
-			{
+			for (Iterator<BuffBase> iterator = buffs.iterator(); iterator.hasNext(); offset = increment) {
 				BuffBase buff = iterator.next();
 				int index = buff.getIconIndex();
 				xPos += (Config.isBuffBarHorizontal ? offset : 0);

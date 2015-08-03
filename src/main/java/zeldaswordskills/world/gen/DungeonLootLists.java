@@ -246,7 +246,7 @@ public class DungeonLootLists
 		setCategoryStats(ChestGenHooks.getInfo(JAR_DROPS), 1, 1, new WeightedRandomChestContent[] {
 			getLoot(ZSSItems.bomb, BombType.BOMB_STANDARD.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.potionRed, 1, 1, 2),
-			getLoot(ZSSItems.potionGreen, 1, 1, 1),
+			getLoot(ZSSItems.magicJar, 1, 1, 3),
 			getLoot(ZSSItems.smallHeart, 1, 1, 6),
 			getLoot(ZSSItems.dekuNut, 1, 1, 4),
 			getLoot(Items.arrow, 1, 1, 5),

@@ -41,6 +41,7 @@ import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.client.gui.GuiItemModeOverlay;
+import zeldaswordskills.client.gui.GuiMagicMeter;
 import zeldaswordskills.client.gui.IGuiOverlay;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -87,6 +88,7 @@ public class ZSSClientEvents
 		overlays.add(new ComboOverlay(mc));
 		overlays.add(new GuiBuffBar(mc));
 		overlays.add(new GuiItemModeOverlay(mc));
+		overlays.add(new GuiMagicMeter(mc));
 	}
 
 	@SubscribeEvent
@@ -207,7 +209,7 @@ public class ZSSClientEvents
 			return;
 		}
 		ILockOnTarget skill = skills.getTargetingSkill();
-		if (skill != null && skill.isLockedOn() && !skills.isNayruActive()) {
+		if (skill != null && skill.isLockedOn()) {
 			if (isAttackKey) {
 				// mouse attack will always be canceled while locked on, as the click has been handled
 				if (Config.allowVanillaControls) {

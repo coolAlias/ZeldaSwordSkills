@@ -24,7 +24,9 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.StatCollector;
+import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.item.ICyclableItem;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.EndComboPacket;
 import zeldaswordskills.ref.Config;
@@ -80,7 +82,7 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 	public void renderOverlay(ScaledResolution resolution) {
 		ZSSPlayerSkills skills = ZSSPlayerSkills.get(mc.thePlayer);
 		if (skills != null) {
-			displayComboText(skills, resolution);
+			updateComboHUD(skills, resolution);
 			ILockOnTarget skill = skills.getTargetingSkill();
 			if (skill != null && skill.isLockedOn()) {
 				//displayTargetingOverlay(event, skill.getCurrentTarget());
@@ -89,9 +91,9 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 	}
 
 	/**
-	 * Displays current combo data if applicable
+	 * Updates combo time and display
 	 */
-	private void displayComboText(ZSSPlayerSkills skills, ScaledResolution resolution) {
+	private void updateComboHUD(ZSSPlayerSkills skills, ScaledResolution resolution) {
 		ICombo iCombo = skills.getComboSkill();
 		if (iCombo != null && iCombo.getCombo() != null) {
 			if (combo != iCombo.getCombo()) {
@@ -104,7 +106,6 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 				}
 			}
 		}
-
 		if (combo != null && combo.getNumHits() > 0) {
 			// combo has changed, reset time
 			if (lastComboSize != combo.getNumHits()) {
@@ -114,14 +115,7 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 			// TODO make display look nice
 			if ((Minecraft.getSystemTime() - displayStartTime) < DISPLAY_TIME) {
 				if (Config.isComboHudEnabled) {
-					String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
-					mc.fontRenderer.drawString(s + combo.getLabel(), 10, 10, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
-					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getNumHits() + "/" + combo.getMaxNumHits(), 10, 20, 0xFFFFFF, true);
-					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
-					List<Float> damageList = combo.getDamageList();
-					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-						mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 30 + mc.fontRenderer.FONT_HEIGHT * (i + 1), 0xFFFFFF, true);
-					}
+					displayComboText(resolution);
 				}
 				// for Ending Blow, use canUse instead of canExecute to determine whether notification should be displayed
 				if (skills.getActiveSkill(SkillBase.endingBlow) != null && skills.getActiveSkill(SkillBase.endingBlow).canUse(mc.thePlayer)) {
@@ -132,6 +126,50 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Displays current combo data if applicable
+	 */
+	private void displayComboText(ScaledResolution resolution) {
+		// TODO add config for combo HUD to be left or right
+		int xPos = 2;
+		int yPos = 2;
+		boolean flag = true; // true to adjust for HUD elements in addition to the magic meter
+		// Adjust for Magic Meter
+		if ((Config.isMagicMeterEnabled || Config.isMagicMeterTextEnabled) && Config.isMagicMeterLeft) { // TODO == Config.isComboDisplayLeft
+			if (Config.isMagicMeterHorizontal || Config.isMagicMeterTextEnabled) { // always move down if text is present so they don't overlap
+				flag = Config.isMagicMeterHorizontal; // true to adjust for other elements, i.e. when bar is horizontal only 
+				yPos += GuiMagicMeter.getBottomY(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2);
+			} else { // move right TODO or left
+				xPos = GuiMagicMeter.getRightX(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2); 
+			}
+		}
+		// Adjust for Buff Bar
+		// TODO Config.isComboDisplayLeft == Config.isBuffBarLeft
+		if (flag && Config.isBuffBarEnabled && Config.isBuffBarLeft && !ZSSEntityInfo.get(mc.thePlayer).getActiveBuffs().isEmpty()) {
+			if (Config.isBuffBarHorizontal) {
+				yPos += GuiBuffBar.ICON_SPACING;
+			} else {
+				xPos += GuiBuffBar.ICON_SPACING;
+			}
+		}
+		// Adjust for Item Mode
+		if (flag && Config.isItemModeEnabled && Config.isItemModeTop && Config.isItemModeLeft
+				&& mc.thePlayer.getHeldItem() != null && mc.thePlayer.getHeldItem().getItem() instanceof ICyclableItem) {
+			yPos += GuiBuffBar.ICON_SPACING;
+		}
+		String s = (combo.isFinished() ? (StatCollector.translateToLocal("combo.finished") + "! ") : (StatCollector.translateToLocal("combo.combo") + ": "));
+		mc.fontRenderer.drawString(s + combo.getLabel(), xPos, yPos, combo.isFinished() ? 0x9400D3 : 0xEEEE00, true);
+		yPos += mc.fontRenderer.FONT_HEIGHT;
+		mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.size") + ": " + combo.getNumHits() + "/" + combo.getMaxNumHits(), xPos, yPos, 0xFFFFFF, true);
+		yPos += mc.fontRenderer.FONT_HEIGHT;
+		mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), xPos, yPos, 0xFFFFFF, true);
+		List<Float> damageList = combo.getDamageList();
+		for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
+			yPos += mc.fontRenderer.FONT_HEIGHT;
+			mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), xPos, yPos, 0xFFFFFF, true);
 		}
 	}
 

@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity;
 
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -93,8 +94,8 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	}
 
 	/** Returns active buffs map */
-	public Map<Buff, BuffBase> getActiveBuffsMap() {
-		return activeBuffs;
+	public Collection<BuffBase> getActiveBuffs() {
+		return activeBuffs.values();
 	}
 
 	/**
@@ -111,12 +112,14 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 * Applies a new Buff to the active buffs map
 	 */
 	public void applyBuff(BuffBase newBuff) {
-		if (isBuffActive(newBuff.getBuff())) {
-			getActiveBuff(newBuff.getBuff()).combine(newBuff);
-			getActiveBuff(newBuff.getBuff()).onChanged(this.entity);
-		} else {
-			activeBuffs.put(newBuff.getBuff(), newBuff);
-			newBuff.onAdded(this.entity);
+		synchronized (activeBuffs) {
+			if (isBuffActive(newBuff.getBuff())) {
+				getActiveBuff(newBuff.getBuff()).combine(newBuff);
+				getActiveBuff(newBuff.getBuff()).onChanged(this.entity);
+			} else {
+				activeBuffs.put(newBuff.getBuff(), newBuff);
+				newBuff.onAdded(this.entity);
+			}
 		}
 	}
 
@@ -149,9 +152,11 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 * Removes a buff from the entity
 	 */
 	public void removeBuff(Buff buff) {
-		BuffBase buffBase = activeBuffs.remove(buff);
-		if (buffBase != null) {
-			buffBase.onRemoved(this.entity);
+		synchronized (activeBuffs) {
+			BuffBase buffBase = activeBuffs.remove(buff);
+			if (buffBase != null) {
+				buffBase.onRemoved(this.entity);
+			}
 		}
 	}
 

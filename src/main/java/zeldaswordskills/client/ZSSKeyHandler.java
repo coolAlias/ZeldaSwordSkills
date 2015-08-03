@@ -187,8 +187,7 @@ public class ZSSKeyHandler
 			}
 			// Only allow attack key to continue processing if it was set to pressed
 			if (key.getIsKeyPressed()) {
-				// Nayru's Love prevents skill activation, but can still attack
-				if (skills.isNayruActive() || !skills.onKeyPressed(mc, key)) {
+				if (!skills.onKeyPressed(mc, key)) {
 					ZSSClientEvents.performComboAttack(mc, skill);
 				}
 				// hack for Armor Break to begin charging without having to press attack again
@@ -201,10 +200,7 @@ public class ZSSKeyHandler
 			KeyBinding key = getKeyBindFromCode(mc, kb);
 			if (key != null) {
 				KeyBinding.setKeyBindState(kb, true);
-				// Nayru's Love prevents all skill interaction
-				if (!skills.isNayruActive()) {
-					skills.onKeyPressed(mc, key);
-				}
+				skills.onKeyPressed(mc, key);
 			}
 		}
 	}

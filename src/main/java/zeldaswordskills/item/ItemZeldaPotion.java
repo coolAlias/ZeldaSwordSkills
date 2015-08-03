@@ -19,85 +19,78 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.texture.IIconRegister;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumAction;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.entity.buff.BuffBase;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 
-public class ItemZeldaPotion extends ItemFood implements IUnenchantable
+public class ItemZeldaPotion extends ItemDrinkable implements IUnenchantable
 {
 	/** Amount of HP to restore when consumed */
 	private final float restoreHP;
 
-	/** Id of the buff to add, if any */
-	private Buff buff;
-	/** Duration the buff will last */
-	private int buffDuration;
-	/** Amplifier of the buff, similar to vanilla potions */
-	private int buffAmplifier;
+	/** Amount of MP to restore when consumed */
+	private final float restoreMP;
+
+	/** The buff to add, if any */
+	private BuffBase buff;
+
+	/** Duration in minutes, with any remainder in seconds */
+	private int minutes, seconds;
+
 	/** Probability of the set buff effect occurring */
 	private float buffProbability;
 
 	/** Creates a potion with no healing or hunger-restoring properties */
-	public ItemZeldaPotion() {
-		this(0, 0.0F, 0.0F);
+	public ItemZeldaPotion(String name) {
+		this(name, 0.0F, 0.0F);
 	}
 
-	public ItemZeldaPotion(int restoreHunger, float saturationModifier, float healAmount) {
-		super(restoreHunger, saturationModifier, false);
-		restoreHP = healAmount;
-		setAlwaysEdible();
+	/**
+	 * @param restoreHP amount of HP drinking this potion immediately restores
+	 * @param restoreMP amount of MP drinking this potion immediately restores
+	 */
+	public ItemZeldaPotion(String name, float restoreHP, float restoreMP) {
+		super(name);
+		this.restoreHP = restoreHP;
+		this.restoreMP = restoreMP;
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
 	}
 
 	@Override
-	public EnumAction getItemUseAction(ItemStack stack) {
-		return EnumAction.drink;
-	}
-
-	@Override
 	public ItemStack onEaten(ItemStack stack, World world, EntityPlayer player) {
-		player.getFoodStats().func_151686_a(this, stack);
-		player.heal(restoreHP);
-		onFoodEaten(stack, world, player);
 		if (!player.capabilities.isCreativeMode) {
-			if (--stack.stackSize <= 0) {
-				return new ItemStack(Items.glass_bottle);
-			}
-			player.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
+			--stack.stackSize;
 		}
-		return stack;
-	}
-
-	@Override
-	protected void onFoodEaten(ItemStack stack, World world, EntityPlayer player) {
-		super.onFoodEaten(stack, world, player);
+		world.playSoundAtEntity(player, "random.burp", 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
+		player.heal(restoreHP);
+		ZSSPlayerInfo.get(player).restoreMagic(restoreMP);
 		if (buff != null && world.rand.nextFloat() < buffProbability) {
-			ZSSEntityInfo.get(player).applyBuff(buff, buffDuration, buffAmplifier);
+			ZSSEntityInfo.get(player).applyBuff(new BuffBase(buff));
 		}
+		return super.onEaten(stack, world, player);
 	}
 
 	/**
 	 * Sets the Buff that this potion will grant when consumed
+	 * @param duration Duration is in ticks
 	 */
 	public ItemZeldaPotion setBuffEffect(Buff buffEnum, int duration, int amplifier, float probability) {
-		buff = buffEnum;
-		buffDuration = duration;
-		buffAmplifier = amplifier;
+		buff = new BuffBase(buffEnum, duration, amplifier);
+		minutes = duration / 1200;
+		seconds = duration % 1200;
 		buffProbability = probability;
 		return this;
 	}
@@ -115,13 +108,19 @@ public class ItemZeldaPotion extends ItemFood implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister register) {
-		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+		if (restoreHP > 0) {
+			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.restore_hp", String.format("%.0f", restoreHP / 2.0F)));
+		}
+		if (restoreMP > 0) {
+			list.add(EnumChatFormatting.GREEN + StatCollector.translateToLocalFormatted("tooltip.zss.restore_mp", MathHelper.floor_float(restoreMP)));
+		}
+		if (buff != null) {
+			list.add(EnumChatFormatting.GRAY + StatCollector.translateToLocalFormatted("tooltip.zss.buff", buff.getBuff().getName(), minutes, String.format("%02d", seconds)));
+			if (buffProbability < 1.0F) {
+				list.add(EnumChatFormatting.GREEN + StatCollector.translateToLocalFormatted("tooltip.zss.buff_chance", String.format("%.1f", buffProbability * 100)));
+			}
+			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.buff_amplifier", buff.getAmplifier()));
+		}
 	}
 }
