@@ -472,7 +472,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		entityLivingUpdate();
 		super.onEntityUpdate();
 		// End hack, start copy/pasta:
-		if (onGround && !wasOnGround) {
+		if (onGround && !wasOnGround && worldObj.isRemote) {
 			spawnParticlesOnLanding();
 			/*
 			int i = this.getSlimeSize();
@@ -639,7 +639,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 	}
 
 	@SideOnly(Side.CLIENT)
-	public void spawnParticlesOnLanding() {
+	private void spawnParticlesOnLanding() {
 		int i = getSlimeSize();
 		float r = 1.0F, g = 1.0F, b = 1.0F;
 		switch(getType()) {
