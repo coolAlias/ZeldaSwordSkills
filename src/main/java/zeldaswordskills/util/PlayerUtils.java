@@ -24,12 +24,10 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.api.item.ISkillItem;
@@ -189,7 +187,6 @@ public class PlayerUtils
 				stack = null;
 				player.setCurrentItemOrArmor(0, null);
 			}
-			PacketDispatcher.sendTo(new S2FPacketSetSlot(player.openContainer.windowId, player.inventory.currentItem, stack), player);
 			return true;
 		}
 	}
@@ -227,18 +224,15 @@ public class PlayerUtils
 		for (int i = 0; i < player.inventory.getSizeInventory() && consumed > 0; ++i) {
 			ItemStack invStack = player.inventory.getStackInSlot(i);
 			if (invStack != null && invStack.getItem() == item && invStack.getItemDamage() == meta) {
-				Slot slot = player.openContainer.getSlotFromInventory(player.inventory, i);
 				if (invStack.stackSize <= consumed) {
 					consumed -= invStack.stackSize;
 					if (!player.capabilities.isCreativeMode) {
 						player.inventory.setInventorySlotContents(i, null);
-						PacketDispatcher.sendTo(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, null), player);
 					}
 				} else {
 					if (!player.capabilities.isCreativeMode) {
 						invStack = invStack.splitStack(invStack.stackSize - consumed);
 						player.inventory.setInventorySlotContents(i, invStack);
-						PacketDispatcher.sendTo(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, invStack), player);
 					}
 					consumed = 0;
 				}
