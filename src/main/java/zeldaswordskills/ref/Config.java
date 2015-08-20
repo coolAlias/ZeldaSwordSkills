@@ -172,6 +172,8 @@ public class Config
 	private static boolean enableDinMelt;
 	/** [SYNC] [Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil */
 	private static boolean disableAllUnenchantables;
+	/** [Hammer] True to allow the Megaton Hammer to break Quake Stone (also requires player to have Golden Gauntlets in inventory) */
+	private static boolean enableMegaSmashQuake;
 	/** [Hero's Bow] Cost (in emeralds) to upgrade, per level */
 	private static int heroBowUpgradeCost;
 	/** [Hero's Bow] Whether the fire arrow can ignite affected blocks */
@@ -484,6 +486,7 @@ public class Config
 		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
 		disableAllUnenchantables = config.get("Item", "[Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", false).getBoolean(false);
+		enableMegaSmashQuake = config.get("Item", "[Hammer] True to allow the Megaton Hammer to break Quake Stone (also requires player to have Golden Gauntlets in inventory)", true).getBoolean(true);
 		heroBowUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt(), 128, 640);
 		enableFireArrowIgnite = config.get("Item", "[Hero's Bow] Whether the fire arrow can ignite affected blocks", true).getBoolean(true);
 		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", false).getBoolean(false);
@@ -669,6 +672,7 @@ public class Config
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
 	public static boolean areUnenchantablesDisabled() { return disableAllUnenchantables; }
+	public static boolean allowMegaSmashQuakeStone() { return enableMegaSmashQuake; }
 	public static int getHeroBowUpgradeCost() { return heroBowUpgradeCost; }
 	public static boolean enableFireArrowIgnite() { return enableFireArrowIgnite; }
 	public static boolean enableFireArrowMelt() { return enableFireArrowMelt; }

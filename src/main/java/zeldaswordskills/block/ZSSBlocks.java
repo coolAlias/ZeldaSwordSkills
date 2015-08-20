@@ -52,6 +52,7 @@ public class ZSSBlocks
 {
 	public static Block
 	heavyBlock,
+	quakeStone,
 	timeBlock,
 	bombFlower,
 	ceramicJar,
@@ -125,6 +126,8 @@ public class ZSSBlocks
 		pedestal = new BlockPedestal().setUnlocalizedName("pedestal");
 		GameRegistry.registerBlock(pedestal, ItemBlockPedestal.class, pedestal.getUnlocalizedName().substring(5));
 		GameRegistry.registerTileEntity(TileEntityPedestal.class, ModInfo.ID + ":tileEntityPedestal");
+		quakeStone = new BlockQuakeStone().setUnlocalizedName("quake_stone");
+		GameRegistry.registerBlock(quakeStone, ItemMetadataBlock.class, quakeStone.getUnlocalizedName().substring(5), new Object[]{new String[]{BlockQuakeStone.EnumType.COBBLE.getName(), BlockQuakeStone.EnumType.MOSSY.getName()}});
 		sacredFlame = new BlockSacredFlame().setUnlocalizedName("sacred_flame");
 		GameRegistry.registerBlock(sacredFlame, ItemSacredFlame.class, sacredFlame.getUnlocalizedName().substring(5));
 		GameRegistry.registerTileEntity(TileEntitySacredFlame.class, ModInfo.ID + ":tileEntitySacredFlame");

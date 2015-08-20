@@ -1,0 +1,6 @@
+{
+    "variants": {
+    	"variant=cobble" : { "model" : "zeldaswordskills:quake_stone_cobble" },
+    	"variant=mossy" : { "model" : "zeldaswordskills:quake_stone_mossy" }
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "parent": "minecraft:block/cube_all",
+    "textures": {
+        "all": "zeldaswordskills:blocks/quake_stone_mossy"
+    }
+}
