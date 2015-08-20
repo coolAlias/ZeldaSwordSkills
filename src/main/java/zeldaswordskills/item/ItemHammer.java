@@ -36,7 +36,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ISmashable;
@@ -177,7 +176,7 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 			player.addExhaustion(charge * 2.0F);
 			if (charge > 0.25F) {
 				if (!player.worldObj.isRemote) {
-					PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, this, 4.0F), player, 64.0D);
+					PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, 4.0F), player, 64.0D);
 				}
 				player.swingItem();
 				ZSSCombatEvents.setPlayerAttackTime(player);
@@ -198,7 +197,7 @@ public class ItemHammer extends Item implements IArmorBreak, IParryModifier, ISm
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void spawnParticles(World world, double x, double y, double z, float radius, Vec3 lookVector) {
+	public void spawnParticles(World world, EntityPlayer player, ItemStack stack, double x, double y, double z, float radius) {
 		int r = MathHelper.ceiling_float_int(radius);
 		for (int i = 0; i < r; ++i) {
 			for (int k = 0; k < r; ++k) {

@@ -17,7 +17,8 @@
 
 package zeldaswordskills.item;
 
-import net.minecraft.util.Vec3;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -38,13 +39,14 @@ public interface ISpawnParticles {
 	/**
 	 * Method that is called on each client world upon receiving an ISpawnParticlesPacket
 	 * Any particles to be spawned should be spawned from this method.
-	 * @param x the x coordinate, typically based on the instigating player's position
-	 * @param y the y coordinate, typically based on the instigating player's position
-	 * @param z the z coordinate, typically based on the instigating player's position
+	 * @param player the player that caused the particles to be spawned (not guaranteed to still be holding the ISpawnParticles item)
+	 * @param stack the ItemStack originally used to spawn the particles
+	 * @param x the instigating player's X position
+	 * @param y the instigating player's Y position
+	 * @param z the instigating player's Z position
 	 * @param r typically used as the radius in which to spawn particles
-	 * @param lookVector the normalized look vector from the original player who caused the particles
 	 */
 	@SideOnly(Side.CLIENT)
-	void spawnParticles(World world, double x, double y, double z, float r, Vec3 lookVector);
+	void spawnParticles(World world, EntityPlayer player, ItemStack stack, double x, double y, double z, float r);
 
 }
