@@ -38,6 +38,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
 import zeldaswordskills.api.block.IBoomerangBlock;
 import zeldaswordskills.api.block.IExplodable;
+import zeldaswordskills.api.block.IQuakeBlock;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
@@ -55,7 +56,7 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExplodable, IWhipBlock
+public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExplodable, IQuakeBlock, IWhipBlock
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -171,6 +172,14 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
 		if (world.getBlockMetadata(x, y, z) == 7 && entity instanceof IProjectile) {
+			createExplosion(world, x, y, z, true);
+		}
+	}
+
+	@Override
+	public void handleQuakeEffect(World world, int x, int y, int z, EntityPlayer player) {
+		if (world.getBlockMetadata(x, y, z) == 7) {
+			// TODO call disperseSeeds instead? schedule an update tick?
 			createExplosion(world, x, y, z, true);
 		}
 	}

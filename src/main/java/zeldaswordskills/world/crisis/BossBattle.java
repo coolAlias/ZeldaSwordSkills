@@ -31,17 +31,21 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.block.BlockAncientTablet;
 import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.ref.Config;
@@ -49,6 +53,7 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
+import zeldaswordskills.util.TimedChatDialogue;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
@@ -199,13 +204,51 @@ public class BossBattle extends AbstractCrisis
 	 * @param sound the sound to play, if any
 	 */
 	protected void setRandomBlockTo(World world, Block block, int meta, String sound) {
-		int x = box.minX + world.rand.nextInt(box.getXSize() - 1) + 1;
-		int y = box.minY + world.rand.nextInt(4) + 3;
-		int z = box.minZ + world.rand.nextInt(box.getZSize() - 1) + 1;
-		if (world.isAirBlock(x, y, z)) {
-			world.setBlock(x, y, z, block, meta, 3);
+		int[] pos = getRandomPlaceablePosition(world, block, box.minX + 1, box.minY + 3, box.minZ + 1, box.getXSize() - 1, box.getYSize() - 3, box.getZSize() - 1);
+		if (pos != null && world.isAirBlock(pos[0], pos[1], pos[2])) {
+			world.setBlock(pos[0], pos[1], pos[2], block, meta, 3);
 			if (sound.length() > 0) {
-				world.playSoundEffect(x, y, z, sound, 1.0F, 1.0F);
+				world.playSoundEffect(pos[0], pos[1], pos[2], sound, 1.0F, 1.0F);
+			}
+		}
+	}
+
+	/**
+	 * Returns a random placeable block position (see {@link Block#canPlaceBlockAt}) within
+	 * a certain range of the minimum x/y/z coordinates, or null if not placeable.
+	 * @param block if null, checks if the current block at the position is replaceable
+	 * @return int[3], if not null, contains x/y/z coordinates (not guaranteed to be within the structure bounding box)
+	 */
+	protected int[] getRandomPlaceablePosition(World world, Block block, int minX, int minY, int minZ, int dx, int dy, int dz) {
+		int i = minX + (dx > 1 ? world.rand.nextInt(dx) : 0);
+		int j = minY + (dy > 1 ? world.rand.nextInt(dy) : 0);
+		int k = minZ + (dz > 1 ? world.rand.nextInt(dz) : 0);
+		if (block != null && block.canPlaceBlockAt(world, i, j, k)) {
+			return new int[]{i, j, k};
+		} else if (block == null && world.getBlock(i, j, k).isReplaceable(world, i, j, k)) {
+			return new int[]{i, j, k};
+		}
+		return null;
+	}
+
+	/**
+	 * Called from {@link #endCrisis} to attempt to generate an Ancient Tablet
+	 */
+	protected void generateAncientTablet(World world) {
+		if (world.rand.nextFloat() < Config.getAncientTabletGenChance()) {
+			// Attempt to find a valid block position n times
+			int[] pos = null;
+			for (int n = 0; n < 4 && pos == null; ++n) {
+				pos = getRandomPlaceablePosition(world, ZSSBlocks.ancientTablet, box.minX + 1, box.maxY + 1, box.minZ + 1, box.getXSize() - 1, 1, box.getZSize() - 1);
+			}
+			if (pos != null) {
+				int meta = BlockAncientTablet.EnumType.byMetadata(world.rand.nextInt(BlockAncientTablet.EnumType.values().length)).getMetadata();
+				world.setBlock(pos[0], pos[1], pos[2], ZSSBlocks.ancientTablet, meta | world.rand.nextInt(2), 2);
+				world.playSoundEffect(pos[0], pos[1], pos[2], Sounds.ROCK_FALL, 1.0F, 1.0F);
+				EntityPlayer player = world.getClosestPlayer(box.getCenterX(), box.getCenterY(), box.getCenterZ(), 16.0D);
+				if (player != null) {
+					new TimedChatDialogue(player, 1250, 1250, new ChatComponentTranslation("chat.zss.ancient_tablet.spawn"));
+				}
 			}
 		}
 	}

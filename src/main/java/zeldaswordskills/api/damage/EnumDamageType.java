@@ -46,6 +46,8 @@ public enum EnumDamageType {
 	FIRE,
 	/** Holy damage is especially potent against undead creatures */
 	HOLY,
+	/** Quake damage results in nausea and slowness on affected entities */
+	QUAKE,
 	/** Shock damage may be resisted with the RESIST_SHOCK buff */
 	SHOCK,
 	/** Stun damage temporarily stuns affected entities */
@@ -55,9 +57,13 @@ public enum EnumDamageType {
 	 * Handles secondary effects of this damage type upon damaging a living entity
 	 */
 	public void handleSecondaryEffects(IPostDamageEffect source, EntityLivingBase entity, float damage) {
-		switch(this) {
+		switch (this) {
 		case COLD:
 			entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, (int)(damage * source.getDuration(this)), source.getAmplifier(this)));
+			break;
+		case QUAKE:
+			entity.addPotionEffect(new PotionEffect(Potion.confusion.id, (int)(damage * source.getDuration(this)), source.getAmplifier(this)));
+			entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, (int)(damage * source.getDuration(this)), 0)); // only ever Slow I
 			break;
 		case STUN:
 			if (source instanceof IDamageSourceStun) {
@@ -83,10 +89,12 @@ public enum EnumDamageType {
 		// do not include FIRE, since it is handled by isFireDamage()
 		damageResistMap.put(COLD, Buff.RESIST_COLD);
 		damageResistMap.put(HOLY, Buff.RESIST_HOLY);
+		damageResistMap.put(QUAKE, Buff.RESIST_QUAKE);
 		damageResistMap.put(SHOCK, Buff.RESIST_SHOCK);
 		
 		damageWeaknessMap.put(COLD, Buff.WEAKNESS_COLD);
 		damageWeaknessMap.put(HOLY, Buff.WEAKNESS_HOLY);
+		damageWeaknessMap.put(QUAKE, Buff.WEAKNESS_QUAKE);
 		damageWeaknessMap.put(SHOCK, Buff.WEAKNESS_SHOCK);
 	}
 }

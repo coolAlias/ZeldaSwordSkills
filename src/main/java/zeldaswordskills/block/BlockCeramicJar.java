@@ -37,6 +37,7 @@ import net.minecraftforge.common.ChestGenHooks;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.IHookable;
+import zeldaswordskills.api.block.IQuakeBlock;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
@@ -55,7 +56,7 @@ import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class BlockCeramicJar extends BlockContainer implements IExplodable, IHookable, ISmashable, IWhipBlock
+public class BlockCeramicJar extends BlockContainer implements IExplodable, IHookable, IQuakeBlock, ISmashable, IWhipBlock
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;
@@ -82,6 +83,12 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 	@Override
 	public Material getHookableMaterial(HookshotType type, World world, int x, int y, int z) {
 		return Material.clay;
+	}
+
+	@Override
+	public void handleQuakeEffect(World world, int x, int y, int z, EntityPlayer player) {
+		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
+		world.func_147480_a(x, y, z, false);
 	}
 
 	@Override

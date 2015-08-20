@@ -87,6 +87,7 @@ import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.entity.projectile.EntityBombosFireball;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.entity.projectile.EntityCeramicJar;
 import zeldaswordskills.entity.projectile.EntityCyclone;
@@ -224,6 +225,7 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityLeapingBlow.class, "leapingblow", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySwordBeam.class, "swordbeam", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBomb.class, "bomb", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityBombosFireball.class, "bombos_fireball", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBoomerang.class, "boomerang", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityCyclone.class, "cyclone", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityCeramicJar.class, "jar", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
@@ -275,6 +277,7 @@ public class ZSSEntities
 	public static void registerRenderers() {
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow());
 		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb());
+		RenderingRegistry.registerEntityRenderingHandler(EntityBombosFireball.class, new RenderSnowball(Items.fire_charge));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang());
 		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar());
 		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu());

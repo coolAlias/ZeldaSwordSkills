@@ -146,6 +146,8 @@ public class ZSSItems
 	private static boolean enableCraftingHammer;
 	/** Enable application of hookshot upgrades via crafting */
 	private static boolean enableCraftingHookshot;
+	/** Enable crafting recipe to make copies of the Book of Mudora */
+	private static boolean enableCraftingMudora;
 	/** Enable crafting throwing rocks from cobblestone and back */
 	private static boolean enableCraftingThrowingRock;
 
@@ -179,6 +181,7 @@ public class ZSSItems
 	crystalDin,
 	crystalFarore,
 	crystalNayru,
+	medallion,
 	dekuLeaf,
 	dekuNut,
 	bombFlowerSeed,
@@ -203,6 +206,7 @@ public class ZSSItems
 	//================ TREASURES TAB ================//
 	public static Item
 	instrument,
+	bookMudora,
 	pendant,
 	masterOre,
 	jellyChu,
@@ -335,6 +339,7 @@ public class ZSSItems
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
 		enableCraftingHookshot = config.get("Recipes", "Enable application of hookshot upgrades via crafting", false).getBoolean(false);
+		enableCraftingMudora = config.get("Recipes", "Enable crafting recipe to make copies of the Book of Mudora", true).getBoolean(true);
 		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
 	}
 
@@ -709,6 +714,10 @@ public class ZSSItems
 		eggKeese = new ItemCustomVariantEgg(EntityKeese.class, "keese").setUnlocalizedName("zss.eggKeese");
 		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
 		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("zss.eggWizzrobe");
+
+		// NEW ITEMS
+		bookMudora = new Item().setUnlocalizedName("zss.book_mudora").setTextureName(ModInfo.ID + ":book_mudora").setMaxDamage(0).setCreativeTab(ZSSCreativeTabs.tabMisc);
+		medallion = new ItemMedallion().setUnlocalizedName("zss.medallion");
 	}
 
 	/**
@@ -773,6 +782,9 @@ public class ZSSItems
 			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.MULTI.ordinal()));
 			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.MULTI.ordinal()));
 			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.EXTENSION.ordinal()));
+		}
+		if (enableCraftingMudora) {
+			GameRegistry.addShapelessRecipe(new ItemStack(bookMudora, 2), bookMudora, Items.book, Items.feather, new ItemStack(Items.dye, 1, 0));
 		}
 		if (enableCraftingThrowingRock) {
 			GameRegistry.addShapelessRecipe(new ItemStack(throwingRock, 9), Blocks.cobblestone);

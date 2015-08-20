@@ -27,8 +27,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.block.BlockAncientTablet;
 import zeldaswordskills.client.ZSSKeyHandler;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.entity.projectile.EntityBombosFireball;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.server.RefreshSpinPacket;
@@ -54,7 +58,8 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Arc: 360 degrees, plus an extra 360 degrees for every level of Super Spin Attack
  * Charge time: 20 ticks, minus 2 per level
  * Range: 3.0D plus 0.5D per level each of Spin and Super Spin Attack
- * Exhaustion: 3.0F - 0.2F per level, added each spin
+ * Exhaustion: 3.0F - 0.2F per level, added on the first spin only
+ * Magic: 5.75F - 0.75F per level for each additional spin; +10.0F per spin if using the Bombos Medallion
  *
  */
 public class SpinAttack extends SkillActive
@@ -86,6 +91,9 @@ public class SpinAttack extends SkillActive
 	/** Whether flame particles should render along the sword's arc */
 	private boolean isFlaming;
 
+	/** Whether the spin attack is enhanced by the Bombos Medallion */
+	private boolean isBombos;
+
 	/** The player's Super Spin Attack level will allow multiple spins and extended range */
 	private int superLevel;
 
@@ -114,6 +122,9 @@ public class SpinAttack extends SkillActive
 		desc.add(getRangeDisplay(getRange()));
 		desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 1).replace("super", ""), superLevel + 1));
 		desc.add(getExhaustionDisplay(getExhaustion()));
+		if (this.getId() == superSpinAttack.getId()) { // player's skill is a different instance
+			desc.add(StatCollector.translateToLocalFormatted(getInfoString("info", 2), String.format("%.2f", getMagicCost())));
+		}
 		level = temp;
 	}
 
@@ -140,7 +151,11 @@ public class SpinAttack extends SkillActive
 
 	@Override
 	protected float getExhaustion() {
-		return 3.0F - (0.2F * level);
+		return (refreshed > 0 ? 0.0F : 3.0F - (0.2F * level));
+	}
+
+	private float getMagicCost() {
+		return 5.75F - (0.75F * superLevel);
 	}
 
 	/** Returns time required before spin will execute */
@@ -153,8 +168,17 @@ public class SpinAttack extends SkillActive
 		return charge > 0;
 	}
 
-	/** Returns true if the arc may be extended by 360 more degrees */
-	private boolean canRefresh() {
+	/**
+	 * Returns true if the arc may be extended by 360 more degrees
+	 */
+	private boolean canRefresh(EntityPlayer player) {
+		float cost = getMagicCost();
+		if (isBombos && ZSSPlayerInfo.get(player).getCurrentMagic() < (10.0F + cost)) {
+			isBombos = false;
+		}
+		if (ZSSPlayerInfo.get(player).getCurrentMagic() < cost) {
+			return false;
+		}
 		return (refreshed < (superLevel + 1) && arc == (360F * refreshed));
 	}
 
@@ -217,9 +241,9 @@ public class SpinAttack extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindAttack || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK]) {
-			if (isActive() && canRefresh() && canExecute(player)) {
+			if (isActive() && canRefresh(player) && canExecute(player)) {
 				PacketDispatcher.sendToServer(new RefreshSpinPacket());
-				arc += 360F;
+				refreshSpin(player);
 				return true;
 			}
 		} else if (!isCharging()) {
@@ -245,7 +269,11 @@ public class SpinAttack extends SkillActive
 		arc = 360F;
 		refreshed = 0;
 		superLevel = (checkHealth(player) ? ZSSPlayerSkills.get(player).getSkillLevel(superSpinAttack) : 0);
-		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
+		// TODO if (Baubles is enabled) { check only that one slot
+		if (PlayerUtils.isHoldingMasterSword(player) && PlayerUtils.hasItem(player, ZSSItems.medallion, BlockAncientTablet.EnumType.BOMBOS.ordinal())) {
+			isBombos = ZSSPlayerInfo.get(player).useMagic(10.0F);
+		}
+		isFlaming = (isBombos || EnchantmentHelper.getFireAspectModifier(player) > 0);
 		startSpin(world, player);
 		return true;
 	}
@@ -255,6 +283,7 @@ public class SpinAttack extends SkillActive
 		charge = 0;
 		currentSpin = 0.0F;
 		arc = 0.0F;
+		isBombos = false;
 	}
 
 	@Override
@@ -274,6 +303,9 @@ public class SpinAttack extends SkillActive
 			}
 		} else if (isActive()) {
 			incrementSpin(player);
+			if (isBombos && !player.worldObj.isRemote) {
+				spawnFireballs(player);
+			}
 		}
 	}
 
@@ -309,9 +341,6 @@ public class SpinAttack extends SkillActive
 			}
 		} else {
 			WorldUtils.playSoundAtEntity(player, Sounds.SPIN_ATTACK, 0.4F, 0.5F);
-			if (refreshed > 1) {
-				player.addExhaustion(getExhaustion());
-			}
 		}
 	}
 
@@ -327,6 +356,10 @@ public class SpinAttack extends SkillActive
 		} else if (currentSpin > (360F * refreshed)) {
 			startSpin(player.worldObj, player);
 		}
+	}
+
+	private void spawnFireballs(EntityPlayer player) {
+		player.worldObj.spawnEntityInWorld(new EntityBombosFireball(player.worldObj, player).setDamage(10.0F));
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -346,8 +379,17 @@ public class SpinAttack extends SkillActive
 	 * Called on the server after receiving the {@link RefreshSpinPacket}
 	 */
 	public void refreshServerSpin(EntityPlayer player) {
-		if (canRefresh() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
+		if (canRefresh(player) && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
+			refreshSpin(player);
+		}
+	}
+
+	private void refreshSpin(EntityPlayer player) {
+		if (ZSSPlayerInfo.get(player).useMagic(getMagicCost())) {
 			arc += 360F;
+		}
+		if (isBombos && !ZSSPlayerInfo.get(player).useMagic(10.0F)) {
+			isBombos = false;
 		}
 	}
 }

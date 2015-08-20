@@ -32,6 +32,7 @@ import zeldaswordskills.block.tileentity.TileEntityGossipStone;
 import zeldaswordskills.block.tileentity.TileEntityInscription;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.block.tileentity.TileEntitySacredFlame;
+import zeldaswordskills.client.render.block.RenderAncientTablet;
 import zeldaswordskills.client.render.block.RenderCeramicJar;
 import zeldaswordskills.client.render.block.RenderChestLocked;
 import zeldaswordskills.client.render.block.RenderGiantLever;
@@ -41,6 +42,7 @@ import zeldaswordskills.client.render.block.RenderTileDungeonBlock;
 import zeldaswordskills.client.render.block.RenderTileEntityCeramicJar;
 import zeldaswordskills.client.render.block.RenderTileEntityChestLocked;
 import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
+import zeldaswordskills.item.ItemAncientTablet;
 import zeldaswordskills.item.ItemBlockTime;
 import zeldaswordskills.item.ItemCeramicJar;
 import zeldaswordskills.item.ItemDungeonBlock;
@@ -68,6 +70,7 @@ public class ZSSBlocks
 	chestLocked,
 	chestInvisible,
 	pedestal,
+	ancientTablet,
 	pegWooden,
 	pegRusty,
 	leverGiant,
@@ -112,6 +115,8 @@ public class ZSSBlocks
 		bombFlower = new BlockBombFlower().setBlockName("zss.bomb_flower");
 		hookTargetAll = new BlockTarget(Material.rock).setBlockName("zss.hook_target_all");
 		doorLockedSmall = new BlockDoorLocked(Material.iron).setBlockName("zss.door_locked_small");
+		ancientTablet = new BlockAncientTablet(Material.rock).setBlockName("zss.ancient_tablet");
+		
 		register();
 	}
 
@@ -123,6 +128,7 @@ public class ZSSBlocks
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCeramicJar.class, new RenderTileEntityCeramicJar());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityChestLocked.class, new RenderTileEntityChestLocked());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityPedestal.class, new RenderTileEntityPedestal());
+		RenderingRegistry.registerBlockHandler(new RenderAncientTablet());
 		RenderingRegistry.registerBlockHandler(new RenderTileDungeonBlock());
 		RenderingRegistry.registerBlockHandler(new RenderSpecialCrop());
 		RenderingRegistry.registerBlockHandler(new RenderCeramicJar());
@@ -155,6 +161,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName());
 		GameRegistry.registerBlock(gossipStone, ItemGossipStone.class, gossipStone.getUnlocalizedName());
 		GameRegistry.registerBlock(bombFlower, bombFlower.getUnlocalizedName());
+		GameRegistry.registerBlock(ancientTablet, ItemAncientTablet.class, ancientTablet.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");
@@ -181,6 +188,7 @@ public class ZSSBlocks
 		}
 
 		// Register rotation types for custom blocks
+		BlockRotationData.registerCustomBlockRotation(ancientTablet, BlockRotationData.Rotation.WOOD);
 		BlockRotationData.registerCustomBlockRotation(chestLocked, BlockRotationData.Rotation.PISTON_CONTAINER);
 		BlockRotationData.registerCustomBlockRotation(chestInvisible, BlockRotationData.Rotation.PISTON_CONTAINER);
 		BlockRotationData.registerCustomBlockRotation(inscription, BlockRotationData.Rotation.PISTON_CONTAINER);
