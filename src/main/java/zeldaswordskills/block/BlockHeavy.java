@@ -87,6 +87,11 @@ public class BlockHeavy extends Block implements IDungeonBlock, ILiftable, ISmas
 	}
 
 	@Override
+	public boolean isSameVariant(World world, int x, int y, int z, int expected) {
+		return true;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerBlockIcons(IIconRegister register) {
 		blockIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));

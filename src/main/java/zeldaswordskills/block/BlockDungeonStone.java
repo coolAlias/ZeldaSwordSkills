@@ -181,6 +181,11 @@ public class BlockDungeonStone extends BlockContainer implements IDungeonBlock, 
 	}
 
 	@Override
+	public boolean isSameVariant(World world, int x, int y, int z, int expected) {
+		return true; // doesn't matter as this block is never used as a door anyway
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
 		list.add(new ItemStack(item, 1, 0x0));

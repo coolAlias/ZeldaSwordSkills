@@ -88,6 +88,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	/** The door's block type, if any */
 	private Block door = null;
 
+	/** The door block's metadata value used to verify state for IDungeonBlocks */
+	private int doorMeta = 0;
+
 	/** Side in which the door is located; always located at centerX or centerZ of that side */
 	private int doorSide;
 
@@ -126,8 +129,9 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Sets the "door" block and side for this room
 	 * @param block the type of block that is acting as a door to this room
 	 */
-	public void setDoor(Block block, int side) {
+	public void setDoor(Block block, int meta, int side) {
 		door = block;
+		doorMeta = meta;
 		doorSide = side;
 	}
 
@@ -370,7 +374,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	private boolean verifyDoor() {
 		int x = box.getCenterX();
 		int z = box.getCenterZ();
-		switch(doorSide) {
+		switch (doorSide) {
 		case RoomBoss.SOUTH: z = box.maxZ; break;
 		case RoomBoss.NORTH: z = box.minZ; break;
 		case RoomBoss.EAST: x = box.maxX; break;
@@ -379,7 +383,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		}
 		for (int y = box.minY; y < box.maxY; ++y) {
 			if (worldObj.getBlock(x, y, z) == door) {
-				return true;
+				return (door instanceof IDungeonBlock) ? ((IDungeonBlock) door).isSameVariant(worldObj, x, y, z, doorMeta) : true;
 			}
 		}
 		return false;
@@ -466,6 +470,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		tag.setBoolean("hasDoor", door != null);
 		if (door != null) {
 			tag.setInteger("doorBlockId", Block.getIdFromBlock(door));
+			tag.setInteger("doorMeta", doorMeta);
 			tag.setInteger("doorSide", doorSide);
 		}
 		if (isSpawner()) {
@@ -507,6 +512,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		if (tag.getBoolean("hasDoor")) {
 			int id = tag.getInteger("doorBlockId");
 			door = id > 0 ? Block.getBlockById(id) : null;
+			doorMeta = tag.getInteger("doorMeta");
 			doorSide = tag.getInteger("doorSide");
 		}
 		// TODO workaround for backwards compatibility:

@@ -156,6 +156,11 @@ public class BlockSecretStone extends Block implements IDungeonBlock, IExplodabl
 	}
 
 	@Override
+	public boolean isSameVariant(World world, int x, int y, int z, int expected) {
+		return (world.getBlockMetadata(x, y, z) == expected);
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
 		for (int i = 0; i < names.length; ++i) {

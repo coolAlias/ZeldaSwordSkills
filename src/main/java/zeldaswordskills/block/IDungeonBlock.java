@@ -17,10 +17,23 @@
 
 package zeldaswordskills.block;
 
+import net.minecraft.world.World;
+
 /**
  * 
  * An interface to allow a variety of blocks to be considered valid during
  * TileEntityDungeonCore's structure validation process
  *
  */
-public interface IDungeonBlock {}
+public interface IDungeonBlock {
+
+	/**
+	 * Called when verifying the door block at x/y/z to allow for variant and tile entity checking.
+	 * Typical implementation may look like this (assuming 1:1 correlation of metadata variants):
+	 *		return (world.getBlockMetadata(x, y, z) == expected);
+	 * @param	expected Metadata value of the expected door variant
+	 * @return	True if the world block is equivalent to that of the same block with the expected metadata value
+	 */
+	boolean isSameVariant(World world, int x, int y, int z, int expected);
+
+}

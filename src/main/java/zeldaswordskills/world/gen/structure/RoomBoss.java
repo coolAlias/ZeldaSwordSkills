@@ -196,7 +196,7 @@ public class RoomBoss extends RoomBase
 			TileEntityDungeonCore core = (TileEntityDungeonCore) te;
 			core.setDungeonBoundingBox(bBox);
 			core.setBossType(type);
-			core.setDoor(ZSSBlocks.doorLocked, doorSide);
+			core.setDoor(ZSSBlocks.doorLocked, type.ordinal(), doorSide);
 		}
 	}
 

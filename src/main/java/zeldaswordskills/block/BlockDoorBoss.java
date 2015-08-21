@@ -62,6 +62,11 @@ public class BlockDoorBoss extends BlockDoorLocked
 	}
 
 	@Override
+	public boolean isSameVariant(World world, int x, int y, int z, int expected) {
+		return ((world.getBlockMetadata(x, y, z) & 0x7) == expected);
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(int side, int meta) {
 		if ((side == 0 && meta > 0x7) || (side == 1 && meta < 0x8)) {

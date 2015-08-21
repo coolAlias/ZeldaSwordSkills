@@ -207,6 +207,11 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 	}
 
 	@Override
+	public boolean isSameVariant(World world, int x, int y, int z, int expected) {
+		return true;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(int side, int meta) {
 		return (side == 0 ? iconBottom : side == 1 ? iconTop : blockIcon);

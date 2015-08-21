@@ -47,6 +47,9 @@ public class RoomSecret extends RoomBase
 	/** Block which will be placed as a door, if any */
 	private Block door = null;
 
+	/** Metadata value for the door variant, if any */
+	private int doorMeta;
+
 	/** Side of the structure that the door is on */
 	private int side;
 
@@ -127,7 +130,7 @@ public class RoomSecret extends RoomBase
 		if (te instanceof TileEntityDungeonCore) {
 			((TileEntityDungeonCore) te).setDungeonBoundingBox(bBox);
 			if (door != null) {
-				((TileEntityDungeonCore) te).setDoor(door, side);
+				((TileEntityDungeonCore) te).setDoor(door, doorMeta, side);
 			}
 			if (!inNether && submerged && !inLava && !inOcean && bBox.getXSize() > 4) {
 				if (inMountain || world.rand.nextFloat() < Config.getFairySpawnerChance()) {
@@ -156,19 +159,36 @@ public class RoomSecret extends RoomBase
 			--bBox.minY;
 		}
 		if (bBox.getXSize() > 5 && rand.nextFloat() < Config.getBarredRoomChance()) {
-			if (rand.nextInt(16) == 0) {
-				door = (submerged && rand.nextInt(3) == 0 ? ZSSBlocks.doorLockedSmall : ZSSBlocks.timeBlock);
-			} else if (!submerged) {
-				// Wooden Pegs > Light Barriers > Rusty Pegs > Heavy Barriers
-				if (rand.nextInt(3) == 0) {
-					door = (rand.nextInt(3) == 0 ? ZSSBlocks.barrierHeavy : ZSSBlocks.pegRusty);
-				} else if (rand.nextInt(3) == 0) {
-					door = ZSSBlocks.doorLockedSmall;
-				} else {
-					door = (rand.nextInt(3) == 0 ? ZSSBlocks.barrierLight : ZSSBlocks.pegWooden);
-				}
-			}
+			setDoor(rand);
 			side = rand.nextInt(4);
+		}
+	}
+
+	/**
+	 * Called for barred rooms to randomly determine what type of door to use
+	 */
+	protected void setDoor(Random rand) {
+		if (rand.nextInt(16) == 0) {
+			if (submerged && rand.nextInt(3) == 0) {
+				door = ZSSBlocks.doorLocked;
+			} else {
+				door = ZSSBlocks.timeBlock;
+				doorMeta = rand.nextInt(2); // 0 = Block of Time, 1 = Royal Family Block
+			}
+		} else if (!submerged) {
+			if (rand.nextInt(3) == 0) {
+				if (rand.nextInt(3) == 0) {
+					door = ZSSBlocks.barrierHeavy;
+				} else {
+					door = ZSSBlocks.pegRusty;
+				}
+			} else if (rand.nextInt(3) == 0) {
+				door = ZSSBlocks.doorLocked;
+			} else if (rand.nextInt(3) == 0) {
+				door = ZSSBlocks.barrierLight;
+			} else {
+				door = ZSSBlocks.pegWooden;
+			}
 		}
 	}
 
@@ -260,8 +280,9 @@ public class RoomSecret extends RoomBase
 		case EAST: x = bBox.maxX; break;
 		case WEST: x = bBox.minX; break;
 		}
-		world.setBlock(x, y, z, door, 0, 2);
-		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? Blocks.air : door), (door instanceof BlockDoorLocked ? 8 : 0), 2);
+		world.setBlock(x, y, z, door, doorMeta, 2);
+		doorMeta = (door instanceof BlockDoorLocked ? (doorMeta | 8) : doorMeta); // upper part of door
+		world.setBlock(x, y + 1, z, (door instanceof BlockPeg ? Blocks.air : door), doorMeta, 2);
 	}
 
 	/**

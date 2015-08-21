@@ -114,6 +114,11 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 	}
 
 	@Override
+	public boolean isSameVariant(World world, int x, int y, int z, int expected) {
+		return true;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIcon(int side, int meta) {
 		if ((side == 0 && meta > 0x7) || (side == 1 && meta < 0x8)) {
