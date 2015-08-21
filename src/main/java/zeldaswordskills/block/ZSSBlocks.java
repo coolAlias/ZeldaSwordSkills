@@ -64,6 +64,7 @@ public class ZSSBlocks
 	public static Block
 	barrierLight,
 	barrierHeavy,
+	quakeStone,
 	timeBlock,
 	bombFlower,
 	ceramicJar,
@@ -116,6 +117,7 @@ public class ZSSBlocks
 		hookTargetAll = new BlockTarget(Material.rock).setBlockName("zss.hook_target_all");
 		doorLockedSmall = new BlockDoorLocked(Material.iron).setBlockName("zss.door_locked_small");
 		ancientTablet = new BlockAncientTablet(Material.rock).setBlockName("zss.ancient_tablet");
+		quakeStone = new BlockQuakeStone().setBlockName("zss.quake_stone");
 		
 		register();
 	}
@@ -162,6 +164,7 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(gossipStone, ItemGossipStone.class, gossipStone.getUnlocalizedName());
 		GameRegistry.registerBlock(bombFlower, bombFlower.getUnlocalizedName());
 		GameRegistry.registerBlock(ancientTablet, ItemAncientTablet.class, ancientTablet.getUnlocalizedName());
+		GameRegistry.registerBlock(quakeStone, ItemMetadataBlock.class, quakeStone.getUnlocalizedName());
 
 		GameRegistry.registerTileEntity(TileEntityCeramicJar.class, "tileEntityCeramicJar");
 		GameRegistry.registerTileEntity(TileEntityChestLocked.class, "tileEntityChestLocked");

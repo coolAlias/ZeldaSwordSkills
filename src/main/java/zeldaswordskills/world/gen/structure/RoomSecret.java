@@ -32,6 +32,7 @@ import zeldaswordskills.block.BlockDoorLocked;
 import zeldaswordskills.block.BlockPeg;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemTreasure;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -176,6 +177,9 @@ public class RoomSecret extends RoomBase
 				door = ZSSBlocks.timeBlock;
 				doorMeta = rand.nextInt(2); // 0 = Block of Time, 1 = Royal Family Block
 			}
+		} else if (rand.nextInt(16) == 0) {
+			door = ZSSBlocks.quakeStone;
+			doorMeta = rand.nextInt(2); // 0 = cobblestone, 1 = mossy cobblestone
 		} else if (!submerged) {
 			if (rand.nextInt(3) == 0) {
 				if (rand.nextInt(3) == 0) {
@@ -250,6 +254,8 @@ public class RoomSecret extends RoomBase
 							loot = new ItemStack(ZSSItems.hammerMegaton);
 						} else if (door == ZSSBlocks.timeBlock) {
 							loot = new ItemStack(ZSSItems.treasure, 1, ItemTreasure.Treasures.ZELDAS_LETTER.ordinal());
+						} else if (door == ZSSBlocks.quakeStone) {
+							loot = new ItemStack(ZSSItems.instrument, 1, ItemInstrument.Instrument.OCARINA_TIME.ordinal());
 						}
 					}
 					if (loot != null) {
