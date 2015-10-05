@@ -17,27 +17,16 @@
 
 package zeldaswordskills.api.item;
 
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import zeldaswordskills.creativetab.ZSSCreativeTabs.ZSSCreativeTab;
 import zeldaswordskills.item.ZSSItems;
 
 public class ZSSItemHelper {
 
 	/**
-	 * Adds a ZSS comparator mapping for the item if it displays on a ZSS Creative Tab.
-	 * Call for each item set to display on a ZSS Creative Tab when registering the item.
+	 * Adds a ZSS comparator mapping for the item. Call for each item that will
+	 * display on a ZSS Creative Tab after registering the item.
 	 */
 	public static void addItemForZssCreativeTab(Item item) {
-		CreativeTabs[] tabs = item.getCreativeTabs();
-		if (tabs == null) {
-			return;
-		}
-		for (CreativeTabs tab : tabs) {
-			if (tab instanceof ZSSCreativeTab) {
-				ZSSItems.addItemComparatorMapping(item);
-				break;
-			}
-		}
+		ZSSItems.addItemComparatorMapping(item);
 	}
 }
