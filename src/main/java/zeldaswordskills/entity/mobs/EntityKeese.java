@@ -48,6 +48,7 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -316,7 +317,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	 * Applies a random negative effect to the player, or possibly no effect
 	 */
 	private void applyRandomCurse(EntityPlayer player) {
-		switch(rand.nextInt(16)) {
+		switch (rand.nextInt(16)) {
 		case 0: ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_DOWN, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
 		case 1: ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_DOWN, rand.nextInt(500) + 100, rand.nextInt(26) + 25); break;
 		case 2: ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
@@ -327,7 +328,16 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 		case 7: player.addPotionEffect(new PotionEffect(Potion.confusion.id, rand.nextInt(500) + 100, 1)); break;
 		case 8: player.addPotionEffect(new PotionEffect(Potion.blindness.id, rand.nextInt(500) + 100, 1)); break;
 		case 9: player.addPotionEffect(new PotionEffect(Potion.poison.id, rand.nextInt(100) + 50, rand.nextInt(9) / 8)); break;
-		case 10: player.addPotionEffect(new PotionEffect(Potion.harm.id, 1, rand.nextInt(9) / 8)); break;
+		case 10:
+		case 11:
+			float drain = 6.0F + rand.nextInt(player.worldObj.getDifficulty().getDifficultyId() * 10);
+			drain = Math.min(drain, ZSSPlayerInfo.get(player).getCurrentMagic());
+			if (ZSSPlayerInfo.get(player).getCurrentMagic() < 5.0F) {
+				player.addPotionEffect(new PotionEffect(Potion.harm.id, 1, rand.nextInt(9) / 8));
+			}
+			ZSSPlayerInfo.get(player).consumeMagic(drain);
+			heal(drain / 2);
+			break;
 		default:
 		}
 	}
