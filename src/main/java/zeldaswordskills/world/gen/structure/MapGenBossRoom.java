@@ -48,11 +48,16 @@ public class MapGenBossRoom extends ZSSMapGenBase
 		int size = rand.nextInt(5) + 9;
 		int posX = (chunkX << 4) + rand.nextInt(16 - size);
 		int posZ = (chunkZ << 4) + rand.nextInt(16 - size);
-		BossType type = BossType.getBossType(world, new BlockPos(posX, 64, posZ));
+		BlockPos pos = new BlockPos(posX, 64, posZ);
+		// Require minimum of half the minimum distance between dungeons as buffer around villages
+		if (world.villageCollectionObj != null && world.villageCollectionObj.getNearestVillage(pos, 8 * Config.getMinBossDistance()) != null) {
+			return;
+		}
+		BossType type = BossType.getBossType(world, pos);
 		if (type != null) {
 			RoomBoss room = new RoomBoss(type, chunkX, chunkZ, rand, size, Blocks.stone);
 			if (rand.nextFloat() < 0.2F && !areStructuresWithinRange(room, Config.getMinBossDistance())) {
-				int posY = StructureGenUtils.getAverageSurfaceHeight(world, new BlockPos(posX, 64, posZ));
+				int posY = StructureGenUtils.getAverageSurfaceHeight(world, pos);
 				if (room.generate(this, world, rand, posX, posY, posZ)) {
 					//LogHelper.finer("Boss room of type " + type.toString() + " successfully generated at " + room.getBoundingBox().toString());
 					onStructureGenerated(world, room);
