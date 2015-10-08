@@ -262,7 +262,6 @@ public enum BossType
 	/**
 	 * Returns a new instance of the appropriate BossBattle crisis event
 	 */
-	@SuppressWarnings("finally")
 	public final BossBattle getBossBattle(TileEntityDungeonCore core) {
 		if (bossBattle == null) {
 			ZSSMain.logger.error("Error retrieving boss battle event for " + toString());
@@ -270,28 +269,27 @@ public enum BossType
 		}
 		BossBattle battle = null;
 		try {
-			try {
-				battle = (BossBattle) bossBattle.getConstructor(TileEntityDungeonCore.class).newInstance(core);
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-				return null;
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				return null;
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-				return null;
-			}
-		} finally {
-			return battle;
+			battle = (BossBattle) bossBattle.getConstructor(TileEntityDungeonCore.class).newInstance(core);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
 		}
+		return battle;
 	}
 
 	/**
 	 * Returns a new instance of the appropriate mob for this type, or null
 	 * Note that no position or other information has been set, the default constructor(World) is used
 	 */
-	@SuppressWarnings("finally")
 	public final Entity getNewMob(World world) {
 		if (bossMob == null) {
 			ZSSMain.logger.error("Error retrieving boss mob for " + toString());
@@ -299,20 +297,20 @@ public enum BossType
 		}
 		Entity entity = null;
 		try {
-			try {
-				entity = (Entity) bossMob.getConstructor(World.class).newInstance(world);
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-				return null;
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				return null;
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-				return null;
-			}
-		} finally {
-			return entity;
+			entity = (Entity) bossMob.getConstructor(World.class).newInstance(world);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
 		}
+		return entity;
 	}
 }
