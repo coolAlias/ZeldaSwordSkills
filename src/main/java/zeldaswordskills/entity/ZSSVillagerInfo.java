@@ -301,7 +301,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 * Sets this villager into forced mating mode if possible
 	 */
 	public void setMating() {
-		if (villager.getGrowingAge() == 0 && !isMating()) {
+		if (villager.getGrowingAge() == 0 && !isMating() && villager.worldObj.getVillageCollection() != null) {
 			village = villager.worldObj.getVillageCollection().getNearestVillage(new BlockPos(villager), 0);
 			if (areSufficientDoors()) {
 				Entity e = villager.worldObj.findNearestEntityWithinAABB(EntityVillager.class, villager.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D), villager);
