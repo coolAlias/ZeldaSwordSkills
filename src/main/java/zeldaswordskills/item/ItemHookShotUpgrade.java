@@ -86,7 +86,7 @@ public class ItemHookShotUpgrade extends BaseModItem implements IUnenchantable
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (entity.getClass() == EntityVillager.class) {
 			if (stack.getItem() instanceof ItemHookShotUpgrade) {
 				addSpecialTrade(stack, player, (EntityVillager) entity);
 			}

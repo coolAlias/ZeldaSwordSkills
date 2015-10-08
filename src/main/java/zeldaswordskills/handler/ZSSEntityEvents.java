@@ -212,7 +212,7 @@ public class ZSSEntityEvents
 			if (event.entity instanceof EntityPlayer) {
 				ZSSEntityInfo.get((EntityPlayer) event.entity).onJoinWorld();
 				ZSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
-			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
+			} else if (event.entity.getClass() == EntityVillager.class) {
 				EntityGoron.doVillagerSpawn((EntityVillager) event.entity, event.entity.worldObj);
 			}
 			if (!Config.areVanillaBuffsDisabled() && event.entity instanceof EntityLivingBase) {

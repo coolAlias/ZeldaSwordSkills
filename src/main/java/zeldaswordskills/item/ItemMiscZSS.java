@@ -76,7 +76,7 @@ public class ItemMiscZSS extends BaseModItem implements IUnenchantable
 		MerchantRecipeList trades = villager.getRecipes(player);
 		if (villager.isChild()) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
-		} else if (!villager.getClass().isAssignableFrom(EntityVillager.class)) {
+		} else if (villager.getClass() != EntityVillager.class) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 		} else if (trades != null && sellPrice > 0) {
 			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sellPrice));

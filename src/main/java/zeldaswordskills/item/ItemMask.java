@@ -157,7 +157,7 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 		if (!player.worldObj.isRemote) {
 			if (entity instanceof EntityVillager) {
 				EntityVillager villager = (EntityVillager) entity;
-				if (entity.getClass().isAssignableFrom(EntityVillager.class) && this == ZSSVillagerInfo.get(villager).getMaskDesired()) {
+				if (entity.getClass() == EntityVillager.class && this == ZSSVillagerInfo.get(villager).getMaskDesired()) {
 					new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.mask.desired.0"),
 							new ChatComponentTranslation("chat.zss.mask.desired.1", getSellPrice()));
 				} else {

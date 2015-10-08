@@ -599,7 +599,7 @@ public class ZSSItems
 			@Override
 			protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
 				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
-				if (villager.getClass().isAssignableFrom(EntityVillager.class) && ("Cursed Man").equals(villager.getCustomNameTag())) {
+				if (villager.getClass() == EntityVillager.class && ("Cursed Man").equals(villager.getCustomNameTag())) {
 					villagerInfo.handleSkulltulaTrade(stack, player);
 				} else if (villager.isChild()) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");

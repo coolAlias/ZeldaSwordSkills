@@ -56,7 +56,7 @@ public class ItemChuJelly extends BaseModItem implements IUnenchantable
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager entityVillager = (EntityVillager) entity;
 			ZSSVillagerInfo villager = ZSSVillagerInfo.get(entityVillager);
 			MerchantRecipeList trades = entityVillager.getRecipes(player);
