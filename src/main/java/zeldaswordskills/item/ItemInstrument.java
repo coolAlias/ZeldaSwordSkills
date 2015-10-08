@@ -40,6 +40,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.block.BlockSongInscription;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -50,7 +51,7 @@ import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 
-public class ItemInstrument extends BaseModItem
+public class ItemInstrument extends BaseModItem implements IRightClickEntity
 {
 	public static enum Instrument {
 		OCARINA_FAIRY("ocarina_fairy", GuiHandler.GUI_OCARINA, 1),
@@ -149,11 +150,8 @@ public class ItemInstrument extends BaseModItem
 		return true;
 	}
 
-	/**
-	 * Called from EntityInteractEvent when the player interacts with an entity while holding an instrument
-	 * @return	True to cancel any further interaction (e.g. villager trading gui)
-	 */
-	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, EntityLiving entity) {
+	@Override
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (entity.hasCustomName() && teachersForClass.containsKey(entity.getClass())) {
 			Map<String, AbstractZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
 			AbstractZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());

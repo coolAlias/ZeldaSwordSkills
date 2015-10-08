@@ -27,7 +27,9 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -35,7 +37,7 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 
-public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
+public class EntityNpcBarnes extends EntityNpcBase implements IMerchant, INpcVillager
 {
 	private static final MerchantRecipe standardBomb = new MerchantRecipe(new ItemStack(Items.emerald, 8), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()));
 	private static final MerchantRecipe waterBomb = new MerchantRecipe(new ItemStack(Items.emerald, 12), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()));
@@ -215,30 +217,25 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant
 		}
 	}
 
-	/**
-	 * Attempts to convert the given villager into Barnes, the NPC; whatever
-	 * trades the villager may have had will continue to be available through Barnes
-	 * @param villager	The original villager will be set to dead if converted
-	 * @param stack		ItemStack that the player is holding, may be null
-	 * @return			True if the villager was transformed into Barnes
-	 */
-	public static boolean convertFromVillager(EntityVillager villager, EntityPlayer player, ItemStack stack) {
-		if (stack != null && stack.getItem() == Items.gunpowder) {
-			EntityNpcBarnes barnes = new EntityNpcBarnes(villager.worldObj);
-			barnes.setRecipes(villager.getRecipes(player));
-			barnes.addDefaultTrades();
-			barnes.setCustomNameTag(villager.getCustomNameTag());
-			barnes.setLocationAndAngles(villager.posX, villager.posY + 1, villager.posZ, villager.rotationYaw, villager.rotationPitch);
-			if (!villager.worldObj.isRemote) {
-				--stack.stackSize;
-				villager.setDead();
-				villager.worldObj.spawnEntityInWorld(barnes);
-			}
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.open");
-			return true;
-		} else {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.hmph");
+	@Override
+	public Result canInteractConvert(EntityPlayer player, EntityVillager villager) {
+		if (player.worldObj.isRemote || villager.getClass() != EntityVillager.class || villager.isChild()) {
+			return Result.DEFAULT;
+		} else if (PlayerUtils.consumeHeldItem(player, Items.gunpowder, 1)) {
+			return Result.ALLOW;
 		}
-		return false;
+		PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.hmph");
+		return Result.DENY;
+	}
+
+	@Override
+	public Result canLeftClickConvert(EntityPlayer player, EntityVillager villager) {
+		return Result.DEFAULT;
+	}
+
+	@Override
+	public void onConverted(EntityPlayer player) {
+		PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.open");
+		addDefaultTrades();
 	}
 }

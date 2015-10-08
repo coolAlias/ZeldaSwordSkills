@@ -44,6 +44,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.CustomEntityList;
@@ -58,7 +59,7 @@ import zeldaswordskills.ref.ModInfo;
  * should use {@link ItemCustomVariantEgg} instead. 
  *
  */
-public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavior, IUnenchantable
+public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavior, IRightClickEntity, IUnenchantable
 {
 	public ItemCustomEgg() {
 		super();
@@ -136,6 +137,14 @@ public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavi
 		return stack;
 	}
 
+	@Override
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (entity instanceof EntityAgeable) {
+			return spawnChild(entity.worldObj, stack, player, (EntityAgeable) entity);
+		}
+		return false;
+	}
+
 	/**
 	 * Spawns the creature specified by the egg's type in the location specified by the last three parameters.
 	 */
@@ -164,7 +173,7 @@ public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavi
 	 * @param entity the entity that will spawn the child
 	 * @return true if a child was spawned and the EntityInteractEvent should be canceled
 	 */
-	public static boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
+	private boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
 		Class oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
 		if (oclass != null && oclass == entity.getClass()) {
 			EntityAgeable child = entity.createChild(entity);

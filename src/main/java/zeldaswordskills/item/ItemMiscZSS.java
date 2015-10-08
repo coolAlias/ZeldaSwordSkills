@@ -30,6 +30,7 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.util.MerchantRecipeHelper;
@@ -41,7 +42,7 @@ import zeldaswordskills.util.PlayerUtils;
  * Use an anonymous class to override onItemRightClick if it should do anything.
  *
  */
-public class ItemMiscZSS extends BaseModItem implements IUnenchantable
+public class ItemMiscZSS extends BaseModItem implements IRightClickEntity, IUnenchantable
 {
 	/** The price this item will fetch if sold to a villager */
 	protected final int sellPrice;
@@ -60,6 +61,15 @@ public class ItemMiscZSS extends BaseModItem implements IUnenchantable
 			handleTrade(stack, player, (EntityVillager) entity);
 		}
 		return true;
+	}
+
+	@Override
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
+			handleTrade(stack, player, (EntityVillager) entity);
+			return true;
+		}
+		return false;
 	}
 
 	@Override

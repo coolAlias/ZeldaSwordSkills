@@ -23,6 +23,7 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemSeeds;
@@ -34,11 +35,16 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.util.PlayerUtils;
 
-public class ItemBombFlowerSeed extends ItemSeeds implements IModItem {
+public class ItemBombFlowerSeed extends ItemSeeds implements IModItem, IRightClickEntity {
 
 	public ItemBombFlowerSeed() {
 		super(ZSSBlocks.bombFlower, Blocks.stone);
@@ -70,6 +76,20 @@ public class ItemBombFlowerSeed extends ItemSeeds implements IModItem {
 				world.setBlockState(pos, plant.getDefaultState());
 			}
 			--stack.stackSize;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (entity instanceof EntityChicken) {
+			if (!player.worldObj.isRemote && PlayerUtils.consumeHeldItem(player, this, 1)) {
+				((EntityChicken) entity).setInLove(player);
+				int time = 60 + entity.worldObj.rand.nextInt(60);
+				EntityBomb bomb = new EntityBomb(entity.worldObj).setType(BombType.BOMB_STANDARD).setTime(time);
+				ZSSEntityInfo.get((EntityChicken) entity).onBombIngested(bomb);
+			}
 			return true;
 		}
 		return false;
