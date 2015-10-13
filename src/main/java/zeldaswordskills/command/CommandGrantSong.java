@@ -28,7 +28,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import zeldaswordskills.api.SongAPI;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.OpenSongGuiPacket;
 import zeldaswordskills.songs.AbstractZeldaSong;

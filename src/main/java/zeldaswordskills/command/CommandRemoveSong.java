@@ -27,7 +27,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.BlockPos;
 import zeldaswordskills.api.SongAPI;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.util.PlayerUtils;
 

@@ -35,9 +35,9 @@ import org.lwjgl.input.Keyboard;
 
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSPlayerInfo;
-import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ICyclableItem;
 import zeldaswordskills.item.ItemHeldBlock;

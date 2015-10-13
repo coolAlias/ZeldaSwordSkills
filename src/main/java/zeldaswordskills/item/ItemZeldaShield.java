@@ -56,7 +56,7 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.client.ISwapModel;
 import zeldaswordskills.client.render.item.ModelItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;

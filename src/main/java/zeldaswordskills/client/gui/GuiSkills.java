@@ -33,7 +33,7 @@ import org.lwjgl.input.Mouse;
 
 import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.inventory.ContainerSkills;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;

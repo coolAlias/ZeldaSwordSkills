@@ -20,7 +20,7 @@ package zeldaswordskills.inventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.item.ZSSItems;
 
 public class InventoryMaskTrader extends AbstractInventory

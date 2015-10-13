@@ -25,7 +25,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.songs.AbstractZeldaSong;

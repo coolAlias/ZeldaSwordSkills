@@ -41,7 +41,7 @@ import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.ILiftable;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.songs.AbstractZeldaSong;

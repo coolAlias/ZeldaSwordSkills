@@ -37,6 +37,8 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;

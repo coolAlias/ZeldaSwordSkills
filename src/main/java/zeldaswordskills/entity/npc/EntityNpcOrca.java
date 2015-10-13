@@ -38,7 +38,7 @@ import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.api.entity.IParryModifier;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemTreasure;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;

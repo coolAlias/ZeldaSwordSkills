@@ -24,7 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 
 public class AttackBlockedPacket extends AbstractClientMessage<AttackBlockedPacket>

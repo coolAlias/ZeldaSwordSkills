@@ -47,7 +47,7 @@ import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.PacketISpawnParticles;

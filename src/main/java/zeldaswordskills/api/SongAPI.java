@@ -25,7 +25,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockSongInscription;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.songs.AbstractZeldaSong;
