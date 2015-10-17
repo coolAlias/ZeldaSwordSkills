@@ -372,7 +372,7 @@ public class ZSSItems
 
 	/** Returns a random stack from within the grass drops list */
 	public static ItemStack getRandomGrassDrop(Random rand) {
-		return grassDrops.get(rand.nextInt(grassDrops.size()));
+		return grassDrops.get(rand.nextInt(grassDrops.size())).copy();
 	}
 
 	/**
