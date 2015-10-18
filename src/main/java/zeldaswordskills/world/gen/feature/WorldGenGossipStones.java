@@ -20,7 +20,6 @@ package zeldaswordskills.world.gen.feature;
 import java.util.Random;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
@@ -46,8 +45,7 @@ public class WorldGenGossipStones
 			world.setBlock(x, y, z, ZSSBlocks.gossipStone, 0, 2);
 			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityGossipStone) {
-				String hint = StatCollector.translateToLocal("chat.zss.block.gossip_stone.hint." + rand.nextInt(12));
-				((TileEntityGossipStone) te).setMessage(hint);
+				((TileEntityGossipStone) te).setMessage("chat.zss.block.gossip_stone.hint." + rand.nextInt(12));
 			}
 		}
 		return false;

@@ -170,8 +170,12 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 			ItemStack helm = player.getEquipmentInSlot(ArmorIndex.EQUIPPED_HELM);
 			if (helm != null && helm.getItem() == ZSSItems.maskTruth) {
 				String msg = ((TileEntityGossipStone) te).getMessage();
-				String messages[] = StringUtils.wrapString(msg, TileEntityGossipStone.LINE_LENGTH, 5);
-				new TimedChatDialogue(player, messages);
+				if (msg.startsWith("chat.")) {
+					PlayerUtils.sendTranslatedChat(player, msg);
+				} else {
+					String messages[] = StringUtils.wrapString(msg, TileEntityGossipStone.LINE_LENGTH, 5);
+					new TimedChatDialogue(player, messages);
+				}
 			} else {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.gossip_stone.silent");
 			}

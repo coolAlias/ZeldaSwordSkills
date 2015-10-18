@@ -20,7 +20,6 @@ package zeldaswordskills.block.tileentity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.entity.EntityFairy;
 import zeldaswordskills.ref.Config;
@@ -47,7 +46,7 @@ public class TileEntityGossipStone extends TileEntity
 	 * Note that the message is NOT updated on the client side.
 	 */
 	public String getMessage() {
-		return (message == null || message.equals("")) ? StatCollector.translateToLocal("chat.zss.block.gossip_stone.default") : message;
+		return (message == null || message.equals("")) ? "chat.zss.block.gossip_stone.default" : message;
 	}
 
 	/**
