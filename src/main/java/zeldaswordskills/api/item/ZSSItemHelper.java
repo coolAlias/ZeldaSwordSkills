@@ -17,9 +17,7 @@
 
 package zeldaswordskills.api.item;
 
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import zeldaswordskills.creativetab.ZSSCreativeTabs.ZSSCreativeTab;
 import zeldaswordskills.item.ZSSItems;
 
 public class ZSSItemHelper {
@@ -29,15 +27,6 @@ public class ZSSItemHelper {
 	 * Call for each item set to display on a ZSS Creative Tab when registering the item.
 	 */
 	public static void addItemForZssCreativeTab(Item item) {
-		CreativeTabs[] tabs = item.getCreativeTabs();
-		if (tabs == null) {
-			return;
-		}
-		for (CreativeTabs tab : tabs) {
-			if (tab instanceof ZSSCreativeTab) {
-				ZSSItems.addItemComparatorMapping(item);
-				break;
-			}
-		}
+		ZSSItems.addItemComparatorMapping(item);
 	}
 }
