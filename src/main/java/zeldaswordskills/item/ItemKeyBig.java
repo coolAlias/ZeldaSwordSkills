@@ -73,7 +73,7 @@ public class ItemKeyBig extends Item implements IUnenchantable
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (trades != null) {

@@ -186,7 +186,7 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	public static boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
 		Class oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
 
-		if (oclass != null && oclass.isAssignableFrom(entity.getClass())) {
+		if (oclass != null && oclass == entity.getClass()) {
 			EntityAgeable child = entity.createChild(entity);
 
 			if (child != null) {

@@ -38,7 +38,7 @@ public class ItemMasterOre extends ItemMiscZSS
 		MerchantRecipeList trades = villager.getRecipes(player);
 		if (villager.isChild()) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.child");
-		} else if (!villager.getClass().isAssignableFrom(EntityVillager.class)) {
+		} else if (villager.getClass() != EntityVillager.class) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 		} else if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.smith");

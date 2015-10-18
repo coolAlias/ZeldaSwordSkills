@@ -125,7 +125,7 @@ public class ZSSEntityEvents
 	@SubscribeEvent
 	public void onInteract(EntityInteractEvent event) {
 		ItemStack stack = event.entityPlayer.getHeldItem();
-		if (event.target.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (event.target.getClass() == EntityVillager.class) {
 			EntityVillager villager = (EntityVillager) event.target;
 			boolean flag2 = villager.getCustomNameTag().contains("Mask Salesman");
 			if (!event.entityPlayer.worldObj.isRemote && !villager.isChild()) {
@@ -212,7 +212,7 @@ public class ZSSEntityEvents
 			if (event.entity instanceof EntityPlayer) {
 				ZSSEntityInfo.get((EntityPlayer) event.entity).onJoinWorld();
 				ZSSPlayerInfo.get((EntityPlayer) event.entity).onJoinWorld();
-			} else if (event.entity.getClass().isAssignableFrom(EntityVillager.class)) {
+			} else if (event.entity.getClass() == EntityVillager.class) {
 				EntityGoron.doVillagerSpawn((EntityVillager) event.entity, event.entity.worldObj);
 			}
 			if (!Config.areVanillaBuffsDisabled() && event.entity instanceof EntityLivingBase) {

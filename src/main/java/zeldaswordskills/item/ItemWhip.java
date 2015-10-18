@@ -22,6 +22,7 @@ import java.util.List;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.INpc;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -103,7 +104,7 @@ public class ItemWhip extends Item implements IFairyUpgrade
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
 			if (villager.getProfession() == EnumVillager.BUTCHER.ordinal() && trades != null) {
@@ -126,6 +127,8 @@ public class ItemWhip extends Item implements IFairyUpgrade
 			} else {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.sorry");
 			}
+		} else if (!player.worldObj.isRemote && entity instanceof INpc) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.sorry");
 		}
 		return true;
 	}

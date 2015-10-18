@@ -66,7 +66,7 @@ public class ItemPendant extends Item implements IUnenchantable
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity.getClass().isAssignableFrom(EntityVillager.class)) {
+		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
 			EntityVillager villager = (EntityVillager) entity;
 			if (villager.getProfession() == 2) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.priest.0");
