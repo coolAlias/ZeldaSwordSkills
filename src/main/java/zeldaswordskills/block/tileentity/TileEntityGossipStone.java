@@ -19,7 +19,6 @@ package zeldaswordskills.block.tileentity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.block.ISongBlock;
 import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.ref.Config;
@@ -41,7 +40,7 @@ public class TileEntityGossipStone extends TileEntityBase
 	 * Note that the message is NOT updated on the client side.
 	 */
 	public String getMessage() {
-		return (message == null || message.equals("")) ? StatCollector.translateToLocal("chat.zss.block.gossip_stone.default") : message;
+		return (message == null || message.equals("")) ? "chat.zss.block.gossip_stone.default" : message;
 	}
 
 	/**
@@ -75,6 +74,9 @@ public class TileEntityGossipStone extends TileEntityBase
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
 		message = compound.getString("message");
+		if (message != null && message.startsWith("chat.block")) {
+			setMessage(message.replaceFirst("chat.block", "chat.zss.block"));
+		}
 		nextFairySpawn = compound.getLong("nextFairySpawn");
 	}
 

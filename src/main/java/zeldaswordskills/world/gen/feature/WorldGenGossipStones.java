@@ -22,7 +22,6 @@ import java.util.Random;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
@@ -51,8 +50,7 @@ public class WorldGenGossipStones extends WorldGenerator
 			world.setBlockState(pos, ZSSBlocks.gossipStone.getDefaultState(), 2);
 			TileEntity te = world.getTileEntity(pos);
 			if (te instanceof TileEntityGossipStone) {
-				String hint = StatCollector.translateToLocal("chat.block.gossip_stone.hint." + rand.nextInt(12));
-				((TileEntityGossipStone) te).setMessage(hint);
+				((TileEntityGossipStone) te).setMessage("chat.zss.block.gossip_stone.hint." + rand.nextInt(12));
 			}
 		}
 		return false;
