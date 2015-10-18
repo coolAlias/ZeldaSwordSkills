@@ -53,6 +53,9 @@ public class ZSSWorldGenEvent
 	// EVENT_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void postPopulate(PopulateChunkEvent.Post event) {
+		if (!Config.isGenEnabledAt(event.chunkX, event.chunkZ)) {
+			return;
+		}
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
 			netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
@@ -75,6 +78,10 @@ public class ZSSWorldGenEvent
 	// EVENT_BUS event
 	@SubscribeEvent
 	public void onDecorate(DecorateBiomeEvent.Pre event) {
+		// DecorateBiomeEvent's chunkX and chunkZ are actually block coordinates, not chunk coordinates
+		if (!Config.isGenEnabledAt(event.chunkX >> 4, event.chunkZ >> 4)) {
+			return;
+		}
 		try {
 			if (event.world.provider.isHellWorld) {
 				for (int n = 0; n < Config.getJarClustersPerChunkNether(); ++n) {
@@ -100,6 +107,10 @@ public class ZSSWorldGenEvent
 	// EVENT_BUS event
 	@SubscribeEvent
 	public void onDecorate(DecorateBiomeEvent.Post event) {
+		// DecorateBiomeEvent's chunkX and chunkZ are actually block coordinates, not chunk coordinates
+		if (!Config.isGenEnabledAt(event.chunkX >> 4, event.chunkZ >> 4)) {
+			return;
+		}
 		try {
 			if (event.world.provider.isSurfaceWorld()) {
 				for (int n = 0; n < Config.getJarClustersPerChunkSub(); ++n) {

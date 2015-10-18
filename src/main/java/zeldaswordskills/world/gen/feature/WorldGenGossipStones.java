@@ -56,6 +56,9 @@ public class WorldGenGossipStones
 		if (!event.world.provider.isSurfaceWorld()) {
 			return;
 		}
+		if (!Config.isGenEnabledAt(event.chunkX, event.chunkZ)) {
+			return;
+		}
 		if (event.rand.nextFloat() < Config.getGossipStoneRate()) {
 			int i = (event.chunkX << 4) + event.rand.nextInt(16);
 			int k = (event.chunkZ << 4) + event.rand.nextInt(16);
