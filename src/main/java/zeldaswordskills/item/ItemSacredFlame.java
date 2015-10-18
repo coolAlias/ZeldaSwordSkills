@@ -34,6 +34,6 @@ public class ItemSacredFlame extends ItemMetadataBlock
 
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal("misc.zss.sacred_flame.name." + stack.getItemDamage());
+		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal("misc.zss.sacred_flame.name." + (stack.getItemDamage() & 7));
 	}
 }
