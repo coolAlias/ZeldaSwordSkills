@@ -55,6 +55,9 @@ public class EntityFairy extends EntityAmbientCreature
 	/** Home coordinates where this fairy spawned; will not wander too far from here */
 	protected int[] home = null;
 
+	/** Fairies released from bottles into the wild set this to false so they cannot be recaptured */
+	protected boolean canBeBottled = true;
+
 	public EntityFairy(World world) {
 		super(world);
 		setSize(0.5F, 0.5F);
@@ -67,6 +70,14 @@ public class EntityFairy extends EntityAmbientCreature
 	public void setFairyHome(double x, double y, double z) {
 		setPositionAndUpdate(x, y, z);
 		home = new int[]{(int) x, (int) y, (int) z};
+	}
+
+	/**
+	 * Determines whether this fairy can be recaptured.
+	 * Call when released from a bottle after the fairy home, if any, has been set.
+	 */
+	public void onReleased() {
+		canBeBottled = (home != null);
 	}
 
 	@Override
@@ -136,7 +147,7 @@ public class EntityFairy extends EntityAmbientCreature
 	@Override
 	protected boolean interact(EntityPlayer player) {
 		ItemStack stack = player.getHeldItem();
-		if (stack != null && stack.getItem() == Items.glass_bottle) {
+		if (canBeBottled && stack != null && stack.getItem() == Items.glass_bottle) {
 			if (!worldObj.isRemote) { 
 				player.triggerAchievement(ZSSAchievements.fairyCatcher);
 				ItemStack fairyBottle = new ItemStack(ZSSItems.fairyBottle);
@@ -262,6 +273,7 @@ public class EntityFairy extends EntityAmbientCreature
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
+		compound.setBoolean("canBeBottled", canBeBottled);
 		compound.setBoolean("hasHome", home != null);
 		if (home != null) {
 			compound.setIntArray("FairyHome", home);
@@ -271,6 +283,7 @@ public class EntityFairy extends EntityAmbientCreature
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
+		canBeBottled = compound.getBoolean("canBeBottled");
 		if (compound.getBoolean("hasHome")) {
 			home = compound.getIntArray("FairyHome");
 		}

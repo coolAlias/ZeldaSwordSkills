@@ -98,8 +98,10 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 				for (TileEntityDungeonCore core : list) {
 					if (core.isSpawner()) {
 						fairy.setFairyHome(core.xCoord, core.yCoord + 1, core.zCoord);
+						break;
 					}
 				}
+				fairy.onReleased();
 				world.spawnEntityInWorld(fairy);
 			}
 		} else if (player.getHealth() < player.getMaxHealth()) {
