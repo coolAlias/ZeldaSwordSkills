@@ -87,6 +87,10 @@ public class WorldGenJars extends WorldGenerator
 
 	@SubscribeEvent
 	public void onPreDecorate(DecorateBiomeEvent.Pre event) {
+		// DecorateBiomeEvent's chunkX and chunkZ are actually block coordinates, not chunk coordinates
+		if (!Config.isGenEnabledAt(event.pos.getX() >> 4, event.pos.getZ() >> 4)) {
+			return;
+		}
 		try {
 			if (event.world.provider.getDimensionId() == -1) {
 				for (int n = 0; n < Config.getJarClustersPerChunkNether(); ++n) {
@@ -111,6 +115,10 @@ public class WorldGenJars extends WorldGenerator
 
 	@SubscribeEvent
 	public void onPostDecorate(DecorateBiomeEvent.Post event) {
+		// DecorateBiomeEvent's chunkX and chunkZ are actually block coordinates, not chunk coordinates
+		if (!Config.isGenEnabledAt(event.pos.getX() >> 4, event.pos.getZ() >> 4)) {
+			return;
+		}
 		try {
 			if (event.world.provider.isSurfaceWorld()) {
 				for (int n = 0; n < Config.getJarClustersPerChunkSub(); ++n) {

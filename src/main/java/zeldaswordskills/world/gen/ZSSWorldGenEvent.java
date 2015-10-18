@@ -42,6 +42,9 @@ public class ZSSWorldGenEvent
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
+		if (!Config.isGenEnabledAt(event.chunkX, event.chunkZ)) {
+			return;
+		}
 		switch(event.world.provider.getDimensionId()) {
 		case -1: // the Nether
 			if (event.type == EventType.GLOWSTONE) {
@@ -62,6 +65,9 @@ public class ZSSWorldGenEvent
 	// EVENT_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void postPopulate(PopulateChunkEvent.Post event) {
+		if (!Config.isGenEnabledAt(event.chunkX, event.chunkZ)) {
+			return;
+		}
 		switch(event.world.provider.getDimensionId()) {
 		case -1: // the Nether
 			if (Config.getNetherAttemptsPerChunk() > 0) {

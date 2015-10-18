@@ -238,6 +238,12 @@ public class Config
 	private static float fairySpawnerChance;
 	/** Maximum number of days required for fairies to replenish */
 	private static int resetSpawnerTime;
+	/** [No-Gen] Disable structure and feature generation entirely within a specified zone */
+	private static boolean disableStructureGen;
+	/** [No-Gen] Starting chunk coordinate X for the structure free zone [max is +/- 1875000] */
+	private static int noGenX;
+	/** [No-Gen] Starting chunk coordinate Z for the structure free zone [max is +/- 1875000] */
+	private static int noGenZ;
 	/*================== WORLD GEN =====================*/
 	/** [Ceramic Jars] Allow ceramic jars to generate in water */
 	private static boolean allowJarsInWater;
@@ -437,6 +443,9 @@ public class Config
 		genAttemptsPerChunkNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt(), 0, 20);
 		fairySpawnerChance = 0.01F * (float) MathHelper.clamp_int(config.get("Dungeon Generation", "Chance (as a percent) for certain dungeons to have fairy spawners [0-100]", 10).getInt(), 0, 100);
 		resetSpawnerTime = MathHelper.clamp_int(config.get("Dungeon Generation", "Maximum number of days required for fairies to replenish [2-10]", 7).getInt(), 2, 10);
+		disableStructureGen = config.get("Dungeon Generation", "[No-Gen] Disable structure and feature generation entirely within a specified zone", false).getBoolean(false);
+		noGenX = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate X for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
+		noGenZ = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate Z for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
 		/*================== WORLD GEN =====================*/
 		allowJarsInWater = config.get("WorldGen", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
 		jarGenChance = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt(), 0, 100);
@@ -587,6 +596,15 @@ public class Config
 	public static int getMinIntervalStorm() { return minSongIntervalStorm; }
 	public static int getMinIntervalSun() { return minSongIntervalSun; }
 	/*================== DUNGEON GEN =====================*/
+	/**
+	 * Returns true if structure/feature generation is enabled for the given chunk coordinates
+	 */
+	public static boolean isGenEnabledAt(int chunkX, int chunkZ) {
+		if (disableStructureGen) {
+			return chunkX < noGenX || chunkZ < noGenZ;
+		}
+		return true;
+	}
 	public static boolean avoidModBlocks() { return avoidModBlocks; }
 	public static boolean areWindowsEnabled() { return enableWindows; }
 	public static boolean areBossDungeonsEnabled() { return enableBossDungeons; }
