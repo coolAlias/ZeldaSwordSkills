@@ -134,8 +134,13 @@ public class ItemFairyBottle extends BaseModItem implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.1"));
+	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+		if (stack.hasDisplayName()) {
+			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip." + getUnlocalizedName().substring(5) + ".navi.desc.0", stack.getDisplayName()));
+		} else {
+			for (int i = 0; i < 4; ++i) {
+				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc." + i));
+			}
+		}
 	}
 }
