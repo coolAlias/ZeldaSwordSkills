@@ -377,7 +377,7 @@ public class RoomBoss extends RoomBase
 				int x = bBox.minX + rand.nextInt(bBox.getXSize());
 				int y = (rand.nextFloat() < 0.5F ? bBox.minY + 1 : bBox.maxY + 1);
 				int z = bBox.minZ + rand.nextInt(bBox.getZSize());
-				if (bBox.isVecInside(new Vec3i(x, y, z))) {
+				if (bBox.isVecInside(new Vec3i(x, y - 1, z))) { // subtract 1 for bounds check
 					placeChestAt(world, new BlockPos(x, y, z), ZSSBlocks.chestInvisible, rand, true);
 				}
 			}
