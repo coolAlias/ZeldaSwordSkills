@@ -273,7 +273,14 @@ public class RoomBoss extends RoomBase
 		case DESERT: // fall through
 		case OCEAN: // fall through
 		case MOUNTAIN: placeMainChest(world, rand, true); hasChest = true; break;
-		case FOREST: placePedestal(world, minY + 1); break;
+		case FOREST:
+			if (rand.nextFloat() < Config.getMasterSwordChance()) {
+				placePedestal(world, minY + 1);
+			} else { // chance of double chest
+				placeMainChest(world, rand, true);
+				hasChest = !(rand.nextFloat() < (2 * Config.getDoubleChestChance()));
+			}
+			break;
 		case HELL: placeFlame(world, BlockSacredFlame.EnumType.DIN); break;
 		case SWAMP: placeFlame(world, BlockSacredFlame.EnumType.FARORE); break;
 		case TAIGA: placeFlame(world, BlockSacredFlame.EnumType.NAYRU); break;
