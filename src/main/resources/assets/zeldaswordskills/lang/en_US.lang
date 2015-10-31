@@ -375,6 +375,7 @@ chat.zss.npc.mask_trader.ocarina.found.0=You found it! I think you should keep i
 chat.zss.npc.mask_trader.ocarina.found.1=Now, let me show you that song I promised.
 chat.zss.npc.mask_trader.ocarina.lost.0=Neat, an ocarina! I used to have on just like that.
 chat.zss.npc.mask_trader.ocarina.lost.1=If you can find it for me, I'll teach you a nice song.
+chat.zss.npc.merchant.busy=Sorry, I'm with another customer. Come back later.
 chat.zss.npc.ocarina.learn=Come on, let me teach you %s.
 chat.zss.npc.ocarina.review=Did you forget how to play %s?
 chat.zss.npc.ocarina.toy=That's a cute toy - does it really work?
