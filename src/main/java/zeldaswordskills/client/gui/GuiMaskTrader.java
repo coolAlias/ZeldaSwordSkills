@@ -24,6 +24,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.inventory.ContainerMaskTrader;
 import zeldaswordskills.ref.ModInfo;
 
@@ -34,8 +35,8 @@ public class GuiMaskTrader extends GuiContainer
 
 	private GuiButton borrow;
 
-	public GuiMaskTrader() {
-		super(new ContainerMaskTrader());
+	public GuiMaskTrader(EntityNpcMaskTrader salesman) {
+		super(new ContainerMaskTrader(salesman));
 	}
 
 	@Override

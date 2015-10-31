@@ -17,6 +17,7 @@
 
 package zeldaswordskills.handler;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -32,21 +33,26 @@ import zeldaswordskills.client.gui.GuiMaskTrader;
 import zeldaswordskills.client.gui.GuiOcarina;
 import zeldaswordskills.client.gui.GuiPedestal;
 import zeldaswordskills.client.gui.GuiSkills;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.inventory.ContainerMaskTrader;
 import zeldaswordskills.inventory.ContainerPedestal;
 import zeldaswordskills.inventory.ContainerSkills;
 
 public class GuiHandler implements IGuiHandler
 {
-	public static final int GUI_PEDESTAL = 0, GUI_MASK_TRADER = 1, GUI_SKILLS = 2,
-			/** Gui for playing musical instruments with the same control scheme as Ocarina of Time */
-			GUI_OCARINA = 3,
-			/** Same as GUI_OCARINA but with a flag set for learning the Scarecrow Song */
-			GUI_SCARECROW = 4,
-			/** Gui to open for learning all songs but the Scarecrow Song */
-			GUI_LEARN_SONG = 5,
-			/** Gui opened when a Gossip Stone is placed, like the vanilla sign editor */
-			GUI_EDIT_GOSSIP_STONE = 6;
+	public static final int
+	GUI_PEDESTAL = 0,
+	/** Gui for Mask Salesman expects parameter 'x' to be the salesman's entity ID */
+	GUI_MASK_TRADER = 1,
+	GUI_SKILLS = 2,
+	/** Gui for playing musical instruments with the same control scheme as Ocarina of Time */
+	GUI_OCARINA = 3,
+	/** Same as GUI_OCARINA but with a flag set for learning the Scarecrow Song */
+	GUI_SCARECROW = 4,
+	/** Gui to open for learning all songs but the Scarecrow Song */
+	GUI_LEARN_SONG = 5,
+	/** Gui opened when a Gossip Stone is placed, like the vanilla sign editor */
+	GUI_EDIT_GOSSIP_STONE = 6;
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
@@ -56,9 +62,13 @@ public class GuiHandler implements IGuiHandler
 			if (te instanceof TileEntityPedestal) {
 				return new ContainerPedestal(player.inventory, (TileEntityPedestal) te);
 			}
-			break;
+			return null;
 		case GUI_MASK_TRADER:
-			return new ContainerMaskTrader();
+			Entity merchant = world.getEntityByID(x);
+			if (merchant instanceof EntityNpcMaskTrader) {
+				return new ContainerMaskTrader((EntityNpcMaskTrader) merchant);
+			}
+			return null;
 		case GUI_SKILLS:
 			return new ContainerSkills(player);
 		}
@@ -73,9 +83,13 @@ public class GuiHandler implements IGuiHandler
 			if (te instanceof TileEntityPedestal) {
 				return new GuiPedestal(player.inventory, (TileEntityPedestal) te);
 			}
-			break;
+			return null;
 		case GUI_MASK_TRADER:
-			return new GuiMaskTrader();
+			Entity merchant = world.getEntityByID(x);
+			if (merchant instanceof EntityNpcMaskTrader) {
+				return new GuiMaskTrader((EntityNpcMaskTrader) merchant);
+			}
+			return null;
 		case GUI_SKILLS:
 			return new GuiSkills(player);
 		case GUI_OCARINA:
@@ -90,7 +104,7 @@ public class GuiHandler implements IGuiHandler
 			if (te instanceof TileEntityGossipStone) {
 				return new GuiEditGossipStone((TileEntityGossipStone) te);
 			}
-			break;
+			return null;
 		case GUI_SCARECROW:
 			return new GuiOcarina(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ), true);
 		case GUI_LEARN_SONG:
