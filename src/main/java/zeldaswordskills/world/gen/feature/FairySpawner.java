@@ -166,6 +166,9 @@ public class FairySpawner
 						getBoundingBox(x, box.getCenterY(), z, x + 1, box.getCenterY() + 1, z + 1).
 						expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2));
 				for (EntityItem item : list) {
+					if (!item.isEntityAlive()) {
+						continue;
+					}
 					ItemStack stack = item.getEntityItem();
 					if (stack.getItem() == Items.emerald) {
 						player.triggerAchievement(ZSSAchievements.fairyEmerald);
