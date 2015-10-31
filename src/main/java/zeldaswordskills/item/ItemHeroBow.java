@@ -300,11 +300,11 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 				int level = getLevel(stack);
 				MerchantRecipe trade = null;
 				if (level > 1) {
-					trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowFire, 4), new ItemStack(Items.emerald, 16));
+					trade = new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.arrowFire, 4));
 					if (MerchantRecipeHelper.doesListContain(trades, trade)) {
-						trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowIce, 4), new ItemStack(Items.emerald, 20));
+						trade = new MerchantRecipe(new ItemStack(Items.emerald, 20), new ItemStack(ZSSItems.arrowIce, 4));
 						if (level > 2 && MerchantRecipeHelper.doesListContain(trades, trade)) {
-							trade = new MerchantRecipe(new ItemStack(ZSSItems.arrowLight, 4), new ItemStack(Items.emerald, 40));
+							trade = new MerchantRecipe(new ItemStack(Items.emerald, 40), new ItemStack(ZSSItems.arrowLight, 4));
 						}
 					}
 				}
