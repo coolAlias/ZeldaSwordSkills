@@ -22,6 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.BorrowMaskPacket;
 
@@ -30,8 +31,11 @@ public class ContainerMaskTrader extends Container
 	private final InventoryMaskTrader inv;
 	/** Set to true when mask is borrowed, closing the screen */
 	private boolean maskBorrowed = false;
+	/** Mask trader entity */
+	private final EntityNpcMaskTrader salesman;
 
-	public ContainerMaskTrader() {
+	public ContainerMaskTrader(EntityNpcMaskTrader salesman) {
+		this.salesman = salesman;
 		inv = new InventoryMaskTrader();
 		for (int i = 0; i < inv.getSizeInventory(); ++i) {
 			addSlotToContainer(new Slot(inv, i, (i > 5 ? 116 : 8) + (i % 3) * 18, (i % 6 > 2 ? 142 : 124)));
@@ -54,6 +58,12 @@ public class ContainerMaskTrader extends Container
 	@Override
 	public boolean canInteractWith(EntityPlayer player) {
 		return !maskBorrowed && inv.isUseableByPlayer(player);
+	}
+
+	@Override
+	public void onContainerClosed(EntityPlayer player) {
+		super.onContainerClosed(player);
+		salesman.setCustomer(null);
 	}
 
 	@Override

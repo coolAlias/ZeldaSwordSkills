@@ -60,6 +60,14 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 		super(world);
 	}
 
+	public EntityPlayer getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(EntityPlayer player) {
+		customer = player;
+	}
+
 	@Override
 	protected String getNameTagOnSpawn() {
 		return "Happy Mask Salesman";
@@ -129,8 +137,8 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 							new ChatComponentTranslation("chat.zss.npc.mask_trader.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
 							new ChatComponentTranslation("chat.zss.npc.mask_trader.borrowed.1"));
 				} else {
-					this.customer = player;
-					player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, 0, 0, 0);
+					setCustomer(player);
+					player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, getEntityId(), 0, 0);
 				}
 			} else {
 				Item mask = maskMap.get(maskStage / NUM_STAGES);
