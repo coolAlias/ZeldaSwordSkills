@@ -20,7 +20,7 @@ package zeldaswordskills.inventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.item.ZSSItems;
 
 public class InventoryMaskTrader extends AbstractInventory
@@ -66,7 +66,7 @@ public class InventoryMaskTrader extends AbstractInventory
 
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer player) {
-		return ZSSPlayerInfo.get(player).getBorrowedMask() == null;
+		return ZSSQuests.get(player).getBorrowedMask() == null;
 	}
 
 	@Override

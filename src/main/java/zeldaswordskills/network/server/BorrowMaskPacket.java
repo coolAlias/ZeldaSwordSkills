@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -56,7 +56,7 @@ public class BorrowMaskPacket extends AbstractServerMessage<BorrowMaskPacket>
 	protected void process(EntityPlayer player, Side side) {
 		if (mask != null) {
 			PlayerUtils.addItemToInventory(player, mask);
-			ZSSPlayerInfo.get(player).setBorrowedMask(mask.getItem());
+			ZSSQuests.get(player).setBorrowedMask(mask.getItem());
 		}
 	}
 }

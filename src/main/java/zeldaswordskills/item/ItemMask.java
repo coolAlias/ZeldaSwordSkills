@@ -27,7 +27,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
@@ -37,7 +37,6 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -49,7 +48,12 @@ import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.quests.IQuest;
+import zeldaswordskills.entity.player.quests.QuestMaskSales;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.SyncQuestPacket;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -133,16 +137,25 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
+		if (player.worldObj.isRemote) {
+			return true;
+		} else if (entity instanceof EntityNpcMaskTrader && ZSSQuests.get(player).hasCompleted(QuestMaskSales.class)) {
+			if (this == ZSSQuests.get(player).getBorrowedMask()) {
+				player.setCurrentItemOrArmor(0, null);
+				ZSSQuests.get(player).setBorrowedMask(null);
+				PlayerUtils.playSound(player, Sounds.POP, 1.0F, ((player.worldObj.rand.nextFloat() - player.worldObj.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.returned");
+			}
+		} else if (entity instanceof EntityVillager) {
+			IQuest quest = ZSSQuests.get(player).get(QuestMaskSales.class);
 			EntityVillager villager = (EntityVillager) entity;
-			if (ZSSVillagerInfo.get(villager).getMaskDesired() == this) {
-				// TODO ? villager.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_HELM, new ItemStack(this));
-				ZSSVillagerInfo.get(villager).onMaskTrade();
-				ZSSPlayerInfo.get(player).completeCurrentMaskStage();
-				player.setCurrentItemOrArmor(0, new ItemStack(Items.emerald, getSellPrice()));
-				PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.mask.sold." + player.worldObj.rand.nextInt(4));
-				player.triggerAchievement(ZSSAchievements.maskSold);
+			if (quest != null && ZSSVillagerInfo.get(villager).getMaskDesired() == this) {
+				// send extra parameter for left-click, then check if it needs to be sync'ed
+				if (quest.update(player, this, true) && quest.requiresSync() && player instanceof EntityPlayerMP) {
+					PacketDispatcher.sendTo(new SyncQuestPacket(quest), (EntityPlayerMP) player);
+				}
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.mask.refuse." + player.worldObj.rand.nextInt(4));
 			}
 		}
 		return true;
@@ -158,8 +171,14 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 			if (entity instanceof EntityVillager) {
 				EntityVillager villager = (EntityVillager) entity;
 				if (entity.getClass() == EntityVillager.class && this == ZSSVillagerInfo.get(villager).getMaskDesired()) {
-					new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.mask.desired.0"),
-							new ChatComponentTranslation("chat.zss.mask.desired.1", getSellPrice()));
+					QuestMaskSales quest = (QuestMaskSales) ZSSQuests.get(player).get(QuestMaskSales.class);
+					if (!quest.hasSold(this)) {
+						new TimedChatDialogue(player,
+								new ChatComponentTranslation("chat.zss.npc.mask_salesman.sales.buyer.0"),
+								new ChatComponentTranslation("chat.zss.npc.mask_salesman.sales.buyer.1", getSellPrice()));
+					} else { // player already sold this mask
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.sales.repeat." + player.worldObj.rand.nextInt(4));
+					}
 				} else {
 					// Custom villager professions all use the same chat message
 					int p = villager.getProfession();
