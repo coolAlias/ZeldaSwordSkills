@@ -110,9 +110,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	}
 
 	/** Completes the mask trade, setting villager to no longer trade for masks */
-	public void onMaskTrade() {
-		desiredMask = NONE;
-	}
+	public void onMaskTrade() {}
 
 	public void handleSkulltulaTrade(ItemStack stack, EntityPlayer player) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
