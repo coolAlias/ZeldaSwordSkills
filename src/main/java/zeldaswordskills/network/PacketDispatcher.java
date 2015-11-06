@@ -49,6 +49,8 @@ import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
 import zeldaswordskills.network.client.SyncConfigPacket;
 import zeldaswordskills.network.client.SyncEntityInfoPacket;
 import zeldaswordskills.network.client.SyncPlayerInfoPacket;
+import zeldaswordskills.network.client.SyncQuestPacket;
+import zeldaswordskills.network.client.SyncQuestsPacket;
 import zeldaswordskills.network.client.SyncSkillPacket;
 import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.network.client.UpdateBuffPacket;
@@ -105,6 +107,8 @@ public class PacketDispatcher
 		registerMessage(SyncConfigPacket.class);
 		registerMessage(SyncEntityInfoPacket.class);
 		registerMessage(SyncPlayerInfoPacket.class);
+		registerMessage(SyncQuestPacket.class);
+		registerMessage(SyncQuestsPacket.class);
 		registerMessage(SyncSkillPacket.class);
 		registerMessage(UnpressKeyPacket.class);
 		registerMessage(UpdateBuffPacket.class);

@@ -35,6 +35,7 @@ import net.minecraftforge.common.util.Constants;
 import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemArmorBoots;
 import zeldaswordskills.item.ItemHeroBow;
@@ -46,6 +47,7 @@ import zeldaswordskills.network.client.AttackBlockedPacket;
 import zeldaswordskills.network.client.SetNockedArrowPacket;
 import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
 import zeldaswordskills.network.client.SyncPlayerInfoPacket;
+import zeldaswordskills.network.client.SyncQuestsPacket;
 import zeldaswordskills.util.PlayerUtils;
 
 public class ZSSPlayerInfo implements IExtendedEntityProperties
@@ -417,6 +419,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Used to register these extended properties for the player during EntityConstructing event */
 	public static final void register(EntityPlayer player) {
 		player.registerExtendedProperties(EXT_PROP_NAME, new ZSSPlayerInfo(player));
+		ZSSQuests.register(player);
 	}
 
 	/** Returns ExtendedPlayer properties for player */
@@ -441,6 +444,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			playerSkills.validateSkills();
 			playerSkills.verifyMaxHealth();
 			PacketDispatcher.sendTo(new SyncPlayerInfoPacket(this), (EntityPlayerMP) player);
+			PacketDispatcher.sendTo(new SyncQuestsPacket(ZSSQuests.get(player)), (EntityPlayerMP) player);
 		}
 	}
 
@@ -453,6 +457,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		NBTTagCompound compound = new NBTTagCompound();
 		info.saveNBTData(compound);
 		this.loadNBTData(compound);
+		ZSSQuests.get(this.player).copy(ZSSQuests.get(info.player));
 	}
 
 	@Override
