@@ -40,6 +40,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.entity.ISongTeacher;
 import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.block.BlockSongInscription;
 import zeldaswordskills.block.BlockWarpStone;
@@ -152,27 +153,27 @@ public class ItemInstrument extends BaseModItem implements IRightClickEntity
 
 	@Override
 	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity.hasCustomName() && teachersForClass.containsKey(entity.getClass())) {
+		ISongTeacher.TeachingResult result = null;
+		if (entity instanceof ISongTeacher) {
+			result = ((ISongTeacher) entity).getTeachingResult(stack, player);
+		} else if (!player.isSneaking() && entity.hasCustomName() && teachersForClass.containsKey(entity.getClass())) {
 			Map<String, AbstractZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
-			AbstractZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
-			if (toLearn != null) {
-				if (toLearn == ZeldaSongs.songTime && getInstrument(stack).getPower() < 5) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.ocarina.toy");
-					return false;
-				}
-				if (player.worldObj.isRemote) {
-					// onItemRightClick still processes after this, despite canceling the interact event -.-
-					ZSSPlayerSongs.get(player).songToLearn = toLearn;
-					if (ZSSPlayerSongs.get(player).isSongKnown(toLearn)) {
-						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", toLearn.getDisplayName());
-					} else {
-						PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", toLearn.getDisplayName());
-					}
-				}
-				return true;
-			}
+			result = new ISongTeacher.TeachingResult(teacherSongs.get(entity.getCustomNameTag()), true, true);
 		}
-		return false;
+		if (result != null) {
+			if (player.worldObj.isRemote && result.songToLearn != null) {
+				ZSSPlayerSongs.get(player).songToLearn = result.songToLearn;
+				if (!result.displayChat) {
+					// don't display default chat messages
+				} else if (ZSSPlayerSongs.get(player).isSongKnown(result.songToLearn)) {
+					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", result.songToLearn.getDisplayName());
+				} else {
+					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", result.songToLearn.getDisplayName());
+				}
+			}
+			return result.cancel; // If true, skips straight to Item#onItemRightClick
+		}
+		return false; // Entity#interact will determine if Item#onItemRightClick is called
 	}
 
 	/**
