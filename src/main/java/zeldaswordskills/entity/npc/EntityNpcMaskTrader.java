@@ -28,21 +28,25 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.INpcVillager;
+import zeldaswordskills.api.entity.ISongTeacher;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.QuestBase;
 import zeldaswordskills.entity.player.quests.QuestMaskSales;
 import zeldaswordskills.entity.player.quests.QuestMaskShop;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.handler.GuiHandler;
+import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.SyncQuestPacket;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
+public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, ISongTeacher
 {
 	private EntityPlayer customer;
 
@@ -98,6 +102,11 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.merchant.busy");
 			}
 			return true;
+		}
+		// Prevents Item#onItemRightClick so song GUI doesn't open when it shouldn't
+		ItemStack stack = player.getHeldItem();
+		if (stack != null && stack.getItem() instanceof ItemInstrument) {
+			return true;
 		} else if (worldObj.isRemote) {
 			return false;
 		}
@@ -114,7 +123,6 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 		if (QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, this)) {
 			return true;
 		} else if (quest.isComplete(player)) {
-			ItemStack stack = player.getHeldItem();
 			Item mask = quests.getBorrowedMask();
 			if (mask != null && stack != null && stack.getItem() == mask) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.returning");
@@ -206,5 +214,32 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 	@Override
 	public void onConverted(EntityPlayer player) {
 		// nothing to do - handled by quests
+	}
+
+	@Override
+	public TeachingResult getTeachingResult(ItemStack stack, EntityPlayer player) {
+		// check shop status here, too, to make sure quests are updated for old saves
+		if (!isEntityAlive() || player.isSneaking() || checkShopStatus(player, false, false)) {
+			return null;
+		}
+		String deny = "chat.zss.npc.mask_salesman.ocarina.begin";
+		ZSSQuests quests = ZSSQuests.get(player);
+		if (!quests.hasCompleted(QuestMaskShop.class)) {
+			deny = "chat.zss.npc.mask_salesman.ocarina.waiting";
+		} else if (!quests.hasCompleted(QuestMaskSales.class)) {
+			deny = "chat.zss.npc.mask_salesman.ocarina." + (quests.hasBegun(QuestMaskSales.class) ? "sell" : "help");
+		} else if (ZSSPlayerSongs.get(player).isSongKnown(ZeldaSongs.songHealing)) {
+			return new ISongTeacher.TeachingResult(ZeldaSongs.songHealing, true, true);
+		} else if (((ItemInstrument) stack.getItem()).getInstrument(stack) == ItemInstrument.Instrument.OCARINA_TIME) {
+			if (!player.worldObj.isRemote) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.ocarina.complete");
+			}
+			return new ISongTeacher.TeachingResult(ZeldaSongs.songHealing, false, true);
+		}
+		if (!player.worldObj.isRemote) {
+			PlayerUtils.sendTranslatedChat(player, deny);
+		}
+		// Returning null will call Entity#interact - return true from there to prevent song GUI from opening via Item#onItemRightClick
+		return null;
 	}
 }
