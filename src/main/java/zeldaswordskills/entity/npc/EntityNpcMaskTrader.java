@@ -17,44 +17,34 @@
 
 package zeldaswordskills.entity.npc;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
-import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
-import zeldaswordskills.entity.player.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.quests.IQuest;
+import zeldaswordskills.entity.player.quests.QuestBase;
+import zeldaswordskills.entity.player.quests.QuestMaskSales;
+import zeldaswordskills.entity.player.quests.QuestMaskShop;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.handler.GuiHandler;
-import zeldaswordskills.item.ItemInstrument;
-import zeldaswordskills.item.ItemMask;
-import zeldaswordskills.item.ItemTreasure.Treasures;
-import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.SyncQuestPacket;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
-import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 {
 	private EntityPlayer customer;
-
-	/** Mapping of masks to give for each quest stage */
-	private static final Map<Integer, Item> maskMap = new HashMap<Integer, Item>();
-
-	/** Number of stages per mask */
-	private static final int NUM_STAGES = 3;
 
 	public EntityNpcMaskTrader(World world) {
 		super(world);
@@ -101,94 +91,41 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 
 	@Override
 	public boolean interact(EntityPlayer player) {
-		ItemStack stack = player.getHeldItem();
-		if (stack != null && stack.getItem() instanceof ItemInstrument) {
-			if (player.worldObj.isRemote) {
-				ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
-				if (songs.isSongKnown(ZeldaSongs.songHealing)) {
-					// instrument doesn't matter when reviewing a known song
-					songs.songToLearn = ZeldaSongs.songHealing;
-					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
-				} else if (((ItemInstrument) stack.getItem()).getInstrument(stack) == ItemInstrument.Instrument.OCARINA_TIME) {
-					new TimedChatDialogue(player,
-							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.found.0"),
-							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.found.1"));
-					songs.songToLearn = ZeldaSongs.songHealing;
-					player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
-				} else {
-					new TimedChatDialogue(player,
-							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.lost.0"),
-							new ChatComponentTranslation("chat.zss.npc.mask_trader.ocarina.lost.1"));
-				}
+		if (!isEntityAlive() || player.isSneaking()) { 
+			return false;
+		} else if (getCustomer() != null) {
+			if (!worldObj.isRemote) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.merchant.busy");
 			}
-		} else if (!player.worldObj.isRemote) {
-			playLivingSound();
-			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
-			int maskStage = info.getCurrentMaskStage();
-			if (maskStage >= (maskMap.size() * NUM_STAGES)) {
-				Item mask = info.getBorrowedMask();
-				if (stack != null && stack.getItem() == mask) {
-					player.setCurrentItemOrArmor(0, null);
-					info.setBorrowedMask(null);
-					PlayerUtils.playSound(player, Sounds.POP, 1.0F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.returned");
-				} else if (mask != null) {
-					new TimedChatDialogue(player,
-							new ChatComponentTranslation("chat.zss.npc.mask_trader.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
-							new ChatComponentTranslation("chat.zss.npc.mask_trader.borrowed.1"));
-				} else {
-					setCustomer(player);
-					player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, getEntityId(), 0, 0);
-				}
+			return true;
+		} else if (worldObj.isRemote) {
+			return false;
+		}
+		// Mask Shop must be open for player to interact
+		if (checkShopStatus(player, false, false)) {
+			return true;
+		}
+		ZSSQuests quests = ZSSQuests.get(player);
+		IQuest quest = quests.get(QuestMaskSales.class);
+		if (quest == null) { // might be null for old saves
+			quest = new QuestMaskSales();
+			quests.add(quest);
+		}
+		if (QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, this)) {
+			return true;
+		} else if (quest.isComplete(player)) {
+			ItemStack stack = player.getHeldItem();
+			Item mask = quests.getBorrowedMask();
+			if (mask != null && stack != null && stack.getItem() == mask) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.returning");
+			} else if (mask != null) {
+				new TimedChatDialogue(player,
+						new ChatComponentTranslation("chat.zss.npc.mask_salesman.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
+						new ChatComponentTranslation("chat.zss.npc.mask_salesman.borrowed.1"));
 			} else {
-				Item mask = maskMap.get(maskStage / NUM_STAGES);
-				switch(maskStage % NUM_STAGES) {
-				case 0: // new mask
-					IChatComponent[] chat;
-					if (maskStage == 0) {
-						chat = new IChatComponent[] {
-								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.0"),
-								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.1"),
-								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.2"),
-								new ChatComponentTranslation("chat.zss.npc.mask_trader.intro.3")
-						};
-					} else {
-						chat = new IChatComponent[] {
-								new ChatComponentTranslation("chat.zss.npc.mask_trader.next_mask.0"),
-								new ChatComponentTranslation("chat.zss.npc.mask_trader.next_mask.1")
-						};
-					}
-					new TimedChatDialogue(player, chat);
-					if (mask != null) {
-						new TimedAddItem(player, new ItemStack(mask), maskStage == 0 ? 4000 : 2000);
-					}
-					info.completeCurrentMaskStage();
-					break;
-				case 1: // still need to sell mask
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.selling." + rand.nextInt(4));
-					break;
-				case 2: // need to pay for mask
-					int price = (mask instanceof ItemMask ? ((ItemMask) mask).getBuyPrice() : 16);
-					if (PlayerUtils.consumeInventoryItem(player, Items.emerald, price)) {
-						PlayerUtils.playSound(player, Sounds.CASH_SALE, 1.0F, 1.0F);
-						info.completeCurrentMaskStage();
-						if (info.getCurrentMaskStage() == (maskMap.size() * NUM_STAGES)) {
-							new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.0"),
-									new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.1"),
-									new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.2"),
-									new ChatComponentTranslation("chat.zss.npc.mask_trader.reward.3"));
-							new TimedAddItem(player, new ItemStack(ZSSItems.maskTruth), 4000);
-							info.setBorrowedMask(ZSSItems.maskTruth);
-							player.triggerAchievement(ZSSAchievements.maskShop);
-						} else {
-							PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.sold");
-						}
-					} else {
-						new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.npc.mask_trader.penniless.0"),
-								new ChatComponentTranslation("chat.zss.npc.mask_trader.penniless.1", price));
-					}
-					break;
-				}
+				playLivingSound();
+				setCustomer(player);
+				player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, getEntityId(), 0, 0);
 			}
 		}
 		return true;
@@ -199,55 +136,75 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 		if (villager.getClass() != EntityVillager.class || villager.isChild()) {
 			return Result.DEFAULT;
 		} else if (!villager.worldObj.isRemote) {
-			ItemStack stack = player.getHeldItem();
-			if (stack != null && stack.getItem() == ZSSItems.treasure && Treasures.byDamage(stack.getItemDamage()) == Treasures.ZELDAS_LETTER) {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me");
-			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.closed." + rand.nextInt(4));
-			}
+			checkShopStatus(player, true, false);
 		}
 		return Result.DENY;
+	}
+
+	/**
+	 * Call when player left- or right-clicks on Mask Salesman to check initial quest status.
+	 * @param isVillager true if the interaction is with a villager and not the mask salesman
+	 * @param leftClick true if this is a left-click interaction
+	 * @return true if the quest status changed (i.e. interaction should be cancelled)
+	 */
+	public boolean checkShopStatus(EntityPlayer player, boolean isVillager, boolean leftClick) {
+		IQuest quest = getMaskQuest(player);
+		if (!isVillager && quest.isComplete(player)) { // not a villager, so don't need to convert
+			return false;
+		}
+		// for compatibility with old saves - player already started mask trading sequence
+		else if (!isVillager && ZSSPlayerInfo.get(player).getCurrentMaskStage() > 0) {
+			quest.forceComplete(player); // completes the first quest and begins or possibly completes QuestMaskSales
+			// both quests require updating the client
+			if (player instanceof EntityPlayerMP) {
+				PacketDispatcher.sendTo(new SyncQuestPacket(quest), (EntityPlayerMP) player);
+				quest = ZSSQuests.get(player).get(QuestMaskSales.class);
+				if (quest != null) {
+					PacketDispatcher.sendTo(new SyncQuestPacket(quest), (EntityPlayerMP) player);
+				}
+			}
+			return false;
+		} else if (leftClick) { // try to complete the quest
+			if (quest.complete(player)) {
+				if (player instanceof EntityPlayerMP) {
+					PacketDispatcher.sendTo(new SyncQuestPacket(quest), (EntityPlayerMP) player);
+				}
+				return true;
+			}
+			return false;
+		}
+		// Right-click gives a hint, but can't complete quest
+		IChatComponent hint = quest.getHint(player);
+		if (hint != null) {
+			player.addChatMessage(hint);
+		}
+		return true;
 	}
 
 	@Override
 	public Result canLeftClickConvert(EntityPlayer player, EntityVillager villager) {
 		if (!villager.worldObj.isRemote && villager.getClass() == EntityVillager.class && !villager.isChild()) {
-			return (PlayerUtils.consumeHeldItem(player, ZSSItems.treasure, Treasures.ZELDAS_LETTER.ordinal(), 1) ? Result.ALLOW : Result.DEFAULT);				
+			if (getMaskQuest(player).complete(player)) {
+				return Result.ALLOW;
+			}
 		}
 		return Result.DEFAULT;
 	}
 
+	/**
+	 * Adds or retrieves the player's Mask Shop quest instance
+	 */
+	private IQuest getMaskQuest(EntityPlayer player) {
+		IQuest quest = ZSSQuests.get(player).get(QuestMaskShop.class);
+		if (quest == null) {
+			quest = new QuestMaskShop();
+			ZSSQuests.get(player).add(quest);
+		}
+		return quest;
+	}
+
 	@Override
 	public void onConverted(EntityPlayer player) {
-		PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-		player.triggerAchievement(ZSSAchievements.maskTrader);
-		if (ZSSPlayerInfo.get(player).getCurrentMaskStage() == 0) {
-			IChatComponent[] chat = new IChatComponent[5];
-			for (int i = 0; i < 5; ++i) {
-				chat[i] = new ChatComponentTranslation("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".success." + i);
-			}
-			new TimedChatDialogue(player, chat);
-		} else {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".already_open");
-		}
-	}
-
-	/** Returns the size of the mask map */
-	public static int getMaskMapSize() {
-		return maskMap.size();
-	}
-	/** Returns the ItemMask stored at i, or null */
-	public static Item getMask(int i) {
-		return maskMap.get(i);
-	}
-
-	static {
-		int i = 0;
-		maskMap.put(i++, ZSSItems.maskKeaton);
-		maskMap.put(i++, ZSSItems.maskSkull);
-		maskMap.put(i++, ZSSItems.maskSpooky);
-		maskMap.put(i++, ZSSItems.maskScents);
-		maskMap.put(i++, ZSSItems.maskCouples);
-		maskMap.put(i++, ZSSItems.maskBunny);
+		// nothing to do - handled by quests
 	}
 }

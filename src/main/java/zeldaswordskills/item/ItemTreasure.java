@@ -37,7 +37,11 @@ import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSVillagerInfo;
+import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
+import zeldaswordskills.entity.player.quests.QuestMaskSales;
+import zeldaswordskills.entity.player.quests.QuestMaskShop;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -125,7 +129,11 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityVillager && Result.DEFAULT == NpcHelper.convertVillager(player, (EntityVillager) entity, false)) {
+		if (player.worldObj.isRemote) {
+			return true;
+		} else if (entity instanceof EntityNpcMaskTrader && ((EntityNpcMaskTrader) entity).checkShopStatus(player, false, true)) {
+			return true; // allows quest to complete without having to convert a villager if Salesman already in town
+		} else if (entity instanceof EntityVillager && Result.DEFAULT == NpcHelper.convertVillager(player, (EntityVillager) entity, false)) {
 			// villager not converted, try other treasure interactions
 			onRightClickEntity(stack, player, entity);
 		}
@@ -174,6 +182,9 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 		} else if (entity instanceof INpc) {
 			if (entity instanceof EntityAgeable && ((EntityAgeable) entity).isChild()) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+			} else if (treasure == Treasures.ZELDAS_LETTER && entity instanceof EntityNpcMaskTrader) {
+				String s = (ZSSQuests.get(player).hasCompleted(QuestMaskSales.class) ? "open" : (ZSSQuests.get(player).hasCompleted(QuestMaskShop.class) ? "opening" : "hint." + itemRand.nextInt(4)));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.shop." + s);
 			} else if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.uninterested." + treasure.uninterested + ".orca");
 			} else {

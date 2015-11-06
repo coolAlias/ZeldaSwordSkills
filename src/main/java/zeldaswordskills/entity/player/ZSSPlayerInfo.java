@@ -100,10 +100,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Current amount of time hovered */
 	public int hoverTime = 0;
 
-	/** The last mask borrowed from the Happy Mask Salesman */
+	@Deprecated
 	private Item borrowedMask = null;
 
-	/** Current stage in the Mask trading sequence */
+	@Deprecated
 	private int maskStage = 0;
 
 	/** Maximum number of skulltula tokens which can be turned in */
@@ -260,27 +260,19 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		}
 	}
 
-	/** Returns the last mask borrowed, or null if no mask has been borrowed */
+	@Deprecated
 	public Item getBorrowedMask() {
 		return borrowedMask;
 	}
 
-	/** Sets the mask that the player has borrowed */
+	@Deprecated
 	public void setBorrowedMask(Item item) {
 		borrowedMask = item;
 	}
 
-	/**
-	 * The player's current progress along the mask quest (% 3 gives stage):
-	 * 0 - can get next mask, 1 - need to sell mask, 2 - need to pay for mask
-	 */
+	@Deprecated
 	public int getCurrentMaskStage() {
 		return maskStage;
-	}
-
-	/** Increments the mask quest stage by one */
-	public void completeCurrentMaskStage() {
-		++maskStage;
 	}
 
 	/**
@@ -442,8 +434,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			NBTTagCompound tag = new NBTTagCompound();
 			compound.setTag("lastHelmWorn", lastHelmWorn.writeToNBT(tag));
 		}
-		compound.setInteger("borrowedMask", borrowedMask != null ? Item.getIdFromItem(borrowedMask) : -1);
-		compound.setInteger("maskStage", maskStage);
 		compound.setInteger("slingshotMode", slingshotMode);
 		compound.setInteger("skulltulaTokens", skulltulaTokens);
 
@@ -473,6 +463,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		if (helm != null) {
 			lastHelmWorn = new ItemStack(helm);
 		}
+		// For backwards compatibility:
 		int maskID = compound.getInteger("borrowedMask");
 		borrowedMask = maskID > -1 ? Item.getItemById(maskID) : null;
 		maskStage = compound.getInteger("maskStage");

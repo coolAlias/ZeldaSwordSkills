@@ -36,9 +36,9 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.npc.EntityGoron;
-import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.quests.QuestMaskSales;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ItemTreasure.Treasures;
@@ -87,7 +87,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public ZSSVillagerInfo(EntityVillager villager) {
 		this.villager = villager;
 		data = new NBTTagCompound();
-		desiredMask = EntityNpcMaskTrader.getMaskMapSize();
+		desiredMask = QuestMaskSales.MASKS.size();
 	}
 
 	public static final void register(EntityVillager villager) {
@@ -102,18 +102,15 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 * Returns the mask that this villager desires, or null if none
 	 */
 	public Item getMaskDesired() {
-		if (desiredMask == EntityNpcMaskTrader.getMaskMapSize()) {
+		if (desiredMask == QuestMaskSales.MASKS.size()) {
 			if (villager.worldObj.rand.nextFloat() < Config.getMaskBuyChance()) {
-				desiredMask = villager.worldObj.rand.nextInt(EntityNpcMaskTrader.getMaskMapSize());
+				desiredMask = villager.worldObj.rand.nextInt(QuestMaskSales.MASKS.size());
 			} else {
 				desiredMask = NONE;
 			}
 		}
-		return (desiredMask != NONE ? EntityNpcMaskTrader.getMask(desiredMask) : null);
+		return (desiredMask != NONE ? QuestMaskSales.getMask(desiredMask) : null);
 	}
-
-	/** Completes the mask trade, setting villager to no longer trade for masks */
-	public void onMaskTrade() {}
 
 	public void handleSkulltulaTrade(ItemStack stack, EntityPlayer player) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);

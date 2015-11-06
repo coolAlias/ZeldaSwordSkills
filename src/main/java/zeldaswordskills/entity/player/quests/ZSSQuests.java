@@ -23,12 +23,16 @@ import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -45,6 +49,9 @@ public class ZSSQuests implements IExtendedEntityProperties
 
 	/** Stores an instance of each quest the player has received */
 	private final Map<Class<? extends IQuest>, IQuest> quests = new HashMap<Class<? extends IQuest>, IQuest>();
+
+	/** The last mask borrowed from the Happy Mask Salesman */
+	private Item borrowedMask = null;
 
 	private final EntityPlayer player;
 
@@ -112,6 +119,26 @@ public class ZSSQuests implements IExtendedEntityProperties
 	}
 
 	/**
+	 * Returns the last mask borrowed, or null if no mask has been borrowed
+	 */
+	public Item getBorrowedMask() {
+		// For backwards compatibility, check for old mask and swap it out
+		Item mask = ZSSPlayerInfo.get(player).getBorrowedMask();
+		if (mask != null) {
+			borrowedMask = mask;
+			ZSSPlayerInfo.get(player).setBorrowedMask(null);
+		}
+		return borrowedMask;
+	}
+
+	/**
+	 * Sets the mask that the player has borrowed
+	 */
+	public void setBorrowedMask(Item item) {
+		borrowedMask = item;
+	}
+
+	/**
 	 * Copies given data to this one when a player is cloned
 	 */
 	public void copy(ZSSQuests quests) {
@@ -137,6 +164,10 @@ public class ZSSQuests implements IExtendedEntityProperties
 			}
 		}
 		compound.setTag("ZssQuests", questList);
+		String maskId = (borrowedMask == null ? null : GameData.getItemRegistry().getNameForObject(borrowedMask));
+		if (maskId != null) {
+			compound.setString("borrowedMask", maskId);
+		}
 	}
 
 	@Override
@@ -148,6 +179,9 @@ public class ZSSQuests implements IExtendedEntityProperties
 			if (quest != null && !this.add(quest)) {
 				ZSSMain.logger.warn("Duplicate quest entry loaded from NBT: " + quest);
 			}
+		}
+		if (compound.hasKey("borrowedMask", Constants.NBT.TAG_STRING)) {
+			borrowedMask = GameData.getItemRegistry().getObject(compound.getString("borrowedMask"));
 		}
 	}
 }
