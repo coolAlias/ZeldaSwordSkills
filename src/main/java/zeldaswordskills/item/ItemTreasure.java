@@ -152,7 +152,7 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 				ItemStack required = trade.getSecondItemToBuy();
 				if (required == null || PlayerUtils.consumeInventoryItem(player, required, required.stackSize)) {
 					PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-					player.setCurrentItemOrArmor(0, trade.getItemToSell());
+					player.setCurrentItemOrArmor(0, trade.getItemToSell().copy());
 					PlayerUtils.sendTranslatedChat(player, "chat." + getUnlocalizedName(stack).substring(5) + ".give");
 					PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.received", trade.getItemToSell().getDisplayName());
 					if (villagerInfo.onTradedTreasure(player, treasure, player.getHeldItem())) {
