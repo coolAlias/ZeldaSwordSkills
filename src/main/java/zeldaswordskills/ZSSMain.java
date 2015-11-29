@@ -41,6 +41,7 @@ import zeldaswordskills.handler.ZSSEntityEvents;
 import zeldaswordskills.handler.ZSSEventsFML;
 import zeldaswordskills.handler.ZSSItemEvents;
 import zeldaswordskills.item.ItemHeroBow;
+import zeldaswordskills.item.WeaponRegistry;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.ref.Config;
@@ -128,5 +129,12 @@ public class ZSSMain
 	public void onServerStarting(FMLServerStartingEvent event) {
 		ZSSItems.onServerStarting();
 		ZSSCommands.registerCommands(event);
+	}
+
+	@Mod.EventHandler
+	public void processMessages(FMLInterModComms.IMCEvent event) {
+		for (final FMLInterModComms.IMCMessage msg : event.getMessages()) {
+			WeaponRegistry.INSTANCE.processMessage(msg);
+		}
 	}
 }
