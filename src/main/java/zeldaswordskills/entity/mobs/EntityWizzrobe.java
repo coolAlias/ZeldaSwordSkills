@@ -307,10 +307,8 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 					return false;
 				}
 			}
-			if (!wasReflected && source.getEntity() != null) {
-				if (canTelevade() && teleportAI.teleportRandomly()) {
-					return false;
-				}
+			if (!wasReflected && canTelevade(source) && teleportAI.teleportRandomly()) {
+				return false;
 			}
 		}
 		return super.attackEntityFrom(source, amount);
@@ -372,11 +370,18 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	/**
 	 * Returns true if Wizzrobe can attempt to teleport out of harm's way
 	 */
-	private boolean canTelevade() {
-		if (getCurrentCastingTime() > 0) {
+	private boolean canTelevade(DamageSource source) {
+		if (getCurrentCastingTime() > 0 || !canEvadeSource(source)) {
 			return false;
 		}
 		return (teleportAI.canTeleport() || (!teleportAI.isTeleporting() && rand.nextFloat() < getTelevadeChance()));
+	}
+
+	/**
+	 * Return true if the DamageSource is a kind that may be evaded
+	 */
+	protected boolean canEvadeSource(DamageSource source) {
+		return source.getEntity() != null;
 	}
 
 	/**
