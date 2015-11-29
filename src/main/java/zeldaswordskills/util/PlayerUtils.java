@@ -35,6 +35,7 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.ISkillItem;
 import zeldaswordskills.api.item.ISword;
 import zeldaswordskills.item.ItemZeldaSword;
+import zeldaswordskills.item.WeaponRegistry;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 
@@ -80,14 +81,14 @@ public class PlayerUtils
 		return (player.getHeldItem() != null && isSkillItem(player.getHeldItem().getItem()));
 	}
 
-	/** Returns true if the item is either an {@link ItemSword} or {@link ISword} */
+	/** Returns true if the item is either an {@link ItemSword}, an {@link ISword}, or registered to the {@link WeaponRegistry} as a sword */
 	public static boolean isSwordItem(Item item) {
-		return (item instanceof ItemSword || item instanceof ISword);
+		return (item instanceof ItemSword || item instanceof ISword || WeaponRegistry.INSTANCE.isSword(item));
 	}
 
-	/** Returns true if the item is either a {@link #isSwordItem(Item) sword} or {@link ISkillItem} */
+	/** Returns true if the item is either a {@link #isSwordItem(Item) sword}, an {@link ISkillItem}, or registered to the {@link WeaponRegistry} as a skill item */
 	public static boolean isSkillItem(Item item) {
-		return (isSwordItem(item) || item instanceof ISkillItem);
+		return (isSwordItem(item) || item instanceof ISkillItem || WeaponRegistry.INSTANCE.isWeapon(item));
 	}
 
 	/** Returns true if the player is currently holding a Zelda-specific sword */
