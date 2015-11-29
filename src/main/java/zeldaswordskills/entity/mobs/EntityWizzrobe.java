@@ -375,10 +375,8 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	private boolean canTelevade() {
 		if (getCurrentCastingTime() > 0) {
 			return false;
-		} else if (teleportAI.canTeleport()) {
-			return true;
 		}
-		return (rand.nextFloat() < getTelevadeChance());
+		return (teleportAI.canTeleport() || (!teleportAI.isTeleporting() && rand.nextFloat() < getTelevadeChance()));
 	}
 
 	/**
@@ -476,6 +474,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 			EntityLivingBase player = findPlayerToAttack();
 			if (player instanceof EntityPlayer && !worldObj.isRemote && canEntityBeSeen(player) && !((EntityPlayer) player).capabilities.disableDamage) {
 				setAttackTarget(player);
+				teleportAI.setTeleporting();
 				for (int i = 0; i < 64; ++i) {
 					if (EntityAITeleport.teleportToEntity(worldObj, this, player, null, teleportAI.isGrounded)) {
 						break;
