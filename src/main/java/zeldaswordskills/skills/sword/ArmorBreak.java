@@ -128,7 +128,7 @@ public class ArmorBreak extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
 	}
 
 	/**
@@ -202,7 +202,7 @@ public class ArmorBreak extends SkillActive
 	@Override
 	public void onUpdate(EntityPlayer player) {
 		if (isCharging(player)) {
-			if (isKeyPressed() && PlayerUtils.isHoldingSkillItem(player)) {
+			if (isKeyPressed() && PlayerUtils.isWeapon(player.getHeldItem())) {
 				if (!player.isSwingInProgress) {
 					if (charge < (getChargeTime(player) - 1)) {
 						Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());

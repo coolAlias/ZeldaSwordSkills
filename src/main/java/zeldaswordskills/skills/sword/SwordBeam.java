@@ -128,7 +128,7 @@ public class SwordBeam extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && checkHealth(player) && player.attackTime == 0 && PlayerUtils.isHoldingSword(player);
+		return super.canUse(player) && checkHealth(player) && player.attackTime == 0 && PlayerUtils.isSword(player.getHeldItem());
 	}
 
 	/**

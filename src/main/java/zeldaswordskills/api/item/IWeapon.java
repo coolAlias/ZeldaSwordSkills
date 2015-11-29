@@ -19,6 +19,7 @@ package zeldaswordskills.api.item;
 
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.item.WeaponRegistry;
+import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.RisingCut;
@@ -26,20 +27,30 @@ import zeldaswordskills.skills.sword.SwordBeam;
 
 /**
  * 
- * For the purpose of using certain skills, this item will be considered a sword.
+ * Items implementing this interface are always considered weapons and thus will
+ * be compatible with most of the {@link SkillBase skills} by default.
  * 
- * For items that do not use NBT or stack damage, consider registering them via
- * the {@link WeaponRegistry} using FML's Inter-Mod Communications.
+ * If a skill's activation requires blocking, the item must be able to block or
+ * it will not be able to activate such skills.
  * 
- * Skills which require a sword are:
- * {@link LeapingBlow}, {@link MortalDraw}, {@link RisingCut}, and {@link SwordBeam}
+ * Some skills may only be performed while wielding a {@link #isSword sword}; these are:
+ * {@link LeapingBlow}, {@link MortalDraw}, {@link RisingCut}, and {@link SwordBeam}.
+ * 
+ * For items that do not use NBT or stack damage, consider registering them as weapons
+ * or as swords via the {@link WeaponRegistry} using FML's Inter-Mod Communications.
  *
  */
-public interface ISword {
+public interface IWeapon {
 
 	/**
 	 * Return true if the ItemStack is considered a sword
 	 */
 	boolean isSword(ItemStack stack);
+
+	/**
+	 * Return true if the ItemStack is considered a weapon
+	 * (should return true if {@link #isSword} returns true)
+	 */
+	boolean isWeapon(ItemStack stack);
 
 }

@@ -113,7 +113,7 @@ public class SwordBreak extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class SwordBreak extends SkillActive
 		if (source.getSourceOfDamage() instanceof EntityLivingBase) {
 			EntityLivingBase attacker = (EntityLivingBase) source.getSourceOfDamage();
 			ItemStack stackToDamage = attacker.getHeldItem();
-			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isHoldingSkillItem(player)) {
+			if (breakTimer > getUseDelay() && stackToDamage != null && PlayerUtils.isWeapon(player.getHeldItem())) {
 				breakTimer = getUseDelay(); // only block one attack
 				WorldUtils.playSoundAtEntity(player, Sounds.SWORD_STRIKE, 0.4F, 0.5F);
 				playMissSound = false;

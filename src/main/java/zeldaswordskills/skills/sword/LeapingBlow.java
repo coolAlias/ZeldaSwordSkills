@@ -117,7 +117,7 @@ public class LeapingBlow extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSword(player) && !TargetUtils.isInLiquid(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isSword(player.getHeldItem()) && !TargetUtils.isInLiquid(player);
 	}
 
 	@Override
@@ -171,7 +171,7 @@ public class LeapingBlow extends SkillActive
 	 */
 	public void onImpact(EntityPlayer player, float distance) {
 		SwordBasic swordSkill = (SwordBasic) ZSSPlayerSkills.get(player).getPlayerSkill(swordBasic);
-		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isHoldingSword(player)) {
+		if (isActive() && swordSkill != null && swordSkill.isActive() && PlayerUtils.isSword(player.getHeldItem())) {
 			if (player.worldObj.isRemote) {
 				if (distance < 1.0F) {
 					ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), swordSkill);

@@ -23,15 +23,14 @@ import java.util.Set;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.api.item.ISkillItem;
-import zeldaswordskills.api.item.ISword;
+import zeldaswordskills.api.item.IWeapon;
 import cpw.mods.fml.common.event.FMLInterModComms;
 
 /**
  * 
  * Allows items from other mods to be registered as generic weapons or as swords.
  * Items that rely on NBT or damage value to determine their weapon status should
- * NOT be registered in this way - use {@link ISword} or {@link ISkillItem} instead.
+ * NOT be registered in this way - use {@link IWeapon} instead.
  * 
  * Note also that some skills require blocking to activate, so any item which cannot
  * be used to block will not be able to trigger those skills even if registered.
