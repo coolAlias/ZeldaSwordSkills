@@ -24,6 +24,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -33,14 +34,17 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
+import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.entity.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemTreasure;
 import zeldaswordskills.item.ItemTreasure.Treasures;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  * 
@@ -49,7 +53,7 @@ import zeldaswordskills.util.PlayerUtils;
  * Spawned by naming any villager 'Orca' and interacting while holding a Knight's Crest.
  *
  */
-public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
+public class EntityNpcOrca extends EntityNpcBase implements INpcVillager, IParryModifier
 {
 	/** Datawatcher index to track with whom Orca is in a match (so player interaction can be prevented on client) */
 	private static final int MATCH_PLAYER_ID = 18;
@@ -316,6 +320,26 @@ public class EntityNpcOrca extends EntityNpcBase implements IParryModifier
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public Result canInteractConvert(EntityPlayer player, EntityVillager villager) {
+		return Result.DEFAULT;
+	}
+
+	@Override
+	public Result canLeftClickConvert(EntityPlayer player, EntityVillager villager) {
+		if (!villager.worldObj.isRemote && villager.getClass() == EntityVillager.class && !villager.isChild()) {
+			ItemStack stack = player.getHeldItem();
+			return (stack != null && stack.getItem() == ZSSItems.treasure && Treasures.byDamage(stack.getItemDamage()) == Treasures.KNIGHTS_CREST) ? Result.ALLOW : Result.DEFAULT;
+		}
+		return Result.DEFAULT;
+	}
+
+	@Override
+	public void onConverted(EntityPlayer player) {
+		PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
+		ZSSPlayerSkills.get(player).giveCrest();
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemSeeds;
@@ -29,13 +30,18 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
+import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemBombFlowerSeed extends ItemSeeds {
+public class ItemBombFlowerSeed extends ItemSeeds implements IRightClickEntity {
 
 	public ItemBombFlowerSeed() {
 		super(ZSSBlocks.bombFlower, Blocks.stone);
@@ -54,6 +60,21 @@ public class ItemBombFlowerSeed extends ItemSeeds {
 				world.setBlock(x, y, z, plant);
 			}
 			--stack.stackSize;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (entity instanceof EntityChicken) {
+			if (!player.worldObj.isRemote && PlayerUtils.consumeHeldItem(player, this, 1)) {
+				// func_146082_f is setInLove
+				((EntityChicken) entity).func_146082_f(player);
+				int time = 60 + entity.worldObj.rand.nextInt(60);
+				EntityBomb bomb = new EntityBomb(entity.worldObj).setType(BombType.BOMB_STANDARD).setTime(time);
+				ZSSEntityInfo.get((EntityChicken) entity).onBombIngested(bomb);
+			}
 			return true;
 		}
 		return false;

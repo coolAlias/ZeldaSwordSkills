@@ -38,6 +38,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.CustomEntityList;
@@ -53,7 +54,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * should use {@link ItemCustomVariantEgg} instead. 
  *
  */
-public class ItemCustomEgg extends Item implements IUnenchantable
+public class ItemCustomEgg extends Item implements IRightClickEntity, IUnenchantable
 {
 	/** The egg's spotted and colored overlay icon */
 	@SideOnly(Side.CLIENT)
@@ -139,6 +140,14 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 		return stack;
 	}
 
+	@Override
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (entity instanceof EntityAgeable) {
+			return spawnChild(entity.worldObj, stack, player, (EntityAgeable) entity);
+		}
+		return false;
+	}
+
 	/**
 	 * Spawns the creature specified by the egg's type in the location specified by the last three parameters.
 	 */
@@ -167,7 +176,7 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	 * @param entity the entity that will spawn the child
 	 * @return true if a child was spawned and the EntityInteractEvent should be canceled
 	 */
-	public static boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
+	private boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
 		Class oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
 		if (oclass != null && oclass == entity.getClass()) {
 			EntityAgeable child = entity.createChild(entity);

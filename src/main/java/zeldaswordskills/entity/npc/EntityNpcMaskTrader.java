@@ -20,6 +20,7 @@ package zeldaswordskills.entity.npc;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
@@ -30,19 +31,22 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.entity.ZSSPlayerInfo;
 import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
+import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class EntityNpcMaskTrader extends EntityNpcBase
+public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager
 {
 	private EntityPlayer customer;
 
@@ -180,6 +184,44 @@ public class EntityNpcMaskTrader extends EntityNpcBase
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public Result canInteractConvert(EntityPlayer player, EntityVillager villager) {
+		if (villager.getClass() != EntityVillager.class || villager.isChild()) {
+			return Result.DEFAULT;
+		} else if (!villager.worldObj.isRemote) {
+			ItemStack stack = player.getHeldItem();
+			if (stack != null && stack.getItem() == ZSSItems.treasure && Treasures.byDamage(stack.getItemDamage()) == Treasures.ZELDAS_LETTER) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me");
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_trader.closed." + rand.nextInt(4));
+			}
+		}
+		return Result.DENY;
+	}
+
+	@Override
+	public Result canLeftClickConvert(EntityPlayer player, EntityVillager villager) {
+		if (!villager.worldObj.isRemote && villager.getClass() == EntityVillager.class && !villager.isChild()) {
+			return (PlayerUtils.consumeHeldItem(player, ZSSItems.treasure, Treasures.ZELDAS_LETTER.ordinal(), 1) ? Result.ALLOW : Result.DEFAULT);				
+		}
+		return Result.DEFAULT;
+	}
+
+	@Override
+	public void onConverted(EntityPlayer player) {
+		PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
+		player.triggerAchievement(ZSSAchievements.maskTrader);
+		if (ZSSPlayerInfo.get(player).getCurrentMaskStage() == 0) {
+			IChatComponent[] chat = new IChatComponent[5];
+			for (int i = 0; i < 5; ++i) {
+				chat[i] = new ChatComponentTranslation("chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".success." + i);
+			}
+			new TimedChatDialogue(player, chat);
+		} else {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".already_open");
+		}
 	}
 
 	/** Returns the size of the mask map */

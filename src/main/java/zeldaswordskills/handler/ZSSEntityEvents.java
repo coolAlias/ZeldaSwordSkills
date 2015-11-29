@@ -17,15 +17,12 @@
 
 package zeldaswordskills.handler;
 
-import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
-import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -37,8 +34,9 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
-import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.entity.NpcHelper;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.entity.EntityGoron;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSPlayerInfo;
@@ -47,18 +45,13 @@ import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.npc.EntityNpcBarnes;
-import zeldaswordskills.entity.projectile.EntityBomb;
-import zeldaswordskills.item.ItemBombFlowerSeed;
-import zeldaswordskills.item.ItemCustomEgg;
-import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.item.ItemMask;
-import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.util.PlayerUtils;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
@@ -122,58 +115,39 @@ public class ZSSEntityEvents
 		}
 	}
 
+	/**
+	 * This event fires on BOTH sides
+	 */
 	@SubscribeEvent
 	public void onInteract(EntityInteractEvent event) {
 		ItemStack stack = event.entityPlayer.getHeldItem();
-		if (event.target.getClass() == EntityVillager.class) {
-			EntityVillager villager = (EntityVillager) event.target;
-			boolean flag2 = villager.getCustomNameTag().contains("Mask Salesman");
-			if (!event.entityPlayer.worldObj.isRemote && !villager.isChild()) {
-				if (("Barnes").equals(villager.getCustomNameTag())) {
-					flag2 = EntityNpcBarnes.convertFromVillager(villager, event.entityPlayer, stack);
-				} else if (("Cursed Man").equals(villager.getCustomNameTag())) {
-					if (stack == null || stack.getItem() != ZSSItems.skulltulaToken) {
-						int tokens = ZSSPlayerInfo.get(event.entityPlayer).getSkulltulaTokens();
-						if (tokens > 0) {
-							PlayerUtils.sendFormattedChat(event.entityPlayer, "chat.zss.npc.cursed_man.amount", tokens);
-						} else {
-							PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man." + event.entity.worldObj.rand.nextInt(4));
-						}
-						flag2 = true;
-					}
-				} else if (stack != null && stack.getItem() == ZSSItems.treasure && stack.getItemDamage() == Treasures.ZELDAS_LETTER.ordinal()) {
-					if (flag2) {
-						PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".for_me");
-					} else {
-						PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.treasure." + Treasures.ZELDAS_LETTER.name + ".fail");
-					}
-					flag2 = true;
-				} else if (flag2) {
-					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.mask_trader.closed." + event.entity.worldObj.rand.nextInt(4));
-				}
-			}
-			event.setCanceled(flag2);
-		} else if (event.target instanceof EntityChicken && stack != null && stack.getItem() instanceof ItemBombFlowerSeed) {
-			if (!event.target.worldObj.isRemote && ((EntityChicken) event.target).interact(event.entityPlayer)) {
-				int time = 60 + event.target.worldObj.rand.nextInt(60);
-				EntityBomb bomb = new EntityBomb(event.target.worldObj).setType(BombType.BOMB_STANDARD).setTime(time);
-				ZSSEntityInfo.get((EntityChicken) event.target).onBombIngested(bomb);
-				event.setCanceled(true);
-			}
+		if (event.target instanceof EntityVillager && Result.DEFAULT != NpcHelper.convertVillager(event.entityPlayer, (EntityVillager) event.target, true)) {
+			event.setCanceled(true);
 		}
+		// Check if the held item has any special interaction upon right-clicking an entity
+		if (!event.isCanceled() && stack != null && stack.getItem() instanceof IRightClickEntity) {
+			event.setCanceled(((IRightClickEntity) stack.getItem()).onRightClickEntity(stack, event.entityPlayer, event.target));
+		}
+		// If the event is not yet canceled, check for Mask interactions
 		if (!event.isCanceled() && event.target instanceof INpc) {
 			ItemStack helm = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
 			if (helm != null && helm.getItem() instanceof ItemMask) {
 				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
 			}
 		}
-		if (!event.isCanceled() && stack != null) {
-			if (stack.getItem() instanceof ItemInstrument && event.target instanceof EntityLiving) {
-				event.setCanceled(((ItemInstrument) stack.getItem()).onRightClickEntity(stack, event.entityPlayer, (EntityLiving) event.target));
-			}
-			// allow custom spawn eggs to create child entities:
-			else if (stack.getItem() instanceof ItemCustomEgg && event.target instanceof EntityAgeable) {
-				event.setCanceled(ItemCustomEgg.spawnChild(event.entity.worldObj, stack, event.entityPlayer, (EntityAgeable) event.target));
+		// Finally, check for interactions with the Cursed Man
+		if (!event.isCanceled() && !event.target.worldObj.isRemote && event.target.getClass() == EntityVillager.class && ("Cursed Man").equals(((EntityVillager) event.target).getCustomNameTag())) {
+			EntityVillager villager = (EntityVillager) event.target;
+			if (stack == null || stack.getItem() != ZSSItems.skulltulaToken) {
+				int tokens = ZSSPlayerInfo.get(event.entityPlayer).getSkulltulaTokens();
+				if (villager.isChild()) {
+					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man.child");
+				} else if (tokens > 0) {
+					PlayerUtils.sendFormattedChat(event.entityPlayer, "chat.zss.npc.cursed_man.amount", tokens);
+				} else {
+					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man." + event.entity.worldObj.rand.nextInt(4));
+				}
+				event.setCanceled(true);
 			}
 		}
 	}

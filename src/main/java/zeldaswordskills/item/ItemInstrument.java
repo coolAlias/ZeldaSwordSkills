@@ -39,6 +39,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.block.BlockSongInscription;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -51,7 +52,7 @@ import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemInstrument extends Item
+public class ItemInstrument extends Item implements IRightClickEntity
 {
 	public static enum Instrument {
 		OCARINA_FAIRY("ocarina_fairy", GuiHandler.GUI_OCARINA, 1),
@@ -153,11 +154,15 @@ public class ItemInstrument extends Item
 		return true;
 	}
 
-	/**
-	 * Called from EntityInteractEvent when the player interacts with an entity while holding an instrument
-	 * @return	True to cancel any further interaction (e.g. villager trading gui)
-	 */
-	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, EntityLiving entity) {
+	@Override
+	public boolean onRightClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+		if (entity instanceof EntityLiving) {
+			return handleRightClickEntity(stack, player, (EntityLiving) entity);
+		}
+		return false;
+	}
+
+	private boolean handleRightClickEntity(ItemStack stack, EntityPlayer player, EntityLiving entity) {
 		if (entity.hasCustomNameTag() && teachersForClass.containsKey(entity.getClass())) {
 			Map<String, AbstractZeldaSong> teacherSongs = teachersForClass.get(entity.getClass());
 			AbstractZeldaSong toLearn = teacherSongs.get(entity.getCustomNameTag());
