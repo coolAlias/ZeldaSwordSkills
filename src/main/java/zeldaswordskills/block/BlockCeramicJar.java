@@ -30,7 +30,6 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -57,6 +56,7 @@ import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
@@ -213,7 +213,7 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IS
 
 	@Override
 	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
-		if (!world.isRemote && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword) {
+		if (!world.isRemote && PlayerUtils.isHoldingWeapon(player)) {
 			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.destroyBlock(pos, false);
 		}
