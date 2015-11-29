@@ -86,6 +86,9 @@ public class EntityAITeleport extends EntityAIBase
 	/** Optional bounding box defining limits of teleportation - entity will not teleport outside of the defined boundary */
 	protected AxisAlignedBB teleBounds;
 
+	/** True when the AI is already in the process of teleporting */
+	protected boolean isTeleporting;
+
 	/**
 	 * 
 	 * @param entity	The task owner, i.e. the teleporting entity
@@ -168,11 +171,14 @@ public class EntityAITeleport extends EntityAIBase
 	public void resetTask() {
 		delayTimer = 0;
 		triggerTimer = 0;
+		isTeleporting = false;
 	}
 
 	@Override
 	public boolean shouldExecute() {
-		if (randomTele) {
+		if (isTeleporting) {
+			return false;
+		} else if (randomTele) {
 			return entity.isEntityAlive();
 		}
 		return (entity.getAttackTarget() != null);
@@ -194,6 +200,7 @@ public class EntityAITeleport extends EntityAIBase
 		} else if (approachTele && target != null && entity.getDistanceSqToEntity(target) > rangeSq) {
 			if (teleBounds == null || teleBounds.isVecInside(Vec3.createVectorHelper(target.posX, target.posY, target.posZ))) {
 				if (!entity.worldObj.isRemote) {
+					isTeleporting = true;
 					for (int i = 0; i < 64; ++i) {
 						if (teleportToEntity(entity.worldObj, entity, target)) {
 							break;
@@ -211,6 +218,7 @@ public class EntityAITeleport extends EntityAIBase
 	 * Attempts to teleport randomly until successful, up to 64 times
 	 */
 	public boolean teleportRandomly() {
+		isTeleporting = true;
 		for (int i = 0; i < 64; ++i) {
 			if (teleportRandomly(entity.worldObj, entity, range, teleBounds, isGrounded)) {
 				return true;
@@ -224,7 +232,21 @@ public class EntityAITeleport extends EntityAIBase
 	 * before calling any of the static methods such as {@link #teleportRandomly}
 	 */
 	public boolean canTeleport() {
-		return delayTimer > teleportDelay;
+		return !isTeleporting && delayTimer > teleportDelay;
+	}
+
+	/**
+	 * Returns whether the AI is currently in the process of teleporting
+	 */
+	public boolean isTeleporting() {
+		return isTeleporting;
+	}
+
+	/**
+	 * Sets {@link #isTeleporting} to true; do this before calling any of the static teleportation methods
+	 */
+	public void setTeleporting() {
+		isTeleporting = true;
 	}
 
 	/**
@@ -234,6 +256,7 @@ public class EntityAITeleport extends EntityAIBase
 		teleportDelay = minTeleportDelay + entity.worldObj.rand.nextInt(minTeleportDelay * 2) - entity.worldObj.rand.nextInt((minTeleportDelay / 2) + 1);
 		delayTimer = 0;
 		triggerTimer = 0;
+		isTeleporting = false;
 	}
 
 	/**
