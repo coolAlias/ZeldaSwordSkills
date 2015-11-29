@@ -272,6 +272,8 @@ public class Config
 	/** [Song Pillars] Minimum number of chunks between song pillars [8-64] */
 	private static int minSongPillarDistance;
 	/*================== LOOT =====================*/
+	/** Chance (as a percent) of a Forest Temple containing a Master Sword [1-100] */
+	private static float masterSwordChance;
 	/** Chance (as a percent) a chest will be locked */
 	private static float lockedChestChance;
 	/** Chance that a secret room may have two chests */
@@ -462,6 +464,7 @@ public class Config
 		minBrokenPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt(), 4, 128);
 		minSongPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt(), 8, 128);
 		/*================== LOOT =====================*/
+		masterSwordChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a Forest Temple containing a Master Sword [1-100]", 33).getInt(), 1, 100);
 		lockedChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt(), 10, 50);
 		doubleChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt(), 0, 25);
 		barredRoomChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [1-50]", 25).getInt(), 1, 50);
@@ -638,6 +641,7 @@ public class Config
 	public static int getBrokenPillarMin() { return minBrokenPillarDistance; }
 	public static int getSongPillarMin() { return minSongPillarDistance; }
 	/*================== LOOT =====================*/
+	public static float getMasterSwordChance() { return masterSwordChance; }
 	public static float getLockedChestChance() { return lockedChestChance; }
 	public static float getDoubleChestChance() { return doubleChestChance; }
 	public static float getBarredRoomChance() { return barredRoomChance; }
