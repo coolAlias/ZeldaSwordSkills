@@ -145,7 +145,7 @@ public class MortalDraw extends SkillActive
 		if (super.canUse(player) && player.getHeldItem() == null && attackTimer == 0) {
 			for (int i = 0; i < 9; ++i) {
 				ItemStack stack = player.inventory.getStackInSlot(i);
-				if (stack != null && PlayerUtils.isSwordItem(stack.getItem())) {
+				if (stack != null && PlayerUtils.isSwordItem(stack)) {
 					swordSlot = i;
 					break;
 				}
