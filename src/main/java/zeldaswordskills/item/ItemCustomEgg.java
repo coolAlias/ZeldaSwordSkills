@@ -93,23 +93,18 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 			y += Facing.offsetsYForSide[side];
 			z += Facing.offsetsZForSide[side];
 			double d0 = 0.0D;
-
 			if (side == 1 && block != null && block.getRenderType() == 11) {
 				d0 = 0.5D;
 			}
-
 			Entity entity = spawnCreature(world, stack.getItemDamage(), x + 0.5D, y + d0, z + 0.5D);
-
 			if (entity != null) {
 				if (entity instanceof EntityLiving && stack.hasDisplayName()) {
 					((EntityLiving) entity).setCustomNameTag(stack.getDisplayName());
 				}
-
 				if (!player.capabilities.isCreativeMode) {
 					--stack.stackSize;
 				}
 			}
-
 			return true;
 		}
 	}
@@ -118,38 +113,29 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
 			MovingObjectPosition mop = getMovingObjectPositionFromPlayer(world, player, true);
-
-			if (mop != null) {
-				if (mop.typeOfHit == MovingObjectType.BLOCK) {
-					int i = mop.blockX;
-					int j = mop.blockY;
-					int k = mop.blockZ;
-
-					if (!world.canMineBlock(player, i, j, k)) {
-						return stack;
-					}
-
-					if (!player.canPlayerEdit(i, j, k, mop.sideHit, stack)) {
-						return stack;
-					}
-
-					if (world.getBlock(i, j, k).getMaterial() == Material.water) {
-						Entity entity = spawnCreature(world, stack.getItemDamage(), i, j, k);
-
-						if (entity != null) {
-							if (entity instanceof EntityLiving && stack.hasDisplayName()) {
-								((EntityLiving) entity).setCustomNameTag(stack.getDisplayName());
-							}
-
-							if (!player.capabilities.isCreativeMode) {
-								--stack.stackSize;
-							}
+			if (mop != null && mop.typeOfHit == MovingObjectType.BLOCK) {
+				int i = mop.blockX;
+				int j = mop.blockY;
+				int k = mop.blockZ;
+				if (!world.canMineBlock(player, i, j, k)) {
+					return stack;
+				}
+				if (!player.canPlayerEdit(i, j, k, mop.sideHit, stack)) {
+					return stack;
+				}
+				if (world.getBlock(i, j, k).getMaterial() == Material.water) {
+					Entity entity = spawnCreature(world, stack.getItemDamage(), i, j, k);
+					if (entity != null) {
+						if (entity instanceof EntityLiving && stack.hasDisplayName()) {
+							((EntityLiving) entity).setCustomNameTag(stack.getDisplayName());
+						}
+						if (!player.capabilities.isCreativeMode) {
+							--stack.stackSize;
 						}
 					}
 				}
 			}
 		}
-
 		return stack;
 	}
 
@@ -159,7 +145,6 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	public Entity spawnCreature(World world, int entityID, double x, double y, double z) {
 		Entity entity = null;
 		Class<? extends Entity> oclass = CustomEntityList.getClassFromID(entityID);
-
 		if (CustomEntityList.entityEggs.containsKey(oclass)) {
 			entity = CustomEntityList.createEntity(oclass, world);
 			if (entity instanceof EntityLiving) {
@@ -172,7 +157,6 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 				entityliving.playLivingSound();
 			}
 		}
-
 		return entity;
 	}
 
@@ -185,32 +169,26 @@ public class ItemCustomEgg extends Item implements IUnenchantable
 	 */
 	public static boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
 		Class oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
-
 		if (oclass != null && oclass == entity.getClass()) {
 			EntityAgeable child = entity.createChild(entity);
-
 			if (child != null) {
 				child.setGrowingAge(-24000);
 				child.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, 0.0F, 0.0F);
 				if (!world.isRemote) {
 					world.spawnEntityInWorld(child);
 				}
-
 				if (stack.hasDisplayName()) {
 					child.setCustomNameTag(stack.getDisplayName());
 				}
-
 				if (!player.capabilities.isCreativeMode) {
 					--stack.stackSize;
 					if (stack.stackSize <= 0) {
 						player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
 					}
 				}
-
 				return true;
 			}
 		}
-
 		return false;
 	}
 
