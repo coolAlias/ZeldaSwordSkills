@@ -179,7 +179,7 @@ public class ZSSItemEvents
 					event.drops.add(event.world.rand.nextInt(4) == 0 ? new ItemStack(Blocks.red_mushroom) : new ItemStack(Blocks.brown_mushroom));
 				}
 			} else if (block == Blocks.tallgrass) {
-				if (PlayerUtils.isHoldingSword(event.harvester) && event.world.rand.nextFloat() < Config.getGrassDropChance()) {
+				if (PlayerUtils.isSword(event.harvester.getHeldItem()) && event.world.rand.nextFloat() < Config.getGrassDropChance()) {
 					event.drops.add(ZSSItems.getRandomGrassDrop(event.world.rand));
 				}
 			} else if (block == Blocks.iron_ore) {

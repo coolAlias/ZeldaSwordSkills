@@ -30,8 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
-import zeldaswordskills.api.item.ISkillItem;
-import zeldaswordskills.api.item.ISword;
+import zeldaswordskills.api.item.IWeapon;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.WeaponRegistry;
 import zeldaswordskills.network.PacketDispatcher;
@@ -69,40 +68,31 @@ public class PlayerUtils
 		return itemDamage != null && itemDamage.getAmount() > 0;
 	}
 
-	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} */
-	public static boolean isHoldingSword(EntityPlayer player) {
-		return (player.getHeldItem() != null && isSwordItem(player.getHeldItem()));
-	}
-
-	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} or {@link ISkillItem} */
-	public static boolean isHoldingSkillItem(EntityPlayer player) {
-		return (player.getHeldItem() != null && isSkillItem(player.getHeldItem()));
-	}
-
 	/**
-	 * Returns true if the item is either an {@link ItemSword}, an {@link ISword},
+	 * Returns true if the item is a sword: i.e. if it is an {@link ItemSword},
+	 * an {@link IWeapon} (returns {@link IWeapon#isSword(ItemStack)}),
 	 * or registered to the {@link WeaponRegistry} as a sword
 	 */
-	public static boolean isSwordItem(ItemStack stack) {
+	public static boolean isSword(ItemStack stack) {
 		if (stack == null) {
 			return false;
-		} else if (stack.getItem() instanceof ISword) {
-			return ((ISword) stack.getItem()).isSword(stack);
+		} else if (stack.getItem() instanceof IWeapon) {
+			return ((IWeapon) stack.getItem()).isSword(stack);
 		}
 		return (stack.getItem() instanceof ItemSword || WeaponRegistry.INSTANCE.isSword(stack.getItem()));
 	}
 
 	/**
-	 * Returns true if the item is either a {@link #isSwordItem(Item) sword}, an {@link ISkillItem},
-	 * or registered to the {@link WeaponRegistry} as a non-sword weapon
+	 * Returns true if the item is any kind of weapon: a {@link #isSword(ItemStack) sword},
+	 * an {@link IWeapon}, or registered to the {@link WeaponRegistry} as a weapon
 	 */
-	public static boolean isSkillItem(ItemStack stack) {
+	public static boolean isWeapon(ItemStack stack) {
 		if (stack == null) {
 			return false;
-		} else if (stack.getItem() instanceof ISkillItem) {
-			return ((ISkillItem) stack.getItem()).isWeapon(stack);
+		} else if (stack.getItem() instanceof IWeapon) {
+			return ((IWeapon) stack.getItem()).isWeapon(stack);
 		}
-		return (isSwordItem(stack) || WeaponRegistry.INSTANCE.isWeapon(stack.getItem()));
+		return (isSword(stack) || WeaponRegistry.INSTANCE.isWeapon(stack.getItem()));
 	}
 
 	/** Returns true if the player is currently holding a Zelda-specific sword */

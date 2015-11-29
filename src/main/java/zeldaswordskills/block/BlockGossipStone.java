@@ -207,7 +207,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 		if (world.isRemote) {
 			return;
 		}
-		if (PlayerUtils.isHoldingSword(player)) {
+		if (PlayerUtils.isSword(player.getHeldItem())) {
 			long time = world.getWorldTime();
 			long days = (time / 24000L);
 			long current = (time + 6000L) % 24000L; // 0 is 6:00 am, 18000 is midnight, so add 6000

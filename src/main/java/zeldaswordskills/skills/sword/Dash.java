@@ -144,7 +144,7 @@ public class Dash extends SkillActive
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		ItemStack stack = (player.getHeldItem() != null ? player.getHeldItem() : null);
-		return super.canUse(player) && !isActive() && (PlayerUtils.isSkillItem(stack) || stack.getItem() instanceof IDashItem);
+		return super.canUse(player) && !isActive() && (PlayerUtils.isWeapon(stack) || stack.getItem() instanceof IDashItem);
 	}
 
 	@Override

@@ -173,7 +173,7 @@ public class Parry extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isHoldingSkillItem(player);
+		return super.canUse(player) && !isActive() && PlayerUtils.isWeapon(player.getHeldItem());
 	}
 
 	/**
@@ -241,7 +241,7 @@ public class Parry extends SkillActive
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		if (source.getEntity() instanceof EntityLivingBase) {
 			EntityLivingBase attacker = (EntityLivingBase) source.getEntity();
-			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItem() != null && PlayerUtils.isHoldingSkillItem(player)) {
+			if (attacksParried < getMaxParries() && parryTimer > getParryDelay() && attacker.getHeldItem() != null && PlayerUtils.isWeapon(player.getHeldItem())) {
 				if (player.worldObj.rand.nextFloat() < getDisarmChance(player, attacker)) {
 					WorldUtils.dropHeldItem(attacker);
 				}
