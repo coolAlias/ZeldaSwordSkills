@@ -17,7 +17,9 @@
 
 package zeldaswordskills.api.item;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import zeldaswordskills.item.WeaponRegistry;
 
 /**
  * 
@@ -25,8 +27,16 @@ import net.minecraft.item.ItemSword;
  * wielding some kind of weapon; note that some skills specifically require a
  * sword, in which case the item must either extend the vanilla {@link ItemSword}
  * directly or implement {@link ISword}.
+ * 
+ * For items that do not use NBT or stack damage, consider registering them via
+ * the {@link WeaponRegistry} using FML's Inter-Mod Communications.
  *
  */
 public interface ISkillItem {
+
+	/**
+	 * Return true if the ItemStack is considered a weapon for the purpose of skill use
+	 */
+	boolean isWeapon(ItemStack stack);
 
 }

@@ -17,6 +17,8 @@
 
 package zeldaswordskills.api.item;
 
+import net.minecraft.item.ItemStack;
+import zeldaswordskills.item.WeaponRegistry;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;
 import zeldaswordskills.skills.sword.RisingCut;
@@ -26,10 +28,18 @@ import zeldaswordskills.skills.sword.SwordBeam;
  * 
  * For the purpose of using certain skills, this item will be considered a sword.
  * 
+ * For items that do not use NBT or stack damage, consider registering them via
+ * the {@link WeaponRegistry} using FML's Inter-Mod Communications.
+ * 
  * Skills which require a sword are:
  * {@link LeapingBlow}, {@link MortalDraw}, {@link RisingCut}, and {@link SwordBeam}
  *
  */
 public interface ISword {
+
+	/**
+	 * Return true if the ItemStack is considered a sword
+	 */
+	boolean isSword(ItemStack stack);
 
 }

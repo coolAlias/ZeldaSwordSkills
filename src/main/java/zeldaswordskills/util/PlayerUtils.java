@@ -73,22 +73,38 @@ public class PlayerUtils
 
 	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} */
 	public static boolean isHoldingSword(EntityPlayer player) {
-		return (player.getHeldItem() != null && isSwordItem(player.getHeldItem().getItem()));
+		return (player.getHeldItem() != null && isSwordItem(player.getHeldItem()));
 	}
 
 	/** Returns true if the player's held item is a {@link #isSwordItem(Item) sword} or {@link ISkillItem} */
 	public static boolean isHoldingSkillItem(EntityPlayer player) {
-		return (player.getHeldItem() != null && isSkillItem(player.getHeldItem().getItem()));
+		return (player.getHeldItem() != null && isSkillItem(player.getHeldItem()));
 	}
 
-	/** Returns true if the item is either an {@link ItemSword}, an {@link ISword}, or registered to the {@link WeaponRegistry} as a sword */
-	public static boolean isSwordItem(Item item) {
-		return (item instanceof ItemSword || item instanceof ISword || WeaponRegistry.INSTANCE.isSword(item));
+	/**
+	 * Returns true if the item is either an {@link ItemSword}, an {@link ISword},
+	 * or registered to the {@link WeaponRegistry} as a sword
+	 */
+	public static boolean isSwordItem(ItemStack stack) {
+		if (stack == null) {
+			return false;
+		} else if (stack.getItem() instanceof ISword) {
+			return ((ISword) stack.getItem()).isSword(stack);
+		}
+		return (stack.getItem() instanceof ItemSword || WeaponRegistry.INSTANCE.isSword(stack.getItem()));
 	}
 
-	/** Returns true if the item is either a {@link #isSwordItem(Item) sword}, an {@link ISkillItem}, or registered to the {@link WeaponRegistry} as a skill item */
-	public static boolean isSkillItem(Item item) {
-		return (isSwordItem(item) || item instanceof ISkillItem || WeaponRegistry.INSTANCE.isWeapon(item));
+	/**
+	 * Returns true if the item is either a {@link #isSwordItem(Item) sword}, an {@link ISkillItem},
+	 * or registered to the {@link WeaponRegistry} as a non-sword weapon
+	 */
+	public static boolean isSkillItem(ItemStack stack) {
+		if (stack == null) {
+			return false;
+		} else if (stack.getItem() instanceof ISkillItem) {
+			return ((ISkillItem) stack.getItem()).isWeapon(stack);
+		}
+		return (isSwordItem(stack) || WeaponRegistry.INSTANCE.isWeapon(stack.getItem()));
 	}
 
 	/** Returns true if the player is currently holding a Zelda-specific sword */

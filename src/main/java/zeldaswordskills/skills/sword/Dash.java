@@ -26,7 +26,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
@@ -142,8 +142,8 @@ public class Dash extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		Item item = (player.getHeldItem() != null ? player.getHeldItem().getItem() : null);
-		return super.canUse(player) && !isActive() && (PlayerUtils.isSkillItem(item) || item instanceof IDashItem);
+		ItemStack stack = (player.getHeldItem() != null ? player.getHeldItem() : null);
+		return super.canUse(player) && !isActive() && (PlayerUtils.isSkillItem(stack) || stack.getItem() instanceof IDashItem);
 	}
 
 	@Override
