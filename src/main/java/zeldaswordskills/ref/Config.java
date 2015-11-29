@@ -188,6 +188,8 @@ public class Config
 	private static boolean enableHookableOnly;
 	/** [Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass */
 	private static boolean enableHookshotBreakBlocks;
+	/** [Magic Medallions] True if Ether and Quake medallions can affect players */
+	private static boolean medallionsAffectPlayers;
 	/** [Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280] */
 	private static int rodUpgradeCost;
 	/** [Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword */
@@ -279,6 +281,10 @@ public class Config
 	/** [No-Gen] Starting chunk coordinate Z for the structure free zone [max is +/- 1875000] */
 	private static int noGenZ;
 	/*================== WORLD GEN =====================*/
+	/** [Ancient Tablet] Chance that a random tablet will spawn when a boss dungeon is defeated */
+	private static float ancientTabletGenChance;
+	/** [Ancient Tablet] Maximum number of chunks from boss dungeon a tablet may generate [0-8] */
+	private static int ancientTabletGenDistance;
 	/** [Bomb Flowers] Enable bomb flower generation */
 	private static boolean enableBombFlowerGen;
 	/** [Ceramic Jars] Allow ceramic jars to generate in water */
@@ -487,6 +493,7 @@ public class Config
 		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
+		medallionsAffectPlayers = config.get("Item", "[Magic Medallions] True if Ether and Quake medallions can affect players", true).getBoolean(true);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
 		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
 		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 50).getInt(), 0, 500);
@@ -531,6 +538,8 @@ public class Config
 		noGenX = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate X for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
 		noGenZ = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate Z for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
 		/*================== WORLD GEN =====================*/
+		ancientTabletGenChance = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ancient Tablet] Chance that a random tablet will spawn when a boss dungeon is defeated [0-100]", 20).getInt(), 0, 100);
+		// TODO ancientTabletGenDistance = MathHelper.clamp_int(config.get("WorldGen", "[Ancient Tablet] Maximum number of chunks from boss dungeon a tablet may generate [0-8]", 0).getInt(), 0, 8);
 		enableBombFlowerGen = config.get("WorldGen", "[Bomb Flowers] Enable bomb flower generation", true).getBoolean(true);
 		allowJarsInWater = config.get("WorldGen", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
 		jarGenChance = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt(), 0, 100);
@@ -668,6 +677,7 @@ public class Config
 	public static int getHookshotRange() { return hookshotRange; }
 	public static boolean allowHookableOnly() { return enableHookableOnly; }
 	public static boolean canHookshotBreakBlocks() { return enableHookshotBreakBlocks; }
+	public static boolean doMedallionsDamagePlayers() { return medallionsAffectPlayers; }
 	public static int getRodUpgradeCost() { return rodUpgradeCost; }
 	public static int getRequiredKills() { return temperedRequiredKills - 1; }
 	public static boolean getMasterSwordsProvidePower() { return allMasterSwordsProvidePower; }
@@ -716,6 +726,8 @@ public class Config
 	public static float getFairySpawnerChance() { return fairySpawnerChance; }
 	public static int getDaysToRespawn() { return resetSpawnerTime; }
 	/*================== WORLD GEN =====================*/
+	public static float getAncientTabletGenChance() { return ancientTabletGenChance; }
+	public static int getAncientTabletGenDistance() { return ancientTabletGenDistance; }
 	public static boolean doBombFlowerGen() { return enableBombFlowerGen; }
 	public static boolean genJarsInWater() { return allowJarsInWater; }
 	public static float getJarGenChance() { return jarGenChance; }

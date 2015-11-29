@@ -139,6 +139,8 @@ public class ZSSItems
 	private static boolean enableCraftingHammer;
 	/** Enable application of hookshot upgrades via crafting */
 	private static boolean enableCraftingHookshot;
+	/** Enable crafting recipe to make copies of the Book of Mudora */
+	private static boolean enableCraftingMudora;
 	/** Enable crafting throwing rocks from cobblestone and back */
 	private static boolean enableCraftingThrowingRock;
 
@@ -170,6 +172,7 @@ public class ZSSItems
 	crystalDin,
 	crystalFarore,
 	crystalNayru,
+	medallion,
 	dekuLeaf,
 	dekuNut,
 	bombFlowerSeed,
@@ -194,6 +197,7 @@ public class ZSSItems
 	//================ TREASURES TAB ================//
 	public static Item
 	instrument,
+	bookMudora,
 	pendant,
 	masterOre,
 	jellyChu,
@@ -325,6 +329,7 @@ public class ZSSItems
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
 		enableCraftingHookshot = config.get("Recipes", "Enable application of hookshot upgrades via crafting", false).getBoolean(false);
+		enableCraftingMudora = config.get("Recipes", "Enable crafting recipe to make copies of the Book of Mudora", true).getBoolean(true);
 		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
 	}
 
@@ -575,6 +580,7 @@ public class ZSSItems
 		potionPurple = new ItemPotionPurple("potion_purple", 20, 40.0F);
 		magicJar = new ItemPickupOnly.ItemMagicJar(10).setUnlocalizedName("magic_jar");
 		magicJarBig = new ItemPickupOnly.ItemMagicJar(250).setUnlocalizedName("magic_jar_big");
+		medallion = new ItemMedallion().setUnlocalizedName("medallion");
 		rodFire = new ItemMagicRod(MagicType.FIRE, 8.0F, 10.0F).setUnlocalizedName("rod_fire");
 		rodIce = new ItemMagicRod(MagicType.ICE, 6.0F, 10.0F).setUnlocalizedName("rod_ice");
 		rodTornado = new ItemMagicRod(MagicType.WIND, 4.0F, 10.0F).setUnlocalizedName("rod_tornado");
@@ -624,6 +630,7 @@ public class ZSSItems
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "chat.zss.links_house.fail").setUnlocalizedName("links_house");
 		instrument = new ItemInstrument();
 		bombFlowerSeed = new ItemBombFlowerSeed().setUnlocalizedName("seed_bomb_flower");
+		bookMudora = new BaseModItem().setUnlocalizedName("book_mudora").setMaxDamage(0).setCreativeTab(ZSSCreativeTabs.tabMisc);
 
 		//===================== NO TAB =====================//
 		heldBlock = new ItemHeldBlock().setUnlocalizedName("held_block");
@@ -742,6 +749,9 @@ public class ZSSItems
 			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.MULTI.ordinal()));
 			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
 		}
+		if (enableCraftingMudora) {
+			GameRegistry.addShapelessRecipe(new ItemStack(bookMudora, 2), bookMudora, Items.book, Items.feather, new ItemStack(Items.dye, 1, EnumDyeColor.BLACK.getDyeDamage()));
+		}
 		if (enableCraftingThrowingRock) {
 			GameRegistry.addShapelessRecipe(new ItemStack(throwingRock, 9), Blocks.cobblestone);
 			GameRegistry.addRecipe(new ItemStack(Blocks.cobblestone), "rrr", "rrr", "rrr", 'r', throwingRock);
@@ -771,6 +781,8 @@ public class ZSSItems
 	 * Adds some special loot to vanilla chests
 	 */
 	private static void addVanillaDungeonLoot() {
+		ChestGenHooks.getInfo(ChestGenHooks.VILLAGE_BLACKSMITH).addItem(new WeightedRandomChestContent(new ItemStack(bookMudora), 1, 1, 2));
+		ChestGenHooks.getInfo(ChestGenHooks.STRONGHOLD_LIBRARY).addItem(new WeightedRandomChestContent(new ItemStack(bookMudora), 1, 1, 2));
 		if (enableBombLoot) {
 			addLootToAll(new WeightedRandomChestContent(new ItemStack(bomb, 1, BombType.BOMB_STANDARD.ordinal()), 1, 3, Config.getBombWeight()), true, true);
 		}

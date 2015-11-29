@@ -1,0 +1,8 @@
+{
+    "variants": {
+    	"facing=north" : { "model" : "zeldaswordskills:ancient_tablet" },
+    	"facing=south" : { "model" : "zeldaswordskills:ancient_tablet" },
+    	"facing=east" : { "model" : "zeldaswordskills:ancient_tablet", "y": 90 },
+    	"facing=west" : { "model" : "zeldaswordskills:ancient_tablet", "y": 90 }
+    }
+}

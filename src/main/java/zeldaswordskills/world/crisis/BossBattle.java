@@ -32,19 +32,24 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.IMob;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Vec3i;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
+import zeldaswordskills.block.BlockAncientTablet;
 import zeldaswordskills.block.BlockSecretStone;
+import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.ref.Config;
@@ -52,6 +57,7 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.StructureGenUtils;
+import zeldaswordskills.util.TimedChatDialogue;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
@@ -114,7 +120,8 @@ public class BossBattle extends AbstractCrisis
 		if (world.getDifficulty() != EnumDifficulty.PEACEFUL) {
 			WorldUtils.spawnXPOrbsWithRandom(world, world.rand, center.getX(), center.getY(), center.getZ(), 1000 * difficulty);
 		}
-		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", (center.getX() >> 4), (center.getZ() >> 4));
+		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", (center.getX() << 4), (center.getZ() << 4));
+		generateAncientTablet(world);
 	}
 
 	@Override
@@ -206,14 +213,55 @@ public class BossBattle extends AbstractCrisis
 	 * @param sound the sound to play, if any
 	 */
 	protected void setRandomBlockTo(World world, IBlockState state, String sound) {
-		int x = box.minX + world.rand.nextInt(box.getXSize() - 1) + 1;
-		int y = box.minY + world.rand.nextInt(4) + 3;
-		int z = box.minZ + world.rand.nextInt(box.getZSize() - 1) + 1;
-		BlockPos pos = new BlockPos(x, y, z);
-		if (world.isAirBlock(pos)) {
+		BlockPos pos = getRandomPlaceablePosition(world, state.getBlock(), box.minX + 1, box.minY + 3, box.minZ + 1, box.getXSize() - 1, box.getYSize() - 3, box.getZSize() - 1);
+		if (pos != null && world.isAirBlock(pos)) {
 			world.setBlockState(pos, state, 3);
 			if (sound.length() > 0) {
-				world.playSoundEffect(x, y, z, sound, 1.0F, 1.0F);
+				world.playSoundEffect(pos.getX(), pos.getY(), pos.getZ(), sound, 1.0F, 1.0F);
+			}
+		}
+	}
+
+	/**
+	 * Returns a random placeable block position (see {@link Block#canPlaceBlockAt}) within
+	 * a certain range of the minimum x/y/z coordinates, or null if not placeable.
+	 * @param block if null, checks if the current block at the position is replaceable
+	 * @return BlockPos, if not null, is not guaranteed to be within the structure bounding box
+	 */
+	protected BlockPos getRandomPlaceablePosition(World world, Block block, int minX, int minY, int minZ, int dx, int dy, int dz) {
+		int i = minX + (dx > 1 ? world.rand.nextInt(dx) : 0);
+		int j = minY + (dy > 1 ? world.rand.nextInt(dy) : 0);
+		int k = minZ + (dz > 1 ? world.rand.nextInt(dz) : 0);
+		BlockPos pos = new BlockPos(i, j, k);
+		if (block != null && block.canPlaceBlockAt(world, pos)) {
+			return pos;
+		} else if (block == null && world.getBlockState(pos).getBlock().isReplaceable(world, pos)) {
+			return pos;
+		}
+		return null;
+	}
+
+	/**
+	 * Called from {@link #endCrisis} to attempt to generate an Ancient Tablet
+	 */
+	protected void generateAncientTablet(World world) {
+		if (world.rand.nextFloat() < 1.0F) { // TODO Config.getAncientTabletGenChance()
+			// Attempt to find a valid block position n times
+			BlockPos pos = null;
+			// TODO allow tablet to spawn up to several chunks away?
+			for (int n = 0; n < 4 && pos == null; ++n) {
+				pos = getRandomPlaceablePosition(world, ZSSBlocks.ancientTablet, box.minX + 1, box.maxY + 1, box.minZ + 1, box.getXSize() - 1, 1, box.getZSize() - 1);
+			}
+			if (pos != null) {
+				BlockAncientTablet.EnumType type = BlockAncientTablet.EnumType.byMetadata(world.rand.nextInt(BlockAncientTablet.EnumType.values().length));
+				EnumFacing facing = (world.rand.nextInt(2) == 0 ? EnumFacing.SOUTH : EnumFacing.EAST);
+				world.setBlockState(pos, ZSSBlocks.ancientTablet.getDefaultState().withProperty(BlockAncientTablet.VARIANT, type).withProperty(BlockAncientTablet.FACING, facing));
+				world.playSoundEffect(pos.getX(), pos.getY(), pos.getZ(), Sounds.ROCK_FALL, 1.0F, 1.0F);
+				Vec3i center = box.getCenter();
+				EntityPlayer player = world.getClosestPlayer(center.getX(), center.getY(), center.getZ(), 16.0D);
+				if (player != null) {
+					new TimedChatDialogue(player, 1250, 1250, new ChatComponentTranslation("chat.zss.ancient_tablet.spawn"));
+				}
 			}
 		}
 	}

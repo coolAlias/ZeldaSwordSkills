@@ -1,0 +1,22 @@
+{
+	"textures": {
+		"particle": "zeldaswordskills:blocks/ancient_tablet_face",
+		"face": "zeldaswordskills:blocks/ancient_tablet_face",
+		"side": "zeldaswordskills:blocks/ancient_tablet_side",
+		"bottom": "zeldaswordskills:blocks/ancient_tablet_bottom",
+		"top": "zeldaswordskills:blocks/ancient_tablet_top"
+	},
+	"elements": [
+		{   "from": [ 2, 0, 6 ],
+            "to": [ 14, 15, 10 ],
+            "faces": {
+                "down":  { "uv": [ 2, 6, 14, 10 ], "texture": "#bottom", "cullface": "down" },
+                "up":    { "uv": [ 2, 6, 14, 10 ], "texture": "#top" },
+                "north": { "uv": [ 2, 0, 14, 15 ], "texture": "#face" },
+                "south": { "uv": [ 2, 0, 14, 15 ], "texture": "#face" },
+                "west":  { "uv": [ 6, 0, 10, 15 ], "texture": "#side" },
+                "east":  { "uv": [ 6, 0, 10, 15 ], "texture": "#side" }
+            }
+        }
+    ]
+}

@@ -72,7 +72,11 @@ public enum Buff
 	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
 	WEAKNESS_SHOCK("buff.zss.weakness_shock", true, 5),
 	/** Increases stun time by a factor of (1.0F + (amplifier * 0.01F)) */
-	WEAKNESS_STUN("buff.zss.weakness_stun", true, 6);
+	WEAKNESS_STUN("buff.zss.weakness_stun", true, 6),
+	/** Multiplies QUAKE damage by a factor of (1.0F - (amplifier * 0.01F)) */
+	RESIST_QUAKE("buff.zss.resist_quake", false, 11),
+	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
+	WEAKNESS_QUAKE("buff.zss.weakness_quake", true, 11);
 
 	public final String unlocalizedName;
 	/** Whether this Buff is a negative effect */

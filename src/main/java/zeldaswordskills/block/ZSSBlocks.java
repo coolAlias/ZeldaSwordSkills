@@ -58,6 +58,7 @@ public class ZSSBlocks
 	chestLocked,
 	chestInvisible,
 	pedestal,
+	ancientTablet,
 	pegWooden,
 	pegRusty,
 	leverGiant,
@@ -133,6 +134,8 @@ public class ZSSBlocks
 		GameRegistry.registerBlock(timeBlock, ItemMetadataBlock.class, timeBlock.getUnlocalizedName().substring(5), new Object[]{new String[]{BlockTime.EnumType.TIME.getName(), BlockTime.EnumType.ROYAL.getName()}});
 		warpStone = new BlockWarpStone().setUnlocalizedName("warp_stone");
 		GameRegistry.registerBlock(warpStone, ItemWarpStone.class, warpStone.getUnlocalizedName().substring(5));
+		ancientTablet = new BlockAncientTablet(Material.rock).setUnlocalizedName("ancient_tablet");
+		GameRegistry.registerBlock(ancientTablet, ItemMetadataBlock.class, ancientTablet.getUnlocalizedName().substring(5), new Object[]{new String[]{BlockAncientTablet.EnumType.BOMBOS.getName(), BlockAncientTablet.EnumType.ETHER.getName(), BlockAncientTablet.EnumType.QUAKE.getName()}});
 		// register block items for creative tab comparator sorting:
 		try {
 			for (Field f: ZSSBlocks.class.getFields()) {

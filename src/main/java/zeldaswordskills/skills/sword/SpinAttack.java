@@ -30,9 +30,12 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.block.BlockAncientTablet;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.entity.projectile.EntityBombosFireball;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.server.RefreshSpinPacket;
@@ -57,7 +60,7 @@ import zeldaswordskills.util.WorldUtils;
  * Charge time: 20 ticks, minus 2 per level
  * Range: 3.0D plus 0.5D per level each of Spin and Super Spin Attack
  * Exhaustion: 3.0F - 0.2F per level, added on the first spin only
- * Magic: 5.75F - 0.75F per level for each additional spin
+ * Magic: 5.75F - 0.75F per level for each additional spin; +10.0F per spin if using the Bombos Medallion
  *
  */
 public class SpinAttack extends SkillActive
@@ -88,6 +91,9 @@ public class SpinAttack extends SkillActive
 
 	/** Whether flame particles should render along the sword's arc */
 	private boolean isFlaming;
+
+	/** Whether the spin attack is enhanced by the Bombos Medallion */
+	private boolean isBombos;
 
 	/** The player's Super Spin Attack level will allow multiple spins and extended range */
 	private int superLevel;
@@ -168,6 +174,9 @@ public class SpinAttack extends SkillActive
 	 */
 	private boolean canRefresh(EntityPlayer player) {
 		float cost = getMagicCost();
+		if (isBombos && ZSSPlayerInfo.get(player).getCurrentMagic() < (10.0F + cost)) {
+			isBombos = false;
+		}
 		if (ZSSPlayerInfo.get(player).getCurrentMagic() < cost) {
 			return false;
 		}
@@ -261,7 +270,11 @@ public class SpinAttack extends SkillActive
 		arc = 360F;
 		refreshed = 0;
 		superLevel = (checkHealth(player) ? ZSSPlayerSkills.get(player).getSkillLevel(superSpinAttack) : 0);
-		isFlaming = EnchantmentHelper.getFireAspectModifier(player) > 0;
+		// TODO if (Baubles is enabled) { check only that one slot
+		if (PlayerUtils.isHoldingMasterSword(player) && PlayerUtils.hasItem(player, ZSSItems.medallion, BlockAncientTablet.EnumType.BOMBOS.ordinal())) {
+			isBombos = ZSSPlayerInfo.get(player).useMagic(10.0F);
+		}
+		isFlaming = (isBombos || EnchantmentHelper.getFireAspectModifier(player) > 0);
 		startSpin(world, player);
 		return true;
 	}
@@ -271,6 +284,7 @@ public class SpinAttack extends SkillActive
 		charge = 0;
 		currentSpin = 0.0F;
 		arc = 0.0F;
+		isBombos = false;
 	}
 
 	@Override
@@ -290,6 +304,9 @@ public class SpinAttack extends SkillActive
 			}
 		} else if (isActive()) {
 			incrementSpin(player);
+			if (isBombos && !player.worldObj.isRemote) {
+				spawnFireballs(player);
+			}
 		}
 	}
 
@@ -342,6 +359,10 @@ public class SpinAttack extends SkillActive
 		}
 	}
 
+	private void spawnFireballs(EntityPlayer player) {
+		player.worldObj.spawnEntityInWorld(new EntityBombosFireball(player.worldObj, player).setDamage(10.0F));
+	}
+
 	@SideOnly(Side.CLIENT)
 	private void spawnParticles(EntityPlayer player) {
 		// TODO these will not be seen by other players
@@ -367,6 +388,9 @@ public class SpinAttack extends SkillActive
 	private void refreshSpin(EntityPlayer player) {
 		if (ZSSPlayerInfo.get(player).useMagic(getMagicCost())) {
 			arc += 360F;
+		}
+		if (isBombos && !ZSSPlayerInfo.get(player).useMagic(10.0F)) {
+			isBombos = false;
 		}
 	}
 }

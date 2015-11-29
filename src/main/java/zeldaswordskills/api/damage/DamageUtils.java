@@ -100,7 +100,7 @@ public class DamageUtils
 		protected final boolean isAoE;
 
 		/** EnumDamageTypes associated with this DamageSource */
-		private Set<EnumDamageType> enumDamageTypes;
+		private final Set<EnumDamageType> enumDamageTypes = new HashSet<EnumDamageType>();
 
 		/** Maximum base stun time; will also be modified by total damage inflicted */
 		private int stunDuration;
@@ -124,7 +124,6 @@ public class DamageUtils
 		public DamageSourceBaseDirect(String name, Entity entity, boolean isAoE) {
 			super(name, entity);
 			this.isAoE = isAoE;
-			enumDamageTypes = new HashSet<EnumDamageType>();
 		}
 
 		/**
@@ -140,9 +139,7 @@ public class DamageUtils
 		 * @param type	Only damage types with no special effects should be added this way
 		 */
 		public DamageSourceBaseDirect(String name, Entity entity, boolean isAoE, EnumDamageType type) {
-			super(name, entity);
-			this.isAoE = isAoE;
-			enumDamageTypes = new HashSet<EnumDamageType>();
+			this(name, entity, isAoE);
 			addDamageType(type);
 		}
 
@@ -207,7 +204,7 @@ public class DamageUtils
 		protected final boolean isAoE;
 
 		/** EnumDamageTypes associated with this DamageSource */
-		private Set<EnumDamageType> enumDamageTypes;
+		private final Set<EnumDamageType> enumDamageTypes = new HashSet<EnumDamageType>();
 
 		/** Maximum base stun time; will also be modified by total damage inflicted */
 		private int stunDuration;
@@ -231,7 +228,6 @@ public class DamageUtils
 		public DamageSourceBaseIndirect(String name, Entity direct, Entity indirect, boolean isAoE) {
 			super(name, direct, indirect);
 			this.isAoE = isAoE;
-			enumDamageTypes = new HashSet<EnumDamageType>();
 		}
 
 		/**
@@ -247,9 +243,7 @@ public class DamageUtils
 		 * @param type	Only damage types with no special effects should be added this way
 		 */
 		public DamageSourceBaseIndirect(String name, Entity direct, Entity indirect, boolean isAoE, EnumDamageType type) {
-			super(name, direct, indirect);
-			this.isAoE = isAoE;
-			enumDamageTypes = new HashSet<EnumDamageType>();
+			this(name, direct, indirect, isAoE);
 			addDamageType(type);
 		}
 
@@ -329,10 +323,9 @@ public class DamageUtils
 		 * @param isAoE		True if this damage is an AoE attack
 		 */
 		public DamageSourceShock(String name, Entity entity, int duration, float hunger, boolean isAoE) {
-			super(name, entity, isAoE);
+			super(name, entity, isAoE, EnumDamageType.SHOCK);
 			this.hunger = hunger;
 			setDamageBypassesArmor();
-			addDamageType(EnumDamageType.SHOCK);
 			setStunDamage(duration, 5, true);
 		}
 
@@ -368,10 +361,9 @@ public class DamageUtils
 		 * @param isAoE		True if this damage is an AoE attack
 		 */
 		public DamageSourceShockIndirect(String name, Entity direct, Entity indirect, int duration, float hunger, boolean isAoE) {
-			super(name, direct, indirect, isAoE);
+			super(name, direct, indirect, isAoE, EnumDamageType.SHOCK);
 			this.hunger = hunger;
 			setDamageBypassesArmor(); // TODO set on a case-by-case basis
-			addDamageType(EnumDamageType.SHOCK);
 			setStunDamage(duration, 5, true);
 		}
 
@@ -398,8 +390,7 @@ public class DamageUtils
 		 * @param isAoE	True if this damage is an AoE attack
 		 */
 		public DamageSourceFire(String name, Entity entity, boolean isAoE) {
-			super(name, entity, isAoE);
-			addDamageType(EnumDamageType.FIRE);
+			super(name, entity, isAoE, EnumDamageType.FIRE);
 			setFireDamage();
 		}
 	}
@@ -416,13 +407,12 @@ public class DamageUtils
 		 * @param isAoE	True if this damage is an AoE attack
 		 */
 		public DamageSourceFireIndirect(String name, Entity direct, Entity indirect, boolean isAoE) {
-			super(name, direct, indirect, isAoE);
-			addDamageType(EnumDamageType.FIRE);
+			super(name, direct, indirect, isAoE, EnumDamageType.FIRE);
 			setFireDamage();
 		}
 	}
 
-	public static class DamageSourceIce extends DamageSourceBaseDirect implements IDamageSourceStun
+	public static class DamageSourceIce extends DamageSourceBaseDirect
 	{
 		/** Slow effect duration and amplifier */
 		private final int duration, amplifier;
@@ -437,10 +427,9 @@ public class DamageUtils
 		 * @param isAoE	True if this damage is an AoE attack
 		 */
 		public DamageSourceIce(String name, Entity entity, int duration, int amplifier, boolean isAoE) {
-			super(name, entity, isAoE);
+			super(name, entity, isAoE, EnumDamageType.COLD);
 			this.duration = duration;
 			this.amplifier = amplifier;
-			addDamageType(EnumDamageType.COLD);
 		}
 
 		@Override
@@ -469,10 +458,9 @@ public class DamageUtils
 		 * @param isAoE	True if this damage is an AoE attack
 		 */
 		public DamageSourceIceIndirect(String name, Entity direct, Entity indirect, int duration, int amplifier, boolean isAoE) {
-			super(name, direct, indirect, isAoE);
+			super(name, direct, indirect, isAoE, EnumDamageType.COLD);
 			this.duration = duration;
 			this.amplifier = amplifier;
-			addDamageType(EnumDamageType.COLD);
 		}
 
 		@Override
@@ -483,6 +471,37 @@ public class DamageUtils
 		@Override
 		public int getAmplifier(EnumDamageType type) {
 			return (type == EnumDamageType.COLD ? amplifier : super.getAmplifier(type));
+		}
+	}
+
+	public static class DamageSourceQuakeIndirect extends DamageSourceBaseIndirect
+	{
+		/** Nausea and slow effect duration and amplifier */
+		private final int duration, amplifier;
+
+		/** Creates an AoE quake-based indirect EntityDamageSource */
+		public DamageSourceQuakeIndirect(String name, Entity direct, Entity indirect, int duration, int amplifier) {
+			this(name, direct, indirect, duration, amplifier, true);
+		}
+
+		/**
+		 * Creates a quake-based indirect EntityDamageSource
+		 * @param isAoE	True if this damage is an AoE attack
+		 */
+		public DamageSourceQuakeIndirect(String name, Entity direct, Entity indirect, int duration, int amplifier, boolean isAoE) {
+			super(name, direct, indirect, isAoE, EnumDamageType.QUAKE);
+			this.duration = duration;
+			this.amplifier = amplifier;
+		}
+
+		@Override
+		public int getDuration(EnumDamageType type) {
+			return (type == EnumDamageType.QUAKE ? duration : super.getDuration(type));
+		}
+
+		@Override
+		public int getAmplifier(EnumDamageType type) {
+			return (type == EnumDamageType.QUAKE ? amplifier : super.getAmplifier(type));
 		}
 	}
 }

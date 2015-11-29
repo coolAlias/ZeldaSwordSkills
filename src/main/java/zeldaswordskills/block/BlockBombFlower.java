@@ -46,6 +46,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.IBoomerangBlock;
 import zeldaswordskills.api.block.IExplodable;
+import zeldaswordskills.api.block.IQuakeBlock;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
@@ -57,7 +58,7 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 
-public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICustomStateMapper, IExplodable, IWhipBlock
+public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICustomStateMapper, IExplodable, IQuakeBlock, IWhipBlock
 {
 	/** Uses bit 8 (true) to flag this block for an explosion next update tick */
 	public static final PropertyBool EXPLODE = PropertyBool.create("explode");
@@ -178,6 +179,14 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 	@Override
 	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity) {
 		if (((Integer) state.getValue(AGE)).intValue() == 7 && entity instanceof IProjectile) {
+			createExplosion(world, pos, true);
+		}
+	}
+
+	@Override
+	public void handleQuakeEffect(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
+		if (((Integer) state.getValue(AGE)).intValue() == 7) {
+			// TODO call disperseSeeds instead? schedule an update tick?
 			createExplosion(world, pos, true);
 		}
 	}

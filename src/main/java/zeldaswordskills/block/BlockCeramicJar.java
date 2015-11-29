@@ -45,6 +45,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IExplodable;
 import zeldaswordskills.api.block.IHookable;
+import zeldaswordskills.api.block.IQuakeBlock;
 import zeldaswordskills.api.block.ISmashable;
 import zeldaswordskills.api.block.IWhipBlock;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
@@ -61,7 +62,7 @@ import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
 
-public class BlockCeramicJar extends Block implements IExplodable, IHookable, ISmashable, ISpecialRenderer, ITileEntityProvider, IWhipBlock
+public class BlockCeramicJar extends Block implements IExplodable, IHookable, IQuakeBlock, ISmashable, ISpecialRenderer, ITileEntityProvider, IWhipBlock
 {
 	/** Prevents inventory from dropping when block is picked up */
 	private static boolean keepInventory;
@@ -93,6 +94,12 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IS
 	@Override
 	public Material getHookableMaterial(HookshotType type, World world, BlockPos pos, EnumFacing face) {
 		return Material.clay;
+	}
+
+	@Override
+	public void handleQuakeEffect(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
+		WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+		world.destroyBlock(pos, false);
 	}
 
 	@Override

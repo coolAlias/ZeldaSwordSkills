@@ -103,6 +103,7 @@ import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.entity.projectile.EntityBombosFireball;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.entity.projectile.EntityCeramicJar;
 import zeldaswordskills.entity.projectile.EntityCyclone;
@@ -241,6 +242,7 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrow_custom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowElemental.class, "arrow_elemental", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityBomb.class, "bomb", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
+		EntityRegistry.registerModEntity(EntityBombosFireball.class, "bombos_fireball", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBoomerang.class, "boomerang", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityCeramicJar.class, "jar", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityCyclone.class, "cyclone", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
@@ -305,6 +307,7 @@ public class ZSSEntities
 		// PROJECTILES
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow(manager));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityBombosFireball.class, new RenderSnowball(manager, Items.fire_charge, itemRender));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang(manager, itemRender));
 		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar(manager, itemRender));
 		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing(manager));
