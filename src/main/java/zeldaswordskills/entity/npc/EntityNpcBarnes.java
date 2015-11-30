@@ -17,19 +17,19 @@
 
 package zeldaswordskills.entity.npc;
 
-import net.minecraft.entity.IMerchant;
+import java.util.ListIterator;
+
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.item.ItemBomb;
+import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
@@ -37,18 +37,12 @@ import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
-public class EntityNpcBarnes extends EntityNpcBase implements IMerchant, INpcVillager
+public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillager
 {
 	private static final MerchantRecipe standardBomb = new MerchantRecipe(new ItemStack(Items.emerald, 8), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()));
 	private static final MerchantRecipe waterBomb = new MerchantRecipe(new ItemStack(Items.emerald, 12), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()));
 	private static final MerchantRecipe fireBomb = new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FIRE.ordinal()));
 	private static final MerchantRecipe bombSeeds = new MerchantRecipe(new ItemStack(ZSSItems.bombFlowerSeed), new ItemStack(Items.emerald, 4));
-
-	/** Barnes' current customer */
-	private EntityPlayer customer;
-
-	/** MerchantRecipeList of all currently available trades */
-	private MerchantRecipeList trades;
 
 	public EntityNpcBarnes(World world) {
 		super(world);
@@ -75,35 +69,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant, INpcVil
 	}
 
 	@Override
-	public void setCustomer(EntityPlayer player) {
-		customer = player;
-	}
-
-	@Override
-	public EntityPlayer getCustomer() {
-		return customer;
-	}
-
-	@Override
-	public MerchantRecipeList getRecipes(EntityPlayer player) {
-		if (trades == null || trades.isEmpty()) {
-			addDefaultTrades();
-		}
-		return trades;
-	}
-
-	@Override
-	public void setRecipes(MerchantRecipeList trades) {
-		this.trades = trades;
-	}
-
-	@Override
-	public void useRecipe(MerchantRecipe trade) {
-		livingSoundTime = -getTalkInterval();
-		playSound("mob.villager.yes", getSoundVolume(), getSoundPitch());
-	}
-
-	private void addDefaultTrades() {
+	protected void populateTradingList() {
 		MerchantRecipeList newTrades = new MerchantRecipeList();
 		newTrades.add(standardBomb);
 		if (trades == null) {
@@ -118,55 +84,80 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant, INpcVil
 	}
 
 	@Override
-	public void func_110297_a_(ItemStack stack) {
-		if (!worldObj.isRemote && livingSoundTime > -getTalkInterval() + 20) {
-			livingSoundTime = -getTalkInterval();
-			playSound((stack == null ? "mob.villager.no" : "mob.villager.yes"), getSoundVolume(), getSoundPitch());
+	protected void refreshTradingList() {
+		for (ListIterator<MerchantRecipe> iterator = trades.listIterator(); iterator.hasNext();) {
+			MerchantRecipe trade = iterator.next();
+			// replace bomb trades so he can't ever become sold out
+			if (isBombTrade(trade)) {
+				iterator.set(getRefreshedBombTrade(trade));
+			} else if (trade.isRecipeDisabled()) {
+				trade.func_82783_a(rand.nextInt(6) + rand.nextInt(6) + 2);
+			}
 		}
 	}
 
 	@Override
+	protected void updateTradingList() {}
+
+	private boolean isBombTrade(MerchantRecipe trade) {
+		return isBombTrade(trade.getItemToSell()) || isBombTrade(trade.getItemToBuy());
+	}
+
+	private boolean isBombTrade(ItemStack stack) {
+		return stack != null && (stack.getItem() instanceof ItemBomb || stack.getItem() instanceof ItemBombBag || stack.getItem() == ZSSItems.bombFlowerSeed);
+	}
+
+	private MerchantRecipe getRefreshedBombTrade(MerchantRecipe trade) {
+		MerchantRecipe newTrade = new MerchantRecipe(trade.getItemToBuy(), trade.getSecondItemToBuy(), trade.getItemToSell());
+		newTrade.func_82783_a(92); // set max uses to 99
+		return newTrade;
+	}
+
+	@Override
 	public boolean interact(EntityPlayer player) {
-		if (isEntityAlive() && getCustomer() == null && !player.isSneaking()) {
-			ItemStack stack = player.getHeldItem();
-			String chat = "chat.zss.npc.barnes.greeting";
-			boolean openGui = true;
-			if (stack != null && trades != null) {
-				if (stack.getItem() == ZSSItems.bombFlowerSeed) {
-					if (insertBombTrade(bombSeeds)) {
-						chat = "chat.zss.npc.barnes.trade.bombseeds.new";
-					} else {
-						chat = "chat.zss.npc.barnes.trade.bombseeds.old";
-					}
-				} else if (stack.getItem() == Items.fish) {
-					if (insertBombTrade(waterBomb)) {
-						--stack.stackSize;
-						chat = "chat.zss.npc.barnes.trade.water";
-						openGui = false;
-					}
-				} else if (stack.getItem() == Items.magma_cream) {
-					if (insertBombTrade(fireBomb)) {
-						--stack.stackSize;
-						chat = "chat.zss.npc.barnes.trade.fire";
-						openGui = false;
-					}
-				} else if (!MerchantRecipeHelper.hasSimilarTrade(trades, waterBomb)) {
-					chat = "chat.zss.npc.barnes.material.water";
-				} else if (!MerchantRecipeHelper.hasSimilarTrade(trades, fireBomb)) {
-					chat = "chat.zss.npc.barnes.material.fire";
-				}
-			}
+		if (!isEntityAlive() || player.isSneaking()) {
+			return false;
+		} else if (getCustomer() != null) {
 			if (!worldObj.isRemote) {
-				PlayerUtils.sendTranslatedChat(player, chat);
-				if (openGui) {
-					setCustomer(player);
-					player.displayGUIMerchant(this, getCustomNameTag());
-				}
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.merchant.busy");
 			}
 			return true;
-		} else {
-			return super.interact(player);
 		}
+		ItemStack stack = player.getHeldItem();
+		String chat = "chat.zss.npc.barnes.greeting";
+		boolean openGui = true;
+		if (stack != null && trades != null) {
+			if (stack.getItem() == ZSSItems.bombFlowerSeed) {
+				if (insertBombTrade(bombSeeds)) {
+					chat = "chat.zss.npc.barnes.trade.bombseeds.new";
+				} else {
+					chat = "chat.zss.npc.barnes.trade.bombseeds.old";
+				}
+			} else if (stack.getItem() == Items.fish) {
+				if (insertBombTrade(waterBomb)) {
+					--stack.stackSize;
+					chat = "chat.zss.npc.barnes.trade.water";
+					openGui = false;
+				}
+			} else if (stack.getItem() == Items.magma_cream) {
+				if (insertBombTrade(fireBomb)) {
+					--stack.stackSize;
+					chat = "chat.zss.npc.barnes.trade.fire";
+					openGui = false;
+				}
+			} else if (!MerchantRecipeHelper.hasSimilarTrade(trades, waterBomb)) {
+				chat = "chat.zss.npc.barnes.material.water";
+			} else if (!MerchantRecipeHelper.hasSimilarTrade(trades, fireBomb)) {
+				chat = "chat.zss.npc.barnes.material.fire";
+			}
+		}
+		if (!worldObj.isRemote) {
+			PlayerUtils.sendTranslatedChat(player, chat);
+			if (openGui) {
+				displayTradingGuiFor(player);
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -188,7 +179,7 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant, INpcVil
 	@Override
 	public void onConverted(EntityPlayer player) {
 		PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.open");
-		addDefaultTrades();
+		populateTradingList();
 	}
 
 	/**
@@ -199,43 +190,21 @@ public class EntityNpcBarnes extends EntityNpcBase implements IMerchant, INpcVil
 	}
 
 	/**
-	 * Inserts any trade at the first available slot after any bombs already in stock
+	 * Inserts the trade at the first available slot after any bombs already in stock
 	 * @return true if the trade was inserted, or false if a similar trade already existed
 	 */
 	private boolean insertBombTrade(MerchantRecipe trade) {
-		if (trades == null) {
+		if (trades == null || MerchantRecipeHelper.hasSimilarTrade(trades, trade)) {
 			return false;
 		}
-		if (MerchantRecipeHelper.hasSimilarTrade(trades, trade)) {
-			return false;
-		}
-		for (int i = 0; i < trades.size(); ++i) {
+		int i = 0;
+		for (i = 0; i < trades.size(); ++i) {
 			MerchantRecipe r = (MerchantRecipe) trades.get(i);
-			if (r.getItemToSell().getItem() instanceof ItemBomb) {
-				continue;
-			} else {
-				trades.add(i, trade);
-				return true;
+			if (!(r.getItemToSell().getItem() instanceof ItemBomb)) {
+				break;
 			}
 		}
-		trades.add(trade);
+		trades.add(i, trade);
 		return true;
-	}
-
-	@Override
-	public void writeEntityToNBT(NBTTagCompound compound) {
-		super.writeEntityToNBT(compound);
-		if (trades != null) {
-			compound.setTag("Offers", trades.getRecipiesAsTags());
-		}
-	}
-
-	@Override
-	public void readEntityFromNBT(NBTTagCompound compound) {
-		super.readEntityFromNBT(compound);
-		if (compound.hasKey("Offers", Constants.NBT.TAG_COMPOUND)) {
-			NBTTagCompound tradeTag = compound.getCompoundTag("Offers");
-			trades = new MerchantRecipeList(tradeTag);
-		}
 	}
 }
