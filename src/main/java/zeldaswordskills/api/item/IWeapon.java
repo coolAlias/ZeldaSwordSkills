@@ -18,7 +18,6 @@
 package zeldaswordskills.api.item;
 
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.item.WeaponRegistry;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.skills.sword.MortalDraw;

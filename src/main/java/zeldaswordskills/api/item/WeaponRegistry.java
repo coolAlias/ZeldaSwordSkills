@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.item;
+package zeldaswordskills.api.item;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,7 +23,6 @@ import java.util.Set;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.api.item.IWeapon;
 import cpw.mods.fml.common.event.FMLInterModComms;
 
 /**
