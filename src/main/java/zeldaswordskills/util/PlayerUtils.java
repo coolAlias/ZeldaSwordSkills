@@ -31,8 +31,8 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.api.item.IWeapon;
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.item.ItemZeldaSword;
-import zeldaswordskills.item.WeaponRegistry;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 

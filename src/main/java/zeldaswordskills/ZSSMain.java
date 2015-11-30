@@ -32,6 +32,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.command.ZSSCommands;
 import zeldaswordskills.entity.ZSSEntities;
@@ -41,7 +42,6 @@ import zeldaswordskills.handler.ZSSEntityEvents;
 import zeldaswordskills.handler.ZSSEventsFML;
 import zeldaswordskills.handler.ZSSItemEvents;
 import zeldaswordskills.item.ItemHeroBow;
-import zeldaswordskills.item.WeaponRegistry;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.ref.Config;
