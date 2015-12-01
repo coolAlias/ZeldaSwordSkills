@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.entity.npc;
 
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -49,6 +49,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.ISongEntity;
+import zeldaswordskills.entity.ZSSEntities;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.ZSSPlayerSongs;
 import zeldaswordskills.entity.ai.GenericAIDefendVillage;
 import zeldaswordskills.entity.ai.IVillageDefender;
 import zeldaswordskills.entity.buff.Buff;
