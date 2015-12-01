@@ -28,6 +28,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -602,6 +603,16 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		}
 		// Register the first model as the base resource
 		mesher.register(this, 0, models.get(0));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
+		for (int i = 1; i < 4; ++i) {
+			ItemStack stack = new ItemStack(item);
+			setLevel(stack, i);
+			list.add(stack);
+		}
 	}
 
 	@Override
