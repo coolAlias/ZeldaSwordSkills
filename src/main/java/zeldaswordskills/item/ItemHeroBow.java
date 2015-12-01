@@ -32,6 +32,7 @@ import mods.battlegear2.api.quiver.QuiverArrowRegistry.DefaultArrowFire;
 import mods.battlegear2.enchantments.BaseEnchantment;
 import mods.battlegear2.items.ItemQuiver;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -534,6 +535,16 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		iconArray = new IIcon[3];
 		for (int i = 0; i < iconArray.length; ++i) {
 			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9) + "_standard_" + (i + 1));
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void getSubItems(Item item, CreativeTabs tab, List list) {
+		for (int i = 1; i < 4; ++i) {
+			ItemStack stack = new ItemStack(item);
+			setLevel(stack, i);
+			list.add(stack);
 		}
 	}
 
