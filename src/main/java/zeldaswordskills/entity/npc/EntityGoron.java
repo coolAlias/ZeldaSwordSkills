@@ -389,11 +389,11 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 	 * Sets the 'zssFirstJoinFlag' in the villager's NBT data to prevent processing
 	 * again when the game is restarted.
 	 * @param villager The villager currently spawning
-	 * @result Depending on the current ration of villagers to gorons, a goron will be spawned near the villager
+	 * @result Depending on the current ratio of villagers to gorons, a goron will be spawned near the villager
 	 */
 	public static void doVillagerSpawn(EntityVillager villager, World world) {
 		NBTTagCompound compound = villager.getEntityData();
-		if (!compound.hasKey("zssFirstJoinFlag")) {
+		if (!villager.isChild() && !compound.hasKey("zssFirstJoinFlag")) {
 			compound.setBoolean("zssFirstJoinFlag", true);
 			int ratio = ZSSEntities.getGoronRatio();
 			if (ratio > 0 && world.rand.nextInt(ratio) == 0) {
