@@ -19,6 +19,7 @@ package zeldaswordskills.util;
 
 import java.util.UUID;
 
+import mods.battlegear2.api.core.IBattlePlayer;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentTranslation;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.IWeapon;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.item.ItemZeldaSword;
@@ -52,9 +54,9 @@ public class PlayerUtils
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && player.isUsingItem() && stack.getItem().getItemUseAction(stack) == EnumAction.BLOCK) {
 			return true;
-		}/* else if (ExampleMod.isBG2Enabled) {
-			// TODO return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
-		}*/
+		} else if (ZSSMain.isBG2Enabled) {
+			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
+		}
 		return false;
 	}
 

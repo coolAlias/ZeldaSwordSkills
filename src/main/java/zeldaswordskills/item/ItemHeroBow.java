@@ -23,6 +23,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mods.battlegear2.api.IAllowItem;
+import mods.battlegear2.api.ISheathed;
+import mods.battlegear2.api.quiver.IArrowFireHandler;
+import mods.battlegear2.api.quiver.ISpecialBow;
+import mods.battlegear2.api.quiver.QuiverArrowRegistry;
+import mods.battlegear2.api.quiver.QuiverArrowRegistry.DefaultArrowFire;
+import mods.battlegear2.enchantments.BaseEnchantment;
+import mods.battlegear2.items.ItemQuiver;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemModelMesher;
@@ -51,11 +59,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.Optional.Method;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -68,6 +79,7 @@ import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityArrowElemental.ElementType;
+import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -86,16 +98,13 @@ import com.google.common.collect.ImmutableBiMap;
  * ice arrows; level 3 can shoot all arrow types
  *
  */
-/*
-// TODO
 @Optional.InterfaceList(value={
 		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.quiver.ISpecialBow", modid="battlegear2", striprefs=true)
 })
-, IAllowItem, ISheathed, ISpecialBow
- */
-public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade, IModItem, IUnenchantable, IZoom
+public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade, IModItem, IUnenchantable, IZoom,
+IAllowItem, ISheathed, ISpecialBow
 {
 	public static enum Mode {
 		/** Default Hero Bow behavior searches for the first usable arrow of any kind */
@@ -170,7 +179,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	private static final Map<Item, ElementType> elementalArrowMap = new HashMap<Item, ElementType>();
 
 	/** Static list to store fire handlers; can't set type without requiring BG2 */
-	// TODO private static final List fireHandlers = new ArrayList();
+	private static final List fireHandlers = new ArrayList();
 
 	public ItemHeroBow() {
 		super();
@@ -332,12 +341,9 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		// This can only be reached if BG2 is not installed or no arrow was found in the quiver
 		if (nockArrowFromInventory(stack, player)) {
 			int duration = getMaxItemUseDuration(stack);
-			/*
-			// TODO
 			if (ZSSMain.isBG2Enabled) {
 				duration -= (EnchantmentHelper.getEnchantmentLevel(BaseEnchantment.bowCharge.get().effectId, stack) * 20000);
 			}
-			 */
 			player.setItemInUse(stack, duration);
 		}
 		return stack;
@@ -381,12 +387,9 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 			}
 
 			EntityArrow arrowEntity = getArrowEntity(arrowStack, player.worldObj, player, charge * 2.0F);
-			/*
-			// TODO
 			if (arrowEntity == null && ZSSMain.isBG2Enabled) { // try to construct BG2 arrow
 				arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, player.worldObj, player, charge * 2.0F);
 			}
-			 */
 			if (arrowEntity != null) {
 				applyArrowSettings(arrowEntity, bow, charge);
 				if (arrowEntity instanceof EntityArrowCustom) {
@@ -429,7 +432,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 			return true;
 		}
 		// allow hero's bow to fire arrows registered with BG2
-		return false; // TODO ZSSMain.isBG2Enabled && QuiverArrowRegistry.isKnownArrow(arrowStack);
+		return ZSSMain.isBG2Enabled && QuiverArrowRegistry.isKnownArrow(arrowStack);
 	}
 
 	/**
@@ -649,11 +652,9 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		return getLevel(stack) < 3;
 	}
 
-	/*
-	// TODO
 	@Method(modid="battlegear2")
 	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+	public boolean allowOffhand(ItemStack main, ItemStack offhand, EntityPlayer player) {
 		return offhand == null || offhand.getItem() instanceof ItemQuiver;
 	}
 
@@ -675,7 +676,6 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		ItemStack arrow = BattlegearEvents.getQuiverArrow(bow, player);
 		return (canShootArrow(player, bow, arrow) ? Result.ALLOW : Result.DENY);
 	}
-	 */
 
 	/**
 	 * Applies vanilla arrow enchantments and sets critical if applicable
@@ -781,8 +781,6 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	 */
 	@Method(modid="battlegear2")
 	public static void registerBG2() {
-		/*
-		// TODO
 		fireHandlers.add(new HeroBowFireHandler());
 		fireHandlers.add(new DefaultArrowFire());
 		QuiverArrowRegistry.addArrowFireHandler(new HeroBowFireHandler());
@@ -793,7 +791,6 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowFire, null);
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowIce, null);
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowLight, null);
-		 */
 	}
 
 	/** 
@@ -801,10 +798,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	 * customized versions of the vanilla arrow.
 	 * 
 	 * ZSS arrows require an appropriately-leveled ItemHeroBow, or creative mode.
-	 *
 	 */
-	/*
-	// TODO
 	@Optional.Interface(iface="mods.battlegear2.api.quiver.IArrowFireHandler", modid="battlegear2", striprefs=true)
 	public static class HeroBowFireHandler implements IArrowFireHandler {
 		@Method(modid="battlegear2")
@@ -832,5 +826,4 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 			return null;
 		}
 	}
-	 */
 }

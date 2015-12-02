@@ -19,6 +19,7 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBreakable;
 import net.minecraft.block.state.IBlockState;
@@ -36,6 +37,8 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.BlockWeight;
@@ -58,13 +61,8 @@ import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Multimap;
 
-/*
-@Optional.InterfaceList(value={
-		@Optional.Interface(iface="mods.battlegear2.api.IAllowItem", modid="battlegear2", striprefs=true),
-		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true)
-})
- */
-public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IWeapon
+@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IWeapon, IBattlegearWeapon
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -246,12 +244,17 @@ public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifi
 	public boolean isWeapon(ItemStack stack) {
 		return !WeaponRegistry.INSTANCE.isWeaponForbidden(this);
 	}
-	/*
-	// TODO
+
 	@Method(modid="battlegear2")
 	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+	public boolean allowOffhand(ItemStack main, ItemStack offhand, EntityPlayer player) {
 		return offhand == null;
+	}
+
+	@Method(modid="battlegear2")
+	@Override
+	public boolean isOffhandWieldable(ItemStack stack, EntityPlayer player) {
+		return false;
 	}
 
 	@Method(modid="battlegear2")
@@ -259,5 +262,4 @@ public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifi
 	public boolean sheatheOnBack(ItemStack stack) {
 		return true;
 	}
-	 */
 }

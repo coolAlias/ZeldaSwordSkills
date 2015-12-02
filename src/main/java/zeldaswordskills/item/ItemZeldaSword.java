@@ -19,6 +19,7 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityLivingBase;
@@ -36,6 +37,8 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
@@ -64,9 +67,8 @@ import com.google.common.collect.Multimap;
  * is able to fix it.
  *
  */
-// TODO @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-//TODO IBattlegearWeapon,
-public class ItemZeldaSword extends BaseModItemSword implements IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed, IUnenchantable, IWeapon
+@Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
+public class ItemZeldaSword extends BaseModItemSword implements IBattlegearWeapon, IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed, IUnenchantable, IWeapon
 {
 	/** Original ItemSword's field is private, but this has the same functionality */
 	protected final float weaponDamage;
@@ -334,7 +336,6 @@ public class ItemZeldaSword extends BaseModItemSword implements IFairyUpgrade, I
 		return true;
 	}
 
-	/*
 	@Method(modid="battlegear2")
 	@Override
 	public boolean sheatheOnBack(ItemStack stack) {
@@ -343,36 +344,13 @@ public class ItemZeldaSword extends BaseModItemSword implements IFairyUpgrade, I
 
 	@Method(modid="battlegear2")
 	@Override
-	public boolean isOffhandHandDual(ItemStack stack) {
-		return (Config.allowOffhandMaster() || !isMaster) && !twoHanded;
+	public boolean isOffhandWieldable(ItemStack stack, EntityPlayer player) {
+		return !twoHanded && (!isMaster || Config.allowOffhandMaster());
 	}
 
 	@Method(modid="battlegear2")
 	@Override
-	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
-		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
+	public boolean allowOffhand(ItemStack main, ItemStack offhand, EntityPlayer player) {
 		return !twoHanded;
 	}
-	 */
 }

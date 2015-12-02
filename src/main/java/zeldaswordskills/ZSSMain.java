@@ -36,6 +36,7 @@ import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.command.ZSSCommands;
 import zeldaswordskills.entity.ZSSEntities;
+import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.handler.ZSSEntityEvents;
@@ -120,7 +121,7 @@ public class ZSSMain
 		Config.postInit();
 		if (isBG2Enabled) {
 			ItemHeroBow.registerBG2();
-			// TODO MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
+			MinecraftForge.EVENT_BUS.register(new BattlegearEvents());
 		}
 		DungeonLootLists.init();
 	}

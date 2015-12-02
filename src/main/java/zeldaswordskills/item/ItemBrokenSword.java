@@ -56,7 +56,6 @@ import com.google.common.collect.Multimap;
  * Broken version of each sword; can only be repaired by a blacksmith.
  *
  */
-// TODO @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
 public class ItemBrokenSword extends BaseModItem implements IUnenchantable, IWeapon
 {
 	private static final String[] parentSwords = new String[]{"sword_kokiri","sword_ordon","sword_giant","sword_darknut"};
@@ -180,46 +179,4 @@ public class ItemBrokenSword extends BaseModItem implements IUnenchantable, IWea
 		}
 		return ZSSItems.swordOrdon;
 	}
-
-	/*
-	@Method(modid="battlegear2")
-	@Override
-	public boolean sheatheOnBack(ItemStack stack) {
-		return false;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean isOffhandHandDual(ItemStack stack) {
-		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandAttackEntity(OffhandAttackEvent event, ItemStack main, ItemStack offhand) {
-		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickAir(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean offhandClickBlock(PlayerInteractEvent event, ItemStack main, ItemStack offhand) {
-		return true;
-	}
-
-	@Method(modid="battlegear2")
-	@Override
-	public void performPassiveEffects(Side side, ItemStack main, ItemStack offhand) {}
-
-	@Method(modid="battlegear2")
-	@Override
-	public boolean allowOffhand(ItemStack main, ItemStack offhand) {
-		return true;
-	}
-	 */
 }

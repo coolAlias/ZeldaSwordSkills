@@ -21,6 +21,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import mods.battlegear2.api.ISheathed;
+import mods.battlegear2.api.core.BattlegearUtils;
+import mods.battlegear2.api.core.InventoryPlayerBattle;
+import mods.battlegear2.api.shield.IArrowCatcher;
+import mods.battlegear2.api.shield.IArrowDisplay;
+import mods.battlegear2.api.shield.IShield;
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -29,6 +35,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
@@ -42,9 +49,12 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.IDamageAoE;
 import zeldaswordskills.api.entity.IReflectable;
@@ -65,18 +75,14 @@ import zeldaswordskills.util.WorldUtils;
 
 import com.google.common.collect.Lists;
 
-/*
-// TODO
 @Optional.InterfaceList(value={
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowCatcher", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IArrowDisplay", modid="battlegear2", striprefs=true),
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
-, IShield, ISheathed, IArrowCatcher, IArrowDisplay
- */
 public class ItemZeldaShield extends BaseModItem implements IDashItem, IFairyUpgrade,
-ISwapModel, ISwingSpeed, IUnenchantable
+ISwapModel, ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	@SideOnly(Side.CLIENT)
 	private List<ModelResourceLocation> models;
@@ -146,14 +152,11 @@ ISwapModel, ISwingSpeed, IUnenchantable
 		float damageBlocked = damage;
 		if (toolMaterial == ToolMaterial.WOOD) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
-				/*
-				// TODO
 				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
 					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
 						((InventoryPlayerBattle) player.inventory).hasChanged = true;
 					}
 				}
-				 */
 			} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
 				damageBlocked *= magicReduction;
 			}
@@ -162,15 +165,11 @@ ISwapModel, ISwingSpeed, IUnenchantable
 				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
 					ForgeEventFactory.onPlayerDestroyItem(player, shield);
-					/*
-					// TODO
 					if (ZSSMain.isBG2Enabled && BattlegearUtils.isPlayerInBattlemode(player)) {
 						BattlegearUtils.setPlayerOffhandItem(player, null);
 					} else {
 						player.destroyCurrentEquippedItem();
 					}
-					 */
-					player.destroyCurrentEquippedItem();
 				}
 			}
 		} else if (toolMaterial == ToolMaterial.EMERALD) {
@@ -346,8 +345,6 @@ ISwapModel, ISwingSpeed, IUnenchantable
 		return ModelItemShield.class;
 	}
 
-	/*
-	// TODO
 	@Method(modid="battlegear2")
 	@Override
 	public void setArrowCount(ItemStack stack, int count) {
@@ -424,5 +421,4 @@ ISwapModel, ISwingSpeed, IUnenchantable
 	public float getDamageReduction(ItemStack shield, DamageSource source) {
 		return 0.0F;
 	}
-	 */
 }

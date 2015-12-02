@@ -156,7 +156,7 @@ public class ZSSCombatEvents
 	}
 
 	/**
-	 * Pre-event to handle shield blocking
+	 * Pre-event to handle shield blocking (only posted when not in BG2 battle mode)
 	 */
 	@SubscribeEvent(priority=EventPriority.NORMAL)
 	public void onPreHurt(LivingHurtEvent event) {

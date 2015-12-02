@@ -24,6 +24,7 @@ archivesBaseName = "1.8-zeldaswordskills"
 dependencies {
 	compile files (
 		"eclipse/libs/antiqueatlas-4.2.4-1.8-deobf.jar",
+		"eclipse/mods/1.8-Battlegear-Bin-1.0.10.0.jar",
 	)
 }
 
