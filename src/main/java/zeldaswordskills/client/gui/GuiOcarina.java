@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ResourceLocation;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.LearnSongPacket;
 import zeldaswordskills.network.bidirectional.PlayRecordPacket;

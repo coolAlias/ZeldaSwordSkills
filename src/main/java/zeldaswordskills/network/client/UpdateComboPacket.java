@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.ICombo;

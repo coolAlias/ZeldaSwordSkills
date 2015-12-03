@@ -22,7 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillBase;
 

@@ -25,7 +25,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.network.AbstractMessage;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;

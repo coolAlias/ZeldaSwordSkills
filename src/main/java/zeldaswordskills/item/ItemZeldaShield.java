@@ -57,7 +57,7 @@ import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;

@@ -29,7 +29,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySwordBeam;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;

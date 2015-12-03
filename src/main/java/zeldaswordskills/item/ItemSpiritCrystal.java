@@ -45,7 +45,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Config;

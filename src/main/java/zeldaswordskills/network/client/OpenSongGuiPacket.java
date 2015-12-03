@@ -23,7 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.songs.AbstractZeldaSong;

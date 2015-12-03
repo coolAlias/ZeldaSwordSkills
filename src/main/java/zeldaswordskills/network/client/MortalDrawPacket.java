@@ -23,7 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.client.ZSSClientEvents;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;

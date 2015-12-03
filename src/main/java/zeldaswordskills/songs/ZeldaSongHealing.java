@@ -21,7 +21,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
 import zeldaswordskills.ref.Sounds;

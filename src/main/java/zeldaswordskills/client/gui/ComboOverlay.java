@@ -24,7 +24,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.StatCollector;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.EndComboPacket;
 import zeldaswordskills.ref.Config;

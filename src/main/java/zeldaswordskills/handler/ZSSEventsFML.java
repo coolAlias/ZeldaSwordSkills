@@ -18,7 +18,7 @@
 package zeldaswordskills.handler;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.SyncConfigPacket;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;

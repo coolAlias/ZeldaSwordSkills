@@ -22,7 +22,7 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.skills.SkillBase;

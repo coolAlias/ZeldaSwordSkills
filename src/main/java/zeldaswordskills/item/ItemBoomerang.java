@@ -33,7 +33,7 @@ import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;

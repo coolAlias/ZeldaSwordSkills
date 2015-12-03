@@ -37,7 +37,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.client.ZSSKeyHandler;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.network.server.DashImpactPacket;

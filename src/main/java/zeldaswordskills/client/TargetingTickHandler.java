@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.render.EntityRendererAlt;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillActive;

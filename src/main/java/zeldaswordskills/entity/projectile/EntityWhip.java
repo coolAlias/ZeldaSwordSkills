@@ -49,7 +49,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemWhip;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;

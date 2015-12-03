@@ -15,7 +15,7 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.entity;
+package zeldaswordskills.entity.player;
 
 import java.util.EnumMap;
 import java.util.Map;

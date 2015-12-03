@@ -26,7 +26,7 @@ import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
-import zeldaswordskills.entity.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;

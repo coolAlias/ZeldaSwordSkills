@@ -25,7 +25,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.network.AbstractMessage.AbstractServerMessage;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Dash;

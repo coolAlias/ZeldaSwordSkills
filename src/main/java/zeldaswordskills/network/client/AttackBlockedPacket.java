@@ -23,7 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
