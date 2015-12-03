@@ -49,6 +49,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -153,6 +154,24 @@ public class ZSSItemEvents
 			}
 			if (mob instanceof IMob && mob.worldObj.rand.nextInt(Config.getPowerDropRate()) == 0) {
 				event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.powerPiece)));
+			}
+			// Check for heart and magic jar drops
+			if (mob instanceof IMob) {
+				// High-HP mobs have a better chance of dropping a Large Magic Jar;
+				// as a base line, Dark Nuts (50 HP) should have a 5-10% drop rate (caps at 25%)
+				float hp = mob.getMaxHealth();
+				float chance = MathHelper.clamp_float(((hp - 40F) / 100F), 0F, 0.25F);
+				if (hp > 100) { // add 5% per additional 100 HP to a max of 50% for a 500+ HP critter
+					chance = MathHelper.clamp_float(chance + (hp - 100F) / 2000F, 0F, 0.5F);
+				}
+				if (mob.worldObj.rand.nextFloat() < chance) {
+					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, new ItemStack(ZSSItems.magicJarBig)));
+				}
+				int consumable_chance = Config.getMobConsumableFrequency();
+				if (consumable_chance > 0 && mob.worldObj.rand.nextInt((event.drops.size() + 1) * (12 - consumable_chance)) == 0) {
+					ItemStack stack = new ItemStack(mob.worldObj.rand.nextInt(4) == 0 ? ZSSItems.magicJar : ZSSItems.smallHeart);
+					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, stack));
+				}
 			}
 		}
 	}
