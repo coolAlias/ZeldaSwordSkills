@@ -53,9 +53,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	private final EntityPlayer player;
 
-	private ZSSPlayerSkills playerSkills;
+	private final ZSSPlayerSkills playerSkills;
 
-	private ZSSPlayerSongs playerSongs;
+	private final ZSSPlayerSongs playerSongs;
 
 	/** Last ridden entity so it can be set after player is no longer riding */
 	private Entity lastRidden;
