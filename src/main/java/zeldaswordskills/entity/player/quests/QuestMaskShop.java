@@ -84,6 +84,8 @@ public class QuestMaskShop extends QuestBase
 	public IChatComponent getHint(EntityPlayer player, Object... data) {
 		if (canComplete(player)) {
 			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.hint.letter");
+		} else if (ZSSQuests.get(player).hasCompleted(QuestZeldaTalk.class)) {
+			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.hint.zelda");
 		} else {
 			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.hint." + rand.nextInt(4));
 		}

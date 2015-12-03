@@ -96,6 +96,7 @@ import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
+import zeldaswordskills.entity.npc.EntityNpcZelda;
 import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.entity.passive.EntityNavi;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
@@ -294,6 +295,7 @@ public class ZSSEntities
 		registerEntity(EntityNpcBarnes.class, "npc.barnes", ++modEntityIndex, 80, 0x8B8378, 0xED9121);
 		registerEntity(EntityNpcMaskTrader.class, "npc.mask_trader", ++modEntityIndex, 80, 0x0000EE, 0x00C957);
 		registerEntity(EntityNpcOrca.class, "npc.orca", ++modEntityIndex, 80, 0x0000EE, 0x9A32CD);
+		registerEntity(EntityNpcZelda.class, "npc.zelda", ++modEntityIndex, 80, 0xCC0099, 0xFFFFFF);
 	}
 
 	@SideOnly(Side.CLIENT) 
@@ -345,6 +347,8 @@ public class ZSSEntities
 				new ModelMaskSalesman(), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_mask_salesman.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityNpcOrca.class, new RenderGenericLiving(manager, 
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_orca.png"));
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcZelda.class, new RenderGenericLiving(manager, 
+				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_zelda.png"));
 	}
 
 	/**

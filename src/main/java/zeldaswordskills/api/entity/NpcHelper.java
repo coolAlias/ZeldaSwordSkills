@@ -33,6 +33,7 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
+import zeldaswordskills.entity.npc.EntityNpcZelda;
 
 /**
  *
@@ -50,6 +51,8 @@ public class NpcHelper
 		nameToClassMap.put("Happy Mask Salesman", EntityNpcMaskTrader.class);
 		nameToClassMap.put("Mask Salesman", EntityNpcMaskTrader.class);
 		nameToClassMap.put("Orca", EntityNpcOrca.class);
+		nameToClassMap.put("Princess Zelda", EntityNpcZelda.class);
+		nameToClassMap.put("Zelda", EntityNpcZelda.class);
 	}
 
 	/**

@@ -240,7 +240,6 @@ public class ItemInstrument extends BaseModItem implements IRightClickEntity
 		teacherSongs.put("Impa", ZeldaSongs.songZeldasLullaby);
 		teacherSongs.put("Malon", ZeldaSongs.songEpona);
 		teacherSongs.put("Saria", ZeldaSongs.songSaria);
-		teacherSongs.put("Zelda", ZeldaSongs.songTime);
 		teachersForClass.put(EntityVillager.class, teacherSongs);
 	}
 }
