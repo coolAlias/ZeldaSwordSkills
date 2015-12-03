@@ -38,7 +38,9 @@ import zeldaswordskills.api.entity.ISongTeacher;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.IQuestHandler;
 import zeldaswordskills.entity.player.quests.QuestBase;
+import zeldaswordskills.entity.player.quests.QuestPendants;
 import zeldaswordskills.entity.player.quests.QuestZeldaTalk;
+import zeldaswordskills.entity.player.quests.QuestZeldasLetter;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.network.PacketDispatcher;
@@ -54,6 +56,8 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 	/** List of quests, in order, which involve interacting with Zelda */
 	private static final ImmutableSet<Class<? extends IQuest>> QUEST_LIST = new ImmutableSet.Builder<Class<? extends IQuest>>()
 			.add(QuestZeldaTalk.class)
+			.add(QuestPendants.class)
+			.add(QuestZeldasLetter.class)
 			.build();
 
 	/** Set when Zelda first converting from a villager and used to end the song */
