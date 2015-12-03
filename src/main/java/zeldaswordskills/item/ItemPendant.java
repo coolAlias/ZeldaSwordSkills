@@ -48,10 +48,24 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ItemPendant extends Item implements IUnenchantable
 {
 	/** The three Pendants of Virtue */
-	public static enum PendantType {POWER,WISDOM,COURAGE};
-
-	/** Unlocalized name suffixes */
-	private String[] names = {"_power","_wisdom","_courage"};
+	public static enum PendantType {
+		POWER("power", 1),
+		WISDOM("wisdom", 2),
+		COURAGE("courage", 4);
+		public final String unlocalizedName;
+		/** Bit flag used in QuestPendant */
+		public final int bitFlag;
+		private PendantType(String name, int bitFlag) {
+			this.unlocalizedName = name;
+			this.bitFlag = bitFlag;
+		}
+		/**
+		 * Returns pendant type by damage value (0, 1, or 2), NOT the same as the bit flag
+		 */
+		public static PendantType byDamage(int damage) {
+			return PendantType.values()[damage % PendantType.values().length];
+		}
+	};
 
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -81,28 +95,28 @@ public class ItemPendant extends Item implements IUnenchantable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIconFromDamage(int par1) {
-		return iconArray[par1 % names.length];
+		return iconArray[PendantType.byDamage(par1).ordinal()];
 	}
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return super.getUnlocalizedName() + names[stack.getItemDamage() % names.length];
+		return super.getUnlocalizedName() + "_" + PendantType.byDamage(stack.getItemDamage()).unlocalizedName;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List list) {
-		for (int i = 0; i < names.length; ++i) {
-			list.add(new ItemStack(item, 1, i));
+		for (PendantType type : PendantType.values()) {
+			list.add(new ItemStack(item, 1, type.ordinal()));
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister register) {
-		iconArray = new IIcon[names.length];
-		for (int i = 0; i < names.length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":pendant" + names[i]);
+		iconArray = new IIcon[PendantType.values().length];
+		for (PendantType type : PendantType.values()) {
+			iconArray[type.ordinal()] = register.registerIcon(ModInfo.ID + ":pendant_" + type.unlocalizedName);
 		}
 	}
 

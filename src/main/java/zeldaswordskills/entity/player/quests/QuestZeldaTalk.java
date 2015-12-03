@@ -74,6 +74,8 @@ public final class QuestZeldaTalk extends QuestBase
 				new ChatComponentTranslation("chat.zss.npc.zelda.ocarina." + chat + ".0"),
 				new ChatComponentTranslation("chat.zss.npc.zelda.ocarina." + chat + ".1"));
 		ocarina = null;
+		// Add next quest so it triggers when player talks to Zelda next
+		ZSSQuests.get(player).add(new QuestPendants());
 		return true;
 	}
 
@@ -81,6 +83,7 @@ public final class QuestZeldaTalk extends QuestBase
 	public void forceComplete(EntityPlayer player, Object... data) {
 		ocarina = null;
 		set(FLAG_COMPLETE);
+		ZSSQuests.get(player).add(new QuestPendants());
 	}
 
 	@Override
