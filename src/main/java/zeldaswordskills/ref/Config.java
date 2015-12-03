@@ -341,6 +341,8 @@ public class Config
 	private static float jarDropChance;
 	/** Creeper bomb drop chance */
 	private static float creeperDrop;
+	/** Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common] */
+	private static int mobConsumableFrequency;
 	/** [Skill Orbs] Enable skill orbs to drop as loot from mobs */
 	private static boolean enableOrbDrops;
 	/** [Skill Orbs] Chance of dropping random orb */
@@ -562,6 +564,7 @@ public class Config
 		grassDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from grass [0-100]", 15).getInt(), 0, 100);
 		jarDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from empty jars when broken [0-100]", 20).getInt(), 0, 100);
 		creeperDrop = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt(), 0, 100);
+		mobConsumableFrequency = MathHelper.clamp_int(config.get("Drops", "Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common]", 5).getInt(), 0, 10);
 		enableOrbDrops = config.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
 		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
 		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
@@ -749,6 +752,7 @@ public class Config
 	public static float getGrassDropChance() { return grassDropChance; }
 	public static float getJarDropChance() { return jarDropChance; }
 	public static float getCreeperDropChance() { return creeperDrop; }
+	public static int getMobConsumableFrequency() { return mobConsumableFrequency; }
 	public static boolean areOrbDropsEnabled() { return enableOrbDrops; }
 	public static float getChanceForRandomDrop() { return randomDropChance; }
 	public static float getRandomMobDropChance() { return genericMobDropChance; }
