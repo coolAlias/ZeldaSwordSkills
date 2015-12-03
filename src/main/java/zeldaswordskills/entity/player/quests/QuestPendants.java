@@ -104,6 +104,7 @@ public final class QuestPendants extends QuestBase
 	@Override
 	public void forceComplete(EntityPlayer player, Object... data) {
 		set(FLAG_COMPLETE);
+		ZSSQuests.get(player).add(new QuestMasterSword());
 	}
 
 	@Override

@@ -39,6 +39,7 @@ import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.IQuestHandler;
 import zeldaswordskills.entity.player.quests.QuestBase;
+import zeldaswordskills.entity.player.quests.QuestMasterSword;
 import zeldaswordskills.entity.player.quests.QuestPendants;
 import zeldaswordskills.entity.player.quests.QuestZeldaTalk;
 import zeldaswordskills.entity.player.quests.QuestZeldasLetter;
@@ -59,6 +60,7 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 			.add(QuestZeldaTalk.class)
 			.add(QuestPendants.class)
 			.add(QuestZeldasLetter.class)
+			.add(QuestMasterSword.class)
 			.build();
 
 	/** Set when Zelda first converting from a villager and used to end the song */
@@ -255,6 +257,10 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 		ZSSQuests quests = ZSSQuests.get(player);
 		if (!quests.hasCompleted(QuestZeldaTalk.class)) {
 			return null; // continue to Entity#interact
+		} else if (!quests.hasBegun(QuestMasterSword.class)) {
+			deny = "chat.zss.npc.zelda.song.not_ready";
+		} else if (!quests.hasCompleted(QuestMasterSword.class)) {
+			deny = "chat.zss.npc.zelda.master_sword.hint." + rand.nextInt(3);
 		} else if (((ItemInstrument) stack.getItem()).getInstrument(stack).getPower() < 5) {
 			deny = "chat.zss.npc.zelda.song.weak";
 		}
