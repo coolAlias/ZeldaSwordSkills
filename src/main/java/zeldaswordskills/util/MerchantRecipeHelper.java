@@ -17,6 +17,8 @@
 
 package zeldaswordskills.util;
 
+import java.util.Iterator;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
@@ -34,18 +36,15 @@ public class MerchantRecipeHelper {
 	 * @return always returns true if the recipe is null
 	 */
 	public static boolean doesListContain(MerchantRecipeList trades, MerchantRecipe recipe) {
-		for (int i = 0; i < trades.size() && recipe != null; ++i) {
-			MerchantRecipe recipe1 = (MerchantRecipe) trades.get(i);
-			if (ItemStack.areItemStacksEqual(recipe.getItemToBuy(), recipe1.getItemToBuy())) {
-				if (ItemStack.areItemStacksEqual(recipe.getSecondItemToBuy(), recipe1.getSecondItemToBuy())) {
-					if (ItemStack.areItemStacksEqual(recipe.getItemToSell(), recipe1.getItemToSell())) {
-						return true;
-					}
-				}
+		if (recipe == null) {
+			return true;
+		}
+		for (int i = 0; i < trades.size(); ++i) {
+			if (areTradesIdentical(recipe, (MerchantRecipe) trades.get(i))) {
+				return true;
 			}
 		}
-
-		return (recipe == null);
+		return false;
 	}
 
 	/**
@@ -87,7 +86,7 @@ public class MerchantRecipeHelper {
 	}
 
 	/**
-	 * Adds the trade to the list if and only if a similar trade (i.e. same IDs but different
+	 * Adds the trade to the list if and only if a similar trade (i.e. same Items but different
 	 * stack sizes) doesn't already exist, or if 'replaceExistingTrade' is true.
 	 * @return returns true if the new trade was added or replaced a current trade
 	 */
@@ -104,6 +103,28 @@ public class MerchantRecipeHelper {
 		}
 		trades.add(trade);
 		return true;
+	}
+
+	/**
+	 * Removes matching trades from the recipe list
+	 * @param exactMatch true to match stack sizes and NBTTagCompounds
+	 * @param removeAll true to remove all matching trades, or false to remove only one
+	 * @return true if trade was removed
+	 */
+	public static boolean removeTrade(MerchantRecipeList trades, MerchantRecipe trade, boolean exactMatch, boolean removeAll) {
+		boolean found = false;
+		Iterator<MerchantRecipe> iterator = trades.iterator();
+		while (iterator.hasNext()) {
+			MerchantRecipe recipe = iterator.next();
+			if (exactMatch ? areTradesIdentical(trade, recipe) : haveSameTradeItems(trade, recipe)) {
+				iterator.remove();
+				if (!removeAll) {
+					return true;
+				}
+				found = true;
+			}
+		}
+		return found;
 	}
 
 	/**
@@ -124,6 +145,21 @@ public class MerchantRecipeHelper {
 			}
 		}
 
+		return false;
+	}
+
+	/**
+	 * Returns true if the two trades match identically, including stack sizes and NBT tag compounds for each item.
+	 * Neither parameter should be null.
+	 */
+	public static boolean areTradesIdentical(MerchantRecipe a, MerchantRecipe b) {
+		if (ItemStack.areItemStacksEqual(a.getItemToBuy(), b.getItemToBuy())) {
+			if (ItemStack.areItemStacksEqual(a.getSecondItemToBuy(), b.getSecondItemToBuy())) {
+				if (ItemStack.areItemStacksEqual(a.getItemToSell(), b.getItemToSell())) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 }
