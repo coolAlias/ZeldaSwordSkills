@@ -21,9 +21,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import zeldaswordskills.ZSSMain;
 import cpw.mods.fml.common.event.FMLInterModComms;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 /**
  * 
@@ -47,22 +48,42 @@ public class WeaponRegistry
 
 	private final Set<Item> weapons = new HashSet<Item>();
 
+	private final Set<Item> forbidden_swords = new HashSet<Item>();
+
+	private final Set<Item> forbidden_weapons = new HashSet<Item>();
+
 	public static final WeaponRegistry INSTANCE = new WeaponRegistry();
 
 	private WeaponRegistry() {}
 
 	/**
-	 * Returns true if the item is registered as a sword
+	 * Returns true if the item is registered as a sword or extends ItemSword.
 	 */
 	public boolean isSword(Item item) {
-		return item != null && swords.contains(item);
+		return !isSwordForbidden(item) && (item instanceof ItemSword || swords.contains(item));
 	}
 
 	/**
-	 * Returns true if the item is registered as a non-sword weapon
+	 * Returns true if the item is forbidden either as a sword or a weapon (if it's not a weapon, it's not a sword).
+	 * Recommended to use this method instead of {@link #isSword} when implementing {@link IWeapon#isSword}.
+	 */
+	public boolean isSwordForbidden(Item item) {
+		return forbidden_swords.contains(item) || isWeaponForbidden(item);
+	}
+
+	/**
+	 * Returns true if the item is registered as a non-sword weapon or extends ItemSword
 	 */
 	public boolean isWeapon(Item item) {
-		return item != null && weapons.contains(item);
+		return !isWeaponForbidden(item) && (item instanceof ItemSword || weapons.contains(item));
+	}
+
+	/**
+	 * Returns true if the item is forbidden as a weapon.
+	 * Recommended to use this method instead of {@link #isWeapon} when implementing {@link IWeapon#isWeapon}.
+	 */
+	public boolean isWeaponForbidden(Item item) {
+		return forbidden_weapons.contains(item);
 	}
 
 	/**
@@ -73,29 +94,146 @@ public class WeaponRegistry
 		if (!msg.isItemStackMessage()) {
 			return;
 		} else if (msg.key.equalsIgnoreCase(IMC_SWORD_KEY)) {
-			registerSword(msg.getSender(), msg.getItemStackValue());
+			registerSword("IMC", msg.getSender(), msg.getItemStackValue().getItem());
 		} else if (msg.key.equalsIgnoreCase(IMC_WEAPON_KEY)) {
-			registerWeapon(msg.getSender(), msg.getItemStackValue());
+			registerWeapon("IMC", msg.getSender(), msg.getItemStackValue().getItem());
 		}
 	}
 
-	private void registerSword(String sender, ItemStack stack) {
-		if (weapons.contains(stack.getItem())) {
-			ZSSMain.logger.warn(String.format("[Message from %s] CONFLICT: %s cannot be registered as a sword - it is already registered as a non-sword weapon", sender, stack.getUnlocalizedName()));
-		} else if (swords.add(stack.getItem())) {
-			ZSSMain.logger.info(String.format("[Message from %s] Registered %s as a sword", sender, stack.getUnlocalizedName()));
-		} else {
-			ZSSMain.logger.warn(String.format("[Message from %s] %s has already been registered as a sword", sender, stack.getUnlocalizedName()));
+	/**
+	 * Registers an array of named items either as swords or generic weapons
+	 * @param names Must be in the format 'modid:registered_item_name'
+	 * @param origin Information about the origin of the names array, e.g. "Config" or "Command"
+	 * @param isSword True to register the items as swords, or false for generic melee weapons
+	 */
+	public void registerItems(String[] names, String origin, boolean isSword) {
+		processArray(names, origin, isSword, true);
+	}
+
+	/**
+	 * Forbids an array of named items either from the swords or generic weapons registry
+	 * @param names Must be in the format 'modid:registered_item_name'
+	 * @param origin Information about the origin of the names array, e.g. "Config" or "Command"
+	 * @param isSword True to forbid the items as swords, or false for generic melee weapons
+	 */
+	public void forbidItems(String[] names, String origin, boolean isSword) {
+		processArray(names, origin, isSword, false);
+	}
+
+	private void processArray(String[] names, String origin, boolean isSword, boolean register) {
+		for (String s : names) {
+			String[] parts = parseString(s);
+			if (parts != null) {
+				Item item = GameRegistry.findItem(parts[0], parts[1]);
+				if (item == null) {
+					ZSSMain.logger.warn(String.format("[WeaponRegistry] [%s] %s:%s could not be found - the mod may not be installed, or you may have typed it incorrectly", origin, parts[0], parts[1]));
+				} else if (isSword) {
+					if (register) {
+						registerSword(origin, parts[0], item);
+					} else {
+						removeSword(origin, parts[0], item);
+					}
+				} else if (register) {
+					registerWeapon(origin, parts[0], item);
+				} else {
+					removeWeapon(origin, parts[0], item);
+				}
+			}
 		}
 	}
 
-	private void registerWeapon(String sender, ItemStack stack) {
-		if (swords.contains(stack.getItem())) {
-			ZSSMain.logger.warn(String.format("[Message from %s] CONFLICT: %s cannot be registered as a weapon - it is already registered as a sword", sender, stack.getUnlocalizedName()));
-		} else if (weapons.add(stack.getItem())) {
-			ZSSMain.logger.info(String.format("[Message from %s] Registered %s as a non-sword weapon", sender, stack.getUnlocalizedName()));
+	/**
+	 * Registers an item as a sword: it may be used to activate sword-specific skills, cut grass, etc.
+	 * Item will be removed from the forbidden sword list if present.
+	 * @param origin String containing information about origins of registration, e.g. "IMC"
+	 * @param modid String modid of mod to which the Item belongs
+	 * @param item Item to add to the sword registry
+	 * @return true if item was successfully added
+	 */
+	public boolean registerSword(String origin, String modid, Item item) {
+		boolean added = false;
+		if (weapons.contains(item)) {
+			ZSSMain.logger.warn(String.format("[WeaponRegistry] [%s] CONFLICT: %s:%s cannot be registered as a sword - it is already registered as a non-sword weapon", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+		} else if (swords.add(item)) {
+			ZSSMain.logger.info(String.format("[WeaponRegistry] [%s] Registered %s:%s as a sword", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+			added = true;
 		} else {
-			ZSSMain.logger.warn(String.format("[Message from %s] %s has already been registered as a weapon", sender, stack.getUnlocalizedName()));
+			ZSSMain.logger.warn(String.format("[WeaponRegistry] [%s] %s:%s has already been registered as a sword", origin, modid, item.getUnlocalizedName().replace("item.", "")));
 		}
+		forbidden_swords.remove(item);
+		return added;
+	}
+
+	/**
+	 * Registers an item as a generic melee weapon: it may be used to activate all skills that do not specifically require a sword.
+	 * Item will be removed from the forbidden weapons list if present.
+	 * @param origin String containing information about origins of registration, e.g. "IMC"
+	 * @param modid String modid of mod to which the Item belongs
+	 * @param item Item to add to the weapon registry
+	 * @return true if item was successfully added
+	 */
+	public boolean registerWeapon(String origin, String modid, Item item) {
+		boolean added = false;
+		if (swords.contains(item)) {
+			ZSSMain.logger.warn(String.format("[WeaponRegistry] [%s] CONFLICT: %s:%s cannot be registered as a weapon - it is already registered as a sword", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+		} else if (weapons.add(item)) {
+			ZSSMain.logger.info(String.format("[WeaponRegistry] [%s] Registered %s:%s as a non-sword weapon", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+			added = true;
+		} else {
+			ZSSMain.logger.warn(String.format("[WeaponRegistry] [%s] %s:%s has already been registered as a weapon", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+		}
+		forbidden_weapons.remove(item);
+		return added;
+	}
+
+	/**
+	 * Removes the item from the SWORD registry if present and adds it to the forbidden swords list
+	 * @return true if item was both present and removed from the SWORD list
+	 */
+	public boolean removeSword(String origin, String modid, Item item) {
+		boolean added = false; // prevent too much log spam
+		if (forbidden_swords.add(item)) {
+			added = true;
+			ZSSMain.logger.info(String.format("[WeaponRegistry] [%s] %s:%s added to FORBIDDEN swords list", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+		}
+		if (swords.remove(item)) {
+			ZSSMain.logger.info(String.format("[WeaponRegistry] [%s] Removed %s:%s from list of registered SWORDS", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+			return true;
+		} else if (!added) {
+			ZSSMain.logger.warn(String.format("[WeaponRegistry] [%s] Could not remove %s:%s - it was not registered as a sword", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+		}
+		return added;
+	}
+
+	/**
+	 * Removes the item from the WEAPON registry if present and adds it to the forbidden weapons list
+	 * @return true if item was both present and removed from the WEAPON list
+	 */
+	public boolean removeWeapon(String origin, String modid, Item item) {
+		boolean added = false; // prevent too much log spam
+		if (forbidden_weapons.add(item)) {
+			added = true;
+			ZSSMain.logger.info(String.format("[WeaponRegistry] [%s] %s:%s added to FORBIDDEN weapons list", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+		}
+		if (weapons.remove(item)) {
+			ZSSMain.logger.info(String.format("[WeaponRegistry] [%s] Removed %s:%s from list of registered WEAPONS", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+			return true;
+		} else if (!added) {
+			ZSSMain.logger.warn(String.format("[WeaponRegistry] [%s] Could not remove %s:%s - it was not registered as a non-sword weapon", origin, modid, item.getUnlocalizedName().replace("item.", "")));
+		}
+		return added;
+	}
+
+	/**
+	 * Parses a String into an array containing the mod_id and item_name, or NULL if format was invalid
+	 * @param itemid Expected format is 'modid:registered_item_name'
+	 */
+	public static String[] parseString(String itemid) {
+		String[] parts = itemid.split(":");
+		if (parts.length == 2) {
+			return parts;
+		}
+		ZSSMain.logger.error(String.format("[WeaponRegistry] String must be in the format 'modid:registered_item_name', received: %s", itemid));
+		return null;
 	}
 }
