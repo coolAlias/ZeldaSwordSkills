@@ -18,6 +18,7 @@
 package zeldaswordskills.ref;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +28,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.client.SyncConfigPacket;
@@ -82,6 +84,15 @@ public class Config
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
 	private static boolean enableOffhandMaster;
+	/*================== WEAPON REGISTRY =====================*/
+	/** Items that are considered Swords for all intents and purposes */
+	private static String[] swords = new String[0];
+	/** Items that are considered Melee Weapons for all intents and purposes */
+	private static String[] weapons = new String[0];
+	/** Items that are forbidden from being considered as Swords */
+	private static String[] forbidden_swords = new String[0];
+	/** Items that are forbidden from being considered as Melee Weapons */
+	private static String[] forbidden_weapons = new String[0];
 	/*================== GENERAL =====================*/
 	/** [SYNC] Whether players can be stunned; if false, item use is still interrupted */
 	private static boolean enableStunPlayer;
@@ -367,6 +378,22 @@ public class Config
 		canTargetPlayers = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
+		/*================== WEAPON REGISTRY =====================*/
+		swords = config.get("Weapon Registry", "[Allowed Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass.\nAll swords are also considered WEAPONS.").getStringList();
+		Arrays.sort(swords);
+		weapons = config.get("Weapon Registry", "[Allowed Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item as a generic melee WEAPON. This means it can be used for all\nskills except those that specifically require a sword, as well as some other things.").getStringList();
+		Arrays.sort(weapons);
+		// Battlegear2 weapons ALL extend ItemSword, but are not really swords
+		String[] forbidden = new String[]{
+				"battlegear2:dagger.wood","battlegear2:dagger.stone","battlegear2:dagger.gold","battlegear2:dagger.iron","battlegear2:dagger.diamond",	
+				"battlegear2:mace.wood","battlegear2:mace.stone","battlegear2:mace.gold","battlegear2:mace.iron","battlegear2:mace.diamond",
+				"battlegear2:spear.wood","battlegear2:spear.stone","battlegear2:spear.gold","battlegear2:spear.iron","battlegear2:spear.diamond",
+				"battlegear2:waraxe.wood","battlegear2:waraxe.stone","battlegear2:waraxe.gold","battlegear2:waraxe.iron","battlegear2:waraxe.diamond"
+		};
+		forbidden_swords = config.get("Weapon Registry", "[Forbidden Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", forbidden, "Forbid one or more items from acting as SWORDs, e.g. if a mod item extends ItemSword but is not really a sword").getStringList();
+		Arrays.sort(forbidden_swords);
+		forbidden_weapons = config.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
+		Arrays.sort(forbidden_weapons);
 		/*================== GENERAL =====================*/
 		enableStunPlayer = config.get("General", "Whether players can be stunned; if false, item use is still interrupted", false).getBoolean(false);
 		enableSwingSpeed = config.get("General", "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", true).getBoolean(true);
@@ -515,6 +542,10 @@ public class Config
 	}
 
 	public static void postInit() {
+		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
+		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 		// load boss types last because they rely on blocks, mobs, etc. to already have been initialized
 		// other biome-related stuff just so all biomes can be sure to have loaded
 		BiomeType.postInit(config);

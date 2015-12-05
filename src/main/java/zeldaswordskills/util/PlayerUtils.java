@@ -79,7 +79,7 @@ public class PlayerUtils
 		} else if (stack.getItem() instanceof IWeapon) {
 			return ((IWeapon) stack.getItem()).isSword(stack);
 		}
-		return (stack.getItem() instanceof ItemSword || WeaponRegistry.INSTANCE.isSword(stack.getItem()));
+		return WeaponRegistry.INSTANCE.isSword(stack.getItem());
 	}
 
 	/**
