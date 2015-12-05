@@ -23,11 +23,17 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.RecipeSorter;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.ModInfo;
 
 public class RecipeBagToBombArrows implements IRecipe {
+
+	public RecipeBagToBombArrows() {
+		RecipeSorter.register(ModInfo.ID + ":bagtobombarrows", RecipeBagToBombArrows.class, RecipeSorter.Category.SHAPELESS, "after:minecraft:shapeless");
+	}
 
 	@Override
 	public boolean matches(InventoryCrafting grid, World world) {
