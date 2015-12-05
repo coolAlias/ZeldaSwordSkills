@@ -21,10 +21,16 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.RecipeSorter;
 import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.ModInfo;
 
 public class RecipeCombineBombBag implements IRecipe {
+
+	public RecipeCombineBombBag() {
+		RecipeSorter.register(ModInfo.ID + ":combinebombbag", RecipeCombineBombBag.class, RecipeSorter.Category.SHAPELESS, "after:minecraft:shapeless");
+	}
 
 	@Override
 	public boolean matches(InventoryCrafting grid, World world) {
