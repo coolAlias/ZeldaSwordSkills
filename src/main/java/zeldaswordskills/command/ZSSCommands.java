@@ -29,5 +29,6 @@ public class ZSSCommands
 		event.registerServerCommand(CommandRemoveSkill.INSTANCE);
 		event.registerServerCommand(CommandGrantSong.INSTANCE);
 		event.registerServerCommand(CommandRemoveSong.INSTANCE);
+		event.registerServerCommand(CommandWeaponRegistry.INSTANCE);
 	}
 }
