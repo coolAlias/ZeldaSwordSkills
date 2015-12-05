@@ -344,7 +344,6 @@ public class Config
 
 	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
-		ZSSMain.logger.info("Reading config: " + config.toString());
 		config.load();
 		ZSSItems.initConfig(config);
 
