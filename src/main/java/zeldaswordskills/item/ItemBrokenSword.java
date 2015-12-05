@@ -39,6 +39,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.api.item.IWeapon;
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
@@ -55,7 +57,7 @@ import com.google.common.collect.Multimap;
  *
  */
 // TODO @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
-public class ItemBrokenSword extends BaseModItem implements IUnenchantable // TODO, IBattlegearWeapon
+public class ItemBrokenSword extends BaseModItem implements IUnenchantable, IWeapon
 {
 	private static final String[] parentSwords = new String[]{"sword_kokiri","sword_ordon","sword_giant","sword_darknut"};
 
@@ -143,6 +145,16 @@ public class ItemBrokenSword extends BaseModItem implements IUnenchantable // TO
 		Multimap multimap = super.getAttributeModifiers(stack);
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", 2.0D, 0));
 		return multimap;
+	}
+
+	@Override
+	public boolean isSword(ItemStack stack) {
+		return !WeaponRegistry.INSTANCE.isSwordForbidden(this);
+	}
+
+	@Override
+	public boolean isWeapon(ItemStack stack) {
+		return !WeaponRegistry.INSTANCE.isWeaponForbidden(this);
 	}
 
 	/**

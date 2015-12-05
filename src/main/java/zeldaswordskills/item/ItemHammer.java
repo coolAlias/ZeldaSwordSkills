@@ -46,6 +46,8 @@ import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.api.item.IWeapon;
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.handler.ZSSCombatEvents;
@@ -62,7 +64,7 @@ import com.google.common.collect.Multimap;
 		@Optional.Interface(iface="mods.battlegear2.api.ISheathed", modid="battlegear2", striprefs=true)
 })
  */
-public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable // TODO , IAllowItem, ISheathed
+public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IWeapon
 {
 	/** Max resistance that a block may have and still be smashed */
 	private final BlockWeight strength;
@@ -235,6 +237,15 @@ public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifi
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 	}
 
+	@Override
+	public boolean isSword(ItemStack stack) {
+		return false;
+	}
+
+	@Override
+	public boolean isWeapon(ItemStack stack) {
+		return !WeaponRegistry.INSTANCE.isWeaponForbidden(this);
+	}
 	/*
 	// TODO
 	@Method(modid="battlegear2")

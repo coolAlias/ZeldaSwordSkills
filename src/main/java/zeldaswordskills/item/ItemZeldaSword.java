@@ -43,6 +43,7 @@ import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
+import zeldaswordskills.api.item.IWeapon;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -64,7 +65,7 @@ import com.google.common.collect.Multimap;
  */
 // TODO @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
 //TODO IBattlegearWeapon,
-public class ItemZeldaSword extends BaseModItemSword implements IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed, IUnenchantable 
+public class ItemZeldaSword extends BaseModItemSword implements IFairyUpgrade, IParryModifier, ISacredFlame, ISwingSpeed, IUnenchantable, IWeapon
 {
 	/** Original ItemSword's field is private, but this has the same functionality */
 	protected final float weaponDamage;
@@ -319,6 +320,16 @@ public class ItemZeldaSword extends BaseModItemSword implements IFairyUpgrade, I
 		if (!flag) {
 			stack.addEnchantment(Enchantment.sharpness, 1);
 		}
+	}
+
+	@Override
+	public boolean isSword(ItemStack stack) {
+		return true;
+	}
+
+	@Override
+	public boolean isWeapon(ItemStack stack) {
+		return true;
 	}
 
 	/*
