@@ -23,12 +23,16 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 
+import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
@@ -45,6 +49,7 @@ public class RenderEntitySwordBeam extends Render
 	public void renderBeam(Entity entity, double x, double y, double z, float yaw, float partialTick) {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
+		GlStateManager.pushAttrib();
 		GlStateManager.enableBlend();
 		GlStateManager.enableLighting();
 		GlStateManager.enableTexture2D();
@@ -55,6 +60,8 @@ public class RenderEntitySwordBeam extends Render
 		WorldRenderer renderer = tessellator.getWorldRenderer();
 		GlStateManager.rotate(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
 		GlStateManager.rotate(-renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+		float rgb = getRgb(entity);
+		GlStateManager.color(rgb, rgb, rgb);
 		renderer.startDrawingQuads();
 		renderer.setNormal(0.0F, 1.0F, 0.0F);
 		renderer.addVertexWithUV(-0.5D, -0.25D, 0.0D, 0, 1);
@@ -62,9 +69,7 @@ public class RenderEntitySwordBeam extends Render
 		renderer.addVertexWithUV(0.5D, 0.75D, 0.0D, 1, 0);
 		renderer.addVertexWithUV(-0.5D, 0.75D, 0.0D, 0, 0);
 		tessellator.draw();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.disableLighting();
-		GlStateManager.disableBlend();
+		GlStateManager.popAttrib();
 		GlStateManager.popMatrix();
 	}
 
@@ -76,5 +81,15 @@ public class RenderEntitySwordBeam extends Render
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
 		return texture;
+	}
+
+	private float getRgb(Entity entity) {
+		if (entity instanceof EntityThrowable) {
+			EntityLivingBase thrower = ((EntityThrowable) entity).getThrower();
+			if (thrower != null && thrower.getCurrentArmor(ArmorIndex.WORN_HELM) != null && thrower.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == ZSSItems.maskFierce) {
+				return 0.0F; //  nice and dark for the Fierce Diety
+			}
+		}
+		return 1.0F;
 	}
 }

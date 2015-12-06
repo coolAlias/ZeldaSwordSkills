@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity.projectile;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -28,6 +29,9 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils;
@@ -47,7 +51,7 @@ import zeldaswordskills.util.WorldUtils;
  * entities in its direct path.
  *
  */
-public class EntitySwordBeam extends EntityThrowable
+public class EntitySwordBeam extends EntityThrowable implements IEntityAdditionalSpawnData
 {
 	/** Damage that will be inflicted on impact */
 	private float damage = 4.0F;
@@ -167,6 +171,24 @@ public class EntitySwordBeam extends EntityThrowable
 					setDead();
 				}
 			}
+		}
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		String throwerName = "";
+		if (getThrower() != null) {
+			throwerName = getThrower().getCommandSenderName();
+		}
+		ByteBufUtils.writeUTF8String(buffer, throwerName);
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		String throwerName = ByteBufUtils.readUTF8String(buffer);
+		if (getThrower() == null && throwerName != null && throwerName.length() > 0) {
+			// EntityThrowable#thrower is private with no setter -.-
+			ReflectionHelper.setPrivateValue(EntityThrowable.class, this, worldObj.getPlayerEntityByName(throwerName), "field_70192_c", "thrower");
 		}
 	}
 
