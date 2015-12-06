@@ -159,7 +159,6 @@ public class PlayerUtils
 	 */
 	public static void addItemToInventory(EntityPlayer player, ItemStack stack) {
 		if (!player.inventory.addItemStackToInventory(stack)) {
-			// TODO test if this works correctly
 			player.dropPlayerItemWithRandomChoice(stack, false);
 		}
 	}
