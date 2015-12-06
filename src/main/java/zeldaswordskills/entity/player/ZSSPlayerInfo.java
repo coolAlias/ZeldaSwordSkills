@@ -244,7 +244,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * @param helm Currently equipped helm (null if none worn)
 	 */
 	public void setWearingHelm(ItemStack helm) {
-		if (lastHelmWorn != null) {
+		if (lastHelmWorn != null && lastHelmWorn.getItem() instanceof ItemMask) {
 			((ItemMask) lastHelmWorn.getItem()).removeModifiers(lastHelmWorn, player);
 		}
 		lastHelmWorn = helm;
