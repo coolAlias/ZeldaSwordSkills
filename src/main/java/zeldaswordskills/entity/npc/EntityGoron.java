@@ -40,12 +40,15 @@ import net.minecraft.entity.ai.EntityAIWatchClosest2;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.village.MerchantRecipe;
+import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -57,16 +60,22 @@ import zeldaswordskills.entity.ai.GenericAIDefendVillage;
 import zeldaswordskills.entity.ai.IVillageDefender;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
+import zeldaswordskills.entity.player.quests.QuestBiggoronSword;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
+import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
 
 public class EntityGoron extends EntityVillager implements IVillageDefender, ISongEntity
 {
+	/** Villager trade for Biggoron's Sword */
+	private static final MerchantRecipe BIGGORONS_TRADE = new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Items.diamond,4), new ItemStack(ZSSItems.swordBiggoron));
+
 	/** The Goron's village, since EntityVillager.villageObj cannot be accessed */
 	protected Village village;
 
@@ -198,6 +207,17 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 		if (wasChild && !isChild()) {
 			updateEntityAttributes();
 		}
+	}
+
+	@Override
+	public MerchantRecipeList getRecipes(EntityPlayer player) {
+		MerchantRecipeList list = super.getRecipes(player);
+		// Make sure Biggoron's Sword trade always removed and only re-add it if appropriate
+		MerchantRecipeHelper.removeTrade(list, BIGGORONS_TRADE, false, true);
+		if (("Biggoron").equals(this.getCustomNameTag()) && ZSSQuests.get(player).hasCompleted(QuestBiggoronSword.class)) {
+			list.add(0, BIGGORONS_TRADE);
+		}
+		return list;
 	}
 
 	@Override
@@ -355,7 +375,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 					new TimedChatDialogue(player,  0, 1500,
 							new ChatComponentTranslation("chat.zss.song.saria.darunia.0"),
 							new ChatComponentTranslation("chat.zss.song.saria.darunia.1"),
-							new ChatComponentTranslation("chat.zss.song.saria.darunia.2", gift.getDisplayName()));
+							new ChatComponentTranslation("chat.zss.song.saria.darunia.2", new ChatComponentTranslation(gift.getUnlocalizedName() + ".name")));
 					new TimedAddItem(player, gift, 3000, Sounds.SUCCESS);
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.saria.darunia.thanks");

@@ -33,9 +33,7 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
-import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
-import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.player.quests.QuestMaskSales;
@@ -59,29 +57,44 @@ import zeldaswordskills.util.TimedChatDialogue;
 public class ZSSVillagerInfo implements IExtendedEntityProperties
 {
 	/** Define villager types for easier to read code */
-	public enum EnumVillager {FARMER,LIBRARIAN,PRIEST,BLACKSMITH,BUTCHER}
+	public enum EnumVillager {
+		FARMER("farmer"),
+		LIBRARIAN("librarian"),
+		PRIEST("priest"),
+		BLACKSMITH("blacksmith"),
+		BUTCHER("butcher");
+		public final String unlocalizedName;
+		private EnumVillager(String name) {
+			this.unlocalizedName = name;
+		}
+	}
+
 	private static final String SAVE_KEY = "zssVillagerInfo";
+
 	/** Used for masks when the villager is not interested */
 	private static final int NONE = -1;
 
 	/** The villager to which these properties belong */
 	private final EntityVillager villager;
+
 	/** Additional save data for villager trading */
 	private NBTTagCompound data;
+
 	/** The index of the mask that this villager wants, or NONE; initial value is masks.size() as a flag */
 	private int desiredMask;
 
 	/** Trade mapping for a single Treasure enum type key to the full trade recipe output */
 	private static final Map<Treasures, MerchantRecipe> treasureTrades = new EnumMap<Treasures, MerchantRecipe>(Treasures.class);
+
 	/** Maps the villager profession capable of trading for the treasure trade to the Treasure enum type key */
 	private static final Map<Treasures, Integer> treasureVillager = new EnumMap<Treasures, Integer>(Treasures.class);
-	/** Maps the custom villager name required for the treasure trade to the Treasure enum type key */
-	private static final Map<Treasures, String> treasureCustom = new EnumMap<Treasures, String>(Treasures.class);
 
 	/** Temporarily stores nearby village when needed for mating */
 	private Village village;
+
 	/** Temporarily stores this villager's current mate */
 	private EntityVillager mate = null;
+
 	/** Temporarily stores the time remaining before a child will be born */
 	private int matingTime = 0;
 
@@ -151,7 +164,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 				default: PlayerUtils.sendFormattedChat(player, s + "amount", n);
 				}
 				if (reward != null) {
-					new TimedChatDialogue(player, new ChatComponentTranslation(s + "token." + n), new ChatComponentTranslation(s + "reward." + n, reward.getDisplayName()));
+					new TimedChatDialogue(player, new ChatComponentTranslation(s + "token." + n), new ChatComponentTranslation(s + "reward." + n, new ChatComponentTranslation(reward.getUnlocalizedName() + ".name")));
 					new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
 				}
 			} else { // probably an impossible case
@@ -159,7 +172,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			}
 		} else if (Config.getSkulltulaRewardRate() > 0 && player.worldObj.getWorldTime() > villager.getEntityData().getLong("NextSkulltulaReward")) {
 			ItemStack reward = new ItemStack(Items.emerald, 64);
-			new TimedChatDialogue(player, new ChatComponentTranslation(s + "complete"), new ChatComponentTranslation(s + "reward.100", reward.getDisplayName()));
+			new TimedChatDialogue(player, new ChatComponentTranslation(s + "complete"), new ChatComponentTranslation(s + "reward.100", new ChatComponentTranslation(reward.getUnlocalizedName() + ".name")));
 			new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
 			villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
 		} else {
@@ -189,10 +202,28 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		price = isMonsterHunter() ? price + price / 2 : price;
 		if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(toBuy, new ItemStack(Items.emerald, price)))) {
 			PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.new", toBuy.getDisplayName());
+			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.new", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
 		} else {
-			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.old", toBuy.getDisplayName());
+			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.old", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
 		}
+	}
+
+	/**
+	 * Returns what the villager is willing to trade for the treasure, if anything.
+	 * Note that the first item to buy is always a stack containing one of the treasure.
+	 * @param treasure the treasure to be traded
+	 * @return may be null
+	 */
+	public MerchantRecipe getTreasureTrade(Treasures treasure) {
+		if (treasureTrades.containsKey(treasure) && treasureVillager.get(treasure) == villager.getProfession()) {
+			return treasureTrades.get(treasure);
+		} else if (isHunter() && treasure.canSell()) {
+			boolean flag = ("Monster Hunter").equals(villager.getCustomNameTag());
+			int price = treasure.getValue();
+			price = flag ? price + (price / 2) : price;
+			return new MerchantRecipe(new ItemStack(ZSSItems.treasure, 1, treasure.ordinal()), new ItemStack(Items.emerald, price));
+		}
+		return null;
 	}
 
 	/**
@@ -200,63 +231,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 * @param stack the player's currently held item, which should be the treasure item
 	 */
 	public boolean isInterested(Treasures treasure, ItemStack stack) {
-		if (treasureCustom.containsKey(treasure)) {
-			boolean flag = treasureCustom.get(treasure).equals(villager.getCustomNameTag());
-			if (flag && treasureCustom.get(treasure).equals("Biggoron")) {
-				flag = villager instanceof EntityGoron;
-			}
-			if (flag && treasure == Treasures.CLAIM_CHECK) {
-				flag = stack.hasTagCompound() && stack.getTagCompound().hasKey("finishDate") &&
-						villager.worldObj.getWorldTime() > stack.getTagCompound().getLong("finishDate");
-			}
-			return flag && (treasure != Treasures.TENTACLE || villager.isChild()) &&
-					(treasureVillager.get(treasure) == null || treasureVillager.get(treasure) == villager.getProfession());
-		}
-		return treasureVillager.get(treasure) == villager.getProfession();
-	}
-
-	/**
-	 * Returns true if this is the final trade (the claim check) but the work
-	 * is not yet finished; checks and initializes the stack's tag compound
-	 * so Creative users can get the trade without running through the whole loop
-	 */
-	public boolean isFinalTrade(Treasures treasure, ItemStack stack) {
-		if (treasure == Treasures.CLAIM_CHECK && treasureCustom.containsKey(treasure) && treasureCustom.get(treasure).equals(villager.getCustomNameTag())) {
-			if (!stack.hasTagCompound()) {
-				stack.setTagCompound(new NBTTagCompound());
-			}
-			if (!stack.getTagCompound().hasKey("finishDate")) {
-				// creative players can redeem the check immediately
-				stack.getTagCompound().setLong("finishDate", villager.worldObj.getWorldTime());
-			}
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Called after the villager trades for a treasure to handle case-specific scenarios, achievements, etc.
-	 * @param stack the ItemStack that was just given to the player
-	 * @return true if a message should be displayed, e.g. about the villager's next desired trade
-	 */
-	public boolean onTradedTreasure(EntityPlayer player, Treasures treasure, ItemStack stack) {
-		switch(treasure) {
-		case TENTACLE: player.triggerAchievement(ZSSAchievements.treasureFirst); break;
-		case POCKET_EGG: player.triggerAchievement(ZSSAchievements.treasureSecond); break;
-		case COJIRO: return true;
-		case GORON_SWORD: return true;
-		case EYE_DROPS:
-			// traded eye drops for claim check: set date for claiming finished sword
-			if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-			stack.getTagCompound().setLong("finishDate", villager.worldObj.getWorldTime() + 48000);
-			return true;
-		case CLAIM_CHECK:
-			player.triggerAchievement(ZSSAchievements.treasureBiggoron);
-			MerchantRecipeHelper.addUniqueTrade(villager.getRecipes(player), new MerchantRecipe(new ItemStack(ZSSItems.masterOre,3), new ItemStack(Items.diamond,4), new ItemStack(ZSSItems.swordBiggoron)));
-			break;
-		default:
-		}
-		return false;
+		return treasureTrades.containsKey(treasure) && treasureVillager.get(treasure) == villager.getProfession();
 	}
 
 	/** Adds the given amount of chu jellies to the current amount */
@@ -377,27 +352,9 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 * @param required the itemstack required for the trade in addition to the Treasure
 	 * @param output the itemstack to be traded for
 	 */
-	public static final void addTreasureTrade(Treasures treasure, EnumVillager villager, ItemStack required, ItemStack output) {
+	private static final void addTreasureTrade(Treasures treasure, EnumVillager villager, ItemStack required, ItemStack output) {
 		treasureVillager.put(treasure, (villager != null ? villager.ordinal() : null));
 		treasureTrades.put(treasure, new MerchantRecipe(new ItemStack(ZSSItems.treasure,1,treasure.ordinal()), required, output));
-	}
-
-	/**
-	 * Adds every component involved in a treasure trade for a custom-named villager
-	 * @param treasure the treasure to be traded
-	 * @param name the name of the villager allowed to have this trade
-	 * @param villager the profession of the villager allowed to have this trade, or null for no requirement
-	 * @param required the itemstack required for the trade in addition to the Treasure
-	 * @param output the itemstack to be traded for
-	 */
-	public static final void addTreasureTrade(Treasures treasure, String name, EnumVillager villager, ItemStack required, ItemStack output) {
-		treasureCustom.put(treasure, name);
-		addTreasureTrade(treasure, villager, required, output);
-	}
-
-	/** Returns the trade for this treasure */
-	public static final MerchantRecipe getTreasureTrade(Treasures treasure) {
-		return treasureTrades.get(treasure);
 	}
 
 	/**
@@ -405,16 +362,5 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 */
 	public static void initTrades() {
 		addTreasureTrade(Treasures.EVIL_CRYSTAL,EnumVillager.PRIEST,new ItemStack(ZSSItems.arrowLight,16),new ItemStack(ZSSItems.crystalSpirit));
-		addTreasureTrade(Treasures.TENTACLE,"Talon",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.POCKET_EGG.ordinal()));
-		addTreasureTrade(Treasures.POCKET_EGG,"Cucco Lady",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.COJIRO.ordinal()));
-		addTreasureTrade(Treasures.COJIRO,"Grog",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.ODD_MUSHROOM.ordinal()));
-		addTreasureTrade(Treasures.ODD_MUSHROOM,"Old Hag",EnumVillager.LIBRARIAN,null,new ItemStack(ZSSItems.treasure,1,Treasures.ODD_POTION.ordinal()));
-		addTreasureTrade(Treasures.ODD_POTION,"Grog",EnumVillager.FARMER,null,new ItemStack(ZSSItems.treasure,1,Treasures.POACHER_SAW.ordinal()));
-		addTreasureTrade(Treasures.POACHER_SAW,"Mutoh",EnumVillager.BLACKSMITH,null,new ItemStack(ZSSItems.treasure,1,Treasures.GORON_SWORD.ordinal()));
-		addTreasureTrade(Treasures.GORON_SWORD,"Biggoron",null,null,new ItemStack(ZSSItems.treasure,1,Treasures.PRESCRIPTION.ordinal()));
-		addTreasureTrade(Treasures.PRESCRIPTION,"King Zora",EnumVillager.PRIEST,null,new ItemStack(ZSSItems.treasure,1,Treasures.EYEBALL_FROG.ordinal()));
-		addTreasureTrade(Treasures.EYEBALL_FROG,"Lake Scientist",EnumVillager.LIBRARIAN,null,new ItemStack(ZSSItems.treasure,1,Treasures.EYE_DROPS.ordinal()));
-		addTreasureTrade(Treasures.EYE_DROPS,"Biggoron",null,null,new ItemStack(ZSSItems.treasure,1,Treasures.CLAIM_CHECK.ordinal()));
-		addTreasureTrade(Treasures.CLAIM_CHECK,"Biggoron",null,null,new ItemStack(ZSSItems.swordBiggoron));
 	}
 }
