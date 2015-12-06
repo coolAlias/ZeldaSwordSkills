@@ -594,32 +594,189 @@ chat.zss.trade.whip.upgrade.old=I could make that whip longer for you...
 chat.zss.trade.whip.long=Sorry, that's as long as I can make it.
 chat.zss.trade.whip.magic=Wow, where in Hyrule did you find THAT?!
 chat.zss.trade.whip.sorry=They sure could use that whip down at Lon Lon Ranch.
-chat.zss.treasure.hunter.new=Whoa, is that a %s?! I'll buy that from you!
-chat.zss.treasure.hunter.old=Another %s, great! I'll buy that one, too!
-chat.zss.treasure.evil_crystal.give=Mwa ha ha, thank you! Here is your reward!
-chat.zss.treasure.tentacle.give=Wow, an Octorok tentacle! Here, have this egg I found.
-chat.zss.treasure.pocket_egg.give=A Cucco egg! Oh, it just hatched!!! Here, you take him.
-chat.zss.treasure.cojiro.give=Zzz... zzz... zzz... huh, a Cucco? Maybe you can help me.
-chat.zss.treasure.cojiro.next=Take this to the Old Hag and bring me a tonic, if you would.
-chat.zss.treasure.odd_mushroom.give=You need a potion, eh? Looks like this mushroom will suffice.
-chat.zss.treasure.odd_potion.give=Oh, thank you so much! Here, maybe this will help you.
-chat.zss.treasure.poacher_saw.give=I thought I had lost that! Thanks! Please take this in return.
-chat.zss.treasure.goron_sword.give=I would love to help, but my eyes are bothering me...
-chat.zss.treasure.goron_sword.next=Take this to King Zora and get me some eye drops.
-chat.zss.treasure.prescription.give=Ah, I see. Take this to the Lake Scientist and he'll sort you out.
-chat.zss.treasure.eyeball_frog.give=Eye drops? Sure, give me that frog. All done!
-chat.zss.treasure.eye_drops.give=Thank you, that is much better! Now I can start working!
-chat.zss.treasure.eye_drops.next=Bring this back in a few days to pick up your sword.
-chat.zss.treasure.claim_check.give=Finally finished! Best sword I ever made - take good care of it!
-chat.zss.treasure.claim_check.wait=I'm not finished yet. Be patient.
-chat.zss.treasure.received=Received %s!
-chat.zss.treasure.trade.fail=Come back when you have %d %s%s.
-chat.zss.treasure.uninterested.default=That's an odd trinket you have there.
-chat.zss.treasure.uninterested.knights_crest=Did you know old man Orca used to collect those? It's true.
-chat.zss.treasure.uninterested.knights_crest.orca=I collected those once, but I didn't find too many...
+
+# General / hunter treasure trades
+chat.zss.treasure.generic.give.0=No thanks, I'm not into that kind of thing.
+chat.zss.treasure.generic.give.1=Why are you giving this to me? I don't want it.
+chat.zss.treasure.generic.give.2=I think you had better keep that.
+chat.zss.treasure.generic.give.3=This is going to get awkward, isn't it? Yep.
+chat.zss.treasure.generic.show.0=That's, um, delightful. Yes, delightful.
+chat.zss.treasure.generic.show.1=You come across the weirdest things, don't you?
+chat.zss.treasure.generic.show.2=Neat! I've never seen anything like that before!
+chat.zss.treasure.generic.show.3=Very curious specimen you've discovered.
+chat.zss.treasure.generic.child.broken=Oops! Um, my brother broke it... really, he did!
+chat.zss.treasure.generic.child.give=Yay, a new toy! Thanks! <playing>
+chat.zss.treasure.generic.child.return=Meh, it's kind of boring... you can have it back.
+chat.zss.treasure.generic.child.show=I wanna play with it! Can I? Pleeeaase?
+chat.zss.treasure.generic.profession.child=I want to be a %s when I grow up!
+chat.zss.treasure.generic.profession.blacksmith=Look at that guy's arms! Wish I had become a %s!
+chat.zss.treasure.generic.profession.butcher=I wouldn't mind being a %s... l-o-o-o-v-e me some meat!
+chat.zss.treasure.generic.profession.farmer=Don't know why, but I used to want to be a %s...
+chat.zss.treasure.generic.profession.librarian=If I'd been a %s, I'd be like, waaay smarter than you.
+chat.zss.treasure.generic.profession.priest=I once thought to become a %s... then I got married.
+chat.zss.treasure.generic.received=Received %s!
+chat.zss.treasure.generic.trade.fail=Come back when you have %d %s%s.
+chat.zss.treasure.generic.uninterested=That's an odd trinket you have there.
+chat.zss.treasure.generic.interested=Hey, that's nice! I'll give you a %s for that!
+chat.zss.treasure.hunter.interested.0=Whoa, is that a %s?! That's quite the find!
+chat.zss.treasure.hunter.interested.1=I'll buy that from you for %d rupees.
+chat.zss.treasure.hunter.trade.0=This will make a nice trophy, thanks!
+chat.zss.treasure.hunter.trade.1=If you find any more, you know where to find me.
+chat.zss.treasure.hunter.trade.2=You're quite the monster hunter yourself, partner!
+chat.zss.treasure.hunter.trade.3=Do you use a whip? I hear it's good for trophy hunting.
+chat.zss.treasure.evil_crystal.trade=Mwa ha ha, thank you! Here is your reward!
+chat.zss.treasure.knights_crest.uninterested=Did you know old man Orca used to collect those? It's true.
+chat.zss.treasure.knights_crest.uninterested.orca=I collected those once, but I didn't find too many...
+
+# TENTACLE (Talon)
+chat.zss.treasure.tentacle.give.first=An Octorok tentacle, perfect! Here, have this egg I found.
+chat.zss.treasure.tentacle.give.random=Get that thing away from me!
+chat.zss.treasure.tentacle.give.repeat=Mwa ha ha, my mom's gonna freak, AGAIN! Here, have this.
+chat.zss.treasure.tentacle.hint.current=I'm trying to gross out my mom, but what's gross enough?
+chat.zss.treasure.tentacle.hint.current.ageable=I've outgrown those kinds of things.
+chat.zss.treasure.tentacle.hint.next=I bet the Cucco Lady knows what kind of egg that is.
+chat.zss.treasure.tentacle.hint.next.ageable=Is that the egg I gave you when I was a kid?
+chat.zss.treasure.tentacle.show=Whoa, that's awesome! Can I have it?
+chat.zss.treasure.tentacle.show.random=Ewww, that's gross! Reminds me of that boy, Talon.
+chat.zss.treasure.tentacle.thanks=I showed that thing to my mom and she totally freaked out!
+chat.zss.treasure.tentacle.thanks.ageable=You know, my mom still gives me a hard time about that prank...
+
+# POCKET EGG (Cucco Lady)
+chat.zss.treasure.pocket_egg.give.first=A Cucco egg! Oh, it just hatched!!! Here, you take him.
+chat.zss.treasure.pocket_egg.give.random=The Cucco Lady would have my head if I fried that up!
+chat.zss.treasure.pocket_egg.give.repeat=You found another - oh, it's hatching! You'd better take him.
+chat.zss.treasure.pocket_egg.hint.previous=That boy Talon, sometimes he finds the darndest things.
+chat.zss.treasure.pocket_egg.hint.previous.match=I haven't seen anything that gross since Talon... never mind.
+chat.zss.treasure.pocket_egg.hint.current=Cuccos are very rare, but their eggs are even rarer!
+chat.zss.treasure.pocket_egg.hint.next=That Cucco sure is loud - it'd even wake up Grog!
+chat.zss.treasure.pocket_egg.show=Is that... it is! Can I take a closer look?
+chat.zss.treasure.pocket_egg.show.random=Definitely not a chicken egg. See if the Cucco Lady knows.
+chat.zss.treasure.pocket_egg.thanks=I hope you found Cojiro a nice home.
+
+# COJIRO (Grog)
+chat.zss.treasure.cojiro.give.first=Zzz... zz... z... what the?! Now you've done it! Here.
+chat.zss.treasure.cojiro.give.next=Take that to the Old Hag and bring me a tonic, double time!
+chat.zss.treasure.cojiro.give.random=Oh no, no way. Get that thing away from me.
+chat.zss.treasure.cojiro.give.repeat=Dang that's loud! Take this and get me another tonic, will ya?
+chat.zss.treasure.cojiro.hint.previous=Zzz... zzz... zzz... (he's not waking up)
+chat.zss.treasure.cojiro.hint.previous.match=Zzz... zzz... zzz... (he's not waking up)
+chat.zss.treasure.cojiro.hint.current=Zzz... zzz... zzz... (he's not waking up)
+chat.zss.treasure.cojiro.hint.next=Did you get that tonic from the Old Hag yet?
+chat.zss.treasure.cojiro.show=Zzz... zzz... zzz... (he can't see what you're holding)
+chat.zss.treasure.cojiro.show.random=I see you spoke to the Cucco Lady. Congratulations.
+chat.zss.treasure.cojiro.thanks=Zzz... zzz... Leave me be. Zzz... zzz...
+
+# ODD MUSHROOM (Old Hag)
+chat.zss.treasure.odd_mushroom.give.first=One special "Potion of Insomnolence" coming right up!
+chat.zss.treasure.odd_mushroom.give.next=Try not to let Grog drink it all at once, okay?
+chat.zss.treasure.odd_mushroom.give.random=I really shouldn't, what with all the work I have.
+chat.zss.treasure.odd_mushroom.give.repeat=Some people never learn... <sigh> Oh well, here it is.
+chat.zss.treasure.odd_mushroom.hint.previous=Have you seen farmer Grog? I bet he's sleeping it off again.
+chat.zss.treasure.odd_mushroom.hint.previous.match=This is no place for animals - get that thing out of here!
+chat.zss.treasure.odd_mushroom.hint.current=Grog often brings mushrooms for his special "tonics"...
+chat.zss.treasure.odd_mushroom.hint.next=Best deliver that potion to Grog before he gets ornery!
+chat.zss.treasure.odd_mushroom.show=Oh, is that the mushroom Grog gave you? That'll do.
+chat.zss.treasure.odd_mushroom.show.random=I ate one of those once... I don't recommend it.
+chat.zss.treasure.odd_mushroom.thanks=It is neither healthy nor wise to drink potions often.
+
+# ODD POTION (Grog)
+chat.zss.treasure.odd_potion.give.first=<gulp><gulp><belch!> Ah, that hits the spot! Here, take this.
+chat.zss.treasure.odd_potion.give.next=Found that in the woods - looks like it could use sharpening.
+chat.zss.treasure.odd_potion.give.random=No thanks, I don't drink mysterious beverages from strangers.
+chat.zss.treasure.odd_potion.give.repeat=By golly, you're swell! <gulp><gulp><gulp> Woohoohoo, yeah!
+chat.zss.treasure.odd_potion.hint.previous=Uhhhhnn my head... ya give that mushroom to the Old Hag yet?
+chat.zss.treasure.odd_potion.hint.previous.match=The Old Hag needs that for my tonic! Why do you still have it?!
+chat.zss.treasure.odd_potion.hint.current=I'm barely holding it together, here! Where's my tonic?!
+chat.zss.treasure.odd_potion.hint.next=I seen Mutoh skulking about in the woods once or twice.
+chat.zss.treasure.odd_potion.show=Oh ho, yes! It's not going to drink itself, hand it over!
+chat.zss.treasure.odd_potion.show.random=What will people think, walking around like that, drink in hand?
+chat.zss.treasure.odd_potion.thanks=Zzz... zzz... zzz... (he must be sleeping it off)
+
+# POACHER SAW (Mutoh)
+chat.zss.treasure.poacher_saw.give.first=Thanks for findin' that. Here, take this and keep quiet.
+chat.zss.treasure.poacher_saw.give.next=Biggoron made that for me back when he was an apprentice.
+chat.zss.treasure.poacher_saw.give.random=What would I do with an old beat up saw like that?
+chat.zss.treasure.poacher_saw.give.repeat=Dang it, how do I keep losing that?! Thanks again.
+chat.zss.treasure.poacher_saw.hint.previous=Seen ol' farmer Grog out by the woods. In a stupor, as usual.
+chat.zss.treasure.poacher_saw.hint.previous.match=The Old Hag's still peddling that stuff? Shame on her.
+chat.zss.treasure.poacher_saw.hint.current=Ya don't happen to have seen an old saw, have ya?
+chat.zss.treasure.poacher_saw.hint.next=Biggoron's better than ever - I bet he could fix that up.
+chat.zss.treasure.poacher_saw.show=Hey, that's my saw! Don't tell anyone, okay?
+chat.zss.treasure.poacher_saw.show.random=Better get some fuel for that if you're headin' South.
+chat.zss.treasure.poacher_saw.thanks=Ya ain't told no one, have ya? Watch yourself.
+
+# GORON SWORD (Biggoron)
+chat.zss.treasure.goron_sword.give.first=Mmm, I would craft it for you, but my eyes are bothering me.
+chat.zss.treasure.goron_sword.give.next=Take that to King Zora - he'll know what to do.
+chat.zss.treasure.goron_sword.give.random=And what, pray tell, do you expect me to do with that?
+chat.zss.treasure.goron_sword.give.repeat=My eyes are troubling me again. Can you get me more eye drops?
+chat.zss.treasure.goron_sword.hint.previous=Hrm, my old friend Mutoh seems troubled these days.
+chat.zss.treasure.goron_sword.hint.previous.match=Oh, I'd know that saw anywhere. It belongs to Mutoh.
+chat.zss.treasure.goron_sword.hint.current=Lately I've been thinking... I should make a new sword.
+chat.zss.treasure.goron_sword.hint.next=Please hurry, brother, my eyes are so sore! Go to King Zora.
+chat.zss.treasure.goron_sword.show=Yes, that would be perfect for a great sword like those of old!
+chat.zss.treasure.goron_sword.show.random=That must've been a mighty blade, once. Shame it's broken.
+chat.zss.treasure.goron_sword.thanks=I can't fix that sword with such itchy eyes...
+
+# PRESCRIPTION (King Zora)
+chat.zss.treasure.prescription.give.first=Ah, I see. Poor Biggoron. Here, take this. 
+chat.zss.treasure.prescription.give.next=The Lake Scientist should be able to extract what you need.
+chat.zss.treasure.prescription.give.random=You shouldn't give that to just anybody.
+chat.zss.treasure.prescription.give.repeat=Biggoron's allergies are bad this year! Take another frog.
+chat.zss.treasure.prescription.hint.previous=Have you seen my friend Biggoron? He's an excellent smith.
+chat.zss.treasure.prescription.hint.previous.match=That looks like something Biggoron made in his youth.
+chat.zss.treasure.prescription.hint.current=You say Biggoron's ill? Did he give you a Prescription?
+chat.zss.treasure.prescription.hint.next=Did the Lake Scientist squeeze some drops out for you yet?
+chat.zss.treasure.prescription.show=Oh, is that from Biggoron? Let's see what ails him, then.
+chat.zss.treasure.prescription.show.random=What's this? A prescription for eye drops?
+chat.zss.treasure.prescription.thanks=How's my friend these days? In good health, I hope.
+
+# EYEBALL FROG (Lake Scientist)
+chat.zss.treasure.eyeball_frog.give.first=Wait, you need Eye Drops? <grumble> Alright, just a minute...
+chat.zss.treasure.eyeball_frog.give.next=There you go. I was really looking forward to a treat.
+chat.zss.treasure.eyeball_frog.give.random=No way, I'm not holding that thing.
+chat.zss.treasure.eyeball_frog.give.repeat=Alright, hold it down! <squirt> There, fresh Eye Drops.
+chat.zss.treasure.eyeball_frog.hint.previous=Humans are no match for the Zora in terms of diving.
+chat.zss.treasure.eyeball_frog.hint.previous.match=That Prescription says it has to be fulfilled by King Zora.
+chat.zss.treasure.eyeball_frog.hint.current=King Zora used to send me deliciously fried eyeballs. So tasty!
+chat.zss.treasure.eyeball_frog.hint.next=Like I said, those will soothe dry, itchy eyes instantaneously.
+chat.zss.treasure.eyeball_frog.show=Oh, is that an Eyeball Frog?! Let's fry it up!
+chat.zss.treasure.eyeball_frog.show.random=Eww, is that a frog? You should wash your hands.
+chat.zss.treasure.eyeball_frog.thanks=Shame about those eyeballs - haven't had 'em in years.
+
+# EYE DROPS (Biggoron)
+chat.zss.treasure.eye_drops.give.first=Thank you, that is much better! Now I can start working!
+chat.zss.treasure.eye_drops.give.next=Bring this back in a few days to pick up your sword.
+chat.zss.treasure.eye_drops.give.random=... why are you giving me Eye Drops? Are my eyes red?
+chat.zss.treasure.eye_drops.give.repeat=Aah, relief. In return, let me give you another Claim Check.
+chat.zss.treasure.eye_drops.hint.previous=Did you speak to King Zora, yet? My eyes are so itchy.
+chat.zss.treasure.eye_drops.hint.previous.match=Will frog help burning eyes? No... no help.
+chat.zss.treasure.eye_drops.hint.current=My eyes are so itchy I can't even work.
+chat.zss.treasure.eye_drops.hint.next=I can already see clearly, brother. Now I must work.
+chat.zss.treasure.eye_drops.show=Are those Eye Drops? My eyes... hurt so bad.
+chat.zss.treasure.eye_drops.show.random=Eye Drops help soothe dry or irritated eyes.
+chat.zss.treasure.eye_drops.thanks=Thank you, brother, it is good to see clearly again.
+
+# CLAIM CHECK (Biggoron)
+chat.zss.treasure.claim_check.early=Huuumans are so impatient. I'm not finished yet.
+chat.zss.treasure.claim_check.give.first=Finally finished! Best sword I've made - take good care of it!
+chat.zss.treasure.claim_check.give.next=If you find some Master Ore, I could probably make another.
+chat.zss.treasure.claim_check.give.random=I don't think I could even lift that thing...
+chat.zss.treasure.claim_check.give.repeat=Sorry, one claim per customer. Feel free to browse my wares.
+chat.zss.treasure.claim_check.hint.previous=My eyes are so itchy I can't even work.
+chat.zss.treasure.claim_check.hint.previous.match=Are those Eye Drops? My eyes... hurt so bad.
+chat.zss.treasure.claim_check.hint.current=I won't give that sword away without a valid Claim Check.
+chat.zss.treasure.claim_check.no_nbt=Hm? I don't remember you. Oh well, come back in 2 days.
+chat.zss.treasure.claim_check.show=Looks like a valid claim. Hand it here and I'll get the sword.
+chat.zss.treasure.claim_check.show.random=Wow, that's a REALLY big stone tablet! Like, BIG big.
+chat.zss.treasure.claim_check.thanks=Find any Master Ore yet? It drops rarely from iron deposits. 
+
+# ZELDA'S LETTER (Mask Salesman)
 chat.zss.treasure.zeldas_letter.already_open=Ah, another letter! But I'm already selling masks, take a look!
-chat.zss.treasure.zeldas_letter.child=Umm... I don't know how to read...
-chat.zss.treasure.zeldas_letter.fail=It's addressed to the Mask Salesman, try giving it to him.
+chat.zss.treasure.zeldas_letter.child.give=Umm... I don't know how to read...
+chat.zss.treasure.zeldas_letter.child.show=No pictures?! Booooring!
+chat.zss.treasure.zeldas_letter.fail.give=Can't you read the envelope? That's not for me!
+chat.zss.treasure.zeldas_letter.fail.show=It's addressed to the Mask Salesman, try giving it to him.
 chat.zss.treasure.zeldas_letter.for_me=Oh, that looks like it's for me! You should hand it over.
 chat.zss.treasure.zeldas_letter.success.0=Hm, what's this? A letter from Princess Zelda! For me?!
 chat.zss.treasure.zeldas_letter.success.1=<opens letter>
@@ -728,6 +885,13 @@ dungeon.zss.temple_ice.name=Ice Temple
 dungeon.zss.temple_shadow.name=Shadow Temple
 dungeon.zss.temple_water.name=Water Temple
 dungeon.zss.temple_wind.name=Wind Temple
+
+# Canonical villager profession translations, since vanilla only has them for the career paths
+entity.villager.profession.blacksmith=Blacksmith
+entity.villager.profession.butcher=Butcher
+entity.villager.profession.farmer=Farmer
+entity.villager.profession.librarian=Librarian
+entity.villager.profession.priest=Priest
 
 entity.zeldaswordskills.leapingblow.name=Leaping Blow
 entity.zeldaswordskills.swordbeam.name=Sword Beam

@@ -42,7 +42,17 @@ import cpw.mods.fml.common.registry.VillagerRegistry.IVillageTradeHandler;
 public class TradeHandler implements IVillageTradeHandler
 {
 	/** Define villager types for easier to read code */
-	public enum EnumVillager {FARMER,LIBRARIAN,PRIEST,BLACKSMITH,BUTCHER}
+	public enum EnumVillager {
+		FARMER("farmer"),
+		LIBRARIAN("librarian"),
+		PRIEST("priest"),
+		BLACKSMITH("blacksmith"),
+		BUTCHER("butcher");
+		public final String unlocalizedName;
+		private EnumVillager(String name) {
+			this.unlocalizedName = name;
+		}
+	}
 
 	/** Trade mapping for a single HookShot ItemStack key to a full Extended HookShot trade recipe output */
 	public static final Map<List<Integer>, MerchantRecipe> hookshotAddonTrades = new HashMap<List<Integer>, MerchantRecipe>();
