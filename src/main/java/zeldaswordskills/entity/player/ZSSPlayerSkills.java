@@ -88,7 +88,7 @@ public class ZSSPlayerSkills
 	@SideOnly(Side.CLIENT)
 	private SkillActive animatingSkill;
 
-	/** Number of crests given to Orca, implying number of Hurrican Spin orbs received */
+	/** Number of crests given to Orca, implying number of Hurricane Spin orbs received */
 	private int crestsGiven = 0;
 
 	public ZSSPlayerSkills(ZSSPlayerInfo playerInfo, EntityPlayer player) {
