@@ -25,6 +25,7 @@ import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -136,11 +137,13 @@ public class ZSSEntityEvents
 			}
 		}
 		// Finally, check for interactions with the Cursed Man
-		if (!event.isCanceled() && !event.target.worldObj.isRemote && event.target.getClass() == EntityVillager.class && ("Cursed Man").equals(event.target.getCustomNameTag())) {
+		if (!event.isCanceled() && event.target.getClass() == EntityVillager.class && ("Cursed Man").equals(event.target.getCustomNameTag())) {
 			EntityVillager villager = (EntityVillager) event.target;
-			if (stack == null || stack.getItem() != ZSSItems.skulltulaToken) {
+			if (stack == null || (stack.getItem() != ZSSItems.skulltulaToken && stack.getItem() != Items.name_tag)) {
 				int tokens = ZSSPlayerInfo.get(event.entityPlayer).getSkulltulaTokens();
-				if (villager.isChild()) {
+				if (villager.worldObj.isRemote) {
+					// don't send chat - will be sent from server
+				} else if (villager.isChild()) {
 					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man.child");
 				} else if (tokens > 0) {
 					PlayerUtils.sendFormattedChat(event.entityPlayer, "chat.zss.npc.cursed_man.amount", tokens);
