@@ -28,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
@@ -66,7 +67,8 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 				if (skills.grantSkill(skill)) {
 					world.playSoundAtEntity(player, Sounds.LEVELUP, 1.0F, 1.0F);
 					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.levelup",
-							skill.getDisplayName(), skills.getSkillLevel(skill));
+							new ChatComponentTranslation(skill.getTranslationString()),
+							skills.getSkillLevel(skill));
 					if (skill == SkillBase.bonusHeart) {
 						player.triggerAchievement(ZSSAchievements.skillHeart);
 						if (skills.getSkillLevel(skill) > 19) {
@@ -93,7 +95,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 						--stack.stackSize;
 					}
 				} else {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.maxlevel", skill.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.maxlevel", new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			}
 		}

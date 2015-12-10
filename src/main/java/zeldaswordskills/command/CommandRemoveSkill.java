@@ -25,6 +25,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
@@ -69,13 +70,13 @@ public class CommandRemoveSkill extends CommandBase
 				if (all) {
 					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.all", player.getCommandSenderName());
 				} else {
-					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.one", player.getCommandSenderName(), skill.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			} else { // player didn't have this skill
 				if (all) {
 					throw new CommandException("commands.removeskill.failure.all", player.getCommandSenderName());
 				} else {
-					throw new CommandException("commands.removeskill.failure.one", player.getCommandSenderName(), skill.getDisplayName());
+					throw new CommandException("commands.removeskill.failure.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			}
 		} else {

@@ -23,6 +23,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -240,7 +241,7 @@ public abstract class SkillActive extends SkillBase
 			return onActivated(world, player);
 		} else {
 			if (level > 0) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.skill.use.fail", getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.skill.use.fail", new ChatComponentTranslation(getTranslationString()));
 			}
 			return false;
 		}

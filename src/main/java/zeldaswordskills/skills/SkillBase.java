@@ -217,9 +217,17 @@ public abstract class SkillBase
 	/** Returns a new instance of the skill with appropriate class type without registering it to the Skill database */
 	public abstract SkillBase newInstance();
 
-	/** Returns the translated skill name */
+	/**
+	 * Return the translated name of this skill. Note that the translation is only correct on the client;
+	 * on the server, send a ChatComponentTranslation using {@link #getTranslationString()} instead.
+	 */
 	public final String getDisplayName() {
 		return StatCollector.translateToLocal(getFullUnlocalizedName() + ".name");
+	}
+
+	/** Returns the string used to translate this skill's name */
+	public final String getTranslationString() {
+		return getFullUnlocalizedName() + ".name";
 	}
 
 	/** Returns the unlocalized name with no prefix, exactly as the skill was registered */
