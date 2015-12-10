@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8",
-			"modVersion":"3.0.3b",
+			"modVersion":"3.1",
 			"changeLog": [
-	               "Hotfix for server crashes",
+	               "Added WeaponRegistry and more, critical bug fixes",
 	               "See main mod page for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
@@ -13,9 +13,9 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.2.8b",
+			"modVersion":"2.3",
 			"changeLog": [
-	               "API change for latest Addon version",
+	               "Added WeaponRegistry and more, critical bug fixes",
 	               "See website for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
