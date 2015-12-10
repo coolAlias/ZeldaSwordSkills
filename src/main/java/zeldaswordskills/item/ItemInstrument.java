@@ -33,6 +33,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
@@ -177,9 +178,9 @@ public class ItemInstrument extends Item implements IRightClickEntity
 				if (!result.displayChat) {
 					// don't display default chat messages
 				} else if (ZSSPlayerSongs.get(player).isSongKnown(result.songToLearn)) {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", result.songToLearn.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", new ChatComponentTranslation(result.songToLearn.getTranslationString()));
 				} else {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", result.songToLearn.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", new ChatComponentTranslation(result.songToLearn.getTranslationString()));
 				}
 			}
 			return result.cancel; // If true, skips straight to Item#onItemRightClick

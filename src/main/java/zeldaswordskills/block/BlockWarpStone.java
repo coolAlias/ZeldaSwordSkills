@@ -27,6 +27,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
@@ -107,7 +108,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 			if (!world.isRemote) {
 				if (song != null) {// && songs.isSongKnown(song)) { // otherwise have to click again after learning the song
 					songs.onActivatedWarpStone(x, y, z, meta);
-					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", song.getDisplayName(), x, y, z);
+					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", new ChatComponentTranslation(song.getTranslationString()), x, y, z);
 				}
 			} else if (!player.isSneaking()) {
 				if (song != null) {

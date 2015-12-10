@@ -26,6 +26,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
@@ -84,7 +85,7 @@ public class CommandGrantSong extends CommandBase
 			if (song == null) {
 				throw new CommandException("commands.song.generic.unknown", args[1]);
 			} else if (!song.canLearnFromCommand()) {
-				throw new CommandException("commands.grantsong.failure.denied", song.getDisplayName());
+				throw new CommandException("commands.grantsong.failure.denied", new ChatComponentTranslation(song.getTranslationString()));
 			} else if (args.length == 3) {
 				if (("true").equals(args[2])) {
 					PacketDispatcher.sendTo(new OpenSongGuiPacket(song), player);
@@ -92,9 +93,9 @@ public class CommandGrantSong extends CommandBase
 					throw new WrongUsageException(getCommandUsage(sender));
 				}
 			} else if (info.learnSong(song, null)) {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), song.getDisplayName());
+				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
 			} else {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.failure.player", player.getCommandSenderName(), song.getDisplayName());
+				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.failure.player", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
 			}
 		}
 	}

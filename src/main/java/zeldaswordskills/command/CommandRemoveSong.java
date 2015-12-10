@@ -25,6 +25,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.songs.AbstractZeldaSong;
@@ -70,9 +71,9 @@ public class CommandRemoveSong extends CommandBase
 				throw new CommandException("commands.song.generic.unknown", args[0]);
 			}
 			if (info.removeSong(song)) {
-				PlayerUtils.sendFormattedChat(player, "commands.removesong.one", song.getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "commands.removesong.one", new ChatComponentTranslation(song.getTranslationString()));
 			} else {
-				PlayerUtils.sendFormattedChat(player, "commands.removesong.fail", song.getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "commands.removesong.fail", new ChatComponentTranslation(song.getTranslationString()));
 			}
 		}
 	}

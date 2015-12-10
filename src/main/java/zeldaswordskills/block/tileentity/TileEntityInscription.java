@@ -26,6 +26,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
@@ -101,10 +102,10 @@ public class TileEntityInscription extends TileEntity
 			if (player.isSneaking()) {
 				if (!worldObj.isRemote) {
 					setNextSong();
-					PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.new", song.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.new", new ChatComponentTranslation(song.getTranslationString()));
 				}
 			} else if (!worldObj.isRemote) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.current", song.getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.current", new ChatComponentTranslation(song.getTranslationString()));
 			}
 			return true;
 		} else if (stack != null && stack.getItem() instanceof ItemInstrument) {
