@@ -26,6 +26,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -84,10 +85,18 @@ public abstract class AbstractZeldaSong
 	}
 
 	/**
-	 * Return the translated name of this song
+	 * Return the translated name of this song. Note that the translation is only correct on the client;
+	 * on the server, send a ChatComponentTranslation using {@link #getTranslationString()} instead.
 	 */
 	public String getDisplayName() {
-		return StatCollector.translateToLocal("song.zss." + unlocalizedName + ".name");
+		return StatCollector.translateToLocal(getTranslationString());
+	}
+
+	/**
+	 * Returns the string used to translate this song's name
+	 */
+	public String getTranslationString() {
+		return "song.zss." + unlocalizedName + ".name";
 	}
 
 	/**
@@ -261,11 +270,11 @@ public abstract class AbstractZeldaSong
 				notifySongEntities(player.worldObj, player, power, Math.min(r, MAX_SONG_RADIUS));
 			}
 			if (!isEnabled()) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.disabled", getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.disabled", new ChatComponentTranslation(getTranslationString()));
 			} else if (hasEffect(player, instrument, power)) {
 				performEffect(player, instrument, power);
 			} else {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.failed", getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.failed", new ChatComponentTranslation(getTranslationString()));
 			}
 		}
 	}

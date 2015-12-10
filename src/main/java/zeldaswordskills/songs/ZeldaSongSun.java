@@ -21,6 +21,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.world.WorldServer;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
@@ -50,7 +51,7 @@ public class ZeldaSongSun extends AbstractZeldaSong
 	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
 		if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
-			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", getDisplayName(), Config.getMinIntervalSun());
+			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalSun());
 			return;
 		}
 		PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);

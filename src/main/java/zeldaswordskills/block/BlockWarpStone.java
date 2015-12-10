@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.IBlockAccess;
@@ -109,7 +110,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 			if (!world.isRemote) {
 				if (song != null) {// && songs.isSongKnown(song)) { // otherwise have to click again after learning the song
 					songs.onActivatedWarpStone(pos, warpSong);
-					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", song.getDisplayName(), pos.getX(), pos.getY(), pos.getZ());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.block.warp_stone.activate", new ChatComponentTranslation(song.getTranslationString()), pos.getX(), pos.getY(), pos.getZ());
 				}
 			} else if (!player.isSneaking()) {
 				if (song != null) {

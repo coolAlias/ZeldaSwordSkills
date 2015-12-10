@@ -33,6 +33,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.Constants;
@@ -113,7 +114,7 @@ public class ZSSPlayerSongs
 			return false;
 		} else if (!song.canLearn(player)) {
 			if (!player.worldObj.isRemote) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.nolearn", song.getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.nolearn", new ChatComponentTranslation(song.getTranslationString()));
 			}
 			return false;
 		} else if (song == ZeldaSongs.songScarecrow) {
@@ -146,7 +147,7 @@ public class ZSSPlayerSongs
 			}
 			if (!player.worldObj.isRemote) {
 				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.learned", song.getDisplayName());
+				PlayerUtils.sendFormattedChat(player, "chat.zss.song.learned", new ChatComponentTranslation(song.getTranslationString()));
 				PacketDispatcher.sendTo(new LearnSongPacket(song, notes), (EntityPlayerMP) player);
 			}
 		}

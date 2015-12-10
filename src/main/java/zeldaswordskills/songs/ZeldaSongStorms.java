@@ -20,6 +20,7 @@ package zeldaswordskills.songs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
 import zeldaswordskills.network.PacketDispatcher;
@@ -53,7 +54,7 @@ public class ZeldaSongStorms extends AbstractZeldaSong
 		if (!(player.worldObj instanceof WorldServer)) {
 			return;
 		} else if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
-			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", getDisplayName(), Config.getMinIntervalStorm());
+			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalStorm());
 			return;
 		}
 		nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalStorm();
