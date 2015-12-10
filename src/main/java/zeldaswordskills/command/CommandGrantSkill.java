@@ -27,6 +27,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
@@ -96,15 +97,15 @@ public class CommandGrantSkill extends CommandBase
 				} else if (skills.grantSkill(skill.getId(), (byte) level)) {
 				 */ 
 				if (skills.grantSkill(skill.getId(), (byte) level)) {
-					PlayerUtils.sendFormattedChat(player, "commands.grantskill.notify.one", skill.getDisplayName(), skills.getSkillLevel(skill));
+					PlayerUtils.sendFormattedChat(player, "commands.grantskill.notify.one", new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
 					if (commandSender != player) {
-						PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.one", player.getCommandSenderName(), skill.getDisplayName(), skills.getSkillLevel(skill));
+						PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
 					}
 				} else {
-					throw new CommandException("commands.grantskill.failure.player", player.getCommandSenderName(), skill.getDisplayName());
+					throw new CommandException("commands.grantskill.failure.player", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			} else {
-				throw new CommandException("commands.grantskill.failure.low", player.getCommandSenderName(), skill.getDisplayName(), oldLevel);
+				throw new CommandException("commands.grantskill.failure.low", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()), oldLevel);
 			}
 		} else {
 			throw new WrongUsageException(getCommandUsage(sender));

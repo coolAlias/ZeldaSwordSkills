@@ -26,6 +26,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
@@ -59,7 +60,7 @@ public class ItemSkillOrb extends BaseModItem implements IUnenchantable
 				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 				if (skills.grantSkill(skill)) {
 					world.playSoundAtEntity(player, Sounds.LEVELUP, 1.0F, 1.0F);
-					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.level_up", skill.getDisplayName(), skills.getSkillLevel(skill));
+					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.level_up", new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
 					if (skill == SkillBase.bonusHeart) {
 						player.triggerAchievement(ZSSAchievements.skillHeart);
 						if (skills.getSkillLevel(skill) > 19) {
@@ -86,7 +87,7 @@ public class ItemSkillOrb extends BaseModItem implements IUnenchantable
 						--stack.stackSize;
 					}
 				} else {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.max_level", skill.getDisplayName());
+					PlayerUtils.sendFormattedChat(player, "chat.zss.skill.max_level", new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			}
 		}
