@@ -221,7 +221,7 @@ public abstract class QuestBase implements IQuest
 		if (!changed) { // check for hint
 			IChatComponent hint = quest.getHint(player, data);
 			if (hint != null) { // result may be different on client vs. server due to Random
-				if (!player.worldObj.isRemote) {
+				if (!player.worldObj.isRemote && !hint.getFormattedText().equals("")) {
 					player.addChatMessage(hint);
 				}
 				return true;

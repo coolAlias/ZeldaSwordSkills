@@ -77,6 +77,8 @@ public interface IQuest {
 
 	/**
 	 * Possibly return a hint for the player, or null for no hint.
+	 * Returning an empty chat will cancel the interaction without sending any further chat,
+	 * e.g. if chat was already sent some other way.
 	 * Note that this may be called at any time, e.g. when {@link #hasBegun} is not yet true.
 	 * @param data Allows additional data to be provided; implementing class should provide documentation
 	 */
