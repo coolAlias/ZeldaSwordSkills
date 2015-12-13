@@ -42,12 +42,12 @@ public class ItemBuilderSeed extends BaseModItem
 	/** The structure that will generate upon right-clicking on a block */
 	private final Class<? extends ISeedStructure> structure;
 
-	/** The chat message to send to the player upon failing to build a structure */
+	/** The translation string used to retrieve the message to send to the player upon failing to build a structure */
 	private String failMessage;
 
 	/**
 	 * @param structure		The structure class that will be generated
-	 * @param failMessage	The message to display (via chat) when the structure fails to generate; may be null
+	 * @param failMessage	The translation string used to retrieve the message to display (via chat) when the structure fails to generate; may be null
 	 */
 	public ItemBuilderSeed(Class<? extends ISeedStructure> structure, String failMessage) {
 		this.structure = structure;
@@ -66,7 +66,7 @@ public class ItemBuilderSeed extends BaseModItem
 					}
 					return true;
 				} else if (failMessage != null && failMessage.length() > 0) {
-					PlayerUtils.sendChat(player, failMessage);
+					PlayerUtils.sendTranslatedChat(player, failMessage);
 				}
 			}
 			return false;

@@ -611,7 +611,7 @@ public class ZSSItems
 				}
 			}
 		}).setUnlocalizedName("skulltula_token");
-		linksHouse = new ItemBuilderSeed(LinksHouse.class, "You must first clear this area of debris!").setUnlocalizedName("links_house");
+		linksHouse = new ItemBuilderSeed(LinksHouse.class, "chat.zss.links_house.fail").setUnlocalizedName("links_house");
 		instrument = new ItemInstrument();
 		bombFlowerSeed = new ItemBombFlowerSeed().setUnlocalizedName("seed_bomb_flower");
 
