@@ -194,7 +194,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 			long current = (time + 6000L) % 24000L; // 0 is 6:00 am, 18000 is midnight, so add 6000
 			int h = (int)(current / 1000L);
 			int m = (int)((current % 1000L) * 3 / 50); // 1000 ticks divided by 60 minutes = 16 and 2/3
-			PlayerUtils.sendChat(player, String.format("Current time is %s:%s of day %s", String.format("%02d", h), String.format("%02d", m), days));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.block.gossip_stone.time", String.format("%02d", h), String.format("%02d", m), days);
 		} else if (world.getBlockMetadata(x, y, z) > 0 && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
 			world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}

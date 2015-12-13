@@ -153,6 +153,7 @@ chat.zss.block.gossip_stone.hint.9=Guru-Guru down at the windmill enjoys a good 
 chat.zss.block.gossip_stone.hint.10=Zelda's Lullaby can reveal hidden things.
 chat.zss.block.gossip_stone.hint.11=Keep an eye out for void particles - something might be there!
 chat.zss.block.gossip_stone.silent=The stone is silent.
+chat.zss.block.gossip_stone.time=Current time is %s:%s of day %s
 chat.zss.block.secret=This tool doesn't seem to be very effective...
 chat.zss.block.warp_stone.activate=Warp coordinates for %s set to %d/%d/%d.
 chat.zss.darunia.cured.wrong=I prefer that other song you played for me.
