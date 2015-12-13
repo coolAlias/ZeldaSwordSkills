@@ -251,18 +251,13 @@ public class PlayerUtils
 		return consumed == 0;
 	}
 
-	/** Sends a pre-translated chat message to the player */
+	/** Sends a literal string chat message to the player */
 	public static void sendChat(EntityPlayer player, String message) {
 		player.addChatMessage(new ChatComponentText(message));
 	}
 
-	/** Sends a translated chat message to the player */
-	public static void sendTranslatedChat(EntityPlayer player, String message) {
-		player.addChatMessage(new ChatComponentTranslation(message));
-	}
-
-	/** Sends a formatted, translated chat message to the player */
-	public static void sendFormattedChat(EntityPlayer player, String message, Object... args) {
+	/** Sends a translated chat message with optional arguments to the player */
+	public static void sendTranslatedChat(EntityPlayer player, String message, Object... args) {
 		player.addChatMessage(new ChatComponentTranslation(message, args));
 	}
 

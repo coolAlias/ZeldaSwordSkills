@@ -270,11 +270,11 @@ public abstract class AbstractZeldaSong
 				notifySongEntities(player.worldObj, player, power, Math.min(r, MAX_SONG_RADIUS));
 			}
 			if (!isEnabled()) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.disabled", new ChatComponentTranslation(getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.disabled", new ChatComponentTranslation(getTranslationString()));
 			} else if (hasEffect(player, instrument, power)) {
 				performEffect(player, instrument, power);
 			} else {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.failed", new ChatComponentTranslation(getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.failed", new ChatComponentTranslation(getTranslationString()));
 			}
 		}
 	}

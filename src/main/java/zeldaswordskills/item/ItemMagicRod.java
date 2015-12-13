@@ -31,6 +31,7 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
@@ -365,7 +366,7 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 	public boolean onClickedSacredFlame(ItemStack stack, World world, EntityPlayer player, BlockSacredFlame.EnumType flame, boolean isActive) {
 		if (!world.isRemote) {
 			if (hasAbsorbedFlame(stack)) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.old.any", getItemStackDisplayName(stack));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.old.any", new ChatComponentTranslation(stack.getUnlocalizedName() + ".name"));
 			} else if (isActive) {
 				boolean canAbsorb = false;
 				switch(magicType) {
@@ -380,8 +381,9 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 					}
 					stack.getTagCompound().setBoolean("absorbedFlame", true);
 					world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
-					PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.new",
-							getItemStackDisplayName(stack), StatCollector.translateToLocal("tile.zss.sacred_flame." + flame.getName() + ".name"));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.new",
+							new ChatComponentTranslation(stack.getUnlocalizedName() + ".name"),
+							new ChatComponentTranslation("tile.zss.sacred_flame." + flame.getName() + ".name"));
 					return true;
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.random");

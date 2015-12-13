@@ -31,6 +31,7 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
@@ -302,8 +303,8 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 				} else {
 					player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
 					if (world.isRemote) {
-						PlayerUtils.sendFormattedChat(player, "chat.zss.spirit_crystal.farore.fail.dimension",
-								StatCollector.translateToLocal(getUnlocalizedName() + ".name"));
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.farore.fail.dimension",
+								new ChatComponentTranslation(getUnlocalizedName() + ".name"));
 					}
 				}
 			} else {

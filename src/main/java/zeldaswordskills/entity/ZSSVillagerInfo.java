@@ -161,7 +161,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 						villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
 					}
 					break;
-				default: PlayerUtils.sendFormattedChat(player, s + "amount", n);
+				default: PlayerUtils.sendTranslatedChat(player, s + "amount", n);
 				}
 				if (reward != null) {
 					new TimedChatDialogue(player, new ChatComponentTranslation(s + "token." + n), new ChatComponentTranslation(s + "reward." + n, new ChatComponentTranslation(reward.getUnlocalizedName() + ".name")));
@@ -202,9 +202,9 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		price = isMonsterHunter() ? price + price / 2 : price;
 		if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(toBuy, new ItemStack(Items.emerald, price)))) {
 			PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.new", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.hunter.new", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
 		} else {
-			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.old", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.hunter.old", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
 		}
 	}
 

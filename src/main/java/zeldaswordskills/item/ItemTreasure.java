@@ -205,21 +205,21 @@ public class ItemTreasure extends BaseModItem implements IRightClickEntity, IUne
 					player.setCurrentItemOrArmor(0, trade.getItemToSell().copy());
 				}
 				if (villagerInfo.isHunter()) {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.hunter.trade." + itemRand.nextInt(4));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.hunter.trade." + itemRand.nextInt(4));
 				} else {
 					new TimedChatDialogue(player, 0, 500,
 							new ChatComponentTranslation("chat.zss.treasure." + treasure.name + ".trade"),
 							new ChatComponentTranslation("chat.zss.treasure.generic.received", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name")));
 				}
 			} else { // can only be true when required stack is not null
-				PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.generic.trade.fail", required.stackSize, new ChatComponentTranslation(required.getUnlocalizedName() + ".name"), (required.stackSize > 1 ? "s" : ""));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.trade.fail", required.stackSize, new ChatComponentTranslation(required.getUnlocalizedName() + ".name"));
 			}
 		} else if (villagerInfo.isHunter()) {
 			new TimedChatDialogue(player, 0, 1000,
 					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.0", new ChatComponentTranslation(trade.getItemToBuy().getUnlocalizedName() + ".name")),
 					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.1", trade.getItemToSell().stackSize));
 		} else {
-			PlayerUtils.sendFormattedChat(player, "chat.zss.treasure.generic.interested", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name"));
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.interested", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name"));
 		}
 		return true;
 	}

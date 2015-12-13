@@ -167,9 +167,9 @@ public class ItemInstrument extends BaseModItem implements IRightClickEntity
 				if (!result.displayChat) {
 					// don't display default chat messages
 				} else if (ZSSPlayerSongs.get(player).isSongKnown(result.songToLearn)) {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.review", new ChatComponentTranslation(result.songToLearn.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.ocarina.review", new ChatComponentTranslation(result.songToLearn.getTranslationString()));
 				} else {
-					PlayerUtils.sendFormattedChat(player, "chat.zss.npc.ocarina.learn", new ChatComponentTranslation(result.songToLearn.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.ocarina.learn", new ChatComponentTranslation(result.songToLearn.getTranslationString()));
 				}
 			}
 			return result.cancel; // If true, skips straight to Item#onItemRightClick

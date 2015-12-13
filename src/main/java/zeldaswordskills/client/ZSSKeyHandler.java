@@ -22,6 +22,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
@@ -118,20 +119,23 @@ public class ZSSKeyHandler
 				PacketDispatcher.sendToServer(new GetBombPacket());
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.toggletp",
-							(Config.toggleTargetPlayers() ? StatCollector.translateToLocal("chat.zss.key.enable")
-									: StatCollector.translateToLocal("chat.zss.key.disable")));
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.toggletp",
+							(Config.toggleTargetPlayers()
+									? new ChatComponentTranslation("chat.zss.key.enable")
+									: new ChatComponentTranslation("chat.zss.key.disable")));
 				} else {
-					PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.toggleat",
-							(Config.toggleAutoTarget() ? StatCollector.translateToLocal("chat.zss.key.enable")
-									: StatCollector.translateToLocal("chat.zss.key.disable")));
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.toggleat",
+							(Config.toggleAutoTarget()
+									? new ChatComponentTranslation("chat.zss.key.enable")
+									: new ChatComponentTranslation("chat.zss.key.disable")));
 				}
 			} else if (kb == keys[KEY_TOGGLE_BUFFBAR].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
 					Config.isComboHudEnabled = !Config.isComboHudEnabled;
-					PlayerUtils.sendFormattedChat(mc.thePlayer, "chat.zss.key.togglehud",
-							(Config.isComboHudEnabled ? StatCollector.translateToLocal("chat.zss.key.enable")
-									: StatCollector.translateToLocal("chat.zss.key.disable")));
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.togglehud",
+							(Config.isComboHudEnabled
+									? new ChatComponentTranslation("chat.zss.key.enable")
+									: new ChatComponentTranslation("chat.zss.key.disable")));
 				} else {
 					Config.isBuffBarEnabled = !Config.isBuffBarEnabled;
 				}

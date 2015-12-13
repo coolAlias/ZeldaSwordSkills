@@ -77,9 +77,9 @@ public class CommandGrantSong extends CommandBase
 				}
 			}
 			if (!flag) {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.partial", player.getCommandSenderName());
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.partial", player.getCommandSenderName());
 			} else if (commandSender != player) {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.all", player.getCommandSenderName());
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.all", player.getCommandSenderName());
 			}
 		} else {
 			AbstractZeldaSong song = SongAPI.getSongByName(args[1]);
@@ -94,9 +94,9 @@ public class CommandGrantSong extends CommandBase
 					throw new WrongUsageException(getCommandUsage(sender));
 				}
 			} else if (info.learnSong(song, null)) {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
 			} else {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantsong.failure.player", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.failure.player", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
 			}
 		}
 	}

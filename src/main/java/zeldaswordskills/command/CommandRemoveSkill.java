@@ -69,9 +69,9 @@ public class CommandRemoveSkill extends CommandBase
 			EntityPlayerMP player = getCommandSenderAsPlayer(sender);
 			if (ZSSPlayerSkills.get(player).removeSkill(args[0])) {
 				if (all) {
-					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.all", player.getCommandSenderName());
+					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.all", player.getCommandSenderName());
 				} else {
-					PlayerUtils.sendFormattedChat(player, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
 				}
 			} else { // player didn't have this skill
 				if (all) {
