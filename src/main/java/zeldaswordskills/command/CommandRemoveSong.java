@@ -71,9 +71,9 @@ public class CommandRemoveSong extends CommandBase
 				throw new CommandException("commands.song.generic.unknown", args[0]);
 			}
 			if (info.removeSong(song)) {
-				PlayerUtils.sendFormattedChat(player, "commands.removesong.one", new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "commands.removesong.one", new ChatComponentTranslation(song.getTranslationString()));
 			} else {
-				PlayerUtils.sendFormattedChat(player, "commands.removesong.fail", new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "commands.removesong.fail", new ChatComponentTranslation(song.getTranslationString()));
 			}
 		}
 	}

@@ -241,7 +241,7 @@ public abstract class SkillActive extends SkillBase
 			return onActivated(world, player);
 		} else {
 			if (level > 0) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.skill.use.fail", new ChatComponentTranslation(getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.skill.use.fail", new ChatComponentTranslation(getTranslationString()));
 			}
 			return false;
 		}

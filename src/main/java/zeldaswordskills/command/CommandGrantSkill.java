@@ -77,10 +77,10 @@ public class CommandGrantSkill extends CommandBase
 			if (flag) {
 				PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.all");
 				if (commandSender != player) {
-					PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.all", player.getCommandSenderName());
+					PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.all", player.getCommandSenderName());
 				}
 			} else {
-				PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.partial", player.getCommandSenderName());
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.partial", player.getCommandSenderName());
 			}
 		} else if (args.length == 3) {
 			SkillBase skill = SkillBase.getSkillByName(args[1]);
@@ -96,9 +96,9 @@ public class CommandGrantSkill extends CommandBase
 				} else if (skills.grantSkill(skill.getId(), (byte) level)) {
 				 */ 
 				if (skills.grantSkill(skill.getId(), (byte) level)) {
-					PlayerUtils.sendFormattedChat(player, "commands.grantskill.notify.one", new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
+					PlayerUtils.sendTranslatedChat(player, "commands.grantskill.notify.one", new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
 					if (commandSender != player) {
-						PlayerUtils.sendFormattedChat(commandSender, "commands.grantskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
+						PlayerUtils.sendTranslatedChat(commandSender, "commands.grantskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
 					}
 				} else {
 					throw new CommandException("commands.grantskill.failure.player", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));

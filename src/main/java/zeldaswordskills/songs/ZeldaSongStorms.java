@@ -54,7 +54,7 @@ public class ZeldaSongStorms extends AbstractZeldaSong
 		if (!(player.worldObj instanceof WorldServer)) {
 			return;
 		} else if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
-			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalStorm());
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalStorm());
 			return;
 		}
 		nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalStorm();

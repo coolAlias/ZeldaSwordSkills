@@ -102,10 +102,10 @@ public class TileEntityInscription extends TileEntity
 			if (player.isSneaking()) {
 				if (!worldObj.isRemote) {
 					setNextSong();
-					PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.new", new ChatComponentTranslation(song.getTranslationString()));
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.song.inscription.new", new ChatComponentTranslation(song.getTranslationString()));
 				}
 			} else if (!worldObj.isRemote) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.inscription.current", new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.inscription.current", new ChatComponentTranslation(song.getTranslationString()));
 			}
 			return true;
 		} else if (stack != null && stack.getItem() instanceof ItemInstrument) {

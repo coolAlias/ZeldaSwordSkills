@@ -51,7 +51,7 @@ public class ZeldaSongSun extends AbstractZeldaSong
 	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
 		if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
-			PlayerUtils.sendFormattedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalSun());
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalSun());
 			return;
 		}
 		PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);

@@ -146,7 +146,7 @@ public class ZSSEntityEvents
 				} else if (villager.isChild()) {
 					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man.child");
 				} else if (tokens > 0) {
-					PlayerUtils.sendFormattedChat(event.entityPlayer, "chat.zss.npc.cursed_man.amount", tokens);
+					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man.amount", tokens);
 				} else {
 					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.cursed_man." + event.entity.worldObj.rand.nextInt(4));
 				}

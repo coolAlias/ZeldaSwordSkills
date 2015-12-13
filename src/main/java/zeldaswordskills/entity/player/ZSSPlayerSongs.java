@@ -113,7 +113,7 @@ public class ZSSPlayerSongs
 			return false;
 		} else if (!song.canLearn(player)) {
 			if (!player.worldObj.isRemote) {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.nolearn", new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.nolearn", new ChatComponentTranslation(song.getTranslationString()));
 			}
 			return false;
 		} else if (song == ZeldaSongs.songScarecrow) {
@@ -146,7 +146,7 @@ public class ZSSPlayerSongs
 			}
 			if (!player.worldObj.isRemote) {
 				PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
-				PlayerUtils.sendFormattedChat(player, "chat.zss.song.learned", new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.learned", new ChatComponentTranslation(song.getTranslationString()));
 				PacketDispatcher.sendTo(new LearnSongPacket(song, notes), (EntityPlayerMP) player);
 			}
 		}

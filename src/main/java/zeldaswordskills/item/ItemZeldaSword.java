@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
@@ -297,13 +298,14 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 				tag.setInteger("SacredFlames", tag.getInteger("SacredFlames") | type);
 				stack.setTagCompound(tag);
 				world.playSoundAtEntity(player, Sounds.FLAME_ABSORB, 1.0F, 1.0F);
-				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.new",
-						getItemStackDisplayName(stack), StatCollector.translateToLocal("misc.zss.sacred_flame.name." + type));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.new",
+						new ChatComponentTranslation(stack.getUnlocalizedName() + ".name"),
+						new ChatComponentTranslation("misc.zss.sacred_flame.name." + type));
 				player.triggerAchievement(ZSSAchievements.swordFlame);
 				addSacredFlameEnchantments(stack, type);
 				return true;
 			} else {
-				PlayerUtils.sendFormattedChat(player, "chat.zss.sacred_flame.old.same", getItemStackDisplayName(stack));
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.sacred_flame.old.same", new ChatComponentTranslation(stack.getUnlocalizedName() + ".name"));
 			}
 		} else {
 			if (isActive) {
