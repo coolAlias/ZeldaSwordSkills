@@ -28,7 +28,6 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.api.item.IWeapon;
 import zeldaswordskills.api.item.WeaponRegistry;
@@ -249,11 +248,6 @@ public class PlayerUtils
 		}
 
 		return consumed == 0;
-	}
-
-	/** Sends a literal string chat message to the player */
-	public static void sendChat(EntityPlayer player, String message) {
-		player.addChatMessage(new ChatComponentText(message));
 	}
 
 	/** Sends a translated chat message with optional arguments to the player */
