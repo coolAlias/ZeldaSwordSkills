@@ -114,7 +114,7 @@ public class BossBattle extends AbstractCrisis
 		if (world.getDifficulty() != EnumDifficulty.PEACEFUL) {
 			WorldUtils.spawnXPOrbsWithRandom(world, world.rand, center.getX(), center.getY(), center.getZ(), 1000 * difficulty);
 		}
-		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", (center.getX() << 4), (center.getZ() << 4));
+		AntiqueAtlasHelper.placeCustomTile(world, ModInfo.ATLAS_DUNGEON_ID + core.getBossType().ordinal() + "_fin", (center.getX() >> 4), (center.getZ() >> 4));
 	}
 
 	@Override
