@@ -40,6 +40,7 @@
     "grunt": {"category": "player","sounds":["player/grunt1","player/grunt2","player/grunt3"]},
     "cash_sale": {"category": "player","sounds":["special/cash_sale"]},
     "flame_absorb": {"category": "player","sounds":["special/flame_absorb"]},
+    "leaf_hit": {"category": "hostile","sounds":["entity/leaf_hit_1"]},
     "levelup": {"category": "player","sounds":["special/levelup"]},
     "master_sword": {"category": "ambient","sounds":["special/master_sword"]},
     "secret_medley": {"category": "ambient","sounds":["special/secret_medley"]},
