@@ -57,12 +57,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.client.model.ModelDarknut;
+import zeldaswordskills.client.model.ModelDekuBaba;
+import zeldaswordskills.client.model.ModelDekuWithered;
 import zeldaswordskills.client.model.ModelGoron;
 import zeldaswordskills.client.model.ModelMaskSalesman;
 import zeldaswordskills.client.model.ModelOctorok;
 import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.client.render.RenderNothing;
 import zeldaswordskills.client.render.entity.RenderCustomArrow;
+import zeldaswordskills.client.render.entity.RenderDekuBaba;
 import zeldaswordskills.client.render.entity.RenderEntityBomb;
 import zeldaswordskills.client.render.entity.RenderEntityBoomerang;
 import zeldaswordskills.client.render.entity.RenderEntityChu;
@@ -80,6 +83,8 @@ import zeldaswordskills.client.render.entity.RenderGenericLiving;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityDekuBaba;
+import zeldaswordskills.entity.mobs.EntityDekuWithered;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
@@ -134,6 +139,10 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityChu.class, EnumCreatureType.MONSTER, 4, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Darknut spawn rate (0 to disable)[0+]", 5).getInt();
 		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.MONSTER, 1, 1, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityDekuBaba.class, EnumCreatureType.MONSTER, 1, 3, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Withered) spawn rate (0 to disable)[0+]", 5).getInt();
+		addSpawnableEntityData(EntityDekuWithered.class, EnumCreatureType.MONSTER, 1, 3, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Fairy (wild) spawn rate (0 to disable)[0+]", 1).getInt();
 		addSpawnableEntityData(EntityFairy.class, EnumCreatureType.AMBIENT, 1, 3, rate);
 		// Gorons are an exception, as they are not spawned using vanilla mechanics
@@ -210,6 +219,8 @@ public class ZSSEntities
 		registerEntities();
 		addSpawnLocations(EntityChu.class, EntityChu.getDefaultBiomes());
 		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
+		addSpawnLocations(EntityDekuBaba.class, EntityDekuBaba.getDefaultBiomes());
+		addSpawnLocations(EntityDekuWithered.class, EntityDekuWithered.getDefaultBiomes());
 		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
 		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
 		addSpawnLocations(EntityOctorok.class, EntityOctorok.getDefaultBiomes());
@@ -247,6 +258,9 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
 		EntitySpawnPlacementRegistry.setPlacementType(EntityChu.class, SpawnPlacementType.ON_GROUND);
+
+		registerEntity(EntityDekuBaba.class, "baba_deku", ++modEntityIndex, 80, 0x33CC33, 0x0000FF);
+		registerEntity(EntityDekuWithered.class, "baba_withered", ++modEntityIndex, 80, 0x8B5A00, 0x0000FF);
 
 		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityKeese.class, "keese", 0x000000, 0x555555, 0x000000, 0xFF4500, 0x000000, 0x40E0D0, 0x000000, 0xFFD700, 0x000000, 0x800080);
@@ -298,6 +312,10 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu(manager, new ModelSlime(16), 0.25F));
 		RenderingRegistry.registerEntityRenderingHandler(EntityDarknut.class, new RenderGenericLiving(manager, 
 				new ModelDarknut(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
+		RenderingRegistry.registerEntityRenderingHandler(EntityDekuBaba.class, new RenderDekuBaba(manager,
+				new ModelDekuBaba(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_baba.png"));
+		RenderingRegistry.registerEntityRenderingHandler(EntityDekuWithered.class, new RenderDekuBaba(manager,
+				new ModelDekuWithered(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_withered.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy(manager));
 		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(manager, 
 				new ModelGoron(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/goron.png"));

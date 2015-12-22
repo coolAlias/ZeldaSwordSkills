@@ -27,6 +27,7 @@ import net.minecraft.util.MathHelper;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.api.entity.IEntityCustomTarget;
 import zeldaswordskills.api.entity.ai.EntityAIDynamicAction.EntityAIDynamicCustomTarget;
+import zeldaswordskills.util.WorldUtils;
 
 /**
  * 
@@ -106,10 +107,10 @@ public class EntityAITargetBombs extends EntityAIDynamicCustomTarget
 			if (timer++ < entity.getRNG().nextInt(20)) {
 				return null;
 			}
-			List<Entity> bombs = entity.worldObj.getEntitiesWithinAABB(IEntityBomb.class, entity.getEntityBoundingBox().expand(range, range / 2.0F, range));
+			List<IEntityBomb> bombs = WorldUtils.getEntitiesWithinAABB(entity.worldObj, IEntityBomb.class, entity.getEntityBoundingBox().expand(range, range / 2.0F, range));
 			Collections.sort(bombs, sorter);
 			if (!bombs.isEmpty()) {
-				targetBomb = bombs.get(0);
+				targetBomb = (Entity) bombs.get(0);
 			}
 			timer = 0;
 		}
