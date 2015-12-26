@@ -70,7 +70,7 @@ public class RenderEntityBomb extends Render
 
 	public void renderEntityModel(Entity bomb, double x, double y, double z, float yaw, float partialTick) {
 		GlStateManager.pushMatrix();
-		float scale = bomb.ticksExisted % 13 > 10 ? 1.65F : 1.25F;
+		float scale = bomb.ticksExisted % 13 > 10 ? 1.25F : 1.1F;
 		bindTexture(getEntityTexture(bomb));
 		GlStateManager.translate(x, y, z);
 		GlStateManager.enableRescaleNormal();
