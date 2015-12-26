@@ -72,7 +72,7 @@ public class ItemBombFlowerSeed extends ItemSeeds implements IRightClickEntity {
 				// func_146082_f is setInLove
 				((EntityChicken) entity).func_146082_f(player);
 				int time = 60 + entity.worldObj.rand.nextInt(60);
-				EntityBomb bomb = new EntityBomb(entity.worldObj).setType(BombType.BOMB_STANDARD).setTime(time);
+				EntityBomb bomb = new EntityBomb(entity.worldObj).setType(BombType.BOMB_STANDARD).setFuseTime(time);
 				ZSSEntityInfo.get((EntityChicken) entity).onBombIngested(bomb);
 			}
 			return true;

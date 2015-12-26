@@ -239,7 +239,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, IExp
 	private void disperseSeeds(World world, int x, int y, int z, boolean isGriefing) {
 		if (!world.isRemote) {
 			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-			EntityBomb bomb = new EntityBomb(world, x + 0.5D, y + 0.5D, z + 0.5D).setType(BombType.BOMB_FLOWER).setTime(64);
+			EntityBomb bomb = new EntityBomb(world, x + 0.5D, y + 0.5D, z + 0.5D).setType(BombType.BOMB_FLOWER).setFuseTime(64);
 			if (!isGriefing) {
 				bomb.setNoGrief();
 			}
