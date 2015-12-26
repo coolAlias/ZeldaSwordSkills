@@ -20,6 +20,7 @@ package zeldaswordskills.util;
 import java.util.UUID;
 
 import mods.battlegear2.api.core.IBattlePlayer;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
@@ -96,14 +97,14 @@ public class PlayerUtils
 		return (isSword(stack) || WeaponRegistry.INSTANCE.isWeapon(stack.getItem()));
 	}
 
-	/** Returns true if the player is currently holding a Zelda-specific sword */
-	public static boolean isHoldingZeldaSword(EntityPlayer player) {
-		return (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemZeldaSword);
+	/** Returns true if the entity is currently holding a Zelda-specific sword */
+	public static boolean isHoldingZeldaSword(EntityLivingBase entity) {
+		return (entity.getHeldItem() != null && entity.getHeldItem().getItem() instanceof ItemZeldaSword);
 	}
 
-	/** Returns true if the player is currently holding a Master sword */
-	public static boolean isHoldingMasterSword(EntityPlayer player) {
-		return (isHoldingZeldaSword(player) && ((ItemZeldaSword) player.getHeldItem().getItem()).isMasterSword());
+	/** Returns true if the entity is currently holding a Master sword */
+	public static boolean isHoldingMasterSword(EntityLivingBase entity) {
+		return (isHoldingZeldaSword(entity) && ((ItemZeldaSword) entity.getHeldItem().getItem()).isMasterSword());
 	}
 
 	/**
