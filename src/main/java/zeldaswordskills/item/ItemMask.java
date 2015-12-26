@@ -125,7 +125,7 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
 			info.setWearingHelm(stack);
 		}
-		if (tickingEffect != null && world.getWorldTime() % 50 == 0) {
+		if (tickingEffect != null && world.getTotalWorldTime() % 50 == 0) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
 		}
 	}
@@ -249,14 +249,14 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 		 * Returns true if this Mask is cooling down
 		 */
 		private boolean isCooling(World world, ItemStack stack) {
-			return (stack.hasTagCompound() && world.getWorldTime() < stack.getTagCompound().getInteger("nextUse"));
+			return (stack.hasTagCompound() && world.getTotalWorldTime() < stack.getTagCompound().getInteger("nextUse"));
 		}
 		/**
 		 * Sets the time, in ticks, which must pass before the stack may be used again
 		 */
 		private void setNextUse(World world, ItemStack stack, int time) {
 			if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-			stack.getTagCompound().setLong("nextUse", world.getWorldTime() + time);
+			stack.getTagCompound().setLong("nextUse", world.getTotalWorldTime() + time);
 		}
 	}
 	public static class ItemMaskBunny extends ItemMask
@@ -288,7 +288,7 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 		@Override
 		public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 			super.onArmorTick(world, player, stack);
-			if (world.getWorldTime() % 64 == 0) {
+			if (world.getTotalWorldTime() % 64 == 0) {
 				List<EntityVillager> villagers = world.getEntitiesWithinAABB(EntityVillager.class, player.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D));
 				for (EntityVillager villager : villagers) {
 					if (world.rand.nextFloat() < 0.5F) {

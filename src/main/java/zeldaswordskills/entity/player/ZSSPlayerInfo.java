@@ -374,7 +374,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			}
 		}
 		if (getFlag(MOBILITY) && !player.onGround && Math.abs(player.motionY) > 0.05D
-				&& !player.capabilities.isFlying && player.worldObj.getWorldTime() % 2 == 0) {
+				&& !player.capabilities.isFlying && player.worldObj.getTotalWorldTime() % 2 == 0) {
 			player.motionX *= 1.15D;
 			player.motionZ *= 1.15D;
 		}

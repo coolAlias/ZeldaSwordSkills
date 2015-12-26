@@ -126,8 +126,8 @@ public class ZSSPlayerSongs
 			if (scarecrowNotes.isEmpty()) {
 				addSong = false;
 				scarecrowNotes.addAll(notes);
-				scarecrowTime = player.worldObj.getWorldTime() + (24000 * 7);
-			} else if (player.worldObj.getWorldTime() > scarecrowTime) {
+				scarecrowTime = player.worldObj.getTotalWorldTime() + (24000 * 7);
+			} else if (player.worldObj.getTotalWorldTime() > scarecrowTime) {
 				// validate notes before adding the song for good
 				for (int i = 0; i < scarecrowNotes.size() && addSong; ++i) {
 					addSong = (scarecrowNotes.get(i) == notes.get(i));
@@ -236,7 +236,7 @@ public class ZSSPlayerSongs
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.scarecrow.known");
 			}
 			return false;
-		} else if (player.worldObj.getWorldTime() < scarecrowTime) {
+		} else if (player.worldObj.getTotalWorldTime() < scarecrowTime) {
 			if (addChat) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.scarecrow.later");
 			}
@@ -250,14 +250,14 @@ public class ZSSPlayerSongs
 	 * Returns true if the player can currently benefit from the Song of Healing
 	 */
 	public boolean canHealFromSong() {
-		return player.getHealth() < player.getMaxHealth() && player.worldObj.getWorldTime() > nextSongHealTime;
+		return player.getHealth() < player.getMaxHealth() && player.worldObj.getTotalWorldTime() > nextSongHealTime;
 	}
 
 	/**
 	 * Sets the next time the player can benefit from the Song of Healing
 	 */
 	public void setNextHealTime() {
-		nextSongHealTime = player.worldObj.getWorldTime() + 24000;
+		nextSongHealTime = player.worldObj.getTotalWorldTime() + 24000;
 	}
 
 	/**

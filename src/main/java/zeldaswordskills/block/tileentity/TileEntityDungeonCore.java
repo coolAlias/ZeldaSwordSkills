@@ -171,7 +171,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUp
 	 * Returns true every 30 ticks if there is a nearby player and no event is active
 	 */
 	private boolean shouldUpdate() {
-		return (bossBattle == null && worldObj.getWorldTime() % 20 == 0 &&
+		return (bossBattle == null && worldObj.getTotalWorldTime() % 20 == 0 &&
 				worldObj.getClosestPlayer(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 16.0D) != null);
 	}
 

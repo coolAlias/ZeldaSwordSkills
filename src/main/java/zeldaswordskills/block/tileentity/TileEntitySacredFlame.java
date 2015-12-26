@@ -35,12 +35,12 @@ public class TileEntitySacredFlame extends TileEntity implements IUpdatePlayerLi
 	 * Call when the flame is extinguished to set the next reset date
 	 */
 	public void extinguish() {
-		nextResetDate = worldObj.getWorldTime() + (24000 * Config.getSacredFlameRefreshRate());
+		nextResetDate = worldObj.getTotalWorldTime() + (24000 * Config.getSacredFlameRefreshRate());
 	}
 
 	@Override
 	public void update() {
-		if (nextResetDate > 0 && worldObj.getWorldTime() > nextResetDate) {
+		if (nextResetDate > 0 && worldObj.getTotalWorldTime() > nextResetDate) {
 			nextResetDate = 0;
 			worldObj.setBlockState(pos, worldObj.getBlockState(pos).withProperty(BlockSacredFlame.EXTINGUISHED, Boolean.valueOf(false)), 3);
 		}

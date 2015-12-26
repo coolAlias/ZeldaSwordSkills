@@ -158,7 +158,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 				case 100:
 					reward = new ItemStack(Items.emerald, 64);
 					if (Config.getSkulltulaRewardRate() > 0) {
-						villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
+						villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getTotalWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
 					}
 					break;
 				default: PlayerUtils.sendTranslatedChat(player, s + "amount", n);
@@ -170,11 +170,11 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 			} else { // probably an impossible case
 				PlayerUtils.sendTranslatedChat(player, s + villager.worldObj.rand.nextInt(4));
 			}
-		} else if (Config.getSkulltulaRewardRate() > 0 && player.worldObj.getWorldTime() > villager.getEntityData().getLong("NextSkulltulaReward")) {
+		} else if (Config.getSkulltulaRewardRate() > 0 && player.worldObj.getTotalWorldTime() > villager.getEntityData().getLong("NextSkulltulaReward")) {
 			ItemStack reward = new ItemStack(Items.emerald, 64);
 			new TimedChatDialogue(player, new ChatComponentTranslation(s + "complete"), new ChatComponentTranslation(s + "reward.100", new ChatComponentTranslation(reward.getUnlocalizedName() + ".name")));
 			new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
-			villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
+			villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getTotalWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
 		} else {
 			PlayerUtils.sendTranslatedChat(player, s + "complete");
 		}

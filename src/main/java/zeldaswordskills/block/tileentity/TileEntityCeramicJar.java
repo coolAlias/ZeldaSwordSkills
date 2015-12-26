@@ -43,7 +43,7 @@ public class TileEntityCeramicJar extends TileEntityInventory implements IUpdate
 	}
 
 	private boolean shouldUpdate() {
-		return (worldObj.getWorldTime() % 20 == 0 && worldObj.rand.nextInt(8) == 0 &&
+		return (worldObj.getTotalWorldTime() % 20 == 0 && worldObj.rand.nextInt(8) == 0 &&
 				worldObj.getClosestPlayer(getPos().getX() + 0.5D, getPos().getY() + 0.5D, getPos().getZ() + 0.5D, 16.0D) != null);
 	}
 

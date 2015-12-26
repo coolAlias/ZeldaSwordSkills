@@ -192,7 +192,7 @@ public class ItemArmorBoots extends ItemModArmor implements IUnenchantable
 					PacketDispatcher.sendTo(new InLiquidPacket(m == Material.lava), (EntityPlayerMP) player);
 				}
 				Material m1 = world.getBlockState(pos.down()).getBlock().getMaterial();
-				if ((m1 == Material.glass || m1 == Material.ice) && world.getWorldTime() % 2 == 0) {
+				if ((m1 == Material.glass || m1 == Material.ice) && world.getTotalWorldTime() % 2 == 0) {
 					if ((!player.isSneaking() && world.rand.nextFloat() < 0.15F) || world.rand.nextFloat() < 0.01F) {
 						world.destroyBlock(pos.down(), false);
 					}

@@ -56,7 +56,7 @@ public class ItemDekuLeaf extends BaseModItem implements IUnenchantable
 	 */
 	private void setNextUseTime(ItemStack stack, World world, int ticks) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setLong("next_use", (world.getWorldTime() + ticks));
+		stack.getTagCompound().setLong("next_use", (world.getTotalWorldTime() + ticks));
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class ItemDekuLeaf extends BaseModItem implements IUnenchantable
 		player.swingItem();
 		if (player.getFoodStats().getFoodLevel() > 0) {
 			if (player.onGround) {
-				if (!world.isRemote && world.getWorldTime() > getNextUseTime(stack)) {
+				if (!world.isRemote && world.getTotalWorldTime() > getNextUseTime(stack)) {
 					player.addExhaustion(2.0F);
 					WorldUtils.playSoundAtEntity(player, Sounds.WHOOSH, 0.4F, 0.5F);
 					world.spawnEntityInWorld(new EntityCyclone(world, player));

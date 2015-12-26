@@ -53,11 +53,11 @@ public class ZeldaSongStorms extends AbstractZeldaSong
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
 		if (!(player.worldObj instanceof WorldServer)) {
 			return;
-		} else if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
+		} else if (!player.capabilities.isCreativeMode && player.worldObj.getTotalWorldTime() < nextChange) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalStorm());
 			return;
 		}
-		nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalStorm();
+		nextChange = player.worldObj.getTotalWorldTime() + Config.getMinIntervalStorm();
 		PacketDispatcher.sendTo(new PlaySoundPacket(Sounds.SUCCESS, 1.0F, 1.0F), (EntityPlayerMP) player);
 		WorldInfo worldinfo = ((WorldServer) player.worldObj).getWorldInfo();
 		if (worldinfo.isRaining()) {

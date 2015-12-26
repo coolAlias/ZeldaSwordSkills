@@ -144,12 +144,12 @@ public class FairySpawner
 				fairy.setFairyHome(new BlockPos(x, y + 2, z));
 				world.spawnEntityInWorld(fairy);
 				if (++fairiesSpawned == maxFairies) {
-					nextResetDate = world.getWorldTime() + 24000 * (world.rand.nextInt(Config.getDaysToRespawn()) + 1);
+					nextResetDate = world.getTotalWorldTime() + 24000 * (world.rand.nextInt(Config.getDaysToRespawn()) + 1);
 				}
 			}
 		}
 
-		if (fairiesSpawned == maxFairies && !world.isDaytime() && world.getWorldTime() > nextResetDate) {
+		if (fairiesSpawned == maxFairies && !world.isDaytime() && world.getTotalWorldTime() > nextResetDate) {
 			fairiesSpawned = 0;
 		}
 	}
