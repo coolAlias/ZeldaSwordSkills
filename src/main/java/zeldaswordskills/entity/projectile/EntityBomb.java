@@ -63,18 +63,22 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 
 	public EntityBomb(World world) {
 		super(world);
+		setSize(0.5F, 0.5F);
 	}
 
 	public EntityBomb(World world, EntityLivingBase entity) {
 		super(world, entity);
+		setSize(0.5F, 0.5F);
 	}
 
 	public EntityBomb(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		setSize(0.5F, 0.5F);
 	}
 
 	public EntityBomb(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
+		setSize(0.5F, 0.5F);
 	}
 
 	@Override
