@@ -71,7 +71,7 @@ public class RenderEntityBomb extends Render
 
 	public void renderEntityModel(Entity bomb, double x, double y, double z, float yaw, float partialTick) {
 		GL11.glPushMatrix();
-		float scale = bomb.ticksExisted % 13 > 10 ? 1.65F : 1.25F;
+		float scale = bomb.ticksExisted % 13 > 10 ? 1.25F : 1.1F;
 		bindTexture(getEntityTexture(bomb));
 		GL11.glTranslated(x, y, z);
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
