@@ -734,7 +734,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public boolean getCanSpawnHere() {
-		return super.getCanSpawnHere() && worldObj.getWorldTime() > Config.getTimeToSpawnDarknut();
+		return super.getCanSpawnHere() && worldObj.getTotalWorldTime() > Config.getTimeToSpawnDarknut();
 	}
 
 	@Override

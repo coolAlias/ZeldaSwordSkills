@@ -62,14 +62,14 @@ public class TileEntityGossipStone extends TileEntity
 	 * @return TRUE if this block was affected
 	 */
 	public boolean onSongPlayed(EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
-		if (worldObj.isDaytime() || nextFairySpawn > worldObj.getWorldTime() || power < 5) {
+		if (worldObj.isDaytime() || nextFairySpawn > worldObj.getTotalWorldTime() || power < 5) {
 			return false;
 		}
 		if (song == ZeldaSongs.songStorms || song == ZeldaSongs.songSun || song == ZeldaSongs.songZeldasLullaby) {
 			EntityFairy fairy = new EntityFairy(worldObj);
 			fairy.setFairyHome(xCoord, yCoord + 2, zCoord);
 			worldObj.spawnEntityInWorld(fairy);
-			nextFairySpawn = worldObj.getWorldTime() + 24000 * (worldObj.rand.nextInt(Config.getDaysToRespawn()) + 1);
+			nextFairySpawn = worldObj.getTotalWorldTime() + 24000 * (worldObj.rand.nextInt(Config.getDaysToRespawn()) + 1);
 			markDirty();
 			return true;
 		}

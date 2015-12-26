@@ -33,12 +33,12 @@ public class TileEntitySacredFlame extends TileEntity
 	 * Call when the flame is extinguished to set the next reset date
 	 */
 	public void extinguish() {
-		nextResetDate = worldObj.getWorldTime() + (24000 * Config.getSacredFlameRefreshRate());
+		nextResetDate = worldObj.getTotalWorldTime() + (24000 * Config.getSacredFlameRefreshRate());
 	}
 
 	@Override
 	public void updateEntity() {
-		if (nextResetDate > 0 && worldObj.getWorldTime() > nextResetDate) {
+		if (nextResetDate > 0 && worldObj.getTotalWorldTime() > nextResetDate) {
 			nextResetDate = 0;
 			int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, meta & ~0x8, 3);

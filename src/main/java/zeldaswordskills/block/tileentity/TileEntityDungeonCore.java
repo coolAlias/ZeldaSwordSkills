@@ -171,7 +171,7 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 	 * Returns true every 30 ticks if there is a nearby player and no event is active
 	 */
 	private boolean shouldUpdate() {
-		return (bossBattle == null && worldObj.getWorldTime() % 20 == 0 &&
+		return (bossBattle == null && worldObj.getTotalWorldTime() % 20 == 0 &&
 				worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 16.0D) != null);
 	}
 

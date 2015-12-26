@@ -50,7 +50,7 @@ public class ZeldaSongSun extends AbstractZeldaSong
 
 	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
-		if (!player.capabilities.isCreativeMode && player.worldObj.getWorldTime() < nextChange) {
+		if (!player.capabilities.isCreativeMode && player.worldObj.getTotalWorldTime() < nextChange) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.cooldown", new ChatComponentTranslation(getTranslationString()), Config.getMinIntervalSun());
 			return;
 		}
@@ -61,6 +61,6 @@ public class ZeldaSongSun extends AbstractZeldaSong
 			WorldServer worldserver = MinecraftServer.getServer().worldServers[i];
 			worldserver.setWorldTime(worldserver.getWorldTime() + addTime);
 		}
-		nextChange = player.worldObj.getWorldTime() + Config.getMinIntervalSun();
+		nextChange = player.worldObj.getTotalWorldTime() + Config.getMinIntervalSun();
 	}
 }

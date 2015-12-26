@@ -37,7 +37,7 @@ public class TileEntityCeramicJar extends TileEntityInventory {
 	}
 
 	private boolean shouldUpdate() {
-		return (worldObj.getWorldTime() % 20 == 0 && worldObj.rand.nextInt(8) == 0 &&
+		return (worldObj.getTotalWorldTime() % 20 == 0 && worldObj.rand.nextInt(8) == 0 &&
 				worldObj.getClosestPlayer(xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, 16.0D) != null);
 	}
 

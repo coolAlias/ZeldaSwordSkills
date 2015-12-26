@@ -163,9 +163,9 @@ public final class QuestBiggoronSword extends QuestBase
 		}
 		if (!stack.getTagCompound().hasKey("finishDate")) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.claim_check.no_nbt");
-			stack.getTagCompound().setLong("finishDate", player.worldObj.getWorldTime() + 48000);
+			stack.getTagCompound().setLong("finishDate", player.worldObj.getTotalWorldTime() + 48000);
 			return false;
-		} else if (player.worldObj.getWorldTime() < stack.getTagCompound().getLong("finishDate")) {
+		} else if (player.worldObj.getTotalWorldTime() < stack.getTagCompound().getLong("finishDate")) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.claim_check.early");
 			return false;
 		}
@@ -181,7 +181,7 @@ public final class QuestBiggoronSword extends QuestBase
 		case POCKET_EGG: player.triggerAchievement(ZSSAchievements.treasureSecond); return false;
 		case EYE_DROPS: // traded eye drops for claim check: set date for claiming finished sword
 			reward.setTagCompound(new NBTTagCompound());
-			reward.getTagCompound().setLong("finishDate", player.worldObj.getWorldTime() + 48000);
+			reward.getTagCompound().setLong("finishDate", player.worldObj.getTotalWorldTime() + 48000);
 			return true;
 		case CLAIM_CHECK: onComplete(player); return true;
 		default: return true;

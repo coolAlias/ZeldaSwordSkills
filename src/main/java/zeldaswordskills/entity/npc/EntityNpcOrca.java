@@ -133,7 +133,7 @@ public class EntityNpcOrca extends EntityNpcBase implements INpcVillager, IParry
 		if (source.getEntity() instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) source.getEntity();
 			Entity opponent = getMatchOpponent();
-			if (worldObj.getWorldTime() < nextMatch) {
+			if (worldObj.getTotalWorldTime() < nextMatch) {
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.damage.resting", true);
 				return false;
 			} else if (opponent != null && opponent != player) {
@@ -248,7 +248,7 @@ public class EntityNpcOrca extends EntityNpcBase implements INpcVillager, IParry
 		setMatchOpponent(attackingPlayer);
 		villageObj = tmp;
 		if (entity == null && prevTarget instanceof EntityPlayer) {
-			nextMatch = worldObj.getWorldTime() + MATCH_INTERVAL;
+			nextMatch = worldObj.getTotalWorldTime() + MATCH_INTERVAL;
 			// func_142015_aE() is getRevengeTimer()
 			if ((ticksExisted - func_142015_aE()) > 99) { // match timed out
 				sendTranslatedChat((EntityPlayer) prevTarget, "chat.zss.npc.orca.match.timeout." + worldObj.rand.nextInt(3), true);

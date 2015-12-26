@@ -119,7 +119,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	 */
 	private void setNextUseTime(ItemStack stack, World world, int ticks) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setLong("next_use", (world.getWorldTime() + ticks));
+		stack.getTagCompound().setLong("next_use", (world.getTotalWorldTime() + ticks));
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (player.capabilities.isCreativeMode || (world.getWorldTime() > getNextUseTime(stack) && player.getFoodStats().getFoodLevel() > 0)) {
+		if (player.capabilities.isCreativeMode || (world.getTotalWorldTime() > getNextUseTime(stack) && player.getFoodStats().getFoodLevel() > 0)) {
 			player.swingItem();
 			if (player.isSneaking()) {
 				boolean isUpgraded = isUpgraded(stack);
