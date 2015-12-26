@@ -87,7 +87,7 @@ public class ItemBombFlowerSeed extends ItemSeeds implements IModItem, IRightCli
 			if (!player.worldObj.isRemote && PlayerUtils.consumeHeldItem(player, this, 1)) {
 				((EntityChicken) entity).setInLove(player);
 				int time = 60 + entity.worldObj.rand.nextInt(60);
-				EntityBomb bomb = new EntityBomb(entity.worldObj).setType(BombType.BOMB_STANDARD).setTime(time);
+				EntityBomb bomb = new EntityBomb(entity.worldObj).setType(BombType.BOMB_STANDARD).setFuseTime(time);
 				ZSSEntityInfo.get((EntityChicken) entity).onBombIngested(bomb);
 			}
 			return true;

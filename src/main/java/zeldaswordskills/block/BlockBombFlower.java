@@ -246,7 +246,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 	private void disperseSeeds(World world, BlockPos pos, boolean isGriefing) {
 		if (!world.isRemote) {
 			world.setBlockState(pos, getDefaultState());
-			EntityBomb bomb = new EntityBomb(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D).setType(BombType.BOMB_FLOWER).setTime(64);
+			EntityBomb bomb = new EntityBomb(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D).setType(BombType.BOMB_FLOWER).setFuseTime(64);
 			if (!isGriefing) {
 				bomb.setNoGrief();
 			}

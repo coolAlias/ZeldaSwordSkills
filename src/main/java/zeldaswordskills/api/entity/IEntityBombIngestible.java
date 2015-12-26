@@ -40,15 +40,25 @@ public interface IEntityBombIngestible extends IEntityBomb {
 	float getExplosionDamage(Entity entity);
 
 	/**
+	 * Sets the damage the explosion will cause
+	 * @param damage Note that 0.0F will result in the default vanilla explosion damage calculations
+	 */
+	IEntityBomb setExplosionDamage(float damage);
+
+	/**
 	 * The radius of the resulting explosion
 	 * @param entity The entity which ingested the bomb
 	 */
 	float getExplosionRadius(Entity entity);
+
+	IEntityBomb setExplosionRadius(float radius);
 
 	/**
 	 * The number of ticks before the ingested bomb explodes
 	 * @param entity The entity which ingested the bomb
 	 */
 	int getFuseTime(Entity entity);
+
+	IEntityBomb setFuseTime(int time);
 
 }

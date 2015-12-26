@@ -320,7 +320,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		int difficulty = worldObj.getDifficulty().getDifficultyId();
 		if (getType() == 1) {
 			projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
-					setType(BombType.BOMB_WATER).setTime(12 - (difficulty * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * difficulty);
+					setType(BombType.BOMB_WATER).setFuseTime(12 - (difficulty * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * difficulty);
 		} else {
 			projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
 					setIgnoreWater().setDamage(f * difficulty);

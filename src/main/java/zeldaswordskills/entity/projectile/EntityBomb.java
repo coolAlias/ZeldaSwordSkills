@@ -94,13 +94,30 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	}
 
 	@Override
+	public EntityBomb setExplosionDamage(float damage) {
+		return (EntityBomb) setDamage(damage);
+	}
+
+	@Override
 	public float getExplosionRadius(Entity entity) {
 		return getRadius();
 	}
 
 	@Override
+	public EntityBomb setExplosionRadius(float radius) {
+		this.radius = radius;
+		return this;
+	}
+
+	@Override
 	public int getFuseTime(Entity entity) {
 		return fuseTime;
+	}
+
+	@Override
+	public EntityBomb setFuseTime(int time) {
+		fuseTime = Math.max(time, 1);
+		return this;
 	}
 
 	/**
@@ -111,24 +128,8 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		return this;
 	}
 
-	/**
-	 * Sets the bomb's fuse time
-	 */
-	public EntityBomb setTime(int time) {
-		fuseTime = Math.max(time, 1);
-		return this;
-	}
-
 	public float getRadius() {
 		return radius > 0 ? radius : ItemBomb.getRadius(getType());
-	}
-
-	/**
-	 * Sets this bomb's radius
-	 */
-	public EntityBomb setRadius(float radius) {
-		this.radius = radius;
-		return this;
 	}
 
 	@Override
