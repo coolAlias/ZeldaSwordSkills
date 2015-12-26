@@ -62,7 +62,7 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	/** Time until the ingested bomb explodes */
 	private int fuseTime;
 
-	/** The ingested bomb entity instance */
+	/** The ingested bomb instance will also be an Entity */
 	private IEntityBombIngestible ingestedBomb;
 
 	public ZSSEntityInfo(EntityLivingBase entity) {
@@ -204,14 +204,14 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	 * @param bomb Ingested bombs are immediately set to dead in the world
 	 * @param boolean true if the bomb was ingested
 	 */
-	public <T extends Entity & IEntityBombIngestible> boolean onBombIngested(T bomb) {
-		if (ingestedBomb != null) {
+	public boolean onBombIngested(IEntityBombIngestible bomb) {
+		if (ingestedBomb != null || !(bomb instanceof Entity)) {
 			return false;
 		}
 		fuseTime = bomb.getFuseTime(entity);
 		ingestedBomb = bomb;
-		if (!bomb.worldObj.isRemote) { 
-			bomb.setDead();
+		if (!entity.worldObj.isRemote) { 
+			((Entity) bomb).setDead();
 		}
 		return true;
 	}
