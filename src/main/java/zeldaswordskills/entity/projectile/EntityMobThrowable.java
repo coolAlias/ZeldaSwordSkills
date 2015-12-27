@@ -17,25 +17,30 @@
 
 package zeldaswordskills.entity.projectile;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
 /**
  * 
  * Abstract class that provides constructor for throwing entity as a mob
  *
  */
-public abstract class EntityMobThrowable extends EntityThrowable
+public abstract class EntityMobThrowable extends EntityThrowable implements IEntityAdditionalSpawnData
 {
 	/** The throwing entity's ID, in case it is not a player. Only used after loading from NBT */
 	private int throwerId;
 
 	/** Usually the damage this entity will cause upon impact */
 	private float damage;
+
+	/** Projectile gravity velocity */
+	private float gravity = 0.03F;
 
 	public EntityMobThrowable(World world) {
 		super(world);
@@ -94,11 +99,49 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		return this;
 	}
 
+	/**
+	 * Re-sets the projectile's heading on the exact same trajectory but using the given velocity
+	 */
+	public EntityMobThrowable setProjectileVelocity(float velocity) {
+		this.setThrowableHeading(this.motionX, this.motionY, this.motionZ, velocity, 0.0F);
+		return this;
+	}
+
+	@Override
+	protected float getGravityVelocity() {
+		return gravity;
+	}
+
+	/**
+	 * Sets the projectile's gravity velocity
+	 */
+	public EntityMobThrowable setGravityVelocity(float amount) {
+		this.gravity = amount;
+		return this;
+	}
+
+	@Override
+	public void onUpdate() {
+		super.onUpdate();
+		if ((!gravityCheck() || posY > 255.0F) && !worldObj.isRemote) {
+			setDead();
+		}
+	}
+
+	/**
+	 * Sanity check for gravity - return true if the entity can stay alive.
+	 * Note that it will be killed anyway once it surpasses y=255.
+	 */
+	protected boolean gravityCheck() {
+		return getGravityVelocity() > 0.0F || ticksExisted < 60;
+	}
+
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setInteger("throwerId", (getThrower() == null ? -1 : getThrower().getEntityId()));
 		compound.setFloat("damage", damage);
+		compound.setFloat("gravity", gravity);
 	}
 
 	@Override
@@ -106,5 +149,16 @@ public abstract class EntityMobThrowable extends EntityThrowable
 		super.readEntityFromNBT(compound);
 		throwerId = compound.getInteger("throwerId");
 		damage = compound.getFloat("damage");
+		gravity = compound.getFloat("gravity");
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		buffer.writeFloat(gravity);
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		gravity = buffer.readFloat();
 	}
 }

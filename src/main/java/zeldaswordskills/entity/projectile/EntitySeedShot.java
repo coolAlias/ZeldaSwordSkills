@@ -75,6 +75,7 @@ public class EntitySeedShot extends EntityMobThrowable
 
 	public EntitySeedShot(World world) {
 		super(world);
+		setGravityVelocity(0.05F);
 	}
 
 	public EntitySeedShot(World world, EntityLivingBase entity, float velocity) {
@@ -83,6 +84,7 @@ public class EntitySeedShot extends EntityMobThrowable
 
 	public EntitySeedShot(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
+		setGravityVelocity(0.05F);
 	}
 
 	/**
@@ -91,6 +93,7 @@ public class EntitySeedShot extends EntityMobThrowable
 	 */
 	public EntitySeedShot(World world, EntityLivingBase entity, float velocity, int n, float spread) {
 		super(world, entity);
+		setGravityVelocity(0.05F);
 		if (n > 1) {
 			setLocationAndAngles(entity.posX, entity.posY + (double) entity.getEyeHeight(), entity.posZ, entity.rotationYaw, entity.rotationPitch);
 			float rotFactor = (float)(n / 2) * spread;
@@ -109,6 +112,7 @@ public class EntitySeedShot extends EntityMobThrowable
 
 	public EntitySeedShot(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		setGravityVelocity(0.05F);
 	}
 
 	@Override
@@ -166,11 +170,6 @@ public class EntitySeedShot extends EntityMobThrowable
 	@Override
 	protected boolean canTriggerWalking() {
 		return false;
-	}
-
-	@Override
-	protected float getGravityVelocity() {
-		return 0.05F;
 	}
 
 	@Override

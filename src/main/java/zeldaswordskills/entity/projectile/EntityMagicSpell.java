@@ -40,7 +40,6 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
@@ -64,7 +63,7 @@ import zeldaswordskills.util.WorldUtils;
  * Set the MagicType and AoE before spawning the entity or the client side will not know about it.
  *
  */
-public class EntityMagicSpell extends EntityMobThrowable implements IEntityAdditionalSpawnData, IReflectable
+public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 {
 	/** The spell's magic type */
 	private MagicType type = MagicType.FIRE;
@@ -80,20 +79,24 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 
 	public EntityMagicSpell(World world) {
 		super(world);
+		setGravityVelocity(0.02F);
 	}
 
 	public EntityMagicSpell(World world, EntityLivingBase entity) {
 		super(world, entity);
+		setGravityVelocity(0.02F);
 		resetSize();
 	}
 
 	public EntityMagicSpell(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		setGravityVelocity(0.02F);
 		resetSize();
 	}
 
 	public EntityMagicSpell(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
+		setGravityVelocity(0.02F);
 		resetSize();
 	}
 
@@ -164,11 +167,6 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 	@Override
 	protected float getVelocity() {
 		return 1.0F;
-	}
-
-	@Override
-	protected float getGravityVelocity() {
-		return 0.02F;
 	}
 
 	@Override
@@ -295,12 +293,14 @@ public class EntityMagicSpell extends EntityMobThrowable implements IEntityAddit
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
+		super.writeSpawnData(buffer);
 		buffer.writeInt(type.ordinal());
 		buffer.writeFloat(radius);
 	}
 
 	@Override
 	public void readSpawnData(ByteBuf buffer) {
+		super.readSpawnData(buffer);
 		type = (MagicType.values()[buffer.readInt() % MagicType.values().length]);
 		radius = buffer.readFloat();
 	}
