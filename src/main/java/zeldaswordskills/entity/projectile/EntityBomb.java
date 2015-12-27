@@ -63,21 +63,25 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 
 	public EntityBomb(World world) {
 		super(world);
+		setGravityVelocity(0.075F);
 		setSize(0.5F, 0.5F);
 	}
 
 	public EntityBomb(World world, EntityLivingBase entity) {
 		super(world, entity);
+		setGravityVelocity(0.075F);
 		setSize(0.5F, 0.5F);
 	}
 
 	public EntityBomb(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		setGravityVelocity(0.075F);
 		setSize(0.5F, 0.5F);
 	}
 
 	public EntityBomb(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
+		setGravityVelocity(0.075F);
 		setSize(0.5F, 0.5F);
 	}
 
@@ -187,11 +191,6 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	@Override
 	public boolean hasPostExplosionEffect() {
 		return getType() != BombType.BOMB_FLOWER || getThrower() == null;
-	}
-
-	@Override
-	protected float getGravityVelocity() {
-		return 0.075F;
 	}
 
 	@Override
