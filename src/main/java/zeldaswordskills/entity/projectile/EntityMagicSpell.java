@@ -66,6 +66,9 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 	/** The spell's magic type */
 	private MagicType type = MagicType.FIRE;
 
+	/** Set to false to prevent the spell from affecting blocks */
+	private boolean canGrief = true;
+
 	/** The spell's effect radius also affects the render scale */
 	private float radius = 2.0F;
 
@@ -74,6 +77,9 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 
 	/** If not set to positive value, default will return (1.0F - (getArea() / 4.0F)) */
 	private float reflectChance = -1.0F;
+
+	/** Set to false for no trailing particles */
+	private boolean spawnParticles = true;
 
 	public EntityMagicSpell(World world) {
 		super(world);
@@ -113,6 +119,14 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 		return this;
 	}
 
+	/**
+	 * Disables griefing - i.e. no blocks will be affected by this spell
+	 */
+	public EntityMagicSpell disableGriefing() {
+		this.canGrief = false;
+		return this;
+	}
+
 	/** Makes this spell's damage source ignore armor */
 	public EntityMagicSpell setDamageBypassesArmor() {
 		bypassesArmor = true;
@@ -134,6 +148,12 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 	/** Sets the chance of the spell being reflected when blocked with the Mirror Shield */
 	public EntityMagicSpell setReflectChance(float chance) {
 		this.reflectChance = chance;
+		return this;
+	}
+
+	/** Disables trailing particles */
+	public EntityMagicSpell disableTrailingParticles() {
+		this.spawnParticles = false;
 		return this;
 	}
 
@@ -171,7 +191,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 	public void onUpdate() {
 		super.onUpdate();
 		MagicType type = getType();
-		if (worldObj.isRemote) {
+		if (worldObj.isRemote && spawnParticles) {
 			String particle = type.getTrailingParticle();
 			boolean flag = type != MagicType.FIRE;
 			for (int i = 0; i < 4; ++i) {
@@ -213,7 +233,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 			spawnImpactParticles(getType().getTrailingParticle(), 16, getType() == MagicType.ICE ? 0.0F : -0.2F);
 		} else {
 			worldObj.playSoundAtEntity(this, "random.explode", 2.0F, (1.0F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.2F) * 0.7F);
-			if (getType().affectsBlocks(worldObj, getThrower())) {
+			if (canGrief && getType().affectsBlocks(worldObj, getThrower())) {
 				Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, r, posX, posY, posZ, null));
 				ItemMagicRod.affectAllBlocks(worldObj, affectedBlocks, getType());
 			}
@@ -272,6 +292,8 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 		compound.setFloat("areaOfEffect", getArea());
 		compound.setFloat("reflectChance", reflectChance);
 		compound.setBoolean("bypassesArmor", bypassesArmor);
+		compound.setBoolean("canGrief", canGrief);
+		compound.setBoolean("spawnParticles", spawnParticles);
 	}
 
 	@Override
@@ -281,6 +303,8 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 		setArea(compound.getFloat("areaOfEffect"));
 		reflectChance = compound.getFloat("reflectChance");
 		bypassesArmor = compound.getBoolean("bypassesArmor");
+		canGrief = compound.getBoolean("canGrief");
+		spawnParticles = compound.getBoolean("spawnParticles");
 	}
 
 	@Override
@@ -288,6 +312,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 		super.writeSpawnData(buffer);
 		buffer.writeInt(type.ordinal());
 		buffer.writeFloat(radius);
+		buffer.writeBoolean(spawnParticles);
 	}
 
 	@Override
@@ -295,5 +320,6 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 		super.readSpawnData(buffer);
 		type = (MagicType.values()[buffer.readInt() % MagicType.values().length]);
 		radius = buffer.readFloat();
+		spawnParticles = buffer.readBoolean();
 	}
 }
