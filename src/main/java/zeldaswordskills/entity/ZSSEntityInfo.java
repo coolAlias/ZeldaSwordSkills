@@ -224,6 +224,16 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	}
 
 	/**
+	 * Refreshes the fuse time from the current ingested bomb entity,
+	 * e.g. if it was set to something else after #onBombIngested
+	 */
+	public void refreshFuseTime() {
+		if (ingestedBomb != null) {
+			fuseTime = ingestedBomb.getFuseTime(entity);
+		}
+	}
+
+	/**
 	 * This method should be called every update tick; currently called from LivingUpdateEvent
 	 */
 	public void onUpdate() {
