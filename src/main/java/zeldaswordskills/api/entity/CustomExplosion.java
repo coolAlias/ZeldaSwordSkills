@@ -28,8 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -37,6 +35,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
@@ -65,6 +64,17 @@ import zeldaswordskills.ref.Sounds;
  */
 public class CustomExplosion extends Explosion
 {
+	/**
+	 * Returns an explosion damage source with the thrower of the explosive, if
+	 * available, set as the indirect entity.
+	 */
+	public static DamageSource getExplosionSource(CustomExplosion explosion) {
+		if (explosion.exploder instanceof EntityThrowable) {
+			return new EntityDamageSourceIndirect("explosion", explosion.exploder, ((EntityThrowable) explosion.exploder).getThrower()).setExplosion().setDifficultyScaled();
+		}
+		return DamageSource.setExplosionSource(explosion);
+	}
+
 	/** Type of liquids to ignore when calculating which blocks to affect */
 	public static enum IgnoreLiquid{NONE, ALL, WATER, LAVA};
 
@@ -167,7 +177,7 @@ public class CustomExplosion extends Explosion
 	 * Returns the damage source to use; if source is null, default explosion-type DamageSource is used
 	 */
 	protected DamageSource getDamageSource() {
-		return (source != null ? source : DamageSource.setExplosionSource(this));
+		return (source != null ? source : CustomExplosion.getExplosionSource(this));
 	}
 
 	/**
@@ -408,16 +418,6 @@ public class CustomExplosion extends Explosion
 	@Override
 	public Map func_77277_b() {
 		return affectedPlayers;
-	}
-
-	/**
-	 * Returns either the entity that placed the explosive block, the entity that caused the explosion,
-	 * the entity that threw the entity that caused the explosion, or null.
-	 */
-	@Override
-	public EntityLivingBase getExplosivePlacedBy() {
-		return exploder == null ? null : (exploder instanceof EntityTNTPrimed ? ((EntityTNTPrimed) exploder).getTntPlacedBy() : 
-			(exploder instanceof EntityLivingBase ? (EntityLivingBase) exploder : (exploder instanceof EntityThrowable ? ((EntityThrowable) exploder).getThrower() : null)));
 	}
 
 	protected void notifyClients() {
