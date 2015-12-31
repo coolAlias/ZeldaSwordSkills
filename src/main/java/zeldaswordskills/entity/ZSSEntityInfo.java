@@ -199,6 +199,13 @@ public class ZSSEntityInfo implements IExtendedEntityProperties
 	}
 
 	/**
+	 * Whether this entity is currently digesting a bomb
+	 */
+	public boolean hasIngestedBomb() {
+		return ingestedBomb != null;
+	}
+
+	/**
 	 * Call when the entity ingests an ingestible bomb entity - only one bomb
 	 * may be ingested at a time using this implementation.
 	 * @param bomb Ingested bombs are immediately set to dead in the world
