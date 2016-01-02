@@ -65,6 +65,7 @@ public class Sounds {
 	public static final String LEAF_RUSTLE = "step.grass";
 	public static final String LEAF_HIT = ModInfo.ID + ":leaf_hit";
 	public static final String SHOCK = ModInfo.ID + ":shock";
+	public static final String SPIT = ModInfo.ID + ":spit";
 	public static final String WHIP_CRACK = ModInfo.ID + ":whip_crack";
 	public static final String WHIRLWIND = ModInfo.ID + ":whirlwind";
 

@@ -27,6 +27,7 @@
     "fairy_living": {"category": "neutral","sounds":["entity/fairy_living"]},
     "fairy_skill": {"category": "ambient","sounds":["entity/fairy_skill"]},
     "shock": {"category": "hostile","sounds":["entity/shock1","entity/shock2","entity/shock3","entity/shock4"]},
+    "spit": {"category": "hostile","sounds":["entity/spit"]},
     "whip_crack": {"category": "neutral","sounds":["entity/whip_crack1","entity/whip_crack2","entity/whip_crack3","entity/whip_crack4"]},
     "whirlwind": {"category": "neutral","sounds":["entity/whirlwind1","entity/whirlwind2"]},
     "cork": {"category": "player","sounds":["item/cork"]},

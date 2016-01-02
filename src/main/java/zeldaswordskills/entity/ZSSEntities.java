@@ -47,6 +47,7 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.client.model.ModelDarknut;
 import zeldaswordskills.client.model.ModelDekuBaba;
+import zeldaswordskills.client.model.ModelDekuFire;
 import zeldaswordskills.client.model.ModelDekuWithered;
 import zeldaswordskills.client.model.ModelGoron;
 import zeldaswordskills.client.model.ModelMaskSalesman;
@@ -71,6 +72,7 @@ import zeldaswordskills.entity.mobs.EntityBlackKnight;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityDekuBaba;
+import zeldaswordskills.entity.mobs.EntityDekuFire;
 import zeldaswordskills.entity.mobs.EntityDekuWithered;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityKeese;
@@ -126,6 +128,7 @@ public class ZSSEntities
 		addSpawnLocations(EntityChu.class, EntityChu.getDefaultBiomes());
 		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
 		addSpawnLocations(EntityDekuBaba.class, EntityDekuBaba.getDefaultBiomes());
+		addSpawnLocations(EntityDekuFire.class, EntityDekuFire.getDefaultBiomes());
 		addSpawnLocations(EntityDekuWithered.class, EntityDekuWithered.getDefaultBiomes());
 		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
 		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
@@ -144,6 +147,8 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.monster, 1, 1, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba spawn rate (0 to disable)[0+]", 10).getInt();
 		addSpawnableEntityData(EntityDekuBaba.class, EnumCreatureType.monster, 1, 1, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Fire) spawn rate (0 to disable)[0+]", 2).getInt();
+		addSpawnableEntityData(EntityDekuFire.class, EnumCreatureType.monster, 1, 1, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Withered) spawn rate (0 to disable)[0+]", 5).getInt();
 		addSpawnableEntityData(EntityDekuWithered.class, EnumCreatureType.monster, 1, 1, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Fairy (wild) spawn rate (0 to disable)[0+]", 1).getInt();
@@ -241,6 +246,7 @@ public class ZSSEntities
 		CustomEntityList.addMapping(EntityDarknut.class, "darknut", 0x1E1E1E, 0x8B2500, 0x1E1E1E, 0xFB2500);
 
 		registerEntity(EntityDekuBaba.class, "baba_deku", ++modEntityIndex, 80, 0x33CC33, 0x0000FF);
+		registerEntity(EntityDekuFire.class, "baba_fire", ++modEntityIndex, 80, 0xFF0000, 0x0000FF);
 		registerEntity(EntityDekuWithered.class, "baba_withered", ++modEntityIndex, 80, 0x8B5A00, 0x0000FF);
 
 		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
@@ -277,6 +283,8 @@ public class ZSSEntities
 				new ModelDarknut(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityDekuBaba.class, new RenderDekuBaba(
 				new ModelDekuBaba(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_baba.png"));
+		RenderingRegistry.registerEntityRenderingHandler(EntityDekuFire.class, new RenderDekuBaba(
+				new ModelDekuFire(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_baba.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityDekuWithered.class, new RenderDekuBaba(
 				new ModelDekuWithered(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_withered.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy());
