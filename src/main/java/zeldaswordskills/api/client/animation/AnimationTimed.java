@@ -19,7 +19,6 @@ package zeldaswordskills.api.client.animation;
 
 import net.minecraft.util.MathHelper;
 
-
 /**
  * 
  * An animation that plays only after a certain frame has been reached.
@@ -38,6 +37,7 @@ public abstract class AnimationTimed extends AnimationBase
 	protected final float startFrame;
 	protected final float endFrame;
 	protected boolean strict;
+	protected IProgressType progressType = IProgressType.LINEAR;
 
 	/**
 	 * Constructs a timed animation object whose timing can be modified dynamically by the speed parameter
@@ -57,6 +57,14 @@ public abstract class AnimationTimed extends AnimationBase
 		return this;
 	}
 
+	/**
+	 * Sets the animation's progress type; see {@link IProgressType}
+	 */
+	public AnimationTimed setProgressType(IProgressType type) {
+		this.progressType = type;
+		return this;
+	}
+
 	@Override
 	public boolean shouldApply(int frame, float partialTick, float speed) {
 		if (this.strict && (float) frame > (this.endFrame / speed)) {
@@ -68,10 +76,10 @@ public abstract class AnimationTimed extends AnimationBase
 	/**
 	 * Returns the animation's progress towards completion, clamped between 0.0F and 1.0F
 	 */
-	protected float getProgress(int frame, float partialTick, float speed) {
+	protected final float getProgress(int frame, float partialTick, float speed) {
 		float start = (this.startFrame / speed);
 		float end = (this.endFrame / speed);
 		float f = (float) frame - start;
-		return MathHelper.clamp_float((f + partialTick) / (end - start), 0.0F, 1.0F);
+		return this.progressType.getProgress(MathHelper.clamp_float((f + partialTick) / (end - start), 0.0F, 1.0F));
 	}
 }
