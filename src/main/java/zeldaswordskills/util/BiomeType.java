@@ -17,7 +17,10 @@
 
 package zeldaswordskills.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.util.StatCollector;
@@ -113,5 +116,21 @@ public enum BiomeType {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Combines the given biome types into a single master array, less any biomes to ignore
+	 * @param ignore Array of biome names (strings) to ignore; may be null 
+	 */
+	public static String[] getBiomeArray(String[] ignore, BiomeType... types) {
+		List<String> combined = new ArrayList<String>();
+		for (BiomeType biomes : types) {
+			for (String biome : biomes.defaultBiomes) {
+				if (ignore == null || Arrays.binarySearch(ignore, biome, String.CASE_INSENSITIVE_ORDER) < 0) {
+					combined.add(biome);
+				}
+			}
+		}
+		return combined.toArray(new String[combined.size()]);
 	}
 }
