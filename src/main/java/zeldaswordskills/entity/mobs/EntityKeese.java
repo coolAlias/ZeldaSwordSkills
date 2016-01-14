@@ -17,8 +17,6 @@
 
 package zeldaswordskills.entity.mobs;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.entity.IEntityLivingData;
@@ -55,6 +53,8 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BiomeType;
 
+import com.google.common.collect.Lists;
+
 public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEntityVariant
 {
 	/** The different varieties of Keese */
@@ -85,18 +85,16 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	 * Returns array of default biomes in which this entity may spawn naturally
 	 */
 	public static String[] getDefaultBiomes() {
-		List<String> biomes = new ArrayList<String>();
+		List<BiomeType> biomes = Lists.newArrayList(BiomeType.RIVER, BiomeType.MOUNTAIN);
 		for (KeeseType type : KeeseType.values()) {
 			if (type.favoredBiome != null) {
-				biomes.addAll(Arrays.asList(type.favoredBiome.defaultBiomes));
+				biomes.add(type.favoredBiome);
 			}
 			if (type.secondBiome != null) {
-				biomes.addAll(Arrays.asList(type.secondBiome.defaultBiomes));
+				biomes.add(type.secondBiome);
 			}
 		}
-		biomes.addAll(Arrays.asList(BiomeType.RIVER.defaultBiomes));
-		biomes.addAll(Arrays.asList(BiomeType.MOUNTAIN.defaultBiomes));
-		return biomes.toArray(new String[biomes.size()]);
+		return BiomeType.getBiomeArray(null, biomes.toArray(new BiomeType[biomes.size()]));
 	}
 
 	/** Chunk coordinates toward which this Keese is currently heading */

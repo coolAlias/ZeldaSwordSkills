@@ -17,8 +17,6 @@
 
 package zeldaswordskills.entity.mobs;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,13 +74,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	 * Returns array of default biomes in which this entity may spawn naturally
 	 */
 	public static String[] getDefaultBiomes() {
-		List<String> biomes = new ArrayList<String>();
-		biomes.addAll(Arrays.asList(BiomeType.ARID.defaultBiomes));
-		biomes.addAll(Arrays.asList(BiomeType.BEACH.defaultBiomes));
-		biomes.addAll(Arrays.asList(BiomeType.FIERY.defaultBiomes));
-		biomes.addAll(Arrays.asList(BiomeType.MOUNTAIN.defaultBiomes));
-		biomes.addAll(Arrays.asList(BiomeType.PLAINS.defaultBiomes));
-		return biomes.toArray(new String[biomes.size()]);
+		return BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.BEACH, BiomeType.FIERY, BiomeType.MOUNTAIN, BiomeType.PLAINS);
 	}
 
 	/** Bonus to knockback resistance when wearing armor */

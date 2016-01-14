@@ -17,8 +17,6 @@
 
 package zeldaswordskills.entity.mobs;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.particle.EntityBreakingFX;
@@ -55,6 +53,9 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
+
+import com.google.common.collect.Lists;
+
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -113,14 +114,12 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 	 * Returns array of default biomes in which this entity may spawn naturally
 	 */
 	public static String[] getDefaultBiomes() {
-		List<String> biomes = new ArrayList<String>();
+		List<BiomeType> biomes = Lists.newArrayList(BiomeType.BEACH, BiomeType.MOUNTAIN);
 		for (ChuType type : ChuType.values()) {
-			biomes.addAll(Arrays.asList(type.favoredBiome.defaultBiomes));
-			biomes.addAll(Arrays.asList(type.secondBiome.defaultBiomes));
+			biomes.add(type.favoredBiome);
+			biomes.add(type.secondBiome);
 		}
-		biomes.addAll(Arrays.asList(BiomeType.BEACH.defaultBiomes));
-		biomes.addAll(Arrays.asList(BiomeType.MOUNTAIN.defaultBiomes));
-		return biomes.toArray(new String[biomes.size()]);
+		return BiomeType.getBiomeArray(null, biomes.toArray(new BiomeType[biomes.size()]));
 	}
 
 	/** Data watcher index for this Chu's size */
