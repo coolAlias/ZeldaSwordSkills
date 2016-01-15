@@ -192,7 +192,7 @@ public class ZSSEntities
 	}
 
 	/**
-	 * Retrives the BiomeGenBase associated with the string given, or null if it was not found
+	 * Retrieves the BiomeGenBase associated with the string given, or null if it was not found
 	 */
 	private static BiomeGenBase getBiomeByName(String name) {
 		for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
