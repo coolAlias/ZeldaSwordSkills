@@ -18,6 +18,7 @@
 package zeldaswordskills.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.config.Configuration;
-import scala.actors.threadpool.Arrays;
 import zeldaswordskills.ZSSMain;
 
 /**
