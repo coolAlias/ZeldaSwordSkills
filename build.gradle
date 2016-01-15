@@ -21,6 +21,8 @@ version = "2.3.1"
 group = "com.google.coolalias.zeldaswordskills" 
 archivesBaseName = "1.7.10-zeldaswordskills"
 
+sourceCompatibility = targetCompatibility = "1.6"
+
 dependencies {
 	compile files (
 		"eclipse/libs/antiqueatlas-4.2.4-1.7.10-deobf.jar",
