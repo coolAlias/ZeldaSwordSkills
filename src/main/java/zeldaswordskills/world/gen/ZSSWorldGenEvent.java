@@ -18,14 +18,10 @@
 package zeldaswordskills.world.gen;
 
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
-import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.world.gen.feature.WorldGenBombFlowers;
-import zeldaswordskills.world.gen.structure.MapGenBossRoom;
-import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoom;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSongPillar;
@@ -34,33 +30,8 @@ public class ZSSWorldGenEvent
 {
 	private MapGenSecretRoom secretRoomGen = new MapGenSecretRoom();
 	private MapGenSecretRoomNether netherRoomGen = new MapGenSecretRoomNether();
-	private MapGenBossRoom bossRoomGen = new MapGenBossRoom();
-	private MapGenBossRoomNether netherBossGen = new MapGenBossRoomNether();
 	private MapGenSongPillar pillarGen = new MapGenSongPillar();
 	private WorldGenBombFlowers bombGen = new WorldGenBombFlowers();
-
-	// TERRAIN_GEN_BUS event
-	@SubscribeEvent(priority=EventPriority.LOWEST)
-	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		if (!Config.isGenEnabledAt(event.chunkX, event.chunkZ)) {
-			return;
-		}
-		switch(event.world.provider.getDimensionId()) {
-		case -1: // the Nether
-			if (event.type == EventType.GLOWSTONE) {
-				netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-			}
-			break;
-		case 0: // the Overworld
-			if (event.type == EventType.ICE) {
-				bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-			} else if (event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-				event.setResult(Result.DENY);
-			}
-			break;
-		default: break;
-		}
-	}
 
 	// EVENT_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
