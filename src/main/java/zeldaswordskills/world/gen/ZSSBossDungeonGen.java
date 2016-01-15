@@ -35,7 +35,11 @@ public class ZSSBossDungeonGen
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		if (event.world.provider.isSurfaceWorld() && event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
+		if (!event.world.provider.isSurfaceWorld()) {
+			return;
+		} else if (event.type != EventType.LAKE && event.type != EventType.LAVA) {
+			return;
+		} else if (bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
 			event.setResult(Result.DENY);
 		}
 	}
