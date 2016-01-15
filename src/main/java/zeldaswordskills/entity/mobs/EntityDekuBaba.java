@@ -488,11 +488,11 @@ public class EntityDekuBaba extends EntityDekuBase implements IEntityBombEater, 
 		if (this.getAttackTarget() != null && !isTargetValid(getAttackTarget())) {
 			this.setAttackTarget(null);
 		}
+		updateAlertness();
 		if (!worldObj.isRemote) {
 			if (worldObj.difficultySetting.getDifficultyId() != getDifficultyModifier()) {
 				dataWatcher.updateObject(DIFFICULTY_INDEX, worldObj.difficultySetting.getDifficultyId());
 			}
-			updateAlertness();
 		} else if (isConfused() && ticksExisted % 10 == 0) {
 			Vec3 look = this.getLookVec();
 			for (int i = 0; i < 1; ++i) {
