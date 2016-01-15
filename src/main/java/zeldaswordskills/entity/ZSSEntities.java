@@ -146,11 +146,11 @@ public class ZSSEntities
 		rate = config.get("Mob Spawns", "[Spawn Rate] Darknut spawn rate (0 to disable)[0+]", 5).getInt();
 		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.monster, 1, 1, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba spawn rate (0 to disable)[0+]", 10).getInt();
-		addSpawnableEntityData(EntityDekuBaba.class, EnumCreatureType.monster, 1, 1, rate);
+		addSpawnableEntityData(EntityDekuBaba.class, EnumCreatureType.monster, 1, 3, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Fire) spawn rate (0 to disable)[0+]", 2).getInt();
-		addSpawnableEntityData(EntityDekuFire.class, EnumCreatureType.monster, 1, 1, rate);
+		addSpawnableEntityData(EntityDekuFire.class, EnumCreatureType.monster, 1, 3, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Withered) spawn rate (0 to disable)[0+]", 5).getInt();
-		addSpawnableEntityData(EntityDekuWithered.class, EnumCreatureType.monster, 1, 1, rate);
+		addSpawnableEntityData(EntityDekuWithered.class, EnumCreatureType.monster, 1, 3, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Fairy (wild) spawn rate (0 to disable)[0+]", 1).getInt();
 		addSpawnableEntityData(EntityFairy.class, EnumCreatureType.ambient, 1, 3, rate);
 		// Gorons are an exception, as they are not spawned using vanilla mechanics
