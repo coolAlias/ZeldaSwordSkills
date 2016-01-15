@@ -19,16 +19,12 @@ package zeldaswordskills.world.gen;
 
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
-import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.world.gen.feature.WorldGenBombFlowers;
 import zeldaswordskills.world.gen.feature.WorldGenJars;
-import zeldaswordskills.world.gen.structure.MapGenBossRoom;
-import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoom;
 import zeldaswordskills.world.gen.structure.MapGenSecretRoomNether;
 import zeldaswordskills.world.gen.structure.MapGenSongPillar;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
@@ -36,19 +32,9 @@ public class ZSSWorldGenEvent
 {
 	private MapGenSecretRoom secretRoomGen = new MapGenSecretRoom();
 	private MapGenSecretRoomNether netherRoomGen = new MapGenSecretRoomNether();
-	private MapGenBossRoom bossRoomGen = new MapGenBossRoom();
-	private MapGenBossRoomNether netherBossGen = new MapGenBossRoomNether();
 	private MapGenSongPillar pillarGen = new MapGenSongPillar();
 	private WorldGenJars jarGen = new WorldGenJars();
 	private WorldGenBombFlowers bombGen = new WorldGenBombFlowers();
-
-	// TERRAIN_GEN_BUS event
-	@SubscribeEvent(priority=EventPriority.LOWEST)
-	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		if (event.world.provider.isSurfaceWorld() && event.type == EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-			event.setResult(Result.DENY);
-		}
-	}
 
 	// EVENT_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
@@ -58,13 +44,11 @@ public class ZSSWorldGenEvent
 		}
 		switch(event.world.provider.dimensionId) {
 		case -1: // the Nether
-			netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			if (Config.getNetherAttemptsPerChunk() > 0) {
 				netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
 			break;
 		case 0: // the Overworld
-			bossRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			if (Config.getAttemptsPerChunk() > 0) {
 				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}

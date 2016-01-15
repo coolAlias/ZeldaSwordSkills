@@ -39,6 +39,7 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 import zeldaswordskills.world.gen.DungeonLootLists;
+import zeldaswordskills.world.gen.ZSSBossDungeonGen;
 import zeldaswordskills.world.gen.ZSSWorldGenEvent;
 import zeldaswordskills.world.gen.feature.WorldGenGossipStones;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -102,9 +103,10 @@ public class ZSSMain
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
 		FMLCommonHandler.instance().bus().register(new ZSSEventsFML());
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-		ZSSWorldGenEvent dungeonGen = new ZSSWorldGenEvent();
-		MinecraftForge.EVENT_BUS.register(dungeonGen);
+		MinecraftForge.EVENT_BUS.register(new ZSSWorldGenEvent());
 		if (Config.areBossDungeonsEnabled()) {
+			ZSSBossDungeonGen dungeonGen = new ZSSBossDungeonGen();
+			MinecraftForge.EVENT_BUS.register(dungeonGen);
 			MinecraftForge.TERRAIN_GEN_BUS.register(dungeonGen);
 		}
 		if (Config.getGossipStoneRate() > 0) {
