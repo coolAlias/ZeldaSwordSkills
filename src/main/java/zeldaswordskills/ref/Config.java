@@ -256,6 +256,8 @@ public class Config
 	/** [No-Gen] Starting chunk coordinate Z for the structure free zone [max is +/- 1875000] */
 	private static int noGenZ;
 	/*================== WORLD GEN =====================*/
+	/** [Bomb Flowers] Enable bomb flower generation */
+	private static boolean enableBombFlowerGen;
 	/** [Ceramic Jars] Allow ceramic jars to generate in water */
 	private static boolean allowJarsInWater;
 	/** [Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk */
@@ -276,6 +278,8 @@ public class Config
 	private static int jarClustersPerChunkNether;
 	/** [Gossip Stones] Chance (1 = 0.1% chance) per chunk of a Gossip Stone generating [0-100] */
 	private static float gossipStoneRate;
+	/** [Song Pillars] Enable song and broken pillar generation */
+	private static boolean enablePillarGen;
 	/** [Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64] */
 	private static int maxPillarRange;
 	/** [Song Pillars] Minimum number of chunks between broken pillars [4-64] */
@@ -476,6 +480,7 @@ public class Config
 		noGenX = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate X for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
 		noGenZ = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate Z for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
 		/*================== WORLD GEN =====================*/
+		enableBombFlowerGen = config.get("WorldGen", "[Bomb Flowers] Enable bomb flower generation", true).getBoolean(true);
 		allowJarsInWater = config.get("WorldGen", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
 		jarGenChance = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt(), 0, 100);
 		jarsPerCluster = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt(), 2, 20);
@@ -486,6 +491,7 @@ public class Config
 		jarsPerClusterNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt(), 2, 20);
 		jarClustersPerChunkNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt(), 1, 20);
 		gossipStoneRate = 0.0001F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Gossip Stones] Chance per chunk of a Gossip Stone generating (100 = 1% chance)[0-500]", 50).getInt(), 0, 500);
+		enablePillarGen = config.get("WorldGen", "[Song Pillars] Enable song and broken pillar generation", true).getBoolean(true);
 		maxPillarRange = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64]", 64).getInt(), 16, 64);
 		minBrokenPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt(), 4, 128);
 		minSongPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt(), 8, 128);
@@ -657,6 +663,7 @@ public class Config
 	public static float getFairySpawnerChance() { return fairySpawnerChance; }
 	public static int getDaysToRespawn() { return resetSpawnerTime; }
 	/*================== WORLD GEN =====================*/
+	public static boolean doBombFlowerGen() { return enableBombFlowerGen; }
 	public static boolean genJarsInWater() { return allowJarsInWater; }
 	public static float getJarGenChance() { return jarGenChance; }
 	public static int getJarsPerCluster() { return jarsPerCluster; }
@@ -667,6 +674,7 @@ public class Config
 	public static int getJarClustersPerChunkNether() { return jarClustersPerChunkNether; }
 	public static int getJarsPerClusterNether() { return jarsPerClusterNether; }
 	public static float getGossipStoneRate() { return gossipStoneRate; }
+	public static boolean doPillarGen() { return enablePillarGen; }
 	public static int getPillarRange() { return maxPillarRange; }
 	public static int getBrokenPillarMin() { return minBrokenPillarDistance; }
 	public static int getSongPillarMin() { return minSongPillarDistance; }

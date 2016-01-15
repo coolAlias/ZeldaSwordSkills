@@ -49,8 +49,12 @@ public class ZSSWorldGenEvent
 			if (Config.getAttemptsPerChunk() > 0) {
 				secretRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
 			}
-			pillarGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
-			bombGen.generate(event.world, event.rand, event.chunkX, event.chunkZ);
+			if (Config.doPillarGen()) {
+				pillarGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			}
+			if (Config.doBombFlowerGen()) {
+				bombGen.generate(event.world, event.rand, event.chunkX, event.chunkZ);
+			}
 			break;
 		default: break;
 		}
