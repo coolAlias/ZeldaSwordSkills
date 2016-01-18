@@ -20,6 +20,7 @@ package zeldaswordskills.util;
 import java.util.UUID;
 
 import mods.battlegear2.api.core.IBattlePlayer;
+import mods.battlegear2.api.shield.IShield;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -34,6 +35,7 @@ import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.IWeapon;
 import zeldaswordskills.api.item.WeaponRegistry;
+import zeldaswordskills.item.ItemZeldaShield;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
@@ -59,6 +61,18 @@ public class PlayerUtils
 			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
 		}
 		return false;
+	}
+
+	/**
+	 * Returns whether the ItemStack (possibly null) is some kind of shield
+	 */
+	public static boolean isShield(ItemStack stack) {
+		if (stack == null) {
+			return false;
+		} else if (ZSSMain.isBG2Enabled && stack.getItem() instanceof IShield) {
+			return true;
+		}
+		return stack.getItem() instanceof ItemZeldaShield;
 	}
 
 	/**
