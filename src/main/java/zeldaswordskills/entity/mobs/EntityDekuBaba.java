@@ -50,6 +50,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BiomeType;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
@@ -386,6 +387,22 @@ public class EntityDekuBaba extends EntityDekuBase implements IEntityBombEater, 
 	@Override
 	protected boolean canAttack() {
 		return isFullyAlert() && action != ACTION_PRONE;
+	}
+
+	@Override
+	public boolean attackEntityAsMob(Entity entity) {
+		boolean blocking = false; // item will no longer be in use after block: store current state
+		if (entity instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) entity;
+			if (PlayerUtils.isBlocking(player) && PlayerUtils.isShield(player.getHeldItem())) {
+				blocking = true;
+			}
+		}
+		boolean flag = super.attackEntityAsMob(entity);
+		if (blocking) {
+			prone = true;
+		}
+		return flag;
 	}
 
 	@Override
