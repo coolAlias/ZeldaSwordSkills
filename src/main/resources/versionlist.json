@@ -2,9 +2,9 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8",
-			"modVersion":"3.1.1",
+			"modVersion":"3.2",
 			"changeLog": [
-	               "Re-added Battlegear2 support: use BG2 v1.0.10.0",
+	               "Added Deku Babas",
 	               "See main mod page for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
