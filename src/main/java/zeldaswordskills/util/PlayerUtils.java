@@ -27,7 +27,6 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
@@ -54,8 +53,7 @@ public class PlayerUtils
 	 * Returns whether the player is blocking with the currently held item, accounting for possibility of Battlegear2 offhand shield use
 	 */
 	public static boolean isBlocking(EntityPlayer player) {
-		ItemStack stack = player.getHeldItem();
-		if (stack != null && player.isUsingItem() && stack.getItem().getItemUseAction(stack) == EnumAction.block) {
+		if (player.isBlocking()) {
 			return true;
 		} else if (ZSSMain.isBG2Enabled) {
 			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
