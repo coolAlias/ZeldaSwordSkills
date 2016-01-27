@@ -95,7 +95,7 @@ public class RisingCut extends SkillActive
 
 	@Override
 	public boolean canUse(EntityPlayer player) {
-		return super.canUse(player) && !isActive() && PlayerUtils.isSword(player.getHeldItem());
+		return super.canUse(player) && !isActive() && !player.isUsingItem() && PlayerUtils.isSword(player.getHeldItem());
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class RisingCut extends SkillActive
 	@SideOnly(Side.CLIENT)
 	public boolean keyPressed(Minecraft mc, KeyBinding key, EntityPlayer player) {
 		if (key == mc.gameSettings.keyBindJump) {
-			if (!isActive() && !PlayerUtils.isBlocking(player) && player.isSneaking()) {
+			if (!isActive() && !player.isUsingItem() && player.isSneaking()) {
 				ticksTilFail = 3; // this allows canExecute to return true for 3 ticks
 				return true;
 			}
