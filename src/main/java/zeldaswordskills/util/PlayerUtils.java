@@ -27,7 +27,6 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
@@ -51,11 +50,10 @@ public class PlayerUtils
 	public static final UUID itemDamageUUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 
 	/**
-	 * Returns whether the player is blocking with the currently held item, accounting for possibility of Battlegear2 shield item use
+	 * Returns whether the player is blocking, accounting for possibility of Battlegear2 shield item use
 	 */
 	public static boolean isBlocking(EntityPlayer player) {
-		ItemStack stack = player.getHeldItem();
-		if (stack != null && player.isUsingItem() && stack.getItem().getItemUseAction(stack) == EnumAction.BLOCK) {
+		if (player.isBlocking()) {
 			return true;
 		} else if (ZSSMain.isBG2Enabled) {
 			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
