@@ -179,7 +179,7 @@ public class RisingCut extends SkillActive
 	 */
 	@Override
 	public float postImpact(EntityPlayer player, EntityLivingBase entity, float amount) {
-		boolean flag = !(entity instanceof EntityPlayer) || !((EntityPlayer) entity).isBlocking();
+		boolean flag = !(entity instanceof EntityPlayer) || !PlayerUtils.isBlocking((EntityPlayer) entity);
 		this.entityHit = (flag ? entity : null);
 		return amount;
 	}
