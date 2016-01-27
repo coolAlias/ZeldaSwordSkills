@@ -80,7 +80,7 @@ public class TargetUtils
 	 * 
 	 */
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
-		double posY = entity.posY + entity.getEyeHeight(); // fix for Dash
+		double posY = entity.posY + (entity.height / 2); // fix for Dash
 		Vec3 vec3 = new Vec3(entity.posX, posY, entity.posZ);
 		Vec3 vec31 = new Vec3(entity.posX + entity.motionX, posY + entity.motionY, entity.posZ + entity.motionZ);
 		MovingObjectPosition mop = world.rayTraceBlocks(vec3, vec31, false, true, false);
