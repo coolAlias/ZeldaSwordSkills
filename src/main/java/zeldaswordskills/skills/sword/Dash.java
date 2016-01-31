@@ -201,7 +201,6 @@ public class Dash extends SkillActive
 				target = null;
 			}
 		}
-
 		// don't use isActive() method, as that also returns true after impact
 		if (isActive) {
 			// Only check for impact on the client, as the server is not reliable for this step
@@ -218,8 +217,6 @@ public class Dash extends SkillActive
 					}
 					double d = Math.sqrt((player.motionX * player.motionX) + (player.motionZ * player.motionZ));
 					player.setVelocity(-player.motionX * d, 0.15D * d, -player.motionZ * d);
-					//player.motionY = 0.15D * d; // TODO adding y motion does not seem to work
-					//player.motionZ = -player.motionZ * d;
 					trajectory = null; // set to null so player doesn't keep moving forward
 					setNotDashing();
 				}
@@ -244,24 +241,18 @@ public class Dash extends SkillActive
 			double dist = target.getDistance(initialPosition.xCoord, initialPosition.yCoord, initialPosition.zCoord);
 			// Subtract half the width for each entity to account for their bounding box size
 			dist -= (target.width / 2.0F) + (player.width / 2.0F);
-			//LogHelper.info("Distance to target from initial position: " + dist + " | Minimum Distance: " + getMinDistance());
-
 			// Base player speed is 0.1D; heavy boots = 0.04D, pegasus = 0.13D
 			double speed = player.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.movementSpeed).getAttributeValue();
 			double sf = (1.0D + (speed - BASE_MOVE)); // speed factor
-			//LogHelper.info("Impacted entity; player's motion factor: " + d + " | movement speed: " + speed);
 			if (speed > 0.075D && dist > getMinDistance() && player.getDistanceSqToEntity(target) < 6.0D) {
 				float dmg = (float) getDamage() + (float)((dist / 2.0D) - 2.0D);
-				//LogHelper.info("Dash distance-modified damage: " + dmg + " | Movement-modified damage: " + (dmg * (1.0D + (speed - BASE_MOVE))));
 				impactTime = 5; // time player will be immune to damage from the target entity
 				target.attackEntityFrom(DamageUtils.causeNonSwordDamage(player), (float)(dmg * sf * sf));
-				// tried putting knock-back even when damage not dealt, but not working for some reason
 				double resist = 1.0D;
 				if (target instanceof EntityLivingBase) {
 					resist -= ((EntityLivingBase) target).getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue();
 				}
 				double k = sf * resist * (distance / 3.0F) * 0.6000000238418579D;
-				//LogHelper.info("Struck entity's knockback resistance: " + resist + " | velocity modifier: " + k);
 				target.addVelocity(player.motionX * k * (0.2D + (0.1D * level)), 0.1D + k * (level * 0.025D), player.motionZ * k * (0.2D + (0.1D * level)));
 				// if player, send velocity update to client
 				if (target instanceof EntityPlayerMP && !player.worldObj.isRemote) {
@@ -269,11 +260,6 @@ public class Dash extends SkillActive
 				}
 			}
 		}
-		// see if setting the motion here will work better; may need to send vanilla velocity update packet
-		//if (d > 0.5D) { d = 0.5D; }
-		//player.motionX = -player.motionX * d;
-		//player.motionY = 0.15D * d;
-		//player.motionZ = -player.motionZ * d;
 		WorldUtils.playSoundAtEntity(player, Sounds.SLAM, 0.4F, 0.5F);
 		setNotDashing();
 	}

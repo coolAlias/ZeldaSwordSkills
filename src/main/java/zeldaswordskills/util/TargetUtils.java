@@ -77,7 +77,6 @@ public class TargetUtils
 	 * @param shooter	An entity not to be collided with, generally the shooter
 	 * @param hitBox	The amount by which to expand the collided entities' bounding boxes when checking for impact (may be negative)
 	 * @param flag		Optional flag to allow collision with shooter, e.g. (ticksInAir >= 5)
-	 * 
 	 */
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
 		Vec3 vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
@@ -86,16 +85,12 @@ public class TargetUtils
 		MovingObjectPosition mop = world.func_147447_a(vec3, vec31, false, true, false);
 		vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
 		vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY - entity.yOffset, entity.posZ + entity.motionZ);
-
 		if (mop != null) {
 			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
 		}
-
 		Entity target = null;
 		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.boundingBox.addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
-		//double hitBox = 0.3D;
-
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = (Entity) list.get(i);
 			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
@@ -110,11 +105,9 @@ public class TargetUtils
 				}
 			}
 		}
-
 		if (target != null) {
 			mop = new MovingObjectPosition(target);
 		}
-
 		if (mop != null && mop.entityHit instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) mop.entityHit;
 			if (player.capabilities.disableDamage || (shooter instanceof EntityPlayer
@@ -123,7 +116,6 @@ public class TargetUtils
 				mop = null;
 			}
 		}
-
 		return mop;
 	}
 
