@@ -77,7 +77,6 @@ public class TargetUtils
 	 * @param shooter	An entity not to be collided with, generally the shooter
 	 * @param hitBox	The amount by which to expand the collided entities' bounding boxes when checking for impact (may be negative)
 	 * @param flag		Optional flag to allow collision with shooter, e.g. (ticksInAir >= 5)
-	 * 
 	 */
 	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
 		double posY = entity.posY + (entity.height / 2); // fix for Dash
@@ -92,7 +91,6 @@ public class TargetUtils
 		Entity target = null;
 		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox().addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
 		double d0 = 0.0D;
-		//double hitBox = 0.3D;
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = (Entity) list.get(i);
 			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
