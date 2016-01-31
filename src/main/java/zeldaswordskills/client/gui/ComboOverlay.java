@@ -120,7 +120,7 @@ public class ComboOverlay extends Gui implements IGuiOverlay
 					mc.fontRenderer.drawString(StatCollector.translateToLocal("combo.damage") + ": " + String.format("%.1f",combo.getDamage()), 10, 30, 0xFFFFFF, true);
 					List<Float> damageList = combo.getDamageList();
 					for (int i = 0; i < damageList.size() && i < Config.getHitsToDisplay(); ++i) {
-						mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 40 + 10 * i, 0xFFFFFF, true);
+						mc.fontRenderer.drawString(" +" + String.format("%.1f",damageList.get(damageList.size() - i - 1)), 10, 30 + mc.fontRenderer.FONT_HEIGHT * (i + 1), 0xFFFFFF, true);
 					}
 				}
 				// for Ending Blow, use canUse instead of canExecute to determine whether notification should be displayed
