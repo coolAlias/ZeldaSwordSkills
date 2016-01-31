@@ -117,7 +117,7 @@ public class ItemSkillOrb extends BaseModItem implements IUnenchantable
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + (skill != null ? skill.getDisplayName() : "");
+		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name", (skill == null ? "" : skill.getDisplayName()));
 	}
 
 	@Override

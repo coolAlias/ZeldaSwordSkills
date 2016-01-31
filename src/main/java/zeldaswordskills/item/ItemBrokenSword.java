@@ -113,7 +113,7 @@ public class ItemBrokenSword extends BaseModItem implements IUnenchantable, IWea
 			ZSSMain.logger.warn("Unable to determine parent sword for broken sword with damage value " + stack.getItemDamage());
 			return super.getItemStackDisplayName(stack);
 		}
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal(sword.getUnlocalizedName() + ".name");
+		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name", StatCollector.translateToLocal(sword.getUnlocalizedName() + ".name"));
 	}
 
 	@Override
