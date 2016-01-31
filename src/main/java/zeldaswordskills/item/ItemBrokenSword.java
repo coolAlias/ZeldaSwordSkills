@@ -128,7 +128,7 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IWeapon, IB
 	public String getItemStackDisplayName(ItemStack stack) {
 		Item sword = Item.getItemById(stack.getItemDamage());
 		String name = (sword instanceof ItemZeldaSword && ((ItemZeldaSword) sword).givesBrokenItem) ? sword.getUnlocalizedName() : ZSSItems.swordOrdon.getUnlocalizedName();
-		return StatCollector.translateToLocal(getUnlocalizedName() + ".name") + " " + StatCollector.translateToLocal(name + ".name");
+		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name", StatCollector.translateToLocal(name + ".name"));
 	}
 
 	@Override
