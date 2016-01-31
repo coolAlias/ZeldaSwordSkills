@@ -85,7 +85,7 @@ public class TargetUtils
 		// func_147447_a is the ray_trace method
 		MovingObjectPosition mop = world.func_147447_a(vec3, vec31, false, true, false);
 		vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
-		vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
+		vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY - entity.yOffset, entity.posZ + entity.motionZ);
 
 		if (mop != null) {
 			vec31 = Vec3.createVectorHelper(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
