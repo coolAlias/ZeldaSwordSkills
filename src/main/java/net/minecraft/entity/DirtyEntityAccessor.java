@@ -33,7 +33,12 @@ public class DirtyEntityAccessor {
 	 * Returns the amount of damage the entity will receive after armor and potions are taken into account
 	 */
 	public static float getModifiedDamage(EntityLivingBase entity, DamageSource source, float amount) {
-		amount = entity.applyArmorCalculations(source, amount);
+		// Don't want to actually damage the entity's armor at this point, so
+		// reproduce parts of EntityLivingBase#applyArmorCalculations here:
+		if (!source.isUnblockable()) {
+			int armor = 25 - entity.getTotalArmorValue();
+			amount = (amount * (float) armor) / 25.0F;
+		}
 		amount = entity.applyPotionDamageCalculations(source, amount);
 		return Math.max(amount - entity.getAbsorptionAmount(), 0.0F);
 	}
