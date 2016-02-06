@@ -90,6 +90,9 @@ public class NpcHelper
 						if (npc instanceof ICustomMerchant) {
 							((ICustomMerchant) npc).setMerchantTrades(villager.getRecipes(player));
 						}
+						if (npc instanceof EntityLiving) {
+							((EntityLiving) npc).onSpawnWithEgg(null);
+						}
 						villager.setDead();
 						villager.worldObj.spawnEntityInWorld(npc);
 						((INpcVillager) npc).onConverted(player);
