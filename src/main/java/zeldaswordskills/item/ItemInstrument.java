@@ -126,7 +126,10 @@ public class ItemInstrument extends BaseModItem implements IRightClickEntity
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (world.isRemote) { // instruments have client-side only Guis
 			// check if song to learn was set from entity interaction
-			if (ZSSPlayerSongs.get(player).songToLearn != null) {
+			ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
+			if (songs.preventSongGui) {
+				songs.preventSongGui = false; // prevent opening GUI this time only
+			} else if (songs.songToLearn != null) {
 				player.openGui(ZSSMain.instance, GuiHandler.GUI_LEARN_SONG, player.worldObj, 0, 0, 0);
 			} else {
 				player.openGui(ZSSMain.instance, getInstrument(stack).getGuiId(), world, 0, 0, 0);

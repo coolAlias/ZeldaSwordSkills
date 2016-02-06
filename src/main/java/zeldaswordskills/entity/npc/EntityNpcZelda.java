@@ -35,6 +35,7 @@ import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.api.entity.ISongTeacher;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.IQuestHandler;
 import zeldaswordskills.entity.player.quests.QuestBase;
@@ -157,7 +158,7 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 
 	@Override
 	public Result canInteractConvert(EntityPlayer player, EntityVillager villager) {
-		if (player.worldObj.isRemote || villager.getClass() != EntityVillager.class || villager.isChild()) {
+		if (villager.getClass() != EntityVillager.class || villager.isChild()) {
 			return Result.DEFAULT;
 		}
 		ZSSQuests quests = ZSSQuests.get(player);
@@ -170,7 +171,10 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() instanceof ItemInstrument && ((ItemInstrument) stack.getItem()).getInstrument(stack) == ItemInstrument.Instrument.OCARINA_FAIRY) {
 			// allow if player already gave ocarina to Zelda, whether quest completed yet or not
-			if (quest.hasBegun(player)) {
+			if (player.worldObj.isRemote) {
+				ZSSPlayerSongs.get(player).preventSongGui = true; // prevent song GUI from opening when converting the Princess
+				return Result.DENY;
+			} else if (quest.hasBegun(player)) {
 				conversionTime = -1; // skips quest intro, since player already went through it
 				return Result.ALLOW;
 			} else if (quest.begin(player)) {

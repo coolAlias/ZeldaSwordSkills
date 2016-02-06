@@ -66,6 +66,9 @@ public class ZSSPlayerSongs
 	@SideOnly(Side.CLIENT)
 	public AbstractZeldaSong songToLearn;
 
+	/** Used to prevent Song GUI from opening during right-click interaction, e.g. when converting Princess Zelda */
+	public boolean preventSongGui;
+
 	/** Notes set by the player to play the Scarecrow's Song */
 	private final List<SongNote> scarecrowNotes = new ArrayList<SongNote>();
 
