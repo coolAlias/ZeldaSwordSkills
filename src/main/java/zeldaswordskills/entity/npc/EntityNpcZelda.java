@@ -32,23 +32,25 @@ import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.api.entity.ISongTeacher;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.IQuestHandler;
 import zeldaswordskills.entity.player.quests.QuestBase;
+import zeldaswordskills.entity.player.quests.QuestLightArrows;
 import zeldaswordskills.entity.player.quests.QuestMasterSword;
 import zeldaswordskills.entity.player.quests.QuestPendants;
 import zeldaswordskills.entity.player.quests.QuestZeldaTalk;
 import zeldaswordskills.entity.player.quests.QuestZeldasLetter;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.item.ItemInstrument;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlayRecordPacket;
 import zeldaswordskills.network.client.SyncQuestPacket;
 import zeldaswordskills.songs.ZeldaSongs;
+import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -61,7 +63,10 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 			.add(QuestPendants.class)
 			.add(QuestZeldasLetter.class)
 			.add(QuestMasterSword.class)
+			.add(QuestLightArrows.class)
 			.build();
+
+	private static final MerchantRecipe lightArrows = new MerchantRecipe(new ItemStack(Items.emerald, 8), null, new ItemStack(ZSSItems.arrowLight), 0, 99);
 
 	/** Set when Zelda first converting from a villager and used to end the song */
 	private int conversionTime;
@@ -94,6 +99,18 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 	@Override
 	protected String getDeathSound() {
 		return null; // TODO Sounds.PRINCESS_DEATH;
+	}
+
+	@Override
+	public MerchantRecipeList getRecipes(EntityPlayer player) {
+		MerchantRecipeList list = super.getRecipes(player);
+		if (list != null) {
+			MerchantRecipeHelper.removeTrade(list, lightArrows, false, true);
+			if (ZSSQuests.get(player).hasCompleted(QuestLightArrows.class)) {
+				list.add(0, new MerchantRecipe(lightArrows.getItemToBuy(), lightArrows.getSecondItemToBuy(), lightArrows.getItemToSell(), 1, 99));
+			}
+		}
+		return list;
 	}
 
 	@Override
