@@ -84,6 +84,7 @@ public final class QuestMasterSword extends QuestBase
 				new ChatComponentTranslation("chat.zss.npc.zelda.master_sword.complete.3"));
 		ItemStack stack = new ItemStack(ZSSItems.instrument, 1, ItemInstrument.Instrument.OCARINA_TIME.ordinal());
 		new TimedAddItem(player, stack, 3250, Sounds.SUCCESS);
+		ZSSQuests.get(player).add(new QuestLightArrows());
 		return true;
 	}
 
@@ -95,6 +96,7 @@ public final class QuestMasterSword extends QuestBase
 	@Override
 	public void forceComplete(EntityPlayer player, Object... data) {
 		set(FLAG_COMPLETE);
+		ZSSQuests.get(player).add(new QuestLightArrows());
 	}
 
 	@Override
