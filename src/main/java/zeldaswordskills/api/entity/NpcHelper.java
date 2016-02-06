@@ -21,9 +21,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.ZSSMain;
@@ -80,7 +82,6 @@ public class NpcHelper
 		for (String match : nameToClassMap.keySet()) {
 			if (match.equals(name)) {
 				Entity npc = getNpcForName(name, villager.worldObj);
-				npc.setCustomNameTag(villager.getCustomNameTag());
 				npc.setLocationAndAngles(villager.posX, villager.posY + 0.2F, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 				if (npc instanceof INpcVillager) {
 					result = (rightClick ? ((INpcVillager) npc).canInteractConvert(player, villager) : ((INpcVillager) npc).canLeftClickConvert(player, villager));
@@ -88,6 +89,10 @@ public class NpcHelper
 						if (npc instanceof IMerchant) {
 							((IMerchant) npc).setRecipes(villager.getRecipes(player));
 						}
+						if (npc instanceof EntityLiving) {
+							((EntityLiving) npc).onInitialSpawn(npc.worldObj.getDifficultyForLocation(new BlockPos(npc)), null);
+						}
+						npc.setCustomNameTag(name);
 						villager.setDead();
 						villager.worldObj.spawnEntityInWorld(npc);
 						((INpcVillager) npc).onConverted(player);
