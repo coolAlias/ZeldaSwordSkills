@@ -44,6 +44,10 @@ public class QuestMaskShop extends QuestBase
 	public boolean canComplete(EntityPlayer player) {
 		// This quest is special in that it can be continually 'completed', i.e. villagers
 		// can be converted into Mask Salesmen at any time by giving them Zelda's Letter
+		return isHoldingZeldasLetter(player);
+	}
+
+	private boolean isHoldingZeldasLetter(EntityPlayer player) {
 		ItemStack stack = player.getHeldItem();
 		return stack != null && stack.getItem() == ZSSItems.treasure && Treasures.byDamage(stack.getItemDamage()) == Treasures.ZELDAS_LETTER;
 	}
@@ -82,9 +86,14 @@ public class QuestMaskShop extends QuestBase
 
 	@Override
 	public IChatComponent getHint(EntityPlayer player, Object... data) {
-		if (canComplete(player)) {
+		if (isComplete(player)) {
+			if (ZSSQuests.get(player).hasCompleted(QuestMaskSales.class) || !isHoldingZeldasLetter(player)) {
+				return null;
+			}
+			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.opening");
+		} else if (canComplete(player)) {
 			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.hint.letter");
-		} else if (ZSSQuests.get(player).hasCompleted(QuestZeldaTalk.class)) {
+		} else if (ZSSQuests.get(player).hasCompleted(QuestZeldasLetter.class)) {
 			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.hint.zelda");
 		} else {
 			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.hint." + rand.nextInt(4));
