@@ -81,7 +81,7 @@ public class NpcHelper
 			if (match.equals(name)) {
 				Entity npc = getNpcForName(name, villager.worldObj);
 				npc.setCustomNameTag(villager.getCustomNameTag());
-				npc.setLocationAndAngles(villager.posX, villager.posY + 1, villager.posZ, villager.rotationYaw, villager.rotationPitch);
+				npc.setLocationAndAngles(villager.posX, villager.posY + 0.2F, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 				if (npc instanceof INpcVillager) {
 					result = (rightClick ? ((INpcVillager) npc).canInteractConvert(player, villager) : ((INpcVillager) npc).canLeftClickConvert(player, villager));
 					if (result == Result.ALLOW && !villager.worldObj.isRemote) { 
