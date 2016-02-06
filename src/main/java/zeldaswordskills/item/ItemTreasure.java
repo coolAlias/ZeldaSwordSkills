@@ -29,6 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
@@ -167,8 +168,20 @@ public class ItemTreasure extends BaseModItem implements IRightClickEntity, IUne
 			if (entity instanceof EntityAgeable && ((EntityAgeable) entity).isChild()) {
 				handleChildTrade(stack, player, isLeftClick);
 			} else if (treasure == Treasures.ZELDAS_LETTER && entity instanceof EntityNpcMaskTrader) {
-				String s = (ZSSQuests.get(player).hasCompleted(QuestMaskSales.class) ? "open" : (ZSSQuests.get(player).hasCompleted(QuestMaskShop.class) ? "opening" : "hint." + itemRand.nextInt(4)));
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.shop." + s);
+				ZSSQuests quests = ZSSQuests.get(player);
+				if (quests.hasCompleted(QuestMaskSales.class)) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.shop.open");
+				} else {
+					IQuest quest = quests.get(QuestMaskShop.class);
+					if (quest != null) {
+						IChatComponent hint = quest.getHint(player);
+						if (hint != null) {
+							player.addChatMessage(hint);
+						}
+					} else {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.shop.hint." + itemRand.nextInt(4));
+					}
+				}
 			} else if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.uninterested + ".uninterested.orca");
 			} else {
