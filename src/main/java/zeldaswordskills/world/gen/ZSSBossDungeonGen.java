@@ -35,6 +35,12 @@ public class ZSSBossDungeonGen
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
+		// Fix for 1.8.0 not posting PopulateChunkEvent.Post for HELL worlds
+		if (event.type == PopulateChunkEvent.Populate.EventType.NETHER_LAVA2 && event.world.provider.getDimensionId() == -1) {
+			if (Config.isGenEnabledAt(event.chunkX, event.chunkZ)) {
+				netherBossGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			}
+		} else
 		if (!event.world.provider.isSurfaceWorld()) {
 			return;
 		} else if (event.type != EventType.LAKE && event.type != EventType.LAVA) {

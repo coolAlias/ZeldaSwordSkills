@@ -104,7 +104,9 @@ public class ZSSMain
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
 		FMLCommonHandler.instance().bus().register(new ZSSEventsFML());
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-		MinecraftForge.EVENT_BUS.register(new ZSSWorldGenEvent());
+		ZSSWorldGenEvent roomGen = new ZSSWorldGenEvent();
+		MinecraftForge.EVENT_BUS.register(roomGen);
+		MinecraftForge.TERRAIN_GEN_BUS.register(roomGen);
 		if (Config.areBossDungeonsEnabled()) {
 			ZSSBossDungeonGen dungeonGen = new ZSSBossDungeonGen();
 			MinecraftForge.EVENT_BUS.register(dungeonGen);

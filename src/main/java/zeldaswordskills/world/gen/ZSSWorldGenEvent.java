@@ -33,6 +33,17 @@ public class ZSSWorldGenEvent
 	private MapGenSongPillar pillarGen = new MapGenSongPillar();
 	private WorldGenBombFlowers bombGen = new WorldGenBombFlowers();
 
+	// TERRAIN_GEN_BUS event
+	@SubscribeEvent(priority=EventPriority.LOWEST)
+	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
+		// Fix for 1.8.0 not posting PopulateChunkEvent.Post for HELL worlds
+		if (event.type == PopulateChunkEvent.Populate.EventType.NETHER_LAVA2 && event.world.provider.getDimensionId() == -1) {
+			if (Config.getNetherAttemptsPerChunk() > 0 && Config.isGenEnabledAt(event.chunkX, event.chunkZ)) {
+				netherRoomGen.generate(event.chunkProvider, event.world, event.rand, event.chunkX, event.chunkZ);
+			}
+		}
+	}
+
 	// EVENT_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void postPopulate(PopulateChunkEvent.Post event) {
