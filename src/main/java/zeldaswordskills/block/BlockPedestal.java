@@ -35,7 +35,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -47,6 +46,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.client.render.block.RenderTileEntityPedestal;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -151,7 +151,7 @@ public class BlockPedestal extends Block implements IBlockItemVariant, ICustomSt
 		}
 		if (!world.isRemote) {
 			TileEntityPedestal te = (TileEntityPedestal) world.getTileEntity(pos);
-			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
+			if (!te.hasSword() && player.getHeldItem() != null && WeaponRegistry.INSTANCE.isSword(player.getHeldItem().getItem())) {
 				te.setSword(player.getHeldItem(), player);
 				player.setCurrentItemOrArmor(0, null);
 			} else if (((Boolean) state.getValue(UNLOCKED)).booleanValue() && te.hasSword()) {
