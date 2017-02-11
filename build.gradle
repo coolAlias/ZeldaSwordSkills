@@ -25,8 +25,8 @@ sourceCompatibility = targetCompatibility = "1.6"
 
 dependencies {
 	compile files (
-		"eclipse/libs/antiqueatlas-4.2.4-1.7.10-deobf.jar",
-		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.7.0.jar"
+		"eclipse/libs/antiqueatlas-1.7.10-4.2.10-deobf.jar",
+		"eclipse/mods/1.7.10-Battlegear-Bin-1.0.8.2.jar"
 	)
 }
 
