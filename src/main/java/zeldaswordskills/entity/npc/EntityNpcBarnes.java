@@ -19,6 +19,7 @@ package zeldaswordskills.entity.npc;
 
 import java.util.ListIterator;
 
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -35,7 +36,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillager
 {

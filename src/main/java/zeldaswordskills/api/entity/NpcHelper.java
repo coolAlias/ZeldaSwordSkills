@@ -20,8 +20,10 @@ package zeldaswordskills.api.entity;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
@@ -29,10 +31,6 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
-
-import com.google.common.collect.Maps;
-
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 /**
  *
@@ -86,8 +84,8 @@ public class NpcHelper
 				if (npc instanceof INpcVillager) {
 					result = (rightClick ? ((INpcVillager) npc).canInteractConvert(player, villager) : ((INpcVillager) npc).canLeftClickConvert(player, villager));
 					if (result == Result.ALLOW && !villager.worldObj.isRemote) { 
-						if (npc instanceof IMerchant) {
-							((IMerchant) npc).setRecipes(villager.getRecipes(player));
+						if (npc instanceof ICustomMerchant) {
+							((ICustomMerchant) npc).setMerchantTrades(villager.getRecipes(player));
 						}
 						villager.setDead();
 						villager.worldObj.spawnEntityInWorld(npc);
