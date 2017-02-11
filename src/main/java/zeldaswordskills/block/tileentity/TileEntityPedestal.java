@@ -20,13 +20,13 @@ package zeldaswordskills.block.tileentity;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.util.MathHelper;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.item.ItemPendant;
 import zeldaswordskills.item.ItemZeldaSword;
 import zeldaswordskills.item.ZSSItems;
@@ -107,7 +107,7 @@ public class TileEntityPedestal extends TileEntityInventory
 	 * @param player may be null
 	 */
 	public boolean setSword(ItemStack stack, EntityPlayer player) {
-		if (sword == null && stack != null && stack.getItem() instanceof ItemSword) {
+		if (sword == null && stack != null && WeaponRegistry.INSTANCE.isSword(stack.getItem())) {
 			if (stack.getItem() == ZSSItems.swordGolden && stack.hasTagCompound() &&
 					stack.getTagCompound().hasKey("SacredFlames") &&
 					stack.getTagCompound().getInteger("SacredFlames") == 0x7)

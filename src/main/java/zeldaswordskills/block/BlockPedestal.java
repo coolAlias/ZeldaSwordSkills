@@ -19,6 +19,8 @@ package zeldaswordskills.block;
 
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -29,7 +31,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.Explosion;
@@ -37,13 +38,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -130,7 +130,7 @@ public class BlockPedestal extends BlockContainer
 		}
 		if (!world.isRemote) {
 			TileEntityPedestal te = (TileEntityPedestal) world.getTileEntity(x, y, z);
-			if (player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemSword && !te.hasSword()) {
+			if (!te.hasSword() && player.getHeldItem() != null && WeaponRegistry.INSTANCE.isSword(player.getHeldItem().getItem())) {
 				te.setSword(player.getHeldItem(), player);
 				player.setCurrentItemOrArmor(0, null);
 			} else if (world.getBlockMetadata(x, y, z) == 0x8 && te.hasSword()) {
