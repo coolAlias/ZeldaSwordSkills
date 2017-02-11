@@ -500,7 +500,10 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 
 	@Override
 	protected void dropRareDrop(int rarity) {
-		entityDropItem(getRareDrop(rarity, 4), 0.0F);
+		ItemStack drop = getRareDrop(rarity, 4);
+		if (drop != null) {
+			entityDropItem(drop, 0.0F);
+		}
 	}
 
 	/**
