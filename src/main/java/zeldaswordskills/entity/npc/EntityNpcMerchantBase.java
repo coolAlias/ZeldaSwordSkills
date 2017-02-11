@@ -19,7 +19,6 @@ package zeldaswordskills.entity.npc;
 
 import java.util.Iterator;
 
-import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -32,6 +31,9 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.api.entity.ICustomMerchant;
 import zeldaswordskills.item.ItemCustomEgg;
 
 /**
@@ -40,7 +42,7 @@ import zeldaswordskills.item.ItemCustomEgg;
  * similar to vanilla villagers.
  *
  */
-public abstract class EntityNpcMerchantBase extends EntityNpcBase implements IMerchant
+public abstract class EntityNpcMerchantBase extends EntityNpcBase implements ICustomMerchant
 {
 	/** MerchantRecipeList of all currently available trades */
 	protected MerchantRecipeList trades;
@@ -115,7 +117,13 @@ public abstract class EntityNpcMerchantBase extends EntityNpcBase implements IMe
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void setRecipes(MerchantRecipeList trades) {
+		this.trades = trades;
+	}
+
+	@Override
+	public void setMerchantTrades(MerchantRecipeList trades) {
 		this.trades = trades;
 	}
 

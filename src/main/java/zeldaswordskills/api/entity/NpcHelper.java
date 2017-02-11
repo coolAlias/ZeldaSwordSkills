@@ -20,9 +20,10 @@ package zeldaswordskills.api.entity;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
@@ -32,8 +33,6 @@ import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
-
-import com.google.common.collect.Maps;
 
 /**
  *
@@ -86,8 +85,8 @@ public class NpcHelper
 				if (npc instanceof INpcVillager) {
 					result = (rightClick ? ((INpcVillager) npc).canInteractConvert(player, villager) : ((INpcVillager) npc).canLeftClickConvert(player, villager));
 					if (result == Result.ALLOW && !villager.worldObj.isRemote) { 
-						if (npc instanceof IMerchant) {
-							((IMerchant) npc).setRecipes(villager.getRecipes(player));
+						if (npc instanceof ICustomMerchant) {
+							((ICustomMerchant) npc).setMerchantTrades(villager.getRecipes(player));
 						}
 						if (npc instanceof EntityLiving) {
 							((EntityLiving) npc).onInitialSpawn(npc.worldObj.getDifficultyForLocation(new BlockPos(npc)), null);
