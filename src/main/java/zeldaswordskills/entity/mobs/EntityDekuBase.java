@@ -114,6 +114,11 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 	public void addVelocity(double dx, double dy, double dz) {}
 
 	@Override
+	public boolean canBePushed() {
+		return false; // can't be pushed by entities
+	}
+
+	@Override
 	public boolean handleWaterMovement() {
 		return false; // can't be pushed by water
 	}
@@ -121,6 +126,13 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 	@Override
 	public boolean isInLava() {
 		return false; // can't be pushed by lava
+	}
+
+	/**
+	 * Returns what {@link #isInLava()} should return so deku can be set on fire from lava
+	 */
+	public boolean isReallyInLava() {
+		return this.worldObj.isMaterialInBB(this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.lava);
 	}
 
 	@Override
@@ -218,6 +230,10 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+		// Copied from Entity#onUpdate to allow being set on fire from lava due to #isInLava always returning false
+		if (this.isReallyInLava()) {
+			this.setOnFireFromLava();
+		}
 		if (!this.worldObj.isRemote && this.worldObj.getDifficulty() == EnumDifficulty.PEACEFUL) {
 			this.setDead();
 		}
