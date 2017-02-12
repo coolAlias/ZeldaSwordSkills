@@ -125,6 +125,9 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		SkillBase skill = SkillBase.getSkill(stack.getItemDamage());
+		if (skill == SkillBase.bonusHeart) {
+			return skill.getDisplayName(); // special case: "Heart Container" instead of "Skill Orb of..."
+		}
 		return StatCollector.translateToLocalFormatted(getUnlocalizedName() + ".name", (skill == null ? "" : skill.getDisplayName()));
 	}
 
