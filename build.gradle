@@ -1,21 +1,24 @@
+/*
+// For those who want the bleeding edge
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.0-SNAPSHOT'
     }
 }
+apply plugin: 'net.minecraftforge.gradle.forge'
+*/
 
-apply plugin: 'forge'
+// for people who want stable
+plugins {
+    id "net.minecraftforge.gradle.forge" version "2.0.2"
+}
 
 version = "3.2"
 group = "com.google.coolalias.zeldaswordskills"
@@ -36,20 +39,11 @@ minecraft {
     mappings = "snapshot_20150617"
 }
 
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
-}
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-tasks.build.dependsOn('sourceJar', 'deobfJar')
-
 processResources
 {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
@@ -62,8 +56,12 @@ processResources
     }
 }
 
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
 artifacts {
 	archives deobfJar
 	archives sourceJar
-	archives jar
 }
