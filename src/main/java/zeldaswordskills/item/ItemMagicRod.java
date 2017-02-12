@@ -318,7 +318,6 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void spawnParticles(World world, EntityPlayer player, ItemStack stack, double x, double y, double z, float radius) {
-		y += 1.62D;
 		Vec3 look = player.getLookVec();
 		for (float f = 0; f < radius; f += 0.5F) {
 			x += look.xCoord;
