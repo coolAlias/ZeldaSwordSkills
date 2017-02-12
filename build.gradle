@@ -34,9 +34,9 @@ dependencies {
 }
 
 minecraft {
-    version = "1.8-11.14.3.1464"
+    version = "1.8-11.14.4.1563"
     runDir = "eclipse"
-    mappings = "snapshot_20150617"
+    mappings = "snapshot_20151031"
 }
 
 processResources
