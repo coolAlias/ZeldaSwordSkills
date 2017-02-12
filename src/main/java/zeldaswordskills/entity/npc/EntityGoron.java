@@ -280,7 +280,6 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 			amount += EnchantmentHelper.func_152377_a(this.getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
 			knockback += EnchantmentHelper.getKnockbackModifier(this);
 		}
-
 		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), amount);
 		if (flag) {
 			if (knockback > 0) {
@@ -291,18 +290,15 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 				motionX *= 0.6D;
 				motionZ *= 0.6D;
 			}
-
 			int fire = EnchantmentHelper.getFireAspectModifier(this);
 			if (fire > 0) {
 				entity.setFire(fire * 4);
 			}
-
 			if (entity instanceof EntityLivingBase) {
 				EnchantmentHelper.func_151384_a((EntityLivingBase) entity, this);
 			}
 			EnchantmentHelper.func_151385_b(this, entity);
 		}
-
 		return flag;
 	}
 
