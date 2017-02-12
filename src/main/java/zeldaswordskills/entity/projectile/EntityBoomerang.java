@@ -241,9 +241,8 @@ public class EntityBoomerang extends EntityMobThrowable
 			if (mop.entityHit != getThrower() && mop.entityHit.attackEntityFrom(getDamageSource(), getDamage())) {
 				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 				if (mop.entityHit instanceof EntityLivingBase && getThrower() != null) {
-					// func_151384_a and func_151385_b is the new way Thorns is handled - copied from EntityArrow
-					EnchantmentHelper.func_151384_a((EntityLivingBase) mop.entityHit, getThrower());
-					EnchantmentHelper.func_151385_b(getThrower(), mop.entityHit);
+					EnchantmentHelper.applyThornEnchantments((EntityLivingBase) mop.entityHit, getThrower());
+					EnchantmentHelper.applyArthropodEnchantments(getThrower(), mop.entityHit);
 				}
 			}
 		} else {

@@ -119,7 +119,7 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 	}
 
 	@Override
-	public boolean handleLavaMovement() {
+	public boolean isInLava() {
 		return false; // can't be pushed by lava
 	}
 
@@ -178,9 +178,9 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 				entity.setFire(j * 4);
 			}
 			if (entity instanceof EntityLivingBase) {
-				EnchantmentHelper.func_151384_a((EntityLivingBase)entity, this);
+				EnchantmentHelper.applyThornEnchantments((EntityLivingBase) entity, this);
 			}
-			EnchantmentHelper.func_151385_b(this, entity);
+			EnchantmentHelper.applyArthropodEnchantments(this, entity);
 		}
 		return flag;
 	}

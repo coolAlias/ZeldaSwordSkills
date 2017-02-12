@@ -300,6 +300,6 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IStateMapper getCustomStateMap() {
-		return (new StateMap.Builder()).addPropertiesToIgnore(EXPLODE).build();
+		return (new StateMap.Builder()).ignore(EXPLODE).build();
 	}
 }

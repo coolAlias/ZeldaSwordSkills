@@ -209,11 +209,6 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	}
 
 	@Override
-	public AxisAlignedBB getBoundingBox() {
-		return getEntityBoundingBox();
-	}
-
-	@Override
 	public AxisAlignedBB getCollisionBox(Entity entity) {
 		return entity.getEntityBoundingBox();
 	}

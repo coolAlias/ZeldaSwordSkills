@@ -199,9 +199,8 @@ public class EntitySeedShot extends EntityMobThrowable
 					}
 
 					if (getThrower() instanceof EntityLivingBase) {
-						// func_151384_a and func_151385_b is the new way Thorns is handled - copied from EntityArrow
-						EnchantmentHelper.func_151384_a((EntityLivingBase) mop.entityHit, getThrower());
-						EnchantmentHelper.func_151385_b((EntityLivingBase) getThrower(), mop.entityHit);
+						EnchantmentHelper.applyThornEnchantments((EntityLivingBase) mop.entityHit, getThrower());
+						EnchantmentHelper.applyArthropodEnchantments((EntityLivingBase) getThrower(), mop.entityHit);
 					}
 				}
 				if (!(mop.entityHit instanceof EntityEnderman)) {

@@ -491,9 +491,9 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 				entity.setFire(j * 4);
 			}
 			if (entity instanceof EntityLivingBase) {
-				EnchantmentHelper.func_151384_a((EntityLivingBase) entity, this);
+				EnchantmentHelper.applyThornEnchantments((EntityLivingBase) entity, this);
 			}
-			EnchantmentHelper.func_151385_b(this, entity);
+			EnchantmentHelper.applyArthropodEnchantments(this, entity);
 			return true;
 		}
 		return false;

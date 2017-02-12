@@ -217,7 +217,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IStateMapper getCustomStateMap() {
-		return (new StateMap.Builder()).addPropertiesToIgnore(UNBREAKABLE).build();
+		return (new StateMap.Builder()).ignore(UNBREAKABLE).build();
 	}
 
 	/**

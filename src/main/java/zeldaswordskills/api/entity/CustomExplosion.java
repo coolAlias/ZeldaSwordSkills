@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -50,9 +53,6 @@ import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * 
@@ -172,8 +172,8 @@ public class CustomExplosion extends Explosion
 	/** Originally private World object from super class */
 	protected final World worldObj;
 
-	/** Affected players get added to this map; not sure what it's used for; private in super class */
-	protected Map<EntityPlayer, Vec3> affectedPlayers = new HashMap<EntityPlayer, Vec3>();
+	/** Maps players to the knockback vector applied by the explosion, to send to the client; private in original class */
+	protected Map<EntityPlayer, Vec3> playerKnockbackMap = new HashMap<EntityPlayer, Vec3>();
 
 	@SideOnly(Side.CLIENT)
 	public CustomExplosion(World world, Entity exploder, double x, double y, double z, float explosionSize, boolean isSmoking, boolean isFlaming, List<BlockPos> affectedBlocks) {
@@ -433,7 +433,7 @@ public class CustomExplosion extends Explosion
 					entity.motionY += d1 * d11 * motionFactor;
 					entity.motionZ += d2 * d11 * motionFactor;
 					if (entity instanceof EntityPlayer) {
-						affectedPlayers.put((EntityPlayer) entity, new Vec3(d0 * d10, d1 * d10, d2 * d10));
+						playerKnockbackMap.put((EntityPlayer) entity, new Vec3(d0 * d10, d1 * d10, d2 * d10));
 					}
 				}
 			}
@@ -442,7 +442,7 @@ public class CustomExplosion extends Explosion
 
 	/** Returns map of affected players */
 	@Override
-	public Map func_77277_b() { return affectedPlayers; }
+	public Map getPlayerKnockbackMap() { return playerKnockbackMap; }
 
 	protected void notifyClients() {
 		if (!worldObj.isRemote) {
@@ -450,7 +450,7 @@ public class CustomExplosion extends Explosion
 			while (iterator.hasNext()) {
 				EntityPlayer player = iterator.next();
 				if (player.getDistanceSq(explosionX, explosionY, explosionZ) < 4096.0D) {
-					((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new S27PacketExplosion(explosionX, explosionY, explosionZ, explosionSize, affectedBlockPositions, (Vec3) this.func_77277_b().get(player)));
+					((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new S27PacketExplosion(explosionX, explosionY, explosionZ, explosionSize, affectedBlockPositions, (Vec3) this.getPlayerKnockbackMap().get(player)));
 				}
 			}
 		}

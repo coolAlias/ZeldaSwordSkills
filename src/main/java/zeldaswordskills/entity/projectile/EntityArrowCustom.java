@@ -496,9 +496,8 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 			}
 		}
 		if (shootingEntity instanceof EntityLivingBase) {
-			// func_151384_a and func_151385_b is the new way Thorns is handled - copied from EntityArrow
-			EnchantmentHelper.func_151384_a((EntityLivingBase) entityHit, shootingEntity);
-			EnchantmentHelper.func_151385_b((EntityLivingBase) shootingEntity, entityHit);
+			EnchantmentHelper.applyThornEnchantments((EntityLivingBase) entityHit, shootingEntity);
+			EnchantmentHelper.applyArthropodEnchantments((EntityLivingBase) shootingEntity, entityHit);
 		}
 	}
 
