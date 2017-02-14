@@ -20,7 +20,6 @@ package zeldaswordskills.item;
 import java.util.List;
 import java.util.UUID;
 
-import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -42,6 +41,7 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.DirtyEntityAccessor;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;

@@ -19,7 +19,6 @@ package zeldaswordskills.handler;
 
 import java.util.Set;
 
-import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -44,6 +43,7 @@ import zeldaswordskills.api.damage.IPostDamageEffect;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IArmorBreak;
 import zeldaswordskills.api.item.ISwingSpeed;
+import zeldaswordskills.entity.DirtyEntityAccessor;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;

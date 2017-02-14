@@ -18,7 +18,6 @@
 package zeldaswordskills.entity.npc;
 
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
@@ -38,6 +37,7 @@ import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.api.entity.IParryModifier;
+import zeldaswordskills.entity.DirtyEntityAccessor;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemTreasure;
 import zeldaswordskills.item.ItemTreasure.Treasures;

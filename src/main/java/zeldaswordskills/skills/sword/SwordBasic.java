@@ -20,7 +20,6 @@ package zeldaswordskills.skills.sword;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,6 +29,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils;
+import zeldaswordskills.entity.DirtyEntityAccessor;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.EndComboPacket;
 import zeldaswordskills.network.server.TargetIdPacket;
