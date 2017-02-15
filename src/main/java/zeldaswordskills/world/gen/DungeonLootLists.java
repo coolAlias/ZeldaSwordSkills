@@ -34,7 +34,6 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.ItemKeyBig;
-import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.LibPotionID;
@@ -226,7 +225,6 @@ public class DungeonLootLists
 			getLoot(ZSSItems.rocsFeather, 1, 1, 1),
 			getLoot(ZSSItems.shieldHylian, 1, 1, 2),
 			getLoot(ZSSItems.slingshot, 1, 1, 2),
-			getLoot(ZSSItems.treasure, Treasures.ZELDAS_LETTER.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.whip, IWhipBlock.WhipType.WHIP_SHORT.ordinal(), 1, 1, 2)
 		});
 	}

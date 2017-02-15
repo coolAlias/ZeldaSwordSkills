@@ -32,6 +32,7 @@ import zeldaswordskills.block.BlockDoorLocked;
 import zeldaswordskills.block.BlockPeg;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.item.ItemTreasure;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.BossType;
@@ -248,7 +249,7 @@ public class RoomSecret extends RoomBase
 						} else if (door == ZSSBlocks.barrierHeavy) {
 							loot = new ItemStack(ZSSItems.hammerMegaton);
 						} else if (door == ZSSBlocks.timeBlock) {
-							// TODO
+							loot = new ItemStack(ZSSItems.treasure, 1, ItemTreasure.Treasures.ZELDAS_LETTER.ordinal());
 						}
 					}
 					if (loot != null) {
