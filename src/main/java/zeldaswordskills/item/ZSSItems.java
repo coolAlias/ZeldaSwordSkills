@@ -54,6 +54,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
+import zeldaswordskills.api.block.IHookable;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.api.item.ArmorIndex;
@@ -136,6 +137,8 @@ public class ZSSItems
 	private static boolean allowGoldSmelting;
 	/** Enable crafting of the Wooden Hammer used to bypass wooden pegs */
 	private static boolean enableCraftingHammer;
+	/** Enable application of hookshot upgrades via crafting */
+	private static boolean enableCraftingHookshot;
 	/** Enable crafting throwing rocks from cobblestone and back */
 	private static boolean enableCraftingThrowingRock;
 
@@ -318,6 +321,7 @@ public class ZSSItems
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
+		enableCraftingHookshot = config.get("Recipes", "Enable application of hookshot upgrades via crafting", false).getBoolean(false);
 		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
 	}
 
@@ -722,6 +726,15 @@ public class ZSSItems
 		if (enableCraftingHammer) {
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log, 's', Items.stick);
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log2, 's', Items.stick);
+		}
+		if (enableCraftingHookshot) {
+			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
+			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.CLAW.ordinal()));
+			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.CLAW.ordinal()));
+			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
+			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.MULTI.ordinal()));
+			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.MULTI.ordinal()));
+			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
 		}
 		if (enableCraftingThrowingRock) {
 			GameRegistry.addShapelessRecipe(new ItemStack(throwingRock, 9), Blocks.cobblestone);
