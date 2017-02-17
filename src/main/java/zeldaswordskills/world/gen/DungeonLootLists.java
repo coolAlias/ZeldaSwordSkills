@@ -219,6 +219,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.hookshotAddon, AddonType.MULTI.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.instrument, Instrument.OCARINA_TIME.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.keySkeleton, 1, 1, 1),
+			getLoot(ZSSItems.magicContainer, 1, 1, 1),
 			getLoot(ZSSItems.magicMirror, 1, 1, 1),
 			getLoot(ZSSItems.masterOre, 1, 1, 1),
 			getLoot(ZSSItems.potionBlue, 1, 1, 1),

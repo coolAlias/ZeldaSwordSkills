@@ -255,7 +255,11 @@ public class RoomSecret extends RoomBase
 						} else if (door == ZSSBlocks.timeBlock) {
 							loot = new ItemStack(ZSSItems.treasure, 1, ItemTreasure.Treasures.ZELDAS_LETTER.ordinal());
 						} else if (door == ZSSBlocks.quakeStone) {
-							loot = new ItemStack(ZSSItems.instrument, 1, ItemInstrument.Instrument.OCARINA_TIME.ordinal());
+							if ((rand.nextInt() & 1) > 0) { // roughly 50% chance
+								loot = new ItemStack(ZSSItems.instrument, 1, ItemInstrument.Instrument.OCARINA_TIME.ordinal());
+							} else {
+								loot = new ItemStack(ZSSItems.magicContainer);
+							}
 						}
 					}
 					if (loot != null) {
