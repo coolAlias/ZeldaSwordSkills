@@ -43,6 +43,7 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ChestGenHooks;
@@ -70,6 +71,7 @@ import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
@@ -192,6 +194,7 @@ public class ZSSItems
 	potionPurple,
 	magicJar,
 	magicJarBig,
+	magicContainer,
 	rocsFeather;
 
 	//================ TREASURES TAB ================//
@@ -580,6 +583,28 @@ public class ZSSItems
 		potionPurple = new ItemPotionPurple("potion_purple", 20, 40.0F);
 		magicJar = new ItemPickupOnly.ItemMagicJar(10).setUnlocalizedName("magic_jar");
 		magicJarBig = new ItemPickupOnly.ItemMagicJar(250).setUnlocalizedName("magic_jar_big");
+		magicContainer = (new ItemDrinkable("magic_container") {
+			@Override
+			public ItemStack onItemUseFinish(ItemStack stack, World world, EntityPlayer player) {
+				ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+				float max = info.getMaxMagic();
+				if (max < Config.getMaxMagicPoints() || info.getCurrentMagic() < max) {
+					world.playSoundAtEntity(player, "random.burp", 0.5F, world.rand.nextFloat() * 0.1F + 0.9F);
+					info.setMaxMagic(max + 50.0F);
+					info.setCurrentMagic(info.getMaxMagic());
+					if (!player.capabilities.isCreativeMode) {
+						--stack.stackSize;
+					}
+				}
+				return super.onItemUseFinish(stack, world, player);
+			}
+			@Override
+			@SideOnly(Side.CLIENT)
+			public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
+				list.add(StatCollector.translateToLocal("tooltip.zss.magic_container.desc.0"));
+				list.add(StatCollector.translateToLocal("tooltip.zss.magic_container.desc.1"));
+			}
+		}).setCreativeTab(ZSSCreativeTabs.tabTools);
 		medallion = new ItemMedallion().setUnlocalizedName("medallion");
 		rodFire = new ItemMagicRod(MagicType.FIRE, 8.0F, 10.0F).setUnlocalizedName("rod_fire");
 		rodIce = new ItemMagicRod(MagicType.ICE, 6.0F, 10.0F).setUnlocalizedName("rod_ice");
