@@ -628,6 +628,7 @@ chat.zss.song.warp.missing=Something isn't right... perhaps Ganon is involved?!
 chat.zss.song.warp.null=Nowhere to warp...
 chat.zss.spirit_crystal.farore.fail.dimension=Farore's Wind only works within the same dimension
 chat.zss.spirit_crystal.farore.fail.mark=A position must first be marked (sneak and right-click)
+chat.zss.spirit_crystal.nayru.unlimited.fail=Nayru's Love cannot be activated while the magic meter is unlimited.
 chat.zss.spirit_crystal.sacred_flame.full=The crystal is already at full power.
 chat.zss.spirit_crystal.sacred_flame.mismatch=Only the same Spirit may fill this crystal.
 chat.zss.sword.blessing=The divine fairy has blessed your sword!
