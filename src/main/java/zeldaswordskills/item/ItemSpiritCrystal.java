@@ -45,6 +45,8 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.item.ISacredFlame;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.PacketISpawnParticles;
@@ -323,7 +325,12 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	 * Processes right-click for Nayru's Love; returns amount of damage to apply to stack
 	 */
 	private int handleNayru(ItemStack stack, World world, EntityPlayer player) {
-		if (canUse(stack) && ZSSPlayerInfo.get(player).useMagic(25.0F)) {
+		if (!Config.allowUnlimitedNayru() && ZSSEntityInfo.get(player).isBuffActive(Buff.UNLIMITED_MAGIC)) {
+			player.playSound(Sounds.MAGIC_FAIL, 1.0F, 1.0F);
+			if (!world.isRemote) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.spirit_crystal.nayru.unlimited.fail");
+			}
+		} else if (canUse(stack) && ZSSPlayerInfo.get(player).useMagic(25.0F)) {
 			ZSSPlayerInfo.get(player).activateNayru();
 			world.playSoundAtEntity(player, Sounds.SUCCESS_MAGIC, 1.0F, 1.0F);
 			return costToUse;

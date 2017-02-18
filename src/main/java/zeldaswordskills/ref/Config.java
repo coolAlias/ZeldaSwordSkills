@@ -232,6 +232,8 @@ public class Config
 	private static float disarmTimingBonus;
 	/** [Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20] */
 	private static float disarmPenalty;
+	/** [Magic] Allow Nayru's Love to be activated even when magic bar is unlimited (such as after drinking a Chateau Romani) */
+	private static boolean allowUnlimitedNayru;
 	/** [Magic] Maximum magic points attainable [50-1000] */
 	private static int maxMagicPoints;
 	/** [SYNC] [Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level */
@@ -518,6 +520,7 @@ public class Config
 		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 15);
 		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
 		maxMagicPoints = MathHelper.clamp_int(config.get("Skills", "[Magic] Maximum magic points attainable [50-1000]", 250).getInt(), 50, 1000);
+		allowUnlimitedNayru = config.get("Skills", "[Magic] Allow Nayru's Love to be activated even when magic bar is unlimited (such as after drinking a Chateau Romani)", false).getBoolean(false);
 		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
 		/*================== DUNGEON GEN =====================*/
 		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
@@ -694,6 +697,7 @@ public class Config
 	public static boolean canDisarmorPlayers() { return allowDisarmorPlayer; }
 	public static float getDisarmPenalty() { return disarmPenalty; }
 	public static float getDisarmTimingBonus() { return disarmTimingBonus; }
+	public static boolean allowUnlimitedNayru() { return allowUnlimitedNayru; }
 	public static int getMaxMagicPoints() { return maxMagicPoints; }
 	/** Returns amount of health that may be missing and still be able to activate certain skills (e.g. Sword Beam) */
 	public static float getHealthAllowance(int level) {

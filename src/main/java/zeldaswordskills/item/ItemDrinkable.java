@@ -37,6 +37,7 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 
 /**
@@ -152,6 +153,9 @@ public class ItemDrinkable extends Item implements IModItem
 			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
 			info.setCurrentMagic(info.getMaxMagic());
 			ZSSEntityInfo.get(player).applyBuff(Buff.UNLIMITED_MAGIC, 1200, 0);
+			if (!Config.allowUnlimitedNayru()) {
+				info.setFlag(ZSSPlayerInfo.IS_NAYRU_ACTIVE, false);
+			}
 			return super.onItemUseFinish(stack, world, player);
 		}
 		@Override

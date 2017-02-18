@@ -338,7 +338,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/** Activates Nayru's Love effect; should call on both client and server */
 	public void activateNayru() {
-		setFlag(IS_NAYRU_ACTIVE, true);
+		if (Config.allowUnlimitedNayru() || !ZSSEntityInfo.get(player).isBuffActive(Buff.UNLIMITED_MAGIC)) {
+			setFlag(IS_NAYRU_ACTIVE, true);
+		}
 	}
 
 	/** Returns whether the player is currently under the effects of Nayru's Love */
