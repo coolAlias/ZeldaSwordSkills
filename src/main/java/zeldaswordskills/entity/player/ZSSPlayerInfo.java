@@ -37,6 +37,8 @@ import net.minecraftforge.common.util.Constants;
 import org.apache.commons.lang3.ArrayUtils;
 
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemArmorBoots;
@@ -223,7 +225,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	 * @param consume true to deplete magic bar even if magic is insufficient
 	 */
 	private boolean useMagic(float amount, boolean consume) {
-		if (player.capabilities.isCreativeMode) {
+		if (player.capabilities.isCreativeMode || ZSSEntityInfo.get(player).isBuffActive(Buff.UNLIMITED_MAGIC)) {
 			return true;
 		}
 		boolean sufficient = amount <= getCurrentMagic();

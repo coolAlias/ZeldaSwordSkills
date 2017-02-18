@@ -26,6 +26,8 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import zeldaswordskills.client.RenderHelperQ;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
@@ -130,6 +132,7 @@ public class GuiMagicMeter extends Gui implements IGuiOverlay
 	@Override
 	public void renderOverlay(ScaledResolution resolution) {
 		ZSSPlayerInfo info = ZSSPlayerInfo.get(mc.thePlayer);
+		boolean unlimited = ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.UNLIMITED_MAGIC);
 		float maxMana = info.getMaxMagic();
 		int width = MathHelper.clamp_int(MathHelper.floor_float((maxMana / 50) * INCREMENT), MathHelper.floor_float(INCREMENT), MAX_WIDTH);
 		int current = MathHelper.floor_float((info.getCurrentMagic() / maxMana) * width);
@@ -137,7 +140,11 @@ public class GuiMagicMeter extends Gui implements IGuiOverlay
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
 		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		if (unlimited) {
+			GL11.glColor4f(0.5F, 0.5F, 1.0F, 1.0F);
+		} else {
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		}
 		int xPos = (Config.isMagicMeterCenteredX ? resolution.getScaledWidth() / 2 : Config.isMagicMeterLeft ? 0 : resolution.getScaledWidth()) + Config.magicMeterOffsetX;
 		int yPos = (Config.isMagicMeterTop ? 0 : resolution.getScaledHeight()) + Config.magicMeterOffsetY;
 		if (Config.isMagicMeterEnabled) {

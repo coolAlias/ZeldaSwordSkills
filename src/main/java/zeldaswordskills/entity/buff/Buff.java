@@ -76,14 +76,16 @@ public enum Buff
 	/** Multiplies QUAKE damage by a factor of (1.0F - (amplifier * 0.01F)) */
 	RESIST_QUAKE("buff.zss.resist_quake", false, 11),
 	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
-	WEAKNESS_QUAKE("buff.zss.weakness_quake", true, 11);
+	WEAKNESS_QUAKE("buff.zss.weakness_quake", true, 11),
+	/** Player will not expend magic points while this buff is active; sync to client to change magic bar display */
+	UNLIMITED_MAGIC("buff.zss.unlimited_magic", false, false, -1, true);
 
 	public final String unlocalizedName;
 	/** Whether this Buff is a negative effect */
 	public final boolean isDebuff;
 	/** Whether this Buff displays an arrow icon overlay */
 	public final boolean displayArrow;
-	/** Icon's texture sheet index; 0 and 1 are the buff and debuff icons */
+	/** Icon's texture sheet index; 0 and 1 are the buff and debuff icons; negative value means no icon */
 	public final int iconIndex;
 	/** Whether this Buff needs to be synchronized to the client(s) when applied to non-player entities */
 	public final boolean syncNonPlayerEntity;
@@ -107,6 +109,13 @@ public enum Buff
 	/** Returns this buff's localized name */
 	public String getName() {
 		return StatCollector.translateToLocal(unlocalizedName + ".name");
+	}
+
+	/**
+	 * Returns true if this buff has an icon to display 
+	 */
+	public boolean hasIcon() {
+		return this.iconIndex >= 0;
 	}
 
 	/**

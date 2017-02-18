@@ -88,6 +88,9 @@ public class GuiBuffBar extends Gui implements IGuiOverlay
 			mc.getTextureManager().bindTexture(textures);
 			for (Iterator<BuffBase> iterator = buffs.iterator(); iterator.hasNext(); offset = increment) {
 				BuffBase buff = iterator.next();
+				if (!buff.getBuff().hasIcon()) {
+					continue;
+				}
 				int index = buff.getIconIndex();
 				xPos += (Config.isBuffBarHorizontal ? offset : 0);
 				yPos += (Config.isBuffBarHorizontal ? 0 : offset);
