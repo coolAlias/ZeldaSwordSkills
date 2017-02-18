@@ -31,6 +31,9 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.ref.ModInfo;
 
 /**
@@ -76,6 +79,35 @@ public class ItemDrinkable extends Item
 			player.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
 		}
 		return stack;
+	}
+
+	public static class ItemLonLonSpecial extends ItemDrinkable
+	{
+		public ItemLonLonSpecial(String name) {
+			super(name);
+			setMaxStackSize(1);
+			setCreativeTab(ZSSCreativeTabs.tabTools);
+		}
+		@Override
+		public ItemStack onEaten(ItemStack stack, World world, EntityPlayer player) {
+			if (!player.capabilities.isCreativeMode) {
+				--stack.stackSize;
+			}
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+			info.setCurrentMagic(info.getMaxMagic());
+			ZSSEntityInfo.get(player).applyBuff(Buff.UNLIMITED_MAGIC, 1200, 0);
+			return super.onEaten(stack, world, player);
+		}
+		@Override
+		public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+			return true;
+		}
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+			list.add(StatCollector.translateToLocal("tooltip.zss.lon_lon_special.desc.0"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.lon_lon_special.desc.1"));
+		}
 	}
 
 	public static class ItemPotionPurple extends ItemDrinkable
