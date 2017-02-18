@@ -124,6 +124,7 @@ buff.zss.defense_down.name=Defense Down
 buff.zss.defense_up.name=Defense Up
 buff.zss.evade_down.name=Evade Down
 buff.zss.evade_up.name=Evade Up
+buff.zss.unlimited_magic.name=Unlimited Magic
 buff.zss.resist_cold.name=Resist Cold
 buff.zss.resist_fire.name=Resist Fire
 buff.zss.resist_holy.name=Resist Holy
