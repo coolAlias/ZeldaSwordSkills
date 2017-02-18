@@ -17,18 +17,26 @@
 
 package zeldaswordskills.item;
 
+import java.util.List;
+
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.ref.ModInfo;
 
 /**
@@ -126,6 +134,35 @@ public class ItemDrinkable extends Item implements IModItem
 		}
 		for (int i = 0; i < variants.length; ++i) {
 			mesher.register(this, i, new ModelResourceLocation(variants[i], "inventory"));
+		}
+	}
+
+	public static class ItemLonLonSpecial extends ItemDrinkable
+	{
+		public ItemLonLonSpecial(String name) {
+			super(name);
+			setMaxStackSize(1);
+			setCreativeTab(ZSSCreativeTabs.tabTools);
+		}
+		@Override
+		public ItemStack onItemUseFinish(ItemStack stack, World world, EntityPlayer player) {
+			if (!player.capabilities.isCreativeMode) {
+				--stack.stackSize;
+			}
+			ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
+			info.setCurrentMagic(info.getMaxMagic());
+			ZSSEntityInfo.get(player).applyBuff(Buff.UNLIMITED_MAGIC, 1200, 0);
+			return super.onItemUseFinish(stack, world, player);
+		}
+		@Override
+		public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+			return true;
+		}
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+			list.add(StatCollector.translateToLocal("tooltip.zss.lon_lon_special.desc.0"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.lon_lon_special.desc.1"));
 		}
 	}
 }
