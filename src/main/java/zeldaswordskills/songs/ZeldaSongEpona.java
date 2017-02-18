@@ -19,6 +19,7 @@ package zeldaswordskills.songs;
 
 import java.util.List;
 
+import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -53,6 +54,13 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 				player.worldObj.setEntityState(horse, (byte) 18);
 			}
 		}
+		ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
+		// Check for cows for Lon Lon Milk (Fairy Ocarina can be used if you don't want to summon Epona)
+		@SuppressWarnings("unchecked")
+		List<EntityCow> cows = player.worldObj.getEntitiesWithinAABB(EntityCow.class, player.boundingBox.expand(8.0D, 4.0D, 8.0D));
+		for (EntityCow cow : cows) {
+			songs.addLonLonCow(cow);
+		}
 		if (power < 5) {
 			return; // only maximum power instruments can teleport Epona
 		}
@@ -64,7 +72,7 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 		} else if (!player.worldObj.canBlockSeeTheSky(x, y, z)) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.sky");
 		} else {
-			EntityHorse epona = ZSSPlayerSongs.get(player).getLastHorseRidden();
+			EntityHorse epona = songs.getLastHorseRidden();
 			if (epona == null) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.song.epona.missing");
 			} else {
@@ -81,7 +89,7 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 				PacketDispatcher.sendTo(packet, player); // send to ocarina player first, maybe it will be faster 
 				PacketDispatcher.sendToPlayersExcept(packet, player, ((WorldServer) player.worldObj).getEntityTracker().getTrackingPlayers(epona));
 				epona.makeHorseRearWithSound();
-				ZSSPlayerSongs.get(player).setHorseRidden(epona); // sets last chunk coordinates in case player doesn't mount
+				songs.setHorseRidden(epona); // sets last chunk coordinates in case player doesn't mount
 			}
 		}
 	}

@@ -23,6 +23,7 @@ import net.minecraft.entity.INpc;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -46,6 +47,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -135,6 +137,10 @@ public class ZSSEntityEvents
 			if (helm != null && helm.getItem() instanceof ItemMask) {
 				event.setCanceled(((ItemMask) helm.getItem()).onInteract(helm, event.entityPlayer, event.target));
 			}
+		}
+		// Check for Lon Lon Milk cow interaction
+		if (!event.isCanceled() && stack != null && stack.getItem() == Items.glass_bottle && event.target.getClass() == EntityCow.class) {
+			event.setCanceled(ZSSPlayerSongs.get(event.entityPlayer).milkLonLonCow(event.entityPlayer, (EntityCow) event.target));
 		}
 		// Finally, check for interactions with the Cursed Man
 		if (!event.isCanceled() && event.target.getClass() == EntityVillager.class && ("Cursed Man").equals(((EntityVillager) event.target).getCustomNameTag())) {

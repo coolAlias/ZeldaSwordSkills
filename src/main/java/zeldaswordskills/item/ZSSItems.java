@@ -201,6 +201,7 @@ public class ZSSItems
 	potionBlue,
 	potionYellow,
 	potionPurple,
+	lonlonMilk,
 	magicJar,
 	magicJarBig,
 	magicContainer,
@@ -602,6 +603,7 @@ public class ZSSItems
 		potionBlue = new ItemZeldaPotion("potion_blue", 40.0F, 100.0F);
 		potionYellow = new ItemZeldaPotion("potion_yellow").setBuffEffect(Buff.RESIST_SHOCK, 6000, 100, 1.0F);
 		potionPurple = new ItemDrinkable.ItemPotionPurple("potion_purple", 20, 40.0F);
+		lonlonMilk = new ItemLonLonMilk("lon_lon_milk", 2, 10.0F);
 		magicJar = new ItemPickupOnly.ItemMagicJar("magic_jar", 10);
 		magicJarBig = new ItemPickupOnly.ItemMagicJar("magic_jar_big", 250);
 		magicContainer = (new ItemDrinkable("magic_container") {
