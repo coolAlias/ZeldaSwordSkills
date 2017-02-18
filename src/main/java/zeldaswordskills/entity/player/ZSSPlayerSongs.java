@@ -20,16 +20,22 @@ package zeldaswordskills.entity.player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
@@ -42,6 +48,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.block.BlockWarpStone;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.LearnSongPacket;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
@@ -86,6 +93,9 @@ public class ZSSPlayerSongs
 
 	/** Last chunk coordinates of horse ridden, in case chunk not loaded */
 	private int horseChunkX, horseChunkZ;
+
+	/** Unsaved collection of cows affected by Epona's Song used for getting Lon Lon Milk */
+	private Map<Integer, Long> lonlonCows = new HashMap<Integer, Long>();
 
 	/** Set of all NPCs this player has cured */
 	private final Set<String> curedNpcs = new HashSet<String>();
@@ -341,6 +351,49 @@ public class ZSSPlayerSongs
 	private void setHorseCoordinates(EntityHorse horse) {
 		this.horseChunkX = (MathHelper.floor_double(horse.posX) >> 4);
 		this.horseChunkZ = (MathHelper.floor_double(horse.posZ) >> 4);
+	}
+
+	/**
+	 * Marks the cow as affected by Epona's Song for purposes of getting Lon Lon Milk
+	 */
+	public void addLonLonCow(EntityCow cow) {
+		NBTTagCompound data = cow.getEntityData(); // Quick and dirty - not really worth a new IEEP
+		if (!cow.isChild() && (!data.hasKey("zss_lon_milk") || cow.worldObj.getWorldTime() > data.getLong("zss_lon_milk"))) {
+			lonlonCows.put(cow.getEntityId(), cow.worldObj.getWorldTime() + 6000); // 5 minutes to milk the cow, using regular world time
+			cow.worldObj.setEntityState(cow, (byte) 18); // show the lovely hearts
+		}
+	}
+
+	/**
+	 * Returns true if the player was able to successfully acquire Lon Lon Milk from this cow
+	 */
+	public boolean milkLonLonCow(EntityPlayer player, EntityCow cow) {
+		boolean match = false;
+		Iterator<Entry<Integer, Long>> iterator = lonlonCows.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<Integer, Long> entry = iterator.next();
+			if (cow.worldObj.getWorldTime() > entry.getValue()) {
+				iterator.remove(); // remove expired entries
+			} else if (entry.getKey() == cow.getEntityId()) {
+				match = true;
+				iterator.remove(); // also remove the matched entry
+			}
+		}
+		ItemStack stack = player.getHeldItem();
+		if (match && stack != null && stack.getItem() == Items.glass_bottle && !cow.isChild()) {
+			NBTTagCompound data = cow.getEntityData();
+			if (!data.hasKey("zss_lon_milk") || cow.worldObj.getWorldTime() > data.getLong("zss_lon_milk")) {
+				if (stack.stackSize > 1) {
+					--stack.stackSize;
+					PlayerUtils.addItemToInventory(player, new ItemStack(ZSSItems.lonlonMilk));
+				} else {
+					player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.lonlonMilk));
+				}
+				data.setLong("zss_lon_milk", cow.worldObj.getWorldTime() + 24000); // once per day, regular world time
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
