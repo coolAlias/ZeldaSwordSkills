@@ -26,8 +26,10 @@ import java.util.Set;
 
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.WeaponRegistry;
+import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.client.SyncConfigPacket;
@@ -38,6 +40,7 @@ import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.BossType;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import zeldaswordskills.util.WarpPoint;
 
 /**
  * 
@@ -391,6 +394,10 @@ public class Config
 	private static int minDaysToSpawnDarknut;
 	/** Minimum number of days required to pass before Wizzrobes may spawn [0-30] */
 	private static int minDaysToSpawnWizzrobe;
+	/*================== MAP MAKING =====================*/
+	private static final String WARP_LOCATIONS_KEY = "Default Warp Locations: one per line with format 'song_name:[dimension_id,x,y,z]'";
+	/** [Warp Stone] Default warp locations */
+	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
 
 	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
@@ -610,6 +617,8 @@ public class Config
 		mobVariantChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt(), 0, 100);
 		minDaysToSpawnDarknut = 24000 * MathHelper.clamp_int(config.get("Mob Spawns", "Minimum number of days required to pass before Darknuts may spawn [0-30]", 7).getInt(), 0, 30);
 		minDaysToSpawnWizzrobe = 24000 * MathHelper.clamp_int(config.get("Mob Spawns", "Minimum number of days required to pass before Wizzrobes may spawn [0-30]", 7).getInt(), 0, 30);
+		/*================== MAP MAKING =====================*/
+		config.addCustomCategoryComment("Map Making", "Configuration settings related to map making; none of these have any impact on normal play.");
 
 		config.save();
 	}
@@ -630,6 +639,24 @@ public class Config
 		for (AbstractZeldaSong song : ZeldaSongs.getRegisteredSongs()) {
 			if (!config.get("Songs", "Whether " + song.getDisplayName() + "'s main effect is enabled (does not affect notification of Song Blocks or Entities)", true).getBoolean(true)) {
 				song.setIsEnabled(false);
+			}
+		}
+		/*================== MAP MAKING =====================*/
+		String[] warp_locations = config.get("Map Making", Config.WARP_LOCATIONS_KEY, new String[0]).getStringList();
+		for (String entry : warp_locations) {
+			String[] split = entry.split(":");
+			if (split.length != 2) {
+				ZSSMain.logger.warn("Invalid default warp location entry: " + entry);
+			} else {
+				AbstractZeldaSong song = ZeldaSongs.getSongByName(split[0]);
+				WarpPoint warp = WarpPoint.fromString(split[1]);
+				if (song == null) {
+					ZSSMain.logger.warn("Default warp location entry contained invalid song name: " + split[0]);
+				} else if (warp == null) {
+					ZSSMain.logger.warn("Default warp location entry contained invalid warp point entry: " + split[1] + "\nExpected format is [dimension_id, x, y, z]");
+				} else {
+					warp_defaults.put(song, warp);
+				}
 			}
 		}
 		if (config.hasChanged()) {
@@ -796,6 +823,47 @@ public class Config
 	public static float getMobVariantChance() { return mobVariantChance; }
 	public static int getTimeToSpawnDarknut() { return minDaysToSpawnDarknut; }
 	public static int getTimeToSpawnWizzrobe() { return minDaysToSpawnWizzrobe; }
+
+	/**
+	 * Returns the default warp point for the given song, if any
+	 */
+	public static WarpPoint getDefaultWarpPoint(AbstractZeldaSong song) {
+		return warp_defaults.get(song);
+	}
+
+	/**
+	 * Sets the default warp point for the given song, returning the previous default warp point, if any
+	 */
+	public static WarpPoint setDefaultWarpPoint(AbstractZeldaSong song, WarpPoint warp) {
+		Integer meta = BlockWarpStone.reverseLookup.get(song);
+		if (meta != null) { // make sure song has a Warp Stone mapping
+			WarpPoint previous = warp_defaults.put(song, warp);
+			if (warp.equals(previous)) {
+				return null; // nothing has changed
+			}
+			Config.saveDefaultWarpPoints();
+			return previous;
+		} else {
+			ZSSMain.logger.warn("Attempted to set default warp point for non-warp song: " + song.getDisplayName());
+		}
+		return null;
+	}
+
+	/**
+	 * Saves default warp point map to the config file
+	 */
+	private static void saveDefaultWarpPoints() {
+		StringBuilder builder = new StringBuilder();
+		for (Map.Entry<AbstractZeldaSong, WarpPoint> entry : warp_defaults.entrySet()) {
+			builder.append(entry.getKey().getUnlocalizedName()).append(":").append(entry.getValue().toString()).append("\n");
+		}
+		Property prop = config.get("Map Making", Config.WARP_LOCATIONS_KEY, new String[0]);
+		prop.set(builder.toString().split("\n"));
+		config.getCategory("Map Making").put(Config.WARP_LOCATIONS_KEY, prop);
+		if (config.hasChanged()) {
+			config.save();
+		}
+	}
 
 	/**
 	 * Updates client settings from server packet

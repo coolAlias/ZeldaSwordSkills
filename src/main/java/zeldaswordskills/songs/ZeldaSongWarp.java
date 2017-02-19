@@ -28,6 +28,7 @@ import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.PlaySoundPacket;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
@@ -49,7 +50,8 @@ public class ZeldaSongWarp extends AbstractZeldaSong {
 	 * Returns the point to which the player will teleport when this song is played
 	 */
 	protected WarpPoint getWarpPoint(EntityPlayer player) {
-		return ZSSPlayerSongs.get(player).getWarpPoint(this);
+		WarpPoint warp = ZSSPlayerSongs.get(player).getWarpPoint(this);
+		return (warp == null ? Config.getDefaultWarpPoint(this) : warp);
 	}
 
 	/**

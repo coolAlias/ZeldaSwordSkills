@@ -40,6 +40,55 @@ public class WarpPoint
 		this.z = z;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + dimensionId;
+		result = prime * result + x;
+		result = prime * result + y;
+		result = prime * result + z;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		WarpPoint other = (WarpPoint) obj;
+		return (dimensionId == other.dimensionId && x == other.x && y == other.y && z == other.z);
+	}
+
+	/**
+	 * Attempts to create a Warp Point from a string
+	 * @param string Expected format is that of {@link WarpPoint#toString()}: "[dimension_id, x, y, z]" where each value is an integer, e.g. "[0, 100, 64, 100]"
+	 * @return Either a valid WarpPoint or null
+	 */
+	public static WarpPoint fromString(String string) {
+		if (string.length() < 9 || !string.startsWith("[") || !string.endsWith("]")) {
+			return null;
+		}
+		string = string.substring(1, string.length() - 1);
+		String[] pieces = string.split(",");
+		if (pieces.length != 4) {
+			return null;
+		}
+		try {
+			return new WarpPoint(Integer.parseInt(pieces[0]), Integer.parseInt(pieces[1]), Integer.parseInt(pieces[2]), Integer.parseInt(pieces[3]));
+		} catch (NumberFormatException e) {
+			// do nothing
+		}
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "["+dimensionId+","+x+","+y+","+z+"]";
+	}
+
 	/**
 	 * Returns an NBTTagCompound containing this warp point
 	 */
