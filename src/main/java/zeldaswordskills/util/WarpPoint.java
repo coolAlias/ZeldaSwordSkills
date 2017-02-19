@@ -44,6 +44,57 @@ public class WarpPoint
 		return String.format("[%d/%d/%d in dimension %d]", pos.getX(), pos.getY(), pos.getZ(), dimensionId);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + dimensionId;
+		result = prime * result + pos.getX();
+		result = prime * result + pos.getY();
+		result = prime * result + pos.getZ();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		WarpPoint other = (WarpPoint) obj;
+		return (dimensionId == other.dimensionId && pos.getX() == other.pos.getX() && pos.getY() == other.pos.getY() && pos.getZ() == other.pos.getZ());
+	}
+
+	/**
+	 * Attempts to create a Warp Point from a string
+	 * @param string Expected format is that of {@link WarpPoint#convertToString()}: "[dimension_id, x, y, z]" where each value is an integer, e.g. "[0, 100, 64, 100]"
+	 * @return Either a valid WarpPoint or null
+	 */
+	public static WarpPoint convertFromString(String string) {
+		if (string.length() < 9 || !string.startsWith("[") || !string.endsWith("]")) {
+			return null;
+		}
+		string = string.substring(1, string.length() - 1);
+		String[] pieces = string.split(",");
+		if (pieces.length != 4) {
+			return null;
+		}
+		try {
+			return new WarpPoint(Integer.parseInt(pieces[0]), new BlockPos(Integer.parseInt(pieces[1]), Integer.parseInt(pieces[2]), Integer.parseInt(pieces[3])));
+		} catch (NumberFormatException e) {
+			// do nothing
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the WarpPoint as a string in the format '[dimension_id, x, y, z]' suitable for passing to {@link WarpPoint#convertFromString(String)}
+	 */
+	public String convertToString() {
+		return String.format("[%d,%d,%d,%d]", dimensionId, pos.getX(), pos.getY(), pos.getZ());
+	}
+
 	/**
 	 * Returns an NBTTagCompound containing this warp point
 	 */

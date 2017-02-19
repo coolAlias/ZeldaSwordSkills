@@ -45,9 +45,11 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemInstrument;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.WarpPoint;
 
 public class BlockWarpStone extends Block implements ILiftable, ISmashable
 {
@@ -121,6 +123,16 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 				}
 			}
 			return true;
+		} else if (player.capabilities.isCreativeMode && player.isSneaking()) {
+			AbstractZeldaSong song = ((BlockWarpStone.EnumWarpSong) state.getValue(WARP_SONG)).getWarpSong();
+			if (song != null && !world.isRemote) {
+				WarpPoint warp = new WarpPoint(world.provider.getDimensionId(), pos);
+				WarpPoint previous = Config.setDefaultWarpPoint(song, warp);
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.warp_stone.set_default", song.getDisplayName(), warp.toString());
+				if (previous != null) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.block.warp_stone.previous", song.getDisplayName(), previous.toString());
+				}
+			}
 		} else {
 			// TODO play failure sound
 		}
