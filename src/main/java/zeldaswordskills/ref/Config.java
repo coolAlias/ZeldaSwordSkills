@@ -613,6 +613,7 @@ public class Config
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-50]", 15).getInt(), 1, 50);
 		/*================== MOB SPAWNING =====================*/
+		config.addCustomCategoryComment("Mob Spawns", "Mobs use the 'Biome Type' lists to populate their individual spawn settings the first time the game is loaded.\nChanging the type lists after this point has no effect UNLESS you also delete the mob spawn locations in the\nconfig - this will force them to re-populate the next time the game is loaded.\nAlternatively, you may add new biomes directly to the individual mob spawn entries and completely ignore biome type.");
 		roomSpawnMobChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100]", 25).getInt(), 0, 100);
 		mobVariantChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt(), 0, 100);
 		minDaysToSpawnDarknut = 24000 * MathHelper.clamp_int(config.get("Mob Spawns", "Minimum number of days required to pass before Darknuts may spawn [0-30]", 7).getInt(), 0, 30);
