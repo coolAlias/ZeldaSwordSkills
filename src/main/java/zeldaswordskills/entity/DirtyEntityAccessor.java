@@ -79,7 +79,7 @@ public class DirtyEntityAccessor {
 			experienceValue = ReflectionHelper.findField(EntityLiving.class, "field_70728_aV", "experienceValue");
 		}
 		try {
-			int value = (int) experienceValue.get(entity);
+			int value = experienceValue.getInt(entity);
 			experienceValue.set(entity, (add ? value + xp : xp));
 		} catch (Exception e) {
 			e.printStackTrace();
