@@ -174,6 +174,8 @@ public class PlayerUtils
 	public static void addItemToInventory(EntityPlayer player, ItemStack stack) {
 		if (!player.inventory.addItemStackToInventory(stack)) {
 			player.dropPlayerItemWithRandomChoice(stack, false);
+		} else if (player instanceof EntityPlayerMP) { // ensure client side notified of inventory change (there are times this method only gets called server-side)
+			((EntityPlayerMP) player).sendContainerToPlayer(player.openContainer);
 		}
 	}
 
