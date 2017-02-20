@@ -148,7 +148,7 @@ public abstract class AbstractZeldaSong
 	 * @return	True to allow {@link #performEffect} to be called
 	 */
 	protected boolean hasEffect(EntityPlayer player, ItemStack instrument, int power) {
-		return power > 1;
+		return true;
 	}
 
 	/**
