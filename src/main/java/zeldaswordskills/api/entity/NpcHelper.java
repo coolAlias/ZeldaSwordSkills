@@ -82,9 +82,8 @@ public class NpcHelper
 		for (String match : nameToClassMap.keySet()) {
 			if (match.equals(name)) {
 				EntityLiving npc = getNpcForName(name, villager.worldObj);
-				npc.setCustomNameTag(villager.getCustomNameTag());
-				npc.setLocationAndAngles(villager.posX, villager.posY + 0.2F, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 				if (npc instanceof INpcVillager) {
+					npc.setLocationAndAngles(villager.posX, villager.posY + 0.2F, villager.posZ, villager.rotationYaw, villager.rotationPitch);
 					result = (rightClick ? ((INpcVillager) npc).canInteractConvert(player, villager) : ((INpcVillager) npc).canLeftClickConvert(player, villager));
 					if (result == Result.ALLOW && !villager.worldObj.isRemote) { 
 						if (npc instanceof ICustomMerchant) {
@@ -93,6 +92,7 @@ public class NpcHelper
 						if (npc instanceof EntityLiving) {
 							((EntityLiving) npc).onSpawnWithEgg(null);
 						}
+						npc.setCustomNameTag(name);
 						villager.setDead();
 						villager.worldObj.spawnEntityInWorld(npc);
 						((INpcVillager) npc).onConverted(player);
