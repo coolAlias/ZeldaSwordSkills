@@ -52,7 +52,7 @@ public class ModelItemShield implements ISmartItemModel
 		IBakedModel shieldBack = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(new ModelResourceLocation(resourceLocation, "inventory"));
 		this.quads = Lists.newArrayList(shieldFront.getGeneralQuads());
 		for (BakedQuad quad : (List<BakedQuad>) shieldBack.getGeneralQuads()) {
-			if (quad.getFace() == EnumFacing.NORTH) {
+			if (quad.getFace() == EnumFacing.SOUTH) {
 				quads.add(quad);
 				break;
 			}
