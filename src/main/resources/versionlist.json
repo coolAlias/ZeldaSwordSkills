@@ -13,9 +13,9 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.5",
+			"modVersion":"2.5.1",
 			"changeLog": [
-	               "Added Magic Meter, Princess Zelda and more!",
+	               "Bug fixes for 2.5: Added Magic Meter, Princess Zelda and more!",
 	               "See website for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
