@@ -82,7 +82,7 @@ import com.google.common.collect.Lists;
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
 public class ItemZeldaShield extends BaseModItem implements IDashItem, IFairyUpgrade,
-ISwapModel, ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+/*ISwapModel,*/ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	@SideOnly(Side.CLIENT)
 	private List<ModelResourceLocation> models;
@@ -331,7 +331,7 @@ ISwapModel, ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArr
 		mesher.register(this, 0, models.get(0));
 	}
 
-	@Override
+	//@Override
 	@SideOnly(Side.CLIENT)
 	public Collection<ModelResourceLocation> getDefaultResources() {
 		String[] variants = getVariants();
@@ -339,7 +339,7 @@ ISwapModel, ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArr
 		return Lists.newArrayList(new ModelResourceLocation(variants[0], "inventory"), new ModelResourceLocation(variants[1], "inventory"));
 	}
 
-	@Override
+	//@Override
 	@SideOnly(Side.CLIENT)
 	public Class<? extends IBakedModel> getNewModel() {
 		return ModelItemShield.class;

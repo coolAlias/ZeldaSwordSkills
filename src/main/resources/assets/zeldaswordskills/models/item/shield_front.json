@@ -10,7 +10,7 @@
             "scale": [ 1.15, 1.15, 1.15 ]
         },
         "firstperson": {
-            "rotation": [ 0, 55, 0 ],
+            "rotation": [ 0, 110, 0 ],
             "translation": [ -4, 4.5, 4 ],
             "scale": [ 2, 2, 2 ]
         }
