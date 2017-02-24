@@ -21,10 +21,12 @@ package zeldaswordskills.network.client;
 
 import java.io.IOException;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 
 /**
@@ -34,24 +36,29 @@ import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
  */
 public class SpawnNayruParticlesPacket extends AbstractClientMessage<SpawnNayruParticlesPacket>
 {
-	/** Affected player's position */
+	/** Affected entity's entityId */
+	private int entityId;
+
+	/** Affected entity's position */
 	private double x, y, z;
 
-	/** Affected player's height and width */
+	/** Affected entity's height and width */
 	private float h, w;
 
 	public SpawnNayruParticlesPacket() {}
 
-	public SpawnNayruParticlesPacket(EntityPlayer player) {
-		x = player.posX;
-		y = player.posY;
-		z = player.posZ;
-		h = player.height;
-		w = player.width;
+	public SpawnNayruParticlesPacket(Entity entity) {
+		entityId = entity.getEntityId();
+		x = entity.posX;
+		y = entity.posY;
+		z = entity.posZ;
+		h = entity.height;
+		w = entity.width;
 	}
 
 	@Override
 	protected void read(PacketBuffer buffer) throws IOException {
+		entityId = buffer.readInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		z = buffer.readDouble();
@@ -61,6 +68,7 @@ public class SpawnNayruParticlesPacket extends AbstractClientMessage<SpawnNayruP
 
 	@Override
 	protected void write(PacketBuffer buffer) throws IOException {
+		buffer.writeInt(entityId);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 		buffer.writeDouble(z);
@@ -70,14 +78,20 @@ public class SpawnNayruParticlesPacket extends AbstractClientMessage<SpawnNayruP
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
+		Entity entity = player.worldObj.getEntityByID(entityId);
+		SpawnNayruParticlesPacket.spawnParticles(entity, x, y, z, h, w);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static void spawnParticles(Entity entity, double x, double y, double z, float h, float w) {
 		for (int i = 0; i < 3; ++i) {
-			double d0 = player.worldObj.rand.nextGaussian() * 0.02D;
-			double d1 = player.worldObj.rand.nextGaussian() * 0.02D;
-			double d2 = player.worldObj.rand.nextGaussian() * 0.02D;
-			player.worldObj.spawnParticle(EnumParticleTypes.CRIT_MAGIC,
-					x + (player.worldObj.rand.nextFloat() * w * 2.0F) -	w,
-					y + (player.worldObj.rand.nextFloat() * h),
-					z + (player.worldObj.rand.nextFloat() * w * 2.0F) - w, d0, d1, d2);
+			double d0 = entity.worldObj.rand.nextGaussian() * 0.02D;
+			double d1 = entity.worldObj.rand.nextGaussian() * 0.02D;
+			double d2 = entity.worldObj.rand.nextGaussian() * 0.02D;
+			entity.worldObj.spawnParticle(EnumParticleTypes.CRIT_MAGIC,
+					x + (entity.worldObj.rand.nextFloat() * w * 2.0F) -	w,
+					y + (entity.worldObj.rand.nextFloat() * h),
+					z + (entity.worldObj.rand.nextFloat() * w * 2.0F) - w, d0, d1, d2);
 		}
 	}
 }
