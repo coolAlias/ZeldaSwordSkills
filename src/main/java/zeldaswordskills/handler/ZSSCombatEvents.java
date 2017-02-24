@@ -130,19 +130,22 @@ public class ZSSCombatEvents
 		if (event.source.getEntity() instanceof EntityLivingBase) {
 			event.setCanceled(ZSSEntityInfo.get((EntityLivingBase) event.source.getEntity()).isBuffActive(Buff.STUN));
 		}
+		if (event.isCanceled()) {
+			return;
+		}
 		// Possible for damage to be negated by resistances, in which case we don't want the hurt animation to play
 		float amount = applyDamageModifiers(event.entityLiving, event.source, event.ammount);
-		if (!event.isCanceled() && event.entity instanceof EntityPlayer) {
+		if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ZSSPlayerSkills.get(player).onBeingAttacked(event);
 			if (amount < 0.1F) {
 				event.setCanceled(true);
-			} else if (!event.isCanceled() && event.source.isFireDamage() && event.source.getSourceOfDamage() == null) {
+			} else if (event.source.isFireDamage() && event.source.getSourceOfDamage() == null) {
 				event.setCanceled(ItemArmorTunic.onFireDamage(player, event.ammount));
 			}
 		} else if (amount < 0.1F) {
 			event.setCanceled(true);
-		} else if (!event.isCanceled() && event.source.getEntity() != null && (!(event.source instanceof IDamageAoE) || !((IDamageAoE) event.source).isAoEDamage())) {
+		} else if (event.source.getEntity() != null && (!(event.source instanceof IDamageAoE) || !((IDamageAoE) event.source).isAoEDamage())) {
 			EntityLivingBase entity = event.entityLiving;
 			float evade = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
 			if (evade > 0.0F && !ZSSEntityInfo.get(entity).isBuffActive(Buff.STUN)) {
