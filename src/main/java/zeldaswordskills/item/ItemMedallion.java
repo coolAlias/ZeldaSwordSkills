@@ -263,6 +263,6 @@ public class ItemMedallion extends BaseModItem implements ISpawnParticles
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
 		BlockAncientTablet.EnumType type = BlockAncientTablet.EnumType.byMetadata(stack.getItemDamage());
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.medallion" + type.getName() + ".desc.0"));
+		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.medallion." + type.getName() + ".desc.0"));
 	}
 }
