@@ -197,6 +197,8 @@ public class Config
 	private static boolean medallionsAffectPlayers;
 	/** [Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280] */
 	private static int rodUpgradeCost;
+	/** [Magic Rods] Enable fire rod to set blocks on fire */
+	private static boolean rodFireGriefing;
 	/** [Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword */
 	private static int temperedRequiredKills;
 	/** [SYNC] [Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal */
@@ -505,6 +507,7 @@ public class Config
 		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
+		rodFireGriefing = config.get("Item", "[Magic Rods] Enable fire rod to set blocks on fire", true).getBoolean(true);
 		medallionsAffectPlayers = config.get("Item", "[Magic Medallions] True if Ether and Quake medallions can affect players", true).getBoolean(true);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
 		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
@@ -714,6 +717,7 @@ public class Config
 	public static boolean canHookshotBreakBlocks() { return enableHookshotBreakBlocks; }
 	public static boolean doMedallionsDamagePlayers() { return medallionsAffectPlayers; }
 	public static int getRodUpgradeCost() { return rodUpgradeCost; }
+	public static boolean getRodFireGriefing() { return rodFireGriefing; }
 	public static int getRequiredKills() { return temperedRequiredKills - 1; }
 	public static boolean getMasterSwordsProvidePower() { return allMasterSwordsProvidePower; }
 	public static int getNumSkelKeyUses() { return numSkelKeyUses; }

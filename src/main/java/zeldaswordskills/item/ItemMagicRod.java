@@ -163,6 +163,9 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 					magic = new EntityCyclone(world, player).setArea(isUpgraded(stack) ? 3.0F : 2.0F);
 				} else {
 					magic = new EntityMagicSpell(world, player).setType(magicType).setArea(isUpgraded ? 3.0F : 2.0F);
+					if (magicType == MagicType.FIRE && !Config.getRodFireGriefing()) {
+						((EntityMagicSpell) magic).disableGriefing();
+					}
 				}
 				magic.setDamage(isUpgraded ? damage * 1.5F : damage);
 				if (!world.isRemote) {
@@ -214,7 +217,9 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 		}
 		PacketDispatcher.sendToAllAround(new PacketISpawnParticles(player, r), player, 64.0D);
 		if (ticksInUse % 4 == 3) {
-			affectBlocks(world, player, r);
+			if (magicType != MagicType.FIRE || Config.getRodFireGriefing()) {
+				affectBlocks(world, player, r);
+			}
 			List<EntityLivingBase> targets = TargetUtils.acquireAllLookTargets(player, Math.round(r), 1.0F);
 			for (EntityLivingBase target : targets) {
 				target.attackEntityFrom(getDamageSource(player), r);
