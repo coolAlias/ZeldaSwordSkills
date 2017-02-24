@@ -230,31 +230,32 @@ public class ZSSEntityEvents
 	 * Applies permanent buffs / debuffs to vanilla mobs
 	 */
 	private void initBuffs(EntityLivingBase entity) {
-		if (!ZSSEntityInfo.get(entity).getActiveBuffs().isEmpty()) {
+		ZSSEntityInfo info = ZSSEntityInfo.get(entity);
+		if (!info.getActiveBuffs().isEmpty()) {
 			return;
 		}
 		// double damage from cold effects, highly resistant to fire damage
 		if (entity.isImmuneToFire()) {
-			ZSSEntityInfo.get(entity).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
-			ZSSEntityInfo.get(entity).applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
+			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
 		}
 		if (entity.getCreatureAttribute() == EnumCreatureAttribute.UNDEAD) {
 			if (!entity.isImmuneToFire()) {
-				ZSSEntityInfo.get(entity).applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 50);
+				info.applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 50);
 			}
-			ZSSEntityInfo.get(entity).applyBuff(Buff.WEAKNESS_HOLY, Integer.MAX_VALUE, 300);
-			ZSSEntityInfo.get(entity).applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 50);
-			ZSSEntityInfo.get(entity).applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.WEAKNESS_HOLY, Integer.MAX_VALUE, 300);
+			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 50);
 		}
 		if (entity instanceof EntityGolem) {
-			ZSSEntityInfo.get(entity).applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
-			ZSSEntityInfo.get(entity).applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
 		}
 		if (entity instanceof EntityWitch) {
-			ZSSEntityInfo.get(entity).applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
+			info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
 		}
 		if (entity instanceof EntityWither) {
-			ZSSEntityInfo.get(entity).removeBuff(Buff.WEAKNESS_COLD);
+			info.removeBuff(Buff.WEAKNESS_COLD);
 		}
 	}
 }
