@@ -159,8 +159,8 @@ public class BuffBase
 	 * @return true if this buff needs to be removed (duration remaining is zero)
 	 */
 	public boolean onUpdate(EntityLivingBase entity) {
+		buff.onUpdate(entity, duration, amplifier);
 		if (duration > 0 && !isPermanent()) {
-			buff.onUpdate(entity, duration, amplifier);
 			--duration;
 		}
 		return duration == 0;
