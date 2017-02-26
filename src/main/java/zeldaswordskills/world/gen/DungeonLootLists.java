@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.ItemKeyBig;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.LibPotionID;
@@ -181,7 +182,6 @@ public class DungeonLootLists
 			getLoot(Items.iron_ingot, 1, 2, 3),
 			getLoot(Items.leather, 1, 3, 3),
 			getLoot(Items.glass_bottle, 1, 2, 3),
-			getLoot(Items.emerald, 2, 5, 5),
 			getLoot(Items.arrow, 3, 7, 5),
 			getLoot(Items.melon_seeds, 1, 3, 2),
 			getLoot(Items.pumpkin_seeds, 1, 3, 2),
@@ -193,6 +193,8 @@ public class DungeonLootLists
 			getLoot(ZSSItems.potionRed, 1, 1, 3),
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
 			getLoot(ZSSItems.potionPurple, 1, 1, 1),
+			getLoot(ZSSItems.rupee, ItemRupee.Rupee.GREEN_RUPEE.ordinal(), 4, 10, 5),
+			getLoot(ZSSItems.rupee, ItemRupee.Rupee.BLUE_RUPEE.ordinal(), 1, 4, 1),
 			getLoot(ZSSItems.shieldDeku, 1, 1, 1),
 			getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordKokiri), 1, 1, 1)
 		});
@@ -226,6 +228,8 @@ public class DungeonLootLists
 			getLoot(ZSSItems.masterOre, 1, 1, 1),
 			getLoot(ZSSItems.potionBlue, 1, 1, 1),
 			getLoot(ZSSItems.rocsFeather, 1, 1, 1),
+			getLoot(ZSSItems.rupee, ItemRupee.Rupee.SILVER_RUPEE.ordinal(), 1, 1, 2),
+			getLoot(ZSSItems.rupee, ItemRupee.Rupee.GOLD_RUPEE.ordinal(), 1, 1, 1),
 			getLoot(ZSSItems.shieldHylian, 1, 1, 2),
 			getLoot(ZSSItems.slingshot, 1, 1, 2),
 			getLoot(ZSSItems.whip, IWhipBlock.WhipType.WHIP_SHORT.ordinal(), 1, 1, 2)
@@ -253,7 +257,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.smallHeart, 1, 1, 6),
 			getLoot(ZSSItems.dekuNut, 1, 1, 4),
 			getLoot(Items.arrow, 1, 1, 5),
-			getLoot(Items.emerald, 1, 1, 10)
+			getLoot(ZSSItems.rupee, ItemRupee.Rupee.GREEN_RUPEE.ordinal(), 1, 1, 10)
 		});
 	}
 

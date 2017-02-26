@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,19 +17,24 @@
 
 package zeldaswordskills.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.ResourceLocation;
+import java.lang.reflect.Method;
+import java.util.List;
 
 import org.lwjgl.opengl.GL11;
+
+import cpw.mods.fml.relauncher.ReflectionHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * 
  * @authors Hunternif, coolAlias
  *
  */
-public class RenderHelperQ {
-
+public class RenderHelperQ
+{
 	public static void drawTexturedRect(ResourceLocation texture, double x, double y, int u, int v, int width, int height, int imageWidth, int imageHeight, double scale) {
 		Minecraft.getMinecraft().renderEngine.bindTexture(texture);
 		double minU = (double)u / (double)imageWidth;
@@ -100,5 +105,21 @@ public class RenderHelperQ {
 		float g = (float)(color >> 8 & 0xff)/256f;
 		float b = (float)(color & 0xff)/256f;
 		GL11.glColor4f(r, g, b, alpha);
+	}
+
+	/** Accessible reference to {@code GuiScreen#drawHoveringText} */
+	private static Method drawHoveringText;
+	/**
+	 * Calls {@link GuiScreen#drawHoveringText} with the arguments provided
+	 */
+	public static void drawHoveringText(GuiScreen gui, List<String> list, int mouseX, int mouseY) {
+		if (RenderHelperQ.drawHoveringText == null) {
+			RenderHelperQ.drawHoveringText = ReflectionHelper.findMethod(GuiScreen.class, gui, new String[]{"func_146283_a", "func_146283_a"}, List.class, int.class, int.class);
+		}
+		try {
+			RenderHelperQ.drawHoveringText.invoke(gui, list, mouseX, mouseY);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -123,8 +123,7 @@ public class ZSSItems
 	/** Whether special drops from grass are enabled and if so, which ones */
 	private static boolean
 	enableGrassArrowDrop,
-	enableGrassBombDrop,
-	enableGrassEmeraldDrop;
+	enableGrassBombDrop;
 
 	/*================== LOOT IN VANILLA CHESTS =====================*/
 	/** Random dungeon loot enable/disable (for vanilla chests only) */
@@ -142,6 +141,8 @@ public class ZSSItems
 	private static boolean enableCraftingMudora;
 	/** Enable crafting throwing rocks from cobblestone and back */
 	private static boolean enableCraftingThrowingRock;
+	/** Number of rupees required to craft a single emerald (0 to disable) [0-64] */
+	private static int rupeesToEmeralds;
 
 
 	/** List of potential extra drops from tall grass when cut with a sword */
@@ -196,10 +197,12 @@ public class ZSSItems
 	magicJar,
 	magicJarBig,
 	magicContainer,
-	rocsFeather;
+	rocsFeather,
+	walletUpgrade;
 
 	//================ TREASURES TAB ================//
 	public static Item
+	rupee,
 	instrument,
 	bookMudora,
 	pendant,
@@ -318,7 +321,6 @@ public class ZSSItems
 		/*================== LOOT SETTINGS =====================*/
 		enableGrassArrowDrop = config.get("Loot", "Enable arrow drops from grass (must use sword)", true).getBoolean(true);
 		enableGrassBombDrop = config.get("Loot", "Enable bomb drops from grass (must use sword)", false).getBoolean(false);
-		enableGrassEmeraldDrop = config.get("Loot", "Enable emerald drops from grass (must use sword)", true).getBoolean(true);
 		enableBombLoot = config.get("Loot", "Enable bombs in vanilla chests", false).getBoolean(false);
 		enableBombBagLoot = config.get("Loot", "Enable bomb bags in vanilla chests", false).getBoolean(false);
 		enableHeartLoot = config.get("Loot", "Enable heart pieces in vanilla chests", false).getBoolean(false);
@@ -327,6 +329,7 @@ public class ZSSItems
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
 		enableCraftingMudora = config.get("Recipes", "Enable crafting recipe to make copies of the Book of Mudora", true).getBoolean(true);
 		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
+		rupeesToEmeralds = MathHelper.clamp_int(config.get("Recipes", "Number of rupees required to craft a single emerald (0 to disable) [0-64]", 0).getInt(), 0, 64);
 	}
 
 	/**
@@ -391,6 +394,9 @@ public class ZSSItems
 	private static void addGrassDrops() {
 		for (int i = 0; i < 10; ++i) {
 			grassDrops.add(new ItemStack(smallHeart));
+			if (i % 2 == 0) {
+				grassDrops.add(new ItemStack(rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()));
+			}
 			if (enableGrassArrowDrop && i % 3 == 2) {
 				grassDrops.add(new ItemStack(Items.arrow));
 			}
@@ -400,9 +406,6 @@ public class ZSSItems
 		}
 		if (enableGrassBombDrop) {
 			grassDrops.add(new ItemStack(bomb));
-		}
-		if (enableGrassEmeraldDrop) {
-			grassDrops.add(new ItemStack(Items.emerald));
 		}
 	}
 
@@ -708,6 +711,8 @@ public class ZSSItems
 		// NEW ITEMS
 		bookMudora = new Item().setUnlocalizedName("zss.book_mudora").setTextureName(ModInfo.ID + ":book_mudora").setMaxDamage(0).setCreativeTab(ZSSCreativeTabs.tabMisc);
 		medallion = new ItemMedallion().setUnlocalizedName("zss.medallion");
+		rupee = new ItemRupee();
+		walletUpgrade = new ItemWalletUpgrade();
 	}
 
 	/**
@@ -798,6 +803,27 @@ public class ZSSItems
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicZoraLegs, new ItemStack(Items.dye, 1, 2));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicGoronLegs, new ItemStack(Items.dye, 1, 4));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicZoraLegs), tunicHeroLegs, new ItemStack(Items.dye, 1, 4));
+		// RUPEE CONVERSIONS: Small -> Big
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.SILVER_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.SILVER_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.GOLD_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, 1, ItemRupee.Rupee.GOLD_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.SILVER_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.SILVER_RUPEE.ordinal()));
+		// RUPEE CONVERSIONS: Big -> Small
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, ItemRupee.Rupee.BLUE_RUPEE.value, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, ItemRupee.Rupee.YELLOW_RUPEE.value/ItemRupee.Rupee.BLUE_RUPEE.value, ItemRupee.Rupee.BLUE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, ItemRupee.Rupee.RED_RUPEE.value/ItemRupee.Rupee.YELLOW_RUPEE.value, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, ItemRupee.Rupee.PURPLE_RUPEE.value/ItemRupee.Rupee.YELLOW_RUPEE.value, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, ItemRupee.Rupee.SILVER_RUPEE.value/ItemRupee.Rupee.PURPLE_RUPEE.value, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.SILVER_RUPEE.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(rupee, ItemRupee.Rupee.GOLD_RUPEE.value/ItemRupee.Rupee.SILVER_RUPEE.value, ItemRupee.Rupee.SILVER_RUPEE.ordinal()), new ItemStack(rupee, 1, ItemRupee.Rupee.GOLD_RUPEE.ordinal()));
+		if (rupeesToEmeralds > 0) {
+			GameRegistry.addShapelessRecipe(new ItemStack(rupee, rupeesToEmeralds, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), new ItemStack(Items.emerald));
+			GameRegistry.addShapelessRecipe(new ItemStack(Items.emerald), new ItemStack(rupee, rupeesToEmeralds, ItemRupee.Rupee.GREEN_RUPEE.ordinal()));
+		}
 	}
 
 	/**

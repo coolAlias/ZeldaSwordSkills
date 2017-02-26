@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,58 +19,22 @@ package zeldaswordskills.network;
 
 import java.util.Collection;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
-import zeldaswordskills.network.bidirectional.AttackTimePacket;
-import zeldaswordskills.network.bidirectional.DeactivateSkillPacket;
-import zeldaswordskills.network.bidirectional.LearnSongPacket;
-import zeldaswordskills.network.bidirectional.PlayRecordPacket;
-import zeldaswordskills.network.bidirectional.PlaySoundPacket;
-import zeldaswordskills.network.client.AttackBlockedPacket;
-import zeldaswordskills.network.client.InLiquidPacket;
-import zeldaswordskills.network.client.MortalDrawPacket;
-import zeldaswordskills.network.client.OpenGossipStoneEditorPacket;
-import zeldaswordskills.network.client.OpenSongGuiPacket;
-import zeldaswordskills.network.client.PacketISpawnParticles;
-import zeldaswordskills.network.client.SetItemModePacket;
-import zeldaswordskills.network.client.SetNockedArrowPacket;
-import zeldaswordskills.network.client.SpawnNayruParticlesPacket;
-import zeldaswordskills.network.client.SyncConfigPacket;
-import zeldaswordskills.network.client.SyncCurrentMagicPacket;
-import zeldaswordskills.network.client.SyncEntityInfoPacket;
-import zeldaswordskills.network.client.SyncPlayerInfoPacket;
-import zeldaswordskills.network.client.SyncQuestPacket;
-import zeldaswordskills.network.client.SyncQuestsPacket;
-import zeldaswordskills.network.client.SyncSkillPacket;
-import zeldaswordskills.network.client.UnpressKeyPacket;
-import zeldaswordskills.network.client.UpdateBuffPacket;
-import zeldaswordskills.network.client.UpdateComboPacket;
-import zeldaswordskills.network.server.AddExhaustionPacket;
-import zeldaswordskills.network.server.BombTickPacket;
-import zeldaswordskills.network.server.BorrowMaskPacket;
-import zeldaswordskills.network.server.CycleItemModePacket;
-import zeldaswordskills.network.server.DashImpactPacket;
-import zeldaswordskills.network.server.EndComboPacket;
-import zeldaswordskills.network.server.FallDistancePacket;
-import zeldaswordskills.network.server.GetBombPacket;
-import zeldaswordskills.network.server.OpenGuiPacket;
-import zeldaswordskills.network.server.RefreshSpinPacket;
-import zeldaswordskills.network.server.RequestCurrentMagicPacket;
-import zeldaswordskills.network.server.SetGossipStoneMessagePacket;
-import zeldaswordskills.network.server.TargetIdPacket;
-import zeldaswordskills.network.server.ZeldaSongPacket;
-import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import zeldaswordskills.network.bidirectional.*;
+import zeldaswordskills.network.client.*;
+import zeldaswordskills.network.server.*;
+import zeldaswordskills.ref.ModInfo;
 
 /**
  * 
@@ -94,7 +58,6 @@ public class PacketDispatcher
 		registerMessage(LearnSongPacket.class);
 		registerMessage(PlayRecordPacket.class);
 		registerMessage(PlaySoundPacket.class);
-
 		// Packets handled on CLIENT
 		registerMessage(AttackBlockedPacket.class);
 		registerMessage(InLiquidPacket.class);
@@ -109,13 +72,14 @@ public class PacketDispatcher
 		registerMessage(SyncCurrentMagicPacket.class);
 		registerMessage(SyncEntityInfoPacket.class);
 		registerMessage(SyncPlayerInfoPacket.class);
+		registerMessage(SyncPlayerWalletPacket.class);
 		registerMessage(SyncQuestPacket.class);
 		registerMessage(SyncQuestsPacket.class);
+		registerMessage(SyncRupeeMerchantPacket.class);
 		registerMessage(SyncSkillPacket.class);
 		registerMessage(UnpressKeyPacket.class);
 		registerMessage(UpdateBuffPacket.class);
 		registerMessage(UpdateComboPacket.class);
-
 		// Packets handled on SERVER
 		registerMessage(AddExhaustionPacket.class);
 		registerMessage(BombTickPacket.class);
@@ -128,6 +92,9 @@ public class PacketDispatcher
 		registerMessage(OpenGuiPacket.class);
 		registerMessage(RefreshSpinPacket.class);
 		registerMessage(RequestCurrentMagicPacket.class);
+		registerMessage(RupeeMerchantIndexPacket.class);
+		registerMessage(RupeeMerchantTogglePacket.class);
+		registerMessage(RupeeMerchantTransactionPacket.class);
 		registerMessage(SetGossipStoneMessagePacket.class);
 		registerMessage(TargetIdPacket.class);
 		registerMessage(ZeldaSongPacket.class);

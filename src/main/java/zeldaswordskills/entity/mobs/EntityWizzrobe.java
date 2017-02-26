@@ -58,6 +58,7 @@ import zeldaswordskills.entity.ai.IMagicUser;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.projectile.EntityArrowSilver;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -449,6 +450,14 @@ public abstract class EntityWizzrobe extends EntityMob implements IEntityEvil, I
 	@Override
 	protected Item getDropItem() {
 		return Items.ender_pearl;
+	}
+
+	@Override
+	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
+		super.dropFewItems(recentlyHit, lootingLevel);
+		if (rand.nextInt(16) > (10 - lootingLevel)) {
+			entityDropItem(new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), 0.0F);
+		}
 	}
 
 	@Override

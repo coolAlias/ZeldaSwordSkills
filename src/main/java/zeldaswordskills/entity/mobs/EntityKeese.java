@@ -25,7 +25,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
@@ -42,6 +41,7 @@ import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -132,7 +132,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable
 	protected void dropRareDrop(int rarity) {
 		switch (rarity) {
 		case 1: this.entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.MONSTER_CLAW.ordinal()), 0.0F); break;
-		default: this.entityDropItem(new ItemStack(this.rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
+		default: this.entityDropItem(this.rand.nextInt(3) == 0 ? new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()) : new ItemStack(ZSSItems.smallHeart), 0.0F);
 		}
 	}
 
@@ -146,7 +146,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable
 		if (this.rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
 			return new ItemStack(ZSSItems.treasure, 1, Treasures.MONSTER_CLAW.ordinal());
 		}
-		return new ItemStack(this.rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart);
+		return (this.rand.nextInt(3) > 0 ? new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()) : new ItemStack(ZSSItems.smallHeart));
 	}
 
 	@Override

@@ -57,6 +57,7 @@ import zeldaswordskills.entity.ai.EntityAIPowerAttack;
 import zeldaswordskills.entity.ai.IPowerAttacker;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntityArrowLight;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -629,6 +630,16 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		case 0:	entityDropItem(new ItemStack(Items.flint), 0.0F); break;
 		case 1: entityDropItem(new ItemStack(Items.coal), 0.0F); break;
 		default: entityDropItem(new ItemStack(Items.iron_ingot), 0.0F); break;
+		}
+		this.dropRupees(recentlyHit, lootingLevel);
+	}
+
+	/**
+	 * Called from dropFewItems to possibly additionally drop one or more rupees
+	 */
+	protected void dropRupees(boolean recentlyHit, int lootingLevel) {
+		if (this.rand.nextInt(16) > (10 - lootingLevel)) {
+			this.entityDropItem(new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.RED_RUPEE.ordinal()), 0.0F);
 		}
 	}
 

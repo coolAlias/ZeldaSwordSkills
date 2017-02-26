@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import java.util.List;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -32,6 +31,8 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.EntityFairy;
+import zeldaswordskills.item.ItemRupee;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.WorldUtils;
 
@@ -58,7 +59,7 @@ public class FairySpawner
 	/** Player who initiated the next scheduled item update */
 	protected String playerName = "";
 
-	/** Number of rupees (emeralds) donated to the fairy */
+	/** Number of rupees donated to the fairy */
 	protected int rupees = 0;
 
 	public FairySpawner(TileEntityDungeonCore core) {
@@ -113,10 +114,12 @@ public class FairySpawner
 	 */
 	private void onBlockBroken(World world, int x, int y, int z) {
 		while (rupees > 0) {
-			int k = (rupees > 64 ? 64 : rupees);
-			rupees -= k;
+			ItemRupee.Rupee rupee = (rupees > 99 ? ItemRupee.Rupee.SILVER_RUPEE : ItemRupee.Rupee.GREEN_RUPEE);
+			int j = rupees * rupee.value;
+			int k = (rupees / j > (64 * j) ? 64 : rupees / j);
+			rupees -= (j * k);
 			world.playSoundEffect(x + 0.5D, y + 0.5D, z + 0.5D, "random.orb", 1.0F, 1.0F);
-			WorldUtils.spawnItemWithRandom(world, new ItemStack(Items.emerald, k), x, y, z);
+			WorldUtils.spawnItemWithRandom(world, new ItemStack(ZSSItems.rupee, k, rupee.ordinal()), x, y, z);
 		}
 	}
 
@@ -170,10 +173,10 @@ public class FairySpawner
 						continue;
 					}
 					ItemStack stack = item.getEntityItem();
-					if (stack.getItem() == Items.emerald) {
+					if (stack.getItem() == ZSSItems.rupee) {
 						player.triggerAchievement(ZSSAchievements.fairyEmerald);
 						world.playSoundEffect(x + 0.5D, y + 1, z + 0.5D, "random.orb", 1.0F, 1.0F);
-						rupees += stack.stackSize;
+						rupees += (ItemRupee.Rupee.byDamage(stack.getItemDamage()).value * stack.stackSize);
 						item.setDead();
 					} else if (stack.getItem() instanceof IFairyUpgrade && ((IFairyUpgrade) stack.getItem()).hasFairyUpgrade(stack)) {
 						((IFairyUpgrade) stack.getItem()).handleFairyUpgrade(item, player, core);

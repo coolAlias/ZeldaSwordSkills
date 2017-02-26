@@ -141,6 +141,18 @@ public class Config
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
 	public static boolean canTargetPlayers;
 	public static boolean toggleTargetPlayers() { canTargetPlayers = !canTargetPlayers; return canTargetPlayers; }
+	/** [Wallet HUD] Enable Wallet HUD display (if disabled, Wallet must be opened to see how many Rupees you have) */
+	public static boolean isWalletHudEnabled;
+	/** Display Wallet HUD even when player has no rupees */
+	public static boolean isWalletHudAlwaysOn;
+	/** [Wallet HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN walletHudHAlign;
+	/** [Wallet HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN walletHudVAlign;
+	/** [Wallet HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int walletHudOffsetX;
+	/** [Wallet HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int walletHudOffsetY;
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
 	private static boolean enableOffhandMaster;
@@ -200,7 +212,7 @@ public class Config
 	private static boolean disableAllUnenchantables;
 	/** [Hammer] True to allow the Megaton Hammer to break Quake Stone (also requires player to have Golden Gauntlets in inventory) */
 	private static boolean enableMegaSmashQuake;
-	/** [Hero's Bow] Cost (in emeralds) to upgrade, per level */
+	/** [Hero's Bow] Cost (in rupees) to upgrade, per level */
 	private static int heroBowUpgradeCost;
 	/** [Hero's Bow] Whether the fire arrow can ignite affected blocks */
 	private static boolean enableFireArrowIgnite;
@@ -218,7 +230,7 @@ public class Config
 	private static boolean enableHookshotBreakBlocks;
 	/** [Magic Medallions] True if Ether and Quake medallions can affect players */
 	private static boolean medallionsAffectPlayers;
-	/** [Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280] */
+	/** [Magic Rods] Cost (in rupees) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280] */
 	private static int rodUpgradeCost;
 	/** [Magic Rods] Enable fire rod to set blocks on fire */
 	private static boolean rodFireGriefing;
@@ -228,9 +240,9 @@ public class Config
 	private static boolean allMasterSwordsProvidePower;
 	/** [Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500] */
 	private static int numSkelKeyUses;
-	/** [Slingshot] Cost (in emeralds) for first upgrade */
+	/** [Slingshot] Cost (in rupees) for first upgrade */
 	private static int slingshotUpgradeOne;
-	/** [Slingshot] Cost (in emeralds) for second upgrade */
+	/** [Slingshot] Cost (in rupees) for second upgrade */
 	private static int slingshotUpgradeTwo;
 	/** [SYNC] [Whip] Range, in blocks, of the standard whip [4-12] */
 	private static int whipRange;
@@ -249,6 +261,8 @@ public class Config
 	public static boolean enableTunic;
 	/** Grants the Kokiri sword (a named wooden sword) */
 	public static boolean enableSword;
+	/** Players start with the Child's Wallet */
+	public static boolean enableStartingWallet;
 	/** Start the game with Navi in a bottle (you can always acquire her later if false) */
 	public static boolean enableNavi;
 	/*================== SKILLS =====================*/
@@ -396,6 +410,8 @@ public class Config
 	//--- DROPS ---//
 	/** Creeper bomb drop chance */
 	private static float creeperDrop;
+	/** Chance (as a percent) for random mobs to drop a rupee [0-100] */
+	private static float rupeeDropChance;
 	/** Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common] */
 	private static int mobConsumableFrequency;
 	/** [Skill Orbs] Enable skill orbs to drop as loot from mobs */
@@ -471,7 +487,7 @@ public class Config
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
 		disableAllUnenchantables = config.get("Item", "[Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", false).getBoolean(false);
 		enableMegaSmashQuake = config.get("Item", "[Hammer] True to allow the Megaton Hammer to break Quake Stone (also requires player to have Golden Gauntlets in inventory)", true).getBoolean(true);
-		heroBowUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt(), 128, 640);
+		heroBowUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Hero's Bow] Cost (in rupees) to upgrade, per level [128-640]", 192).getInt(), 128, 640);
 		enableFireArrowIgnite = config.get("Item", "[Hero's Bow] Whether the fire arrow can ignite affected blocks", true).getBoolean(true);
 		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", false).getBoolean(false);
 		enableLightArrowNoClip = config.get("Item", "[Hero's Bow] Whether the light arrow can penetrate blocks", true).getBoolean(true);
@@ -480,13 +496,13 @@ public class Config
 		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
 		medallionsAffectPlayers = config.get("Item", "[Magic Medallions] True if Ether and Quake medallions can affect players", true).getBoolean(true);
-		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
+		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in rupees) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
 		rodFireGriefing = config.get("Item", "[Magic Rods] Enable fire rod to set blocks on fire", true).getBoolean(true);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
 		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
 		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 50).getInt(), 0, 500);
-		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64-320]", 128).getInt(), 64, 320);
-		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128-640]", 320).getInt(), 128, 640);
+		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in rupees) for first upgrade [64-320]", 128).getInt(), 64, 320);
+		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in rupees) for second upgrade [128-640]", 320).getInt(), 128, 640);
 		whipRange = MathHelper.clamp_int(config.get("Item", "[Whip] Range, in blocks, of the standard whip [4-12]", 6).getInt(), 4, 12);
 		/*================== STARTING GEAR =====================*/
 		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", true).getBoolean(true);
@@ -496,6 +512,7 @@ public class Config
 		enableFullSet = config.get("Bonus Gear", "Grants a full set of Kokiri clothing: hat, tunic, trousers, boots", true).getBoolean(true);
 		enableTunic = config.get("Bonus Gear", "Grants only a Kokiri Tunic (if full set is disabled)", true).getBoolean(true);
 		enableSword = config.get("Bonus Gear", "Grants a Kokiri sword", true).getBoolean(true);
+		enableStartingWallet = config.get("Bonus Gear", "Players start with the Child's Wallet", true).getBoolean(true);
 		enableNavi = config.get("Bonus Gear", "Start the game with Navi in a bottle (you can always acquire her later if false)", false).getBoolean(false);
 		/*================== SKILLS =====================*/
 		maxBonusHearts = MathHelper.clamp_int(config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt(), 0, BonusHeart.MAX_BONUS_HEARTS);
@@ -567,7 +584,7 @@ public class Config
 		}
 		/*================== TRADES =====================*/
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
-		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [32-64]", 64).getInt(), 32, 64);
+		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [1-9999]", 100).getInt(), 1, 99999);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
 		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-100]", 15).getInt(), 1, 100);
@@ -638,12 +655,19 @@ public class Config
 		targetMobs = clientConfig.get("Targeting", "Prioritize mobs over other entity types when targeting", true).getBoolean(true);
 		enableAutoTarget = clientConfig.get("Targeting", "Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
 		canTargetPlayers = clientConfig.get("Targeting", "Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
+		isWalletHudEnabled = clientConfig.get("Wallet HUD", "Enable Wallet HUD display (if disabled, Wallet must be opened to see how many Rupees you have)", true).getBoolean(true);
+		isWalletHudAlwaysOn = clientConfig.get("Wallet HUD", "Display Wallet HUD even when player has no rupees", false).getBoolean(false);
+		walletHudHAlign = HALIGN.fromString(clientConfig.get("Wallet HUD", "[Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
+		walletHudVAlign = VALIGN.fromString(clientConfig.get("Wallet HUD", "[Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
+		walletHudOffsetX = clientConfig.get("Wallet HUD", "[Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
+		walletHudOffsetY = clientConfig.get("Wallet HUD", "[Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
 		clientConfig.save();
 		/*================== MOBS =====================*/
 		mobConfig = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH + "zss_mobs.cfg"));
 		mobConfig.load();
 		//--- DROPS ---//
 		creeperDrop = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt(), 0, 100);
+		rupeeDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for random mobs to drop a rupee [0-100]", 20).getInt(), 0, 100);
 		mobConsumableFrequency = MathHelper.clamp_int(mobConfig.get("Drops", "Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common]", 5).getInt(), 0, 10);
 		enableOrbDrops = mobConfig.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
 		randomDropChance = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
@@ -864,6 +888,7 @@ public class Config
 	}
 	/*================== MOB DROPS =====================*/
 	public static float getCreeperDropChance() { return creeperDrop; }
+	public static float getRupeeDropChance() { return rupeeDropChance; }
 	public static int getMobConsumableFrequency() { return mobConsumableFrequency; }
 	public static boolean areOrbDropsEnabled() { return enableOrbDrops; }
 	public static float getChanceForRandomDrop() { return randomDropChance; }

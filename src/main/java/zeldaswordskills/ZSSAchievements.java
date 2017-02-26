@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import net.minecraftforge.common.AchievementPage;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.item.ItemInstrument.Instrument;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillBase;
@@ -111,7 +112,7 @@ public class ZSSAchievements
 
 		// BOMB->FAIRY TREE
 		fairyCatcher = new Achievement("zss.fairy.catcher", "fairy.catcher", dx + 2, dy, ZSSItems.fairyBottle, bombsAway).registerStat();
-		fairyEmerald = new Achievement("zss.fairy.emerald", "fairy.emerald", dx + 2, dy - 2, Items.emerald, fairyCatcher).registerStat();
+		fairyEmerald = new Achievement("zss.fairy.emerald", "fairy.emerald", dx + 2, dy - 2, new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.SILVER_RUPEE.ordinal()), fairyCatcher).registerStat();
 		fairyBow = new Achievement("zss.fairy.bow", "fairy.bow", dx + 2, dy - 4, ZSSItems.heroBow, fairyEmerald).registerStat();
 		fairyBowMax = new Achievement("zss.fairy.bow_max", "fairy.bow_max", dx + 2, dy - 6, ZSSItems.arrowLight, fairyBow).setSpecial().registerStat();
 		fairyEnchantment = new Achievement("zss.fairy.enchantment", "fairy.enchantment", dx + 4, dy - 2, Items.melon_seeds, fairyEmerald).registerStat();

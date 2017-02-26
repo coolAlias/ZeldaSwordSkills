@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.InventoryMerchant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -138,6 +139,10 @@ public abstract class EntityNpcMerchantBase extends EntityNpcBase implements ICu
 		}
 	}
 
+	/**
+	 * Called from {@link InventoryMerchant#resetRecipeAndSlots()} each time the output stack changes
+	 * @param stack the current trade result, if any
+	 */
 	@Override
 	public void func_110297_a_(ItemStack stack) {
 		if (!worldObj.isRemote && livingSoundTime > -getTalkInterval() + 20) {

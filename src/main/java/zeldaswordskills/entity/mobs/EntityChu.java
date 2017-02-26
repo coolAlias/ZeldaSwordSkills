@@ -51,6 +51,7 @@ import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityBombEater;
 import zeldaswordskills.api.entity.IEntityBombIngestible;
 import zeldaswordskills.api.entity.IEntityLootable;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -200,7 +201,7 @@ public abstract class EntityChu extends EntityLiving implements IMob, IEntityAdd
 	protected void dropRareDrop(int rarity) {
 		switch(rarity) {
 		case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal()), 0.0F); break;
-		default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
+		default: entityDropItem(rand.nextInt(3) == 0 ? new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()) : new ItemStack(ZSSItems.smallHeart), 0.0F);
 		}
 	}
 

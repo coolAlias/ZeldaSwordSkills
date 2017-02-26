@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,11 @@
 
 package zeldaswordskills.handler;
 
+import cpw.mods.fml.common.eventhandler.Event.Result;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityGolem;
@@ -36,6 +39,9 @@ import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import zeldaswordskills.api.entity.NpcHelper;
+import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
+import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
+import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -47,14 +53,13 @@ import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
+import zeldaswordskills.item.ItemCustomEgg;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 
@@ -141,7 +146,7 @@ public class ZSSEntityEvents
 		if (!event.isCanceled() && stack != null && stack.getItem() == Items.glass_bottle && event.target.getClass() == EntityCow.class) {
 			event.setCanceled(ZSSPlayerSongs.get(event.entityPlayer).milkLonLonCow(event.entityPlayer, (EntityCow) event.target));
 		}
-		// Finally, check for interactions with the Cursed Man
+		// Check for interactions with the Cursed Man
 		if (!event.isCanceled() && event.target.getClass() == EntityVillager.class && ("Cursed Man").equals(((EntityVillager) event.target).getCustomNameTag())) {
 			EntityVillager villager = (EntityVillager) event.target;
 			if (stack == null || (stack.getItem() != ZSSItems.skulltulaToken && stack.getItem() != Items.name_tag)) {
@@ -157,6 +162,48 @@ public class ZSSEntityEvents
 				}
 				event.setCanceled(true);
 			}
+		}
+		// Finally, check whether the rupee trading interface needs to be opened
+		IRupeeMerchant merchant = RupeeMerchantHelper.getRupeeMerchant(event.target);
+		if (!event.isCanceled() && merchant != null) {
+			Result result = merchant.onInteract(event.entityPlayer);
+			if (result != Result.DEFAULT) {
+				// nothing further to process - either denied or allowed
+			} else if (!event.target.isEntityAlive()) {
+				// don't open GUI if merchant is dead
+			} else if (stack != null && (stack.getItem() == Items.spawn_egg || stack.getItem() instanceof ItemCustomEgg)) {
+				// don't open GUI when clicking on entity with spawn egg
+			} else if (merchant.getRupeeCustomer() != null) {
+				if (!event.entityPlayer.worldObj.isRemote) {
+					PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.merchant.busy");
+				}
+			} else if (event.target instanceof IMerchant) {
+				// IMerchant trading interface should open unless merchant has a customer or player is sneaking
+				if (!event.entityPlayer.isSneaking()) {
+					result = Result.DENY;
+				} else if (((IMerchant) event.target).getCustomer() != null) {
+					if (!event.entityPlayer.worldObj.isRemote) {
+						PlayerUtils.sendTranslatedChat(event.entityPlayer, "chat.zss.npc.merchant.busy");
+					}
+					result = Result.DENY;
+				} else {
+					result = Result.ALLOW;
+				}
+			} else {
+				result = Result.ALLOW;
+			}
+			if (result == Result.ALLOW && !event.entityPlayer.worldObj.isRemote) {
+				// TODO any way to allow player to control which interface (buying or selling) opens?
+				RupeeTradeList trades = RupeeMerchantHelper.getRupeeTrades(merchant, true, event.entityPlayer);
+				boolean getItemsToSell = trades != null && !trades.isEmpty();
+				if (!RupeeMerchantHelper.openRupeeMerchantGui(merchant, event.entityPlayer, getItemsToSell)) {
+					// Otherwise merchant becomes stuck thinking they already have a customer, and
+					// RupeeMerchantHelper#openRupeeMerchantGui can't do it since it is used when toggling trade lists
+					merchant.setRupeeCustomer(null);
+					result = Result.DENY; // gui was not opened
+				}
+			}
+			event.setCanceled(merchant.wasInteractionHandled(result));
 		}
 	}
 

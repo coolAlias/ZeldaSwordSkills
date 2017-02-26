@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,15 +17,24 @@
 
 package zeldaswordskills.client;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mods.battlegear2.client.gui.BattleEquipGUI;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiContainerCreative;
+import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -33,23 +42,30 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.FOVUpdateEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
+import zeldaswordskills.client.gui.GuiButtonWallet;
 import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
 import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.client.gui.GuiMagicMeter;
 import zeldaswordskills.client.gui.GuiMagicMeterText;
+import zeldaswordskills.client.gui.GuiWalletOverlay;
+import zeldaswordskills.client.gui.IGuiButtonPostDraw;
 import zeldaswordskills.client.gui.IGuiOverlay;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerWallet;
 import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
@@ -93,6 +109,7 @@ public class ZSSClientEvents
 		GuiMagicMeter meter = new GuiMagicMeter(mc);
 		overlays.add(meter);
 		overlays.add(new GuiMagicMeterText(mc, meter));
+		overlays.add(new GuiWalletOverlay(mc));
 		overlays.add(new GuiBuffBar(mc));
 		overlays.add(new GuiItemModeOverlay(mc));
 		overlays.add(new ComboOverlay(mc));
@@ -289,5 +306,75 @@ public class ZSSClientEvents
 			GL11.glPopMatrix();
 			needsPop = false;
 		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOW)
+	public void postInitGui(GuiScreenEvent.InitGuiEvent.Post event) {
+		if (event.gui instanceof InventoryEffectRenderer && !(event.gui instanceof GuiContainerCreative) && ZSSPlayerWallet.get(this.mc.thePlayer).getCapacity() > 0) {
+			int id = event.buttonList.size() + 2; // Due to GuiInventory and GuiContainerCreative button performed actions, without them having buttons...
+			// Place button at bottom right corner of player portrait area
+			int guiLeft = ZSSClientEvents.getGuiLeft((GuiContainer)event.gui) + 61;
+			int guiTop = ZSSClientEvents.getGuiTop((GuiContainer)event.gui) + 61;
+			// Adjust for BG2 since BG2 screen doesn't have the armor slots on the left
+			if (ZSSMain.isBG2Enabled && event.gui instanceof BattleEquipGUI) {
+				guiLeft -= 18;
+			}
+			GuiButtonWallet button = new GuiButtonWallet(id, guiLeft, guiTop);
+			event.buttonList.add(button);
+		}
+	}
+
+	@SubscribeEvent
+	public void postDrawScreen(DrawScreenEvent.Post event) {
+		List<GuiButton> buttons = getButtonList(event.gui);
+		if (buttons != null && !buttons.isEmpty()) {
+			for (GuiButton button : buttons) {
+				if (button instanceof IGuiButtonPostDraw) {
+					((IGuiButtonPostDraw) button).postDraw(event.gui, event.mouseX, event.mouseY);
+				}
+			}
+		}
+	}
+
+	/** Accessible reference to {@code GuiScreen#buttonList */
+	private static Field buttonList;
+	public static List<GuiButton> getButtonList(GuiScreen gui) {
+		if (buttonList == null) {
+			buttonList = ReflectionHelper.findField(GuiScreen.class, "field_146292_n", "buttonList");
+		}
+		try {
+			return (List<GuiButton>) buttonList.get(gui);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/** Accessible reference to {@code GuiScreen#guiLeft */
+	private static Field guiLeft;
+	public static int getGuiLeft(GuiContainer gui) {
+		if (guiLeft == null) {
+			guiLeft = ReflectionHelper.findField(GuiContainer.class, "field_147003_i", "guiLeft");
+		}
+		try {
+			return (Integer) guiLeft.get(gui);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	/** Accessible reference to {@code GuiScreen#guiTop */
+	private static Field guiTop;
+	public static int getGuiTop(GuiContainer gui) {
+		if (guiTop == null) {
+			guiTop = ReflectionHelper.findField(GuiContainer.class, "field_147009_r", "guiTop");
+		}
+		try {
+			return (Integer) guiTop.get(gui);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 }

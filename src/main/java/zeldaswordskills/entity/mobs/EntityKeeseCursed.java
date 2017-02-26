@@ -19,7 +19,6 @@ package zeldaswordskills.entity.mobs;
 
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -27,6 +26,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 
@@ -73,7 +73,7 @@ public class EntityKeeseCursed extends EntityKeese
 	protected void dropRareDrop(int rarity) {
 		switch (rarity) {
 		case 1: this.entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal()), 0.0F); break;
-		default: this.entityDropItem(new ItemStack(this.rand.nextInt(8) == 0 ? ZSSItems.heartPiece : ZSSItems.smallHeart), 0.0F);
+		default: this.entityDropItem(this.rand.nextInt(8) == 0 ? new ItemStack(ZSSItems.heartPiece) : new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.YELLOW_RUPEE.ordinal()), 0.0F);
 		}
 	}
 
@@ -82,6 +82,6 @@ public class EntityKeeseCursed extends EntityKeese
 		if (this.rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
 			return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
 		}
-		return new ItemStack(rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart);
+		return (this.rand.nextInt(3) > 0 ? new ItemStack(ZSSItems.smallHeart) : new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()));
 	}
 }

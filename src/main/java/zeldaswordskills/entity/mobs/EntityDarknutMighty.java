@@ -26,6 +26,8 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ItemRupee;
+import zeldaswordskills.item.ZSSItems;
 
 public class EntityDarknutMighty extends EntityDarknut
 {
@@ -90,6 +92,15 @@ public class EntityDarknutMighty extends EntityDarknut
 	protected void onArmorDestroyed() {
 		this.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, new ItemStack(Items.chainmail_chestplate));
 		this.applyArmorAttributeModifiers(false);
+	}
+
+	@Override
+	protected void dropRupees(boolean recentlyHit, int lootingLevel) {
+		if (this.rand.nextInt(16) > (10 - lootingLevel)) {
+			this.entityDropItem(new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.PURPLE_RUPEE.ordinal()), 0.0F);
+		} else { // Chance of dropping a RED rupee instead
+			super.dropRupees(recentlyHit, lootingLevel);
+		}
 	}
 
 	@Override

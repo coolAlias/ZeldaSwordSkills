@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,6 @@ import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
@@ -83,6 +82,7 @@ import zeldaswordskills.entity.mobs.EntityWizzrobeIce;
 import zeldaswordskills.entity.mobs.EntityWizzrobeThunder;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemHeldBlock;
+import zeldaswordskills.item.ItemRupee.Rupee;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.UnpressKeyPacket;
@@ -180,6 +180,20 @@ public class ZSSItemEvents
 					ItemStack stack = new ItemStack(mob.worldObj.rand.nextInt(4) == 0 ? ZSSItems.magicJar : ZSSItems.smallHeart);
 					event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, stack));
 				}
+				if (mob.worldObj.rand.nextFloat() < Config.getRupeeDropChance()) {
+					boolean dropRupee = true; // only drop rupees if drops do not already include any
+					for (EntityItem item : event.drops) {
+						if (item.getEntityItem().getItem() == ZSSItems.rupee) {
+							dropRupee = false;
+							break;
+						}
+					}
+					if (dropRupee) {
+						Rupee rupee = (hp < 40 ? Rupee.GREEN_RUPEE : (hp < 80 ? Rupee.BLUE_RUPEE : (hp < 150 ? Rupee.YELLOW_RUPEE : (hp < 300 ? Rupee.RED_RUPEE : Rupee.PURPLE_RUPEE))));
+						ItemStack stack = new ItemStack(ZSSItems.rupee, 1, rupee.ordinal());
+						event.drops.add(new EntityItem(mob.worldObj, mob.posX, mob.posY, mob.posZ, stack));
+					}
+				}
 			}
 		}
 	}
@@ -220,7 +234,7 @@ public class ZSSItemEvents
 			if (stack.getItem() instanceof IHandleToss) {
 				((IHandleToss) stack.getItem()).onItemTossed(item, event.player);
 			}
-			if (!item.isDead && (stack.getItem() == Items.emerald || (stack.getItem() instanceof IFairyUpgrade)
+			if (!item.isDead && (stack.getItem() == ZSSItems.rupee || (stack.getItem() instanceof IFairyUpgrade)
 					&& ((IFairyUpgrade) stack.getItem()).hasFairyUpgrade(stack))) {
 				TileEntityDungeonCore core = WorldUtils.getNearbyFairySpawner(item.worldObj, item.posX, item.posY, item.posZ, true);
 				if (core != null) {

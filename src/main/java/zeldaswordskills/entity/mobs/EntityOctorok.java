@@ -27,7 +27,6 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -38,6 +37,7 @@ import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
+import zeldaswordskills.item.ItemRupee;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -381,7 +381,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	protected void dropRareDrop(int rarity) {
 		switch (rarity) {
 		case 1: this.entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal()), 0.0F); break;
-		default: this.entityDropItem(rand.nextInt(3) == 0 ? new ItemStack(Items.emerald) : new ItemStack(ZSSItems.smallHeart), 0.0F);
+		default: this.entityDropItem(rand.nextInt(3) == 0 ? new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.BLUE_RUPEE.ordinal()) : new ItemStack(ZSSItems.smallHeart), 0.0F);
 		}
 	}
 

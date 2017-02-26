@@ -63,6 +63,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	private final ZSSPlayerSongs playerSongs;
 
+	private final ZSSPlayerWallet playerWallet;
+
 	/** Current magic points */
 	private float mp, lastMp;
 
@@ -120,10 +122,14 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	/** Used by certain skills for controlling the player's main arm rendering */
 	public float armSwing = 0.0F;
 
+	/** Used by ContainerRupeeMerchant when switching between shop modes (i.e. buying <-> selling) */
+	private ItemStack rupeeContainerStack;
+
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;
 		playerSkills = new ZSSPlayerSkills(player);
 		playerSongs = new ZSSPlayerSongs(player);
+		playerWallet = new ZSSPlayerWallet(player);
 		player.getAttributeMap().registerAttribute(maxMagic).setBaseValue(50.0D);
 		mp = getMaxMagic(); // don't use setter here: don't want to send packet
 		initStats();
@@ -247,6 +253,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		return playerSongs;
 	}
 
+	public ZSSPlayerWallet getPlayerWallet() {
+		return playerWallet;
+	}
+
 	/** Whether the player is able to block at this time (block timer is zero) */
 	public boolean canBlock() {
 		return blockTime == 0;
@@ -324,6 +334,20 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		if (player instanceof EntityPlayerMP) {
 			PacketDispatcher.sendTo(new SetNockedArrowPacket(stack), (EntityPlayerMP) player);
 		}
+	}
+
+	/**
+	 * Returns the {@link #rupeeContainerStack}
+	 */
+	public ItemStack getRupeeContainerStack() {
+		return this.rupeeContainerStack;
+	}
+
+	/**
+	 * Sets the {@link #rupeeContainerStack}
+	 */
+	public void setRupeeContainerStack(ItemStack stack) {
+		this.rupeeContainerStack = stack;
 	}
 
 	/**
@@ -465,6 +489,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void saveNBTData(NBTTagCompound compound) {
 		playerSkills.saveNBTData(compound);
 		playerSongs.saveNBTData(compound);
+		playerWallet.saveNBTData(compound);
 		compound.setFloat("zssCurrentMagic", mp);
 		compound.setIntArray("zssStats", ArrayUtils.toPrimitive(playerStats.values().toArray(new Integer[playerStats.size()])));
 		compound.setByte("ZSSGearReceived", receivedGear);
@@ -487,6 +512,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void loadNBTData(NBTTagCompound compound) {
 		playerSkills.loadNBTData(compound);
 		playerSongs.loadNBTData(compound);
+		playerWallet.loadNBTData(compound);
 		mp = compound.getFloat("zssCurrentMagic");
 		int[] stats = compound.getIntArray("zssStats");
 		for (int i = 0; i < stats.length; ++i) {
