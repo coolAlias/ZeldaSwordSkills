@@ -192,6 +192,7 @@ public class DungeonLootLists
 			getLoot(ZSSItems.keySmall, 1, 1, Config.getSmallKeyWeight()),
 			getLoot(ZSSItems.potionRed, 1, 1, 3),
 			getLoot(ZSSItems.potionGreen, 1, 1, 1),
+			getLoot(ZSSItems.potionPurple, 1, 1, 1),
 			getLoot(ZSSItems.shieldDeku, 1, 1, 1),
 			getLoot(ZSSItems.swordBroken, Item.getIdFromItem(ZSSItems.swordKokiri), 1, 1, 1)
 		});
