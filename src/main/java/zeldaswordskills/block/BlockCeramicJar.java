@@ -98,8 +98,10 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IQ
 
 	@Override
 	public void handleQuakeEffect(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
-		WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.destroyBlock(pos, false);
+		if (!world.isRemote) {
+			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.destroyBlock(pos, false);
+		}
 	}
 
 	@Override
@@ -109,8 +111,10 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IQ
 
 	@Override
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face) {
-		WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.destroyBlock(pos, false);
+		if (!world.isRemote) {
+			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.destroyBlock(pos, false);
+		}
 		return Result.ALLOW;
 	}
 
@@ -239,8 +243,10 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IQ
 
 	@Override
 	public void onBlockDestroyedByExplosion(World world, BlockPos pos, Explosion explosion) {
-		WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.destroyBlock(pos, false);
+		if (!world.isRemote) {
+			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.destroyBlock(pos, false);
+		}
 	}
 
 	@Override
@@ -250,7 +256,7 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IQ
 
 	@Override
 	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity) {
-		if (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot) {
+		if (!world.isRemote && (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot)) {
 			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.destroyBlock(pos, false);
 		}
@@ -258,7 +264,7 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IQ
 
 	@Override
 	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighbor) {
-		if (!world.isSideSolid(pos.down(), EnumFacing.UP)) {
+		if (!world.isRemote && !world.isSideSolid(pos.down(), EnumFacing.UP)) {
 			WorldUtils.playSoundAt(world, pos.getX(), pos.getY(), pos.getZ(), Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.destroyBlock(pos, false);
 		}
