@@ -19,6 +19,7 @@ package zeldaswordskills.block;
 
 import java.util.Random;
 
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -49,12 +50,11 @@ import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.SideHit;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import zeldaswordskills.world.gen.DungeonLootLists;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class BlockCeramicJar extends BlockContainer implements IExplodable, IHookable, IQuakeBlock, ISmashable, IWhipBlock
 {
@@ -87,8 +87,10 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 
 	@Override
 	public void handleQuakeEffect(World world, int x, int y, int z, EntityPlayer player) {
-		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.func_147480_a(x, y, z, false);
+		if (!world.isRemote) {
+			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.func_147480_a(x, y, z, false);
+		}
 	}
 
 	@Override
@@ -98,8 +100,10 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 
 	@Override
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, int x, int y, int z, int side) {
-		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.func_147480_a(x, y, z, false);
+		if (!world.isRemote) {
+			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.func_147480_a(x, y, z, false);
+		}
 		return Result.ALLOW;
 	}
 
@@ -244,13 +248,15 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 
 	@Override
 	public void onBlockDestroyedByExplosion(World world, int x, int y, int z, Explosion explosion) {
-		WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
-		world.func_147480_a(x, y, z, false);
+		if (!world.isRemote) {
+			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
+			world.func_147480_a(x, y, z, false);
+		}
 	}
 
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
-		if (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot) {
+		if (!world.isRemote && (entity instanceof EntityArrow || entity instanceof EntityBoomerang || entity instanceof EntityHookShot)) {
 			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 			// func_147480_a is destroyBlock
 			world.func_147480_a(x, y, z, false);
@@ -259,7 +265,7 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 
 	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block neighbor) {
-		if (!canBlockStay(world, x, y, z)) {
+		if (!world.isRemote && !canBlockStay(world, x, y, z)) {
 			WorldUtils.playSoundAt(world, x, y, z, Sounds.BREAK_JAR, 0.4F, 0.5F);
 			world.func_147480_a(x, y, z, false);
 		}
