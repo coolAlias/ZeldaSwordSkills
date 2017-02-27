@@ -49,7 +49,6 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.util.EnumHelper;
-import net.minecraftforge.oredict.RecipeSorter;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.block.BlockWeight;
 import zeldaswordskills.api.block.IHookable;
@@ -819,7 +818,7 @@ public class ZSSItems
 			GameRegistry.addRecipe(new ItemStack(Blocks.cobblestone), "rrr", "rrr", "rrr", 'r', throwingRock);
 		}
 		GameRegistry.addRecipe(new RecipeCombineBombBag());
-		RecipeSorter.register(ModInfo.ID + ":combinebombbag", RecipeCombineBombBag.class, RecipeSorter.Category.SHAPELESS, "");
+		//RecipeSorter.register(ModInfo.ID + ":combinebombbag", RecipeCombineBombBag.class, RecipeSorter.Category.SHAPELESS, "");
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.pedestal,3,0x8), "qqq","qpq","qqq", 'q', Blocks.quartz_block, 'p', new ItemStack(ZSSBlocks.pedestal,1,0x8));
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.beamWooden), "b","b","b", 'b', Blocks.planks);
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.gossipStone), " s ","sos"," s ", 's', Blocks.stone, 'o', new ItemStack(ZSSItems.instrument, 1, Instrument.OCARINA_FAIRY.ordinal()));
