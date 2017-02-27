@@ -857,10 +857,10 @@ chat.zss.treasure.zeldas_letter.success.3=Yippee!!! I can finally start selling 
 chat.zss.treasure.zeldas_letter.success.4=I wonder if anyone would be able to help me sell them...
 chat.zss.use.fail.0=That's not going to work... perhaps you should ask someone
 
-combo.combo=Combo
-combo.finished=Finished
-combo.damage=Dmg
-combo.size=Hits
+combo.combo=Combo: %s
+combo.finished=Finished! %s
+combo.damage=Dmg: %s
+combo.size=Hits: %1$d/%2$d
 combo.label.1=One hit wonder
 combo.label.2=Novice
 combo.label.3=Decent
@@ -1019,6 +1019,7 @@ entity.zeldaswordskills.wizzrobe.name.3=Gale Wizzrobe
 entity.zeldaswordskills.wizzrobe_grand.name=Grand Wizzrobe
 
 gui.gossip_stone.name=Gossip Stone Secret Message
+gui.zss.magic_meter.text=MP %1$d/%2$d
 gui.mask_trader.name=Welcome to the Happy Mask Shop!
 
 itemGroup.zss.blocks=Zelda Blocks

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package zeldaswordskills.client.gui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.MathHelper;
@@ -33,14 +32,18 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
-public class GuiMagicMeter extends Gui implements IGuiOverlay
+public class GuiMagicMeter extends AbstractGuiOverlay
 {
-	private static final ResourceLocation textureHorizontal = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_horizontal.png");
-	private static final ResourceLocation textureVertical = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_vertical.png");
-	private static int MAX_WIDTH;
-	private static int NUM_INCREMENTS = 2;
-	private static float INCREMENT;
+	private static final ResourceLocation HORIZONTAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_horizontal.png");
+	private static final ResourceLocation VERTICAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_vertical.png");
+	public static final int PADDING = 1;
 	public static final int METER_HEIGHT = 9;
+	private static int NUM_INCREMENTS = 2;
+	private static int MAX_WIDTH;
+	private static float INCREMENT;
+	private ZSSPlayerInfo info;
+	/** The width (or height if vertical) of the inner portion of the mana bar */
+	private int inner_bar;
 
 	/**
 	 * Call this method if Config settings change while in game.
@@ -62,116 +65,95 @@ public class GuiMagicMeter extends Gui implements IGuiOverlay
 		INCREMENT = (float) MAX_WIDTH / (float) NUM_INCREMENTS;
 	}
 
-	/**
-	 * Returns the x coordinate of the left-most edge of the Magic Meter
-	 */
-	public static int getLeftX(ScaledResolution resolution) {
-		if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode) {
-			return 0;
-		}
-		return (Config.isMagicMeterCenteredX ? resolution.getScaledWidth() / 2 : Config.isMagicMeterLeft ? 0 : resolution.getScaledWidth() - (Config.isMagicMeterEnabled ? (Config.isMagicMeterHorizontal ? MAX_WIDTH : METER_HEIGHT) : 0)) + Config.magicMeterOffsetX;
-	}
-
-	/**
-	 * Returns the x coordinate of the right-most edge of the Magic Meter
-	 */
-	public static int getRightX(ScaledResolution resolution) {
-		if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode) {
-			return 0;
-		}
-		int left = getLeftX(resolution);
-		return (Config.isMagicMeterEnabled ? (Config.isMagicMeterHorizontal ? left + MAX_WIDTH : left + METER_HEIGHT) : left);
-	}
-
-	/**
-	 * Returns the y coordinate of the top-most edge of the Magic Meter including the text element, if any
-	 */
-	public static int getTopY(ScaledResolution resolution) {
-		if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode) {
-			return 0;
-		}
-		int y = (Config.isMagicMeterTop ? 0 : resolution.getScaledHeight() - (Config.isMagicMeterEnabled ? (Config.isMagicMeterHorizontal ? METER_HEIGHT : MAX_WIDTH + 6) : 0)) + Config.magicMeterOffsetY;
-		if (Config.isMagicMeterTextEnabled && !Config.isMagicMeterTop) {
-			y -= (Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT + (Config.isMagicMeterEnabled ? 2 : 0));
-		}
-		return y;
-	}
-
-	/**
-	 * Returns the y coordinate of the bottom-most edge of the Magic Meter including the text element, if any
-	 */
-	public static int getBottomY(ScaledResolution resolution) {
-		if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode) {
-			return 0;
-		}
-		int y = (Config.isMagicMeterTop ? (Config.isMagicMeterEnabled ? (Config.isMagicMeterHorizontal ? METER_HEIGHT : MAX_WIDTH + 6) : 0) : resolution.getScaledHeight()) + Config.magicMeterOffsetY;
-		if (Config.isMagicMeterTextEnabled && Config.isMagicMeterTop) {
-			y += (Minecraft.getMinecraft().fontRendererObj.FONT_HEIGHT + (Config.isMagicMeterEnabled ? 2 : 0));
-		}
-		return y;
-	}
-
-	private final Minecraft mc;
-
 	public GuiMagicMeter(Minecraft mc) {
-		this.mc = mc;
+		super(mc);
 		GuiMagicMeter.setMaxWidth(Config.magicMeterWidth);
 		GuiMagicMeter.setNumIncrements(Config.magicMeterIncrements);
 	}
 
 	@Override
-	public boolean shouldRender() {
-		if (mc.thePlayer.capabilities.isCreativeMode) {
-			return false;
-		}
-		return (Config.isMagicMeterEnabled || Config.isMagicMeterTextEnabled) && ZSSPlayerInfo.get(mc.thePlayer).getMaxMagic() > 0;
+	public HALIGN getHorizontalAlignment() {
+		return Config.magicMeterHAlign;
 	}
 
 	@Override
-	public void renderOverlay(ScaledResolution resolution) {
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(mc.thePlayer);
-		boolean unlimited = ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.UNLIMITED_MAGIC);
-		float maxMana = info.getMaxMagic();
-		int width = MathHelper.clamp_int(MathHelper.floor_float((maxMana / 50) * INCREMENT), MathHelper.floor_float(INCREMENT), MAX_WIDTH);
-		int current = MathHelper.floor_float((info.getCurrentMagic() / maxMana) * width);
+	public VALIGN getVerticalAlignment() {
+		return Config.magicMeterVAlign;
+	}
+
+	@Override
+	public boolean allowMergeX(boolean rendered) {
+		return !Config.isMagicMeterHorizontal;
+	}
+
+	@Override
+	public boolean shouldRender() {
+		if (!Config.isMagicMeterEnabled || this.mc.thePlayer.capabilities.isCreativeMode) {
+			return false;
+		}
+		this.info = ZSSPlayerInfo.get(this.mc.thePlayer);
+		return this.info.getMaxMagic() > 0;
+	}
+
+	@Override
+	protected void setup(ScaledResolution resolution) {
+		this.inner_bar = MathHelper.clamp_int(MathHelper.floor_float((this.info.getMaxMagic() / 50) * INCREMENT), MathHelper.floor_float(INCREMENT), MAX_WIDTH);
+		if (Config.isMagicMeterHorizontal) {
+			this.width = MAX_WIDTH; // so offsets work the same for bars of differing sizes
+			this.height = METER_HEIGHT;
+			int offsetX = Config.magicMeterOffsetX;
+			if (this.getHorizontalAlignment() == HALIGN.RIGHT) {
+				offsetX += (MAX_WIDTH - this.inner_bar - 6);
+			} else if (this.getHorizontalAlignment() == HALIGN.CENTER) {
+				if (offsetX == 0) { // should be perfectly centered
+					this.width = this.inner_bar + 6;
+				} else if (!Config.isMagicBarLeft) { // this allows 'centered' bar to be left- or right-aligned as well
+					offsetX += (MAX_WIDTH - this.inner_bar - 6);
+				}
+			}
+			this.setPosX(resolution, offsetX);
+			this.setPosY(resolution, Config.magicMeterOffsetY);
+			this.width = this.inner_bar + 6; // actual rendering width
+		} else {
+			this.width = METER_HEIGHT;
+			this.height = MAX_WIDTH; // so offsets work the same for bars of differing sizes
+			int offsetY = Config.magicMeterOffsetY;
+			if (this.getVerticalAlignment() == VALIGN.BOTTOM) {
+				offsetY += (MAX_WIDTH - this.inner_bar - 6);
+			} else if (this.getVerticalAlignment() == VALIGN.CENTER) {
+				this.height = this.inner_bar + 6; // bar will be centered
+			}
+			this.setPosX(resolution, Config.magicMeterOffsetX);
+			this.setPosY(resolution, offsetY);
+			this.height = this.inner_bar + 6; // actual rendering height
+		}
+	}
+
+	@Override
+	protected void render(ScaledResolution resolution) {
+		int xPos = this.getLeft();
+		int yPos = this.getTop();
+		int current = MathHelper.floor_float((this.info.getCurrentMagic() / this.info.getMaxMagic()) * this.inner_bar);
+		boolean unlimited = ZSSEntityInfo.get(this.mc.thePlayer).isBuffActive(Buff.UNLIMITED_MAGIC);
 		GlStateManager.pushAttrib();
 		GlStateManager.disableLighting();
 		GlStateManager.enableAlpha();
 		GlStateManager.enableBlend();
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		if (unlimited) {
 			GlStateManager.color(0.5F, 0.5F, 1.0F, 1.0F);
 		} else {
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		}
-		int xPos = (Config.isMagicMeterCenteredX ? resolution.getScaledWidth() / 2 : Config.isMagicMeterLeft ? 0 : resolution.getScaledWidth()) + Config.magicMeterOffsetX;
-		int yPos = (Config.isMagicMeterTop ? 0 : resolution.getScaledHeight()) + Config.magicMeterOffsetY;
-		if (Config.isMagicMeterEnabled) {
-			if (Config.isMagicMeterHorizontal) {
-				xPos -= (Config.isMagicMeterLeft ? 0 : width + 6);
-				yPos -= (Config.isMagicMeterTop ? 0 : METER_HEIGHT);
-				mc.getTextureManager().bindTexture(textureHorizontal);
-				RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, 3 + width, METER_HEIGHT, 106, 12);
-				RenderHelperQ.drawTexturedRect(xPos + 3 + width, yPos, 103, 0, 3, METER_HEIGHT, 106, 12);
-				RenderHelperQ.drawTexturedRect(xPos + 3 + (Config.isMagicMeterLeft ? 0 : width - current), yPos + 3, 0, METER_HEIGHT, current, 3, 106, 12);
-				xPos += (Config.isMagicMeterLeft ? 0 : (width + 6));
-				yPos += (Config.isMagicMeterTop ? 11 : -2);
-			} else {
-				xPos -= (Config.isMagicMeterLeft ? 0 : METER_HEIGHT);
-				yPos -= (Config.isMagicMeterTop ? 0 : width + 6);
-				mc.getTextureManager().bindTexture(textureVertical);
-				RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, METER_HEIGHT, 3 + width, 12, 106);
-				RenderHelperQ.drawTexturedRect(xPos, yPos + 3 + width, 0, 103, METER_HEIGHT, 3, 12, 106);
-				RenderHelperQ.drawTexturedRect(xPos + 3, yPos + 3 + (width - current), METER_HEIGHT, 0, 3, current, 12, 106);
-				xPos += (Config.isMagicMeterLeft ? 0 : METER_HEIGHT);
-				yPos += (Config.isMagicMeterTop ? width + 8 : -(width + 8));
-			}
-		}
-		if (Config.isMagicMeterTextEnabled) {
-			String mp = "MP " + (int) Math.ceil(info.getCurrentMagic()) + "/" + (int) Math.ceil(info.getMaxMagic());
-			xPos -= (Config.isMagicMeterLeft ? 0 : mc.fontRendererObj.getStringWidth(mp));
-			yPos -= (Config.isMagicMeterTop ? 0 : mc.fontRendererObj.FONT_HEIGHT);
-			mc.fontRendererObj.drawString(mp, xPos, yPos, 0xFFFFFF, true);
+		if (Config.isMagicMeterHorizontal) {
+			this.mc.getTextureManager().bindTexture(HORIZONTAL_BAR);
+			RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, 3 + this.inner_bar, METER_HEIGHT, 106, 12);
+			RenderHelperQ.drawTexturedRect(xPos + 3 + this.inner_bar, yPos, 103, 0, 3, METER_HEIGHT, 106, 12);
+			RenderHelperQ.drawTexturedRect(xPos + 3 + (Config.isMagicBarLeft ? 0 : this.inner_bar - current), yPos + 3, 0, METER_HEIGHT, current, 3, 106, 12);
+		} else {
+			this.mc.getTextureManager().bindTexture(VERTICAL_BAR);
+			RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, METER_HEIGHT, 3 + this.inner_bar, 12, 106);
+			RenderHelperQ.drawTexturedRect(xPos, yPos + 3 + this.inner_bar, 0, 103, METER_HEIGHT, 3, 12, 106);
+			RenderHelperQ.drawTexturedRect(xPos + 3, yPos + 3 + (Config.isMagicBarLeft ? (this.inner_bar - current) : 0), METER_HEIGHT, 0, 3, current, 12, 106);
 		}
 		GlStateManager.popAttrib();
 	}

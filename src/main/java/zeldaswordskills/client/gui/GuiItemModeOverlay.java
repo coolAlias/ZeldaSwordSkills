@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,69 +19,65 @@ package zeldaswordskills.client.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ICyclableItem;
 import zeldaswordskills.ref.Config;
 
 @SideOnly(Side.CLIENT)
-public class GuiItemModeOverlay extends Gui implements IGuiOverlay
+public class GuiItemModeOverlay extends AbstractGuiOverlay
 {
 	private static final int ICON_SIZE = 18;
-	public static final int ICON_SPACING = ICON_SIZE + 2;
-	private final Minecraft mc;
 	private ItemStack stack;
 
 	public GuiItemModeOverlay(Minecraft mc) {
-		this.mc = mc;
+		super(mc);
+		this.width = ICON_SIZE;
+		this.height = ICON_SIZE;
+	}
+
+	@Override
+	public HALIGN getHorizontalAlignment() {
+		return Config.itemModeHAlign;
+	}
+
+	@Override
+	public VALIGN getVerticalAlignment() {
+		return Config.itemModeVAlign;
 	}
 
 	@Override
 	public boolean shouldRender() {
-		this.stack = mc.thePlayer.getHeldItem();
+		this.stack = this.mc.thePlayer.getHeldItem();
 		return Config.isItemModeEnabled && this.stack != null && this.stack.getItem() instanceof ICyclableItem;
 	}
 
 	@Override
-	public void renderOverlay(ScaledResolution resolution) {
-		stack = ((ICyclableItem) stack.getItem()).getRenderStackForMode(stack, mc.thePlayer);
-		if (stack != null) {
-			int xPos = (Config.isItemModeLeft ? 2 : resolution.getScaledWidth() - ICON_SIZE);
-			int yPos = (Config.isItemModeTop ? 2 : resolution.getScaledHeight() - ICON_SIZE);
-			// Adjust for Magic Meter
-			if ((Config.isMagicMeterEnabled || Config.isMagicMeterTextEnabled) && Config.isItemModeTop == Config.isMagicMeterTop && Config.isItemModeLeft == Config.isMagicMeterLeft) {
-				if ((Config.isItemModeLeft ? GuiMagicMeter.getLeftX(resolution) < ICON_SPACING : GuiMagicMeter.getRightX(resolution) > xPos) 
-						&& (Config.isItemModeTop ? GuiMagicMeter.getTopY(resolution) < ICON_SPACING : GuiMagicMeter.getBottomY(resolution) > yPos)) {
-					if (Config.isMagicMeterHorizontal) { // move up or down
-						yPos = (Config.isItemModeTop ? GuiMagicMeter.getBottomY(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2) : GuiMagicMeter.getTopY(resolution) - ICON_SPACING);
-					} else { // move right or left
-						xPos = (Config.isItemModeLeft ? GuiMagicMeter.getRightX(resolution) + (Config.isMagicMeterTextEnabled ? 0 : 2) : GuiMagicMeter.getLeftX(resolution) - ICON_SPACING); 
-					}
-				}
-			}
-			// Adjust for Buff Bar
-			if (Config.isItemModeTop && Config.isBuffBarEnabled && Config.isItemModeLeft == Config.isBuffBarLeft && !ZSSEntityInfo.get(mc.thePlayer).getActiveBuffs().isEmpty()) {
-				if (Config.isBuffBarHorizontal) {
-					yPos += GuiBuffBar.ICON_SPACING;
-				} else {
-					xPos += GuiBuffBar.ICON_SPACING;
-				}
-			}
+	protected void setup(ScaledResolution resolution) {
+		this.setPosX(resolution, this.getOffsetX(DEFAULT_PADDING) + Config.itemModeOffsetX);
+		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.itemModeOffsetY);
+	}
+
+	@Override
+	protected void render(ScaledResolution resolution) {
+		this.stack = ((ICyclableItem) this.stack.getItem()).getRenderStackForMode(this.stack, this.mc.thePlayer);
+		if (this.stack != null) {
+			int xPos = this.getLeft();
+			int yPos = this.getTop();
 			GlStateManager.pushAttrib();
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 			GlStateManager.disableLighting();
 			// alpha test and blend needed due to vanilla or Forge rendering bug
 			GlStateManager.enableAlpha();
 			GlStateManager.enableBlend();
-			FontRenderer font = stack.getItem().getFontRenderer(stack);
-			mc.getRenderItem().renderItemAndEffectIntoGUI(stack, xPos, yPos);
-			String text = (stack.stackSize == 1 ? null : String.valueOf(stack.stackSize));
-			mc.getRenderItem().renderItemOverlayIntoGUI(font == null ? mc.fontRendererObj : font, stack, xPos, yPos, text);
+			FontRenderer font = this.stack.getItem().getFontRenderer(this.stack);
+			if (font == null) font = this.mc.fontRendererObj;
+			this.mc.getRenderItem().renderItemAndEffectIntoGUI(this.stack, xPos, yPos);
+			String text = (this.stack.stackSize == 1 ? null : String.valueOf(this.stack.stackSize));
+			this.mc.getRenderItem().renderItemOverlayIntoGUI(font, this.stack, xPos, yPos, text);
 			GlStateManager.popAttrib();
 		}
 	}
