@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,11 @@ package zeldaswordskills.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -31,17 +36,16 @@ import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
-
-import org.lwjgl.opengl.GL11;
-
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
+import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
 import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.client.gui.GuiMagicMeter;
+import zeldaswordskills.client.gui.GuiMagicMeterText;
 import zeldaswordskills.client.gui.IGuiOverlay;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -54,9 +58,6 @@ import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.TargetUtils;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -70,6 +71,9 @@ public class ZSSClientEvents
 
 	/** List of all GUI Overlays that may need rendering */
 	private final List<IGuiOverlay> overlays = new ArrayList<IGuiOverlay>();
+
+	/** List of GUI overlays that have rendered this tick */
+	private final List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
 
 	/** True when openGL matrix needs to be popped */
 	private boolean needsPop;
@@ -85,10 +89,14 @@ public class ZSSClientEvents
 
 	public ZSSClientEvents() {
 		this.mc = Minecraft.getMinecraft();
-		overlays.add(new ComboOverlay(mc));
+		// Add overlays in order of rendering priority (generally bigger is higher priority)
+		GuiMagicMeter meter = new GuiMagicMeter(mc);
+		overlays.add(meter);
+		overlays.add(new GuiMagicMeterText(mc, meter));
 		overlays.add(new GuiBuffBar(mc));
 		overlays.add(new GuiItemModeOverlay(mc));
-		overlays.add(new GuiMagicMeter(mc));
+		overlays.add(new ComboOverlay(mc));
+		overlays.add(new GuiEndingBlowOverlay(mc));
 	}
 
 	@SubscribeEvent
@@ -96,11 +104,12 @@ public class ZSSClientEvents
 		if (event.type != RenderGameOverlayEvent.ElementType.EXPERIENCE) {
 			return;
 		}
-		for (IGuiOverlay overlay : overlays) {
-			if (overlay.shouldRender()) {
-				overlay.renderOverlay(event.resolution);
+		for (IGuiOverlay overlay : this.overlays) {
+			if (overlay.shouldRender() && overlay.renderOverlay(event.resolution, this.rendered)) {
+				this.rendered.add(overlay);
 			}
 		}
+		this.rendered.clear();
 	}
 
 	/**

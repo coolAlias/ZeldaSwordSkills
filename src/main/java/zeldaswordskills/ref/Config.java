@@ -24,12 +24,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.BlockWarpStone;
+import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
+import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.client.SyncConfigPacket;
@@ -39,7 +42,6 @@ import zeldaswordskills.songs.AbstractZeldaSong;
 import zeldaswordskills.songs.ZeldaSongs;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.BossType;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import zeldaswordskills.util.WarpPoint;
 
 /**
@@ -54,28 +56,58 @@ public class Config
 {
 	public static Configuration config;
 	/*================== CLIENT SIDE SETTINGS  =====================*/
+	/** [Buff HUD] Maximum number of icons to display per row or column [1-10] */
+	public static int buffBarMaxIcons;
 	/** [Buff HUD] Whether the buff bar should be displayed by default */
 	public static boolean isBuffBarEnabled;
 	/** [Buff HUD] Whether the buff bar should be displayed horizontally */
 	public static boolean isBuffBarHorizontal;
-	/** [Buff HUD] Whether the buff bar should be displayed on the left side of the screen */
-	public static boolean isBuffBarLeft;
+	/** [Buff HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN buffBarHAlign;
+	/** [Buff HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN buffBarVAlign;
+	/** [Buff HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int buffBarOffsetX;
+	/** [Buff HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int buffBarOffsetY;
 	/** [Chat] Whether to show a chat message when striking secret blocks */
 	public static boolean showSecretMessage;
 	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
 	public static boolean isComboHudEnabled;
 	/** [Combo HUD] Number of combo hits to display */
 	private static int hitsToDisplay;
+	/** [Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN comboHudHAlign;
+	/** [Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN comboHudVAlign;
+	/** [Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int comboHudOffsetX;
+	/** [Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int comboHudOffsetY;
 	/** [Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry */
 	public static boolean allowVanillaControls;
 	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
 	public static boolean requireDoubleTap;
+	/** [Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use) */
+	public static boolean isEndingBlowHudEnabled;
+	/** [Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN endingBlowHudHAlign;
+	/** [Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN endingBlowHudVAlign;
+	/** [Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int endingBlowHudOffsetX;
+	/** [Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int endingBlowHudOffsetY;
 	/** [Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip) */
 	public static boolean isItemModeEnabled;
-	/** [Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen */
-	public static boolean isItemModeTop;
-	/** [Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen */
-	public static boolean isItemModeLeft;
+	/** [Item Mode HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN itemModeHAlign;
+	/** [Item Mode HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN itemModeVAlign;
+	/** [Item Mode HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int itemModeOffsetX;
+	/** [Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int itemModeOffsetY;
 	/** [Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100] */
 	private static int resetNotesInterval;
 	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
@@ -85,6 +117,10 @@ public class Config
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
 	public static boolean canTargetPlayers;
 	/*================== MAGIC METER (CLIENT SIDE) =====================*/
+	/** [Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN magicMeterHAlign;
+	/** [Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN magicMeterVAlign;
 	/** Enable text display of current Magic Points */
 	public static boolean isMagicMeterTextEnabled;
 	/** Enable the Magic Meter HUD display */
@@ -95,12 +131,8 @@ public class Config
 	public static int magicMeterOffsetY;
 	/** [Orientation] True for a horizontal magic meter, or false for a vertical one */
 	public static boolean isMagicMeterHorizontal;
-	/** [Position: Centered] Whether the horizontal position is relative to the center of the screen (+ is to the right, - is to the left) */
-	public static boolean isMagicMeterCenteredX;
-	/** [Position: Left] Whether the horizontal position is relative to the left side of the screen (offsetX should be negative if false) */
-	public static boolean isMagicMeterLeft;
-	/** [Position: Top] Whether the vertical position is relative to the top of the screen (offsetY should be negative if false) */
-	public static boolean isMagicMeterTop;
+	/** [Orientation: Mana] True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite */
+	public static boolean isMagicBarLeft;
 	/** [Width: Max] Maximum width of the magic meter [25-100] */
 	public static int magicMeterWidth;
 	/** [Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10] */
@@ -408,18 +440,36 @@ public class Config
 
 		/*================== CLIENT SIDE SETTINGS  =====================*/
 		String category = "client";
-		config.addCustomCategoryComment(category, "This category contains client side settings; i.e. they are not synchronized with the server.");
+		config.addCustomCategoryComment(category,
+				"This category contains client side settings; i.e. they are not synchronized with the server." +
+				"\nNote that HUD elements added by ZSS will dynamically adjust their position so they don't overlap with other ZSS HUD elements." +
+				"\nAs such, it is generally recommended to leave the offset x and y at 0 or set them identically for each element with the same alignment.");
+		buffBarMaxIcons = MathHelper.clamp_int(config.get(category, "[Buff HUD] Maximum number of icons to display per row or column [1-10]", 5).getInt(), 1, 10);
 		isBuffBarEnabled = config.get(category, "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
 		isBuffBarHorizontal = config.get(category, "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
-		isBuffBarLeft = config.get(category, "[Buff HUD] Whether the buff bar should be displayed on the left side of the screen", false).getBoolean(false);
+		buffBarHAlign = HALIGN.fromString(config.get(category, "[Buff HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "right").getString());
+		buffBarVAlign = VALIGN.fromString(config.get(category, "[Buff HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
+		buffBarOffsetX = config.get(category, "[Buff HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
+		buffBarOffsetY = config.get(category, "[Buff HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
 		showSecretMessage = config.get(category, "[Chat] Whether to show a chat message when striking secret blocks", false).getBoolean(false);
 		isComboHudEnabled = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
 		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
+		comboHudHAlign = HALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
+		comboHudVAlign = VALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
+		comboHudOffsetX = config.get(category, "[Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
+		comboHudOffsetY = config.get(category, "[Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
 		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
 		requireDoubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
+		isEndingBlowHudEnabled = config.get(category, "[Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use))", true).getBoolean(true);
+		endingBlowHudHAlign = HALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "center").getString());
+		endingBlowHudVAlign = VALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
+		endingBlowHudOffsetX = config.get(category, "[Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
+		endingBlowHudOffsetY = config.get(category, "[Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 30).getInt();
 		isItemModeEnabled = config.get(category, "[Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)", true).getBoolean(true);
-		isItemModeTop = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the top or bottom of the screen", true).getBoolean(true);
-		isItemModeLeft = config.get(category, "[Item Mode HUD] Whether the item mode icon should be displayed on the left or right side of the screen", true).getBoolean(true);
+		itemModeHAlign = HALIGN.fromString(config.get(category, "[Item Mode HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
+		itemModeVAlign = VALIGN.fromString(config.get(category, "[Item Mode HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
+		itemModeOffsetX = config.get(category, "[Item Mode HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
+		itemModeOffsetY = config.get(category, "[Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
 		resetNotesInterval = MathHelper.clamp_int(config.get(category, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
 		enableHookshotSound = config.get(category, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
 		enableAutoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
@@ -428,25 +478,24 @@ public class Config
 		category = "Magic Meter";
 		config.addCustomCategoryComment(category,
 				"Magic meter can be configured to display anywhere on the screen using the offset X and Y." +
-				"\nOffsets are in relation to its initial position, which is either in one of the four corners" +
-				"\nof the screen, or at the top or bottom with the left-most edge at the center of the screen." +
+				"\nOffsets are in relation to its horizontal and vertical alignments." +
 				"\n\nDefault maximum width is 75 which is the same width as the hunger bar when the player has" +
 				"\ngained magic points equal to or greater than 50 times the number of increments required." +
 				"\nE.g., at 2 increments, the meter for a player with 100 mp will be at maximum width." +
 				"\n===============================================" + 
 				"\nCommon Settings" + 
 				"\n===============================================" + 
-				"\nAbove Hunger Bar, from right to left: x=91, y=-40, orientation=true, centered=true, left=false, top=false" +
-				"\nAbove Hunger Bar, from left to right: x=10, y=-40, orientation=true, centered=true, left=true, top=false" + 
-				"\nAny Corner: x=0, y=0, centered=false (top, left, and orientation may be any value)");
+				"\nAbove Hunger Bar, drains from left to right: x=53, y=-40, orientation=true, orientation:mana=false, halign=center, valign=bottom" +
+				"\nAbove Hunger Bar, drains from right to left: x=47, y=-40, orientation=true, orientation:mana=true, halign=center, valign=bottom" +
+				"\nAny Corner: x=0, y=0, halign=left|right, valign=top|bottom");
+		magicMeterHAlign = HALIGN.fromString(config.get(category, "[Alignment: Horizontal] Alignment on the X axis [left|center|right]", "center").getString());
+		magicMeterVAlign = VALIGN.fromString(config.get(category, "[Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "bottom").getString());
 		isMagicMeterTextEnabled = config.get(category, "Enable text display of current Magic Points", false).getBoolean(false);
 		isMagicMeterEnabled = config.get(category, "Enable the Magic Meter HUD display", true).getBoolean(true);
-		magicMeterOffsetX = config.get(category, "[Offset: X] Moves the Meter left (-) or right (+) this number of pixels", 91).getInt();
+		magicMeterOffsetX = config.get(category, "[Offset: X] Moves the Meter left (-) or right (+) this number of pixels", 47).getInt();
 		magicMeterOffsetY = config.get(category, "[Offset: Y] Moves the Meter up (-) or down (+) this number of pixels", -40).getInt();
 		isMagicMeterHorizontal = config.get(category, "[Orientation] True for a horizontal magic meter, or false for a vertical one", true).getBoolean(true);
-		isMagicMeterCenteredX = config.get(category, "[Position: Centered] Whether the horizontal position is relative to the center of the screen (+ is to the right, - is to the left)", true).getBoolean(true);
-		isMagicMeterLeft = config.get(category, "[Position: Left] Whether the horizontal position is relative to the left side of the screen (offsetX should usually be negative if false)", false).getBoolean(false);
-		isMagicMeterTop = config.get(category, "[Position: Top] Whether the vertical position is relative to the top of the screen (offsetY should be negative if false)", false).getBoolean(false);
+		isMagicBarLeft = config.get(category, "[Orientation: Mana] True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", true).getBoolean(true);
 		magicMeterWidth = config.get(category, "[Width: Max] Maximum width of the magic meter [25-100]", 75).getInt();
 		magicMeterIncrements = config.get(category, "[Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10]", 2).getInt();
 		/*================== MOD INTER-COMPATIBILITY =====================*/
