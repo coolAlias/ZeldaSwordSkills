@@ -315,9 +315,9 @@ public class DungeonLootLists
 
 	private static void initOceanLoot() {
 		setCategoryStats(ChestGenHooks.getInfo(OCEAN_LOOT), 1, 2, new WeightedRandomChestContent[] {
-			getLoot(Items.fishing_rod, 1, 1, 2),
-			getLoot(Items.fish, 1, 2, 4),
-			getLoot(Items.potionitem, LibPotionID.WATER_BREATHING.id, 1, 1, 3),
+			getLoot(Items.fishing_rod, 1, 1, 1),
+			getLoot(Items.fish, 1, 2, 3),
+			getLoot(Items.potionitem, LibPotionID.WATER_BREATHING.id, 1, 1, 2),
 			getLoot(ZSSItems.arrowBombWater, 2, 5, 3),
 			getLoot(ZSSItems.bomb, BombType.BOMB_WATER.ordinal(), 1, 2, Config.getBombWeight() * 2),
 			getLoot(ZSSItems.tunicZoraHelm, 1, 1, 1),
