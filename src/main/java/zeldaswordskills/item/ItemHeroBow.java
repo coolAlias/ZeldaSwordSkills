@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+
 import mods.battlegear2.api.IAllowItem;
 import mods.battlegear2.api.ISheathed;
 import mods.battlegear2.api.quiver.IArrowFireHandler;
@@ -87,9 +90,6 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 
 /**
  * 
@@ -457,18 +457,17 @@ IAllowItem, ISheathed, ISpecialBow
 		if (modeArrow == null && Config.enableAutoBombArrows() && player.isSneaking()) {
 			arrow = getAutoBombArrow(bow, player);
 		}
-		// Search specifically for the selected arrow type:
-		if (modeArrow != null) {
-			if (!canShootArrow(player, bow, new ItemStack(modeArrow))) {
-				return null; // can't shoot this arrow type
-			}
+		// Search specifically for the selected arrow type
+		if (modeArrow != null && canShootArrow(player, bow, new ItemStack(modeArrow))) {
 			for (ItemStack stack : player.inventory.mainInventory) {
 				if (stack != null && stack.getItem() == modeArrow) {
 					arrow = stack;
 					break;
 				}
 			}
-		} else if (arrow == null) {
+		}
+		// No mode selected or arrow could not be shot - search inventory for shootable arrow
+		if (arrow == null) {
 			for (ItemStack stack : player.inventory.mainInventory) {
 				if (stack != null && canShootArrow(player, bow, stack)) {
 					arrow = stack;
@@ -476,7 +475,7 @@ IAllowItem, ISheathed, ISpecialBow
 				}
 			}
 		}
-
+		// If still no arrow and player is in Creative Mode, nock default arrow
 		if (arrow == null && player.capabilities.isCreativeMode) {
 			arrow = new ItemStack(modeArrow == null ? Items.arrow : modeArrow);
 		}
