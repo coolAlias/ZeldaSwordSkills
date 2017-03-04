@@ -38,6 +38,7 @@ public class ZSSCreativeTabs
 	public abstract static class ZSSCreativeTab extends CreativeTabs {
 		public ZSSCreativeTab(String label) {
 			super(label);
+			this.setBackgroundImageName("zss.png");
 		}
 
 		@Override
