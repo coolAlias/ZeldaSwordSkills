@@ -443,18 +443,17 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		if (modeArrow == null && Config.enableAutoBombArrows() && player.isSneaking()) {
 			arrow = getAutoBombArrow(bow, player);
 		}
-		// Search specifically for the selected arrow type:
-		if (modeArrow != null) {
-			if (!canShootArrow(player, bow, new ItemStack(modeArrow))) {
-				return null; // can't shoot this arrow type
-			}
+		// Search specifically for the selected arrow type
+		if (modeArrow != null && canShootArrow(player, bow, new ItemStack(modeArrow))) {
 			for (ItemStack stack : player.inventory.mainInventory) {
 				if (stack != null && stack.getItem() == modeArrow) {
 					arrow = stack;
 					break;
 				}
 			}
-		} else if (arrow == null) { // otherwise use default behavior
+		}
+		// No mode selected or arrow could not be shot - search inventory for shootable arrow
+		if (arrow == null) {
 			for (ItemStack stack : player.inventory.mainInventory) {
 				if (stack != null && canShootArrow(player, bow, stack)) {
 					arrow = stack;
@@ -462,7 +461,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 				}
 			}
 		}
-
+		// If still no arrow and player is in Creative Mode, nock default arrow
 		if (arrow == null && player.capabilities.isCreativeMode) {
 			arrow = new ItemStack(modeArrow == null ? Items.arrow : modeArrow);
 		}
