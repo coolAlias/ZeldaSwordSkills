@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,11 @@ package zeldaswordskills.api.entity.ai;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.api.entity.IEntityCustomTarget;
@@ -33,10 +35,16 @@ import zeldaswordskills.api.entity.ai.EntityAIDynamicAction.EntityAIDynamicCusto
  * AI that targets nearest bomb within the given range after a random delay
  *
  */
-public class EntityAITargetBombs extends EntityAIDynamicCustomTarget
+public class EntityAITargetBombs<T extends EntityCreature & IEntityDynamic & IEntityCustomTarget> extends EntityAIDynamicCustomTarget<T>
 {
 	/** Sorts potential targets by range */
 	protected final EntityAINearestAttackableTarget.Sorter sorter;
+	protected static final IEntitySelector SELECTOR = new IEntitySelector() {
+		@Override
+		public boolean isEntityApplicable(Entity entity) {
+			return entity instanceof IEntityBomb;
+		}
+	};
 	protected final float range;
 	protected Entity targetBomb;
 	protected int delay;
@@ -45,7 +53,7 @@ public class EntityAITargetBombs extends EntityAIDynamicCustomTarget
 	/**
 	 * Passes true for require_sight; see {@link EntityAITargetBombs#EntityAITargetBombs(EntityCreature, EntityAction, float, boolean, boolean) EntityAITargetBombs}
 	 */
-	public <T extends EntityCreature & IEntityDynamic & IEntityCustomTarget> EntityAITargetBombs(T entity, EntityAction action, float range, boolean require_ground) {
+	public EntityAITargetBombs(T entity, EntityAction action, float range, boolean require_ground) {
 		this(entity, action, range, require_ground, true);
 	}
 
@@ -53,7 +61,7 @@ public class EntityAITargetBombs extends EntityAIDynamicCustomTarget
 	 * Also see {@link EntityAIDynamicCustomTarget#EntityAIDynamicCustomTarget(EntityCreature, EntityAction, float, boolean, boolean) EntityAIDynamicCustomTarget}
 	 * @param range Additionally used as the radius within which to search for bombs
 	 */
-	public <T extends EntityCreature & IEntityDynamic & IEntityCustomTarget> EntityAITargetBombs(T entity, EntityAction action, float range, boolean require_ground, boolean require_sight) {
+	public EntityAITargetBombs(T entity, EntityAction action, float range, boolean require_ground, boolean require_sight) {
 		super(entity, action, range, require_ground, require_sight);
 		this.sorter = new EntityAINearestAttackableTarget.Sorter(entity);
 		this.range = range;
@@ -61,26 +69,26 @@ public class EntityAITargetBombs extends EntityAIDynamicCustomTarget
 
 	@Override
 	public boolean shouldExecute() {
-		if (actor.getActionTime(action.id) > 0) {
+		if (this.actor.getActionTime(this.action.id) > 0) {
 			return true; // otherwise animation will cut short
-		} else if (targetBomb != null && !targetBomb.isEntityAlive()) {
+		} else if (this.targetBomb != null && !this.targetBomb.isEntityAlive()) {
 			this.softReset(); // target is no longer valid
 		} else if (super.shouldExecute()) {
-			if (delay == 0) {
-				delay = 5 + entity.worldObj.rand.nextInt(10) + entity.worldObj.rand.nextInt(10);
-				if (entity.getAttackTarget() != null) {
-					double d = entity.getDistanceToEntity(entity.getAttackTarget());
-					delay += MathHelper.ceiling_double_int(range - d);
+			if (this.delay == 0) {
+				this.delay = 5 + this.actor.worldObj.rand.nextInt(10) + this.actor.worldObj.rand.nextInt(10);
+				if (this.actor.getAttackTarget() != null) {
+					double d = this.actor.getDistanceToEntity(this.actor.getAttackTarget());
+					this.delay += MathHelper.ceiling_double_int(this.range - d);
 				}
 			}
-			return timer++ > delay;
+			return this.timer++ > this.delay;
 		}
 		return false;
 	}
 
 	@Override
 	public void startExecuting() {
-		targeting.setCustomTarget(targetBomb);
+		this.actor.setCustomTarget(targetBomb);
 		super.startExecuting();
 	}
 
@@ -94,25 +102,26 @@ public class EntityAITargetBombs extends EntityAIDynamicCustomTarget
 	 * Soft reset of AI fields for when action not yet in progress (i.e. during delay period)
 	 */
 	protected void softReset() {
-		targeting.setCustomTarget(null);
-		targetBomb = null;
-		delay = 0;
-		timer = 0;
+		this.actor.setCustomTarget(null);
+		this.targetBomb = null;
+		this.delay = 0;
+		this.timer = 0;
 	}
 
 	@Override
 	protected Entity getTarget() {
-		if (targetBomb == null && targeting.getCustomTarget() == null) {
-			if (timer++ < entity.getRNG().nextInt(20)) {
+		if (this.targetBomb == null && this.actor.getCustomTarget() == null) {
+			if (this.timer++ < this.actor.getRNG().nextInt(20)) {
 				return null;
 			}
-			List<Entity> bombs = entity.worldObj.getEntitiesWithinAABB(IEntityBomb.class, entity.boundingBox.expand(range, range / 2.0F, range));
+			AxisAlignedBB aabb = this.actor.boundingBox.expand(this.range, this.range / 2.0F, this.range);
+			List<Entity> bombs = this.actor.worldObj.selectEntitiesWithinAABB(Entity.class, aabb, EntityAITargetBombs.SELECTOR);
 			Collections.sort(bombs, sorter);
 			if (!bombs.isEmpty()) {
-				targetBomb = bombs.get(0);
+				this.targetBomb = bombs.get(0);
 			}
-			timer = 0;
+			this.timer = 0;
 		}
-		return targetBomb;
+		return this.targetBomb;
 	}
 }

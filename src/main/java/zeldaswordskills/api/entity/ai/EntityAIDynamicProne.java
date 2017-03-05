@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -28,9 +28,9 @@ import net.minecraft.entity.EntityCreature;
  * it is allowed to execute.
  *
  */
-public class EntityAIDynamicProne extends EntityAIDynamic {
+public class EntityAIDynamicProne<T extends EntityCreature & IEntityDynamic> extends EntityAIDynamic<T> {
 
-	public <T extends EntityCreature & IEntityDynamic> EntityAIDynamicProne(T entity, EntityAction action, int mutex) {
+	public EntityAIDynamicProne(T entity, EntityAction action, int mutex) {
 		super(entity, action, 0, mutex);
 	}
 

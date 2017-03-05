@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,14 +26,14 @@ import zeldaswordskills.api.entity.IEntityCustomTarget;
  * Basic AI to perform any action on the current AI target once the action frame is reached.
  *
  */
-public class EntityAIDynamicAction extends EntityAIDynamic
+public class EntityAIDynamicAction<T extends EntityCreature & IEntityDynamic>  extends EntityAIDynamic<T>
 {
 	protected Entity target;
 	protected final float rangeSq;
 	protected final boolean require_ground;
 	protected final boolean require_sight;
 
-	public <T extends EntityCreature & IEntityDynamic> EntityAIDynamicAction(T entity, EntityAction action, float range, boolean require_ground) {
+	public EntityAIDynamicAction(T entity, EntityAction action, float range, boolean require_ground) {
 		this(entity, action, range, require_ground, true);
 	}
 
@@ -43,7 +43,7 @@ public class EntityAIDynamicAction extends EntityAIDynamic
 	 * @param require_ground Whether the entity must be on the ground to perform the action
 	 * @param require_sight Whether the entity requires line-of-sight to the target to perform the action
 	 */
-	public <T extends EntityCreature & IEntityDynamic> EntityAIDynamicAction(T entity, EntityAction action, float range, boolean require_ground, boolean require_sight) {
+	public EntityAIDynamicAction(T entity, EntityAction action, float range, boolean require_ground, boolean require_sight) {
 		super(entity, action, 0, 3);
 		this.rangeSq = (range * range);
 		this.require_ground = require_ground;
@@ -54,7 +54,7 @@ public class EntityAIDynamicAction extends EntityAIDynamic
 	 * Return the entity's current attack target
 	 */
 	protected Entity getTarget() {
-		return entity.getAttackTarget();
+		return actor.getAttackTarget();
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class EntityAIDynamicAction extends EntityAIDynamic
 	@Override
 	protected void updateActionState(int frame, int action_frame, float speed) {
 		if (frame < action_frame && target != null) {
-			entity.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
+			actor.getLookHelper().setLookPositionWithEntity(target, 30.0F, 30.0F);
 		}
 	}
 
@@ -77,9 +77,9 @@ public class EntityAIDynamicAction extends EntityAIDynamic
 	protected boolean canPerformAction() {
 		if (target == null || !target.isEntityAlive()) {
 			return false;
-		} else if (require_ground && !entity.onGround) {
+		} else if (require_ground && !actor.onGround) {
 			return false;
-		} else if (require_sight && !entity.getEntitySenses().canSee(target)) {
+		} else if (require_sight && !actor.getEntitySenses().canSee(target)) {
 			return false;
 		} else if (!checkRange()) {
 			return false;
@@ -91,7 +91,7 @@ public class EntityAIDynamicAction extends EntityAIDynamic
 	 * Checks whether entity is within range of the target to perform the action
 	 */
 	protected boolean checkRange() {
-		return entity.getDistanceSqToEntity(target) <= rangeSq;
+		return actor.getDistanceSqToEntity(target) <= rangeSq;
 	}
 
 	@Override
@@ -106,23 +106,19 @@ public class EntityAIDynamicAction extends EntityAIDynamic
 	 * to retrieve the current target.
 	 *
 	 */
-	public static class EntityAIDynamicCustomTarget extends EntityAIDynamicAction
+	public static class EntityAIDynamicCustomTarget<T extends EntityCreature & IEntityDynamic & IEntityCustomTarget> extends EntityAIDynamicAction<T>
 	{
-		/** IEntityCustomTarget version of parent entity instance used to retrieve current target */
-		protected final IEntityCustomTarget targeting;
-
-		public <T extends EntityCreature & IEntityDynamic & IEntityCustomTarget> EntityAIDynamicCustomTarget(T entity, EntityAction action, float range, boolean require_ground) {
+		public EntityAIDynamicCustomTarget(T entity, EntityAction action, float range, boolean require_ground) {
 			this(entity, action, range, require_ground, true);
 		}
 
-		public <T extends EntityCreature & IEntityDynamic & IEntityCustomTarget> EntityAIDynamicCustomTarget(T entity, EntityAction action, float range, boolean require_ground, boolean require_sight) {
+		public EntityAIDynamicCustomTarget(T entity, EntityAction action, float range, boolean require_ground, boolean require_sight) {
 			super(entity, action, range, require_ground, require_sight);
-			this.targeting = entity;
 		}
 
 		@Override
 		protected Entity getTarget() {
-			return targeting.getCurrentTarget();
+			return actor.getCurrentTarget();
 		}
 	}
 }

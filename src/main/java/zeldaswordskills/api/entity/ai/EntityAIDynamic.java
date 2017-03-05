@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,10 @@ import net.minecraft.entity.ai.EntityAIBase;
  * Base AI class for AI tasks that interact with {@link IEntityDynamic} entities.
  *
  */
-public class EntityAIDynamic extends EntityAIBase implements IEntityDynamicAI
+public class EntityAIDynamic<T extends EntityCreature & IEntityDynamic> extends EntityAIBase implements IEntityDynamicAI
 {
-	/** Parent entity instance as an EntityCreature */
-	protected final EntityCreature entity;
-
-	/** Parent entity instance as an IEntityDynamic entity */
-	protected final IEntityDynamic actor;
+	/** The dynamic entity */
+	protected final T actor;
 
 	/** The action to perform */
 	protected final EntityAction action;
@@ -46,8 +43,7 @@ public class EntityAIDynamic extends EntityAIBase implements IEntityDynamicAI
 	 * @param action_tick Frame on which the action should be performed
 	 * @param mutex Mutex bits for determining if this AI can run concurrently with others
 	 */
-	public <T extends EntityCreature & IEntityDynamic> EntityAIDynamic(T entity, EntityAction action, int action_tick, int mutex) {
-		this.entity = entity;
+	public EntityAIDynamic(T entity, EntityAction action, int action_tick, int mutex) {
 		this.actor = entity;
 		this.action = action;
 		this.setMutexBits(mutex);

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -84,7 +84,7 @@ public class EntityDekuFire extends EntityDekuBaba implements IEntityAdditionalS
 	@Override
 	protected void addAITasks() {
 		super.addAITasks();
-		this.tasks.addTask(2, new EntityAIDynamicRangedAction(this, ACTION_SPIT, 4.0F, 40.0F, 20, 60, 0.0F, true).setDifficultyScaled());
+		this.tasks.addTask(2, new EntityAIDynamicRangedAction<EntityDekuFire>(this, ACTION_SPIT, 4.0F, 40.0F, 20, 60, 0.0F, true).setDifficultyScaled());
 	}
 
 	@Override
