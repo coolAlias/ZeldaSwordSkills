@@ -2,10 +2,10 @@
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8",
-			"modVersion":"3.2",
+			"modVersion":"3.3",
 			"changeLog": [
-	               "Added Deku Babas",
-	               "See main mod page for full change log"
+	               "Added Magic Meter, Princess Zelda and more!",
+	               "See mod home page for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
 			"isDirectLink":"false",
@@ -13,10 +13,10 @@
 		},
 		{
 			"mcVersion":"Minecraft 1.7.10",
-			"modVersion":"2.3.1",
+			"modVersion":"2.5.1",
 			"changeLog": [
-	               "Fix crash with Tinkers Construct: NoClassDefFoundError",
-	               "See website for full change log"
+					"Bug fixes for 2.5: Added Magic Meter, Princess Zelda and more!",
+					"See mod home page for full change log"
 			],
 			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
 			"isDirectLink":"false",
