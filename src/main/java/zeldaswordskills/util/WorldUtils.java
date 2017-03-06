@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,11 @@ package zeldaswordskills.util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+
+import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockButton;
@@ -55,9 +56,6 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * 
@@ -132,7 +130,7 @@ public class WorldUtils
 		if (!(tileEntity instanceof IInventory)) { return; }
 		IInventory inv = (IInventory) tileEntity;
 		for (int i = 0; i < inv.getSizeInventory(); ++i) {
-			spawnItemWithRandom(world, inv.getStackInSlotOnClosing(i), pos.getX(), pos.getY(), pos.getZ());
+			spawnItemWithRandom(world, inv.removeStackFromSlot(i), pos.getX(), pos.getY(), pos.getZ());
 		}
 	}
 
@@ -366,23 +364,6 @@ public class WorldUtils
 		}
 
 		return hashset;
-	}
-
-	/**
-	 * Returns a list of all entities within the given bounding box that match the class or interface provided
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> List<T> getEntitiesWithinAABB(World world, Class<T> clazz, AxisAlignedBB aabb) {
-		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, aabb);
-		List<T> found = Lists.newArrayList();
-		Iterator<Entity> iterator = entities.iterator();
-		while (iterator.hasNext()) {
-			Entity e = iterator.next();
-			if (clazz.isAssignableFrom(e.getClass())) {
-				found.add((T) e);
-			}
-		}
-		return found;
 	}
 
 	/**

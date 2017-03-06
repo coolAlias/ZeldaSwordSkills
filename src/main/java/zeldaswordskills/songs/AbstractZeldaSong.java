@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.base.Predicate;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
@@ -38,7 +41,6 @@ import zeldaswordskills.item.ItemInstrument;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.SongNote;
-import zeldaswordskills.util.WorldUtils;
 
 /**
  * 
@@ -50,6 +52,13 @@ import zeldaswordskills.util.WorldUtils;
  */
 public abstract class AbstractZeldaSong
 {
+	protected static final Predicate <? super Entity> SELECTOR = new Predicate<Entity>() {
+		@Override
+		public boolean apply(Entity entity) {
+			return entity instanceof ISongEntity;
+		}
+	};
+
 	/** Maximum effect radius for notifying blocks and entities */
 	public static final int MAX_SONG_RADIUS = 16;
 
@@ -307,9 +316,9 @@ public abstract class AbstractZeldaSong
 	 */
 	private void notifySongEntities(World world, EntityPlayer player, int power, int radius) {
 		int affected = 0;
-		List<ISongEntity> entities = WorldUtils.getEntitiesWithinAABB(world, ISongEntity.class, player.getEntityBoundingBox().expand(radius, (double) radius / 2.0D, radius));
-		for (ISongEntity entity : entities) {
-			if (entity.onSongPlayed(player, this, power, affected)) {
+		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, player.getEntityBoundingBox().expand(radius, (double) radius / 2.0D, radius), SELECTOR);
+		for (Entity entity : entities) {
+			if (((ISongEntity) entity).onSongPlayed(player, this, power, affected)) {
 				++affected;
 			}
 		}

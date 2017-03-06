@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,13 +25,10 @@ import net.minecraft.entity.ai.EntityAIBase;
  * Base AI class for AI tasks that interact with {@link IEntityDynamic} entities.
  *
  */
-public class EntityAIDynamic extends EntityAIBase implements IEntityDynamicAI
+public class EntityAIDynamic<T extends EntityCreature & IEntityDynamic> extends EntityAIBase implements IEntityDynamicAI
 {
-	/** Parent entity instance as an EntityCreature */
-	protected final EntityCreature entity;
-
-	/** Parent entity instance as an IEntityDynamic entity */
-	protected final IEntityDynamic actor;
+	/** The dynamic entity */
+	protected final T actor;
 
 	/** The action to perform */
 	protected final EntityAction action;
@@ -46,8 +43,7 @@ public class EntityAIDynamic extends EntityAIBase implements IEntityDynamicAI
 	 * @param action_tick Frame on which the action should be performed
 	 * @param mutex Mutex bits for determining if this AI can run concurrently with others
 	 */
-	public <T extends EntityCreature & IEntityDynamic> EntityAIDynamic(T entity, EntityAction action, int action_tick, int mutex) {
-		this.entity = entity;
+	public  EntityAIDynamic(T entity, EntityAction action, int action_tick, int mutex) {
 		this.actor = entity;
 		this.action = action;
 		this.setMutexBits(mutex);
@@ -55,23 +51,23 @@ public class EntityAIDynamic extends EntityAIBase implements IEntityDynamicAI
 
 	@Override
 	public boolean shouldExecute() {
-		return actor.canExecute(action.id, this);
+		return this.actor.canExecute(this.action.id, this);
 	}
 
 	@Override
 	public void startExecuting() {
-		actor.beginAction(action.id, this);
+		this.actor.beginAction(this.action.id, this);
 	}
 
 	@Override
 	public boolean continueExecuting() {
-		if (actor.getActiveActions().isEmpty() || !actor.getActiveActions().contains(action)) {
+		if (this.actor.getActiveActions().isEmpty() || !this.actor.getActiveActions().contains(this.action)) {
 			return false; // stop executing if action no longer active
 		} else if (!super.continueExecuting()) {
 			return false; // super calls #shouldExecute which calls IEntityDynamic#canExecute
 		}
-		int frame = actor.getActionTime(action.id);
-		int action_duration = action.getDuration(actor.getActionSpeed(action.id));
+		int frame = this.actor.getActionTime(this.action.id);
+		int action_duration = this.action.getDuration(this.actor.getActionSpeed(this.action.id));
 		if (frame >= action_duration) {
 			return false;
 		}
@@ -80,13 +76,13 @@ public class EntityAIDynamic extends EntityAIBase implements IEntityDynamicAI
 
 	@Override
 	public void updateTask() {
-		float speed = actor.getActionSpeed(action.id);
-		int action_frame = action.getActionFrame(speed);
-		int frame = actor.getActionTime(action.id);
+		float speed = this.actor.getActionSpeed(this.action.id);
+		int action_frame = this.action.getActionFrame(speed);
+		int frame = this.actor.getActionTime(this.action.id);
 		updateActionState(frame, action_frame, speed);
-		if (frame == action_frame && !performed && canPerformAction()) {
-			actor.performAction(action.id, this);
-			performed = true; // prevent action from happening twice at slower speeds
+		if (frame == action_frame && !this.performed && canPerformAction()) {
+			this.actor.performAction(this.action.id, this);
+			this.performed = true; // prevent action from happening twice at slower speeds
 		}
 	}
 
@@ -108,7 +104,7 @@ public class EntityAIDynamic extends EntityAIBase implements IEntityDynamicAI
 
 	@Override
 	public void resetTask() {
-		actor.endAction(action.id, this);
-		performed = false;
+		this.actor.endAction(this.action.id, this);
+		this.performed = false;
 	}
 }

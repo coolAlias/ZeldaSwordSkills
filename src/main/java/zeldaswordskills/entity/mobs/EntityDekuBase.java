@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -157,7 +157,7 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 	}
 
 	@Override
-	public boolean canAttackClass(Class clazz) {
+	public boolean canAttackClass(Class<? extends EntityLivingBase> clazz) {
 		return !EntityDekuBase.class.isAssignableFrom(clazz) && super.canAttackClass(clazz);
 	}
 
@@ -177,7 +177,7 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 		float f = (float)this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int i = 0;
 		if (entity instanceof EntityLivingBase) {
-			f += EnchantmentHelper.func_152377_a(this.getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
+			f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
 			i += EnchantmentHelper.getKnockbackModifier(this);
 		}
 		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), f);
@@ -259,11 +259,11 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void handleHealthUpdate(byte flag) {
+	public void handleStatusUpdate(byte flag) {
 		if (flag == CUSTOM_DEATH) {
 			custom_death = (this.rand.nextInt(2) == 0 ? -1 : 1);
 		} else {
-			super.handleHealthUpdate(flag);
+			super.handleStatusUpdate(flag);
 		}
 	}
 

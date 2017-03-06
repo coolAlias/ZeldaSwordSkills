@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import net.minecraft.util.MathHelper;
  * AI to perform an action when the target is at least a certain distance away.
  *
  */
-public class EntityAIDynamicRangedAction extends EntityAIDynamicAction
+public class EntityAIDynamicRangedAction<T extends EntityCreature & IEntityDynamic> extends EntityAIDynamicAction<T>
 {
 	/** Maximum range */
 	protected final float range;
@@ -48,7 +48,7 @@ public class EntityAIDynamicRangedAction extends EntityAIDynamicAction
 	/** Whether the delay scales with difficulty, i.e. becomes shorter on higher difficulties */
 	protected boolean difficultScaled;
 
-	public <T extends EntityCreature & IEntityDynamic> EntityAIDynamicRangedAction(T entity, EntityAction action, float rangeMin, float rangeMax, int minDelay, int maxDelay, float speed, boolean require_ground) {
+	public EntityAIDynamicRangedAction(T entity, EntityAction action, float rangeMin, float rangeMax, int minDelay, int maxDelay, float speed, boolean require_ground) {
 		this(entity, action, rangeMin, rangeMax, minDelay, maxDelay, speed, require_ground, true);
 	}
 
@@ -59,7 +59,7 @@ public class EntityAIDynamicRangedAction extends EntityAIDynamicAction
 	 * @param maxDelay Maximum delay between actions, give or take a little
 	 * @param speed    Speed at which the entity will move towards a target to close range or gain visibility
 	 */
-	public <T extends EntityCreature & IEntityDynamic> EntityAIDynamicRangedAction(T entity, EntityAction action, float rangeMin, float rangeMax, int minDelay, int maxDelay, float speed, boolean require_ground, boolean require_sight) {
+	public EntityAIDynamicRangedAction(T entity, EntityAction action, float rangeMin, float rangeMax, int minDelay, int maxDelay, float speed, boolean require_ground, boolean require_sight) {
 		super(entity, action, rangeMax, require_ground, require_sight);
 		this.range = rangeMax;
 		this.minRangeSq = rangeMin * rangeMin;
@@ -71,24 +71,24 @@ public class EntityAIDynamicRangedAction extends EntityAIDynamicAction
 	/**
 	 * Sets the delay timer to scale inversely with difficulty (i.e. shorter delay on higher difficulty)
 	 */
-	public EntityAIDynamicRangedAction setDifficultyScaled() {
+	public EntityAIDynamicRangedAction<T> setDifficultyScaled() {
 		this.difficultScaled = true;
 		return this;
 	}
 
 	@Override
 	protected boolean checkRange() {
-		double distance = entity.getDistanceSqToEntity(target);
-		return distance > minRangeSq && distance <= rangeSq;
+		double distance = this.actor.getDistanceSqToEntity(this.target);
+		return distance > this.minRangeSq && distance <= this.rangeSq;
 	}
 
 	@Override
 	protected boolean canPerformAction() {
-		if (target == null || !target.isEntityAlive()) {
+		if (this.target == null || !this.target.isEntityAlive()) {
 			return false;
-		} else if (require_ground && !entity.onGround) {
+		} else if (this.require_ground && !this.actor.onGround) {
 			return false;
-		} else if (require_sight && !entity.getEntitySenses().canSee(target)) {
+		} else if (this.require_sight && !this.actor.getEntitySenses().canSee(this.target)) {
 			return false;
 		} // don't check range again; shoot even if target is too close or too far
 		return true;
@@ -96,23 +96,23 @@ public class EntityAIDynamicRangedAction extends EntityAIDynamicAction
 
 	@Override
 	public boolean continueExecuting() {
-		return super.continueExecuting() || !this.entity.getNavigator().noPath();
+		return super.continueExecuting() || !this.actor.getNavigator().noPath();
 	}
 
 	@Override
 	public boolean shouldExecute() {
 		if (super.shouldExecute()) {
-			if (target == null) {
+			if (this.target == null) {
 				return true; // action in progress, but no target
 			} else if (delay == 0) {
-				float f = this.entity.getDistanceToEntity(this.target) / this.range;
-				float scale = (this.difficultScaled ? 2.0F - 0.5F * this.entity.worldObj.getDifficulty().getDifficultyId() : 1.0F);
+				float f = this.actor.getDistanceToEntity(this.target) / this.range;
+				float scale = (this.difficultScaled ? 2.0F - 0.5F * this.actor.worldObj.getDifficulty().getDifficultyId() : 1.0F);
 				this.delay = MathHelper.floor_float(f * scale * (float)(this.maxDelay - this.minDelay));
-				this.delay += this.minDelay - this.entity.worldObj.rand.nextInt(Math.max(1, this.minDelay));
+				this.delay += this.minDelay - this.actor.worldObj.rand.nextInt(Math.max(1, this.minDelay));
 			}
 			return timer++ > delay;
-		} else if (target != null) {
-			moveIntoPosition();
+		} else if (this.target != null) {
+			this.moveIntoPosition();
 		}
 		return false;
 	}
@@ -122,29 +122,29 @@ public class EntityAIDynamicRangedAction extends EntityAIDynamicAction
 	 * expects current target to be non-null
 	 */
 	protected boolean moveIntoPosition() {
-		double distance = this.entity.getDistanceSq(this.target.posX, this.target.getEntityBoundingBox().minY, this.target.posZ);
-		boolean flag = this.entity.getEntitySenses().canSee(this.target);
+		double distance = this.actor.getDistanceSq(this.target.posX, this.target.getEntityBoundingBox().minY, this.target.posZ);
+		boolean flag = this.actor.getEntitySenses().canSee(this.target);
 		if (flag) {
 			++this.visibilityTimer;
 		} else {
 			this.visibilityTimer = 0;
 		}
 		if (distance <= (double) this.rangeSq && this.visibilityTimer >= 20) {
-			this.entity.getNavigator().clearPathEntity();
+			this.actor.getNavigator().clearPathEntity();
 			return false;
-		} else if (speed > 0.0F) {
-			this.entity.getNavigator().tryMoveToEntityLiving(this.target, this.speed);
+		} else if (this.speed > 0.0F) {
+			this.actor.getNavigator().tryMoveToEntityLiving(this.target, this.speed);
 		}
-		this.entity.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
-		return speed > 0.0F;
+		this.actor.getLookHelper().setLookPositionWithEntity(this.target, 30.0F, 30.0F);
+		return this.speed > 0.0F;
 	}
 
 	@Override
 	public void resetTask() {
 		super.resetTask();
-		target = null;
-		delay = 0;
-		timer = 0;
-		visibilityTimer = 0;
+		this.target = null;
+		this.delay = 0;
+		this.timer = 0;
+		this.visibilityTimer = 0;
 	}
 }

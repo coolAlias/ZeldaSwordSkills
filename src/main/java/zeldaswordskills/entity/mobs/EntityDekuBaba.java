@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -136,11 +136,11 @@ public class EntityDekuBaba extends EntityDekuBase implements IEntityBombEater, 
 
 	@Override
 	protected void addAITasks() {
-		this.tasks.addTask(1, new EntityAIDynamicProne(this, ACTION_PRONE, 63));
-		this.tasks.addTask(2, new EntityAIDynamicAction(this, ACTION_ATTACK, 4.0F, true));
-		this.tasks.addTask(4, new EntityAITargetBombs(this, ACTION_BOMB, 3.0F, true));
+		this.tasks.addTask(1, new EntityAIDynamicProne<EntityDekuBaba>(this, ACTION_PRONE, 63));
+		this.tasks.addTask(2, new EntityAIDynamicAction<EntityDekuBaba>(this, ACTION_ATTACK, 4.0F, true));
+		this.tasks.addTask(4, new EntityAITargetBombs<EntityDekuBaba>(this, ACTION_BOMB, 3.0F, true));
 		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true));
-		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true, false, null));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<EntityPlayer>(this, EntityPlayer.class, 0, true, false, null));
 	}
 
 	@Override
@@ -584,11 +584,11 @@ public class EntityDekuBaba extends EntityDekuBase implements IEntityBombEater, 
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void handleHealthUpdate(byte flag) {
+	public void handleStatusUpdate(byte flag) {
 		if (flag == BOMB_INGESTED) {
 			status_timer = FUSE_TIME;
 		} else if (!setActionState(flag)) {
-			super.handleHealthUpdate(flag);
+			super.handleStatusUpdate(flag);
 		}
 	}
 

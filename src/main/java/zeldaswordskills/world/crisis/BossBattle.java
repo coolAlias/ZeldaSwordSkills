@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package zeldaswordskills.world.crisis;
 
 import java.util.UUID;
+
+import com.google.common.base.Predicate;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -69,6 +71,13 @@ import zeldaswordskills.world.gen.AntiqueAtlasHelper;
  */
 public class BossBattle extends AbstractCrisis
 {
+	protected static final Predicate <? super Entity> SELECTOR = new Predicate<Entity>() {
+		@Override
+		public boolean apply(Entity entity) {
+			return entity instanceof IMob;
+		}
+	};
+
 	/** The dungeon core in which the battle is occurring */
 	protected final TileEntityDungeonCore core;
 
@@ -141,10 +150,10 @@ public class BossBattle extends AbstractCrisis
 	private boolean areAllEnemiesDead(World world) {
 		// TODO instead, add all enemies by id to a List and check if still alive in world
 		Vec3i center = box.getCenter();
-		return (WorldUtils.getEntitiesWithinAABB(world, IMob.class, new AxisAlignedBB(
+		return (world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(
 				center.getX() - 0.5D, center.getY(), center.getZ() - 0.5D,
 				center.getX() + 0.5D, center.getY() + 1, center.getZ() + 0.5D).
-				expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2)).isEmpty());
+				expand(box.getXSize() / 2, box.getYSize() / 2, box.getZSize() / 2), SELECTOR).isEmpty());
 	}
 
 	/**

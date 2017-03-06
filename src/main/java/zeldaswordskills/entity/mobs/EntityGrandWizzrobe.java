@@ -50,7 +50,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		tasks.addTask(0, new EntityAILevitate(this, 2.5D));
 		targetTasks.taskEntries.clear();
 		targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+		targetTasks.addTask(2, new EntityAINearestAttackableTarget<EntityPlayer>(this, EntityPlayer.class, true));
 		enablePersistence();
 		setType(rand.nextInt(WizzrobeType.values().length));
 		setSize(1.0F, 3.0F);

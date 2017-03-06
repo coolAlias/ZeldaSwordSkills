@@ -442,7 +442,7 @@ public class CustomExplosion extends Explosion
 
 	/** Returns map of affected players */
 	@Override
-	public Map getPlayerKnockbackMap() { return playerKnockbackMap; }
+	public Map<EntityPlayer, Vec3> getPlayerKnockbackMap() { return playerKnockbackMap; }
 
 	protected void notifyClients() {
 		if (!worldObj.isRemote) {
