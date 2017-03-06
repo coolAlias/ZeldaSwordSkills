@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -40,14 +40,14 @@ public class EntityRendererAlt extends EntityRenderer
 	}
 
 	@Override
-	public void updateCameraAndRender(float partialTick) {
+	public void updateCameraAndRender(float partialTick, long nanoTime) {
 		if (mc.thePlayer == null || mc.thePlayer.isPlayerSleeping()) {
-			super.updateCameraAndRender(partialTick);
+			super.updateCameraAndRender(partialTick, nanoTime);
 			return;
 		}
 		// TODO used to be yOffset; not sure what renderOffsetY will do
 		mc.thePlayer.renderOffsetY -= ySize;
-		super.updateCameraAndRender(partialTick);
+		super.updateCameraAndRender(partialTick, nanoTime);
 		mc.thePlayer.renderOffsetY = 1.62F;
 	}
 

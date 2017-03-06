@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -77,9 +77,9 @@ public class CommandGrantSong extends CommandBase
 				}
 			}
 			if (!flag) {
-				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.partial", player.getCommandSenderName());
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.partial", player.getName());
 			} else if (commandSender != player) {
-				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.all", player.getCommandSenderName());
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.all", player.getName());
 			}
 		} else {
 			AbstractZeldaSong song = SongAPI.getSongByName(args[1]);
@@ -94,15 +94,15 @@ public class CommandGrantSong extends CommandBase
 					throw new WrongUsageException(getCommandUsage(sender));
 				}
 			} else if (info.learnSong(song, null)) {
-				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.one", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.success.one", player.getName(), new ChatComponentTranslation(song.getTranslationString()));
 			} else {
-				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.failure.player", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.grantsong.failure.player", player.getName(), new ChatComponentTranslation(song.getTranslationString()));
 			}
 		}
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return getListOfStringsMatchingLastWord(args, SongAPI.getRegisteredNames().toArray(new String[SongAPI.getTotalSongs()]));

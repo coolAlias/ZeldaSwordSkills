@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,8 @@ package zeldaswordskills.client.render.item;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -30,8 +32,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.model.ISmartItemModel;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -48,7 +48,7 @@ public class ModelItemShield implements ISmartItemModel
 
 	public ModelItemShield(IBakedModel shieldFront) {
 		this.shieldFront = shieldFront;
-		String resourceLocation = shieldFront.getTexture().getIconName().replaceAll("items/", "").replaceAll("#inventory", "").replaceAll("_using", "") + "_back";
+		String resourceLocation = shieldFront.getParticleTexture().getIconName().replaceAll("items/", "").replaceAll("#inventory", "").replaceAll("_using", "") + "_back";
 		IBakedModel shieldBack = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(new ModelResourceLocation(resourceLocation, "inventory"));
 		this.quads = Lists.newArrayList(shieldFront.getGeneralQuads());
 		for (BakedQuad quad : (List<BakedQuad>) shieldBack.getGeneralQuads()) {
@@ -80,8 +80,8 @@ public class ModelItemShield implements ISmartItemModel
 	}
 
 	@Override
-	public TextureAtlasSprite getTexture() {
-		return shieldFront.getTexture();
+	public TextureAtlasSprite getParticleTexture() {
+		return shieldFront.getParticleTexture();
 	}
 
 	@Override

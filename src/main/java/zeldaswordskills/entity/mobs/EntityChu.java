@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -558,7 +558,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		}
 		this.onGroundSpeedFactor += (f3 - this.onGroundSpeedFactor) * 0.3F;
 		this.worldObj.theProfiler.startSection("headTurn");
-		f2 = this.func_110146_f(f1, f2);
+		f2 = this.updateDistance(f1, f2);
 		this.worldObj.theProfiler.endSection();
 		this.worldObj.theProfiler.startSection("rangeChecks");
 		while (this.rotationYaw - this.prevRotationYaw < -180.0F) {

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -124,7 +124,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
 		tasks.addTask(5, new EntityAILookIdle(this));
 		targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-		targetTasks.addTask(2, new EntityAINearestAttackableTargetNight(this, EntityPlayer.class, 0, true, 0.5F));
+		targetTasks.addTask(2, new EntityAINearestAttackableTargetNight<EntityPlayer>(this, EntityPlayer.class, 0, true, 0.5F));
 		experienceValue = 8; // normal mobs are 5
 		setSize(0.6F, 1.8F);
 		setType(WizzrobeType.WIND_WIZ);

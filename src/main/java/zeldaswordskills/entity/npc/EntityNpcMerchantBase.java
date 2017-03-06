@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -136,7 +136,7 @@ public abstract class EntityNpcMerchantBase extends EntityNpcBase implements ICu
 		if (recipe.getToolUses() == 1 || rand.nextInt(5) == 0) {
 			refreshTimer = 40;
 			refreshTrades = true;
-			lastCustomer = (customer == null ? null : customer.getCommandSenderName());
+			lastCustomer = (customer == null ? null : customer.getName());
 			xp += 5;
 		}
 		if (recipe.getRewardsExp()) {

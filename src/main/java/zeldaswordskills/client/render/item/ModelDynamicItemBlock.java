@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,26 +21,27 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartItemModel;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import zeldaswordskills.api.item.IDynamicItemBlock;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.ref.ModInfo;
@@ -77,8 +78,8 @@ public class ModelDynamicItemBlock implements ISmartItemModel {
 	}
 
 	@Override
-	public TextureAtlasSprite getTexture() {
-		return defaultModel.getTexture();
+	public TextureAtlasSprite getParticleTexture() {
+		return defaultModel.getParticleTexture();
 	}
 
 	@Override
@@ -151,8 +152,8 @@ public class ModelDynamicItemBlock implements ISmartItemModel {
 		}
 
 		@Override
-		public TextureAtlasSprite getTexture() {
-			return parent.getTexture();
+		public TextureAtlasSprite getParticleTexture() {
+			return parent.getParticleTexture();
 		}
 
 		@Override
@@ -161,7 +162,7 @@ public class ModelDynamicItemBlock implements ISmartItemModel {
 		}
 
 		@Override
-		public Pair<IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType) {
+		public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
 			Matrix4f matrix = null;
 			switch (cameraTransformType) {
 			case FIRST_PERSON:
@@ -186,6 +187,11 @@ public class ModelDynamicItemBlock implements ISmartItemModel {
 				break;
 			}
 			return Pair.of(parent, matrix);
+		}
+
+		@Override
+		public VertexFormat getFormat() {
+			return DefaultVertexFormats.ITEM;
 		}
 	}
 }

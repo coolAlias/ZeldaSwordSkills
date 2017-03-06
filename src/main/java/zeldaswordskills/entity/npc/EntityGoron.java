@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import net.minecraft.entity.ai.EntityAIVillagerMate;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.EntityAIWatchClosest2;
+import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -105,7 +106,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 		tasks.addTask(1, new EntityAITradePlayer(this));
 		tasks.addTask(1, new EntityAILookAtTradePlayer(this));
 		tasks.addTask(2, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
-		tasks.addTask(2, new EntityAIAttackOnCollide(this, IMob.class, 1.0D, false));
+		tasks.addTask(2, new EntityAIAttackOnCollide(this, 1.0D, false));
 		tasks.addTask(3, new EntityAIMoveTowardsTarget(this, getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue(), 16.0F));
 		tasks.addTask(4, new EntityAIMoveThroughVillage(this, 0.6D, true));
 		//tasks.addTask(2, new EntityAIMoveIndoors(this));
@@ -256,12 +257,12 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void handleHealthUpdate(byte flag) {
+	public void handleStatusUpdate(byte flag) {
 		if (flag == ATTACK_FLAG) {
 			// matches golem's value for rendering; not the same as value on server
 			attackTimer = 10;
 		} else {
-			super.handleHealthUpdate(flag);
+			super.handleStatusUpdate(flag);
 		}
 	}
 
@@ -277,7 +278,7 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 
 		if (entity instanceof EntityLivingBase) {
 			// func_152377_a applies attack damage modifier of the held weapon vs. the attack creature's type (e.g. UNDEAD)
-			amount += EnchantmentHelper.func_152377_a(this.getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
+			amount += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
 			knockback += EnchantmentHelper.getKnockbackModifier(this);
 		}
 		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), amount);
@@ -308,11 +309,22 @@ public class EntityGoron extends EntityVillager implements IVillageDefender, ISo
 	}
 
 	@Override
+	public boolean canAttackClass(Class<? extends EntityLivingBase> cls) {
+		return cls != EntityCreeper.class && super.canAttackClass(cls);
+	}
+
+	@Override
 	protected void collideWithEntity(Entity entity) {
+		if (entity instanceof EntityLivingBase) {
+			collideWtihEntityLivingBase((EntityLivingBase) entity);
+		}
+		super.collideWithEntity(entity);
+	}
+
+	protected void collideWtihEntityLivingBase(EntityLivingBase entity) {
 		if (entity instanceof IMob && canAttackClass(entity.getClass()) && getRNG().nextInt(20) == 0) {
 			setAttackTarget((EntityLivingBase) entity);
 		}
-		super.collideWithEntity(entity);
 	}
 
 	public int getAttackTimer() {

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,11 @@
 
 package zeldaswordskills.entity.ai;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-
 import com.google.common.base.Predicate;
+
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 
 /**
  * 
@@ -29,20 +29,20 @@ import com.google.common.base.Predicate;
  * may be limited by light level to replicate behavior such as spiders during the day.
  *
  */
-public class EntityAINearestAttackableTargetNight extends EntityAINearestAttackableTarget
+public class EntityAINearestAttackableTargetNight<T extends EntityLivingBase> extends EntityAINearestAttackableTarget<T>
 {
 	/** Light level below which task owner will search for targets */
 	private final float minLightLevel;
 
-	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, float minLightLevel) {
+	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<T> targetClass, int targetChance, boolean shouldCheckSight, float minLightLevel) {
 		this(taskOwner, targetClass, targetChance, shouldCheckSight, false, minLightLevel);
 	}
 
-	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, float minLightLevel) {
+	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<T> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, float minLightLevel) {
 		this(taskOwner, targetClass, targetChance, shouldCheckSight, nearbyOnly, null, minLightLevel);
 	}
 
-	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<? extends Entity> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, Predicate targetEntitySelector, float minLightLevel) {
+	public EntityAINearestAttackableTargetNight(EntityCreature taskOwner, Class<T> targetClass, int targetChance, boolean shouldCheckSight, boolean nearbyOnly, Predicate<T> targetEntitySelector, float minLightLevel) {
 		super(taskOwner, targetClass, targetChance, shouldCheckSight, nearbyOnly, targetEntitySelector);
 		this.minLightLevel = minLightLevel;
 	}

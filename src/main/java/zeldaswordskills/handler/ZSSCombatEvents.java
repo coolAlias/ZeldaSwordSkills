@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -115,7 +115,7 @@ public class ZSSCombatEvents
 	public void onSetAttackTarget(LivingSetAttackTargetEvent event) {
 		if (event.target instanceof EntityPlayer && event.entity instanceof EntityLiving) {
 			ItemStack mask = ((EntityPlayer) event.target).getCurrentArmor(ArmorIndex.WORN_HELM);
-			if (mask != null && mask.getItem() == ZSSItems.maskSpooky && event.entityLiving.func_94060_bK() != event.target) {
+			if (mask != null && mask.getItem() == ZSSItems.maskSpooky && event.entityLiving.getAttackingEntity() != event.target) {
 				((EntityLiving) event.entity).setAttackTarget(null);
 			}
 		}

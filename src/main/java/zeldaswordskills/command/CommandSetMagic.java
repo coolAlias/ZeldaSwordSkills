@@ -78,11 +78,11 @@ public class CommandSetMagic extends CommandBase
 			info.setCurrentMagic(mp);
 			mp = Math.round(info.getCurrentMagic());
 		}
-		PlayerUtils.sendTranslatedChat(commandSender, "commands.zssmagic.success", player.getCommandSenderName(), args[2], mp);
+		PlayerUtils.sendTranslatedChat(commandSender, "commands.zssmagic.success", player.getName(), args[2], mp);
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch(args.length) {
 		case 1: return CommandBase.getListOfStringsMatchingLastWord(args, getPlayers());
 		case 2: return Arrays.asList("add","set");

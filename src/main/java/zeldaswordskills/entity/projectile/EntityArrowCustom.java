@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -517,7 +517,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		compound.setDouble("damage", getDamage());
 		compound.setInteger("arrowId", Item.getIdFromItem(arrowItem));
 		if ((shooterName == null || shooterName.length() == 0) && shootingEntity instanceof EntityPlayer) {
-			shooterName = shootingEntity.getCommandSenderName();
+			shooterName = shootingEntity.getName();
 		}
 		compound.setString("shooter", shooterName == null ? "" : shooterName);
 		compound.setInteger("target", getTarget() == null ? -1 : getTarget().getEntityId());

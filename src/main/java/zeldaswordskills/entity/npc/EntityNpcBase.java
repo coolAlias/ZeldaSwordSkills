@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package zeldaswordskills.entity.npc;
+
+import com.google.common.base.Predicate;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -46,8 +48,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ref.Config;
 
-import com.google.common.base.Predicate;
-
 /**
  * 
  * Generic NPC class adds default villager-like AI and keeps close to a village when possible.
@@ -70,7 +70,7 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 		((PathNavigateGround) this.getNavigator()).setBreakDoors(true);
 		((PathNavigateGround) this.getNavigator()).setAvoidsWater(true);
 		this.tasks.addTask(0, new EntityAISwimming(this));
-		this.tasks.addTask(1, new EntityAIAvoidEntity(this, new Predicate<Entity>() {
+		this.tasks.addTask(1, new EntityAIAvoidEntity<Entity>(this, Entity.class, new Predicate<Entity>() {
 			public boolean apply(Entity entity) {
 				return entity instanceof IMob;
 			}
@@ -146,7 +146,7 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void handleHealthUpdate(byte flag) {
+	public void handleStatusUpdate(byte flag) {
 		switch(flag) {
 		case 12:
 			generateRandomParticles(EnumParticleTypes.HEART);
@@ -158,7 +158,7 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 			generateRandomParticles(EnumParticleTypes.VILLAGER_HAPPY);
 			break;
 		default:
-			super.handleHealthUpdate(flag);
+			super.handleStatusUpdate(flag);
 		}
 	}
 
@@ -182,7 +182,7 @@ public abstract class EntityNpcBase extends EntityCreature implements INpc
 			villageObj.addOrRenewAgressor(entity);
 			if (entity instanceof EntityPlayer) {
 				int rep = (isChild() ? -3 : -1);
-				villageObj.setReputationForPlayer(entity.getCommandSenderName(), rep);
+				villageObj.setReputationForPlayer(entity.getName(), rep);
 				if (isEntityAlive()) {
 					worldObj.setEntityState(this, (byte) 13);
 				}

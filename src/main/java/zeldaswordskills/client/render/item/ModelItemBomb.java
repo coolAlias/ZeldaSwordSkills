@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,9 @@ import javax.vecmath.Matrix4f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.IBakedModel;
@@ -31,8 +33,10 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -73,7 +77,7 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 	}
 
 	@Override
-	public Pair<IBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
+	public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
 		// gui renders as 2D sprite; this is apparently also what renders when the item is dropped
 		if (cameraTransformType == ItemCameraTransforms.TransformType.GUI) {
 			RenderItem.applyVanillaTransform(baseModel.getItemCameraTransforms().gui);
@@ -109,12 +113,12 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 	}
 
 	@Override
-	public List getFaceQuads(EnumFacing face) {
+	public List<BakedQuad> getFaceQuads(EnumFacing face) {
 		return baseModel.getFaceQuads(face);
 	}
 
 	@Override
-	public List getGeneralQuads() {
+	public List<BakedQuad> getGeneralQuads() {
 		return baseModel.getGeneralQuads();
 	}
 
@@ -134,8 +138,8 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 	}
 
 	@Override
-	public TextureAtlasSprite getTexture() {
-		return baseModel.getTexture();
+	public TextureAtlasSprite getParticleTexture() {
+		return baseModel.getParticleTexture();
 	}
 
 	@Override

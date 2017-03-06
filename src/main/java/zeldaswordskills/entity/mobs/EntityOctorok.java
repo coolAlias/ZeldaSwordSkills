@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -128,7 +128,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	}
 
 	@Override
-	public boolean canAttackClass(Class clazz) {
+	public boolean canAttackClass(Class<? extends EntityLivingBase> clazz) {
 		return super.canAttackClass(clazz) && clazz != EntityOctorok.class;
 	}
 
@@ -288,7 +288,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		float damage = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int knockback = 0;
 		if (entity instanceof EntityLivingBase) {
-			damage += EnchantmentHelper.func_152377_a(getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
+			damage += EnchantmentHelper.getModifierForCreature(getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
 			knockback += EnchantmentHelper.getKnockbackModifier(this);
 		}
 		boolean flag = entity.attackEntityFrom(DamageSource.causeMobDamage(this), damage);

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -154,7 +154,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
 		tasks.addTask(6, new EntityAILookIdle(this));
 		targetTasks.addTask(1, new EntityAIHurtByTarget(this, true));
-		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+		targetTasks.addTask(2, new EntityAINearestAttackableTarget<EntityPlayer>(this, EntityPlayer.class, true));
 		setSize(1.0F, 3.0F);
 		experienceValue = 12;
 	}
@@ -477,7 +477,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		float damage = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int k = (flag == POWER_ATTACK_FLAG || flag == SPIN_FLAG ? 1 : 0); // knockback
 		if (entity instanceof EntityLivingBase) {
-			damage += EnchantmentHelper.func_152377_a(getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
+			damage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) entity).getCreatureAttribute());
 			k += EnchantmentHelper.getKnockbackModifier(this);
 		}
 		if (entity.attackEntityFrom(getDamageSource(flag), damage)) {
@@ -644,7 +644,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void handleHealthUpdate(byte flag) {
+	public void handleStatusUpdate(byte flag) {
 		switch(flag) {
 		case ATTACK_FLAG:
 			isPowerAttack = false;
@@ -669,7 +669,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 			spinAttackTimer = 12;
 			break;
 		default:
-			super.handleHealthUpdate(flag);
+			super.handleStatusUpdate(flag);
 		}
 	}
 

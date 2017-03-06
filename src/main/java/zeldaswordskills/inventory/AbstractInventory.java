@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ public abstract class AbstractInventory implements IInventory
 	}
 
 	@Override
-	public ItemStack getStackInSlotOnClosing(int slot) {
+	public ItemStack removeStackFromSlot(int slot) {
 		ItemStack stack = getStackInSlot(slot);
 		setInventorySlotContents(slot, null);
 		return stack;
@@ -112,7 +112,7 @@ public abstract class AbstractInventory implements IInventory
 	 * Return unlocalized name here, or pre-translated and return true for hasCustomName()
 	 */
 	@Override
-	public String getCommandSenderName() {
+	public String getName() {
 		return "";
 	}
 
@@ -123,7 +123,7 @@ public abstract class AbstractInventory implements IInventory
 
 	@Override
 	public IChatComponent getDisplayName() {
-		return (IChatComponent)(hasCustomName() ? new ChatComponentText(getCommandSenderName()) : new ChatComponentTranslation(getCommandSenderName()));
+		return (IChatComponent)(hasCustomName() ? new ChatComponentText(getName()) : new ChatComponentTranslation(getName()));
 	}
 
 	/**

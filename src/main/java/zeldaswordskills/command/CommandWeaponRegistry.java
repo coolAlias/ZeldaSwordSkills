@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -111,7 +111,7 @@ public class CommandWeaponRegistry extends CommandBase
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		switch (args.length) {
 		case 1: return getListOfStringsMatchingLastWord(args, "allow", "forbid");
 		case 2: return getListOfStringsMatchingLastWord(args, "sword", "weapon");

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -98,7 +98,7 @@ public class FairySpawner
 			itemUpdate = 2;
 		}
 		if (playerName.equals("")) {
-			playerName = player.getCommandSenderName();
+			playerName = player.getName();
 		}
 	}
 
