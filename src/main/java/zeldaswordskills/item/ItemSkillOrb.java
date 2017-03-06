@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -125,7 +125,7 @@ public class ItemSkillOrb extends BaseModItem implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (SkillBase skill : SkillBase.getSkills()) {
 			list.add(new ItemStack(item, 1, skill.getId()));
 		}
@@ -133,7 +133,7 @@ public class ItemSkillOrb extends BaseModItem implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		if (SkillBase.doesSkillExist(stack.getItemDamage())) {
 			SkillBase skill = ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.getSkill(stack.getItemDamage()));
 			if (skill != null && skill.getLevel() > 0) {

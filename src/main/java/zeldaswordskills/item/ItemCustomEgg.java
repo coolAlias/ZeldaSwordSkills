@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -174,7 +174,7 @@ public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavi
 	 * @return true if a child was spawned and the EntityInteractEvent should be canceled
 	 */
 	private boolean spawnChild(World world, ItemStack stack, EntityPlayer player, EntityAgeable entity) {
-		Class oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
+		Class<? extends Entity> oclass = CustomEntityList.getClassFromID(stack.getItemDamage());
 		if (oclass != null && oclass == entity.getClass()) {
 			EntityAgeable child = entity.createChild(entity);
 			if (child != null) {
@@ -205,7 +205,7 @@ public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavi
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List itemList) {
+	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> itemList) {
 		Iterator<Class<? extends Entity>> iterator = CustomEntityList.entityEggs.keySet().iterator();
 		while (iterator.hasNext()) {
 			Class<? extends Entity> oclass = iterator.next();

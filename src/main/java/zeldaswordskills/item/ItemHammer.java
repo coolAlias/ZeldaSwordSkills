@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package zeldaswordskills.item;
 
 import java.util.List;
+
+import com.google.common.collect.Multimap;
 
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
@@ -58,8 +60,6 @@ import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
-
-import com.google.common.collect.Multimap;
 
 @Optional.Interface(iface="mods.battlegear2.api.weapons.IBattlegearWeapon", modid="battlegear2", striprefs=true)
 public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifier, ISmashBlock, ISpawnParticles, ISwingSpeed, IUnenchantable, IWeapon, IBattlegearWeapon
@@ -223,15 +223,15 @@ public class ItemHammer extends BaseModItem implements IArmorBreak, IParryModifi
 	}
 
 	@Override
-	public Multimap getAttributeModifiers(ItemStack stack) {
-		Multimap multimap = super.getAttributeModifiers(stack);
+	public Multimap<String, AttributeModifier> getAttributeModifiers(ItemStack stack) {
+		Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(stack);
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", (double) weaponDamage, 0));
 		return multimap;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 	}
 

@@ -107,7 +107,7 @@ public class ItemZeldaPotion extends ItemDrinkable implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		if (restoreHP > 0) {
 			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.restore_hp", String.format("%.0f", restoreHP / 2.0F)));
 		}

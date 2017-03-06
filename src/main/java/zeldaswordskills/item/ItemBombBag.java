@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,8 @@ package zeldaswordskills.item;
 
 import java.util.Collection;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -45,8 +47,6 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -138,7 +138,7 @@ public class ItemBombBag extends BaseModItem implements ISwapModel, IUnenchantab
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.1"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.2"));

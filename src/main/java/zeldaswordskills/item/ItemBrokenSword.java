@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package zeldaswordskills.item;
 
 import java.util.List;
+
+import com.google.common.collect.Multimap;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -48,8 +50,6 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-
-import com.google.common.collect.Multimap;
 
 /**
  * 
@@ -118,7 +118,7 @@ public class ItemBrokenSword extends BaseModItem implements IUnenchantable, IWea
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (int i = 0; i < parentSwords.length; ++i) {
 			list.add(new ItemStack(item, 1, i));
 		}
@@ -135,13 +135,13 @@ public class ItemBrokenSword extends BaseModItem implements IUnenchantable, IWea
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.sword_broken.desc.0"));
 	}
 
 	@Override
-	public Multimap getAttributeModifiers(ItemStack stack) {
-		Multimap multimap = super.getAttributeModifiers(stack);
+	public Multimap<String, AttributeModifier> getAttributeModifiers(ItemStack stack) {
+		Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(stack);
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", 2.0D, 0));
 		return multimap;
 	}

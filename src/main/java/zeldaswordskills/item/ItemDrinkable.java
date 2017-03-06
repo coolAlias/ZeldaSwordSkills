@@ -164,7 +164,7 @@ public class ItemDrinkable extends Item implements IModItem
 		}
 		@Override
 		@SideOnly(Side.CLIENT)
-		public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+		public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean isHeld) {
 			list.add(StatCollector.translateToLocal("tooltip.zss.lon_lon_special.desc.0"));
 			list.add(StatCollector.translateToLocal("tooltip.zss.lon_lon_special.desc.1"));
 		}

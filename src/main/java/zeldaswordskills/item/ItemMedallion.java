@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -244,7 +244,7 @@ public class ItemMedallion extends BaseModItem implements ISpawnParticles
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockAncientTablet.EnumType type : BlockAncientTablet.EnumType.values()) {
 			list.add(new ItemStack(item, 1, type.ordinal()));
 		}
@@ -261,7 +261,7 @@ public class ItemMedallion extends BaseModItem implements ISpawnParticles
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		BlockAncientTablet.EnumType type = BlockAncientTablet.EnumType.byMetadata(stack.getItemDamage());
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.medallion." + type.getName() + ".desc.0"));
 	}

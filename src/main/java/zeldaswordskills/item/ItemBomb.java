@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,8 @@ package zeldaswordskills.item;
 
 import java.util.Collection;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -54,8 +56,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -257,7 +257,7 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BombType type : BombType.values()) {
 			list.add(new ItemStack(item, 1, type.ordinal()));
 		}
@@ -265,7 +265,7 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack itemstack, EntityPlayer player, List<String> list, boolean advanced) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb.desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb.desc.1"));
 	}

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -212,7 +212,7 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 	 * Affects all blocks in the radius with the effects of Din's Fire
 	 */
 	private void affectDinBlocks(World world, EntityPlayer player, float radius) {
-		List<BlockPos> affectedBlockPositions = new ArrayList(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, null));
+		List<BlockPos> affectedBlockPositions = new ArrayList<BlockPos>(WorldUtils.getAffectedBlocksList(world, world.rand, radius, player.posX, player.posY, player.posZ, null));
 		Block block;
 		BlockPos pos;
 		Iterator<BlockPos> iterator = affectedBlockPositions.iterator();
@@ -374,7 +374,7 @@ public class ItemSpiritCrystal extends BaseModItem implements ISacredFlame, ISpa
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.1"));
 	}

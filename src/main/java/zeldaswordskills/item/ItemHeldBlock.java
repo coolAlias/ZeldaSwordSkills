@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package zeldaswordskills.item;
 
 import java.util.Collection;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
@@ -48,8 +50,6 @@ import zeldaswordskills.api.item.IHandleToss;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.client.ISwapModel;
 import zeldaswordskills.client.render.item.ModelDynamicItemBlock;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -256,7 +256,7 @@ public class ItemHeldBlock extends BaseModItem implements IDynamicItemBlock, IHa
 		}
 		Block block = world.getBlockState(pos).getBlock();
 		if (block == state.getBlock()) {
-			ItemBlock.setTileEntityNBT(world, pos, stack, player);
+			ItemBlock.setTileEntityNBT(world, player, pos, stack);
 			block.onBlockPlacedBy(world, pos, state, player, stack);
 			if (block instanceof ILiftable) {
 				((ILiftable) block).onHeldBlockPlaced(world, stack, pos, state);

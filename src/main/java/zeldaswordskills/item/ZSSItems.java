@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -464,7 +464,7 @@ public class ZSSItems
 		tunicZoraHelm = (new ItemArmorTunic(ZSSMain.proxy.addArmor("tunic"), ArmorIndex.TYPE_HELM) {
 			@Override
 			@SideOnly(Side.CLIENT)
-			public void getSubItems(Item item, CreativeTabs tab, List list) {
+			public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
 				ItemStack helm = new ItemStack(item);
 				helm.addEnchantment(Enchantment.respiration, 3);
 				list.add(helm);
@@ -604,7 +604,7 @@ public class ZSSItems
 			}
 			@Override
 			@SideOnly(Side.CLIENT)
-			public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
+			public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 				list.add(StatCollector.translateToLocal("tooltip.zss.magic_container.desc.0"));
 				list.add(StatCollector.translateToLocal("tooltip.zss.magic_container.desc.1"));
 			}

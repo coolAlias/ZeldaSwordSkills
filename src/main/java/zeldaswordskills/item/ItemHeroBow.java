@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -180,7 +180,7 @@ IAllowItem, ISheathed, ISpecialBow
 	private static final Map<Item, ElementType> elementalArrowMap = new HashMap<Item, ElementType>();
 
 	/** Static list to store fire handlers; can't set type without requiring BG2 */
-	private static final List fireHandlers = new ArrayList();
+	private static final List<IArrowFireHandler> fireHandlers = new ArrayList<IArrowFireHandler>();
 
 	public ItemHeroBow() {
 		super();
@@ -621,7 +621,7 @@ IAllowItem, ISheathed, ISpecialBow
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubItems(Item item, CreativeTabs tab, List list) {
+	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (int i = 1; i < 4; ++i) {
 			ItemStack stack = new ItemStack(item);
 			setLevel(stack, i);
@@ -631,7 +631,7 @@ IAllowItem, ISheathed, ISpecialBow
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip." + getUnlocalizedName().substring(5) + ".desc.1", getLevel(stack)));
 		Item item = getMode(stack).getArrowItem();
@@ -678,7 +678,7 @@ IAllowItem, ISheathed, ISpecialBow
 	@Method(modid="battlegear2")
 	@Override
 	public List<IArrowFireHandler> getFireHandlers(ItemStack arrow, ItemStack bow, EntityPlayer player) {
-		return (List<IArrowFireHandler>) fireHandlers;
+		return fireHandlers;
 	}
 
 	@Method(modid="battlegear2")

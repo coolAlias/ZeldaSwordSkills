@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,9 @@
 package zeldaswordskills.item;
 
 import java.util.List;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import mods.battlegear2.api.weapons.IBattlegearWeapon;
 import net.minecraft.block.Block;
@@ -55,9 +58,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 
 /**
  * 
@@ -196,15 +196,15 @@ public class ItemZeldaSword extends BaseModItemSword implements IBattlegearWeapo
 	 * Override to add custom weapon damage field rather than vanilla ItemSword's field
 	 */
 	@Override
-	public Multimap getItemAttributeModifiers() {
-		Multimap multimap = HashMultimap.create();
+	public Multimap<String, AttributeModifier> getItemAttributeModifiers() {
+		Multimap<String, AttributeModifier> multimap = HashMultimap.create();
 		multimap.put(SharedMonsterAttributes.attackDamage.getAttributeUnlocalizedName(), new AttributeModifier(itemModifierUUID, "Weapon modifier", (double) weaponDamage, 0));
 		return multimap;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 		if (stack.getItem() == ZSSItems.swordTempered) {
 			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssHitCount")) {

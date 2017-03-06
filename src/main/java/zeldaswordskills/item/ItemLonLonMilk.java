@@ -106,7 +106,7 @@ public class ItemLonLonMilk extends ItemDrinkable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		long expiration = (stack.hasTagCompound() ? stack.getTagCompound().getLong("expiration") : 0);
 		if (expiration > 0 && player.worldObj.getWorldTime() > expiration) {
 			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocal("tooltip.zss.lon_lon_milk.expired"));
