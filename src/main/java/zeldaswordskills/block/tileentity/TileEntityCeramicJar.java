@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,9 +26,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ITickable;
 import zeldaswordskills.ref.Config;
 
 /**
@@ -36,7 +36,7 @@ import zeldaswordskills.ref.Config;
  * A jar that holds one ItemStack and sucks in nearby items if inventory is empty
  *
  */
-public class TileEntityCeramicJar extends TileEntityInventory implements IUpdatePlayerListBox
+public class TileEntityCeramicJar extends TileEntityInventory implements ITickable
 {
 	public TileEntityCeramicJar() {
 		inventory = new ItemStack[1];
@@ -94,7 +94,7 @@ public class TileEntityCeramicJar extends TileEntityInventory implements IUpdate
 	}
 
 	@Override
-	public Packet getDescriptionPacket() {
+	public Packet<?> getDescriptionPacket() {
 		NBTTagCompound tag = new NBTTagCompound();
 		this.writeToNBT(tag);
 		return new S35PacketUpdateTileEntity(getPos(), 1, tag);

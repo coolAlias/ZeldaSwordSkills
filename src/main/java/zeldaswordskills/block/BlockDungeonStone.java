@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package zeldaswordskills.block;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStone;
@@ -67,8 +69,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 
-import com.google.common.collect.Lists;
-
 /**
  * 
  * A simple block that renders as nearly any texture and can only be destroyed by explosions
@@ -96,7 +96,7 @@ public class BlockDungeonStone extends Block implements ICustomStateMapper, IDun
 
 	@Override
 	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.VERY_HEAVY);
+		return (state.getValue(UNBREAKABLE).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.VERY_HEAVY);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class BlockDungeonStone extends Block implements ICustomStateMapper, IDun
 
 	@Override
 	public boolean canEntityDestroy(IBlockAccess world, BlockPos pos, Entity entity) {
-		return !((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue();
+		return !world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue();
 	}
 
 	@Override
@@ -177,7 +177,7 @@ public class BlockDungeonStone extends Block implements ICustomStateMapper, IDun
 	// TODO remove if Mojang's stupid code ever gets fixed
 	@Override
 	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
-		if (!((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue()) {
+		if (!world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue()) {
 			super.onBlockExploded(world, pos, explosion);
 		}
 	}
@@ -188,7 +188,7 @@ public class BlockDungeonStone extends Block implements ICustomStateMapper, IDun
 		if (state.getBlock() != this) {
 			return state.getBlock().getExplosionResistance(world, pos, entity, explosion);
 		}
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
+		return (state.getValue(UNBREAKABLE).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
 	}
 
 	@Override
@@ -203,7 +203,7 @@ public class BlockDungeonStone extends Block implements ICustomStateMapper, IDun
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? 0x8 : 0x0;
+		return state.getValue(UNBREAKABLE).booleanValue() ? 0x8 : 0x0;
 	}
 
 	@Override
@@ -252,7 +252,7 @@ public class BlockDungeonStone extends Block implements ICustomStateMapper, IDun
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		list.add(new ItemStack(item, 1, 0));
 		list.add(new ItemStack(item, 1, 8));
 	}

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ import zeldaswordskills.util.PlayerUtils;
 public class BlockAncientTablet extends Block implements IBlockItemVariant, ICustomStateMapper, IVanillaRotation, IWhipBlock
 {
 	public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockAncientTablet.EnumType.class);
+	public static final PropertyEnum<BlockAncientTablet.EnumType> VARIANT = PropertyEnum.create("variant", BlockAncientTablet.EnumType.class);
 
 	public BlockAncientTablet(Material material) {
 		super(material);
@@ -103,7 +103,7 @@ public class BlockAncientTablet extends Block implements IBlockItemVariant, ICus
 	@Override
 	public int damageDropped(IBlockState state) {
 		// item version has damage values 0-2 based on variant ordinal
-		return ((BlockAncientTablet.EnumType) state.getValue(VARIANT)).ordinal();
+		return state.getValue(VARIANT).ordinal();
 	}
 
 	@Override
@@ -146,7 +146,7 @@ public class BlockAncientTablet extends Block implements IBlockItemVariant, ICus
 
 	@Override
 	public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
-		int i = ((BlockAncientTablet.EnumType) state.getValue(VARIANT)).ordinal();
+		int i = state.getValue(VARIANT).ordinal();
 		EntityItem item = new EntityInvulnerableItem(world, pos.getX() + 0.5D, pos.getY() + 5.5D, pos.getZ() + 0.5D, new ItemStack(ZSSItems.medallion, 1, i));
 		item.setDefaultPickupDelay();
 		world.spawnEntityInWorld(item);
@@ -155,7 +155,7 @@ public class BlockAncientTablet extends Block implements IBlockItemVariant, ICus
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
-		if (((EnumFacing) world.getBlockState(pos).getValue(FACING)).getAxis() == Axis.X) {
+		if (world.getBlockState(pos).getValue(FACING).getAxis() == Axis.X) {
 			setBlockBounds(0.375F, 0.0F, 0.125F, 0.625F, 0.9375F, 0.875F);
 		} else {
 			setBlockBounds(0.125F, 0.0F, 0.375F, 0.875F, 0.9375F, 0.625F);
@@ -173,7 +173,7 @@ public class BlockAncientTablet extends Block implements IBlockItemVariant, ICus
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockAncientTablet.EnumType variant : BlockAncientTablet.EnumType.values()) {
 			list.add(new ItemStack(item, 1, variant.ordinal()));
 		}
@@ -186,7 +186,7 @@ public class BlockAncientTablet extends Block implements IBlockItemVariant, ICus
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return (((EnumFacing) state.getValue(FACING)).getAxis() == Axis.X ? 1 : 0) + ((EnumType) state.getValue(VARIANT)).getMetadata();
+		return (state.getValue(FACING).getAxis() == Axis.X ? 1 : 0) + state.getValue(VARIANT).getMetadata();
 	}
 
 	@Override

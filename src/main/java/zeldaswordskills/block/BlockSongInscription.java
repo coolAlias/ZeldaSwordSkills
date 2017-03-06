@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -148,7 +148,7 @@ public class BlockSongInscription extends Block implements ITileEntityProvider, 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
 		float f = 1.0F - px2;
-		switch((EnumFacing) world.getBlockState(pos).getValue(FACING)) {
+		switch(world.getBlockState(pos).getValue(FACING)) {
 		case DOWN: setBlockBounds(px2, 1.0F - px1, px2, f, 1.0F, f); break;
 		case UP: setBlockBounds(px2, 0.0F, px2, f, px1, f); break;
 		case NORTH: setBlockBounds(px2, px2, 1.0F - px1, f, f, 1.0F); break;
@@ -160,7 +160,7 @@ public class BlockSongInscription extends Block implements ITileEntityProvider, 
 
 	@Override
 	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighbor) {
-		EnumFacing face = (EnumFacing) state.getValue(FACING);
+		EnumFacing face = state.getValue(FACING);
 		if (!world.isSideSolid(pos.offset(face.getOpposite()), face)) { // TODO , true) is used in many vanilla blocks
 			dropBlockAsItem(world, pos, state, 0);
 			world.setBlockToAir(pos);
@@ -174,7 +174,7 @@ public class BlockSongInscription extends Block implements ITileEntityProvider, 
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((EnumFacing) state.getValue(FACING)).getIndex();
+		return state.getValue(FACING).getIndex();
 	}
 
 	@Override

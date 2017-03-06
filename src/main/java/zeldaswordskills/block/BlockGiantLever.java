@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ public class BlockGiantLever extends BlockLever implements IWhipBlock
 
 	@Override
 	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
-		EnumFacing facing = ((BlockLever.EnumOrientation) world.getBlockState(pos).getValue(FACING)).getFacing();
+		EnumFacing facing = world.getBlockState(pos).getValue(FACING).getFacing();
 		return face != facing.getOpposite();
 	}
 
@@ -77,7 +77,7 @@ public class BlockGiantLever extends BlockLever implements IWhipBlock
 	 */
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
-		switch ((BlockLever.EnumOrientation) state.getValue(FACING)) {
+		switch (state.getValue(FACING)) {
 		case EAST: return new AxisAlignedBB(pos.getX() + 0.0F, pos.getY() + 0.125F, pos.getZ() + 0.2F, pos.getX() + 0.375F, pos.getY() + 0.875F, pos.getZ() + 0.8F);
 		case WEST: return new AxisAlignedBB(pos.getX() + 0.625F, pos.getY() + 0.125F, pos.getZ() + 0.2F, pos.getX() + 1.0F, pos.getY() + 0.875F, pos.getZ() + 0.8F);
 		case SOUTH: return new AxisAlignedBB(pos.getX() + 0.2F, pos.getY() + 0.125F, pos.getZ() + 0.0F, pos.getX() + 0.8F, pos.getY() + 0.875F, pos.getZ() + 0.375F);
@@ -97,7 +97,7 @@ public class BlockGiantLever extends BlockLever implements IWhipBlock
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
-		switch ((BlockLever.EnumOrientation) world.getBlockState(pos).getValue(FACING)) {
+		switch (world.getBlockState(pos).getValue(FACING)) {
 		case EAST: setBlockBounds(0.0F, 0.125F, 0.2F, 0.8F, 0.875F, 0.8F); break;
 		case WEST: setBlockBounds(0.2F, 0.125F, 0.2F, 1.0F, 0.875F, 0.8F); break;
 		case SOUTH: setBlockBounds(0.2F, 0.125F, 0.0F, 0.8F, 0.875F, 0.8F); break;
@@ -121,18 +121,18 @@ public class BlockGiantLever extends BlockLever implements IWhipBlock
 		if (state.getBlock() != this) {
 			return state.getBlock().getBlockHardness(world, pos);
 		}
-		return (((Boolean) state.getValue(POWERED)).booleanValue() ? blockHardness : -1.0F);
+		return (state.getValue(POWERED).booleanValue() ? blockHardness : -1.0F);
 	}
 
 	@Override
 	public boolean canEntityDestroy(IBlockAccess world, BlockPos pos, Entity entity) {
-		return ((Boolean) world.getBlockState(pos).getValue(POWERED)).booleanValue();
+		return world.getBlockState(pos).getValue(POWERED).booleanValue();
 	}
 
 	// TODO remove if Mojang's stupid code ever gets fixed
 	@Override
 	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
-		if (((Boolean) world.getBlockState(pos).getValue(POWERED)).booleanValue()) {
+		if (world.getBlockState(pos).getValue(POWERED).booleanValue()) {
 			super.onBlockExploded(world, pos, explosion);
 		}
 	}
@@ -143,6 +143,6 @@ public class BlockGiantLever extends BlockLever implements IWhipBlock
 		if (state.getBlock() != this) {
 			return state.getBlock().getExplosionResistance(world, pos, entity, explosion);
 		}
-		return (((Boolean) state.getValue(POWERED)).booleanValue() ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
+		return (state.getValue(POWERED).booleanValue() ? getExplosionResistance(entity) : BlockWeight.getMaxResistance());
 	}
 }

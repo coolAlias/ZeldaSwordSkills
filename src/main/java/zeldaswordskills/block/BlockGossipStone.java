@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -97,7 +97,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 
 	@Override
 	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.MEDIUM);
+		return (state.getValue(UNBREAKABLE).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.MEDIUM);
 	}
 
 	@Override
@@ -127,12 +127,12 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 
 	@Override
 	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.VERY_HEAVY);
+		return (state.getValue(UNBREAKABLE).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.VERY_HEAVY);
 	}
 
 	@Override
 	public Result onSmashed(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state, EnumFacing face) {
-		return (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue() ? Result.DENY : Result.DEFAULT);
+		return (world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue() ? Result.DENY : Result.DEFAULT);
 	}
 
 	@Override
@@ -153,13 +153,13 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 
 	@Override
 	public boolean canEntityDestroy(IBlockAccess world, BlockPos pos, Entity entity) {
-		return !((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue();
+		return !world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue();
 	}
 
 	// TODO remove if Mojang's stupid code ever gets fixed
 	@Override
 	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
-		if (!((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue()) {
+		if (!world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue()) {
 			super.onBlockExploded(world, pos, explosion);
 		}
 	}
@@ -170,7 +170,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 		if (state.getBlock() != this) {
 			return state.getBlock().getExplosionResistance(world, pos, entity, explosion);
 		}
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
+		return (state.getValue(UNBREAKABLE).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
 	}
 
 	@Override
@@ -179,7 +179,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 		if (state.getBlock() != this) {
 			return state.getBlock().getBlockHardness(world, pos);
 		}
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? -1.0F : blockHardness);
+		return (state.getValue(UNBREAKABLE).booleanValue() ? -1.0F : blockHardness);
 	}
 
 	@Override
@@ -214,7 +214,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 			int h = (int)(current / 1000L);
 			int m = (int)((current % 1000L) * 3 / 50); // 1000 ticks divided by 60 minutes = 16 and 2/3
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.block.gossip_stone.time", String.format("%02d", h), String.format("%02d", m), days);
-		} else if (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue() && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
+		} else if (world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue() && player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ItemPickaxe) {
 			world.playSoundAtEntity(player, Sounds.ITEM_BREAK, 0.25F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.5F));
 		}
 	}
@@ -226,7 +226,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? 0x8 : 0x0;
+		return state.getValue(UNBREAKABLE).booleanValue() ? 0x8 : 0x0;
 	}
 
 	@Override
@@ -236,7 +236,7 @@ public class BlockGossipStone extends Block implements IHookable, ILiftable, ISm
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		list.add(new ItemStack(item, 1, 0));
 		list.add(new ItemStack(item, 1, 8));
 	}

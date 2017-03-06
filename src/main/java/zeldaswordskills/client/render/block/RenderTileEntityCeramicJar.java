@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,26 +19,17 @@ package zeldaswordskills.client.render.block;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import zeldaswordskills.block.tileentity.TileEntityCeramicJar;
 
-public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
+public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer<TileEntityCeramicJar>
 {
-	private final RenderItem renderItem;
-
-	public RenderTileEntityCeramicJar() {
-		this.renderItem = Minecraft.getMinecraft().getRenderItem();
-	}
+	public RenderTileEntityCeramicJar() {}
 
 	@Override
-	public void renderTileEntityAt(TileEntity te, double dx, double dy, double dz, float partialTick, int blockDamageProgress) {
-		renderPedestal((TileEntityCeramicJar) te, dx, dy, dz, partialTick);
-	}
-
-	private void renderPedestal(TileEntityCeramicJar jar, double dx, double dy, double dz, float partialTick) {
+	public void renderTileEntityAt(TileEntityCeramicJar jar, double dx, double dy, double dz, float partialTick, int blockDamageProgress) {
 		ItemStack stack = jar.getStackInSlot(0);
 		if (stack != null) {
 			GlStateManager.pushMatrix();
@@ -48,7 +39,7 @@ public class RenderTileEntityCeramicJar extends TileEntitySpecialRenderer
 			GlStateManager.rotate(45F, 0.0F, 1.0F, 0.0F);
 			GlStateManager.rotate(30F, 1.0F, 0.0F, 0.0F);
 			GlStateManager.rotate((stack.getItem().isFull3D() ? 225.0F : 45.0F), 0.0F, 0.0F, 1.0F);
-			renderItem.renderItemModel(stack);
+			Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
 			GlStateManager.disableRescaleNormal();
 			GlStateManager.popMatrix();
 		}

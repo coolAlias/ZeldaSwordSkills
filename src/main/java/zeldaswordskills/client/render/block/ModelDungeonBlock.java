@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -64,8 +64,8 @@ public class ModelDungeonBlock implements ISmartBlockModel
 	}
 
 	@Override
-	public TextureAtlasSprite getTexture() {
-		return defaultModel.getTexture(); // needed for particles
+	public TextureAtlasSprite getParticleTexture() {
+		return defaultModel.getParticleTexture(); // needed for particles
 	}
 
 	@Override

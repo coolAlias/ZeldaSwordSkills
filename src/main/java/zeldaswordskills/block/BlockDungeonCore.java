@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class BlockDungeonCore extends BlockDungeonStone
 		if (state.getBlock() != this) {
 			return state.getBlock().getBlockHardness(world, pos);
 		}
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? -1.0F : blockHardness);
+		return (state.getValue(UNBREAKABLE).booleanValue() ? -1.0F : blockHardness);
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class BlockDungeonCore extends BlockDungeonStone
 	@Override
 	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
 		// super plays the break sound and prints a message: only call if unbreakable
-		if (((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue()) {
+		if (world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue()) {
 			super.onBlockClicked(world, pos, player);
 		}
 	}

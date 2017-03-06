@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,13 +18,13 @@
 package zeldaswordskills.block.tileentity;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.ref.Config;
 
-public class TileEntitySacredFlame extends TileEntity implements IUpdatePlayerListBox
+public class TileEntitySacredFlame extends TileEntity implements ITickable
 {
 	/** Minimum date before next spawn reset */
 	private long nextResetDate = 0;

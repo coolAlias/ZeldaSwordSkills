@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ import zeldaswordskills.util.PlayerUtils;
 
 public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBlock, ILiftable, ISmashable
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockHeavy.EnumType.class);
+	public static final PropertyEnum<BlockHeavy.EnumType> VARIANT = PropertyEnum.create("variant", BlockHeavy.EnumType.class);
 
 	/**
 	 * An indestructible block that can only be moved with special items
@@ -73,12 +73,12 @@ public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBloc
 
 	@Override
 	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
-		return ((BlockHeavy.EnumType) state.getValue(VARIANT)).getWeight();
+		return state.getValue(VARIANT).getWeight();
 	}
 
 	@Override
 	public void onLifted(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state) {
-		BlockWeight weight = ((BlockHeavy.EnumType) state.getValue(VARIANT)).getWeight();
+		BlockWeight weight = state.getValue(VARIANT).getWeight();
 		if (weight.compareTo(BlockWeight.LIGHT) > 0) { // i.e. at least MEDIUM
 			player.triggerAchievement(ZSSAchievements.movingBlocks);
 			if (weight.compareTo(BlockWeight.HEAVY) > 0) { // i.e. at least VERY HEAVY
@@ -92,7 +92,7 @@ public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBloc
 
 	@Override
 	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
-		BlockWeight weight = ((BlockHeavy.EnumType) state.getValue(VARIANT)).getWeight();
+		BlockWeight weight = state.getValue(VARIANT).getWeight();
 		return (stack.getItem() == ZSSItems.hammerMegaton && PlayerUtils.hasItem(player, ZSSItems.gauntletsGolden) ? weight : weight.next());
 	}
 
@@ -112,7 +112,7 @@ public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBloc
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockHeavy.EnumType variant : BlockHeavy.EnumType.values()) {
 			list.add(new ItemStack(item, 1, variant.getMetadata()));
 		}
@@ -121,7 +121,7 @@ public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBloc
 	@Override
 	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
 		IBlockState expected = getStateFromMeta(meta);
-		return ((BlockHeavy.EnumType) state.getValue(VARIANT)) == ((BlockHeavy.EnumType) expected.getValue(VARIANT));
+		return state.getValue(VARIANT) == expected.getValue(VARIANT);
 	}
 
 	@Override
@@ -131,7 +131,7 @@ public class BlockHeavy extends Block implements IBlockItemVariant, IDungeonBloc
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((EnumType) state.getValue(VARIANT)).getMetadata();
+		return state.getValue(VARIANT).getMetadata();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ import zeldaswordskills.util.PlayerUtils;
 
 public class BlockQuakeStone extends Block implements IBlockItemVariant, IDungeonBlock, IQuakeBlock, ISmashable
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockQuakeStone.EnumType.class);
+	public static final PropertyEnum<BlockQuakeStone.EnumType> VARIANT = PropertyEnum.create("variant", BlockQuakeStone.EnumType.class);
 
 	public BlockQuakeStone() {
 		super(ZSSBlockMaterials.adventureStone);
@@ -78,12 +78,12 @@ public class BlockQuakeStone extends Block implements IBlockItemVariant, IDungeo
 
 	@Override
 	public int damageDropped(IBlockState state) {
-		return ((BlockQuakeStone.EnumType) state.getValue(VARIANT)).getMetadata();
+		return state.getValue(VARIANT).getMetadata();
 	}
 
 	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-		return Item.getItemFromBlock(((BlockQuakeStone.EnumType) state.getValue(VARIANT)).getDroppedBlock());
+		return Item.getItemFromBlock(state.getValue(VARIANT).getDroppedBlock());
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class BlockQuakeStone extends Block implements IBlockItemVariant, IDungeo
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockQuakeStone.EnumType type : BlockQuakeStone.EnumType.values()) {
 			list.add(new ItemStack(item, 1, type.getMetadata()));
 		}
@@ -117,7 +117,7 @@ public class BlockQuakeStone extends Block implements IBlockItemVariant, IDungeo
 	@Override
 	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
 		IBlockState expected = getStateFromMeta(meta);
-		return ((BlockQuakeStone.EnumType) state.getValue(VARIANT)) == ((BlockQuakeStone.EnumType) expected.getValue(VARIANT));
+		return state.getValue(VARIANT) == expected.getValue(VARIANT);
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class BlockQuakeStone extends Block implements IBlockItemVariant, IDungeo
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((BlockQuakeStone.EnumType) state.getValue(VARIANT)).getMetadata();
+		return state.getValue(VARIANT).getMetadata();
 	}
 
 	@Override

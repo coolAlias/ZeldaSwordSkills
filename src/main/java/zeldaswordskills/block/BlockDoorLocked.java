@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ import zeldaswordskills.util.PlayerUtils;
 public class BlockDoorLocked extends Block implements IDungeonBlock
 {
 	/** Upper (bit 8) or lower (default) half of door */
-	public static final PropertyEnum HALF = PropertyEnum.create("half", BlockDoor.EnumDoorHalf.class);
+	public static final PropertyEnum<BlockDoor.EnumDoorHalf> HALF = PropertyEnum.create("half", BlockDoor.EnumDoorHalf.class);
 
 	public BlockDoorLocked(Material material) {
 		super(material);
@@ -111,7 +111,7 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
-		pos = (((BlockDoor.EnumDoorHalf) state.getValue(HALF)) == BlockDoor.EnumDoorHalf.LOWER ? pos.up() : pos.down());
+		pos = (state.getValue(HALF) == BlockDoor.EnumDoorHalf.LOWER ? pos.up() : pos.down());
 		if (isSameVariant(world, pos, world.getBlockState(pos), state.getBlock().getMetaFromState(state))) {
 			world.setBlockToAir(pos);
 		}
@@ -130,7 +130,7 @@ public class BlockDoorLocked extends Block implements IDungeonBlock
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return (((BlockDoor.EnumDoorHalf) state.getValue(HALF)) == BlockDoor.EnumDoorHalf.UPPER) ? 8 : 0;
+		return (state.getValue(HALF) == BlockDoor.EnumDoorHalf.UPPER) ? 8 : 0;
 	}
 
 	@Override

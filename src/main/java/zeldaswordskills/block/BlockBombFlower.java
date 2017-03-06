@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -116,7 +116,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
-		if (player.getHeldItem() != null || ((Integer) state.getValue(AGE)).intValue() != 7) {
+		if (player.getHeldItem() != null || state.getValue(AGE).intValue() != 7) {
 			return false; // this lets bonemeal do its thing
 		} else if (!world.isRemote) {
 			player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.bomb,1,BombType.BOMB_FLOWER.ordinal()));
@@ -127,7 +127,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
-		if (((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7) {
+		if (world.getBlockState(pos).getValue(AGE).intValue() == 7) {
 			if (PlayerUtils.isHoldingWeapon(player)) {
 				createExplosion(world, pos, true);
 			} else {
@@ -139,9 +139,9 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 	@Override
 	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
 		IBlockState state = world.getBlockState(pos);
-		if (((Boolean) state.getValue(EXPLODE)).booleanValue()) {
+		if (state.getValue(EXPLODE).booleanValue()) {
 			// do nothing, these will explode on their own next update tick
-		} else if (((Integer) state.getValue(AGE)).intValue() == 7) {
+		} else if (state.getValue(AGE).intValue() == 7) {
 			world.setBlockState(pos, state.withProperty(EXPLODE, Boolean.valueOf(true)), 2);
 			world.scheduleUpdate(pos, this, 5);
 		} else {
@@ -154,7 +154,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public boolean onBoomerangCollided(World world, BlockPos pos, IBlockState state, EntityBoomerang boomerang) {
-		if (!world.isRemote && ((Integer) state.getValue(AGE)).intValue() == 7) {
+		if (!world.isRemote && state.getValue(AGE).intValue() == 7) {
 			boolean captured = false;
 			world.setBlockState(pos, getDefaultState());
 			EntityItem bomb = new EntityItem(world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FLOWER.ordinal()));
@@ -178,14 +178,14 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity) {
-		if (((Integer) state.getValue(AGE)).intValue() == 7 && entity instanceof IProjectile) {
+		if (state.getValue(AGE).intValue() == 7 && entity instanceof IProjectile) {
 			createExplosion(world, pos, true);
 		}
 	}
 
 	@Override
 	public void handleQuakeEffect(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
-		if (((Integer) state.getValue(AGE)).intValue() == 7) {
+		if (state.getValue(AGE).intValue() == 7) {
 			// TODO call disperseSeeds instead? schedule an update tick?
 			createExplosion(world, pos, true);
 		}
@@ -193,17 +193,17 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public boolean canBreakBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
-		return getGrowthStage(((Integer) world.getBlockState(pos).getValue(AGE)).intValue()) < 2;
+		return getGrowthStage(world.getBlockState(pos).getValue(AGE).intValue()) < 2;
 	}
 
 	@Override
 	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
-		return ((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7;
+		return world.getBlockState(pos).getValue(AGE).intValue() == 7;
 	}
 
 	@Override
 	public Result shouldSwing(EntityWhip whip, World world, BlockPos pos, int ticksInGround) {
-		if (ticksInGround > 30 && ((Integer) world.getBlockState(pos).getValue(AGE)).intValue() == 7) {
+		if (ticksInGround > 30 && world.getBlockState(pos).getValue(AGE).intValue() == 7) {
 			EntityLivingBase thrower = whip.getThrower();
 			EntityItem bomb = new EntityItem(world, whip.posX, whip.posY + 1, whip.posZ, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FLOWER.ordinal()));
 			double dx = thrower.posX - bomb.posX;
@@ -273,7 +273,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
-		int stage = getGrowthStage(((Integer) state.getValue(AGE)).intValue());
+		int stage = getGrowthStage(state.getValue(AGE).intValue());
 		if (stage == 0) {
 			return null;
 		}
@@ -282,7 +282,7 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
-		int stage = getGrowthStage(((Integer) world.getBlockState(pos).getValue(AGE)).intValue());
+		int stage = getGrowthStage(world.getBlockState(pos).getValue(AGE).intValue());
 		setBlockBounds(0.1F, 0.0F, 0.1F, 0.9F, 0.2F + (stage * 0.15F), 0.9F);
 	}
 
@@ -294,8 +294,8 @@ public class BlockBombFlower extends BlockCrops implements IBoomerangBlock, ICus
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		int i = ((Integer) state.getValue(AGE)).intValue();
-		if (((Boolean) state.getValue(EXPLODE)).booleanValue()) {
+		int i = state.getValue(AGE).intValue();
+		if (state.getValue(EXPLODE).booleanValue()) {
 			i |= 0x8;
 		}
 		return i;

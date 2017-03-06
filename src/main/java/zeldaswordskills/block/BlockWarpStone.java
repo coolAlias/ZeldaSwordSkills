@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ import zeldaswordskills.util.WarpPoint;
 
 public class BlockWarpStone extends Block implements ILiftable, ISmashable
 {
-	public static final PropertyEnum WARP_SONG = PropertyEnum.create("warp_song", BlockWarpStone.EnumWarpSong.class);
+	public static final PropertyEnum<BlockWarpStone.EnumWarpSong> WARP_SONG = PropertyEnum.create("warp_song", BlockWarpStone.EnumWarpSong.class);
 
 	public BlockWarpStone() {
 		super(Material.rock);
@@ -106,7 +106,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing side, float hitX, float hitY, float hitZ) {
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() instanceof ItemInstrument) {
-			BlockWarpStone.EnumWarpSong warpSong = (BlockWarpStone.EnumWarpSong) state.getValue(WARP_SONG);
+			BlockWarpStone.EnumWarpSong warpSong = state.getValue(WARP_SONG);
 			AbstractZeldaSong song = warpSong.getWarpSong();
 			ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
 			if (!world.isRemote) {
@@ -124,7 +124,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 			}
 			return true;
 		} else if (player.capabilities.isCreativeMode && player.isSneaking()) {
-			AbstractZeldaSong song = ((BlockWarpStone.EnumWarpSong) state.getValue(WARP_SONG)).getWarpSong();
+			AbstractZeldaSong song = state.getValue(WARP_SONG).getWarpSong();
 			if (song != null && !world.isRemote) {
 				WarpPoint warp = new WarpPoint(world.provider.getDimensionId(), pos);
 				WarpPoint previous = Config.setDefaultWarpPoint(song, warp);
@@ -141,7 +141,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockWarpStone.EnumWarpSong song : BlockWarpStone.EnumWarpSong.values()) {
 			list.add(new ItemStack(item, 1, song.getMetadata()));
 		}
@@ -154,7 +154,7 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((EnumWarpSong) state.getValue(WARP_SONG)).getMetadata();
+		return state.getValue(WARP_SONG).getMetadata();
 	}
 
 	@Override

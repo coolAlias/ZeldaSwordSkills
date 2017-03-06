@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ import zeldaswordskills.util.PlayerUtils;
  */
 public class BlockSacredFlame extends Block implements ITileEntityProvider
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockSacredFlame.EnumType.class);
+	public static final PropertyEnum<BlockSacredFlame.EnumType> VARIANT = PropertyEnum.create("variant", BlockSacredFlame.EnumType.class);
 	public static final PropertyBool EXTINGUISHED = PropertyBool.create("extinguished");
 
 	public BlockSacredFlame() {
@@ -79,7 +79,7 @@ public class BlockSacredFlame extends Block implements ITileEntityProvider
 
 	@Override
 	public int damageDropped(IBlockState state) {
-		return ((BlockSacredFlame.EnumType) state.getValue(VARIANT)).getMetadata();
+		return state.getValue(VARIANT).getMetadata();
 	}
 
 	@Override
@@ -117,8 +117,8 @@ public class BlockSacredFlame extends Block implements ITileEntityProvider
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumFacing face, float hitX, float hitY, float hitZ) {
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() instanceof ISacredFlame) {
-			BlockSacredFlame.EnumType flame = ((BlockSacredFlame.EnumType) state.getValue(VARIANT));
-			boolean isActive = !((Boolean) state.getValue(EXTINGUISHED)).booleanValue();
+			BlockSacredFlame.EnumType flame = state.getValue(VARIANT);
+			boolean isActive = !state.getValue(EXTINGUISHED).booleanValue();
 			if (((ISacredFlame) stack.getItem()).onActivatedSacredFlame(stack, world, player, flame, isActive)) {
 				extinguishFlame(world, pos);
 				return true;
@@ -134,8 +134,8 @@ public class BlockSacredFlame extends Block implements ITileEntityProvider
 		IBlockState state = world.getBlockState(pos);
 		ItemStack stack = player.getHeldItem();
 		if (stack != null) {
-			BlockSacredFlame.EnumType flame = ((BlockSacredFlame.EnumType) state.getValue(VARIANT));
-			boolean isActive = !((Boolean) state.getValue(EXTINGUISHED)).booleanValue();
+			BlockSacredFlame.EnumType flame = state.getValue(VARIANT);
+			boolean isActive = !state.getValue(EXTINGUISHED).booleanValue();
 			if (stack.getItem() instanceof ISacredFlame) {
 				if (((ISacredFlame) stack.getItem()).onClickedSacredFlame(stack, world, player, flame, isActive)) {
 					extinguishFlame(world, pos);
@@ -186,7 +186,7 @@ public class BlockSacredFlame extends Block implements ITileEntityProvider
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockSacredFlame.EnumType flame : BlockSacredFlame.EnumType.values()) {
 			list.add(new ItemStack(item, 1, flame.getMetadata()));
 		}
@@ -200,8 +200,8 @@ public class BlockSacredFlame extends Block implements ITileEntityProvider
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		int i = ((BlockSacredFlame.EnumType) state.getValue(VARIANT)).getMetadata();
-		if (((Boolean) state.getValue(EXTINGUISHED)).booleanValue()) {
+		int i = state.getValue(VARIANT).getMetadata();
+		if (state.getValue(EXTINGUISHED).booleanValue()) {
 			i |= 0x8;
 		}
 		return i;

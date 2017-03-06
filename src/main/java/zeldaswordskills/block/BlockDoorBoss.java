@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ import zeldaswordskills.util.PlayerUtils;
 public class BlockDoorBoss extends BlockDoorLocked
 {
 	/** The boss type associated with this door */
-	public static final PropertyEnum BOSS_TYPE = PropertyEnum.create("boss_type", BlockDoorBoss.EnumType.class);
+	public static final PropertyEnum<BlockDoorBoss.EnumType> BOSS_TYPE = PropertyEnum.create("boss_type", BlockDoorBoss.EnumType.class);
 
 	public BlockDoorBoss(Material material) {
 		super(material);
@@ -48,18 +48,18 @@ public class BlockDoorBoss extends BlockDoorLocked
 
 	@Override
 	protected boolean canUnlock(EntityPlayer player, IBlockState state) {
-		int meta = ((BlockDoorBoss.EnumType) state.getValue(BOSS_TYPE)).getMetadata();
+		int meta = state.getValue(BOSS_TYPE).getMetadata();
 		return PlayerUtils.consumeHeldItem(player, ZSSItems.keyBig, meta, 1) || PlayerUtils.consumeHeldItem(player, ZSSItems.keySkeleton, 0, 1);
 	}
 
 	@Override
 	public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos) {
-		return new ItemStack(this, 1, ((BlockDoorBoss.EnumType) world.getBlockState(pos).getValue(BOSS_TYPE)).getMetadata());
+		return new ItemStack(this, 1, world.getBlockState(pos).getValue(BOSS_TYPE).getMetadata());
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockDoorBoss.EnumType variant : BlockDoorBoss.EnumType.values()) {
 			list.add(new ItemStack(item, 1, variant.getMetadata()));
 		}
@@ -70,7 +70,7 @@ public class BlockDoorBoss extends BlockDoorLocked
 		if (state.getBlock() != this) {
 			return false;
 		}
-		return ((BlockDoorBoss.EnumType) state.getValue(BOSS_TYPE)) == BlockDoorBoss.EnumType.byMetadata(meta);
+		return state.getValue(BOSS_TYPE) == BlockDoorBoss.EnumType.byMetadata(meta);
 	}
 
 	@Override
@@ -80,8 +80,8 @@ public class BlockDoorBoss extends BlockDoorLocked
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		int i = ((BlockDoorBoss.EnumType) state.getValue(BOSS_TYPE)).getMetadata();
-		if (((BlockDoor.EnumDoorHalf) state.getValue(HALF)) == BlockDoor.EnumDoorHalf.UPPER) {
+		int i = state.getValue(BOSS_TYPE).getMetadata();
+		if (state.getValue(HALF) == BlockDoor.EnumDoorHalf.UPPER) {
 			i |= 8;
 		}
 		return i;

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class BlockTargetDirectional extends BlockTarget implements IVanillaRotat
 
 	@Override
 	public Result canGrabBlock(HookshotType type, World world, BlockPos pos, EnumFacing face) {
-		return (face.getOpposite() == ((EnumFacing) world.getBlockState(pos).getValue(FACING)) ? Result.ALLOW : Result.DENY);
+		return (face.getOpposite() == world.getBlockState(pos).getValue(FACING) ? Result.ALLOW : Result.DENY);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class BlockTargetDirectional extends BlockTarget implements IVanillaRotat
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((EnumFacing) state.getValue(FACING)).getIndex();
+		return state.getValue(FACING).getIndex();
 	}
 
 	@Override

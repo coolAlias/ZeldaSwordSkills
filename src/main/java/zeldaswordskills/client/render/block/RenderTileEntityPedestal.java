@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,29 +19,20 @@ package zeldaswordskills.client.render.block;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 
 @SideOnly(Side.CLIENT)
-public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
+public class RenderTileEntityPedestal extends TileEntitySpecialRenderer<TileEntityPedestal>
 {
-	private final RenderItem renderItem;
-
-	public RenderTileEntityPedestal() {
-		this.renderItem = Minecraft.getMinecraft().getRenderItem();
-	}
+	public RenderTileEntityPedestal() {}
 
 	@Override
-	public void renderTileEntityAt(TileEntity te, double dx, double dy, double dz, float partialTick, int blockDamageProgress) {
-		renderPedestal((TileEntityPedestal) te, dx, dy, dz, partialTick);
-	}
-
-	private void renderPedestal(TileEntityPedestal pedestal, double dx, double dy, double dz, float partialTick) {
+	public void renderTileEntityAt(TileEntityPedestal pedestal, double dx, double dy, double dz, float partialTick, int blockDamageProgress) {
 		ItemStack sword = pedestal.getSword();
 		if (sword != null) {
 			GlStateManager.pushMatrix();
@@ -50,7 +41,7 @@ public class RenderTileEntityPedestal extends TileEntitySpecialRenderer
 			GlStateManager.scale(1F, 1F, 1F);
 			GlStateManager.rotate(pedestal.getOrientation() == 0 ? 0F : 90F, 0.0F, 1.0F, 0.0F);
 			GlStateManager.rotate(225.0F, 0.0F, 0.0F, 1.0F);
-			renderItem.renderItemModel(sword);
+			Minecraft.getMinecraft().getRenderItem().renderItem(sword, ItemCameraTransforms.TransformType.FIXED);
 			GlStateManager.disableRescaleNormal();
 			GlStateManager.popMatrix();
 		}

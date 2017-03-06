@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -131,7 +131,7 @@ public class BlockChestLocked extends Block implements ITileEntityProvider, IVan
 	 * Converts this locked chest block into a vanilla chest
 	 */
 	protected void convertToChest(IInventory inv, World world, BlockPos pos) {
-		EnumFacing facing = (EnumFacing) world.getBlockState(pos).getValue(FACING);
+		EnumFacing facing = world.getBlockState(pos).getValue(FACING);
 		keepInventory = true;
 		world.setBlockState(pos, Blocks.chest.getDefaultState());
 		keepInventory = false;
@@ -178,7 +178,7 @@ public class BlockChestLocked extends Block implements ITileEntityProvider, IVan
 		IBlockState state_south = world.getBlockState(pos.south());
 		IBlockState state_west = world.getBlockState(pos.west());
 		IBlockState state_east = world.getBlockState(pos.east());
-		EnumFacing facing = (EnumFacing) state.getValue(FACING);
+		EnumFacing facing = state.getValue(FACING);
 		if (state_north.getBlock().isFullBlock() && !state_south.getBlock().isFullBlock()) {
 			facing = EnumFacing.SOUTH;
 		}
@@ -224,7 +224,7 @@ public class BlockChestLocked extends Block implements ITileEntityProvider, IVan
 		if (facing != null) {
 			return state.withProperty(FACING, facing.getOpposite());
 		} else {
-			EnumFacing facing2 = (EnumFacing) state.getValue(FACING);
+			EnumFacing facing2 = state.getValue(FACING);
 			if (world.getBlockState(pos.offset(facing2)).getBlock().isFullBlock()) {
 				facing2 = facing2.getOpposite();
 			}
@@ -249,7 +249,7 @@ public class BlockChestLocked extends Block implements ITileEntityProvider, IVan
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((EnumFacing) state.getValue(FACING)).getIndex();
+		return state.getValue(FACING).getIndex();
 	}
 
 	@Override

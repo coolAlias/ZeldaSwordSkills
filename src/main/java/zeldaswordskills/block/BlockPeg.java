@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -109,7 +109,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 			return Result.DENY;
 		}
 		boolean flag = false;
-		int hits = ((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue();
+		int hits = world.getBlockState(pos).getValue(HITS_TAKEN).intValue();
 		int impact = 1 + ((ISmashBlock) stack.getItem()).getSmashStrength(player, stack, state, face).ordinal() - weight.ordinal();
 		if (impact > 0) {
 			flag = hits < MAX_HITS;
@@ -137,12 +137,12 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
-		return (face.getAxis().isHorizontal() && ((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue() < MAX_HITS);
+		return (face.getAxis().isHorizontal() && world.getBlockState(pos).getValue(HITS_TAKEN).intValue() < MAX_HITS);
 	}
 
 	@Override
 	public Result shouldSwing(EntityWhip whip, World world, BlockPos pos, int ticksInGround) {
-		if (((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue() >= MAX_HITS) {
+		if (world.getBlockState(pos).getValue(HITS_TAKEN).intValue() >= MAX_HITS) {
 			whip.setDead();
 			return Result.DENY;
 		}
@@ -151,7 +151,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
-		int hits = ((Integer) state.getValue(HITS_TAKEN)).intValue();
+		int hits = state.getValue(HITS_TAKEN).intValue();
 		if (hits > 0) {
 			world.setBlockState(pos, state.withProperty(HITS_TAKEN, Integer.valueOf(hits - 1)), 3);
 		}
@@ -179,7 +179,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
-		int hits = ((Integer) state.getValue(HITS_TAKEN)).intValue();
+		int hits = state.getValue(HITS_TAKEN).intValue();
 		if (hits == 0) {
 			return new AxisAlignedBB(pos.getX() + minX, pos.getY() + minY, pos.getZ() + minZ, pos.getX() + maxX, pos.getY() + maxY + 0.5D, pos.getZ() + maxZ);
 		} else if (hits >= MAX_HITS) {
@@ -191,7 +191,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
-		int hits = Math.min(((Integer) world.getBlockState(pos).getValue(HITS_TAKEN)).intValue(), MAX_HITS);
+		int hits = Math.min(world.getBlockState(pos).getValue(HITS_TAKEN).intValue(), MAX_HITS);
 		setBlockBounds(0.25F, 0.0F, 0.25F, 0.75F, 0.8125F - (hits * 0.1875F), 0.75F);
 	}
 
@@ -212,7 +212,7 @@ public class BlockPeg extends Block implements IDungeonBlock, IHookable, ISmasha
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((Integer) state.getValue(HITS_TAKEN)).intValue();
+		return state.getValue(HITS_TAKEN).intValue();
 	}
 
 	@Override

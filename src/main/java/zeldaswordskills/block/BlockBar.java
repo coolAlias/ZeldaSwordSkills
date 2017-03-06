@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public class BlockBar extends BlockRotatedPillar implements IWhipBlock
 
 	@Override
 	public boolean canGrabBlock(WhipType whip, EntityLivingBase thrower, World world, BlockPos pos, EnumFacing face) {
-		return face.getAxis() != ((EnumFacing.Axis) world.getBlockState(pos).getValue(AXIS));
+		return face.getAxis() != world.getBlockState(pos).getValue(AXIS);
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class BlockBar extends BlockRotatedPillar implements IWhipBlock
 	@Override
 	public void onNeighborBlockChange(World world, BlockPos pos, IBlockState state, Block neighbor) {
 		boolean drop = false;
-		switch ((EnumFacing.Axis) world.getBlockState(pos).getValue(AXIS)) {
+		switch (world.getBlockState(pos).getValue(AXIS)) {
 		case X:
 			drop = (!world.isSideSolid(pos.east(), EnumFacing.WEST) && !world.isSideSolid(pos.west(), EnumFacing.EAST));
 			break;
@@ -95,7 +95,7 @@ public class BlockBar extends BlockRotatedPillar implements IWhipBlock
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
-		switch ((EnumFacing.Axis) world.getBlockState(pos).getValue(AXIS)) {
+		switch (world.getBlockState(pos).getValue(AXIS)) {
 		case X:
 			setBlockBounds(0.0F, 0.25F, 0.25F, 1.0F, 0.75F, 0.75F);
 			break;
@@ -120,7 +120,7 @@ public class BlockBar extends BlockRotatedPillar implements IWhipBlock
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		return ((EnumFacing.Axis) state.getValue(AXIS)).ordinal();
+		return state.getValue(AXIS).ordinal();
 	}
 
 	@Override

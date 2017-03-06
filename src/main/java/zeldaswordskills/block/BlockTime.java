@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ import zeldaswordskills.songs.ZeldaSongs;
 
 public class BlockTime extends Block implements IBlockItemVariant, IDungeonBlock, ISongBlock
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockTime.EnumType.class);
+	public static final PropertyEnum<BlockTime.EnumType> VARIANT = PropertyEnum.create("variant", BlockTime.EnumType.class);
 	/** Whether the block is currently ethereal or not */
 	public static final PropertyBool ETHEREAL = PropertyBool.create("ethereal");
 
@@ -90,27 +90,27 @@ public class BlockTime extends Block implements IBlockItemVariant, IDungeonBlock
 
 	@Override
 	public boolean isBlockSolid(IBlockAccess world, BlockPos pos, EnumFacing side) {
-		return !((Boolean) world.getBlockState(pos).getValue(ETHEREAL)).booleanValue();
+		return !world.getBlockState(pos).getValue(ETHEREAL).booleanValue();
 	}
 
 	@Override
 	public boolean canCollideCheck(IBlockState state, boolean isHoldingBoat) {
-		return !((Boolean) state.getValue(ETHEREAL)).booleanValue();
+		return !state.getValue(ETHEREAL).booleanValue();
 	}
 
 	@Override
 	public AxisAlignedBB getCollisionBoundingBox(World world, BlockPos pos, IBlockState state) {
-		return (((Boolean) state.getValue(ETHEREAL)).booleanValue() ? null : super.getCollisionBoundingBox(world, pos, state));
+		return (state.getValue(ETHEREAL).booleanValue() ? null : super.getCollisionBoundingBox(world, pos, state));
 	}
 
 	@Override
 	public boolean isReplaceable(World world, BlockPos pos) {
-		return (((Boolean) world.getBlockState(pos).getValue(ETHEREAL)).booleanValue() ? true : super.isReplaceable(world, pos));
+		return (world.getBlockState(pos).getValue(ETHEREAL).booleanValue() ? true : super.isReplaceable(world, pos));
 	}
 
 	@Override
 	public void setBlockBoundsBasedOnState(IBlockAccess world, BlockPos pos) {
-		if (((Boolean) world.getBlockState(pos).getValue(ETHEREAL)).booleanValue()) {
+		if (world.getBlockState(pos).getValue(ETHEREAL).booleanValue()) {
 			setBlockBounds(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		} else {
 			setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
@@ -126,8 +126,8 @@ public class BlockTime extends Block implements IBlockItemVariant, IDungeonBlock
 	public boolean onSongPlayed(World world, BlockPos pos, EntityPlayer player, AbstractZeldaSong song, int power, int affected) {
 		if (power > 4) {
 			IBlockState state = world.getBlockState(pos);
-			if (song == ((BlockTime.EnumType) state.getValue(VARIANT)).getRequiredSong()) {
-				world.setBlockState(pos, state.withProperty(ETHEREAL, !((Boolean) state.getValue(ETHEREAL))), 2);
+			if (song == state.getValue(VARIANT).getRequiredSong()) {
+				world.setBlockState(pos, state.withProperty(ETHEREAL, !state.getValue(ETHEREAL)), 2);
 				if (affected == 0) {
 					world.playSoundAtEntity(player, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
 				}
@@ -148,7 +148,7 @@ public class BlockTime extends Block implements IBlockItemVariant, IDungeonBlock
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		for (BlockTime.EnumType variant : BlockTime.EnumType.values()) {
 			list.add(new ItemStack(item, 1, variant.getMetadata()));
 		}
@@ -157,7 +157,7 @@ public class BlockTime extends Block implements IBlockItemVariant, IDungeonBlock
 	@Override
 	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
 		IBlockState expected = getStateFromMeta(meta);
-		return ((BlockTime.EnumType) state.getValue(VARIANT)) == ((BlockTime.EnumType) expected.getValue(VARIANT));
+		return state.getValue(VARIANT) == expected.getValue(VARIANT);
 	}
 
 	@Override
@@ -168,8 +168,8 @@ public class BlockTime extends Block implements IBlockItemVariant, IDungeonBlock
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		int i = ((BlockTime.EnumType) state.getValue(VARIANT)).getMetadata();
-		if (((Boolean) state.getValue(ETHEREAL)).booleanValue()) {
+		int i = state.getValue(VARIANT).getMetadata();
+		if (state.getValue(ETHEREAL).booleanValue()) {
 			i |= 0x8;
 		}
 		return i;

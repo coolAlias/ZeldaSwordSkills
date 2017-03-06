@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,7 @@ import zeldaswordskills.util.PlayerUtils;
  */
 public class BlockSecretStone extends Block implements IBlockItemVariant, ICustomStateMapper, IDungeonBlock, IExplodable, ILiftable, ISmashable
 {
-	public static final PropertyEnum VARIANT = PropertyEnum.create("variant", BlockSecretStone.EnumType.class);
+	public static final PropertyEnum<BlockSecretStone.EnumType> VARIANT = PropertyEnum.create("variant", BlockSecretStone.EnumType.class);
 	public static final PropertyBool UNBREAKABLE = PropertyBool.create("unbreakable");
 
 	public BlockSecretStone(Material material) {
@@ -77,14 +77,14 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 
 	@Override
 	public BlockWeight getLiftWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() || !Config.canLiftSecretStone() ? BlockWeight.IMPOSSIBLE : null);
+		return (state.getValue(UNBREAKABLE).booleanValue() || !Config.canLiftSecretStone() ? BlockWeight.IMPOSSIBLE : null);
 	}
 
 	@Override
 	public void onLifted(World world, EntityPlayer player, ItemStack stack, BlockPos pos, IBlockState state) {
 		NBTTagCompound tag = stack.getTagCompound();
 		if (tag != null) {
-			Block block = ((EnumType) state.getValue(VARIANT)).getDroppedBlock();
+			Block block = state.getValue(VARIANT).getDroppedBlock();
 			tag.setInteger("blockId", Block.getIdFromBlock(block));
 			tag.setInteger("metadata", 0);
 		}
@@ -95,7 +95,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 
 	@Override
 	public BlockWeight getSmashWeight(EntityPlayer player, ItemStack stack, IBlockState state, EnumFacing face) {
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.VERY_HEAVY);
+		return (state.getValue(UNBREAKABLE).booleanValue() ? BlockWeight.IMPOSSIBLE : BlockWeight.VERY_HEAVY);
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 
 	@Override
 	public boolean canEntityDestroy(IBlockAccess world, BlockPos pos, Entity entity) {
-		return !((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue();
+		return !world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue();
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 
 	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-		return Item.getItemFromBlock(((EnumType) state.getValue(VARIANT)).getDroppedBlock());
+		return Item.getItemFromBlock(state.getValue(VARIANT).getDroppedBlock());
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 	// TODO remove if Mojang's stupid code ever gets fixed
 	@Override
 	public void onBlockExploded(World world, BlockPos pos, Explosion explosion) {
-		if (!((Boolean) world.getBlockState(pos).getValue(UNBREAKABLE)).booleanValue()) {
+		if (!world.getBlockState(pos).getValue(UNBREAKABLE).booleanValue()) {
 			super.onBlockExploded(world, pos, explosion);
 		}
 	}
@@ -166,7 +166,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 		if (state.getBlock() != this) {
 			return state.getBlock().getExplosionResistance(world, pos, entity, explosion);
 		}
-		return (((Boolean) state.getValue(UNBREAKABLE)).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
+		return (state.getValue(UNBREAKABLE).booleanValue() ? BlockWeight.getMaxResistance() : getExplosionResistance(entity));
 	}
 
 	@Override
@@ -180,7 +180,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		BlockSecretStone.EnumType types[] = BlockSecretStone.EnumType.values();
 		for (int i = 0; i < types.length; ++i) {
 			list.add(new ItemStack(item, 1, types[i].getMetadata()));
@@ -191,7 +191,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 	@Override
 	public boolean isSameVariant(World world, BlockPos pos, IBlockState state, int meta) {
 		IBlockState expected = getStateFromMeta(meta);
-		return ((BlockSecretStone.EnumType) state.getValue(VARIANT)) == ((BlockSecretStone.EnumType) expected.getValue(VARIANT));
+		return state.getValue(VARIANT) == expected.getValue(VARIANT);
 	}
 
 	@Override
@@ -202,8 +202,8 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 
 	@Override
 	public int getMetaFromState(IBlockState state) {
-		int i = ((EnumType) state.getValue(VARIANT)).getMetadata();
-		if (((Boolean) state.getValue(UNBREAKABLE)).booleanValue()) {
+		int i = state.getValue(VARIANT).getMetadata();
+		if (state.getValue(UNBREAKABLE).booleanValue()) {
 			i |= 0x8;
 		}
 		return i;
@@ -224,7 +224,7 @@ public class BlockSecretStone extends Block implements IBlockItemVariant, ICusto
 	 * Helper method returns the variant's dropped block based on metadata
 	 */
 	public static Block getDroppedBlock(int meta) {
-		return ((BlockSecretStone.EnumType) ZSSBlocks.secretStone.getStateFromMeta(meta).getValue(VARIANT)).getDroppedBlock();
+		return ZSSBlocks.secretStone.getStateFromMeta(meta).getValue(VARIANT).getDroppedBlock();
 	}
 
 	public static enum EnumType implements IStringSerializable {

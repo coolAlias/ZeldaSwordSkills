@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,10 +29,10 @@ import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3i;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -69,7 +69,7 @@ import zeldaswordskills.world.gen.feature.FairySpawner;
  * occasionally reset, limiting the number of fairies that can spawn on any given day.
  *
  */
-public class TileEntityDungeonCore extends TileEntityDungeonStone implements IUpdatePlayerListBox
+public class TileEntityDungeonCore extends TileEntityDungeonStone implements ITickable
 {
 	/** The bounding box of the associated structure*/
 	protected StructureBoundingBox box;

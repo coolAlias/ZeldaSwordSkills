@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -202,7 +202,7 @@ public class BlockPedestal extends Block implements IBlockItemVariant, ICustomSt
 	}
 
 	@Override
-	public int isProvidingWeakPower(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing face) {
+	public int getWeakPower(IBlockAccess world, BlockPos pos, IBlockState state, EnumFacing face) {
 		TileEntity te = world.getTileEntity(pos);
 		if (te instanceof TileEntityPedestal) {
 			return ((TileEntityPedestal) te).getPowerLevel();
@@ -212,7 +212,7 @@ public class BlockPedestal extends Block implements IBlockItemVariant, ICustomSt
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs tab, List list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> list) {
 		list.add(new ItemStack(item, 1, 0));
 		list.add(new ItemStack(item, 1, 8));
 	}
