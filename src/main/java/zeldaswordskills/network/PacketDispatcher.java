@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -160,7 +160,7 @@ public class PacketDispatcher
 	/**
 	 * Sends this message to players provided. SERVER->CLIENT only.
 	 */
-	public static void sendToPlayers(IMessage message, Collection<EntityPlayer> players) {
+	public static void sendToPlayers(IMessage message, Collection<? extends EntityPlayer> players) {
 		for (EntityPlayer player : players) {
 			if (player instanceof EntityPlayerMP) {
 				PacketDispatcher.dispatcher.sendTo(message, (EntityPlayerMP) player);
@@ -219,7 +219,7 @@ public class PacketDispatcher
 	/**
 	 * Sends a vanilla Packet to a player. SERVER->CLIENT only.
 	 */
-	public static void sendTo(Packet packet, EntityPlayer player) {
+	public static void sendTo(Packet<?> packet, EntityPlayer player) {
 		if (player instanceof EntityPlayerMP) {
 			((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
 		}
@@ -228,7 +228,7 @@ public class PacketDispatcher
 	/**
 	 * Sends a vanilla Packet to players provided. SERVER->CLIENT only.
 	 */
-	public static void sendToPlayers(Packet packet, Collection<EntityPlayer> players) {
+	public static void sendToPlayers(Packet<?> packet, Collection<? extends EntityPlayer> players) {
 		for (EntityPlayer player : players) {
 			if (player instanceof EntityPlayerMP) {
 				((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
@@ -239,7 +239,7 @@ public class PacketDispatcher
 	/**
 	 * Sends a vanilla Packet to all players in the list except for the one player. SERVER->CLIENT only.
 	 */
-	public static void sendToPlayersExcept(Packet packet, EntityPlayer player, Collection<EntityPlayer> players) {
+	public static void sendToPlayersExcept(Packet<?> packet, EntityPlayer player, Collection<? extends EntityPlayer> players) {
 		for (EntityPlayer p : players) {
 			if (p != player && p instanceof EntityPlayerMP) {
 				((EntityPlayerMP) p).playerNetServerHandler.sendPacket(packet);
@@ -250,7 +250,7 @@ public class PacketDispatcher
 	/**
 	 * Sends a vanilla Packet to all players in the same dimension. SERVER->CLIENT only.
 	 */
-	public static void sendToAll(Packet packet, World world) {
+	public static void sendToAll(Packet<?> packet, World world) {
 		if (world instanceof WorldServer) {
 			for (Object o : ((WorldServer) world).playerEntities) {
 				if (o instanceof EntityPlayerMP) {
@@ -263,7 +263,7 @@ public class PacketDispatcher
 	/**
 	 * Sends a vanilla Packet to all players within the given range of an entity. SERVER->CLIENT only.
 	 */
-	public static void sendToAllAround(Packet packet, Entity entity, int range) {
+	public static void sendToAllAround(Packet<?> packet, Entity entity, int range) {
 		int rangeSq = (range * range);
 		if (entity.worldObj instanceof WorldServer) {
 			for (Object o : ((WorldServer) entity.worldObj).playerEntities) {

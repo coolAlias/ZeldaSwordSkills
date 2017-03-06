@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -392,7 +392,7 @@ public class EntityAITeleport extends EntityAIBase
 	 */
 	public static void disruptTargeting(EntityLivingBase entity) {
 		if (entity.worldObj instanceof WorldServer) {
-			Set<EntityPlayer> players = ((WorldServer) entity.worldObj).getEntityTracker().getTrackingPlayers(entity);
+			Set<? extends EntityPlayer> players = ((WorldServer) entity.worldObj).getEntityTracker().getTrackingPlayers(entity);
 			for (EntityPlayer player : players) {
 				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 				if (skills.getTargetingSkill() != null && skills.getTargetingSkill().getCurrentTarget() == entity) {

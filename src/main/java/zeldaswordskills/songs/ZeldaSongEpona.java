@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,6 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 
 	@Override
 	protected void performEffect(EntityPlayer player, ItemStack instrument, int power) {
-		@SuppressWarnings("unchecked")
 		List<EntityHorse> horses = player.worldObj.getEntitiesWithinAABB(EntityHorse.class, player.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D));
 		for (EntityHorse horse : horses) {
 			if (!horse.isTame()) {
@@ -57,7 +56,6 @@ public class ZeldaSongEpona extends AbstractZeldaSong {
 		}
 		ZSSPlayerSongs songs = ZSSPlayerSongs.get(player);
 		// Check for cows for Lon Lon Milk (Fairy Ocarina can be used if you don't want to summon Epona)
-		@SuppressWarnings("unchecked")
 		List<EntityCow> cows = player.worldObj.getEntitiesWithinAABB(EntityCow.class, player.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D));
 		for (EntityCow cow : cows) {
 			songs.addLonLonCow(cow);
