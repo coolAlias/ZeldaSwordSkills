@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,6 @@ import net.minecraft.util.IThreadListener;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
@@ -68,8 +67,8 @@ public class ClientProxy extends CommonProxy
 		super.preInit();
 		registerVariants();
 		MinecraftForge.EVENT_BUS.register(new ZSSClientEvents());
-		FMLCommonHandler.instance().bus().register(new TargetingTickHandler());
-		FMLCommonHandler.instance().bus().register(new ZSSKeyHandler());
+		MinecraftForge.EVENT_BUS.register(new TargetingTickHandler());
+		MinecraftForge.EVENT_BUS.register(new ZSSKeyHandler());
 		UnpressKeyPacket.init();
 	}
 

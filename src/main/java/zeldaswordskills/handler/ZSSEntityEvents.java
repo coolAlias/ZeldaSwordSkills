@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
@@ -38,6 +39,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import zeldaswordskills.api.entity.NpcHelper;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IRightClickEntity;
@@ -52,6 +54,8 @@ import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.item.ItemMask;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.SyncConfigPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
@@ -187,6 +191,14 @@ public class ZSSEntityEvents
 		// Can't send update packets from here - use EntityJoinWorldEvent
 		ZSSEntityInfo.get(event.entityPlayer).copy(ZSSEntityInfo.get(event.original));
 		ZSSPlayerInfo.get(event.entityPlayer).copy(ZSSPlayerInfo.get(event.original));
+	}
+
+	@SubscribeEvent
+	public void onPlayerLoggedIn(PlayerLoggedInEvent event) {
+		ZSSPlayerInfo.get(event.player).onPlayerLoggedIn();
+		if (event.player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncConfigPacket(), (EntityPlayerMP) event.player);
+		}
 	}
 
 	@SubscribeEvent
