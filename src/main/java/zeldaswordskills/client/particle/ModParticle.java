@@ -127,6 +127,7 @@ public class ModParticle extends EntityFX {
 
 	@Override
 	public void renderParticle(WorldRenderer renderer, Entity entity, float partialTick, float rotX, float rotXZ, float rotZ, float rotYZ, float rotXY) {
+		/*
 		renderer.finishDrawing();
 		Minecraft.getMinecraft().renderEngine.bindTexture(modParticles);
 		renderer.startDrawingQuads();
@@ -134,6 +135,7 @@ public class ModParticle extends EntityFX {
 		super.renderParticle(renderer, entity, partialTick, rotX, rotXZ, rotZ, rotYZ, rotXY);
 		renderer.finishDrawing();
 		renderer.startDrawingQuads();
+		*/
 		Minecraft.getMinecraft().renderEngine.bindTexture(minecraftParticles);
 	}
 
