@@ -15,38 +15,31 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package zeldaswordskills.client.render;
+package zeldaswordskills.client.render.entity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.Item;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * 
- * A class that renders nothing.
+ * Render factory for entities that render using the vanilla RenderSnowball class.
  *
  */
-@SideOnly(Side.CLIENT)
-public class RenderNothing extends Render<Entity> {
+public class RenderSnowballFactory implements IRenderFactory<Entity>
+{
+	private final Item item;
 
-	public RenderNothing(RenderManager renderManager) {
-		super(renderManager);
+	public RenderSnowballFactory(Item item) {
+		this.item = item;
 	}
 
 	@Override
-	public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick) {}
-
-	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) { return null; }
-
-	public static class Factory implements IRenderFactory<Entity> {
-		@Override
-		public Render<? super Entity> createRenderFor(RenderManager manager) {
-			return new RenderNothing(manager);
-		}
+	public Render<? super Entity> createRenderFor(RenderManager manager) {
+		return new RenderSnowball<Entity>(manager, this.item, Minecraft.getMinecraft().getRenderItem());
 	}
 }

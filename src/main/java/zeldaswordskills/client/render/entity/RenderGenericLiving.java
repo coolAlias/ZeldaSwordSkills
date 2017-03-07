@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package zeldaswordskills.client.render.entity;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.layers.LayerCustomHead;
@@ -30,6 +31,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.BossStatus;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.model.IModelBiped;
@@ -47,7 +49,7 @@ import zeldaswordskills.client.render.entity.layers.LayerGenericHeldItem;
  *
  */
 @SideOnly(Side.CLIENT)
-public class RenderGenericLiving extends RenderLiving
+public class RenderGenericLiving extends RenderLiving<EntityLiving>
 {
 	private final ResourceLocation texture;
 	private final float scale;
@@ -79,16 +81,34 @@ public class RenderGenericLiving extends RenderLiving
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
+	protected ResourceLocation getEntityTexture(EntityLiving entity) {
 		return texture;
 	}
 
 	@Override
-	protected void preRenderCallback(EntityLivingBase entity, float partialTick) {
+	protected void preRenderCallback(EntityLiving entity, float partialTick) {
 		float f = scale;
 		if (entity.isChild()) {
 			f = (float)((double) f * 0.5D);
 		}
 		GlStateManager.scale(f, f, f);
+	}
+
+	public static class Factory implements IRenderFactory<EntityLiving>
+	{
+		protected final ModelBase model;
+		protected final float shadowSize;
+		protected final float scale;
+		protected final String texturePath;
+		public Factory(ModelBase model, float shadowSize, float scale, String texturePath) {
+			this.model = model;
+			this.shadowSize = shadowSize;
+			this.scale = scale;
+			this.texturePath = texturePath;
+		}
+		@Override
+		public Render<? super EntityLiving> createRenderFor(RenderManager manager) {
+			return new RenderGenericLiving(manager, this.model, this.shadowSize, this.scale, this.texturePath);
+		}
 	}
 }

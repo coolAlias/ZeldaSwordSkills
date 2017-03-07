@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,12 +20,8 @@ package zeldaswordskills.entity;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelSlime;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLiving.SpawnPlacementType;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
@@ -81,6 +77,7 @@ import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
 import zeldaswordskills.client.render.entity.RenderEntityWhip;
 import zeldaswordskills.client.render.entity.RenderEntityWizzrobe;
 import zeldaswordskills.client.render.entity.RenderGenericLiving;
+import zeldaswordskills.client.render.entity.RenderSnowballFactory;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityDarknut;
@@ -302,55 +299,53 @@ public class ZSSEntities
 
 	@SideOnly(Side.CLIENT) 
 	public static void registerRenderers() {
-		RenderManager manager = Minecraft.getMinecraft().getRenderManager();
-		RenderItem itemRender = Minecraft.getMinecraft().getRenderItem();
 		// PROJECTILES
-		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityBombosFireball.class, new RenderSnowball(manager, Items.fire_charge, itemRender));
-		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang(manager, itemRender));
-		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar(manager, itemRender));
-		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(manager, ZSSItems.dekuNut, itemRender));
-		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(manager, ZSSItems.throwingRock, itemRender));
-		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderEntityWhip(manager));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityBombosFireball.class, new RenderSnowballFactory(Items.fire_charge));
+		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowballFactory(ZSSItems.dekuNut));
+		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowballFactory(ZSSItems.throwingRock));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderEntityWhip.Factory());
 
 		// NATURALLY SPAWNING MOBS
-		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu(manager, new ModelSlime(16), 0.25F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityDarknut.class, new RenderGenericLiving(manager, 
+		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu.Factory(new ModelSlime(16), 0.25F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityDarknut.class, new RenderGenericLiving.Factory( 
 				new ModelDarknut(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityDekuBaba.class, new RenderDekuBaba(manager,
+		RenderingRegistry.registerEntityRenderingHandler(EntityDekuBaba.class, new RenderDekuBaba.Factory(
 				new ModelDekuBaba(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_baba.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityDekuFire.class, new RenderDekuBaba(manager,
+		RenderingRegistry.registerEntityRenderingHandler(EntityDekuFire.class, new RenderDekuBaba.Factory(
 				new ModelDekuFire(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_baba.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityDekuWithered.class, new RenderDekuBaba(manager,
+		RenderingRegistry.registerEntityRenderingHandler(EntityDekuWithered.class, new RenderDekuBaba.Factory(
 				new ModelDekuWithered(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_withered.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(manager, 
+		RenderingRegistry.registerEntityRenderingHandler(EntityFairy.class, new RenderEntityFairy.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving.Factory( 
 				new ModelGoron(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/goron.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(manager, new ModelOctorok(), 0.7F));
-		RenderingRegistry.registerEntityRenderingHandler(EntitySkulltula.class, new RenderEntitySkulltula(manager));
-		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobe.class, new RenderEntityWizzrobe(manager, new ModelWizzrobe(), 1.0F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok.Factory(new ModelOctorok(), 0.7F));
+		RenderingRegistry.registerEntityRenderingHandler(EntitySkulltula.class, new RenderEntitySkulltula.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobe.class, new RenderEntityWizzrobe.Factory(new ModelWizzrobe(), 1.0F));
 
 		// BOSSES
-		RenderingRegistry.registerEntityRenderingHandler(EntityBlackKnight.class, new RenderGenericLiving(manager, 
+		RenderingRegistry.registerEntityRenderingHandler(EntityBlackKnight.class, new RenderGenericLiving.Factory( 
 				new ModelDarknut(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobe(manager, new ModelWizzrobe(), 1.5F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobe.Factory(new ModelWizzrobe(), 1.5F));
 
 		// NPCS
-		RenderingRegistry.registerEntityRenderingHandler(EntityNpcBarnes.class, new RenderGenericLiving(manager, 
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcBarnes.class, new RenderGenericLiving.Factory( 
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_barnes.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityNpcMaskTrader.class, new RenderGenericLiving(manager, 
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcMaskTrader.class, new RenderGenericLiving.Factory( 
 				new ModelMaskSalesman(), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_mask_salesman.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityNpcOrca.class, new RenderGenericLiving(manager, 
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcOrca.class, new RenderGenericLiving.Factory( 
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_orca.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityNpcZelda.class, new RenderGenericLiving(manager, 
+		RenderingRegistry.registerEntityRenderingHandler(EntityNpcZelda.class, new RenderGenericLiving.Factory(
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_zelda.png"));
 	}
 

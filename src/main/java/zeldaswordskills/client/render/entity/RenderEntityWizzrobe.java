@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,24 +17,21 @@
 
 package zeldaswordskills.client.render.entity;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.BossStatus;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.lwjgl.opengl.GL11;
-
 import zeldaswordskills.client.model.ModelCube;
 import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
@@ -43,7 +40,7 @@ import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
-public class RenderEntityWizzrobe extends RenderLiving
+public class RenderEntityWizzrobe extends RenderLiving<EntityWizzrobe>
 {
 	private static final ResourceLocation fireWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_fire.png");
 	private static final ResourceLocation iceWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice.png");
@@ -73,18 +70,18 @@ public class RenderEntityWizzrobe extends RenderLiving
 	}
 
 	@Override
-	protected void preRenderCallback(EntityLivingBase entity, float partialTick) {
+	protected void preRenderCallback(EntityWizzrobe entity, float partialTick) {
 		GlStateManager.scale(scale, scale, scale);
 	}
 
 	@Override
-	public void doRender(EntityLiving entity, double dx, double dy, double dz, float yaw, float partialTick) {
+	public void doRender(EntityWizzrobe entity, double dx, double dy, double dz, float yaw, float partialTick) {
 		if (entity instanceof IBossDisplayData) {
 			BossStatus.setBossStatus((IBossDisplayData) entity, true);
 		}
 		super.doRender(entity, dx, dy, dz, yaw, partialTick);
 		if (model.atPeak) {
-			renderSpell((EntityWizzrobe) entity, dx, dy, dz, yaw, partialTick);
+			renderSpell(entity, dx, dy, dz, yaw, partialTick);
 		}
 	}
 
@@ -94,7 +91,7 @@ public class RenderEntityWizzrobe extends RenderLiving
 		GlStateManager.enableLighting();
 		GlStateManager.enableTexture2D();
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240F, 240F);
 		Vec3 vec3 = new Vec3(dx, dy, dz).normalize();
 		GlStateManager.translate(dx - vec3.xCoord, dy + wizzrobe.getEyeHeight(), dz - vec3.zCoord);
 		GlStateManager.scale(scale, scale, scale);
@@ -103,7 +100,6 @@ public class RenderEntityWizzrobe extends RenderLiving
 		GlStateManager.rotate(yaw, 0, 1, 0);
 		GlStateManager.rotate(roll, 0.8F, 0F, -0.6F);
 		bindTexture(wizzrobe.getMagicType().getEntityTexture());
-		Tessellator.getInstance().getWorldRenderer().setBrightness(0xf000f0);
 		box1.render(spell);
 		GlStateManager.rotate(45, 1, 0, 1);
 		box2.render(spell);
@@ -114,13 +110,27 @@ public class RenderEntityWizzrobe extends RenderLiving
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
+	protected ResourceLocation getEntityTexture(EntityWizzrobe entity) {
 		boolean grand = (entity instanceof EntityGrandWizzrobe);
-		switch(((EntityWizzrobe) entity).getMagicType()) {
+		switch(entity.getMagicType()) {
 		case FIRE: return (grand ? grandFireWizTexture : fireWizTexture);
 		case ICE: return (grand ? grandIceWizTexture : iceWizTexture);
 		case LIGHTNING: return (grand ? grandLightningWizTexture : lightningWizTexture);
 		default: return (grand ? grandWindWizTexture : windWizTexture);
+		}
+	}
+
+	public static class Factory implements IRenderFactory<EntityWizzrobe>
+	{
+		protected final ModelWizzrobe model;
+		protected final float shadowSize;
+		public Factory(ModelWizzrobe model, float shadowSize) {
+			this.model = model;
+			this.shadowSize = shadowSize;
+		}
+		@Override
+		public Render<? super EntityWizzrobe> createRenderFor(RenderManager manager) {
+			return new RenderEntityWizzrobe(manager, this.model, this.shadowSize);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.entity.BombType;
@@ -36,7 +36,7 @@ import zeldaswordskills.ref.ModInfo;
  *
  */
 @SideOnly(Side.CLIENT)
-public class RenderEntityBomb extends Render
+public class RenderEntityBomb extends Render<EntityBomb>
 {
 	/** Base bomb textures */
 	public static final ResourceLocation[] bombTextures = new ResourceLocation[BombType.values().length];
@@ -58,17 +58,13 @@ public class RenderEntityBomb extends Render
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Entity bomb) {
+	protected ResourceLocation getEntityTexture(EntityBomb bomb) {
 		int i = ((EntityBomb) bomb).getType().ordinal();
 		return (bomb.ticksExisted % 13 > 10) ? flashTextures[i] : bombTextures[i];
 	}
 
 	@Override
-	public void doRender(Entity bomb, double x, double y, double z, float yaw, float partialTick) {
-		renderEntityModel(bomb, x, y, z, yaw, partialTick);
-	}
-
-	public void renderEntityModel(Entity bomb, double x, double y, double z, float yaw, float partialTick) {
+	public void doRender(EntityBomb bomb, double x, double y, double z, float yaw, float partialTick) {
 		GlStateManager.pushMatrix();
 		float scale = bomb.ticksExisted % 13 > 10 ? 1.25F : 1.1F;
 		bindTexture(getEntityTexture(bomb));
@@ -80,5 +76,12 @@ public class RenderEntityBomb extends Render
 		model.render(bomb, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0475F);
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.popMatrix();
+	}
+
+	public static class Factory implements IRenderFactory<EntityBomb> {
+		@Override
+		public Render<? super EntityBomb> createRenderFor(RenderManager manager) {
+			return new RenderEntityBomb(manager);
+		}
 	}
 }

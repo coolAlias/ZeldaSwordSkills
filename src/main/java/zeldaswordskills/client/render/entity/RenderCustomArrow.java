@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,12 @@
 
 package zeldaswordskills.client.render.entity;
 
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderArrow;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
@@ -41,16 +43,12 @@ public class RenderCustomArrow extends RenderArrow
 	}
 
 	@Override
-	public void doRender(Entity entity, double dx, double dy, double dz, float yaw, float partialTick) {
+	public void doRender(EntityArrow entity, double dx, double dy, double dz, float yaw, float partialTick) {
 		super.doRender(entity, dx, dy, dz, yaw, partialTick);
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		return getArrowTexture((EntityArrowCustom) entity);
-	}
-
-	protected ResourceLocation getArrowTexture(EntityArrowCustom arrow) {
+	protected ResourceLocation getEntityTexture(EntityArrow arrow) {
 		if (arrow instanceof EntityArrowBomb) {
 			return getBombArrowTexture((EntityArrowBomb) arrow);
 		} else if (arrow instanceof EntityArrowElemental) {
@@ -73,6 +71,13 @@ public class RenderCustomArrow extends RenderArrow
 		case ICE: return iceArrow;
 		case LIGHT: return lightArrow;
 		default: return super.getEntityTexture(arrow);
+		}
+	}
+
+	public static class Factory implements IRenderFactory<EntityArrowCustom> {
+		@Override
+		public Render<? super EntityArrowCustom> createRenderFor(RenderManager manager) {
+			return new RenderCustomArrow(manager);
 		}
 	}
 }

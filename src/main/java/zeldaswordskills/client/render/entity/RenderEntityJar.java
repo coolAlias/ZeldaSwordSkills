@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,31 +17,33 @@
 
 package zeldaswordskills.client.render.entity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.projectile.EntityCeramicJar;
 
 @SideOnly(Side.CLIENT)
-public class RenderEntityJar extends Render
+public class RenderEntityJar extends Render<EntityCeramicJar>
 {
 	private final RenderItem renderItem;
 	private static final ItemStack jar = new ItemStack(ZSSBlocks.ceramicJar);
 
-	public RenderEntityJar(RenderManager renderManager, RenderItem renderItem) {
+	public RenderEntityJar(RenderManager renderManager) {
 		super(renderManager);
-		this.renderItem = renderItem;
+		this.renderItem = Minecraft.getMinecraft().getRenderItem();
 	}
 
-	public void renderJar(EntityCeramicJar entity, double dx, double dy, double dz, float yaw, float partialTick) {
+	@Override
+	public void doRender(EntityCeramicJar entity, double dx, double dy, double dz, float yaw, float partialTick) {
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(dx, dy, dz);
 		GlStateManager.rotate(yaw, 0, 1, 0);
@@ -49,17 +51,19 @@ public class RenderEntityJar extends Render
 		while (roll > 360) { roll -= 360; }
 		GlStateManager.rotate(roll, -0.25F, 0.1F, 0);
 		GlStateManager.scale(1.5F, 1.5F, 1.5F);
-		renderItem.renderItemModel(jar);
+		renderItem.renderItem(jar, renderItem.getItemModelMesher().getItemModel(jar));
 		GlStateManager.popMatrix();
 	}
 
 	@Override
-	public void doRender(Entity entity, double dx, double dy, double dz, float yaw, float partialTick) {
-		renderJar((EntityCeramicJar) entity, dx, dy, dz, yaw, partialTick);
+	protected ResourceLocation getEntityTexture(EntityCeramicJar entity) {
+		return TextureMap.locationBlocksTexture;
 	}
 
-	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		return TextureMap.locationBlocksTexture;
+	public static class Factory implements IRenderFactory<EntityCeramicJar> {
+		@Override
+		public Render<? super EntityCeramicJar> createRenderFor(RenderManager manager) {
+			return new RenderEntityJar(manager);
+		}
 	}
 }

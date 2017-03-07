@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,12 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderSlime;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntityChu;
@@ -42,7 +44,7 @@ public class RenderEntityChu extends RenderSlime
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
+	protected ResourceLocation getEntityTexture(EntitySlime entity) {
 		return getChuTexture((EntityChu) entity);
 	}
 
@@ -53,6 +55,21 @@ public class RenderEntityChu extends RenderSlime
 		case BLUE: return (chu.getShockTime() % 8 > 5 ? blueChuShock : blueChu);
 		case YELLOW: return (chu.getShockTime() % 8 > 5 ? yellowChuShock : yellowChu);
 		default: return redChu;
+		}
+	}
+
+	public static class Factory implements IRenderFactory<EntityChu>
+	{
+		private final ModelBase model;
+		private final float shadowSize;
+		public Factory(ModelBase model, float shadowSize) {
+			this.model = model;
+			this.shadowSize = shadowSize;
+		}
+
+		@Override
+		public Render<? super EntityChu> createRenderFor(RenderManager manager) {
+			return new RenderEntityChu(manager, this.model, this.shadowSize);
 		}
 	}
 }

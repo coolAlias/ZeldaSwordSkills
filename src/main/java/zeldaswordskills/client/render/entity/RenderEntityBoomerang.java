@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,29 +17,31 @@
 
 package zeldaswordskills.client.render.entity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
 
 @SideOnly(Side.CLIENT)
-public class RenderEntityBoomerang extends Render
+public class RenderEntityBoomerang extends Render<EntityBoomerang>
 {
 	private final RenderItem renderItem;
 
-	public RenderEntityBoomerang(RenderManager renderManager, RenderItem renderItem) {
+	public RenderEntityBoomerang(RenderManager renderManager) {
 		super(renderManager);
-		this.renderItem = renderItem;
+		this.renderItem = Minecraft.getMinecraft().getRenderItem();
 	}
 
-	public void renderBoomerang(EntityBoomerang entity, double x, double y, double z, float yaw, float partialTick) {
+	@Override
+	public void doRender(EntityBoomerang entity, double x, double y, double z, float yaw, float partialTick) {
 		ItemStack boomerang = entity.getBoomerang();
 		if (boomerang != null) {
 			GlStateManager.pushMatrix();
@@ -51,7 +53,7 @@ public class RenderEntityBoomerang extends Render
 			GlStateManager.rotate(entity.rotationYaw + (entity.prevRotationYaw - entity.rotationYaw) * partialTick - 60.0F, 0.0F, 1.0F, 0.0F);
 			GlStateManager.rotate(Math.abs(entity.rotationPitch + (entity.prevRotationPitch - entity.rotationPitch)) * partialTick - rotation, 0.0F, 0.0F, 1.0F);
 			bindTexture(TextureMap.locationBlocksTexture);
-			renderItem.renderItemModel(boomerang);
+			renderItem.renderItem(boomerang, renderItem.getItemModelMesher().getItemModel(boomerang));
 			GlStateManager.disableRescaleNormal();
 			GlStateManager.popMatrix();
 		}
@@ -59,12 +61,14 @@ public class RenderEntityBoomerang extends Render
 	}
 
 	@Override
-	public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick) {
-		renderBoomerang((EntityBoomerang) entity, x, y, z, yaw, partialTick);
+	protected ResourceLocation getEntityTexture(EntityBoomerang entity) {
+		return null;
 	}
 
-	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		return null;
+	public static class Factory implements IRenderFactory<EntityBoomerang> {
+		@Override
+		public Render<? super EntityBoomerang> createRenderFor(RenderManager manager) {
+			return new RenderEntityBoomerang(manager);
+		}
 	}
 }

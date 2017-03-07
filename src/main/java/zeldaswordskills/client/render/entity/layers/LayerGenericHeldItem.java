@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,14 +34,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.model.IModelBiped;
 
 @SideOnly(Side.CLIENT)
-public class LayerGenericHeldItem implements LayerRenderer
+public class LayerGenericHeldItem implements LayerRenderer<EntityLivingBase>
 {
-	private final RendererLivingEntity modelBase;
+	private final RendererLivingEntity<?> modelBase;
 
 	/**
 	 * Renderer's getMainModel() must return a model implementing IModelBiped
 	 */
-	public LayerGenericHeldItem(RendererLivingEntity modelBase) {
+	public LayerGenericHeldItem(RendererLivingEntity<?> modelBase) {
 		this.modelBase = modelBase;
 		if (!(this.modelBase.getMainModel() instanceof IModelBiped)) {
 			throw new IllegalArgumentException("Model must implement IModelBiped!");

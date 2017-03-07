@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,9 @@ package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -35,7 +36,7 @@ public class RenderDekuBaba extends RenderGenericLiving
 	}
 
 	@Override
-	protected void preRenderCallback(EntityLivingBase entity, float partialTick) {
+	protected void preRenderCallback(EntityLiving entity, float partialTick) {
 		super.preRenderCallback(entity, partialTick);
 		if (entity instanceof EntityDekuBaba) {
 			int fuse = ((EntityDekuBaba) entity).getBombTimer();
@@ -53,7 +54,7 @@ public class RenderDekuBaba extends RenderGenericLiving
 	}
 
 	@Override
-	protected int getColorMultiplier(EntityLivingBase entity, float brightness, float partialTick) {
+	protected int getColorMultiplier(EntityLiving entity, float brightness, float partialTick) {
 		if (entity instanceof EntityDekuBaba) {
 			int fuse = ((EntityDekuBaba) entity).getBombTimer();
 			if (fuse > 0) {
@@ -71,8 +72,19 @@ public class RenderDekuBaba extends RenderGenericLiving
 	}
 
 	@Override
-	protected float getDeathMaxRotation(EntityLivingBase entity) {
+	protected float getDeathMaxRotation(EntityLiving entity) {
 		boolean flag = (entity instanceof EntityDekuBase && ((EntityDekuBase) entity).custom_death != 0);
 		return (flag ? 0.0F : super.getDeathMaxRotation(entity));
+	}
+
+	public static class Factory extends RenderGenericLiving.Factory
+	{
+		public Factory(ModelBase model, float shadowSize, float scale, String texturePath) {
+			super(model, shadowSize, scale, texturePath);
+		}
+		@Override
+		public Render<? super EntityLiving> createRenderFor(RenderManager manager) {
+			return new RenderDekuBaba(manager, this.model, this.shadowSize, this.scale, this.texturePath);
+		}
 	}
 }

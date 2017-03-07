@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,19 +19,18 @@ package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
-public class RenderEntityOctorok extends RenderLiving
+public class RenderEntityOctorok extends RenderLiving<EntityOctorok>
 {
 	private static final ResourceLocation texture1 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok1.png");
 	private static final ResourceLocation texture2 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok2.png");
@@ -40,13 +39,20 @@ public class RenderEntityOctorok extends RenderLiving
 		super(renderManager, model, shadowSize);
 	}
 
-	public void renderLivingSquid(EntityOctorok entity, double dx, double dy, double dz, float f, float f1) {
+	@Override
+	public void doRender(EntityOctorok entity, double dx, double dy, double dz, float f, float f1) {
 		super.doRender(entity, dx, dy, dz, f, f1);
 	}
 
-	protected void rotateSquidsCorpse(EntityOctorok octorok, float dx, float dy, float dz) {
-		float f3 = octorok.prevSquidPitch + (octorok.squidPitch - octorok.prevSquidPitch) * dz;
-		float f4 = octorok.prevSquidYaw + (octorok.squidYaw - octorok.prevSquidYaw) * dz;
+	@Override
+	protected float handleRotationFloat(EntityOctorok entity, float f) {
+		return entity.prevTentacleAngle + (entity.tentacleAngle - entity.prevTentacleAngle) * f;
+	}
+
+	@Override
+	protected void rotateCorpse(EntityOctorok entity, float dx, float dy, float dz) {
+		float f3 = entity.prevSquidPitch + (entity.squidPitch - entity.prevSquidPitch) * dz;
+		float f4 = entity.prevSquidYaw + (entity.squidYaw - entity.prevSquidYaw) * dz;
 		GlStateManager.translate(0.0F, 0.5F, 0.0F);
 		GlStateManager.rotate(180.0F - dy, 0.0F, 1.0F, 0.0F);
 		GlStateManager.rotate(f3, 1.0F, 0.0F, 0.0F);
@@ -54,27 +60,22 @@ public class RenderEntityOctorok extends RenderLiving
 		GlStateManager.translate(0.0F, -1.2F, 0.0F);
 	}
 
-	protected float handleRotationFloat(EntityOctorok octorok, float f) {
-		return octorok.prevTentacleAngle + (octorok.tentacleAngle - octorok.prevTentacleAngle) * f;
+	@Override
+	protected ResourceLocation getEntityTexture(EntityOctorok entity) {
+		return (entity.getType() == 0 ? texture1 : texture2);
 	}
 
-	@Override
-	public void doRender(EntityLiving entity, double dx, double dy, double dz, float f, float f1) {
-		renderLivingSquid((EntityOctorok) entity, dx, dy, dz, f, f1);
-	}
-
-	@Override
-	protected float handleRotationFloat(EntityLivingBase entity, float f) {
-		return handleRotationFloat((EntityOctorok) entity, f);
-	}
-
-	@Override
-	protected void rotateCorpse(EntityLivingBase entity, float dx, float dy, float dz) {
-		rotateSquidsCorpse((EntityOctorok) entity, dx, dy, dz);
-	}
-
-	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		return (((EntityOctorok) entity).getType() == 0 ? texture1 : texture2);
+	public static class Factory implements IRenderFactory<EntityOctorok>
+	{
+		protected final ModelBase model;
+		protected final float shadowSize;
+		public Factory(ModelBase model, float shadowSize) {
+			this.model = model;
+			this.shadowSize = shadowSize;
+		}
+		@Override
+		public Render<? super EntityOctorok> createRenderFor(RenderManager manager) {
+			return new RenderEntityOctorok(manager, this.model, this.shadowSize);
+		}
 	}
 }

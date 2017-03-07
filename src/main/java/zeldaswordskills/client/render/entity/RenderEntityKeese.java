@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,12 @@
 
 package zeldaswordskills.client.render.entity;
 
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderBat;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntityKeese;
@@ -58,5 +60,12 @@ public class RenderEntityKeese extends RenderBat
 	@Override
 	protected ResourceLocation getEntityTexture(EntityBat entity) {
 		return getKeeseTextures((EntityKeese) entity);
+	}
+
+	public static class Factory implements IRenderFactory<EntityBat> {
+		@Override
+		public Render<? super EntityBat> createRenderFor(RenderManager manager) {
+			return new RenderEntityKeese(manager);
+		}
 	}
 }

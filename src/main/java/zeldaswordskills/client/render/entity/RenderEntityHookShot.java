@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,18 +17,19 @@
 
 package zeldaswordskills.client.render.entity;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.lwjgl.opengl.GL11;
-
 import zeldaswordskills.entity.projectile.EntityHookShot;
 
 /**
@@ -37,7 +38,7 @@ import zeldaswordskills.entity.projectile.EntityHookShot;
  *
  */
 @SideOnly(Side.CLIENT)
-public class RenderEntityHookShot extends Render
+public class RenderEntityHookShot extends Render<EntityHookShot>
 {
 	/** Use arrow texture for now */
 	private static final ResourceLocation arrowTexture = new ResourceLocation("textures/entity/arrow.png");
@@ -47,22 +48,17 @@ public class RenderEntityHookShot extends Render
 	}
 
 	@Override
-	public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTick) {
-		renderArrow((EntityHookShot) entity, x, y, z, yaw, partialTick);
-		renderLeash((EntityHookShot) entity, x, y, z, yaw, partialTick);
-	}
-
-	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
+	protected ResourceLocation getEntityTexture(EntityHookShot entity) {
 		return arrowTexture;
 	}
 
-	public void renderArrow(EntityHookShot hookshot, double x, double y, double z, float yaw, float partialTick) {
-		bindEntityTexture(hookshot);
+	public void doRender(EntityHookShot entity, double x, double y, double z, float yaw, float partialTick) {
+		bindEntityTexture(entity);
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
-		GlStateManager.rotate(hookshot.prevRotationYaw + (hookshot.rotationYaw - hookshot.prevRotationYaw) * partialTick - 90.0F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotate(hookshot.prevRotationPitch + (hookshot.rotationPitch - hookshot.prevRotationPitch) * partialTick, 0.0F, 0.0F, 1.0F);
+		GlStateManager.rotate(entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTick - 90.0F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate(entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTick, 0.0F, 0.0F, 1.0F);
 		Tessellator tessellator = Tessellator.getInstance();
 		WorldRenderer renderer = tessellator.getWorldRenderer();
 		byte b0 = 0;
@@ -80,31 +76,33 @@ public class RenderEntityHookShot extends Render
 		GlStateManager.scale(f10, f10, f10);
 		GlStateManager.translate(-4.0F, 0.0F, 0.0F);
 		GL11.glNormal3f(f10, 0.0F, 0.0F);
-		renderer.startDrawingQuads();
-		renderer.addVertexWithUV(-7.0D, -2.0D, -2.0D, (double)f6, (double)f8);
-		renderer.addVertexWithUV(-7.0D, -2.0D, 2.0D, (double)f7, (double)f8);
-		renderer.addVertexWithUV(-7.0D, 2.0D, 2.0D, (double)f7, (double)f9);
-		renderer.addVertexWithUV(-7.0D, 2.0D, -2.0D, (double)f6, (double)f9);
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		renderer.pos(-7.0D, -2.0D, -2.0D).tex((double)f4, (double)f6).endVertex();
+		renderer.pos(-7.0D, -2.0D, 2.0D).tex((double)f5, (double)f6).endVertex();
+		renderer.pos(-7.0D, 2.0D, 2.0D).tex((double)f5, (double)f7).endVertex();
+		renderer.pos(-7.0D, 2.0D, -2.0D).tex((double)f4, (double)f7).endVertex();
 		tessellator.draw();
 		GL11.glNormal3f(-f10, 0.0F, 0.0F);
-		renderer.startDrawingQuads();
-		renderer.addVertexWithUV(-7.0D, 2.0D, -2.0D, (double)f6, (double)f8);
-		renderer.addVertexWithUV(-7.0D, 2.0D, 2.0D, (double)f7, (double)f8);
-		renderer.addVertexWithUV(-7.0D, -2.0D, 2.0D, (double)f7, (double)f9);
-		renderer.addVertexWithUV(-7.0D, -2.0D, -2.0D, (double)f6, (double)f9);
+		renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		renderer.pos(-7.0D, 2.0D, -2.0D).tex((double)f6, (double)f8).endVertex();
+		renderer.pos(-7.0D, 2.0D, 2.0D).tex((double)f7, (double)f8).endVertex();
+		renderer.pos(-7.0D, -2.0D, 2.0D).tex((double)f7, (double)f9).endVertex();
+		renderer.pos(-7.0D, -2.0D, -2.0D).tex((double)f6, (double)f9).endVertex();
 		tessellator.draw();
 		for (int i = 0; i < 4; ++i) {
 			GlStateManager.rotate(90.0F, 1.0F, 0.0F, 0.0F);
 			GL11.glNormal3f(0.0F, 0.0F, f10);
-			renderer.startDrawingQuads();
-			renderer.addVertexWithUV(-8.0D, -2.0D, 0.0D, (double)f2, (double)f4);
-			renderer.addVertexWithUV(8.0D, -2.0D, 0.0D, (double)f3, (double)f4);
-			renderer.addVertexWithUV(8.0D, 2.0D, 0.0D, (double)f3, (double)f5);
-			renderer.addVertexWithUV(-8.0D, 2.0D, 0.0D, (double)f2, (double)f5);
+			renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+			renderer.pos(-8.0D, -2.0D, 0.0D).tex((double)f2, (double)f4).endVertex();
+			renderer.pos(8.0D, -2.0D, 0.0D).tex((double)f3, (double)f4).endVertex();
+			renderer.pos(8.0D, 2.0D, 0.0D).tex((double)f3, (double)f5).endVertex();
+			renderer.pos(-8.0D, 2.0D, 0.0D).tex((double)f2, (double)f5).endVertex();
 			tessellator.draw();
 		}
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.popMatrix();
+		renderLeash(entity, x, y, z, yaw, partialTick);
+		super.doRender(entity, x, y, z, yaw, partialTick);
 	}
 
 	/**
@@ -114,25 +112,26 @@ public class RenderEntityHookShot extends Render
 		return start + (end - start) * pct;
 	}
 
+	/**
+	 * Copied from RenderLiving#renderLeash
+	 */
 	protected void renderLeash(EntityHookShot hookshot, double x, double y, double z, float yaw, float partialTick) {
 		Entity entity = hookshot.getThrower();
 		if (entity != null) {
 			// TODO mess with this to get it looking right with the models
 			y -= (3.0D - (double) hookshot.height) * 0.5D;
-			Tessellator tessellator = Tessellator.getInstance();
-			WorldRenderer renderer = tessellator.getWorldRenderer();
-			double d3 = interpolateValue((double) entity.prevRotationYaw, (double) entity.rotationYaw, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
-			double d4 = interpolateValue((double) entity.prevRotationPitch, (double) entity.rotationPitch, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
-			double d5 = Math.cos(d3);
-			double d6 = Math.sin(d3);
-			double d7 = Math.sin(d4);
-			double d8 = Math.cos(d4);
-			double d9 = interpolateValue(entity.prevPosX, entity.posX, (double) partialTick) - d5 * 0.7D - d6 * 0.5D * d8;
-			double d10 = interpolateValue(entity.prevPosY + (double) entity.getEyeHeight() * 0.7D, entity.posY + (double) entity.getEyeHeight() * 0.7D, (double) partialTick) - d7 * 0.5D - 0.25D;
-			double d11 = interpolateValue(entity.prevPosZ, entity.posZ, (double) partialTick) - d6 * 0.7D + d5 * 0.5D * d8;
-			double d12 = interpolateValue((double) hookshot.prevRotationYaw, (double) hookshot.prevRotationPitch, (double) partialTick) * 0.01745329238474369D + (Math.PI / 2D);
-			d5 = Math.cos(d12) * (double) hookshot.width * 0.4D;
-			d6 = Math.sin(d12) * (double) hookshot.width * 0.4D;
+			double d0 = interpolateValue((double) entity.prevRotationYaw, (double) entity.rotationYaw, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
+			double d1 = interpolateValue((double) entity.prevRotationPitch, (double) entity.rotationPitch, (double)(partialTick * 0.5F)) * 0.01745329238474369D;
+			double d2 = Math.cos(d0);
+			double d3 = Math.sin(d0);
+			double d4 = Math.sin(d1);
+			double d5 = Math.cos(d1);
+			double d6 = interpolateValue(entity.prevPosX, entity.posX, (double) partialTick) - d2 * 0.7D - d3 * 0.5D * d5;
+			double d7 = interpolateValue(entity.prevPosY + (double) entity.getEyeHeight() * 0.7D, entity.posY + (double) entity.getEyeHeight() * 0.7D, (double) partialTick) - d4 * 0.5D - 0.25D;
+			double d8 = interpolateValue(entity.prevPosZ, entity.posZ, (double) partialTick) - d3 * 0.7D + d2 * 0.5D * d5;
+			double d9 = interpolateValue((double) hookshot.prevRotationYaw, (double) hookshot.prevRotationPitch, (double) partialTick) * 0.01745329238474369D + (Math.PI / 2D);
+			d2 = Math.cos(d9) * (double) hookshot.width * 0.4D;
+			d3 = Math.sin(d9) * (double) hookshot.width * 0.4D;
 			if (hookshot.isInGround()) {
 				hookshot.posX = hookshot.getDataWatcher().getWatchableObjectFloat(EntityHookShot.HIT_POS_X);
 				hookshot.posY = hookshot.getDataWatcher().getWatchableObjectFloat(EntityHookShot.HIT_POS_Y);
@@ -141,48 +140,47 @@ public class RenderEntityHookShot extends Render
 				hookshot.prevPosY = hookshot.posY;
 				hookshot.prevPosZ = hookshot.posZ;
 			}
-			double d13 = interpolateValue(hookshot.prevPosX, hookshot.posX, (double) partialTick) + d5;
-			double d14 = interpolateValue(hookshot.prevPosY, hookshot.posY, (double) partialTick);
-			double d15 = interpolateValue(hookshot.prevPosZ, hookshot.posZ, (double) partialTick) + d6;
-			x += d5;
-			z += d6;
-			double d16 = (double)((float)(d9 - d13));
-			double d17 = (double)((float)(d10 - d14));
-			double d18 = (double)((float)(d11 - d15));
+			double d10 = interpolateValue(hookshot.prevPosX, hookshot.posX, (double) partialTick) + d2;
+			double d11 = interpolateValue(hookshot.prevPosY, hookshot.posY, (double) partialTick);
+			double d12 = interpolateValue(hookshot.prevPosZ, hookshot.posZ, (double) partialTick) + d3;
+			x += d2;
+			z += d3;
+			double d13 = (double)((float)(d6 - d10));
+			double d14 = (double)((float)(d7 - d11));
+			double d15 = (double)((float)(d8 - d12));
 			GlStateManager.disableTexture2D();
 			GlStateManager.disableLighting();
 			GlStateManager.disableCull();
-			renderer.startDrawing(5);
-			int i;
-			float f2;
+			Tessellator tessellator = Tessellator.getInstance();
+			WorldRenderer renderer = tessellator.getWorldRenderer();
+			renderer.begin(GL11.GL_TRIANGLE_STRIP, DefaultVertexFormats.POSITION_COLOR);
 			float grey = (1.0F/255) * 128F;
 			float lgrey = grey / 2;
-			for (i = 0; i <= 24; ++i) {
-				if (i % 2 == 0) {
-					renderer.setColorRGBA_F(grey, grey, grey, 1.0F);
-				} else {
-					renderer.setColorRGBA_F(lgrey, lgrey, lgrey, 1.0F);
-				}
-				f2 = (float)i / 24.0F;
-				renderer.addVertex(x + d16 * (double) f2 + 0.0D, y + d17 * (double)(f2 * f2 + f2) * 0.5D + (double)((24.0F - (float) i) / 18.0F + 0.125F), z + d18 * (double) f2);
-				renderer.addVertex(x + d16 * (double) f2 + 0.025D, y + d17 * (double)(f2 * f2 + f2) * 0.5D + (double)((24.0F - (float) i) / 18.0F + 0.125F) + 0.025D, z + d18 * (double) f2);
+			for (int i = 0; i <= 24; ++i) {
+				float rgb = (i % 2 == 0 ? grey : lgrey);
+				float f3 = (float) i / 24.0F;
+				renderer.pos(x + d13 * (double)f3 + 0.0D, y + d14 * (double)(f3 * f3 + f3) * 0.5D + (double)((24.0F - (float)i) / 18.0F + 0.125F), z + d15 * (double)f3).color(rgb, rgb, rgb, 1.0F).endVertex();
+				renderer.pos(x + d13 * (double)f3 + 0.025D, y + d14 * (double)(f3 * f3 + f3) * 0.5D + (double)((24.0F - (float)i) / 18.0F + 0.125F) + 0.025D, z + d15 * (double)f3).color(rgb, rgb, rgb, 1.0F).endVertex();
 			}
 			tessellator.draw();
-			renderer.startDrawing(5);
-			for (i = 0; i <= 24; ++i) {
-				if (i % 2 == 0) {
-					renderer.setColorRGBA_F(grey, grey, grey, 1.0F);
-				} else {
-					renderer.setColorRGBA_F(lgrey, lgrey, lgrey, 1.0F);
-				}
-				f2 = (float) i / 24.0F;
-				renderer.addVertex(x + d16 * (double) f2 + 0.0D, y + d17 * (double)(f2 * f2 + f2) * 0.5D + (double)((24.0F - (float) i) / 18.0F + 0.125F) + 0.025D, z + d18 * (double) f2);
-				renderer.addVertex(x + d16 * (double) f2 + 0.025D, y + d17 * (double)(f2 * f2 + f2) * 0.5D + (double)((24.0F - (float) i) / 18.0F + 0.125F), z + d18 * (double) f2 + 0.025D);
+			renderer.begin(GL11.GL_TRIANGLE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+			for (int i = 0; i <= 24; ++i) {
+				float rgb = (i % 2 == 0 ? grey : lgrey);
+				float f3 = (float)i / 24.0F;
+				renderer.pos(x + d13 * (double)f3 + 0.0D, y + d14 * (double)(f3 * f3 + f3) * 0.5D + (double)((24.0F - (float)i) / 18.0F + 0.125F) + 0.025D, z + d15 * (double)f3).color(rgb, rgb, rgb, 1.0F).endVertex();
+				renderer.pos(x + d13 * (double)f3 + 0.025D, y + d14 * (double)(f3 * f3 + f3) * 0.5D + (double)((24.0F - (float)i) / 18.0F + 0.125F), z + d15 * (double)f3 + 0.025D).color(rgb, rgb, rgb, 1.0F).endVertex();
 			}
 			tessellator.draw();
 			GlStateManager.enableLighting();
 			GlStateManager.enableTexture2D();
 			GlStateManager.enableCull();
+		}
+	}
+
+	public static class Factory implements IRenderFactory<EntityHookShot> {
+		@Override
+		public Render<? super EntityHookShot> createRenderFor(RenderManager manager) {
+			return new RenderEntityHookShot(manager);
 		}
 	}
 }

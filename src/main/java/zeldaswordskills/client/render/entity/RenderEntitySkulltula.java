@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,21 +18,21 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderSpider;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
-public class RenderEntitySkulltula extends RenderSpider
+public class RenderEntitySkulltula extends RenderSpider<EntitySkulltula>
 {
 	private static final ResourceLocation base = new ResourceLocation(ModInfo.ID, "textures/entity/skulltula.png");
 	private static final ResourceLocation golden = new ResourceLocation(ModInfo.ID, "textures/entity/skulltula_gold.png");
@@ -42,7 +42,7 @@ public class RenderEntitySkulltula extends RenderSpider
 	}
 
 	@Override
-	protected void rotateCorpse(EntityLivingBase entity, float f5, float f2, float partialTicks) {
+	protected void rotateCorpse(EntitySkulltula entity, float f5, float f2, float partialTicks) {
 		if (entity.deathTime > 0) {
 			GlStateManager.rotate(180.0F - f2, 0.0F, 1.0F, 0.0F);
 			float f3 = ((float) entity.deathTime + partialTicks - 1.0F) / 20.0F * 1.6F;
@@ -51,7 +51,7 @@ public class RenderEntitySkulltula extends RenderSpider
 				f3 = 1.0F;
 			}
 			GlStateManager.rotate(f3 * this.getDeathMaxRotation(entity), 0.0F, 0.0F, 1.0F);
-		} else if (((EntitySkulltula) entity).isPerched()) {
+		} else if (entity.isPerched()) {
 			BlockPos pos = new BlockPos(entity);
 			EnumFacing face = EnumFacing.EAST;
 			for (EnumFacing facing : EnumFacing.HORIZONTALS) {
@@ -75,7 +75,14 @@ public class RenderEntitySkulltula extends RenderSpider
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		return ((EntitySkulltula) entity).isGolden() ? golden : base;
+	protected ResourceLocation getEntityTexture(EntitySkulltula entity) {
+		return entity.isGolden() ? golden : base;
+	}
+
+	public static class Factory implements IRenderFactory<EntitySkulltula> {
+		@Override
+		public Render<? super EntitySkulltula> createRenderFor(RenderManager manager) {
+			return new RenderEntitySkulltula(manager);
+		}
 	}
 }
