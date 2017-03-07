@@ -38,6 +38,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.entity.BombType;
@@ -253,6 +254,13 @@ public class ItemBomb extends BaseModItem implements IHandlePickup, IHandleToss,
 			variants[type.ordinal()] = ModInfo.ID + ":bomb_" + type.unlocalizedName;
 		}
 		return variants;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerResources() {
+		super.registerResources();
+		ModelLoader.registerItemVariants(this, new ModelResourceLocation(ModInfo.ID + ":empty", "inventory"));
 	}
 
 	@Override

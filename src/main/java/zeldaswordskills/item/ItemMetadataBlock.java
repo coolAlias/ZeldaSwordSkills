@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,19 +17,19 @@
 
 package zeldaswordskills.item;
 
+import com.google.common.base.Function;
+
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemMultiTexture;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.IBlockItemVariant;
 import zeldaswordskills.ref.ModInfo;
-
-import com.google.common.base.Function;
 
 /**
  * 
@@ -96,31 +96,18 @@ public class ItemMetadataBlock extends ItemMultiTexture implements IModItem, IUn
 	}
 
 	/**
-	 * Default implementation suggested by {@link IModItem#registerVariants()}
+	 * Default implementation suggested by {@link IModItem#registerResources()}
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerVariants() {
-		String[] variants = getVariants();
-		if (variants != null) {
-			ModelBakery.addVariantName(this, variants);
-		}
-	}
-
-	/**
-	 * Default behavior registers a renderer for each variant
-	 * If no variants are returned by {@link #getVariants()}, the unlocalized name is used instead.
-	 */
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
+	public void registerResources() {
 		String[] variants = getVariants();
 		if (variants == null || variants.length < 1) {
 			String name = getUnlocalizedName();
 			variants = new String[]{ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1)};
 		}
 		for (int i = 0; i < variants.length; ++i) {
-			mesher.register(this, i, new ModelResourceLocation(variants[i], "inventory"));
+			ModelLoader.setCustomModelResourceLocation(this, i, new ModelResourceLocation(variants[i], "inventory"));
 		}
 	}
 }

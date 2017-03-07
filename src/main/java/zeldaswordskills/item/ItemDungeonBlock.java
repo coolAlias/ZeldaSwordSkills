@@ -26,7 +26,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockIce;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,6 +39,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -195,8 +195,9 @@ public class ItemDungeonBlock extends ItemBlockUnbreakable implements IDynamicIt
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
-		mesher.register(this, new ItemMeshDefinition() {
+	public void registerResources() {
+		ModelLoader.registerItemVariants(this, ModelDynamicItemBlock.resource);
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {
 				return ModelDynamicItemBlock.resource;

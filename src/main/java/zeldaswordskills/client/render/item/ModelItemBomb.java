@@ -21,28 +21,26 @@ import java.util.List;
 
 import javax.vecmath.Matrix4f;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
-import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartItemModel;
-import net.minecraftforge.client.model.TRSRTransformation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.client.model.ModelBomb;
 import zeldaswordskills.client.render.entity.RenderEntityBomb;
@@ -54,19 +52,14 @@ import zeldaswordskills.ref.ModInfo;
 public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 {
 	protected final ModelBomb bombModel;
-	private final IBakedModel baseModel;
-	private final IBakedModel emptyModel;
+	private final IFlexibleBakedModel baseModel;
+	private IFlexibleBakedModel emptyModel;
 	private BombType type;
 	private boolean isFlashing;
 
 	public ModelItemBomb(IBakedModel baseModel) {
 		bombModel = new ModelBomb();
-		this.baseModel = baseModel;
-		ModelResourceLocation resource = new ModelResourceLocation(ModInfo.ID + ":empty", "inventory");
-		this.emptyModel = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(resource);
-		if (emptyModel == null) {
-			ZSSMain.logger.warn("Failed to retrieve model for resource location: " + resource);
-		}
+		this.baseModel = (baseModel instanceof IFlexibleBakedModel ? (IFlexibleBakedModel) baseModel : new IFlexibleBakedModel.Wrapper(baseModel, DefaultVertexFormats.ITEM));
 	}
 
 	@Override
@@ -80,8 +73,8 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 	public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
 		// gui renders as 2D sprite; this is apparently also what renders when the item is dropped
 		if (cameraTransformType == ItemCameraTransforms.TransformType.GUI) {
-			RenderItem.applyVanillaTransform(baseModel.getItemCameraTransforms().gui);
-			return Pair.of(baseModel, null);
+			ForgeHooksClient.handleCameraTransforms(baseModel, cameraTransformType);
+			return Pair.of(this, null);
 		}
 		GlStateManager.pushMatrix();
 		switch (cameraTransformType) {
@@ -108,6 +101,10 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 		// first Entity parameter not used for anything in ModelBomb, so null is safe
 		bombModel.render(null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0475F);
 		GlStateManager.popMatrix();
+		if (this.emptyModel == null) {
+			ModelResourceLocation resource = new ModelResourceLocation(ModInfo.ID + ":empty", "inventory");
+			this.emptyModel = new IFlexibleBakedModel.Wrapper(Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(resource), DefaultVertexFormats.ITEM);
+		}
 		// return empty model to render nothing - bomb model already rendered
 		return Pair.of(emptyModel, null);
 	}
@@ -150,5 +147,10 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 	private ResourceLocation getTexture(BombType type, boolean isFlashing) {
 		int i = type.ordinal();
 		return (isFlashing) ? RenderEntityBomb.flashTextures[i] : RenderEntityBomb.bombTextures[i];
+	}
+
+	@Override
+	public VertexFormat getFormat() {
+		return baseModel.getFormat();
 	}
 }

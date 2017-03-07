@@ -28,11 +28,13 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartItemModel;
@@ -46,11 +48,11 @@ import zeldaswordskills.ref.ModInfo;
 @SideOnly(Side.CLIENT)
 public class ModelItemBombBag implements ISmartItemModel, IPerspectiveAwareModel
 {
-	private final IBakedModel baseModel;
+	private final IFlexibleBakedModel baseModel;
 	private int bombsHeld;
 
 	public ModelItemBombBag(IBakedModel baseModel) {
-		this.baseModel = baseModel;
+		this.baseModel = (baseModel instanceof IFlexibleBakedModel ? (IFlexibleBakedModel) baseModel : new IFlexibleBakedModel.Wrapper(baseModel, DefaultVertexFormats.ITEM));
 	}
 
 	@Override
@@ -63,23 +65,11 @@ public class ModelItemBombBag implements ISmartItemModel, IPerspectiveAwareModel
 
 	@Override
 	public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
-		switch (cameraTransformType) {
-		case FIRST_PERSON:
-			RenderItem.applyVanillaTransform(baseModel.getItemCameraTransforms().firstPerson);
-			return Pair.of(baseModel, null);
-		case GUI:
-			RenderItem.applyVanillaTransform(baseModel.getItemCameraTransforms().gui);
-			return Pair.of((IBakedModel)(new ModelItemBombBagGui(baseModel, bombsHeld)), null);
-		case HEAD:
-			RenderItem.applyVanillaTransform(baseModel.getItemCameraTransforms().head);
-			return Pair.of(baseModel, null);
-		case THIRD_PERSON:
-			RenderItem.applyVanillaTransform(baseModel.getItemCameraTransforms().thirdPerson);
-			return Pair.of(baseModel, null);
-		default:
-			break;
+		ForgeHooksClient.handleCameraTransforms(baseModel, cameraTransformType);
+		if (cameraTransformType == ItemCameraTransforms.TransformType.GUI) {
+			return Pair.of(new ModelItemBombBagGui(baseModel, bombsHeld), null);
 		}
-		return Pair.of(baseModel, null);
+		return Pair.of(this, null);
 	}
 
 	@Override
@@ -117,15 +107,20 @@ public class ModelItemBombBag implements ISmartItemModel, IPerspectiveAwareModel
 		return baseModel.getItemCameraTransforms();
 	}
 
+	@Override
+	public VertexFormat getFormat() {
+		return baseModel.getFormat();
+	}
+
 	/**
 	 * Model specifically for the GUI view; renders number of bombs held overlaid as digits
 	 */
-	private static class ModelItemBombBagGui implements IBakedModel
+	private static class ModelItemBombBagGui implements IFlexibleBakedModel
 	{
-		private final IBakedModel baseModel;
+		private final IFlexibleBakedModel baseModel;
 		private final TextureAtlasSprite tensSprite, onesSprite;
 
-		public ModelItemBombBagGui(IBakedModel baseModel, int bombsHeld) {
+		public ModelItemBombBagGui(IFlexibleBakedModel baseModel, int bombsHeld) {
 			this.baseModel = baseModel;
 			int tens = (bombsHeld / 10);
 			int ones = (bombsHeld % 10);
@@ -170,6 +165,11 @@ public class ModelItemBombBag implements ISmartItemModel, IPerspectiveAwareModel
 		@Override
 		public ItemCameraTransforms getItemCameraTransforms() {
 			return baseModel.getItemCameraTransforms();
+		}
+
+		@Override
+		public VertexFormat getFormat() {
+			return baseModel.getFormat();
 		}
 	}
 }

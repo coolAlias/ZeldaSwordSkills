@@ -29,7 +29,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -37,6 +36,7 @@ import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartItemModel;
@@ -163,30 +163,24 @@ public class ModelDynamicItemBlock implements ISmartItemModel {
 
 		@Override
 		public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
-			Matrix4f matrix = null;
 			switch (cameraTransformType) {
 			case FIRST_PERSON:
 				GlStateManager.scale(2.0F, 2.0F, 2.0F);
-				RenderItem.applyVanillaTransform(parent.getItemCameraTransforms().firstPerson);
+				ForgeHooksClient.handleCameraTransforms(parent, cameraTransformType);
 				GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
 				GlStateManager.translate(0.0F, 0.0F, -0.35F);
 				break;
-			case GUI:
-				RenderItem.applyVanillaTransform(parent.getItemCameraTransforms().gui);
-				break;
-			case HEAD:
-				RenderItem.applyVanillaTransform(parent.getItemCameraTransforms().head);
-				break;
 			case THIRD_PERSON:
 				GlStateManager.scale(2.0F, 2.0F, 2.0F);
-				RenderItem.applyVanillaTransform(parent.getItemCameraTransforms().thirdPerson);
+				ForgeHooksClient.handleCameraTransforms(parent, cameraTransformType);
 				GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
 				GlStateManager.translate(-0.15F, 0.25F, -0.25F);
 				break;
 			default:
+				ForgeHooksClient.handleCameraTransforms(parent, cameraTransformType);
 				break;
 			}
-			return Pair.of(parent, matrix);
+			return Pair.of(this, null);
 		}
 
 		@Override

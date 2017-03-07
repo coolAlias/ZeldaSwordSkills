@@ -36,8 +36,8 @@ import mods.battlegear2.enchantments.BaseEnchantment;
 import mods.battlegear2.items.ItemQuiver;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
@@ -59,6 +59,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
@@ -580,7 +581,7 @@ IAllowItem, ISheathed, ISpecialBow
 				GlStateManager.scale(0.625F, 0.625F, 0.625F);
 			}
 			GlStateManager.translate(-(-3F+i)/16F, -(-3F+i)/16F, 0.5F/16F);
-			mc.getRenderItem().renderItemModel(arrowStack);
+			mc.getRenderItem().renderItem(arrowStack, ItemCameraTransforms.TransformType.FIXED);
 			GlStateManager.popMatrix();
 		}
 		return models.get(i);
@@ -599,24 +600,19 @@ IAllowItem, ISheathed, ISpecialBow
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerVariants() {
+	public void registerResources() {
 		String[] variants = getVariants();
-		if (variants != null) {
-			ModelBakery.addVariantName(this, variants);
+		models = new ArrayList<ModelResourceLocation>(variants.length);
+		for (int i = 0; i < variants.length; ++i) {
+			models.add(new ModelResourceLocation(variants[i], "inventory"));
 		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
-		String name = getUnlocalizedName();
-		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
-		models = new ArrayList<ModelResourceLocation>();
-		for (int i = 0; i < 4; ++i) {
-			models.add(new ModelResourceLocation(name + "_" + i, "inventory"));
-		}
-		// Register the first model as the base resource
-		mesher.register(this, 0, models.get(0));
+		ModelLoader.registerItemVariants(this, models.toArray(new ModelResourceLocation[0]));
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return models.get(0);
+			}
+		});
 	}
 
 	@Override

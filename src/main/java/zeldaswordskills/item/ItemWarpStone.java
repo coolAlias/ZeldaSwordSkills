@@ -20,12 +20,13 @@ package zeldaswordskills.item;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.block.BlockWarpStone;
@@ -33,6 +34,9 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.songs.AbstractZeldaSong;
 
 public class ItemWarpStone extends ItemMetadataBlock {
+
+	@SideOnly(Side.CLIENT)
+	protected ModelResourceLocation model;
 
 	public ItemWarpStone(Block block) {
 		super(block);
@@ -50,11 +54,14 @@ public class ItemWarpStone extends ItemMetadataBlock {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
-		ModelResourceLocation resource = new ModelResourceLocation(ModInfo.ID + ":warp_stone", "inventory");
-		for (int i = 0; i < BlockWarpStone.EnumWarpSong.values().length; ++i) {
-			mesher.register(this, i, resource); // all have the same texture
-		}
+	public void registerResources() {
+		this.model = new ModelResourceLocation(ModInfo.ID + ":warp_stone", "inventory");
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return ItemWarpStone.this.model; // All use same texture for now
+			}
+		});
 	}
 
 	@Override

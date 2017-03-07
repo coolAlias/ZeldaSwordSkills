@@ -1,0 +1,6 @@
+{
+    "parent": "zeldaswordskills:builtin/generated",
+    "textures": {
+        "all": "zeldaswordskills:blocks/empty"
+    }
+}

@@ -29,7 +29,7 @@ import mods.battlegear2.api.core.InventoryPlayerBattle;
 import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
-import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
@@ -50,6 +50,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.Optional.Method;
@@ -65,7 +66,6 @@ import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.client.ISwapModel;
 import zeldaswordskills.client.render.item.ModelItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
@@ -321,14 +321,19 @@ public class ItemZeldaShield extends BaseModItem implements IDashItem, IFairyUpg
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
-		String[] resources = getVariants();
-		models = new ArrayList<ModelResourceLocation>(resources.length);
-		for (int i = 0; i < resources.length; ++i) {
-			models.add(new ModelResourceLocation(resources[i], "inventory"));
+	public void registerResources() {
+		String[] variants = getVariants();
+		models = new ArrayList<ModelResourceLocation>(variants.length);
+		for (int i = 0; i < variants.length; ++i) {
+			models.add(new ModelResourceLocation(variants[i], "inventory"));
 		}
-		// Register only the first model as the base resource:
-		mesher.register(this, 0, models.get(0));
+		ModelLoader.registerItemVariants(this, models.toArray(new ModelResourceLocation[0]));
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return models.get(0);
+			}
+		});
 	}
 
 	//@Override

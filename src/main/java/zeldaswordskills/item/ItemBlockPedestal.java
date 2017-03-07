@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,21 @@
 
 package zeldaswordskills.item;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemBlockPedestal extends ItemMetadataBlock {
+
+	@SideOnly(Side.CLIENT)
+	private List<ModelResourceLocation> models;
 
 	public ItemBlockPedestal(Block block) {
 		super(block);
@@ -34,9 +42,18 @@ public class ItemBlockPedestal extends ItemMetadataBlock {
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
+	public void registerResources() {
 		String[] variants = getVariants();
-		mesher.register(this, 0, new ModelResourceLocation(variants[0], "inventory"));
-		mesher.register(this, 8, new ModelResourceLocation(variants[1], "inventory"));
+		this.models = new ArrayList<ModelResourceLocation>(variants.length);
+		for (int i = 0; i < variants.length; ++i) {
+			this.models.add(new ModelResourceLocation(variants[i], "inventory"));
+		}
+		ModelLoader.registerItemVariants(this, this.models.toArray(new ModelResourceLocation[0]));
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return models.get(stack.getItemDamage() == 8 ? 1 : 0);
+			}
+		});
 	}
 }

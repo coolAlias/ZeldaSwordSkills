@@ -20,6 +20,8 @@ package zeldaswordskills;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
@@ -48,13 +50,10 @@ import zeldaswordskills.network.client.UnpressKeyPacket;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
-import com.google.common.collect.Maps;
-
 public class ClientProxy extends CommonProxy
 {
 	private final Minecraft mc = Minecraft.getMinecraft();
 	/** Stores all models which need to be replaced during {@link ModelBakeEvent} */
-	@SuppressWarnings("deprecation")
 	public static final Map<ModelResourceLocation, Class<? extends net.minecraft.client.resources.model.IBakedModel>> smartModels = Maps.newHashMap();
 	/** Accessible version of EffectRenderer's IParticleFactory map */
 	public static Map<Integer, IParticleFactory> particleFactoryMap;
@@ -65,20 +64,16 @@ public class ClientProxy extends CommonProxy
 	@Override
 	public void preInit() {
 		super.preInit();
-		registerVariants();
+		registerRenderers();
+		ZSSEntities.registerRenderers();
 		MinecraftForge.EVENT_BUS.register(new ZSSClientEvents());
 		MinecraftForge.EVENT_BUS.register(new TargetingTickHandler());
 		MinecraftForge.EVENT_BUS.register(new ZSSKeyHandler());
 		UnpressKeyPacket.init();
 	}
 
-	/**
-	 * All renderers must be registered at this time
-	 */
 	@Override
 	public void init() {
-		registerRenderers();
-		ZSSEntities.registerRenderers();
 		AntiqueAtlasHelper.registerTextures();
 		Object o = ReflectionHelper.getPrivateValue(EffectRenderer.class, Minecraft.getMinecraft().effectRenderer, 6);
 		if (o instanceof Map) {
@@ -92,11 +87,9 @@ public class ClientProxy extends CommonProxy
 	}
 
 	/**
-	 * Automated variant and custom state mapper registration for blocks and items
-	 * Utilizes {@link IModItem#registerVariants()} and {@link ICustomStateMapper#getCustomStateMap()}
-	 * Call during FMLPreInitializationEvent after all Blocks and Items have been initialized
+	 * Automated block and item renderer registration using {@link IModItem#registerRenderers}
 	 */
-	private void registerVariants() {
+	private void registerRenderers() {
 		try {
 			for (Field f: ZSSBlocks.class.getFields()) {
 				if (Block.class.isAssignableFrom(f.getType())) {
@@ -109,49 +102,13 @@ public class ClientProxy extends CommonProxy
 						String name = block.getUnlocalizedName();
 						Item item = GameRegistry.findItem(ModInfo.ID, name.substring(name.lastIndexOf(".") + 1));
 						if (item instanceof IModItem) {
-							((IModItem) item).registerVariants();
+							((IModItem) item).registerResources();
 						}
-					}
-				}
-			}
-		} catch(Exception e) {
-			ZSSMain.logger.warn("Caught exception while registering block variants: " + e.toString());
-			e.printStackTrace();
-		}
-		try {
-			for (Field f: ZSSItems.class.getFields()) {
-				if (Item.class.isAssignableFrom(f.getType())) {
-					Item item = (Item) f.get(null);
-					if (item instanceof IModItem) {
-						((IModItem) item).registerVariants();
-					}
-				}
-			}
-		} catch(Exception e) {
-			ZSSMain.logger.warn("Caught exception while registering item variants: " + e.toString());
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Automated block and item renderer registration using {@link IModItem#registerRenderers}
-	 */
-	private void registerRenderers() {
-		try {
-			for (Field f: ZSSBlocks.class.getFields()) {
-				if (Block.class.isAssignableFrom(f.getType())) {
-					Block block = (Block) f.get(null);
-					if (block != null) {
 						if (block instanceof ISpecialRenderer) {
 							((ISpecialRenderer) block).registerSpecialRenderer();
 						}
 						if (block instanceof ISwapModel) {
 							addModelToSwap((ISwapModel) block);
-						}
-						String name = block.getUnlocalizedName();
-						Item item = GameRegistry.findItem(ModInfo.ID, name.substring(name.lastIndexOf(".") + 1));
-						if (item instanceof IModItem) {
-							((IModItem) item).registerRenderers(mc.getRenderItem().getItemModelMesher());
 						}
 						if (item instanceof ISwapModel) {
 							addModelToSwap((ISwapModel) item);
@@ -168,7 +125,7 @@ public class ClientProxy extends CommonProxy
 				if (Item.class.isAssignableFrom(f.getType())) {
 					Item item = (Item) f.get(null);
 					if (item instanceof IModItem) {
-						((IModItem) item).registerRenderers(mc.getRenderItem().getItemModelMesher());
+						((IModItem) item).registerResources();
 					}
 					if (item instanceof ISwapModel) {
 						addModelToSwap((ISwapModel) item);

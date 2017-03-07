@@ -22,12 +22,12 @@ import java.util.List;
 import com.google.common.base.Function;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ref.ModInfo;
@@ -69,15 +69,15 @@ public class ItemBlockUnbreakable extends ItemMetadataBlock
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
+	public void registerResources() {
 		String[] variants = getVariants();
 		if (variants == null || variants.length < 1) {
 			String name = getUnlocalizedName();
 			variants = new String[]{ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1)};
 		}
 		for (int i = 0; i < variants.length; ++i) {
-			mesher.register(this, i, new ModelResourceLocation(variants[i], "inventory"));
-			mesher.register(this, i | 8, new ModelResourceLocation(variants[i], "inventory"));
+			ModelLoader.setCustomModelResourceLocation(this, i, new ModelResourceLocation(variants[i], "inventory"));
+			ModelLoader.setCustomModelResourceLocation(this, i | 8, new ModelResourceLocation(variants[i], "inventory"));
 		}
 	}
 }

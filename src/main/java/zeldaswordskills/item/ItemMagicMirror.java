@@ -20,7 +20,7 @@ package zeldaswordskills.item;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.renderer.ItemModelMesher;
+import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -37,6 +37,7 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -58,7 +59,7 @@ import zeldaswordskills.world.TeleporterNoPortal;
 public class ItemMagicMirror extends BaseModItem implements IUnenchantable
 {
 	@SideOnly(Side.CLIENT)
-	private static List<ModelResourceLocation> models;
+	private List<ModelResourceLocation> models;
 
 	/** Ticks required to be in use before effect will occur */
 	private static final int USE_TIME = 140;
@@ -178,15 +179,19 @@ public class ItemMagicMirror extends BaseModItem implements IUnenchantable
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
-		String name = getUnlocalizedName();
-		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
-		models = new ArrayList<ModelResourceLocation>();
-		for (int i = 0; i < 4; ++i) {
-			models.add(new ModelResourceLocation(name + "_" + i, "inventory"));
+	public void registerResources() {
+		String[] variants = getVariants();
+		this.models = new ArrayList<ModelResourceLocation>(variants.length);
+		for (int i = 0; i < variants.length; ++i) {
+			this.models.add(new ModelResourceLocation(variants[i], "inventory"));
 		}
-		// Register the first model as the base resource
-		mesher.register(this, 0, models.get(0));
+		ModelLoader.registerItemVariants(this, this.models.toArray(new ModelResourceLocation[0]));
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return models.get(0);
+			}
+		});
 	}
 
 	@Override

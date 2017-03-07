@@ -24,7 +24,6 @@ import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
@@ -42,6 +41,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IRightClickEntity;
@@ -61,6 +61,10 @@ import zeldaswordskills.ref.ModInfo;
  */
 public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavior, IRightClickEntity, IUnenchantable
 {
+	/** Reference to the vanilla spawn egg item model */
+	@SideOnly(Side.CLIENT)
+	protected ModelResourceLocation model;
+
 	public ItemCustomEgg() {
 		super();
 		setHasSubtypes(true);
@@ -199,11 +203,6 @@ public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavi
 	}
 
 	@Override
-	public String[] getVariants() {
-		return new String[]{"minecraft:spawn_egg"}; // prevent 'missing location' error
-	}
-
-	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(Item item, CreativeTabs tab, List<ItemStack> itemList) {
 		Iterator<Class<? extends Entity>> iterator = CustomEntityList.entityEggs.keySet().iterator();
@@ -216,16 +215,23 @@ public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavi
 		}
 	}
 
+	@Override
+	public String[] getVariants() {
+		return new String[]{"minecraft:spawn_egg"}; // prevent 'missing location' error
+	}
+
 	/**
 	 * Register same base texture for each egg subtype
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerRenderers(ItemModelMesher mesher) {
-		mesher.register(this, new ItemMeshDefinition() {
+	public void registerResources() {
+		this.model = new ModelResourceLocation("minecraft:spawn_egg", "inventory");
+		ModelLoader.registerItemVariants(this, this.model);
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
 			@Override
 			public ModelResourceLocation getModelLocation(ItemStack stack) {
-				return new ModelResourceLocation("minecraft:spawn_egg", "inventory");
+				return ItemCustomEgg.this.model;
 			}
 		});
 	}

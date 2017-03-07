@@ -75,7 +75,6 @@ import zeldaswordskills.util.TargetUtils;
  * Handles all client-sided events, such as render events, mouse event, etc.
  *
  */
-@SuppressWarnings("deprecation") // Stupid to deprecate IBakedModel when it is still perfectly valid to use
 @SideOnly(Side.CLIENT)
 public class ZSSClientEvents
 {
@@ -137,7 +136,8 @@ public class ZSSClientEvents
 				} catch (NoSuchMethodException e) {
 					ZSSMain.logger.warn("Failed to swap model: class " + clazz.getSimpleName() + " is missing a constructor that takes an IBakedModel");
 				} catch (Exception e) {
-					ZSSMain.logger.warn("Failed to swap model with exception: " + e.getMessage());
+					ZSSMain.logger.warn(String.format("Failed to swap model for %s with exception: %s", resource.toString(), e.getMessage()));
+					e.printStackTrace();
 				}
 			} else {
 				ZSSMain.logger.warn("Resource is not a baked model! Failed resource: " + resource.toString());
