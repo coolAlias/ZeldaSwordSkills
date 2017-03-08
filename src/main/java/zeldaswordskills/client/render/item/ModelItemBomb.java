@@ -71,7 +71,7 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 
 	@Override
 	public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
-		// gui renders as 2D sprite; this is apparently also what renders when the item is dropped
+		// Render as 2D sprite when in GUI
 		if (cameraTransformType == ItemCameraTransforms.TransformType.GUI) {
 			ForgeHooksClient.handleCameraTransforms(baseModel, cameraTransformType);
 			return Pair.of(this, null);
@@ -94,8 +94,12 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 				GlStateManager.scale(1.2F, 1.2F, 1.2F);
 			}
 			break;
-		default:
+		case GROUND:
+			GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
+			GlStateManager.translate(0.0F, -0.725F, 0.0F);
+			GlStateManager.scale(0.825F, 0.825F, 0.825F);
 			break;
+		default:
 		}
 		Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture(type, isFlashing));
 		// first Entity parameter not used for anything in ModelBomb, so null is safe
