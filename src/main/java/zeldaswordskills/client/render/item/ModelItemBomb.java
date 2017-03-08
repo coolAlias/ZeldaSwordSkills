@@ -99,6 +99,11 @@ public class ModelItemBomb implements ISmartItemModel, IPerspectiveAwareModel
 			GlStateManager.translate(0.0F, -0.725F, 0.0F);
 			GlStateManager.scale(0.825F, 0.825F, 0.825F);
 			break;
+		case FIXED: // e.g. inside a ceramic jar
+			GlStateManager.rotate(90.0F, 1.0F, 1.0F, 0.0F);
+			GlStateManager.translate(0F, -0.325F, 0F);
+			GlStateManager.scale(0.5F, 0.5F, 0.5F);
+			break;
 		default:
 		}
 		Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture(type, isFlashing));
