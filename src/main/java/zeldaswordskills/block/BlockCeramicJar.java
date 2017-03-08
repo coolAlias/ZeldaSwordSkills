@@ -20,6 +20,7 @@ package zeldaswordskills.block;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockGlass;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -182,7 +183,7 @@ public class BlockCeramicJar extends Block implements IExplodable, IHookable, IQ
 
 	@Override
 	public boolean canPlaceBlockAt(World world, BlockPos pos) {
-		return super.canPlaceBlockAt(world, pos) && world.isSideSolid(pos.down(), EnumFacing.UP);
+		return super.canPlaceBlockAt(world, pos) && (world.isSideSolid(pos.down(), EnumFacing.UP) || world.getBlockState(pos.down()).getBlock() instanceof BlockGlass);
 	}
 
 	@Override
