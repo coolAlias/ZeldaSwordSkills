@@ -19,16 +19,25 @@ package zeldaswordskills.client.render.item;
 
 import java.util.List;
 
+import javax.vecmath.Matrix4f;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartItemModel;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -41,22 +50,24 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 @SuppressWarnings("deprecation")
 @SideOnly(Side.CLIENT)
-public class ModelItemShield implements ISmartItemModel
+public class ModelItemShield implements IPerspectiveAwareModel, ISmartItemModel
 {
-	private final IBakedModel shieldFront;
-	private final List<BakedQuad> quads;
+	private final IFlexibleBakedModel shieldFront;
+	private List<BakedQuad> quads;
 
 	public ModelItemShield(IBakedModel shieldFront) {
-		this.shieldFront = shieldFront;
-		String resourceLocation = shieldFront.getParticleTexture().getIconName().replaceAll("items/", "").replaceAll("#inventory", "").replaceAll("_using", "") + "_back";
-		IBakedModel shieldBack = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(new ModelResourceLocation(resourceLocation, "inventory"));
-		this.quads = Lists.newArrayList(shieldFront.getGeneralQuads());
-		for (BakedQuad quad : (List<BakedQuad>) shieldBack.getGeneralQuads()) {
-			if (quad.getFace() == EnumFacing.SOUTH) {
-				quads.add(quad);
-				break;
-			}
-		}
+		this.shieldFront = (shieldFront instanceof IFlexibleBakedModel ? (IFlexibleBakedModel) shieldFront : new IFlexibleBakedModel.Wrapper(shieldFront, DefaultVertexFormats.ITEM));
+	}
+
+	@Override
+	public Pair<? extends IFlexibleBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
+		ForgeHooksClient.handleCameraTransforms(shieldFront, cameraTransformType);
+		return Pair.of(this, null);
+	}
+
+	@Override
+	public VertexFormat getFormat() {
+		return shieldFront.getFormat();
 	}
 
 	@Override
@@ -96,6 +107,17 @@ public class ModelItemShield implements ISmartItemModel
 
 	@Override
 	public List<BakedQuad> getGeneralQuads() {
+		if (this.quads == null) {
+			String resource = shieldFront.getParticleTexture().getIconName().replaceAll("items/", "").replaceAll("#inventory", "").replaceAll("_using", "") + "_back";
+			IBakedModel shieldBack = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getModelManager().getModel(new ModelResourceLocation(resource, "inventory"));
+			this.quads = Lists.newArrayList(shieldFront.getGeneralQuads());
+			for (BakedQuad quad : (List<BakedQuad>) shieldBack.getGeneralQuads()) {
+				if (quad.getFace() == EnumFacing.NORTH) {
+					this.quads.add(quad);
+					break;
+				}
+			}
+		}
 		return this.quads;
 	}
 }

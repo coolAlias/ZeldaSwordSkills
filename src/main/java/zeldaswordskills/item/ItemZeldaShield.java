@@ -66,6 +66,7 @@ import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
+import zeldaswordskills.client.ISwapModel;
 import zeldaswordskills.client.render.item.ModelItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
@@ -82,7 +83,7 @@ import zeldaswordskills.util.WorldUtils;
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
 public class ItemZeldaShield extends BaseModItem implements IDashItem, IFairyUpgrade,
-/*ISwapModel,*/ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+ISwapModel, ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	@SideOnly(Side.CLIENT)
 	private List<ModelResourceLocation> models;
@@ -336,7 +337,7 @@ public class ItemZeldaShield extends BaseModItem implements IDashItem, IFairyUpg
 		});
 	}
 
-	//@Override
+	@Override
 	@SideOnly(Side.CLIENT)
 	public Collection<ModelResourceLocation> getDefaultResources() {
 		String[] variants = getVariants();
@@ -344,7 +345,7 @@ public class ItemZeldaShield extends BaseModItem implements IDashItem, IFairyUpg
 		return Lists.newArrayList(new ModelResourceLocation(variants[0], "inventory"), new ModelResourceLocation(variants[1], "inventory"));
 	}
 
-	//@Override
+	@Override
 	@SideOnly(Side.CLIENT)
 	public Class<? extends IBakedModel> getNewModel() {
 		return ModelItemShield.class;
