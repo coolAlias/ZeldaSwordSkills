@@ -55,7 +55,7 @@ public class RenderEntitySwordBeam extends Render<EntityThrowable>
 		GlStateManager.enableLighting();
 		GlStateManager.enableTexture2D();
 		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GlStateManager.scale(1.5F, 1.25F, 1.5F);
+		GlStateManager.scale(1.5F, 0.5F, 1.5F);
 		this.bindTexture(this.getEntityTexture(entity));
 		Tessellator tessellator = Tessellator.getInstance();
 		WorldRenderer renderer = tessellator.getWorldRenderer();
