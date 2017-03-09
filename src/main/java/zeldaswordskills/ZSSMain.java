@@ -61,7 +61,7 @@ import zeldaswordskills.world.gen.feature.WorldGenJars;
  * included.
  *
  */
-@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION)
+@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
 public class ZSSMain
 {
 	@Mod.Instance(ModInfo.ID)
@@ -110,8 +110,7 @@ public class ZSSMain
 			MinecraftForge.EVENT_BUS.register(WorldGenGossipStones.INSTANCE);
 		}
 		MinecraftForge.EVENT_BUS.register(WorldGenJars.INSTANCE);
-		String link = "https://raw.githubusercontent.com/coolAlias/ZeldaSwordSkills/master/src/main/resources/versionlist.json";
-		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", link);
+		FMLInterModComms.sendRuntimeMessage(ModInfo.ID, "VersionChecker", "addVersionCheck", ModInfo.VERSION_LIST);
 	}
 
 	@Mod.EventHandler

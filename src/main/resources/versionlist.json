@@ -1,4 +1,15 @@
 {
+	"homepage": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
+	"promos": {
+		"1.7.10-latest": "2.5.1",
+		"1.7.10-recommended": "2.5.1",
+		"1.8.0-latest": "3.3",
+		"1.8.9-latest": "3.4",
+		"1.8.9-recommended": "3.4",
+	},
+	"1.8.0": {
+	    "3.3": "Added Magic Meter, Princess Zelda and more!\nSee mod home page for full change log"
+	},
 	"versionList": [
 		{
 			"mcVersion":"Minecraft 1.8",
