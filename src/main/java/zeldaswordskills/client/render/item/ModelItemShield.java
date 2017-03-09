@@ -25,7 +25,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
+import mods.battlegear2.api.RenderPlayerEventChild.PreRenderPlayerElement;
+import mods.battlegear2.api.core.BattlegearUtils;
+import mods.battlegear2.api.core.IBattlePlayer;
+import mods.battlegear2.api.core.InventoryPlayerBattle;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -39,8 +44,12 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.IFlexibleBakedModel;
 import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ISmartItemModel;
+import net.minecraftforge.fml.common.Optional.Method;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.ZSSMain;
+import zeldaswordskills.item.ItemZeldaShield;
 
 /**
  * 
@@ -57,6 +66,9 @@ public class ModelItemShield implements IPerspectiveAwareModel, ISmartItemModel
 
 	public ModelItemShield(IBakedModel shieldFront) {
 		this.shieldFront = (shieldFront instanceof IFlexibleBakedModel ? (IFlexibleBakedModel) shieldFront : new IFlexibleBakedModel.Wrapper(shieldFront, DefaultVertexFormats.ITEM));
+		if (ZSSMain.isBG2Enabled) {
+			BattlegearUtils.RENDER_BUS.register(this);
+		}
 	}
 
 	@Override
@@ -119,5 +131,35 @@ public class ModelItemShield implements IPerspectiveAwareModel, ISmartItemModel
 			}
 		}
 		return this.quads;
+	}
+
+	@Method(modid="battlegear2")
+	@SubscribeEvent
+	public void renderOffhand(PreRenderPlayerElement event) {
+		ItemStack offhandItem = ((InventoryPlayerBattle) event.entityPlayer.inventory).getCurrentOffhandWeapon();
+		if (offhandItem == null || !(offhandItem.getItem() instanceof ItemZeldaShield)) {
+			return;
+		}
+		switch (event.type) {
+		case ItemOffhand:
+			boolean flag = ((IBattlePlayer) event.entityPlayer).isBlockingWithShield();
+			if (event.isFirstPerson) {
+				GlStateManager.rotate(25F, 0.375F, 0.8F, 0.0F);
+				if (flag) {
+					GlStateManager.translate(-0.3D, 0.15D, -0.3D);
+				} else {
+					GlStateManager.translate(-0.475D, 0.2125D, -0.15D);
+				}
+			} else {
+				if (flag) {
+					GlStateManager.rotate(27.5F, 0.0F, 0.325F, 0.1F);
+				} else {
+					GlStateManager.rotate(24F, 0.125F, 1.0F, 0.35F);
+				}
+				GlStateManager.translate(0.05D, -0.00125D, 0.0125D);
+			}
+			break;
+		default:
+		}
 	}
 }
