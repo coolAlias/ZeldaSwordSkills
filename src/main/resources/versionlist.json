@@ -10,7 +10,21 @@
 	"1.8.0": {
 	    "3.3": "Added Magic Meter, Princess Zelda and more!\nSee mod home page for full change log"
 	},
+	"1.8.9": {
+	    "3.4": "Initial 1.8.9 update\nSee mod home page for full change log"
+	},
 	"versionList": [
+		{
+			"mcVersion":"Minecraft 1.8.9",
+			"modVersion":"3.4",
+			"changeLog": [
+	               "Initial 1.8.9 update",
+	               "See mod home page for full change log"
+			],
+			"updateURL":"http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1293190",
+			"isDirectLink":"false",
+			"newFileName":""
+		},
 		{
 			"mcVersion":"Minecraft 1.8",
 			"modVersion":"3.3",

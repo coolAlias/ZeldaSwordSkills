@@ -21,9 +21,9 @@ plugins {
 }
 */
 
-version = "3.3"
+version = "3.4"
 group = "com.google.coolalias.zeldaswordskills"
-archivesBaseName = "1.8-zeldaswordskills"
+archivesBaseName = "1.8.9-zeldaswordskills"
 
 sourceCompatibility = targetCompatibility = "1.7"
 
