@@ -35,6 +35,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.api.damage.DamageUtils;
+import zeldaswordskills.api.damage.IComboDamage;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.entity.DirtyEntityAccessor;
@@ -143,7 +144,7 @@ public class EntityNpcOrca extends EntityNpcBase implements INpcVillager, IParry
 			} else if (opponent != null && opponent != player) {
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.in_match", true);
 				return false;
-			} else if (source.getSourceOfDamage() != player && !source.getDamageType().equals(DamageUtils.INDIRECT_SWORD) && !source.getDamageType().equals(DamageUtils.INDIRECT_COMBO)) {
+			} else if (source.getSourceOfDamage() != player && (!(source instanceof IComboDamage) || !((IComboDamage) source).isComboDamage(player))) {
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.damage.melee_only", false);
 				return false;
 			} else if (player.getHealth() < 2.0F) {
@@ -163,7 +164,7 @@ public class EntityNpcOrca extends EntityNpcBase implements INpcVillager, IParry
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.damage.ending_blow", false);
 			} else if (ZSSPlayerSkills.get(player).isSkillActive(SkillBase.risingCut)) {
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.damage.rising_cut", false);	
-			} else if (source.getDamageType().equals(DamageUtils.INDIRECT_SWORD) || source.getDamageType().equals(DamageUtils.INDIRECT_COMBO)) {
+			} else if (source.getSourceOfDamage() != player) {
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.damage.ranged_sword", false);
 			} else if (source.getDamageType().equals(DamageUtils.NON_SWORD)) {
 				sendTranslatedChat(player, "chat.zss.npc.orca.match.damage.non_sword", false);
