@@ -24,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
@@ -35,6 +36,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils;
+import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
@@ -51,7 +53,7 @@ import zeldaswordskills.util.WorldUtils;
  * entities in its direct path.
  *
  */
-public class EntitySwordBeam extends EntityThrowable implements IEntityAdditionalSpawnData
+public class EntitySwordBeam extends EntityThrowable implements IReflectable, IEntityAdditionalSpawnData
 {
 	/** Damage that will be inflicted on impact */
 	private float damage = 4.0F;
@@ -209,4 +211,13 @@ public class EntitySwordBeam extends EntityThrowable implements IEntityAdditiona
 		level = compound.getInteger("level");
 		lifespan = compound.getInteger("lifespan");
 	}
+
+	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, Entity shooter) {
+		return 0.0F; // not able to be reflected
+	}
+
+	@Override
+	public void onReflected(ItemStack shield, EntityPlayer player, Entity shooter, Entity oldEntity) {}
+
 }
