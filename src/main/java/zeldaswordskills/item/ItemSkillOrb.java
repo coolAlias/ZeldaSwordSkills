@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -65,7 +65,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 			if (skill != null) {
 				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 				if (skills.grantSkill(skill)) {
-					world.playSoundAtEntity(player, Sounds.LEVELUP, 1.0F, 1.0F);
+					PlayerUtils.playRandomizedSound(player, Sounds.LEVELUP, 1.0F, 1.0F);
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.skill.levelup",
 							new ChatComponentTranslation(skill.getTranslationString()),
 							skills.getSkillLevel(skill));
