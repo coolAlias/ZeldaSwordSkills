@@ -59,7 +59,7 @@ public class ItemSkillOrb extends BaseModItem implements IUnenchantable
 			if (skill != null) {
 				ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
 				if (skills.grantSkill(skill)) {
-					world.playSoundAtEntity(player, Sounds.LEVELUP, 1.0F, 1.0F);
+					PlayerUtils.playRandomizedSound(player, Sounds.LEVELUP, 1.0F, 1.0F);
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.skill.level_up", new ChatComponentTranslation(skill.getTranslationString()), skills.getSkillLevel(skill));
 					if (skill == SkillBase.bonusHeart) {
 						player.triggerAchievement(ZSSAchievements.skillHeart);
