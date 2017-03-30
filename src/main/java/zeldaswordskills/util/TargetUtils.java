@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -55,17 +55,21 @@ public class TargetUtils
 	// TODO write general MovingObjectPosition method, then have specific methods return blockHit or entityHit from that
 	// TODO methods for acquiring multiple targets (beam, sphere, etc) with optional number of targets to acquire
 
-	/** Returns the player's current reach distance, taking held item into account if applicable */
-	// Packet7UseEntity uses 36.0D for determining if an attack should hit, or 9.0D if the entity cannot be seen
-	// EntityRenderer uses 36.0D for creative mode, otherwise 9.0D, in calculating whether mouseover entity should be null
-	// but using this exactly results in some attacks that in reality hit, being counted as a miss
-	// Unlike Creative Mode, the mouseover is always null when an attack should miss when in Survival
+	/**
+	 * Returns the player's current reach distance based on game mode.
+	 * The values were determined via actual in-game testing as the reach distances
+	 * found in EntityRenderer#getMouseOver and PlayerControllerMP#getBlockReachDistance
+	 * do not seem to accurately reflect the actual distance at which an attack will miss.
+	 * Note that the only important distance check is handled server side in
+	 * NetHandlerPlayServer#processUseEntity.
+	 */
 	public static double getReachDistanceSq(EntityPlayer player) {
-		return 38.5D; // seems to be just about right for Creative Mode hit detection
+		return player.capabilities.isCreativeMode ? 36.0D : 12.0D;
 	}
 
 	/**
-	 * Returns true if current target is within the player's reach distance; does NOT check mouse over
+	 * Returns true if current target is within the player's reach distance, used mainly
+	 * for predicting misses from the client side; does not use the mouse over object.
 	 */
 	public static boolean canReachTarget(EntityPlayer player, Entity target) {
 		return (player.canEntityBeSeen(target) && player.getDistanceSqToEntity(target) < getReachDistanceSq(player));
