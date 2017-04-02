@@ -50,7 +50,7 @@ public class RenderEntitySwordBeam extends Render
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glScalef(1.5F, 1.25F, 1.5F);
+		GL11.glScalef(1.5F, 0.5F, 1.5F);
 		bindTexture(texture);
 		Tessellator tessellator = Tessellator.instance;
 		GL11.glRotatef(180.0F - renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
