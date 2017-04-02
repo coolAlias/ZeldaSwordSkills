@@ -333,7 +333,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 
 	@Override
 	public void onHurtTarget(EntityPlayer player, LivingHurtEvent event) {
-		if (!isValidComboDamage(player, event.source)) { return; }
+		if (!isLockedOn() || !isValidComboDamage(player, event.source)) { return; }
 		if (combo == null || combo.isFinished()) {
 			combo = new Combo(player, this, getMaxComboSize(), getComboTimeLimit());
 		}
