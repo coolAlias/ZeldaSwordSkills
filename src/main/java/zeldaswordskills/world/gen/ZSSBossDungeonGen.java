@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package zeldaswordskills.world.gen;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
+import net.minecraftforge.event.world.WorldEvent;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.world.gen.structure.MapGenBossRoom;
 import zeldaswordskills.world.gen.structure.MapGenBossRoomNether;
@@ -29,26 +30,44 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class ZSSBossDungeonGen
 {
-	private final MapGenBossRoom bossRoomGen = new MapGenBossRoom();
-	private final MapGenBossRoom netherBossGen = new MapGenBossRoomNether();
+	private MapGenBossRoom bossRoomGen;
+	private MapGenBossRoom netherBossGen;
+
+	@SubscribeEvent
+	public void onWorldLoad(WorldEvent.Load event) {
+		switch (event.world.provider.dimensionId) {
+		case -1: // the Nether
+			this.netherBossGen = new MapGenBossRoomNether();
+			break;
+		case 0: // the Overworld
+			this.bossRoomGen = new MapGenBossRoom();
+			break;
+		}
+	}
 
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {
-		if (!event.world.provider.isSurfaceWorld()) {
-			return;
-		} else if (event.type != EventType.LAKE && event.type != EventType.LAVA) {
-			return;
-		} else if (bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-			event.setResult(Result.DENY);
+		switch (event.world.provider.dimensionId) {
+		case 0: // the Overworld
+			boolean flag = (event.type == EventType.LAKE || event.type == EventType.LAVA);
+			if (flag && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
+				event.setResult(Result.DENY);
+			}
+			break;
 		}
 	}
 
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent
 	public void onDecorate(Decorate event) {
-		if (event.world.provider.isSurfaceWorld() && event.type == Decorate.EventType.LAKE && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
-			event.setResult(Result.DENY);
+		switch (event.world.provider.dimensionId) {
+		case 0: // the Overworld
+			boolean flag = (event.type == Decorate.EventType.LAKE);
+			if (flag && bossRoomGen.shouldDenyLakeAt(event.chunkX, event.chunkZ)) {
+				event.setResult(Result.DENY);
+			}
+			break;
 		}
 	}
 

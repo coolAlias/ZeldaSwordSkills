@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package zeldaswordskills.world.gen;
 
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.world.gen.feature.WorldGenBombFlowers;
 import zeldaswordskills.world.gen.feature.WorldGenJars;
@@ -30,11 +31,25 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class ZSSWorldGenEvent
 {
-	private MapGenSecretRoom secretRoomGen = new MapGenSecretRoom();
-	private MapGenSecretRoomNether netherRoomGen = new MapGenSecretRoomNether();
-	private MapGenSongPillar pillarGen = new MapGenSongPillar();
+	private MapGenSecretRoom secretRoomGen;
+	private MapGenSecretRoomNether netherRoomGen;
+	private MapGenSongPillar pillarGen;
 	private WorldGenJars jarGen = new WorldGenJars();
 	private WorldGenBombFlowers bombGen = new WorldGenBombFlowers();
+
+	@SubscribeEvent
+	public void onWorldLoad(WorldEvent.Load event) {
+		switch(event.world.provider.dimensionId) {
+		case -1: // the Nether
+			this.netherRoomGen = new MapGenSecretRoomNether();
+			break;
+		case 0: // the Overworld
+			this.secretRoomGen = new MapGenSecretRoom();
+			this.pillarGen = new MapGenSongPillar();
+			break;
+		default:
+		}
+	}
 
 	// EVENT_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
