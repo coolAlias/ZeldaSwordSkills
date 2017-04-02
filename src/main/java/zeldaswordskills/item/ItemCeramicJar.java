@@ -35,11 +35,11 @@ public class ItemCeramicJar extends ItemBlock implements IUnenchantable
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+		player.swingItem();
 		EntityCeramicJar jar = new EntityCeramicJar(world, player);
 		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("jarStack")) {
 			jar.setStack(ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("jarStack")));
 		}
-
 		if (!world.isRemote) {
 			world.spawnEntityInWorld(jar);
 		}
