@@ -200,7 +200,7 @@ public abstract class EntityDekuBase extends EntityCreature implements IMob, IEn
 	 * Returns if the damage source is fatal to this deku in its current state
 	 */
 	protected boolean isSourceFatal(DamageSource source) {
-		if (source.getSourceOfDamage() instanceof EntityBoomerang) {
+		if (source.getSourceOfDamage() instanceof EntityBoomerang || source.getSourceOfDamage() instanceof EntitySwordBeam) {
 			return true;
 		} else if (source.getEntity() instanceof EntityPlayer) {
 			return (ZSSPlayerSkills.get((EntityPlayer) source.getEntity()).isSkillActive(SkillBase.spinAttack));
