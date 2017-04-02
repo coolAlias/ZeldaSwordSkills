@@ -151,7 +151,7 @@ public class EntitySwordBeam extends EntityThrowable implements IEntityAdditiona
 					if (skill != null) {
 						skill.onImpact(player, false);
 					}
-					if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player), damage)) {
+					if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player).setProjectile(), damage)) {
 						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_SUCCESSFUL_HIT, 0.4F, 0.5F);
 					}
 					damage *= 0.8F;
