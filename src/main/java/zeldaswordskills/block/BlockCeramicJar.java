@@ -22,6 +22,7 @@ import java.util.Random;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
+import net.minecraft.block.BlockGlass;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -181,7 +182,8 @@ public class BlockCeramicJar extends BlockContainer implements IExplodable, IHoo
 
 	@Override
 	public boolean canBlockStay(World world, int x, int y, int z) {
-		return world.getBlock(x, y - 1, z).func_149730_j();
+		Block block = world.getBlock(x, y - 1, z); 
+		return block.func_149730_j() || block instanceof BlockGlass;
 	}
 
 	@Override
