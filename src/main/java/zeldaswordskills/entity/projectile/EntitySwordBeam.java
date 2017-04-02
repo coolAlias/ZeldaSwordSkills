@@ -149,6 +149,7 @@ public class EntitySwordBeam extends EntityThrowable implements IReflectable, IE
 			SwordBeam skill = (player != null ? (SwordBeam) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
 			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
+				if (entity == player) { return; }
 				if (player != null) {
 					if (skill != null) {
 						skill.onImpact(player, false);

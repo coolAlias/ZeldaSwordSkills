@@ -179,7 +179,7 @@ public class SwordBeam extends SkillActive
 			EntitySwordBeam beam = new EntitySwordBeam(world, player).setLevel(level);
 			beam.setDamage(getDamage(player));
 			beam.setMasterSword(PlayerUtils.isHoldingMasterSword(player));
-			beam.setPosition(beam.posX + vec3.xCoord * 2, beam.posY + vec3.yCoord * 2, beam.posZ + vec3.zCoord * 2);
+			beam.setPosition(beam.posX + vec3.xCoord * 0.5F, beam.posY + vec3.yCoord * 0.5F, beam.posZ + vec3.zCoord * 0.5F);
 			world.spawnEntityInWorld(beam);
 		}
 		return true;
