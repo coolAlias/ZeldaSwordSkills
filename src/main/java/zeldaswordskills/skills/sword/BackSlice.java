@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -39,21 +42,22 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.IEntityBackslice;
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.client.ZSSClientEvents;
 import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
+import zeldaswordskills.network.server.EndComboPacket;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
+import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -217,7 +221,20 @@ public class BackSlice extends SkillActive
 				keyPressed = key;
 			}
 		} else if (isActive() && (key == mc.gameSettings.keyBindAttack || key == ZSSKeyHandler.keys[ZSSKeyHandler.KEY_ATTACK])) {
-			ZSSClientEvents.performComboAttack(mc, ZSSPlayerSkills.get(player).getTargetingSkill());
+			// Attack targeted entity directly rather than using mouse cursor object due to camera funkiness
+			Entity target = ZSSPlayerSkills.get(player).getTargetingSkill().getCurrentTarget();
+			if (target != null && TargetUtils.canReachTarget(player, target)) {
+				mc.playerController.attackEntity(mc.thePlayer, target);
+			} else {
+				PlayerUtils.playRandomizedSound(player, Sounds.SWORD_MISS, 0.4F, 0.5F);
+				ICombo combo = ZSSPlayerSkills.get(player).getComboSkill();
+				if (combo.isComboInProgress()) {
+					PacketDispatcher.sendToServer(new EndComboPacket((SkillBase) combo));
+				}
+			}
+			player.swingItem();
+			ZSSCombatEvents.setPlayerAttackTime(mc.thePlayer);
+
 		}
 		return false; // allow other skills to receive this key press (e.g. Spin Attack)
 	}
