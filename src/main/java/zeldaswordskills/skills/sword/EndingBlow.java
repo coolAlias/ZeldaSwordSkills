@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -74,6 +74,10 @@ public class EndingBlow extends SkillActive
 	@SideOnly(Side.CLIENT)
 	private int keyPressed;
 
+	/** The last time this skill was activated (so HUD element can display or hide as appropriate) */
+	@SideOnly(Side.CLIENT)
+	private long lastActivationTime;
+
 	/** Number of consecutive hits the combo had when the skill was last used */
 	private int lastNumHits;
 
@@ -119,15 +123,22 @@ public class EndingBlow extends SkillActive
 		return 110 - (level * 10);
 	}
 
+	/** Returns the {@link #lastActivationTime} */
+	@SideOnly(Side.CLIENT)
+	public long getLastActivationTime() {
+		return this.lastActivationTime;
+	}
+
 	@Override
 	public boolean canUse(EntityPlayer player) {
 		if (!isActive() && super.canUse(player) && PlayerUtils.isWeapon(player.getHeldItem())) {
-			ICombo skill = ZSSPlayerSkills.get(player).getComboSkill();
-			if (skill != null && skill.isComboInProgress()) {
+			ICombo combo = ZSSPlayerSkills.get(player).getComboSkill();
+			ILockOnTarget lock = ZSSPlayerSkills.get(player).getTargetingSkill();
+			if (combo != null && combo.isComboInProgress() && lock != null && lock.getCurrentTarget() == combo.getCombo().getLastEntityHit()) {
 				if (lastNumHits > 0) {
-					return skill.getCombo().getConsecutiveHits() > 1 && skill.getCombo().getNumHits() > lastNumHits + 2;
+					return combo.getCombo().getConsecutiveHits() > 1 && combo.getCombo().getNumHits() > lastNumHits + 2;
 				} else {
-					return skill.getCombo().getConsecutiveHits() > 1;
+					return combo.getCombo().getConsecutiveHits() > 1;
 				}
 			}
 		}
@@ -177,6 +188,7 @@ public class EndingBlow extends SkillActive
 		}
 		if (world.isRemote) { // only attack after server has been activated, i.e. client receives activation packet back
 			ZSSClientEvents.performComboAttack(Minecraft.getMinecraft(), ZSSPlayerSkills.get(player).getTargetingSkill());
+			this.lastActivationTime = Minecraft.getSystemTime();
 			ticksTilFail = 0;
 			keyPressed = 0;
 		}
