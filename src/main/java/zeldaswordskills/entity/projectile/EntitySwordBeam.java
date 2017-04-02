@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -147,6 +147,7 @@ public class EntitySwordBeam extends EntityThrowable implements IEntityAdditiona
 			SwordBeam skill = (player != null ? (SwordBeam) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
 			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
+				if (entity == player) { return; }
 				if (player != null) {
 					if (skill != null) {
 						skill.onImpact(player, false);
