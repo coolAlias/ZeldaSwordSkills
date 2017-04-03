@@ -333,7 +333,7 @@ public class ZSSItems
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
-		enableCraftingHookshot = config.get("Recipes", "Enable application of hookshot upgrades via crafting", false).getBoolean(false);
+		enableCraftingHookshot = config.get("Recipes", "Enable application of hookshot upgrades via crafting", true).getBoolean(true);
 		enableCraftingMudora = config.get("Recipes", "Enable crafting recipe to make copies of the Book of Mudora", true).getBoolean(true);
 		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
 	}
