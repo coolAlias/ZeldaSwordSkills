@@ -669,7 +669,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		if (!worldObj.isRemote && i < 3 && getHealth() < (getMaxHealth() / 2) && rand.nextInt(16) == 0) {
 			List<EntityChu> list = worldObj.getEntitiesWithinAABB(EntityChu.class, getEntityBoundingBox().expand(2.0D, 1.0D, 2.0D));
 			for (EntityChu chu : list) {
-				if (chu != this && chu.getSlimeSize() == this.getSlimeSize() && chu.getHealth() < (chu.getMaxHealth() / 2)) {
+				if (chu != this && chu.isEntityAlive() && chu.getSlimeSize() == this.getSlimeSize() && chu.getHealth() < (chu.getMaxHealth() / 2)) {
 					worldObj.playSoundAtEntity(this, Sounds.CHU_MERGE, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 					EntityChu newChu = createInstance();
 					newChu.setSlimeSize(i * 2);
