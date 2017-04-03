@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -42,8 +42,8 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 {
 	@Override
 	public void generate(IChunkProvider provider, World world, Random rand, int chunkX, int chunkZ) {
-		this.worldObj = world;
-		loadOrCreateData(worldObj);
+		this.setWorld(world);
+		this.loadOrCreateData(world);
 		NBTTagList roomList = getStructureListFor(chunkX, chunkZ);
 		int posX = (chunkX << 4);
 		int posZ = (chunkZ << 4);
@@ -64,9 +64,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 				}
 			}
 		}
-
 		if (roomList.tagCount() > 0) {
-			//ZSSMain.logger.trace(String.format("roomList for chunk %d/%d contains %d elements", chunkX, chunkZ, roomList.tagCount()));
 			NBTTagCompound compound = new NBTTagCompound();
 			compound.setTag("roomList", roomList);
 			addRoomTag(compound, chunkX, chunkZ);
@@ -90,7 +88,6 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 				}
 			}
 		}
-
 		return null;
 	}
 
@@ -110,7 +107,7 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 	 * Returns an NBTTagList of all the structures generated in the given chunk or a new list if none exists
 	 */
 	protected NBTTagList getStructureListFor(int chunkX, int chunkZ) {
-		loadOrCreateData(worldObj);
+		loadOrCreateData(this.worldObj.get());
 		if (structureMap.containsKey(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)))) {
 			return (NBTTagList) structureMap.get(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunkX, chunkZ)));
 		} else {
@@ -130,7 +127,6 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 		if (isNearStructureInChunk(room, box, room.chunkX, room.chunkZ, range)) {
 			return true;
 		}
-
 		for (int i = 0; i <= (range + 8) / 16; ++i) {
 			// neighbors along x and z axis directly
 			if (isNearStructureInChunk(room, box, room.chunkX + i + 1, room.chunkZ, range)) {
@@ -145,7 +141,6 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 			if (isNearStructureInChunk(room, box, room.chunkX, room.chunkZ - i - 1, range)) {
 				return true;
 			}
-
 			// check neighbors diagonally
 			if (isNearStructureInChunk(room, box, room.chunkX + i + 1, room.chunkZ + i + 1, range)) {
 				return true;
@@ -160,7 +155,6 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -185,7 +179,6 @@ public class MapGenSecretRoom extends ZSSMapGenBase
 				ZSSMain.logger.warn("Invalid tag while checking for structures in chunk " + chunkX + "/" + chunkZ);
 			}
 		}
-
 		return false;
 	}
 }

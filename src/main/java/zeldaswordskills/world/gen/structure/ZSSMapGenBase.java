@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package zeldaswordskills.world.gen.structure;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,8 +42,13 @@ public abstract class ZSSMapGenBase
 	 */
 	protected Map<Long, Object> structureMap = new HashMap<Long, Object>();
 
-	/** This world object. */
-	protected World worldObj;
+	/** A weak reference to the current World object; should be set during each call to {@link #generate} */
+	protected WeakReference<World> worldObj;
+
+	/** Creates a weak reference to the world object */
+	protected final void setWorld(World world) {
+		this.worldObj = new WeakReference<World>(world);
+	}
 
 	/** Generates all relevant structures within the chunk provided */
 	public abstract void generate(IChunkProvider provider, World world, Random rand, int chunkX, int chunkZ);
@@ -77,6 +83,7 @@ public abstract class ZSSMapGenBase
 	 * If roomData is null, it is loaded from world storage if available or a new one is created
 	 */
 	protected final void loadOrCreateData(World world) {
+		if (world == null) { return; } // just in case weak reference returned null
 		if (roomData == null) {
 			roomData = (RoomGenData) world.perWorldStorage.loadData(RoomGenData.class, getTagName());
 			if (roomData == null) {
@@ -101,7 +108,7 @@ public abstract class ZSSMapGenBase
 	 * Returns true if the structure generator has generated a structure located at the given position tuple.
 	 */
 	public boolean hasStructureAt(int x, int y, int z) {
-		loadOrCreateData(worldObj);
+		loadOrCreateData(this.worldObj.get());
 		return getStructureBBAt(x, y, z) != null;
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -42,8 +42,8 @@ public class MapGenBossRoom extends ZSSMapGenBase
 {
 	@Override
 	public void generate(IChunkProvider provider, World world, Random rand, int chunkX, int chunkZ) {
-		this.worldObj = world;
-		loadOrCreateData(worldObj);
+		this.setWorld(world);
+		this.loadOrCreateData(world);
 		int size = rand.nextInt(5) + 9;
 		int posX = (chunkX << 4) + rand.nextInt(16 - size);
 		int posZ = (chunkZ << 4) + rand.nextInt(16 - size);
@@ -57,10 +57,7 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			if (rand.nextFloat() < 0.2F && !areStructuresWithinRange(room, Config.getMinBossDistance())) {
 				int posY = StructureGenUtils.getAverageSurfaceHeight(world, posX, posZ);
 				if (room.generate(this, world, rand, posX, posY, posZ)) {
-					//LogHelper.finer("Boss room of type " + type.toString() + " successfully generated at " + room.getBoundingBox().toString());
 					onStructureGenerated(world, room);
-				} else {
-					//LogHelper.finest("Boss room of type " + type.toString() + " failed to generate at " + room.getBoundingBox().toString());
 				}
 			}
 		}
@@ -103,22 +100,19 @@ public class MapGenBossRoom extends ZSSMapGenBase
 	 */
 	@Override
 	public boolean areStructuresWithinRange(RoomBase room, int range) {
-		loadOrCreateData(worldObj);
+		loadOrCreateData(this.worldObj.get());
 		for (int i = room.chunkX - range; i <= room.chunkX + range; ++i) {
 			for (int j = room.chunkZ - range; j <= room.chunkZ + range; ++j) {
 				if (structureMap.containsKey(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)))) {
 					BossType type = ((RoomBoss) room).getBossType();
 					if (type != null && (Config.areBossDungeonsRandom() || type.ordinal() == getBossTypeFor(i, j))) {
-						//LogHelper.finer("Boss room of same type found within " + range + " chunks of " + room.chunkX + "/" + room.chunkZ);
 						return true;
 					} else if (((room.chunkX - i) * (room.chunkX - i) + (room.chunkZ - j) * (room.chunkZ - j)) < (range * range) / 2) {
-						//LogHelper.finer("Boss room of different type found within " + ((range * range) / 2) + " chunks squared of " + room.chunkX + "/" + room.chunkZ);
 						return true;
 					}
 				}
 			}
 		}
-
 		return false;
 	}
 
@@ -129,7 +123,6 @@ public class MapGenBossRoom extends ZSSMapGenBase
 			int j = compound.getInteger("chunkZ");
 			int bossType = compound.getInteger("bossType");
 			structureMap.put(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(i, j)), bossType);
-			//LogHelper.finer("Loaded roomList data for chunk " + i + "/" + j);
 		} else {
 			ZSSMain.logger.warn("Failed to translate Boss Room NBT compound into structure map");
 		}

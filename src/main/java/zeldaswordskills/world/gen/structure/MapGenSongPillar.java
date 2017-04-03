@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -75,8 +75,8 @@ public class MapGenSongPillar extends ZSSMapGenBase
 
 	@Override
 	public void generate(IChunkProvider provider, World world, Random rand, int chunkX, int chunkZ) {
-		this.worldObj = world;
-		loadOrCreateData(worldObj);
+		this.setWorld(world);
+		this.loadOrCreateData(world);
 		int x = (chunkX << 4) + rand.nextInt(16);
 		int z = (chunkZ << 4) + rand.nextInt(16);
 		biome = world.getBiomeGenForCoords(x, z);
@@ -86,16 +86,16 @@ public class MapGenSongPillar extends ZSSMapGenBase
 		if (song == null && biome != null && biome.biomeName != null) {
 			flag = allowedBiomes.contains(biome.biomeName);
 		}
-		if (flag && generate2(rand, x, z)) {
+		if (flag && generate2(world, rand, x, z)) {
 			onPillarPlaced(chunkX, chunkZ);
 		}
 		song = null;
 	}
 
-	private boolean generate2(Random rand, int x, int z) {
-		int y = worldObj.getHeightValue(x, z) - 1;
-		if (rand.nextFloat() < (rand.nextFloat() * 0.2F) && canGenerateAt(worldObj, x, y, z)) {
-			doGenerate(worldObj, rand, x, y, z);
+	private boolean generate2(World world, Random rand, int x, int z) {
+		int y = world.getHeightValue(x, z) - 1;
+		if (rand.nextFloat() < (rand.nextFloat() * 0.2F) && canGenerateAt(world, x, y, z)) {
+			doGenerate(world, rand, x, y, z);
 			return true;
 		}
 		return false;

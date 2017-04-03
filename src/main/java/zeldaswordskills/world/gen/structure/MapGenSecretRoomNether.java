@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 {
 	@Override
 	public void generate(IChunkProvider provider, World world, Random rand, int chunkX, int chunkZ) {
-		this.worldObj = world;
-		loadOrCreateData(worldObj);
+		this.setWorld(world);
+		this.loadOrCreateData(world);
 		NBTTagList roomList = getStructureListFor(chunkX, chunkZ);
 		int posX = (chunkX << 4);
 		int posZ = (chunkZ << 4);
@@ -48,9 +48,7 @@ public class MapGenSecretRoomNether extends MapGenSecretRoom
 				}
 			}
 		}
-
 		if (roomList.tagCount() > 0) {
-			//LogHelper.log(Level.INFO, "Nether roomList for chunk " + chunkX + "/" + chunkZ + " contains " + roomList.tagCount() + " elements");
 			NBTTagCompound compound = new NBTTagCompound();
 			compound.setTag("roomList", roomList);
 			addRoomTag(compound, chunkX, chunkZ);
