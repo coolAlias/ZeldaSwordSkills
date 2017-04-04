@@ -45,6 +45,19 @@ public class ZSSBossDungeonGen
 		}
 	}
 
+	@SubscribeEvent
+	public void onWorldUnload(WorldEvent.Unload event) {
+		switch (event.world.provider.dimensionId) {
+		case -1: // the Nether
+			this.netherBossGen = null;
+			break;
+		case 0: // the Overworld
+			this.bossRoomGen = null;
+			break;
+		default:
+		}
+	}
+
 	// TERRAIN_GEN_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void onPopulateChunk(PopulateChunkEvent.Populate event) {

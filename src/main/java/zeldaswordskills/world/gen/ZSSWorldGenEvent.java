@@ -51,6 +51,20 @@ public class ZSSWorldGenEvent
 		}
 	}
 
+	@SubscribeEvent
+	public void onWorldUnload(WorldEvent.Unload event) {
+		switch (event.world.provider.dimensionId) {
+		case -1: // the Nether
+			this.netherRoomGen = null;
+			break;
+		case 0: // the Overworld
+			this.secretRoomGen = null;
+			this.pillarGen = null;
+			break;
+		default:
+		}
+	}
+
 	// EVENT_BUS event
 	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void postPopulate(PopulateChunkEvent.Post event) {
