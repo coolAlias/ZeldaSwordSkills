@@ -518,27 +518,27 @@ public class Config
 		forbidden_weapons = config.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
 		Arrays.sort(forbidden_weapons);
 		/*================== GENERAL =====================*/
-		enableStunPlayer = config.get("General", "Whether players can be stunned; if false, item use is still interrupted", false).getBoolean(false);
+		enableStunPlayer = config.get("General", "Players Can Be Stunned", false, "Whether players can be stunned; if false, item use is still interrupted").getBoolean(false);
 		//TODO enableSwingSpeed Button needs a Title
-		enableSwingSpeed = config.get("General", "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", true).getBoolean(true);
-		baseSwingSpeed = MathHelper.clamp_int(config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
-		enableSecretStoneLift = config.get("General", "Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets)", false).getBoolean(false);
-		enableVanillaLift = config.get("General", "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", true).getBoolean(true);
-		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
-		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
-		enableHardcoreZeldaFanMode = config.get("General", "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", false).getBoolean(false);
-		bossHealthFactor = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]", 250).getInt(), 100, 500);
-		bossNumber = MathHelper.clamp_int(config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]", 4).getInt(), 1, 8);
-		enableJarUpdates = config.get("General", "[Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items", true).getBoolean(true);
-		keeseCursedChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt(), 0, 100);
-		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt(), 0, 100);
-		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt(), 4, 16);
-		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt(), 0, 30);
-		skulltulaRewardRate = MathHelper.clamp_int(config.get("General", "[Skulltula Tokens] Number of days between each recurring reward for completing the quest (0 to disable recurring reward) [0-30]", 7).getInt(), 0, 30);
-		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
-		npcsAreInvulnerable = config.get("General", "[NPC] Sets whether Zelda NPCs are invulnerable or not", true).getBoolean(true);
-		naviRange = MathHelper.clamp_int(config.get("General", "Range at which Navi can sense secret rooms, in blocks (0 to disable) [0-10]", 4).getInt(), 0, 10);
-		naviFrequency = MathHelper.clamp_int(config.get("General", "[NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200]", 50).getInt(), 20, 200);
+		enableSwingSpeed = config.get("General", "NEEDS A TITLE", true, "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds").getBoolean(true);
+		baseSwingSpeed = MathHelper.clamp_int(config.get("General", "Default Swing Speed", 0, "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]").getInt(), 0, 20);
+		enableSecretStoneLift = config.get("General", "Can Pick Up Secret Blocks", false, "Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets)").getBoolean(false);
+		enableVanillaLift = config.get("General", "Can Pick Up Vanilla Blocks", true, "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)").getBoolean(true);
+		enableVanillaSmash = config.get("General", "Can Smash Vanilla Blocks", true, "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)").getBoolean(true);
+		alwaysPickupHearts = config.get("General", "Always Pick Up Hearts", false, "Always pick up small hearts regardless of health").getBoolean(false);
+		enableHardcoreZeldaFanMode = config.get("General", "Start With Three Hearts", false, "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)").getBoolean(false);
+		bossHealthFactor = 0.01F * (float) MathHelper.clamp_int(config.get("General", "Boss Health Multiplier", 250, "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]").getInt(), 100, 500);
+		bossNumber = MathHelper.clamp_int(config.get("General", "Number of Mobs Spawned in Boss Dungeons", 4, "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]").getInt(), 1, 8);
+		enableJarUpdates = config.get("General", "Jars Can Store Dropped Items", true, "[Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items").getBoolean(true);
+		keeseCursedChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "Chance of Cursed Keese Spawning", false, "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]").getInt(), 0, 100);
+		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "Chance Keese Spawn in a Swarm", 25, "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]").getInt(), 0, 100);
+		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "Number of Keese to Spawn in a Swarm", 6, "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]").getInt(), 4, 16);
+		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "Frequency of Rekindling Sacred Flame", 7, "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]").getInt(), 0, 30);
+		skulltulaRewardRate = MathHelper.clamp_int(config.get("General", "Days Between Recurring Quest Award", 7, "[Skulltula Tokens] Number of days between each recurring reward for completing the quest (0 to disable recurring reward) [0-30]").getInt(), 0, 30);
+		disableVanillaBuffs = config.get("General", "Disable Vanilla Mob Buffs", false, "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs").getBoolean(false);
+		npcsAreInvulnerable = config.get("General", "Zelda NPCs are Invulnerable", true, "[NPC] Sets whether Zelda NPCs are invulnerable or not").getBoolean(true);
+		naviRange = MathHelper.clamp_int(config.get("General", "Navi Sense Range", 4, "Range at which Navi can sense secret rooms, in blocks (0 to disable) [0-10]").getInt(), 0, 10);
+		naviFrequency = MathHelper.clamp_int(config.get("General", "Navi Sense Check Fequency", 50, "[NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200]").getInt(), 20, 200);
 		/*================== ITEMS =====================*/
 		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
 		bombFuseTime = MathHelper.clamp_int(config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt(), 0, 128);
