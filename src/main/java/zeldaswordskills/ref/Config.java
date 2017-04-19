@@ -444,36 +444,37 @@ public class Config
 				"This category contains client side settings; i.e. they are not synchronized with the server." +
 				"\nNote that HUD elements added by ZSS will dynamically adjust their position so they don't overlap with other ZSS HUD elements." +
 				"\nAs such, it is generally recommended to leave the offset x and y at 0 or set them identically for each element with the same alignment.");
+		//TODO Create an interactive HUD Config GUI
 		buffBarMaxIcons = MathHelper.clamp_int(config.get(category, "[Buff HUD] Maximum number of icons to display per row or column [1-10]", 5).getInt(), 1, 10);
-		isBuffBarEnabled = config.get(category, "[Buff HUD] Whether the buff bar should be displayed at all times", true).getBoolean(true);
-		isBuffBarHorizontal = config.get(category, "[Buff HUD] Whether the buff bar should be displayed horizontally", true).getBoolean(true);
-		buffBarHAlign = HALIGN.fromString(config.get(category, "[Buff HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "right").getString());
-		buffBarVAlign = VALIGN.fromString(config.get(category, "[Buff HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
-		buffBarOffsetX = config.get(category, "[Buff HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
-		buffBarOffsetY = config.get(category, "[Buff HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
-		showSecretMessage = config.get(category, "[Chat] Whether to show a chat message when striking secret blocks", false).getBoolean(false);
-		isComboHudEnabled = config.get(category, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')", true).getBoolean(true);
-		hitsToDisplay = MathHelper.clamp_int(config.get(category, "[Combo HUD] Max hits to display in Combo HUD [0-12]", 3).getInt(), 0, 12);
-		comboHudHAlign = HALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
-		comboHudVAlign = VALIGN.fromString(config.get(category, "[Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
-		comboHudOffsetX = config.get(category, "[Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
-		comboHudOffsetY = config.get(category, "[Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
-		allowVanillaControls = config.get(category, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry", true).getBoolean(true);
-		requireDoubleTap = config.get(category, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", true).getBoolean(true);
-		isEndingBlowHudEnabled = config.get(category, "[Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use))", true).getBoolean(true);
-		endingBlowHudHAlign = HALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "center").getString());
-		endingBlowHudVAlign = VALIGN.fromString(config.get(category, "[Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
-		endingBlowHudOffsetX = config.get(category, "[Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
-		endingBlowHudOffsetY = config.get(category, "[Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 30).getInt();
-		isItemModeEnabled = config.get(category, "[Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)", true).getBoolean(true);
-		itemModeHAlign = HALIGN.fromString(config.get(category, "[Item Mode HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]", "left").getString());
-		itemModeVAlign = VALIGN.fromString(config.get(category, "[Item Mode HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "top").getString());
-		itemModeOffsetX = config.get(category, "[Item Mode HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels", 0).getInt();
-		itemModeOffsetY = config.get(category, "[Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
-		resetNotesInterval = MathHelper.clamp_int(config.get(category, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
-		enableHookshotSound = config.get(category, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
-		enableAutoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
-		canTargetPlayers = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
+		isBuffBarEnabled = config.get(category, "Buff Bar Displays at All Times", true, "[Buff HUD] Whether the buff bar should be displayed at all times").getBoolean(true);
+		isBuffBarHorizontal = config.get(category, "Display Buff Bar Horizontally", true, "[Buff HUD] Whether the buff bar should be displayed horizontally").getBoolean(true);
+		buffBarHAlign = HALIGN.fromString(config.get(category, "Buff HUD X-axis Alignment", "right", "[Buff HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
+		buffBarVAlign = VALIGN.fromString(config.get(category, "Buff HUD Y-axis Alignment", "top", "[Buff HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
+		buffBarOffsetX = config.get(category, "Buff HUD X Offset", 0, "[Buff HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
+		buffBarOffsetY = config.get(category, "Buff HUD Offset on the Y-axis", 0, "[Buff HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
+		showSecretMessage = config.get(category, "Alert When Striking Secret Blocks", false, "[Chat] Whether to show a chat message when striking secret blocks").getBoolean(false);
+		isComboHudEnabled = config.get(category, "Display Combo Counter", true, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')").getBoolean(true);
+		hitsToDisplay = MathHelper.clamp_int(config.get(category, "Hits to Display in Combo HUD", 3, "[Combo HUD] Max hits to display in Combo HUD [0-12]").getInt(), 0, 12);
+		comboHudHAlign = HALIGN.fromString(config.get(category, "Combo HUD X-axis Alignment", "left", "[Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
+		comboHudVAlign = VALIGN.fromString(config.get(category, "Combo HUD Y-axis Alignment", "top", "[Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
+		comboHudOffsetX = config.get(category, "Combo HUD X Offset", 0, "[Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
+		comboHudOffsetY = config.get(category, "Combo HUD Y Offset", 0, "[Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
+		allowVanillaControls = config.get(category, "Use Vanilla Movement Keys fo Skills", true, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry").getBoolean(true);
+		requireDoubleTap = config.get(category, "Double-tap for Movement Skills", true, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)").getBoolean(true);
+		isEndingBlowHudEnabled = config.get(category, "Display Ending Blow HUD", true, "[Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use))").getBoolean(true);
+		endingBlowHudHAlign = HALIGN.fromString(config.get(category, "Ending Blow HUD X Alignment", "center", "[Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
+		endingBlowHudVAlign = VALIGN.fromString(config.get(category, "Ending Blow HUD Y Alignment", "top", "[Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
+		endingBlowHudOffsetX = config.get(category, "Ending Blow HUD X Offset", 0, "[Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
+		endingBlowHudOffsetY = config.get(category, "Ending Blow HUD Y Offset", 30, "[Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
+		isItemModeEnabled = config.get(category, "Display Item Mode HUD", true, "[Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)").getBoolean(true);
+		itemModeHAlign = HALIGN.fromString(config.get(category, "Item Mode HUD X-axis Alignment", "left", "[Item Mode HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
+		itemModeVAlign = VALIGN.fromString(config.get(category, "Item Mode HUD Y-axis Alignment", "top", "[Item Mode HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
+		itemModeOffsetX = config.get(category, "Item Mode HUD X Offset", 0, "[Item Mode HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
+		itemModeOffsetY = config.get(category, "Item Mode HUD Y Offset", 0, "[Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
+		resetNotesInterval = MathHelper.clamp_int(config.get(category, "Ticks Between Notes Before Clear", 30, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]").getInt(), 5, 100);
+		enableHookshotSound = config.get(category, "Hookshot Miss Plays Item-Break Sound", true, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses").getBoolean(true);
+		enableAutoTarget = config.get(category, "Auto-Targeting Enabled", true, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')").getBoolean(true);
+		canTargetPlayers = config.get(category, "Target Players", true, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)").getBoolean(true);
 		/*================== MAGIC METER (CLIENT SIDE) =====================*/
 		category = "Magic Meter";
 		config.addCustomCategoryComment(category,
@@ -518,6 +519,7 @@ public class Config
 		Arrays.sort(forbidden_weapons);
 		/*================== GENERAL =====================*/
 		enableStunPlayer = config.get("General", "Whether players can be stunned; if false, item use is still interrupted", false).getBoolean(false);
+		//TODO enableSwingSpeed Button needs a Title
 		enableSwingSpeed = config.get("General", "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", true).getBoolean(true);
 		baseSwingSpeed = MathHelper.clamp_int(config.get("General", "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]", 0).getInt(), 0, 20);
 		enableSecretStoneLift = config.get("General", "Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets)", false).getBoolean(false);

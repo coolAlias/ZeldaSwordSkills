@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -29,6 +30,7 @@ import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.ZSSBlocks;
@@ -61,7 +63,8 @@ import zeldaswordskills.world.gen.feature.WorldGenJars;
  * included.
  *
  */
-@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST)
+@Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST
+	, guiFactory = "zeldaswordskills.client.GuiFactoryZeldaSwordSkills")
 public class ZSSMain
 {
 	@Mod.Instance(ModInfo.ID)
@@ -133,6 +136,15 @@ public class ZSSMain
 	public void processMessages(FMLInterModComms.IMCEvent event) {
 		for (final FMLInterModComms.IMCMessage msg : event.getMessages()) {
 			WeaponRegistry.INSTANCE.processMessage(msg);
+		}
+	}
+	
+	@SubscribeEvent
+	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event){
+		if(event.modID.equals(ModInfo.ID)){
+			if(Config.config.hasChanged()){
+				Config.config.save();
+			}
 		}
 	}
 }
