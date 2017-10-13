@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -55,100 +56,6 @@ import zeldaswordskills.util.WarpPoint;
 public class Config
 {
 	public static Configuration config;
-	/*================== CLIENT SIDE SETTINGS  =====================*/
-	/** [Buff HUD] Maximum number of icons to display per row or column [1-10] */
-	public static int buffBarMaxIcons;
-	/** [Buff HUD] Whether the buff bar should be displayed by default */
-	public static boolean isBuffBarEnabled;
-	/** [Buff HUD] Whether the buff bar should be displayed horizontally */
-	public static boolean isBuffBarHorizontal;
-	/** [Buff HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
-	public static HALIGN buffBarHAlign;
-	/** [Buff HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
-	public static VALIGN buffBarVAlign;
-	/** [Buff HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
-	public static int buffBarOffsetX;
-	/** [Buff HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
-	public static int buffBarOffsetY;
-	/** [Chat] Whether to show a chat message when striking secret blocks */
-	public static boolean showSecretMessage;
-	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
-	public static boolean isComboHudEnabled;
-	/** [Combo HUD] Number of combo hits to display */
-	private static int hitsToDisplay;
-	/** [Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
-	public static HALIGN comboHudHAlign;
-	/** [Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
-	public static VALIGN comboHudVAlign;
-	/** [Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
-	public static int comboHudOffsetX;
-	/** [Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
-	public static int comboHudOffsetY;
-	/** [Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry */
-	public static boolean allowVanillaControls;
-	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
-	public static boolean requireDoubleTap;
-	/** [Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use) */
-	public static boolean isEndingBlowHudEnabled;
-	/** [Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
-	public static HALIGN endingBlowHudHAlign;
-	/** [Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
-	public static VALIGN endingBlowHudVAlign;
-	/** [Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
-	public static int endingBlowHudOffsetX;
-	/** [Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
-	public static int endingBlowHudOffsetY;
-	/** [Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip) */
-	public static boolean isItemModeEnabled;
-	/** [Item Mode HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
-	public static HALIGN itemModeHAlign;
-	/** [Item Mode HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
-	public static VALIGN itemModeVAlign;
-	/** [Item Mode HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
-	public static int itemModeOffsetX;
-	/** [Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
-	public static int itemModeOffsetY;
-	/** [Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100] */
-	private static int resetNotesInterval;
-	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
-	public static boolean enableHookshotSound;
-	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
-	public static boolean enableAutoTarget;
-	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
-	public static boolean canTargetPlayers;
-	/*================== MAGIC METER (CLIENT SIDE) =====================*/
-	/** [Alignment: Horizontal] Alignment on the X axis [left|center|right] */
-	public static HALIGN magicMeterHAlign;
-	/** [Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
-	public static VALIGN magicMeterVAlign;
-	/** Enable text display of current Magic Points */
-	public static boolean isMagicMeterTextEnabled;
-	/** Enable the Magic Meter HUD display */
-	public static boolean isMagicMeterEnabled;
-	/** [Offset: X] Moves the Meter left (-) or right (+) this number of pixels */
-	public static int magicMeterOffsetX;
-	/** [Offset: Y] Moves the Meter up (-) or down (+) this number of pixels */
-	public static int magicMeterOffsetY;
-	/** [Orientation] True for a horizontal magic meter, or false for a vertical one */
-	public static boolean isMagicMeterHorizontal;
-	/** [Orientation: Mana] True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite */
-	public static boolean isMagicBarLeft;
-	/** [Width: Max] Maximum width of the magic meter [25-100] */
-	public static int magicMeterWidth;
-	/** [Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10] */
-	public static int magicMeterIncrements;
-	/*================== MOD INTER-COMPATIBILITY =====================*/
-	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
-	private static boolean enableOffhandMaster;
-	/*================== WEAPON REGISTRY =====================*/
-	/** Items that are considered Swords for all intents and purposes */
-	private static String[] swords = new String[0];
-	/** Items that are considered Melee Weapons for all intents and purposes */
-	private static String[] weapons = new String[0];
-	/** Items that are forbidden from being considered as Swords */
-	private static String[] forbidden_swords = new String[0];
-	/** Items that are forbidden from being considered as Melee Weapons */
-	private static String[] forbidden_weapons = new String[0];
 	/*================== GENERAL =====================*/
 	/** [SYNC] Whether players can be stunned; if false, item use is still interrupted */
 	private static boolean enableStunPlayer;
@@ -190,6 +97,104 @@ public class Config
 	private static int naviRange;
 	/** [NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200] */
 	private static int naviFrequency;
+	/*=================== BUFF BAR HUD ===================*/
+	/** [Buff HUD] Maximum number of icons to display per row or column [1-10] */
+	public static int buffBarMaxIcons;
+	/** [Buff HUD] Whether the buff bar should be displayed by default */
+	public static boolean isBuffBarEnabled;
+	/** [Buff HUD] Whether the buff bar should be displayed horizontally */
+	public static boolean isBuffBarHorizontal;
+	/** [Buff HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN buffBarHAlign;
+	/** [Buff HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN buffBarVAlign;
+	/** [Buff HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int buffBarOffsetX;
+	/** [Buff HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int buffBarOffsetY;
+	/*=================== COMBO HUD ===================*/
+	public static boolean isComboHudEnabled;
+	/** [Combo HUD] Number of combo hits to display */
+	private static int hitsToDisplay;
+	/** [Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN comboHudHAlign;
+	/** [Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN comboHudVAlign;
+	/** [Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int comboHudOffsetX;
+	/** [Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int comboHudOffsetY;
+	/*=================== ENDING BLOW HUD ===================*/
+	/** [Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use) */
+	public static boolean isEndingBlowHudEnabled;
+	/** [Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN endingBlowHudHAlign;
+	/** [Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN endingBlowHudVAlign;
+	/** [Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int endingBlowHudOffsetX;
+	/** [Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int endingBlowHudOffsetY;
+	/*=================== ITEM MODE HUD ===================*/
+	/** [Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip) */
+	public static boolean isItemModeEnabled;
+	/** [Item Mode HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN itemModeHAlign;
+	/** [Item Mode HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN itemModeVAlign;
+	/** [Item Mode HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels */
+	public static int itemModeOffsetX;
+	/** [Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels */
+	public static int itemModeOffsetY;
+	/*================== CLIENT SIDE SETTINGS  =====================*/
+	/** [Chat] Whether to show a chat message when striking secret blocks */
+	public static boolean showSecretMessage;
+	/** [Combo HUD] Whether the combo hit counter will display by default (may be toggled in game) */
+	/** [Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry */
+	public static boolean allowVanillaControls;
+	/** [Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme) */
+	public static boolean requireDoubleTap;	
+	/** [Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100] */
+	private static int resetNotesInterval;
+	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
+	public static boolean enableHookshotSound;
+	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
+	public static boolean enableAutoTarget;
+	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
+	public static boolean canTargetPlayers;
+	/*================== MAGIC METER (CLIENT SIDE) =====================*/
+	/** [Alignment: Horizontal] Alignment on the X axis [left|center|right] */
+	public static HALIGN magicMeterHAlign;
+	/** [Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
+	public static VALIGN magicMeterVAlign;
+	/** Enable text display of current Magic Points */
+	public static boolean isMagicMeterTextEnabled;
+	/** Enable the Magic Meter HUD display */
+	public static boolean isMagicMeterEnabled;
+	/** [Offset: X] Moves the Meter left (-) or right (+) this number of pixels */
+	public static int magicMeterOffsetX;
+	/** [Offset: Y] Moves the Meter up (-) or down (+) this number of pixels */
+	public static int magicMeterOffsetY;
+	/** [Orientation] True for a horizontal magic meter, or false for a vertical one */
+	public static boolean isMagicMeterHorizontal;
+	/** [Orientation: Mana] True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite */
+	public static boolean isMagicBarLeft;
+	/** [Width: Max] Maximum width of the magic meter [25-100] */
+	public static int magicMeterWidth;
+	/** [Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10] */
+	public static int magicMeterIncrements;
+	/*================== MOD INTER-COMPATIBILITY =====================*/
+	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
+	private static boolean enableOffhandMaster;
+	/*================== WEAPON REGISTRY =====================*/
+	/** Items that are considered Swords for all intents and purposes */
+	private static String[] swords = new String[0];
+	/** Items that are considered Melee Weapons for all intents and purposes */
+	private static String[] weapons = new String[0];
+	/** Items that are forbidden from being considered as Swords */
+	private static String[] forbidden_swords = new String[0];
+	/** Items that are forbidden from being considered as Melee Weapons */
+	private static String[] forbidden_weapons = new String[0];
 	/*================== ITEMS =====================*/
 	/** [Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame */
 	private static boolean arrowsConsumeFlame;
@@ -436,47 +441,94 @@ public class Config
 	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
 		config.load();
+		init();
+	}
+	
+	public static void init(){
 		ZSSItems.initConfig(config);
-
+		/*================== GENERAL =====================*/
+		
+		String category = "general";
+		config.setCategoryComment(category, "General Settings for Zelda Sword Skills.");
+		
+		enableStunPlayer = config.getBoolean("Players Can Be Stunned", category, false, "Whether players can be stunned; if false, item use is still interrupted", "config.zss.general.enable_stun_player");
+		enableSwingSpeed = config.getBoolean("Enable Swing Speed Timer", category, true, "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", "config.zss.general.enable_swing_speed");
+		baseSwingSpeed = config.getInt("Default Swing Speed", category, 0, 0, 20, "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)", "config.zss.general.base_swing_speed");
+		enableSecretStoneLift = config.getBoolean("Can Pick Up Secret Blocks", category, false, "Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets)", "config.zss.general.enable_secret_stone_lift");
+		enableVanillaLift = config.getBoolean("Can Pick Up Vanilla Blocks", category, true, "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", "config.zss.general.enable_vanilla_lift");
+		enableVanillaSmash = config.getBoolean("Can Smash Vanilla Blocks", category, true, "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", "config.zss.general.enable_vanilla_smash");
+		alwaysPickupHearts = config.getBoolean("Always Pick Up Hearts", category, false, "Always pick up small hearts regardless of health", "config.zss.general.always_pickup_hearts");
+		enableHardcoreZeldaFanMode = config.getBoolean("Start With Three Hearts", category, false, "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", "config.zss.general.enable_hardcore_zelda_fan_mode");
+		bossHealthFactor = 0.01F * config.getFloat("[Boss] Boss Health Multiplier", category, 250, 100, 500, "Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses)", "config.zss.general.boss_health_factor");
+		bossNumber = config.getInt("[Boss] Number of Mobs Spawned in Boss Dungeons", category, 4, 1, 8, "Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses)", "config.zss.general.boss_number");
+		enableJarUpdates = config.getBoolean("[Ceramic Jars] Jars Can Store Dropped Items", category, true, "Whether ceramic jar tile entities update each tick, allowing them to store dropped items", "config.zss.general.enable_jar_updates");
+		keeseCursedChance = 0.01F * config.getFloat("[Mobs][Keese] Chance of Cursed Keese Spawning", category, 25, 0, 100, "Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)", "config.zss.general.keese_cursed_chance");
+		keeseSwarmChance = 0.01F * config.getFloat("[Mobs][Keese] Chance of Keese to Spawn in a Swarm", category, 25, 0, 100, "Chance of Keese spawning in a swarm (0 to disable)", "config.zss.general.keese_swarm_chance");
+		keeseSwarmSize = config.getInt("[Mobs][Keese] Number of Keese to Spawn in a Swarm", category, 6, 4, 16, "Maximum number of Keese that can spawn in a swarm", "config.zss.general.keese_swarm_size");
+		sacredRefreshRate = config.getInt("[Sacred Flames] Frequency of Rekindling Sacred Flame", category, 7, 0, 30, "Number of days before flame rekindles itself (0 to disable)", "config.zss.general.sacred_refresh_rate");
+		skulltulaRewardRate = config.getInt("[Skulltula Tokens] Days Between Recurring Quest Reward", category, 7, 0, 30, "Number of days between each recurring reward for completing the quest (0 to disable recurring reward)", "config.zss.general.skulltula_reward_rate");
+		disableVanillaBuffs = config.getBoolean("[Mob Buff] Disable Vanilla Mob Buffs", category, false, "Disable all buffs (resistances and weaknesses) for vanilla mobs", "config.zss.general.disable_vanilla_buffs");
+		npcsAreInvulnerable = config.getBoolean("[NPC] Zelda NPCs are Invulnerable", category, true, "Sets whether Zelda NPCs are invulnerable or not", "config.zss.general.npcs_are_invulnerable");
+		naviRange = config.getInt("[NPC][Navi] Navi Sense Range", category, 4, 0, 10, "Range at which Navi can sense secret rooms, in blocks (0 to disable)", "config.zss.general.navi_range");
+		naviFrequency = config.getInt("[NPC][Navi] Navi Sense Frequency", category, 50, 20, 200, "Frequency with which Navi checks the proximity for secret rooms, in ticks", "config.zss.general.navi_frequency");
+		
+		/*=================== BUFF BAR HUD ===================*/
+		category = "buff bar hud";
+		
+		buffBarMaxIcons = config.getInt("Number of Icons to Display on Buff", category, 5, 1, 10, "Maximum number of icons to display per row or column", "config.zss.buff_bar.buff_bar_max_icons");
+		isBuffBarEnabled = config.getBoolean("Buff Bar Displays at All Times", category, true, "Whether the buff bar should be displayed at all times", "config.zss.buff_bar.is_buff_bar_enabled");
+		isBuffBarHorizontal = config.getBoolean("Display Buff Bar Horizontally", category, true, "Whether the buff bar should be displayed horizontally", "config.zss.buff_bar.is_buff_bar_horizontal");
+		buffBarHAlign = HALIGN.fromString(config.getString("Buff HUD X-axis Alignment", category, "right", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.buff_bar.buff_bar_halign"));
+		buffBarVAlign = VALIGN.fromString(config.getString("Buff HUD Y-axis Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.buff_bar.buff_bar_valign"));
+		//Configuration without min/max int must use this form
+		buffBarOffsetX = config.get(category, "Buff HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.buffBar.buffBarOffsetX").getInt();
+		buffBarOffsetY = config.get(category, "Buff HUD Y Offset", 0,"Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.buffBar.buffBarOffsetY").getInt();
+		
+		/*=================== COMBO HUD ===================*/
+		category = "combo hud";
+		
+		isComboHudEnabled = config.getBoolean("Display Combo Counter", category, true, "Whether the combo hit counter will display by default (toggle in game: 'v')", "config.zss.combo_hud.is_combo_hud_enabled");
+		hitsToDisplay = config.getInt("Hits to Display in Combo HUD", category, 3, 0, 12, "Max hits to display in Combo HUD", "config.zss.combo_hud.hits_to_display");
+		comboHudHAlign = HALIGN.fromString(config.getString("Combo HUD X-axis Alignment", category, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.combo_hud.combo_hud_halign"));
+		comboHudVAlign = VALIGN.fromString(config.getString("Combo HUD Y-axis Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.combo_hud.combo_hud_valign"));
+		comboHudOffsetX = config.get(category, "Combo HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_x").getInt();
+		comboHudOffsetY = config.get(category, "Combo HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_y").getInt();
+		
+		/*================== ENDING BLOW HUD =====================*/
+		category = "ending blow hud";
+		
+		isEndingBlowHudEnabled = config.getBoolean("Display Ending Blow HUD", category, true, "Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use)", "config.zss.ending_blow.is_ending_blow_hud_enabled");
+		endingBlowHudHAlign = HALIGN.fromString(config.getString("Ending Blow HUD X Alignment", category, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.ending_blow.ending_blow_hud_halign"));
+		endingBlowHudVAlign = VALIGN.fromString(config.getString("Ending Blow HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.ending_blow.ending_blow_hud_valign"));
+		endingBlowHudOffsetX = config.get(category, "Ending Blow HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_x").getInt();
+		endingBlowHudOffsetY = config.get(category, "Ending Blow HUD Y Offset", 30, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_y").getInt();
+		
+		/*================== ITEM MODE HUD =====================*/
+		category = "item mode hud";
+		
+		isItemModeEnabled = config.getBoolean("Display Item Mode HUD", category, true, "Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)", "config.zss.item_mode.is_item_mode_enabled");
+		itemModeHAlign = HALIGN.fromString(config.getString("Item Mode HUD X-axis Alignment", category, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.item_mode.item_mode_halign"));
+		itemModeVAlign = VALIGN.fromString(config.getString("Item Mode HUD Y-axis Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.item_mode.item_mode_valign"));
+		itemModeOffsetX = config.get(category, "Item Mode HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_x").getInt();
+		itemModeOffsetY = config.get(category, "Item Mode HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_y").getInt();
+		
 		/*================== CLIENT SIDE SETTINGS  =====================*/
-		String category = "client";
+		category = "client";
 		config.addCustomCategoryComment(category,
 				"This category contains client side settings; i.e. they are not synchronized with the server." +
 				"\nNote that HUD elements added by ZSS will dynamically adjust their position so they don't overlap with other ZSS HUD elements." +
 				"\nAs such, it is generally recommended to leave the offset x and y at 0 or set them identically for each element with the same alignment.");
-		//TODO Create an interactive HUD Config GUI
-		buffBarMaxIcons = MathHelper.clamp_int(config.get(category, "[Buff HUD] Maximum number of icons to display per row or column [1-10]", 5).getInt(), 1, 10);
-		isBuffBarEnabled = config.get(category, "Buff Bar Displays at All Times", true, "[Buff HUD] Whether the buff bar should be displayed at all times").getBoolean(true);
-		isBuffBarHorizontal = config.get(category, "Display Buff Bar Horizontally", true, "[Buff HUD] Whether the buff bar should be displayed horizontally").getBoolean(true);
-		buffBarHAlign = HALIGN.fromString(config.get(category, "Buff HUD X-axis Alignment", "right", "[Buff HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
-		buffBarVAlign = VALIGN.fromString(config.get(category, "Buff HUD Y-axis Alignment", "top", "[Buff HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
-		buffBarOffsetX = config.get(category, "Buff HUD X Offset", 0, "[Buff HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
-		buffBarOffsetY = config.get(category, "Buff HUD Offset on the Y-axis", 0, "[Buff HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
-		showSecretMessage = config.get(category, "Alert When Striking Secret Blocks", false, "[Chat] Whether to show a chat message when striking secret blocks").getBoolean(false);
-		isComboHudEnabled = config.get(category, "Display Combo Counter", true, "[Combo HUD] Whether the combo hit counter will display by default (toggle in game: 'v')").getBoolean(true);
-		hitsToDisplay = MathHelper.clamp_int(config.get(category, "Hits to Display in Combo HUD", 3, "[Combo HUD] Max hits to display in Combo HUD [0-12]").getInt(), 0, 12);
-		comboHudHAlign = HALIGN.fromString(config.get(category, "Combo HUD X-axis Alignment", "left", "[Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
-		comboHudVAlign = VALIGN.fromString(config.get(category, "Combo HUD Y-axis Alignment", "top", "[Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
-		comboHudOffsetX = config.get(category, "Combo HUD X Offset", 0, "[Combo HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
-		comboHudOffsetY = config.get(category, "Combo HUD Y Offset", 0, "[Combo HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
-		allowVanillaControls = config.get(category, "Use Vanilla Movement Keys fo Skills", true, "[Controls] Whether to use vanilla movement keys to activate skills such as Dodge and Parry").getBoolean(true);
-		requireDoubleTap = config.get(category, "Double-tap for Movement Skills", true, "[Controls] Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)").getBoolean(true);
-		isEndingBlowHudEnabled = config.get(category, "Display Ending Blow HUD", true, "[Ending Blow HUD] Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use))").getBoolean(true);
-		endingBlowHudHAlign = HALIGN.fromString(config.get(category, "Ending Blow HUD X Alignment", "center", "[Ending Blow HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
-		endingBlowHudVAlign = VALIGN.fromString(config.get(category, "Ending Blow HUD Y Alignment", "top", "[Ending Blow HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
-		endingBlowHudOffsetX = config.get(category, "Ending Blow HUD X Offset", 0, "[Ending Blow HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
-		endingBlowHudOffsetY = config.get(category, "Ending Blow HUD Y Offset", 30, "[Ending Blow HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
-		isItemModeEnabled = config.get(category, "Display Item Mode HUD", true, "[Item Mode HUD] Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)").getBoolean(true);
-		itemModeHAlign = HALIGN.fromString(config.get(category, "Item Mode HUD X-axis Alignment", "left", "[Item Mode HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right]").getString());
-		itemModeVAlign = VALIGN.fromString(config.get(category, "Item Mode HUD Y-axis Alignment", "top", "[Item Mode HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom]").getString());
-		itemModeOffsetX = config.get(category, "Item Mode HUD X Offset", 0, "[Item Mode HUD][Offset: X] Moves the HUD element left (-) or right (+) this number of pixels").getInt();
-		itemModeOffsetY = config.get(category, "Item Mode HUD Y Offset", 0, "[Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels").getInt();
-		resetNotesInterval = MathHelper.clamp_int(config.get(category, "Ticks Between Notes Before Clear", 30, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]").getInt(), 5, 100);
-		enableHookshotSound = config.get(category, "Hookshot Miss Plays Item-Break Sound", true, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses").getBoolean(true);
-		enableAutoTarget = config.get(category, "Auto-Targeting Enabled", true, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')").getBoolean(true);
-		canTargetPlayers = config.get(category, "Target Players", true, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)").getBoolean(true);
+		
+		showSecretMessage = config.getBoolean("[Chat] Alert When Striking Secret Blocks", category, false, "Whether to show a chat message when striking secret blocks", "config.zss.client.show_secret_message");
+		allowVanillaControls = config.getBoolean("[Controls] Use Vanilla Movement Keys for Skills", category, true, "Whether to use vanilla movement keys to activate skills such as Dodge and Parry", "config.zss.client.allow_vanilla_controls");
+		requireDoubleTap = config.getBoolean("[Controls] Double-tap for Movement Skills", category, true, "Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", "config.zss.client.require_double_tap");
+		resetNotesInterval = config.getInt("[Song GUI] Ticks Between Notes Before Clear", category, 30, 5, 100, "Number of ticks allowed between notes before played notes are cleared", "config.zss.client.reset_notes_interval");
+		enableHookshotSound = config.getBoolean("[Sound] Hookshot Miss Plays Item-Break Sound", category, true, "Whether to play the 'itembreak' sound when the hookshot misses", "config.zss.client.enable_hookshot_sound");
+		enableAutoTarget = config.getBoolean("[Targeting] Enable Auto-Targeting", category, true, "Whether auto-targeting is enabled or not (toggle in game: '.')", "config.zss.client.enable_auto_target");
+		canTargetPlayers = config.getBoolean("[Targeting] Can Target Players", category, true, "Whether players can be targeted (toggle in game: '.' while sneaking)", "config.zss.client.can_target_players");
+		
 		/*================== MAGIC METER (CLIENT SIDE) =====================*/
-		category = "Magic Meter";
+		category = "magic meter";
 		config.addCustomCategoryComment(category,
 				"Magic meter can be configured to display anywhere on the screen using the offset X and Y." +
 				"\nOffsets are in relation to its horizontal and vertical alignments." +
@@ -489,157 +541,165 @@ public class Config
 				"\nAbove Hunger Bar, drains from left to right: x=53, y=-40, orientation=true, orientation:mana=false, halign=center, valign=bottom" +
 				"\nAbove Hunger Bar, drains from right to left: x=47, y=-40, orientation=true, orientation:mana=true, halign=center, valign=bottom" +
 				"\nAny Corner: x=0, y=0, halign=left|right, valign=top|bottom");
-		magicMeterHAlign = HALIGN.fromString(config.get(category, "[Alignment: Horizontal] Alignment on the X axis [left|center|right]", "center").getString());
-		magicMeterVAlign = VALIGN.fromString(config.get(category, "[Alignment: Vertical] Alignment on the Y axis [top|center|bottom]", "bottom").getString());
-		isMagicMeterTextEnabled = config.get(category, "Enable text display of current Magic Points", false).getBoolean(false);
-		isMagicMeterEnabled = config.get(category, "Enable the Magic Meter HUD display", true).getBoolean(true);
-		magicMeterOffsetX = config.get(category, "[Offset: X] Moves the Meter left (-) or right (+) this number of pixels", 47).getInt();
-		magicMeterOffsetY = config.get(category, "[Offset: Y] Moves the Meter up (-) or down (+) this number of pixels", -40).getInt();
-		isMagicMeterHorizontal = config.get(category, "[Orientation] True for a horizontal magic meter, or false for a vertical one", true).getBoolean(true);
-		isMagicBarLeft = config.get(category, "[Orientation: Mana] True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", true).getBoolean(true);
-		magicMeterWidth = config.get(category, "[Width: Max] Maximum width of the magic meter [25-100]", 75).getInt();
-		magicMeterIncrements = config.get(category, "[Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10]", 2).getInt();
+		
+		magicMeterHAlign = HALIGN.fromString(config.getString("Magic Meter Horizontal Alignment", category, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.magic_meter.magic_meter_halign"));
+		magicMeterVAlign = VALIGN.fromString(config.getString("Magic Meter Vertical Alignment", category, "bottom", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.magic_meter.magic_meter_valign"));
+		isMagicMeterTextEnabled = config.getBoolean("Display Current Magic Points", category, false, "Enable text display of current Magic Points", "config.magic_meter.is_magic_meter_text_enabled");
+		isMagicMeterEnabled = config.getBoolean("Dsiplay Magic Meter", category, true, "Enable the Magic Meter HUD display", "config.magic_meter.is_magic_meter_enabled");
+		magicMeterOffsetX = config.get(category, "Magic Meter Horizontal Offset", 47, "Moves the Meter left (-) or right (+) this number of pixels").setLanguageKey("config.magic_meter.magic_meter_offset_x").getInt();
+		magicMeterOffsetY = config.get(category, "Magic Meter Vertical Offset", -40, "Moves the Meter up (-) or down (+) this number of pixels").setLanguageKey("config.magic_meter.magic_meter_offset_y").getInt();
+		isMagicMeterHorizontal = config.getBoolean("Magic Meter Displays Horizontally", category, true,"True for a horizontal magic meter, or false for a vertical one", "config.magic_meter.is_magic_meter_horizontal");
+		isMagicBarLeft = config.getBoolean("Drain Magic Bar To the Bottom/Left", category, true, "True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", "config.magic_meter.is_magic_bar_left");
+		magicMeterWidth = config.getInt("Magic Meter Width", category, 75, 25, 100, "Maximum width of the magic meter", "config.magic_meter.magic_meter_width");
+		magicMeterIncrements = config.getInt("Number of Meter Increments", category, 2, 1, 10, "Number of increments required to max out the magic meter, where each increment is 50 magic points", "config.magic_meter.magic_meter_increments");
+		
 		/*================== MOD INTER-COMPATIBILITY =====================*/
-		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
+		category = "mod support";
+		
+		enableOffhandMaster = config.getBoolean("[BattleGear2] Can Offhand Master Swords", category, false, "Allow Master Swords to be held in the off-hand", "config.mod_support.enable_offhand_master");
+		
 		/*================== WEAPON REGISTRY =====================*/
-		swords = config.get("Weapon Registry", "[Allowed Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass.\nAll swords are also considered WEAPONS.").getStringList();
+		//TODO ConfigGui has no effect on these
+		category = "weapon registry";
+		
+		swords = config.get(category, "Allowed Swords", new String[0], "Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'. Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass. All swords are also considered WEAPONS.").setRequiresMcRestart(true).setLanguageKey("config.zss.weapon_registry.allowed_swords").getStringList();
 		Arrays.sort(swords);
-		weapons = config.get("Weapon Registry", "[Allowed Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item as a generic melee WEAPON. This means it can be used for all\nskills except those that specifically require a sword, as well as some other things.").getStringList();
+		weapons = config.get(category, "Allowed Weapons", new String[0], "Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'. Register an item as a generic melee WEAPON. This means it can be used for all\nskills except those that specifically require a sword, as well as some other things.").setRequiresMcRestart(true).setLanguageKey("config.zss.weapon_registry.allowed_weapons").getStringList();
 		Arrays.sort(weapons);
 		// Battlegear2 weapons ALL extend ItemSword, but are not really swords
 		String[] forbidden = new String[]{
-				"battlegear2:dagger.wood","battlegear2:dagger.stone","battlegear2:dagger.gold","battlegear2:dagger.iron","battlegear2:dagger.diamond",	
-				"battlegear2:mace.wood","battlegear2:mace.stone","battlegear2:mace.gold","battlegear2:mace.iron","battlegear2:mace.diamond",
-				"battlegear2:spear.wood","battlegear2:spear.stone","battlegear2:spear.gold","battlegear2:spear.iron","battlegear2:spear.diamond",
-				"battlegear2:waraxe.wood","battlegear2:waraxe.stone","battlegear2:waraxe.gold","battlegear2:waraxe.iron","battlegear2:waraxe.diamond"
+				"battlegear2:dagger.diamond","battlegear2:dagger.gold","battlegear2:dagger.iron","battlegear2:dagger.stone","battlegear2:dagger.wood",
+				"battlegear2:mace.diamond","battlegear2:mace.gold","battlegear2:mace.iron","battlegear2:mace.stone","battlegear2:mace.wood",
+				"battlegear2:spear.diamond","battlegear2:spear.gold","battlegear2:spear.iron","battlegear2:spear.stone","battlegear2:spear.wood",
+				"battlegear2:waraxe.diamond","battlegear2:waraxe.gold","battlegear2:waraxe.iron","battlegear2:waraxe.stone","battlegear2:waraxe.wood"
 		};
-		forbidden_swords = config.get("Weapon Registry", "[Forbidden Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", forbidden, "Forbid one or more items from acting as SWORDs, e.g. if a mod item extends ItemSword but is not really a sword").getStringList();
+		forbidden_swords = config.get(category, "Forbidden Swords", forbidden, "Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'. Forbid one or more items from acting as SWORDs, e.g. if a mod item extends ItemSword but is not really a sword.").setRequiresMcRestart(true).setLanguageKey("config.zss.weapon_registry.forbidden_swords").getStringList();
 		Arrays.sort(forbidden_swords);
-		forbidden_weapons = config.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
+		forbidden_weapons = config.get(category, "Forbidden Weapons", new String[0], "Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'. Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").setRequiresMcRestart(true).setLanguageKey("config.zss.weapon_registry.forbidden_weapons").getStringList();
 		Arrays.sort(forbidden_weapons);
-		/*================== GENERAL =====================*/
-		enableStunPlayer = config.get("General", "Players Can Be Stunned", false, "Whether players can be stunned; if false, item use is still interrupted").getBoolean(false);
-		//TODO enableSwingSpeed Button needs a Title
-		enableSwingSpeed = config.get("General", "NEEDS A TITLE", true, "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds").getBoolean(true);
-		baseSwingSpeed = MathHelper.clamp_int(config.get("General", "Default Swing Speed", 0, "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)[0-20]").getInt(), 0, 20);
-		enableSecretStoneLift = config.get("General", "Can Pick Up Secret Blocks", false, "Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets)").getBoolean(false);
-		enableVanillaLift = config.get("General", "Can Pick Up Vanilla Blocks", true, "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)").getBoolean(true);
-		enableVanillaSmash = config.get("General", "Can Smash Vanilla Blocks", true, "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)").getBoolean(true);
-		alwaysPickupHearts = config.get("General", "Always Pick Up Hearts", false, "Always pick up small hearts regardless of health").getBoolean(false);
-		enableHardcoreZeldaFanMode = config.get("General", "Start With Three Hearts", false, "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)").getBoolean(false);
-		bossHealthFactor = 0.01F * (float) MathHelper.clamp_int(config.get("General", "Boss Health Multiplier", 250, "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]").getInt(), 100, 500);
-		bossNumber = MathHelper.clamp_int(config.get("General", "Number of Mobs Spawned in Boss Dungeons", 4, "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]").getInt(), 1, 8);
-		enableJarUpdates = config.get("General", "Jars Can Store Dropped Items", true, "[Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items").getBoolean(true);
-		keeseCursedChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "Chance of Cursed Keese Spawning", false, "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]").getInt(), 0, 100);
-		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "Chance Keese Spawn in a Swarm", 25, "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]").getInt(), 0, 100);
-		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "Number of Keese to Spawn in a Swarm", 6, "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]").getInt(), 4, 16);
-		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "Frequency of Rekindling Sacred Flame", 7, "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]").getInt(), 0, 30);
-		skulltulaRewardRate = MathHelper.clamp_int(config.get("General", "Days Between Recurring Quest Award", 7, "[Skulltula Tokens] Number of days between each recurring reward for completing the quest (0 to disable recurring reward) [0-30]").getInt(), 0, 30);
-		disableVanillaBuffs = config.get("General", "Disable Vanilla Mob Buffs", false, "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs").getBoolean(false);
-		npcsAreInvulnerable = config.get("General", "Zelda NPCs are Invulnerable", true, "[NPC] Sets whether Zelda NPCs are invulnerable or not").getBoolean(true);
-		naviRange = MathHelper.clamp_int(config.get("General", "Navi Sense Range", 4, "Range at which Navi can sense secret rooms, in blocks (0 to disable) [0-10]").getInt(), 0, 10);
-		naviFrequency = MathHelper.clamp_int(config.get("General", "Navi Sense Check Fequency", 50, "[NPC][Navi] Frequency with which Navi checks the proximity for secret rooms, in ticks [20-200]").getInt(), 20, 200);
+
 		/*================== ITEMS =====================*/
-		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
-		bombFuseTime = MathHelper.clamp_int(config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt(), 0, 128);
-		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone", false).getBoolean(false);
-		// TODO bombsGriefAdventure = config.get("Item", "[Bombs] Whether bombs can destroy regular blocks in Adventure Mode", false).getBoolean(false);
-		enableDekuDenude = config.get("Item", "[Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves", true).getBoolean(true);
-		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);
-		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
-		disableAllUnenchantables = config.get("Item", "[Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", false).getBoolean(false);
-		enableMegaSmashQuake = config.get("Item", "[Hammer] True to allow the Megaton Hammer to break Quake Stone (also requires player to have Golden Gauntlets in inventory)", true).getBoolean(true);
-		heroBowUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Hero's Bow] Cost (in emeralds) to upgrade, per level [128 - 640]", 192).getInt(), 128, 640);
-		enableFireArrowIgnite = config.get("Item", "[Hero's Bow] Whether the fire arrow can ignite affected blocks", true).getBoolean(true);
-		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", false).getBoolean(false);
-		enableLightArrowNoClip = config.get("Item", "[Hero's Bow] Whether the light arrow can penetrate blocks", true).getBoolean(true);
-		enableAutoBombArrows = config.get("Item", "[Hero's Bow] Whether to automate bomb arrow firing when sneaking", true).getBoolean(true);
-		hookshotRange = MathHelper.clamp_int(config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt(), 4, 16);
-		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
-		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
-		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
-		rodFireGriefing = config.get("Item", "[Magic Rods] Enable fire rod to set blocks on fire", true).getBoolean(true);
-		medallionsAffectPlayers = config.get("Item", "[Magic Medallions] True if Ether and Quake medallions can affect players", true).getBoolean(true);
-		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
-		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
-		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 50).getInt(), 0, 500);
-		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt(), 64, 320);
-		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt(), 128, 640);
-		whipRange = MathHelper.clamp_int(config.get("Item", "[Whip] Range, in blocks, of the standard whip [4-12]", 6).getInt(), 4, 12);
+		category = "item";
+		
+		arrowsConsumeFlame = config.getBoolean("[Arrows] Can Arrows Consume Sacred Flame", category, true , "Whether transforming arrows with the Sacred Flames has a chance to consume the flame", "config.zss.item.arrows_consume_flame");
+		bombFuseTime = config.getInt("[Bombs] Minimum Bomb Fuse Time", category, 56, 0, 128, "Minimum fuse time; set to 0 to disable held bomb ticks", "config.zss.item.bomb_fuse_time");
+		onlyBombSecretStone = config.getBoolean("[Bombs] Can Bombs Grief", category, false, "Whether bombs are non-griefing, i.e. can only destroy secret stone", "config.zss.item.only_bomb_secret_room");
+		//bombsGriefAdventure = config.getBoolean("[Bombs] Can Bombs Grief in Adventure Mode", category, false, "Whether bombs can destroy regular blocks in Adventure Mode", "config.zss.item.bombs_grief_adventure");
+		enableDekuDenude = config.getBoolean("[Deku Leaf] Can Whirlwind Strip Trees", category, true, "Allow Deku Leaf whirlwind to destroy leaves", "config.zss.item.enable_deku_denude");
+		enableDinIgnite = config.getBoolean("[Din's Fire] Can Din's Fire Ignite Blocks", category, false, "Whether Din's Fire can set blocks on fire", "config.zss.item.enable_din_ignite");
+		enableDinMelt = config.getBoolean("[Din's Fire] Can Din's Fire Melt Ice", category, true, "Whether Din's Fire can melt unbreakable ice blocks", "config.zss.item.enable_din_melt");
+		disableAllUnenchantables = config.getBoolean("[Enchantments] Can Enchant on the Vanilla Anvil", category, false, "Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", "config.zss.item.disable_all_unenchantables");
+		enableMegaSmashQuake = config.getBoolean("[Hammer] Can Megaton Hammer Break Quake Stone", category, true, "True to allow the Megaton Hammer to break Quake Stone (also requires player to have Golden Gauntlets in inventory)", "config.zss.item.enable_mega_smash_quake");
+		heroBowUpgradeCost = config.getInt("[Hero's Bow] Hero's Bow Upgrade Cost", category, 192, 128, 640, "Cost (in emeralds) to upgrade, per level", "config.zss.item.hero_bow_upgrade_cost");
+		enableFireArrowIgnite = config.getBoolean("[Hero's Bow] Can Fire Arrows Ignite Blocks", category, true, "Whether the fire arrow can ignite affected blocks", "config.zss.item.enable_fire_arrow_ignite");
+		enableFireArrowMelt = config.getBoolean("[Hero's Bow] Can Fire Arrow Melt Ice", category, false, "Whether the fire arrow can melt unbreakable ice blocks", "config.zss.item.enable_fire_arrow_melt");
+		enableLightArrowNoClip = config.getBoolean("[Hero's Bow] Can Light Arrow Penetrate Blocks", category, true, "Whether the light arrow can penetrate blocks", "config.zss.item.enable_light_arrow_no_clip");
+		enableAutoBombArrows = config.getBoolean("[Hero's Bow] Automate Bomb Arrow Firing While Sneaking", category, true, "Whether to automate bomb arrow firing when sneaking", "config.zss.item.enable_auto_bomb_arrows");
+		hookshotRange = config.getInt("[Hookshot] Range of Non-Extended Hookshots", category, 8, 4, 16, "Max range of non-extended hookshots", "config.zss.item.hookshot_range");
+		enableHookableOnly = config.getBoolean("[Hookshot] Hookshots Only Grab Hookable Blocks", category, false, "Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", "config.zss.item.enable_hookable_only");
+		enableHookshotBreakBlocks = config.getBoolean("[Hookshot] Can Hookshots Destroy Blocks", category, true, "Whether hookshots are allowed to destroy certain blocks such as glass", "config.zss.item.enable_hookshot_break_blocks");
+		rodUpgradeCost = config.getInt("[Hookshot] Magic Rod Upgrade Cost", category, 768, 128, 1280, "Cost (in emeralds) to upgrade (note that the Tornado Rod costs 3/4 this value)", "config.zss.item.rod_upgrade_cost");
+		rodFireGriefing = config.getBoolean("[Hookshot] Can Fire Rod Ignite Blocks", category, true, "Enable fire rod to set blocks on fire", "config.zss.item.rod_fire_griefing");
+		medallionsAffectPlayers = config.getBoolean("[Magic Medallions] Can Medallions Affect Players", category, true, "True if Ether and Quake medallions can affect players", "config.zss.item.medallions_affect_players");
+		temperedRequiredKills = config.getInt("[Master Sword] Mobs Killed to Upgrade Temprered Sword", category, 300, 100, 1000, "Number of mobs that need to be killed to upgrade the Tempered Sword", "config.zss.item.tempered_required_kills");
+		allMasterSwordsProvidePower = config.getBoolean("[Master Sword] Any Master Sword Provides Power", category, true, "Whether ALL master swords provide power when placed in a Sword Pedestal", "config.zss.item.all_master_swords_provide_power");
+		numSkelKeyUses = config.getInt("[Skeleton Key] Chest Key Unlock Limit", category, 50, 0, 500, "Number of locked chests which can be opened before key breaks (0 for no limit)", "config.zss.item.num_skel_key_uses");
+		slingshotUpgradeOne = config.getInt("[Slingshot] Slingshot First Upgrade Cost", category, 128, 64, 320, "Cost (in emeralds) for first upgrade", "config.zss.item.slingshot_upgrade_one");
+		slingshotUpgradeTwo = config.getInt("[Slingshot] Slingshot Second Upgrade Cost", category, 320, 128, 640, "Cost (in emeralds) for second upgrade", "config.zss.item.slingshot_upgrade_two");
+		whipRange = config.getInt("[Whip] Whip Range", category, 6, 4, 12, "Range, in blocks, of the standard whip", "config.zss.item.whip_range");
+		
 		/*================== STARTING GEAR =====================*/
-		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", true).getBoolean(true);
-		enableAutoEquip = config.get("Bonus Gear", "Automatically equip starting equipment", true).getBoolean(true);
-		enableLinksHouse = config.get("Bonus Gear", "Begin the game with Link's House - place it anywhere you like!", true).getBoolean(true);
-		enableOrb = config.get("Bonus Gear", "Grants a single Basic Sword skill orb", true).getBoolean(true);
-		enableFullSet = config.get("Bonus Gear", "Grants a full set of Kokiri clothing: hat, tunic, trousers, boots", true).getBoolean(true);
-		enableTunic = config.get("Bonus Gear", "Grants only a Kokiri Tunic (if full set is disabled)", true).getBoolean(true);
-		enableSword = config.get("Bonus Gear", "Grants a Kokiri sword", true).getBoolean(true);
-		enableNavi = config.get("Bonus Gear", "Start the game with Navi in a bottle (you can always acquire her later if false)", false).getBoolean(false);
+		category = "bonus gear";
+		
+		enableStartingGear = config.getBoolean("Enable Start Equipment", category, true, "Enable bonus starting equipment", "config.zss.bonus_gear.enable_starting_gear");
+		enableAutoEquip = config.getBoolean("Is Starting Gear Equipped", category, true, "Automatically equip starting equipment", "config.zss.bonus_gear.enable_auto_equip");
+		enableLinksHouse = config.getBoolean("Start With Link's House", category, true, "Begin the game with Link's House - place it anywhere you like!", "config.zss.bonus_gear.enable_links_house");
+		enableOrb = config.getBoolean("Start With a Skill Orb", category, true, "Grants a single Basic Sword skill orb", "config.zss.bonus_gear.enable_orb");
+		enableFullSet = config.getBoolean("Start With a Set of Kokiri Clothing", category, true, "Grants a full set of Kokiri clothing: hat, tunic, trousers, boots", "config.zss.bonus_gear.enable_full_set");
+		enableTunic = config.getBoolean("Start With a Kokiri Tunic", category, true, "Grants only a Kokiri Tunic (if full set is disabled)", "config.zss.bonus_gear.enable_tunic");
+		enableSword = config.getBoolean("Start With a Kokiri Sword", category, true, "Grants a Kokiri sword", "config.zss.bonus_gear.enable_sword");
+		enableNavi = config.getBoolean("Start With Navi", category, false, "Start the game with Navi in a bottle (you can always acquire her later if false)", "config.zss.bonus_gear.enable_navi");
+		
 		/*================== SKILLS =====================*/
-		maxBonusHearts = MathHelper.clamp_int(config.get("Skills", "Max Bonus Hearts [0-50]", 20).getInt(), 0, BonusHeart.MAX_BONUS_HEARTS);
-		allowDisarmorPlayer = config.get("Skills", "[Back Slice] Allow Back Slice to potentially knock off player armor", true).getBoolean(true);
-		disarmTimingBonus = 0.001F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer [0-50]", 25).getInt(), 0, 15);
-		disarmPenalty = 0.01F * (float) MathHelper.clamp_int(config.get("Skills", "[Parry] Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing [0-20]", 10).getInt(), 0, 20);
-		maxMagicPoints = MathHelper.clamp_int(config.get("Skills", "[Magic] Maximum magic points attainable [50-1000]", 250).getInt(), 50, 1000);
-		allowUnlimitedNayru = config.get("Skills", "[Magic] Allow Nayru's Love to be activated even when magic bar is unlimited (such as after drinking a Chateau Romani)", false).getBoolean(false);
-		requireFullHealth = config.get("Skills", "[Super Spin Attack | Sword Beam] True to require a completely full health bar to use, or false to allow a small amount to be missing per level", false).getBoolean(false);
+		category = "skills";
+		
+		maxBonusHearts = config.getInt("Max Bonus Hearts", category, 20, 0, BonusHeart.MAX_BONUS_HEARTS, "The maximum number of hearts a player can have", "config.zss.skills.max_bonus_hearts");
+		allowDisarmorPlayer = config.getBoolean("[Back Slice] Back Slice Can Disarm Players", category, true, "Allow Back Slice to potentially knock off player armor", "config.zss.skills.allow_disarm_player");
+		disarmTimingBonus = 0.001F * config.getFloat("[Parry] Disarm Timing Bonus", category, 25, 0, 50, "Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer", "config.zss.skills.disarm_timing_bonus");
+		disarmPenalty = 0.01F * config.getFloat("[Parry] Disarm Penalty Chance", category, 10, 0, 20, "Penalty to disarm chance: percent per Parry level of the opponent, default negates defender's skill bonus so disarm is based entirely on timing", "config.zss.skills.disarm_penalty");
+		maxMagicPoints = config.getInt("[Magic] Maximum Attainable Magic Points", category, 250, 50, 1000, "Maximum magic points attainable", "config.zss.skills.max_maigc_points");
+		allowUnlimitedNayru = config.getBoolean("[Magic] Can Always Activate Naryu's Love", category, false, "Allow Nayru's Love to be activated even when magic bar is unlimited (such as after drinking a Chateau Romani)", "config.zss.skills.allow_unlimited_nayru");
+		requireFullHealth = config.getBoolean("[Super Spin Attack | Sword Beam] Sword Skills Require Full Health", category, false, "True to require a completely full health bar to use, or false to allow a small amount to be missing per level", "config.zss.skills.require_full_health");
+		
 		/*================== DUNGEON GEN =====================*/
-		avoidModBlocks = config.get("Dungeon Generation", "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", true).getBoolean(true);
-		enableWindows = config.get("Dungeon Generation", "[Boss Dungeon] Whether boss dungeons are allowed to have windows or not", true).getBoolean(true);
-		enableBossDungeons = config.get("Dungeon Generation", "[Boss Dungeon] Enable Boss Dungeon generation", true).getBoolean(true);
-		randomizeBossDungeons = config.get("Dungeon Generation", "[Boss Dungeon] Ignore biome settings and randomize boss dungeon / boss key locations", false).getBoolean(false);
-		mainDungeonDifficulty = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt(), 1, 3);
-		secretRoomChance = 0.01F * (float) MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt(), 1, 100);
-		minLandDistance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt(), 2, 16);
-		minOceanDistance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Minimum number of blocks between ocean-based secret rooms [2-32]", 6).getInt(), 2, 32);
-		minBossDistance = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Minimum number of chunks between Boss Dungeons [8-128]", 24).getInt(), 8, 128);
-		genAttemptsPerChunk = MathHelper.clamp_int(config.get("Dungeon Generation", "[Overworld] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt(), 0, 20);
-		netherDungeonDifficulty = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Adjust secret rooms so they are more hidden [1 = less, 3 = most]", 2).getInt(), 1, 3);
-		secretRoomChanceNether = 0.01F * (float) MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Chance (as a percent) per iteration of secret room generating [1-100]", 80).getInt(), 1, 100);
-		minDistanceNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Minimum number of blocks between land-based secret rooms [2-16]", 6).getInt(), 2, 16);
-		minBossDistanceNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Minimum number of chunks between Boss Dungeons [8-64]", 12).getInt(), 8, 64);
-		genAttemptsPerChunkNether = MathHelper.clamp_int(config.get("Dungeon Generation", "[Nether] Secret room generation attempts per chunk (0 to disable) [0-20]", 12).getInt(), 0, 20);
-		fairySpawnerChance = 0.01F * (float) MathHelper.clamp_int(config.get("Dungeon Generation", "Chance (as a percent) for certain dungeons to have fairy spawners [0-100]", 10).getInt(), 0, 100);
-		resetSpawnerTime = MathHelper.clamp_int(config.get("Dungeon Generation", "Maximum number of days required for fairies to replenish [2-10]", 7).getInt(), 2, 10);
-		disableStructureGen = config.get("Dungeon Generation", "[No-Gen] Disable structure and feature generation entirely within a specified zone", false).getBoolean(false);
-		noGenX = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate X for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
-		noGenZ = MathHelper.clamp_int(config.get("Dungeon Generation", "[No-Gen] Starting chunk coordinate Z for the structure free zone [max is +/- 1875000]", 0).getInt(), -1875000, 1875000);
+		//TODO add in a later commit
+		category = "dungeon generation";
+		
+		avoidModBlocks = config.getBoolean("Avoid Mod Blocks when Generating", category, true, "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", "config.zss.dun_gen.avoid_mod_blocks");
+		enableWindows = config.getBoolean("[Boss Dungeon] Boss Dungeons Can Have Windows", category, true, "Whether boss dungeons are allowed to have windows or not", "config.zss.dun_gen.enable_windows");
+		enableBossDungeons = config.getBoolean("[Boss Dungeon] Boss Dungeons Generate", category, true, "Enable Boss Dungeon generation", "config.zss.dun_gen.enable_boss_dungeons");
+		randomizeBossDungeons = config.getBoolean("[Boss Dungeon] Dungeons Can Spawn Wherever", category, false, "Ignore biome settings and randomize boss dungeon / boss key locations", "config.zss.dun_gen.randomize_boss_dungeons");
+		mainDungeonDifficulty = config.getInt("[Overworld] Secret Room Hiding Difficulty", category, 2, 1, 3, "Adjust secret rooms so they are more hidden (difficulty in increasing number)", "config.zss.dun_gen.main_dungeon_difficulty");
+		secretRoomChance = 0.01F * config.getFloat("[Overworld] Secret Room Gen Chance", category, 80, 1, 100, "Chance (as a percent) per iteration of secret room generating", "config.zss.dun_gen.secret_room_chance");
+		minLandDistance = config.getInt("[Overworld] Minimum Secret Room Land Distance", category, 6, 2, 12, "Minimum number of blocks between land-based secret rooms", "config.zss.dun_gen.min_land_distance");
+		minOceanDistance = config.getInt("[Overworld] Minimum Secret Room Ocean Distance", category, 6, 2, 32, "Minimum number of blocks between ocean-based secret rooms", "config.zss.dun_gen.min_ocean_distance");
+		minBossDistance = config.getInt("[Overworld] Minimum Chunks Between Dungeons", category, 24, 8, 128, "Minimum number of chunks between Boss Dungeons", "config.zss.dun_gen.min_boss_distance");
+		genAttemptsPerChunk = config.getInt("[Overworld] Secret Room Chunk Gen Attempts", category, 12, 0, 20, "Secret room generation attempts per chunk (0 to disable)", "config.zss.dun_gen.gen_attempts_per_chunk");
+		netherDungeonDifficulty = config.getInt("[Nether] Secret Room Hiding Difficulty", category, 2, 1, 3, "Adjust secret rooms so they are more hidden (difficulty in increasing number)", "config.zss.dun_gen.nether_dungeon_difficulty");
+		secretRoomChanceNether = 0.01F * config.getFloat("[Nether] Secret Room Gen Chance", category, 80, 1, 100, "Chance (as a percent) per iteration of secret room generating", "config.zss.dun_gen.secret_room_chance_nether");
+		minDistanceNether = config.getInt("[Nether] Minimum Secret Room Distance", category, 6, 2, 16, "Minimum number of blocks between land-based secret rooms", "config.zss.dun_gen.min_distance_nether");
+		minBossDistanceNether = config.getInt("[Nether] Chunks Between Dungeons", category, 12, 8, 64, "Minimum number of chunks between Boss Dungeons", "config.zss.dun_gen.min_boss_distance_nether");
+		genAttemptsPerChunkNether = config.getInt("[Nether] Secret Room Chunk Gen Attempts", category, 12, 0, 20, "Secret room generation attempts per chunk (0 to disable)", "config.zss.dun_gen.gen_attempts_per_chunk_nether");
+		fairySpawnerChance = 0.01F * config.getFloat("Fairy Spawner Gen Chance", category, 10, 0, 100, "Chance (as a percent) for certain dungeons to have fairy spawners", "config.zss.dun_gen.fairy_spawner_chance");
+		resetSpawnerTime = config.getInt("Fairy Replenish Time", category, 7, 2, 10, "Maximum number of days required for fairies to replenish", "config.zss.dun_gen.reset_spawner_time");
+		disableStructureGen = config.getBoolean("[No-Gen] Disable Dungeon Generation", category, false, "Disable structure and feature generation entirely within a specified zone", "config.zss.dun_gen.disable_structure_gen");
+		noGenX = config.getInt("[No-Gen] Structure Gen X Limit", category, 0, -1875000, 1875000, "Starting chunk coordinate X for the structure free zone", "config.zss.dun_gen.no_gen_x");
+		noGenZ = config.getInt("[No-Gen] Structure Gen Z Limit", category, 0, -1875000, 1875000, "Starting chunk coordinate Z for the structure free zone", "config.zss.dun_gen.no_gen_z");
 		/*================== WORLD GEN =====================*/
-		ancientTabletGenChance = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ancient Tablet] Chance that a random tablet will spawn when a boss dungeon is defeated [0-100]", 20).getInt(), 0, 100);
-		// TODO ancientTabletGenDistance = MathHelper.clamp_int(config.get("WorldGen", "[Ancient Tablet] Maximum number of chunks from boss dungeon a tablet may generate [0-8]", 0).getInt(), 0, 8);
-		enableBombFlowerGen = config.get("WorldGen", "[Bomb Flowers] Enable bomb flower generation", true).getBoolean(true);
-		allowJarsInWater = config.get("WorldGen", "[Ceramic Jars][Surface] Allow ceramic jars to generate in water", true).getBoolean(true);
-		jarGenChance = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Chance of generating a jar cluster in a given chunk [0-100]", 50).getInt(), 0, 100);
-		jarsPerCluster = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Surface] Max number of jars per jar cluster [2-20]", 8).getInt(), 2, 20);
-		jarGenChanceSub = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Underground] Chance for each jar cluster to generate [0-100]", 65).getInt(), 0, 100);
-		jarsPerClusterSub = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jars per cluster [2-20]", 8).getInt(), 2, 20);
-		jarClustersPerChunkSub = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Underground] Max number of jar clusters per chunk [1-20]", 10).getInt(), 1, 20);
-		jarGenChanceNether = 0.01F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Chance for each jar cluster to generate [0-100]", 50).getInt(), 0, 100);
-		jarsPerClusterNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jars per cluster [2-20]", 8).getInt(), 2, 20);
-		jarClustersPerChunkNether = MathHelper.clamp_int(config.get("WorldGen", "[Ceramic Jars][Nether] Max number of jar clusters per chunk [1-20]", 8).getInt(), 1, 20);
-		gossipStoneRate = 0.0001F * (float) MathHelper.clamp_int(config.get("WorldGen", "[Gossip Stones] Chance per chunk of a Gossip Stone generating (100 = 1% chance)[0-500]", 50).getInt(), 0, 500);
-		enablePillarGen = config.get("WorldGen", "[Song Pillars] Enable song and broken pillar generation", true).getBoolean(true);
-		maxPillarRange = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Maximum search range; reduce if new chunks are loading too slowly [16-64]", 64).getInt(), 16, 64);
-		minBrokenPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt(), 4, 128);
-		minSongPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt(), 8, 128);
+		category = "world generation";
+		
+		ancientTabletGenChance = 0.01F * config.getFloat("[Ancient Tablet] Ancient Tablet Spawn Chance", category, 20, 0, 100, "Chance that a random tablet will spawn when a boss dungeon is defeated", "config.zss.world_gen.ancient_tablet_gen_chance");
+		// TODO ancientTabletGenDistance = config.getInt("Ancient Tablet Spawn Distance", category, 0, 0, 8, "Maximum number of chunks from boss dungeon a tablet may generate", "config.zss.world_gen.ancient_tablet_gen_distance");//TODO need a lang key when this is implemented
+		enableBombFlowerGen = config.getBoolean("[Bomb Flowers] Flower Bombs Generate", category, true, "Enable bomb flower generation", "config.zss.world_gen.enable_bomb_flower_gen");
+		allowJarsInWater = config.getBoolean("[Ceramic Jars][Surface] Jars Generate in Water", category, true, "Allow ceramic jars to generate in water", "config.zss.world_gen.allowed_jars_in_water");
+		jarGenChance = 0.01F * config.getFloat("[Ceramic Jars][Surface] Jar Cluster Spawn Chance", category, 50, 0, 100, "Chance of generating a jar cluster in a given chunk", "config.zss.world_gen.jars_gen_chance");
+		jarsPerCluster = config.getInt("[Ceramic Jars][Surface] Max Jars in a Cluster", category, 8, 2, 20, "Max number of jars per jar cluster", "config.zss.world_gen.jars_per_cluster");
+		jarGenChanceSub = 0.01F * config.getFloat("[Ceramic Jars][Underground] Cluster Spawn Chance", category, 65, 0, 100, "Chance for each jar cluster to generate", "config.zss.world_gen.jar_gen_chance_sub");
+		jarsPerClusterSub = config.getInt("[Ceramic Jars][Underground] Max Jars in a Cluster", category, 8, 2, 20, "Max number of jars per cluster", "config.zss.world_gen.jars_per_cluster_sub");
+		jarClustersPerChunkSub = config.getInt("[Ceramic Jars][Underground] Max Clusters per Chunk", category, 10, 1, 20, "Max number of jar clusters per chunk", "config.zss.world_gen.jar_clusters_per_chunk_sub");
+		jarGenChanceNether = 0.01F * config.getFloat("[Ceramic Jars][Nether] Jar Cluster Spawn Chance", category, 50, 0, 100, "Chance for each jar cluster to generate", "config.zss.world_gen.jar_gen_chance_nether");
+		jarsPerClusterNether = config.getInt("[Ceramic Jars][Nether] Max Jars in a Cluster", category, 8, 2, 20, "Max number of jars per cluster", "config.zss.world_gen.jars_per_cluster_nether");
+		jarClustersPerChunkNether = config.getInt("[Ceramic Jars][Nether] Max Clusters per Chunk", category, 8, 1, 20, "Max number of jar clusters per chunk", "config.zss.world_gen.jar_clusters_per_chunk_nether");
+		gossipStoneRate = 0.0001F * config.getFloat("[Gossip Stones] Gossip Stone Spawn Chance", category, 50, 0, 500, "Chance per chunk of a Gossip Stone generating (100 = 1% chance)", "config.zss.world_gen.gossip_stone_rate");
+		enablePillarGen = config.getBoolean("[Song Pillars] Can Pillars Generate", category, true, "Enable song and broken pillar generation", "config.zss.world_gen.enable_pillar_gen");
+		maxPillarRange = config.getInt("[Song Pillars] Maximum Pillar Range", category, 64, 16, 64, "Maximum search range; reduce if new chunks are loading too slowly", "config.zss.world_gen.max_pillar_range");
+		minBrokenPillarDistance = config.getInt("[Song Pillars] Broken Pillar Sparceness", category, 32, 4, 128, "Minimum number of chunks between broken pillars", "config.zss.world_gen.min_broken_pillar_distance");
+		minSongPillarDistance = config.getInt("[Song Pillars] Song Pillar Sparceness", category, 64, 8, 128, "Minimum number of chunks between song pillars", "config.zss.world_gen.min_song_pillar_distance");
+		
 		/*================== LOOT =====================*/
-		masterSwordChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a Forest Temple containing a Master Sword [1-100]", 33).getInt(), 1, 100);
-		lockedChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt(), 10, 50);
-		doubleChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt(), 0, 25);
-		barredRoomChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [1-50]", 25).getInt(), 1, 50);
-		heartPieceChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a heart piece generating in secret room chests [0-100]", 15).getInt(), 0, 100);
-		randomBossItemChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a random boss-level item being added to locked chest loot table [0-50]", 25).getInt(), 0, 50);
-		minNumChestItems = MathHelper.clamp_int(config.get("Loot", "Minimum number of random chest contents for first chest [1-10]", 4).getInt(), 1, 10);
-		bombWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb [1-10]", 5).getInt(), 1, 10);
-		bombBagWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb Bag (locked chest weight only) [1-10]", 3).getInt(), 1, 10);
-		heartPieceWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Heart Piece (vanilla chests only) [1-10]", 1).getInt(), 1, 10);
-		bigKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Big [1-10]", 4).getInt(), 1, 10);
-		smallKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Small [1-10]", 4).getInt(), 1, 10);
-		lockedLootWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Locked Chest Content [1-10]", 3).getInt(), 1, 10);
+		category = "loot";
+		
+		masterSwordChance = 0.01F * config.getFloat("Chance a Temple Contains a Master Sword", category, 33, 1, 100, "Chance (as a percent) of a Forest Temple containing a Master Sword", "config.zss.loot.master_sword_chance");
+		lockedChestChance = 0.01F * config.getFloat("Locked Chest Chance", category, 33, 10, 50, "Chance (as a percent) a chest will be locked", "config.zss.loot.locked_chest_chance");
+		doubleChestChance = 0.01F * config.getFloat("Secret Room Double Chest Chance", category, 10, 0, 25, "Chance (as a percent) a secret room may have two chests", "config.zss.loot.double_chest_chance");
+		barredRoomChance = 0.01F * config.getFloat("Secret Room Barred Chance", category, 25, 1, 50, "Chance that a secret room's entrance will be barred by some obstacle", "config.zss.loot.barred_room_chance");
+		heartPieceChance = 0.01F * config.getFloat("Secret Room Heart Piece Chance", category, 15, 0, 100, "Chance (as a percent) of a heart piece generating in secret room chests", "config.zss.loot.heart_piece_chance");
+		randomBossItemChance = 0.01F * config.getFloat("Boss Item Chest Chance", category, 25, 0, 50, "Chance (as a percent) of a random boss-level item being added to locked chest loot table", "config.zss.loot.random_boss_item_chance");
+		minNumChestItems = config.getInt("Minimum Number of Items in First Chest", category, 4, 1, 10, "Minimum number of random chest contents for first chest", "config.zss.loot.min_num_chest_items");
+		bombWeight = config.getInt("[Loot Weight] Bomb Loot Weight", category, 5, 1, 10, "The loot weight of a Bomb", "config.zss.loot.bomb_weight");
+		bombBagWeight = config.getInt("[Loot Weight] Bomb Bag Loot Weight", category, 3, 1, 10, "The loot weight of a Bomb Bag (locked chest only)", "config.zss.loot.bomb_bag_weight");
+		heartPieceWeight = config.getInt("[Loot Weight] Heart Piece Loot Weight", category, 1, 1, 10, "The loot weight of a Heart Piece (vanilla chests only)", "config.zss.loot.heart_piece_weight");
+		bigKeyWeight = config.getInt("[Loot Weight] Big Key Loot Weight", category, 4, 1, 10, "The loot weight of a Big Key", "config.zss.loot.big_key_weight");
+		smallKeyWeight = config.getInt("[Loot Weight] Small Key Loot Weight", category, 4, 1, 10, "The loot weight of a Small Key", "config.zss.loot.small_key_weight");
+		lockedLootWeight = config.getInt("[Loot Weight] Locked Chest Content Weight", category, 3, 1, 10, "The maximum weight of the contents in a Locked Chest", "config.zss.loot.locked_loot_weight");
+		
 		/*================== DROPS =====================*/
-		grassDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from grass [0-100]", 15).getInt(), 0, 100);
-		jarDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from empty jars when broken [0-100]", 20).getInt(), 0, 100);
-		creeperDrop = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt(), 0, 100);
+		//TODO add to GuiConfig in a later commit
+		category = "drops";
+		
+		grassDropChance = 0.01F * config.getFloat("Grass Loot Drop Chance", category, 15, 0, 100, "Chance (as a percent) of loot dropping from grass (0 to disable)", "");
+		jarDropChance = 0.01F * config.getFloat("Jar Loot Drop Chance", category, 20, 0, 100, "Chance (as a percent) of loot dropping from empty jars when broken (0 to disable)", "");
+		creeperDrop = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for creepers to drop bombs", 10).getInt(), 0, 100);
 		mobConsumableFrequency = MathHelper.clamp_int(config.get("Drops", "Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common]", 5).getInt(), 0, 10);
 		enableOrbDrops = config.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
 		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
@@ -647,10 +707,10 @@ public class Config
 		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
 			if (skill.canDrop()) {
-				int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
+				int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable)", 5).getInt(), 0, 10);
 				orbDropChance.put(skill.getId(), (0.001F * (float) i));
 			}
-			if (skill.isLoot() && config.get("Loot", "[Skill Orbs] Whether " + skill.getDisplayName() + " orbs may appear as random loot, such as in Boss chests", true).getBoolean(true)) {
+			if (skill.isLoot() && config.getBoolean("[Skill Orbs] " + skill.getDisplayName() + " Orbs are Lootable", "loot", true, "Whether " + skill.getDisplayName() + " orbs may appear as random loot, such as in Boss chests", skill.getTranslationString() + ".loot")) {
 				lootableOrbs.add(skill.getId());
 			}
 		}
@@ -659,26 +719,47 @@ public class Config
 		vanillaWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt(), 0, 100);
 		globalWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt(), 0, 500);
 		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
+		
 		/*================== TRADES =====================*/
-		friendTradesRequired = Math.max(config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt(), 3);
-		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
-		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [32-64]", 64).getInt(), 32, 64);
-		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
-		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
-		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-50]", 15).getInt(), 1, 50);
+		category = "trade";
+		
+		friendTradesRequired = config.getInt("Friendship Trade Minimum", category, 6, 3, 100, "Number of unlocked trades required before a villager considers you 'friend' [3+]", "config.zss.trade.friend_trades_required");
+		enableTradeBombBag = config.getBoolean("[Bomb Bag] Barnes Sells Bomb Bags", category, true, "Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", "config.zss.trade.enable_trade_bomb_bag");
+		bombBagPrice = config.getInt("[Bomb Bag] Bomb Bag Cost", category, 64, 32, 64, "Cost of a bomb bag at Barnes' shop (only applied to new trades)", "config.zss.trade.bomb_bag_price");
+		enableTradeBomb = config.getBoolean("[Bombs] Villagers Can Trade Bombs", category, true, "Enable random villager trades for bombs", "config.zss.trade.enable_trade_bomb");
+		enableArrowTrades = config.getBoolean("[Hero's Bow] Can Trade Magic Arrows", category, true, "Whether magic arrows (fire, ice, light) can be purchased", "config.zss.trade.enable_arrow_trades");
+		maskBuyChance = 0.01F * config.getFloat("[Masks] Mask Trade Chance", category, 15, 1, 50, "Chance that a villager will be interested in purchasing a random mask", "config.zss.trade.mask_buy_chance");
+		
 		/*================== MOB SPAWNING =====================*/
-		config.addCustomCategoryComment("Mob Spawns", "Mobs use the 'Biome Type' lists to populate their individual spawn settings the first time the game is loaded.\nChanging the type lists after this point has no effect UNLESS you also delete the mob spawn locations in the\nconfig - this will force them to re-populate the next time the game is loaded.\nAlternatively, you may add new biomes directly to the individual mob spawn entries and completely ignore biome type.");
-		roomSpawnMobChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100]", 25).getInt(), 0, 100);
-		mobVariantChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100]", 20).getInt(), 0, 100);
-		minDaysToSpawnDarknut = 24000 * MathHelper.clamp_int(config.get("Mob Spawns", "Minimum number of days required to pass before Darknuts may spawn [0-30]", 7).getInt(), 0, 30);
-		minDaysToSpawnWizzrobe = 24000 * MathHelper.clamp_int(config.get("Mob Spawns", "Minimum number of days required to pass before Wizzrobes may spawn [0-30]", 7).getInt(), 0, 30);
+		category = "mob spawns";
+		
+		config.addCustomCategoryComment(category, "Mobs use the 'Biome Type' lists to populate their individual spawn settings the first time the game is loaded.\nChanging the type lists after this point has no effect UNLESS you also delete the mob spawn locations in the\nconfig - this will force them to re-populate the next time the game is loaded.\nAlternatively, you may add new biomes directly to the individual mob spawn entries and completely ignore biome type.");
+		
+		roomSpawnMobChance = 0.01F * config.getFloat("Mob Secret Room Spawn Chance", category, 25, 0, 100, "Chance that a random mob will spawn inside of secret rooms (0 to disable)", "config.zss.mob_spawns.room_spawn_mob_chance");
+		mobVariantChance = 0.01F * config.getFloat("Mob Variant Secret Room Chance", category, 20, 0, 100, "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType", "config.zss.mob_spawns.mob_variant_chance");
+		minDaysToSpawnDarknut = 24000 * config.getInt("Darknut Grace Period", category, 7, 0, 30, "Minimum number of days required to pass before Darknuts may spawn", "config.zss.mob_spawns.min_days_to_spawn_darknut");
+		minDaysToSpawnWizzrobe = 24000 * config.getInt("Wizzrode Grace Period", category, 7, 0, 30, "Minimum number of days required to pass before Wizzrobes may spawn", "config.zss.mob_spawns.min_days_to_spawn_wizzrobe");
+		
 		/*================== MAP MAKING =====================*/
 		config.addCustomCategoryComment("map making", "Configuration settings related to map making; none of these have any impact on normal play.");
-
-		config.save();
+		
+		/*==========================================================*/
+		/*
+		/*END PROPERTY INITS
+		/*
+		/*==========================================================*/
+		if (config.hasChanged()) {
+			config.save();
+		}
 	}
 
-	public static void postInit() {
+	public static void postInit(){
+		/*
+		 * This method should only be called from the postInit phase of startup. Any changes made to the following
+		 * would warrant a Minecraft restart to take into effect. Also, when the GuiConfig is refreshed, these should not be called,
+		 * so as to not cause any registry errors. #postPropInit() allows for property refresh from the GuiConfig without bumping into any
+		 * the previously listed problems
+		 */
 		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
 		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
 		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
@@ -688,7 +769,12 @@ public class Config
 		BiomeType.postInit(config);
 		BossType.postInit(config);
 		ZSSEntities.postInit(config);
+		postPropInit();
+	}
+	
+	public static void postPropInit() {
 		/*================== SONGS =====================*/
+		//TODO add to GuiConfig
 		minSongIntervalStorm = MathHelper.clamp_int(config.get("Songs", "[Song of Storms] Time required between each use of the song (by anybody) [0-24000]", 600).getInt(), 0, 24000);
 		minSongIntervalSun = MathHelper.clamp_int(config.get("Songs", "[Sun's Song] Time required between each use of the song (by anybody) [0-24000]", 1200).getInt(), 0, 24000);
 		for (AbstractZeldaSong song : ZeldaSongs.getRegisteredSongs()) {
@@ -697,6 +783,7 @@ public class Config
 			}
 		}
 		/*================== MAP MAKING =====================*/
+		//TODO coming soon to GuiConfig
 		String[] warp_locations = config.get("map making", Config.WARP_LOCATIONS_KEY, new String[0]).getStringList();
 		for (String entry : warp_locations) {
 			String[] split = entry.split(":");
@@ -899,9 +986,8 @@ public class Config
 			}
 			Config.saveDefaultWarpPoints();
 			return previous;
-		} else {
-			ZSSMain.logger.warn("Attempted to set default warp point for non-warp song: " + song.getDisplayName());
 		}
+		ZSSMain.logger.warn("Attempted to set default warp point for non-warp song: " + song.getDisplayName());
 		return null;
 	}
 

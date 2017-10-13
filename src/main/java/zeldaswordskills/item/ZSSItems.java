@@ -321,21 +321,22 @@ public class ZSSItems
 	 */
 	public static void initConfig(Configuration config) {
 		/*================== GRASS DROPS =====================*/
-		enableGrassArrowDrop = config.get("Drops", "Enable arrow drops from grass (must use sword)", true).getBoolean(true);
-		enableGrassBombDrop = config.get("Drops", "Enable bomb drops from grass (must use sword)", false).getBoolean(false);
-		enableGrassEmeraldDrop = config.get("Drops", "Enable emerald drops from grass (must use sword)", true).getBoolean(true);
+		//TODO add keys when Drops is added to ConfigGui
+		enableGrassArrowDrop = config.getBoolean("Grass Can Drop Arrows", "drops", true, "Enable arrow drops from grass (must use sword)", "config.zss.drops.enable_grass_arrow_drop");
+		enableGrassBombDrop = config.getBoolean("Grass Can Drop Bombs", "drops", false, "Enable bomb drops from grass (must use sword)", "config.zss.drops.enable_grass_bomb_drop");
+		enableGrassEmeraldDrop = config.getBoolean("Bombs Can Drop Emeralds", "drops", true, "Enable emerald drops from grass (must use sword)", "config.zss.drops.enable_grass_emerald_drop");
 
 		/*================== LOOT IN VANILLA CHESTS =====================*/
-		enableBombLoot = config.get("Loot", "Enable bombs in vanilla chests", false).getBoolean(false);
-		enableBombBagLoot = config.get("Loot", "Enable bomb bags in vanilla chests", false).getBoolean(false);
-		enableHeartLoot = config.get("Loot", "Enable heart pieces in vanilla chests", false).getBoolean(false);
+		enableBombLoot = config.getBoolean("Bombs in Chests", "loot", false, "Enable bombs in vanilla chests", "config.zss.loot.enable_bomb_loot");
+		enableBombBagLoot = config.getBoolean("Bomb Bags in Chests", "loot", false, "Enable bomb bags in vanilla chests", "config.zss.loot.enable_bomb_bag_loot");
+		enableHeartLoot = config.getBoolean("Heart Pieces in Chests", "loot", false, "Enable heart pieces in vanilla chests", "config.zss.loot.enable_heart_loot");
 
 		/*================== RECIPES =====================*/
-		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
-		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
-		enableCraftingHookshot = config.get("Recipes", "Enable application of hookshot upgrades via crafting", false).getBoolean(false);
-		enableCraftingMudora = config.get("Recipes", "Enable crafting recipe to make copies of the Book of Mudora", true).getBoolean(true);
-		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
+		allowGoldSmelting = config.getBoolean("Can Smelt Pigmen Swords", "recipes", false, "Smelt all those disarmed pigmen swords into gold ingots", "config.zss.recipes.allow_gold_smelting");
+		enableCraftingHammer = config.getBoolean("Can Craft the Wooden Hammer", "recipes", true, "Enable crafting of the Wooden Hammer used to bypass wooden pegs", "config.zss.recipes.enable_crafting_hammer");
+		enableCraftingHookshot = config.getBoolean("Can Craft Hookshot Upgrades", "recipes", false, "Enable application of hookshot upgrades via crafting", "config.zss.recipes.enable_crafting_hookshot");
+		enableCraftingMudora = config.getBoolean("Can Copy Book of Mudora by Crafting", "recipes", true, "Enable crafting recipe to make copies of the Book of Mudora", "config.zss.recipes.enable_crafting_mudora");
+		enableCraftingThrowingRock = config.getBoolean("Can Craft Throwing Rocks", "recipes", false, "Enable crafting throwing rocks from cobblestone and back", "config.zss.recipes.enable_crafting_throwing_rock");
 	}
 
 	/**

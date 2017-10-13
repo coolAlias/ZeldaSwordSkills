@@ -49,7 +49,7 @@ public enum BiomeType {
 	TAIGA("taiga", "Taiga", "Taiga Hills", "Mega Taiga", "Mega Taiga Hills");
 
 	private final String unlocalizedName;
-
+	
 	/** Default biomes for this type */
 	public final String[] defaultBiomes;
 
@@ -63,15 +63,23 @@ public enum BiomeType {
 
 	@Override
 	public String toString() {
-		return StatCollector.translateToLocal("biometype.zss" + unlocalizedName + ".name");
+		return StatCollector.translateToLocal(this.getLangKey());
 	}
-
+	
+	public String getLangKey(){
+		return "biometype.zss." + unlocalizedName + ".name";
+	}
+	
+	public String getCapName(){
+		return String.valueOf(this.unlocalizedName.charAt(0)).toUpperCase() + this.unlocalizedName.substring(1);
+	}
+	
 	/**
 	 * Loads biome type lists from config file
 	 */
 	public static void postInit(Configuration config) {
 		for (BiomeType type : BiomeType.values()) {
-			addBiomes(type, config.get("Mob Spawns", String.format("[Biome Types] List of %s type biomes - certain mobs spawn differently depending on the biome type", type.toString()), type.defaultBiomes).getStringList());
+			addBiomes(type, config.getStringList("[Biome Types] " + type.getCapName() + " Biomes", "mob spawns", type.defaultBiomes, "List of " + type.name() + " type biomes - certain mobs spawn differently depending on the biome type", (String[]) null, type.getLangKey()));
 		}
 	}
 

@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -64,7 +65,7 @@ import zeldaswordskills.world.gen.feature.WorldGenJars;
  *
  */
 @Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VERSION, updateJSON = ModInfo.VERSION_LIST
-	, guiFactory = "zeldaswordskills.client.GuiFactoryZeldaSwordSkills")
+	, guiFactory = ModInfo.FACTORY_PATH)
 public class ZSSMain
 {
 	@Mod.Instance(ModInfo.ID)
@@ -99,6 +100,7 @@ public class ZSSMain
 	public void load(FMLInitializationEvent event) {
 		proxy.init();
 		ZSSItems.init();
+		MinecraftForge.EVENT_BUS.register(instance);
 		MinecraftForge.EVENT_BUS.register(new ZSSCombatEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSEntityEvents());
 		MinecraftForge.EVENT_BUS.register(new ZSSItemEvents());
@@ -142,9 +144,9 @@ public class ZSSMain
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event){
 		if(event.modID.equals(ModInfo.ID)){
-			if(Config.config.hasChanged()){
-				Config.config.save();
-			}
+			Config.init();
+			//Has no effect yet
+			Config.postPropInit();
 		}
 	}
 }

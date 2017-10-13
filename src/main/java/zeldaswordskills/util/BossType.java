@@ -63,13 +63,13 @@ import zeldaswordskills.world.crisis.SwampBattle;
  */
 public enum BossType implements IStringSerializable
 {
-	HELL("temple_fire", 0, FireBattle.class, EntityBlaze.class, 7, ZeldaSongs.songWarpFire, "hell"),
-	DESERT("temple_desert", 1, DesertBattle.class, EntityBlaze.class, 1, ZeldaSongs.songWarpSpirit, "desert", "deserthills"),
-	FOREST("temple_forest", 2, ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
-	TAIGA("temple_ice", 3, BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
-	OCEAN("temple_water", 4, OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
-	SWAMP("temple_wind", 5, SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
-	MOUNTAIN("temple_earth", 6, EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
+	HELL("temple_fire", "Fire Temple", 0, FireBattle.class, EntityBlaze.class, 7, ZeldaSongs.songWarpFire, "hell"),
+	DESERT("temple_desert", "Desert Temple", 1, DesertBattle.class, EntityBlaze.class, 1, ZeldaSongs.songWarpSpirit, "desert", "deserthills"),
+	FOREST("temple_forest", "Forest Temple", 2, ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
+	TAIGA("temple_ice", "Ice Temple", 3, BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
+	OCEAN("temple_water", "Water Temple", 4, OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
+	SWAMP("temple_wind", "Wind Temple", 5, SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
+	MOUNTAIN("temple_earth", "Earth Temple", 6, EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");
 	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
 	// need to set their target and aggravation state so they attack automatically
@@ -77,6 +77,8 @@ public enum BossType implements IStringSerializable
 	/** Name that can be used to retrieve the BossType from {@link #getBossType(String)} */
 	private final String unlocalizedName;
 
+	private final String title;
+	
 	/** Default biomes in which this dungeon can generate */
 	private final String[] defaultBiomes;
 
@@ -101,8 +103,9 @@ public enum BossType implements IStringSerializable
 	/** Mapping of biome names to boss types */
 	private static final Map<String, BossType> bossBiomeList = new HashMap<String, BossType>();
 
-	private BossType(String name, int doorKeyMeta, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, AbstractZeldaSong warpSong, String... defaultBiomes) {
+	private BossType(String name, String title, int doorKeyMeta, Class<? extends BossBattle> bossBattle, Class<? extends IMob> bossMob, int meta, AbstractZeldaSong warpSong, String... defaultBiomes) {
 		this.unlocalizedName = name;
+		this.title = title;
 		this.doorKeyMeta = doorKeyMeta;
 		this.defaultBiomes = defaultBiomes;
 		this.bossBattle = bossBattle;
@@ -123,7 +126,11 @@ public enum BossType implements IStringSerializable
 
 	/** Returns the translated name */
 	public String getDisplayName() {
-		return StatCollector.translateToLocal("dungeon.zss." + unlocalizedName + ".name");
+		return StatCollector.translateToLocal(this.getLangKey());
+	}
+
+	public String getLangKey(){
+		return "dungeon.zss." + unlocalizedName + ".name";
 	}
 
 	@Override
@@ -135,8 +142,9 @@ public enum BossType implements IStringSerializable
 	 * Loads biome lists from config file during post initialization
 	 */
 	public static void postInit(Configuration config) {
+		String category = "dungeon generation";
 		for (BossType type : BossType.values()) {
-			addBiomes(type, config.get("Dungeon Generation", String.format("[Boss Dungeon] List of biomes in which %ss can generate", type.getDisplayName()), type.defaultBiomes).getStringList());
+			addBiomes(type, config.getStringList("[Boss Dungeon] " + type.title + " Dungeon Biomes", category, type.defaultBiomes, "[Boss Dungeon] List of biomes in which " + type.title + "s can generate", (String[]) null, type.getLangKey()));
 		}
 	}
 
