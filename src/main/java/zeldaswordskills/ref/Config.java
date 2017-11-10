@@ -115,7 +115,7 @@ public class Config
 	/*=================== COMBO HUD ===================*/
 	public static boolean isComboHudEnabled;
 	/** [Combo HUD] Number of combo hits to display */
-	private static int hitsToDisplay;
+	public static int hitsToDisplay;
 	/** [Combo HUD][Alignment: Horizontal] Alignment on the X axis [left|center|right] */
 	public static HALIGN comboHudHAlign;
 	/** [Combo HUD][Alignment: Vertical] Alignment on the Y axis [top|center|bottom] */
@@ -655,6 +655,7 @@ public class Config
 		disableStructureGen = config.getBoolean("[No-Gen] Disable Dungeon Generation", category, false, "Disable structure and feature generation entirely within a specified zone", "config.zss.dun_gen.disable_structure_gen");
 		noGenX = config.getInt("[No-Gen] Structure Gen X Limit", category, 0, -1875000, 1875000, "Starting chunk coordinate X for the structure free zone", "config.zss.dun_gen.no_gen_x");
 		noGenZ = config.getInt("[No-Gen] Structure Gen Z Limit", category, 0, -1875000, 1875000, "Starting chunk coordinate Z for the structure free zone", "config.zss.dun_gen.no_gen_z");
+		
 		/*================== WORLD GEN =====================*/
 		category = "world generation";
 		
@@ -743,11 +744,6 @@ public class Config
 		/*================== MAP MAKING =====================*/
 		config.addCustomCategoryComment("map making", "Configuration settings related to map making; none of these have any impact on normal play.");
 		
-		/*==========================================================*/
-		/*
-		/*END PROPERTY INITS
-		/*
-		/*==========================================================*/
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -773,6 +769,7 @@ public class Config
 	}
 	
 	public static void postPropInit() {
+		
 		/*================== SONGS =====================*/
 		//TODO add to GuiConfig
 		minSongIntervalStorm = MathHelper.clamp_int(config.get("Songs", "[Song of Storms] Time required between each use of the song (by anybody) [0-24000]", 600).getInt(), 0, 24000);
@@ -783,7 +780,6 @@ public class Config
 			}
 		}
 		/*================== MAP MAKING =====================*/
-		//TODO coming soon to GuiConfig
 		String[] warp_locations = config.get("map making", Config.WARP_LOCATIONS_KEY, new String[0]).getStringList();
 		for (String entry : warp_locations) {
 			String[] split = entry.split(":");

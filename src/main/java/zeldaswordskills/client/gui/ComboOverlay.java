@@ -41,7 +41,7 @@ import zeldaswordskills.skills.SkillBase;
 public class ComboOverlay extends AbstractGuiOverlay
 {
 	/** Combo to display will update as combo updates, should fade after some time */
-	private Combo combo = null;
+	protected Combo combo = null;
 
 	/** Current combo descriptors */
 	private String label, comboSize, comboDamage;
@@ -50,7 +50,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 	private int lastComboSize = 0;
 
 	/** Time at which the current combo first started displaying */
-	private long displayStartTime;
+	protected long displayStartTime;
 
 	/** Length of time combo pop-up will display */
 	private static final long DISPLAY_TIME = 5000;
