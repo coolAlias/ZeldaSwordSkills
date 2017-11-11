@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -41,7 +42,10 @@ import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
 import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.client.gui.GuiMagicMeter;
+import zeldaswordskills.client.gui.GuiMagicMeterText;
 import zeldaswordskills.client.gui.IGuiOverlay;
+import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
+import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.ref.Config;
@@ -77,7 +81,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		//TODO perhaps draw a hotbar and experience bar above all these to prevent them from rendering in that space
 		FakeGuiMagicMeter magicMeterDummy = new FakeGuiMagicMeter(mc);
 		overlays.add(magicMeterDummy);
-		//overlays.add(new FakeMagicMeterText(mc, magicMeterDummy));
+		overlays.add(new FakeGuiMagicMeterText(mc, magicMeterDummy));
 		overlays.add(new FakeGuiBuffBar(mc));
 		//overlays.add(new FakeGuiItemModeOverlay(mc));
 		overlays.add(new FakeComboOverlay(mc));
@@ -389,7 +393,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		}
 	}
 	
-	private final class FakeGuiMagicMeterText extends GuiMagicMeter implements IOverlayButton{
+	private final class FakeGuiMagicMeterText extends GuiMagicMeterText implements IOverlayButton{
 
 		private final String CATEGORY = "magic meter";
 		
@@ -398,22 +402,56 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		private final Property magicMeterOffsetX = Config.config.get(CATEGORY, "Magic Meter Horizontal Offset", 47);
 		private final Property magicMeterOffsetY = Config.config.get(CATEGORY, "Magic Meter Vertical Offset", -40);
 		
-		public FakeGuiMagicMeterText(Minecraft mc) {
-			super(mc);
+		public FakeGuiMagicMeterText(Minecraft mc, FakeGuiMagicMeter meter) {
+			super(mc, meter);
+		}
+		
+		@Override
+		public boolean shouldRender(){return Config.isMagicMeterTextEnabled;}
+		
+		@Override
+		protected void setup(ScaledResolution resolution){
+			int current = MathHelper.floor_float(this.meter.getNumIncrements() <= 1 ? 1 : this.meter.getNumIncrements() >= 10 ? 10 : ((this.meter.getNumIncrements() - 1) / this.meter.getNumIncrements())) * Config.getMaxMagicPoints();
+			this.text = StatCollector.translateToLocalFormatted("gui.zss.magic_meter.text", (int) Math.ceil(Config.getMaxMagicPoints()), (int) Math.ceil(Config.getMaxMagicPoints()));
+			this.width = this.mc.fontRendererObj.getStringWidth(this.text);
+			this.height = this.mc.fontRendererObj.FONT_HEIGHT - DEFAULT_PADDING; // font height seems to include some empty space - remove it
+			if (Config.isMagicMeterEnabled) {
+				this.x = (this.getHorizontalAlignment() == HALIGN.LEFT ? this.meter.getLeft() + GuiMagicMeter.PADDING : this.meter.getRight() - this.width - GuiMagicMeter.PADDING);
+				if (Config.isMagicMeterHorizontal && Config.magicMeterOffsetX == 0 && this.getHorizontalAlignment() == HALIGN.CENTER) {
+					this.x += (this.width / 2) - (this.meter.getWidth() / 2); // perfectly centered
+				}
+				this.y = (this.getVerticalAlignment() == VALIGN.BOTTOM ? this.meter.getTop() - this.mc.fontRendererObj.FONT_HEIGHT : this.meter.getBottom() + GuiMagicMeter.PADDING);
+			} else {
+				this.setPosX(resolution, Config.magicMeterOffsetX);
+				this.setPosY(resolution, Config.magicMeterOffsetY);
+			}
+		}
+		
+		@Override
+		protected void render(ScaledResolution resolution){
+			this.mc.fontRendererObj.drawString(this.text, this.getLeft(), this.getTop(), 0xFFFFFF, true);
 		}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {return false;}
+		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive){
+			if(this.renderOverlay(res, rendered)){
+				if(isActive){
+					this.renderInfoPanel();
+					this.renderOverlayBorder();
+				}
+				return true;
+			}else return false;
+		}
 
 		@Override
 		public void renderInfoPanel() {/*TODO Unsupported*/}
 
 		@Override
 		public void renderOverlayBorder() {
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0);
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0);
-			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0);
-			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0);
+			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0xFF000000);
+			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0xFF000000);
+			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0xFF000000);
+			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0xFF000000);
 		}
 
 		@Override
