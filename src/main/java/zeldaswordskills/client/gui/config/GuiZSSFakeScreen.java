@@ -636,10 +636,60 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		}
 		
 		@Override
-		public void handleAlignment(int keyCode) {}
+		public void handleAlignment(int keyCode) {
+			switch(keyCode){
+				case Keyboard.KEY_UP:
+					Config.itemModeVAlign = Config.itemModeVAlign.equals(VALIGN.TOP) ? VALIGN.BOTTOM : Config.itemModeVAlign.equals(VALIGN.BOTTOM) ? VALIGN.CENTER : VALIGN.TOP;
+					Config.itemModeOffsetY = itemModeOffsetY.setValue(0).getInt();
+					itemModeVAlign.set(Config.itemModeVAlign.toString());
+					break;
+				case Keyboard.KEY_DOWN:
+					Config.itemModeVAlign = Config.itemModeVAlign.equals(VALIGN.TOP) ? VALIGN.CENTER : Config.itemModeVAlign.equals(VALIGN.CENTER) ? VALIGN.BOTTOM : VALIGN.TOP;
+					Config.itemModeOffsetY = itemModeOffsetY.setValue(0).getInt();
+					itemModeVAlign.set(Config.itemModeVAlign.toString());
+					break;
+				case Keyboard.KEY_LEFT:
+					Config.itemModeHAlign = Config.itemModeHAlign.equals(HALIGN.LEFT) ? HALIGN.RIGHT : Config.itemModeHAlign.equals(HALIGN.RIGHT) ? HALIGN.CENTER : HALIGN.LEFT;
+					Config.itemModeOffsetX = itemModeOffsetX.setValue(0).getInt();
+					itemModeHAlign.set(Config.itemModeHAlign.toString());
+					break;
+				case Keyboard.KEY_RIGHT:
+					Config.itemModeHAlign = Config.itemModeHAlign.equals(HALIGN.LEFT) ? HALIGN.CENTER : Config.itemModeHAlign.equals(HALIGN.CENTER) ? HALIGN.RIGHT : HALIGN.LEFT;
+					Config.itemModeOffsetX = itemModeOffsetX.setValue(0).getInt();
+					itemModeHAlign.set(Config.itemModeHAlign.toString());
+					break;
+			}
+		}
 
 		@Override
-		public void handleOffset(int keyCode) {}
+		public void handleOffset(int keyCode) {
+			switch(keyCode){
+				case Keyboard.KEY_W:
+					if(Math.abs(Config.itemModeOffsetY) < mc.currentScreen.height / 4 && this.getTop() > 0){
+						Config.itemModeOffsetY -= 1;
+						itemModeOffsetY.set(Config.itemModeOffsetY);
+					}
+					break;
+				case Keyboard.KEY_S:
+					if(Math.abs(Config.itemModeOffsetY) < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
+						Config.itemModeOffsetY += 1;
+						itemModeOffsetY.set(Config.itemModeOffsetY);
+					}
+					break;
+				case Keyboard.KEY_A:
+					if(Math.abs(Config.itemModeOffsetX) < mc.currentScreen.width / 4 && this.getLeft() > 0){
+						Config.itemModeOffsetX -= 1;
+						itemModeOffsetX.set(Config.itemModeOffsetX);
+					}
+					break;
+				case Keyboard.KEY_D:
+					if(Math.abs(Config.itemModeOffsetX) < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
+						Config.itemModeOffsetX += 1;
+						itemModeOffsetX.set(Config.itemModeOffsetX);
+					}
+					break;
+			}
+		}
 	}
 	
 	private final class FakeComboOverlay extends ComboOverlay implements IOverlayButton{
