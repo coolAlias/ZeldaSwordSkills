@@ -29,11 +29,13 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
+import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
@@ -73,8 +75,8 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		this.mc = Minecraft.getMinecraft();
 
 		//TODO perhaps draw a hotbar and experience bar above all these to prevent them from rendering in that space
-		//FakeGuiMagicMeter magicMeterDummy = new FakeGuiMagicMeter(mc);
-		//overlays.add(magicMeterDummy);
+		FakeGuiMagicMeter magicMeterDummy = new FakeGuiMagicMeter(mc);
+		overlays.add(magicMeterDummy);
 		//overlays.add(new FakeMagicMeterText(mc, magicMeterDummy));
 		overlays.add(new FakeGuiBuffBar(mc));
 		//overlays.add(new FakeGuiItemModeOverlay(mc));
@@ -188,6 +190,64 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public boolean shouldRender(){return Config.isMagicMeterEnabled;}
 
 		@Override
+		protected void setup(ScaledResolution resolution){
+			this.inner_bar = MathHelper.clamp_int(MathHelper.floor_float((Config.getMaxMagicPoints() / 50) * getIncrementLength()), MathHelper.floor_float(getIncrementLength()), getMaxWidth());
+			if (Config.isMagicMeterHorizontal) {
+				this.width = getMaxWidth();
+				this.height = METER_HEIGHT;
+				int offsetX = Config.magicMeterOffsetX;
+				if (this.getHorizontalAlignment() == HALIGN.RIGHT) {
+					offsetX += (getMaxWidth() - this.inner_bar - 6);
+				} else if (this.getHorizontalAlignment() == HALIGN.CENTER) {
+					if (offsetX == 0) {
+						this.width = this.inner_bar + 6;
+					} else if (!Config.isMagicBarLeft) {
+						offsetX += (getMaxWidth() - this.inner_bar - 6);
+					}
+				}
+				this.setPosX(resolution, offsetX);
+				this.setPosY(resolution, Config.magicMeterOffsetY);
+				this.width = this.inner_bar + 6;
+			} else {
+				this.width = METER_HEIGHT;
+				this.height = getMaxWidth();
+				int offsetY = Config.magicMeterOffsetY;
+				if (this.getVerticalAlignment() == VALIGN.BOTTOM) {
+					offsetY += (getMaxWidth() - this.inner_bar - 6);
+				} else if (this.getVerticalAlignment() == VALIGN.CENTER) {
+					this.height = this.inner_bar + 6;
+				}
+				this.setPosX(resolution, Config.magicMeterOffsetX);
+				this.setPosY(resolution, offsetY);
+				this.height = this.inner_bar + 6;
+			}
+		}
+		
+		@Override
+		protected void render(ScaledResolution resolution){//
+			int xPos = this.getLeft();
+			int yPos = this.getTop();
+			int current = MathHelper.floor_float(((getNumIncrements() <= 1 ? 1 : getNumIncrements() > 10 ? 10 : (float)(getNumIncrements() - 1) / (float)getNumIncrements())) * this.inner_bar);//For Robijnvogel ;)
+			GlStateManager.pushAttrib();
+			GlStateManager.disableLighting();
+			GlStateManager.enableAlpha();
+			GlStateManager.enableBlend();
+			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			if (Config.isMagicMeterHorizontal) {
+				this.mc.getTextureManager().bindTexture(HORIZONTAL_BAR);
+				RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, 3 + this.inner_bar, METER_HEIGHT, 106, 12);
+				RenderHelperQ.drawTexturedRect(xPos + 3 + this.inner_bar, yPos, 103, 0, 3, METER_HEIGHT, 106, 12);
+				RenderHelperQ.drawTexturedRect(xPos + 3 + (Config.isMagicBarLeft ? 0 : this.inner_bar - current), yPos + 3, 0, METER_HEIGHT, current, 3, 106, 12);
+			} else {
+				this.mc.getTextureManager().bindTexture(VERTICAL_BAR);
+				RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, METER_HEIGHT, 3 + this.inner_bar, 12, 106);
+				RenderHelperQ.drawTexturedRect(xPos, yPos + 3 + this.inner_bar, 0, 103, METER_HEIGHT, 3, 12, 106);
+				RenderHelperQ.drawTexturedRect(xPos + 3, yPos + 3 + (Config.isMagicBarLeft ? (this.inner_bar - current) : 0), METER_HEIGHT, 0, 3, current, 12, 106);
+			}
+			GlStateManager.popAttrib();
+		}
+		
+		@Override
 		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive){
 			if(this.renderOverlay(res, rendered)){
 				if(isActive){
@@ -226,24 +286,28 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 				case Keyboard.KEY_LBRACKET:
 					if(Config.magicMeterIncrements > 1){
 						Config.magicMeterIncrements -= 1;
+						this.setNumIncrements(Config.magicMeterIncrements);
 						magicMeterIncrements.set(Config.magicMeterIncrements);
 					}
 					break;
 				case Keyboard.KEY_RBRACKET:
 					if(Config.magicMeterIncrements < 10){
 						Config.magicMeterIncrements += 1;
+						this.setNumIncrements(Config.magicMeterIncrements);
 						magicMeterIncrements.set(Config.magicMeterIncrements);
 					}
 					break;
 				case Keyboard.KEY_ADD:
 					if(Config.magicMeterWidth < 100){
 						Config.magicMeterWidth += 1;
+						this.setMaxWidth(Config.magicMeterWidth);
 						magicMeterWidth.set(Config.magicMeterWidth);
 					}
 					break;
 				case Keyboard.KEY_SUBTRACT:
 					if(Config.magicMeterWidth > 25){
 						Config.magicMeterWidth -= 1;
+						this.setMaxWidth(Config.magicMeterWidth);
 						magicMeterWidth.set(Config.magicMeterWidth);
 					}
 					break;
@@ -263,7 +327,9 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 			Config.isMagicMeterHorizontal = isMagicMeterHorizontal.setToDefault().getBoolean();
 			Config.isMagicBarLeft = isMagicMeterHorizontal.setToDefault().getBoolean();
 			Config.magicMeterWidth = magicMeterWidth.setToDefault().getInt();
+			this.setMaxWidth(Config.magicMeterWidth);
 			Config.magicMeterIncrements = magicMeterIncrements.setToDefault().getInt();
+			this.setNumIncrements(Config.magicMeterIncrements);
 		}
 
 		@Override
@@ -281,7 +347,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 					break;
 				case Keyboard.KEY_UP:
 					Config.magicMeterVAlign = Config.magicMeterVAlign.equals(VALIGN.TOP) ? VALIGN.BOTTOM : Config.magicMeterVAlign.equals(VALIGN.BOTTOM) ? VALIGN.CENTER : VALIGN.TOP;
-					Config.magicMeterOffsetY = magicMeterOffsetY.setToDefault().getInt();
+					Config.magicMeterOffsetY = magicMeterOffsetY.setValue(0).getInt();
 					magicMeterVAlign.set(Config.magicMeterVAlign.toString());
 					break;
 				case Keyboard.KEY_DOWN:

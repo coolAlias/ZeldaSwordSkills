@@ -34,8 +34,8 @@ import zeldaswordskills.ref.ModInfo;
 @SideOnly(Side.CLIENT)
 public class GuiMagicMeter extends AbstractGuiOverlay
 {
-	private static final ResourceLocation HORIZONTAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_horizontal.png");
-	private static final ResourceLocation VERTICAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_vertical.png");
+	protected static final ResourceLocation HORIZONTAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_horizontal.png");
+	protected static final ResourceLocation VERTICAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_vertical.png");
 	public static final int PADDING = 1;
 	public static final int METER_HEIGHT = 9;
 	private static int NUM_INCREMENTS = 2;
@@ -43,7 +43,7 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 	private static float INCREMENT;
 	private ZSSPlayerInfo info;
 	/** The width (or height if vertical) of the inner portion of the mana bar */
-	private int inner_bar;
+	protected int inner_bar;
 
 	/**
 	 * Call this method if Config settings change while in game.
@@ -54,7 +54,9 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 		MAX_WIDTH = MathHelper.clamp_int(value, 25, 100);
 		INCREMENT = (float) MAX_WIDTH / (float) NUM_INCREMENTS;
 	}
-
+	
+	public static int getMaxWidth(){return MAX_WIDTH;}
+	
 	/**
 	 * Call this method if Config settings change while in game.
 	 * Sets the number of increments required to max out the magic meter.
@@ -64,6 +66,10 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 		NUM_INCREMENTS = MathHelper.clamp_int(value, 1, 10);
 		INCREMENT = (float) MAX_WIDTH / (float) NUM_INCREMENTS;
 	}
+
+	public static int getNumIncrements(){return NUM_INCREMENTS;}
+	
+	public static float getIncrementLength(){return INCREMENT;}
 
 	public GuiMagicMeter(Minecraft mc) {
 		super(mc);
