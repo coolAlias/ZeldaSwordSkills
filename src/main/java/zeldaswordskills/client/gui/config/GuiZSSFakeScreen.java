@@ -109,6 +109,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		this.drawModalRectWithCustomSizedTexture(0, 0, 0.0F, 0.0F, mc.currentScreen.width, mc.currentScreen.height, mc.currentScreen.width, mc.currentScreen.height);
 		
 		//Render the overlays
+		GlStateManager.enableAlpha();
 		ScaledResolution res = new ScaledResolution(this.mc);
 		List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
 		for(IOverlayButton overlay : this.overlays){
