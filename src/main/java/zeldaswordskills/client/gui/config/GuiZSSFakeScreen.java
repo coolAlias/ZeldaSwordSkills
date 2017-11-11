@@ -47,7 +47,13 @@ import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.SkillBase;
 
-
+/**
+ * This screen provides dummy versions of Zelda Sword Skills' in-game overlays that can be edited with this
+ * interface. The keys for controlling the interfaces are relatively the same; WASD controls integer offset
+ * for any overlay, and the arrow keys control {@code HALIGN} and {@code VALIGN}.
+ * 
+ * @author Spitfyre03
+ */
 public final class GuiZSSFakeScreen extends GuiScreen{
 	
 	protected int previousWidth = 0;
@@ -102,11 +108,6 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		this.mc.getTextureManager().bindTexture(ZSS_FAKE_GUI);
 		this.drawModalRectWithCustomSizedTexture(0, 0, 0.0F, 0.0F, mc.currentScreen.width, mc.currentScreen.height, mc.currentScreen.width, mc.currentScreen.height);
 		
-		//Currently used for pointer tracking and precise placement of buttons and other elements TODO remove for build
-		this.drawHorizontalLine(0, this.width, mouseY, 0xFFFF0000);
-		this.drawVerticalLine(mouseX, 0, this.height, 0xFFFF0000);
-		this.drawString(fontRendererObj, "(" + mouseX + "," + mouseY + ")", mouseX + 3, mouseY + 3, 0xFFFFFFFF);
-		
 		//Render the overlays
 		ScaledResolution res = new ScaledResolution(this.mc);
 		List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
@@ -116,11 +117,6 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 			}
 		}
 		rendered.clear();
-		
-		//TODO draw the panel
-		/*if(this.panel.isOpen){
-			this.panel.drawScreen(mouseX, mouseY, partialTicks);
-		}*/
 		
 		//Draws the Done button
 		super.drawScreen(mouseX, mouseY, partialTicks);

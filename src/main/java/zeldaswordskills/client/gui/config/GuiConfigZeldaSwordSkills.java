@@ -45,8 +45,6 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 	
 	private GuiButtonExt fakeScreen;
 	
-	//private ZSSConfigEntries entriesList;
-	
 	public GuiConfigZeldaSwordSkills(GuiScreen parentScreen){
 		super(parentScreen, getElements(), ModInfo.ID, GuiConfig.getAbridgedConfigPath(Config.config.toString()), false, false, I18n.format("config.zss.parent.title"));
 		fakeScreen = new GuiButtonExt(26, 0, 50, 300, 18, "Overlay Customizer");//TODO add lang key
@@ -60,13 +58,8 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks){
-		this.fakeScreen.xPosition = this.entryList.width / 2 - 150;
+		this.fakeScreen.xPosition = this.entryList.width / 2 - fakeScreen.width / 2;
 		super.drawScreen(mouseX, mouseY, partialTicks);
-		
-		//TODO remove for build
-		this.drawHorizontalLine(0, this.width, mouseY, 0xFFFF0000);
-		this.drawVerticalLine(mouseX, 0, this.height, 0xFFFF0000);
-		this.drawString(fontRendererObj, "(" + mouseX + "," + mouseY + ")", mouseX + 3, mouseY + 3, 0xFFFFFF00);
 	}
 	
 	@Override
