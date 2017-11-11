@@ -366,25 +366,25 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public void handleOffset(int keyCode) {
 			switch(keyCode){
 				case Keyboard.KEY_W:
-					if(Math.abs(Config.magicMeterOffsetY) < mc.currentScreen.height / 4 && this.getTop() > 0){
+					if(-(Config.magicMeterOffsetY - 1) < mc.currentScreen.height / 4 && this.getTop() > 0){
 						Config.magicMeterOffsetY -= 1;
 						magicMeterOffsetY.set(Config.magicMeterOffsetY);
 					}
 					break;
 				case Keyboard.KEY_S:
-					if(Math.abs(Config.magicMeterOffsetY) < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
+					if(Config.magicMeterOffsetY + 1 < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
 						Config.magicMeterOffsetY += 1;
 						magicMeterOffsetY.set(Config.magicMeterOffsetY);
 					}
 					break;
 				case Keyboard.KEY_A:
-					if(Math.abs(Config.magicMeterOffsetX) < mc.currentScreen.width / 4 && this.getLeft() > 0){
+					if(-(Config.magicMeterOffsetX - 1) < mc.currentScreen.width / 4 && this.getLeft() > 0){
 						Config.magicMeterOffsetX -= 1;
 						magicMeterOffsetX.set(Config.magicMeterOffsetX);
 					}
 					break;
 				case Keyboard.KEY_D:
-					if(Math.abs(Config.magicMeterOffsetX) < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
+					if(Config.magicMeterOffsetX + 1 < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
 						Config.magicMeterOffsetX += 1;
 						magicMeterOffsetX.set(Config.magicMeterOffsetX);
 					}
@@ -508,25 +508,25 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public void handleOffset(int keyCode) {
 			switch(keyCode){
 				case Keyboard.KEY_W:
-					if(Math.abs(Config.magicMeterOffsetY) < mc.currentScreen.height / 4 && this.getTop() > 0){
+					if(-(Config.magicMeterOffsetY - 1) < mc.currentScreen.height / 4 && this.getTop() > 0){
 						Config.magicMeterOffsetY -= 1;
 						magicMeterOffsetY.set(Config.magicMeterOffsetY);
 					}
 					break;
 				case Keyboard.KEY_S:
-					if(Math.abs(Config.magicMeterOffsetY) < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
+					if(Config.magicMeterOffsetY + 1 < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
 						Config.magicMeterOffsetY += 1;
 						magicMeterOffsetY.set(Config.magicMeterOffsetY);
 					}
 					break;
 				case Keyboard.KEY_A:
-					if(Math.abs(Config.magicMeterOffsetX) < mc.currentScreen.width / 4 && this.getLeft() > 0){
+					if(-(Config.magicMeterOffsetX - 1) < mc.currentScreen.width / 4 && this.getLeft() > 0){
 						Config.magicMeterOffsetX -= 1;
 						magicMeterOffsetX.set(Config.magicMeterOffsetX);
 					}
 					break;
 				case Keyboard.KEY_D:
-					if(Math.abs(Config.magicMeterOffsetX) < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
+					if(Config.magicMeterOffsetX + 1 < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
 						Config.magicMeterOffsetX += 1;
 						magicMeterOffsetX.set(Config.magicMeterOffsetX);
 					}
@@ -660,25 +660,25 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public void handleOffset(int keyCode){
 			switch(keyCode){
 				case Keyboard.KEY_W:
-					if(Math.abs(Config.buffBarOffsetY) < mc.currentScreen.height / 4 && this.getTop() > 0){
+					if(-(Config.buffBarOffsetY - 1) < mc.currentScreen.height / 4 && this.getTop() > 0){
 						Config.buffBarOffsetY -= 1;
 						buffBarOffsetY.set(Config.buffBarOffsetY);
 					}
 					break;
 				case Keyboard.KEY_S:
-					if(Math.abs(Config.buffBarOffsetY) < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
+					if(Config.buffBarOffsetY + 1 < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
 						Config.buffBarOffsetY += 1;
 						buffBarOffsetY.set(Config.buffBarOffsetY);
 					}
 					break;
 				case Keyboard.KEY_A:
-					if(Math.abs(Config.buffBarOffsetX) < mc.currentScreen.width / 4 && this.getLeft() > 0){
+					if(-(Config.buffBarOffsetX - 1) < mc.currentScreen.width / 4 && this.getLeft() > 0){
 						Config.buffBarOffsetX -= 1;
 						buffBarOffsetX.set(Config.buffBarOffsetX);
 					}
 					break;
 				case Keyboard.KEY_D:
-					if(Math.abs(Config.buffBarOffsetX) < mc.currentScreen.width / 4 || this.getRight() < mc.currentScreen.width){
+					if(Config.buffBarOffsetX + 1 < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
 						Config.buffBarOffsetX += 1;
 						buffBarOffsetX.set(Config.buffBarOffsetX);
 					}
@@ -769,25 +769,25 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public void handleOffset(int keyCode) {
 			switch(keyCode){
 				case Keyboard.KEY_W:
-					if(Math.abs(Config.itemModeOffsetY) < mc.currentScreen.height / 4 && this.getTop() > 0){
+					if(-(Config.itemModeOffsetY - 1) < mc.currentScreen.height / 4 && this.getTop() > 0){
 						Config.itemModeOffsetY -= 1;
 						itemModeOffsetY.set(Config.itemModeOffsetY);
 					}
 					break;
 				case Keyboard.KEY_S:
-					if(Math.abs(Config.itemModeOffsetY) < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
+					if(Config.itemModeOffsetY + 1 < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
 						Config.itemModeOffsetY += 1;
 						itemModeOffsetY.set(Config.itemModeOffsetY);
 					}
 					break;
 				case Keyboard.KEY_A:
-					if(Math.abs(Config.itemModeOffsetX) < mc.currentScreen.width / 4 && this.getLeft() > 0){
+					if(-(Config.itemModeOffsetX - 1) < mc.currentScreen.width / 4 && this.getLeft() > 0){
 						Config.itemModeOffsetX -= 1;
 						itemModeOffsetX.set(Config.itemModeOffsetX);
 					}
 					break;
 				case Keyboard.KEY_D:
-					if(Math.abs(Config.itemModeOffsetX) < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
+					if(Config.itemModeOffsetX + 1 < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
 						Config.itemModeOffsetX += 1;
 						itemModeOffsetX.set(Config.itemModeOffsetX);
 					}
@@ -905,25 +905,25 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public void handleOffset(int keyCode) {
 			switch(keyCode){
 				case Keyboard.KEY_W:
-					if(Math.abs(Config.comboHudOffsetX) < mc.currentScreen.height / 4 && this.getTop() > 0){
+					if(-(Config.comboHudOffsetX - 1) < mc.currentScreen.height / 4 && this.getTop() > 0){
 						Config.comboHudOffsetY -= 1;
 						comboHudOffsetY.set(Config.comboHudOffsetX);
 					}
 					break;
 				case Keyboard.KEY_S:
-					if(Math.abs(Config.comboHudOffsetY) < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
+					if(Config.comboHudOffsetY + 1 < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
 						Config.comboHudOffsetY += 1;
 						comboHudOffsetY.set(Config.comboHudOffsetY);
 					}
 					break;
 				case Keyboard.KEY_A:
-					if(Math.abs(Config.comboHudOffsetX) < mc.currentScreen.width / 4 && this.getLeft() > 0){
+					if(-(Config.comboHudOffsetX - 1) < mc.currentScreen.width / 4 && this.getLeft() > 0){
 						Config.comboHudOffsetX -= 1;
 						comboHudOffsetX.set(Config.comboHudOffsetX);
 					}
 					break;
 				case Keyboard.KEY_D:
-					if(Math.abs(Config.comboHudOffsetX) < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
+					if(Config.comboHudOffsetX + 1 < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
 						Config.comboHudOffsetX += 1;
 						comboHudOffsetX.set(Config.comboHudOffsetX);
 					}
@@ -1026,25 +1026,25 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public void handleOffset(int keyCode) {
 			switch(keyCode){
 				case Keyboard.KEY_W:
-					if(Math.abs(Config.endingBlowHudOffsetY) < mc.currentScreen.height / 4 && this.getTop() > 0){
+					if(-(Config.endingBlowHudOffsetY - 1) < mc.currentScreen.height / 4 && this.getTop() > 0){
 						Config.endingBlowHudOffsetY -= 1;
 						endingBlowHudOffsetY.set(Config.endingBlowHudOffsetY);
 					}
 					break;
 				case Keyboard.KEY_S:
-					if(Math.abs(Config.endingBlowHudOffsetY) < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
+					if(Config.endingBlowHudOffsetY + 1 < mc.currentScreen.height / 4 && this.getBottom() < mc.currentScreen.height){
 						Config.endingBlowHudOffsetY += 1;
 						endingBlowHudOffsetY.set(Config.endingBlowHudOffsetY);
 					}
 					break;
 				case Keyboard.KEY_A:
-					if(Math.abs(Config.endingBlowHudOffsetX) < mc.currentScreen.width / 4 && this.getLeft() > 0){
+					if(-(Config.endingBlowHudOffsetX - 1) < mc.currentScreen.width / 4 && this.getLeft() > 0){
 						Config.endingBlowHudOffsetX -= 1;
 						endingBlowHudOffsetX.set(Config.endingBlowHudOffsetX);
 					}
 					break;
 				case Keyboard.KEY_D:
-					if(Math.abs(Config.endingBlowHudOffsetX) < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
+					if(Config.endingBlowHudOffsetX + 1 < mc.currentScreen.width / 4 && this.getRight() < mc.currentScreen.width){
 						Config.endingBlowHudOffsetX += 1;
 						endingBlowHudOffsetX.set(Config.endingBlowHudOffsetX);
 					}
