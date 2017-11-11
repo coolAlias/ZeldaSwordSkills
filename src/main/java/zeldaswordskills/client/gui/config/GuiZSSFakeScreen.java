@@ -271,12 +271,12 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 			switch(keyCode){
 				case Keyboard.KEY_LEFT:
 					Config.magicMeterHAlign = Config.magicMeterHAlign.equals(HALIGN.LEFT) ? HALIGN.RIGHT : Config.magicMeterHAlign.equals(HALIGN.RIGHT) ? HALIGN.CENTER : HALIGN.LEFT;
-					Config.magicMeterOffsetX = magicMeterOffsetX.setToDefault().getInt();
+					Config.magicMeterOffsetX = magicMeterOffsetX.setValue(0).getInt();
 					magicMeterHAlign.set(Config.magicMeterHAlign.toString());
 					break;
 				case Keyboard.KEY_RIGHT:
 					Config.magicMeterHAlign = Config.magicMeterHAlign.equals(HALIGN.LEFT) ? HALIGN.CENTER : Config.magicMeterHAlign.equals(HALIGN.CENTER) ? HALIGN.RIGHT : HALIGN.LEFT;
-					Config.magicMeterOffsetX = magicMeterOffsetX.setToDefault().getInt();
+					Config.magicMeterOffsetX = magicMeterOffsetX.setValue(0).getInt();
 					magicMeterHAlign.set(Config.magicMeterHAlign.toString());
 					break;
 				case Keyboard.KEY_UP:
@@ -286,7 +286,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 					break;
 				case Keyboard.KEY_DOWN:
 					Config.magicMeterVAlign = Config.magicMeterVAlign.equals(VALIGN.TOP) ? VALIGN.CENTER : Config.magicMeterVAlign.equals(VALIGN.CENTER) ? VALIGN.BOTTOM : VALIGN.TOP;
-					Config.magicMeterOffsetY = magicMeterOffsetY.setToDefault().getInt();
+					Config.magicMeterOffsetY = magicMeterOffsetY.setValue(0).getInt();
 					magicMeterVAlign.set(Config.magicMeterVAlign.toString());
 					break;
 			}
@@ -378,22 +378,22 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 				switch(keyCode){
 					case Keyboard.KEY_LEFT:
 						Config.magicMeterHAlign = Config.magicMeterHAlign.equals(HALIGN.LEFT) ? HALIGN.RIGHT : Config.magicMeterHAlign.equals(HALIGN.RIGHT) ? HALIGN.CENTER : HALIGN.LEFT;
-						Config.magicMeterOffsetX = magicMeterOffsetX.setToDefault().getInt();
+						Config.magicMeterOffsetX = magicMeterOffsetX.setValue(0).getInt();
 						magicMeterHAlign.set(Config.magicMeterHAlign.toString());
 						break;
 					case Keyboard.KEY_RIGHT:
 						Config.magicMeterHAlign = Config.magicMeterHAlign.equals(HALIGN.LEFT) ? HALIGN.CENTER : Config.magicMeterHAlign.equals(HALIGN.CENTER) ? HALIGN.RIGHT : HALIGN.LEFT;
-						Config.magicMeterOffsetX = magicMeterOffsetX.setToDefault().getInt();
+						Config.magicMeterOffsetX = magicMeterOffsetX.setValue(0).getInt();
 						magicMeterHAlign.set(Config.magicMeterHAlign.toString());
 						break;
 					case Keyboard.KEY_UP:
 						Config.magicMeterVAlign = Config.magicMeterVAlign.equals(VALIGN.TOP) ? VALIGN.BOTTOM : Config.magicMeterVAlign.equals(VALIGN.BOTTOM) ? VALIGN.CENTER : VALIGN.TOP;
-						Config.magicMeterOffsetY = magicMeterOffsetY.setToDefault().getInt();
+						Config.magicMeterOffsetY = magicMeterOffsetY.setValue(0).getInt();
 						magicMeterVAlign.set(Config.magicMeterVAlign.toString());
 						break;
 					case Keyboard.KEY_DOWN:
 						Config.magicMeterVAlign = Config.magicMeterVAlign.equals(VALIGN.TOP) ? VALIGN.CENTER : Config.magicMeterVAlign.equals(VALIGN.CENTER) ? VALIGN.BOTTOM : VALIGN.TOP;
-						Config.magicMeterOffsetY = magicMeterOffsetY.setToDefault().getInt();
+						Config.magicMeterOffsetY = magicMeterOffsetY.setValue(0).getInt();
 						magicMeterVAlign.set(Config.magicMeterVAlign.toString());
 						break;
 				}
@@ -530,12 +530,12 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 			switch(keyCode){
 				case Keyboard.KEY_LEFT:
 					Config.buffBarHAlign = Config.buffBarHAlign.equals(HALIGN.LEFT) ? HALIGN.RIGHT : Config.buffBarHAlign.equals(HALIGN.RIGHT) ? HALIGN.CENTER : HALIGN.LEFT;
-					Config.buffBarOffsetX = buffBarOffsetX.setToDefault().getInt();
+					Config.buffBarOffsetX = buffBarOffsetX.setValue(0).getInt();
 					buffBarHAlign.set(Config.buffBarHAlign.toString());
 					break;
 				case Keyboard.KEY_RIGHT:
 					Config.buffBarHAlign = Config.buffBarHAlign.equals(HALIGN.LEFT) ? HALIGN.CENTER : Config.buffBarHAlign.equals(HALIGN.CENTER) ? HALIGN.RIGHT : HALIGN.LEFT;
-					Config.buffBarOffsetX = buffBarOffsetX.setToDefault().getInt();
+					Config.buffBarOffsetX = buffBarOffsetX.setValue(0).getInt();
 					buffBarHAlign.set(Config.buffBarHAlign.toString());
 					break;
 				case Keyboard.KEY_UP:
@@ -545,7 +545,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 					break;
 				case Keyboard.KEY_DOWN:
 					Config.buffBarVAlign = Config.buffBarVAlign.equals(VALIGN.TOP) ? VALIGN.CENTER : Config.buffBarVAlign.equals(VALIGN.CENTER) ? VALIGN.BOTTOM : VALIGN.TOP;
-					Config.buffBarOffsetY = buffBarOffsetY.setToDefault().getInt();
+					Config.buffBarOffsetY = buffBarOffsetY.setValue(0).getInt();
 					buffBarVAlign.set(Config.buffBarVAlign.toString());
 					break;
 				default: break;
@@ -726,22 +726,22 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 			switch(keyCode){
 				case Keyboard.KEY_LEFT:
 					Config.comboHudHAlign = Config.comboHudHAlign.equals(HALIGN.LEFT) ? HALIGN.RIGHT : Config.comboHudHAlign.equals(HALIGN.RIGHT) ? HALIGN.CENTER : HALIGN.LEFT;
-					Config.comboHudOffsetX = comboHudOffsetX.setToDefault().getInt();
+					Config.comboHudOffsetX = comboHudOffsetX.setValue(0).getInt();
 					comboHudHAlign.set(Config.comboHudHAlign.toString());
 					break;
 				case Keyboard.KEY_RIGHT:
 					Config.comboHudHAlign = Config.comboHudHAlign.equals(HALIGN.LEFT) ? HALIGN.CENTER : Config.comboHudHAlign.equals(HALIGN.CENTER) ? HALIGN.RIGHT : HALIGN.LEFT;
-					Config.comboHudOffsetX = comboHudOffsetX.setToDefault().getInt();
+					Config.comboHudOffsetX = comboHudOffsetX.setValue(0).getInt();
 					comboHudHAlign.set(Config.comboHudHAlign.toString());
 					break;
 				case Keyboard.KEY_UP:
 					Config.comboHudVAlign = Config.comboHudVAlign.equals(VALIGN.TOP) ? VALIGN.BOTTOM : Config.comboHudVAlign.equals(VALIGN.BOTTOM) ? VALIGN.CENTER : VALIGN.TOP;
-					Config.comboHudOffsetY = comboHudOffsetY.setToDefault().getInt();
+					Config.comboHudOffsetY = comboHudOffsetY.setValue(0).getInt();
 					comboHudVAlign.set(Config.comboHudVAlign.toString());
 					break;
 				case Keyboard.KEY_DOWN:
 					Config.comboHudVAlign = Config.comboHudVAlign.equals(VALIGN.TOP) ? VALIGN.CENTER : Config.comboHudVAlign.equals(VALIGN.CENTER) ? VALIGN.BOTTOM : VALIGN.TOP;
-					Config.comboHudOffsetY = comboHudOffsetY.setToDefault().getInt();
+					Config.comboHudOffsetY = comboHudOffsetY.setValue(0).getInt();
 					comboHudVAlign.set(Config.comboHudVAlign.toString());
 					break;
 			}
@@ -847,18 +847,22 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 			switch(keyCode){
 				case Keyboard.KEY_UP:
 					Config.endingBlowHudVAlign = Config.endingBlowHudVAlign.equals(VALIGN.TOP) ? VALIGN.BOTTOM : Config.endingBlowHudVAlign.equals(VALIGN.BOTTOM) ? VALIGN.CENTER : VALIGN.TOP;
+					Config.endingBlowHudOffsetY = endingBlowHudOffsetY.setValue(0).getInt();
 					endingBlowHudVAlign.set(Config.endingBlowHudVAlign.toString());
 					break;
 				case Keyboard.KEY_DOWN:
 					Config.endingBlowHudVAlign = Config.endingBlowHudVAlign.equals(VALIGN.TOP) ? VALIGN.CENTER : Config.endingBlowHudVAlign.equals(VALIGN.CENTER) ? VALIGN.BOTTOM : VALIGN.TOP;
+					Config.endingBlowHudOffsetY = endingBlowHudOffsetY.setValue(0).getInt();
 					endingBlowHudVAlign.set(Config.endingBlowHudVAlign.toString());
 					break;
 				case Keyboard.KEY_LEFT:
 					Config.endingBlowHudHAlign = Config.endingBlowHudHAlign.equals(HALIGN.LEFT) ? HALIGN.RIGHT : Config.endingBlowHudHAlign.equals(HALIGN.RIGHT) ? HALIGN.CENTER : HALIGN.LEFT;
+					Config.endingBlowHudOffsetX = endingBlowHudOffsetX.setValue(0).getInt();
 					endingBlowHudHAlign.set(Config.endingBlowHudHAlign.toString());
 					break;
 				case Keyboard.KEY_RIGHT:
 					Config.endingBlowHudHAlign = Config.endingBlowHudHAlign.equals(HALIGN.LEFT) ? HALIGN.CENTER : Config.endingBlowHudHAlign.equals(HALIGN.CENTER) ? HALIGN.RIGHT : HALIGN.LEFT;
+					Config.endingBlowHudOffsetX = endingBlowHudOffsetX.setValue(0).getInt();
 					endingBlowHudHAlign.set(Config.endingBlowHudHAlign.toString());
 					break;
 			}
