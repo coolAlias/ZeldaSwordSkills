@@ -1,8 +1,5 @@
 package zeldaswordskills.client.gui.config;
 
-import java.util.List;
-
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.IGuiOverlay;
 
@@ -13,18 +10,15 @@ import zeldaswordskills.client.gui.IGuiOverlay;
  */
 public interface IOverlayButton extends IGuiOverlay {
 
-	/** This is the encompassing method of rendering the overlay and all of its accessories */
-	boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive);
-
 	/** This method is used rendering the panel containing the information specific to an overlay */
 	void renderInfoPanel();
 
 	/**
-	 * Renders the black-line border around an overlay. All overlays should essentially have the same code that draws
-	 * black lines from corner to corner, unless an overlay is irregularly shaped and it is imperative that negative
-	 * space be ignored
+	 * By default, a rectangular border will be rendered; if a more specialized
+	 * border is required, render it in this method.
+	 * @return true if the overlay doesn't need the default border
 	 */
-	void renderOverlayBorder();
+	boolean renderOverlayBorder();
 
 	/**
 	 * Defines the behaviors of pressed keys for the overlay, when in focus. In this method, overlays should set their

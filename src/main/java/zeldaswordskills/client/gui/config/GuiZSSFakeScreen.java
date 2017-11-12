@@ -115,7 +115,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		ScaledResolution res = new ScaledResolution(this.mc);
 		List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
 		for (IOverlayButton overlay : this.overlays) {
-			if (overlay.shouldRender() && overlay.renderElement(res, rendered, overlay.equals(this.activeElement))) {
+			if (overlay.shouldRender() && this.renderElement(overlay, res, rendered, overlay.equals(this.activeElement))) {
 				rendered.add(overlay);
 			}
 		}
@@ -123,6 +123,29 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 		// Draws the Done button
 		super.drawScreen(mouseX, mouseY, partialTicks);
+	}
+
+	protected boolean renderElement(IOverlayButton overlay, ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
+		if (overlay.renderOverlay(res, rendered)) {
+			if (isActive) {
+				overlay.renderInfoPanel();
+				if (!overlay.renderOverlayBorder()) {
+					this.renderOverlayBorder(overlay);
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Renders the default rectangular border around the overlay
+	 */
+	protected void renderOverlayBorder(IGuiOverlay overlay) {
+		this.drawHorizontalLine(overlay.getLeft(), overlay.getRight(), overlay.getTop(), 0xFF000000);
+		this.drawHorizontalLine(overlay.getLeft(), overlay.getRight(), overlay.getBottom(), 0xFF000000);
+		this.drawVerticalLine(overlay.getLeft(), overlay.getTop(), overlay.getBottom(), 0xFF000000);
+		this.drawVerticalLine(overlay.getRight(), overlay.getTop(), overlay.getBottom(), 0xFF000000);
 	}
 
 	/**
@@ -207,28 +230,13 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
-			if (this.renderOverlay(res, rendered)) {
-				if (isActive) {
-					this.renderInfoPanel();
-					this.renderOverlayBorder();
-				}
-				return true;
-			}
-			return false;
-		}
-
-		@Override
 		public void renderInfoPanel() {
 			// TODO Unsupported
 		}
 
 		@Override
-		public void renderOverlayBorder() {
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0xFF000000);
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0xFF000000);
+		public boolean renderOverlayBorder() {
+			return false;
 		}
 
 		@Override
@@ -393,28 +401,13 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
-			if (this.renderOverlay(res, rendered)) {
-				if (isActive) {
-					this.renderInfoPanel();
-					this.renderOverlayBorder();
-				}
-				return true;
-			}
-			return false;
-		}
-
-		@Override
 		public void renderInfoPanel() {
 			// TODO Unsupported
 		}
 
 		@Override
-		public void renderOverlayBorder() {
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0xFF000000);
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0xFF000000);
+		public boolean renderOverlayBorder() {
+			return false;
 		}
 
 		@Override
@@ -534,28 +527,13 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
-			if (this.renderOverlay(res, rendered)) {
-				if (isActive) {
-					this.renderInfoPanel();
-					this.renderOverlayBorder();
-				}
-				return true;
-			}
-			return false;
-		}
-
-		@Override
 		public void renderInfoPanel() {
 			// TODO Unsupported
 		}
 
 		@Override
-		public void renderOverlayBorder() {
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0xFF000000);
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0xFF000000);
+		public boolean renderOverlayBorder() {
+			return false;
 		}
 
 		@Override
@@ -682,28 +660,13 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
-			if (this.renderOverlay(res, rendered)) {
-				if (isActive) {
-					this.renderInfoPanel();
-					this.renderOverlayBorder();
-				}
-				return true;
-			}
-			return false;
-		}
-
-		@Override
 		public void renderInfoPanel() {
 			// TODO Unsupported
 		}
 
 		@Override
-		public void renderOverlayBorder() {
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0xFF000000);
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0xFF000000);
+		public boolean renderOverlayBorder() {
+			return false;
 		}
 
 		@Override
@@ -808,28 +771,13 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
-			if (this.renderOverlay(res, rendered)) {
-				if (isActive) {
-					this.renderInfoPanel();
-					this.renderOverlayBorder();
-				}
-				return true;
-			}
-			return false;
-		}
-
-		@Override
 		public void renderInfoPanel() {
 			// TODO Unsupported
 		}
 
 		@Override
-		public void renderOverlayBorder() {
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0xFF000000);
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0xFF000000);
+		public boolean renderOverlayBorder() {
+			return false;
 		}
 
 		@Override
@@ -944,28 +892,13 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
-			if (this.renderOverlay(res, rendered)) {
-				if (isActive) {
-					this.renderInfoPanel();
-					this.renderOverlayBorder();
-				}
-				return true;
-			}
-			return false;
-		}
-
-		@Override
 		public void renderInfoPanel() {
 			// TODO Unsupported
 		}
 
 		@Override
-		public void renderOverlayBorder() {
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getTop(), 0xFF000000);
-			this.drawHorizontalLine(this.getLeft(), this.getRight(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getLeft(), this.getTop(), this.getBottom(), 0xFF000000);
-			this.drawVerticalLine(this.getRight(), this.getTop(), this.getBottom(), 0xFF000000);
+		public boolean renderOverlayBorder() {
+			return false;
 		}
 
 		@Override
