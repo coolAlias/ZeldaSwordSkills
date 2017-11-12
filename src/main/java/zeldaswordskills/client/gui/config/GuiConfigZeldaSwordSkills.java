@@ -28,6 +28,7 @@ import net.minecraftforge.fml.client.config.DummyConfigElement;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
+import zeldaswordskills.client.gui.config.overlays.GuiZSSFakeScreen;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 

@@ -1,4 +1,4 @@
-package zeldaswordskills.client.gui.config;
+package zeldaswordskills.client.gui.config.overlays;
 
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.IGuiOverlay;
