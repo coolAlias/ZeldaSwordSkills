@@ -36,7 +36,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import zeldaswordskills.client.RenderHelperQ;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
@@ -44,8 +43,6 @@ import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.client.gui.GuiMagicMeter;
 import zeldaswordskills.client.gui.GuiMagicMeterText;
 import zeldaswordskills.client.gui.IGuiOverlay;
-import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
-import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.ref.Config;
@@ -61,7 +58,7 @@ import zeldaswordskills.skills.SkillBase;
  * @author Spitfyre03
  */
 public final class GuiZSSFakeScreen extends GuiScreen{
-	
+
 	protected int previousWidth = 0;
 	
 	/**The background image for this screen*/
@@ -194,63 +191,20 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		public boolean shouldRender(){return Config.isMagicMeterEnabled;}
 
 		@Override
-		protected void setup(ScaledResolution resolution){
-			this.inner_bar = MathHelper.clamp_int(MathHelper.floor_float((Config.getMaxMagicPoints() / 50) * getIncrementLength()), MathHelper.floor_float(getIncrementLength()), getMaxWidth());
-			if (Config.isMagicMeterHorizontal) {
-				this.width = getMaxWidth();
-				this.height = METER_HEIGHT;
-				int offsetX = Config.magicMeterOffsetX;
-				if (this.getHorizontalAlignment() == HALIGN.RIGHT) {
-					offsetX += (getMaxWidth() - this.inner_bar - 6);
-				} else if (this.getHorizontalAlignment() == HALIGN.CENTER) {
-					if (offsetX == 0) {
-						this.width = this.inner_bar + 6;
-					} else if (!Config.isMagicBarLeft) {
-						offsetX += (getMaxWidth() - this.inner_bar - 6);
-					}
-				}
-				this.setPosX(resolution, offsetX);
-				this.setPosY(resolution, Config.magicMeterOffsetY);
-				this.width = this.inner_bar + 6;
-			} else {
-				this.width = METER_HEIGHT;
-				this.height = getMaxWidth();
-				int offsetY = Config.magicMeterOffsetY;
-				if (this.getVerticalAlignment() == VALIGN.BOTTOM) {
-					offsetY += (getMaxWidth() - this.inner_bar - 6);
-				} else if (this.getVerticalAlignment() == VALIGN.CENTER) {
-					this.height = this.inner_bar + 6;
-				}
-				this.setPosX(resolution, Config.magicMeterOffsetX);
-				this.setPosY(resolution, offsetY);
-				this.height = this.inner_bar + 6;
-			}
+		protected float getMaxMagic() {
+			return 50.0F;
 		}
-		
+	
 		@Override
-		protected void render(ScaledResolution resolution){//
-			int xPos = this.getLeft();
-			int yPos = this.getTop();
-			int current = MathHelper.floor_float(((getNumIncrements() <= 1 ? 1 : getNumIncrements() > 10 ? 10 : (float)(getNumIncrements() - 1) / (float)getNumIncrements())) * this.inner_bar);//For Robijnvogel ;)
-			GlStateManager.pushAttrib();
-			GlStateManager.disableLighting();
-			GlStateManager.enableAlpha();
-			GlStateManager.enableBlend();
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			if (Config.isMagicMeterHorizontal) {
-				this.mc.getTextureManager().bindTexture(HORIZONTAL_BAR);
-				RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, 3 + this.inner_bar, METER_HEIGHT, 106, 12);
-				RenderHelperQ.drawTexturedRect(xPos + 3 + this.inner_bar, yPos, 103, 0, 3, METER_HEIGHT, 106, 12);
-				RenderHelperQ.drawTexturedRect(xPos + 3 + (Config.isMagicBarLeft ? 0 : this.inner_bar - current), yPos + 3, 0, METER_HEIGHT, current, 3, 106, 12);
-			} else {
-				this.mc.getTextureManager().bindTexture(VERTICAL_BAR);
-				RenderHelperQ.drawTexturedRect(xPos, yPos, 0, 0, METER_HEIGHT, 3 + this.inner_bar, 12, 106);
-				RenderHelperQ.drawTexturedRect(xPos, yPos + 3 + this.inner_bar, 0, 103, METER_HEIGHT, 3, 12, 106);
-				RenderHelperQ.drawTexturedRect(xPos + 3, yPos + 3 + (Config.isMagicBarLeft ? (this.inner_bar - current) : 0), METER_HEIGHT, 0, 3, current, 12, 106);
-			}
-			GlStateManager.popAttrib();
+		protected float getCurrentMagic() {
+			return this.getMaxMagic();
 		}
-		
+
+		@Override
+		protected boolean isUnlimited() {
+			return false;
+		}
+
 		@Override
 		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive){
 			if(this.renderOverlay(res, rendered)){
