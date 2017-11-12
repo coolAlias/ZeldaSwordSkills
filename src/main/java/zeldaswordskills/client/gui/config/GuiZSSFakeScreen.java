@@ -31,7 +31,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.MinecraftForge;
@@ -379,7 +378,6 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 		@Override
 		protected void setup(ScaledResolution resolution) {
-			int current = MathHelper.floor_float(this.meter.getNumIncrements() <= 1 ? 1 : this.meter.getNumIncrements() >= 10 ? 10 : ((this.meter.getNumIncrements() - 1) / this.meter.getNumIncrements())) * Config.getMaxMagicPoints();
 			this.text = StatCollector.translateToLocalFormatted("gui.zss.magic_meter.text", (int) Math.ceil(Config.getMaxMagicPoints()), (int) Math.ceil(Config.getMaxMagicPoints()));
 			this.width = this.mc.fontRendererObj.getStringWidth(this.text);
 			this.height = this.mc.fontRendererObj.FONT_HEIGHT - DEFAULT_PADDING; // font height seems to include some empty space - remove it
@@ -493,8 +491,6 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 	private final class FakeGuiBuffBar extends GuiBuffBar implements IOverlayButton {
 
-		private final GuiBuffBar bar;
-
 		private final String CATEGORY = "buff bar hud";
 
 		private final Property buffBarMaxIcons = Config.config.get(CATEGORY, "Number of Icons to Display on Buff", 5);
@@ -506,7 +502,6 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 		public FakeGuiBuffBar(Minecraft mc) {
 			super(mc);
-			this.bar = new GuiBuffBar(mc);
 			this.buffs = new ArrayList<BuffBase>();
 			// 10 buffs, since the max per row is 10
 			this.buffs.add(new BuffBase(Buff.ATTACK_UP, Integer.MAX_VALUE, 0));
