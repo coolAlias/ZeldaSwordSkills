@@ -440,11 +440,11 @@ public class Config
 
 	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
+		config.load();
 		init();
 	}
 	
 	public static void init(){
-		config.load();
 		ZSSItems.initConfig(config);
 		/*================== GENERAL =====================*/
 		

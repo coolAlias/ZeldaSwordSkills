@@ -61,9 +61,14 @@ public class GuiItemModeOverlay extends AbstractGuiOverlay
 		this.setPosY(resolution, this.getOffsetY(DEFAULT_PADDING) + Config.itemModeOffsetY);
 	}
 
+	/** Return the ItemStack to render; called during {@link #render(ScaledResolution) render} */
+	protected ItemStack getStackToRender() {
+		return (this.stack == null ? null : ((ICyclableItem) this.stack.getItem()).getRenderStackForMode(this.stack, this.mc.thePlayer));
+	}
+
 	@Override
 	protected void render(ScaledResolution resolution) {
-		this.stack = ((ICyclableItem) this.stack.getItem()).getRenderStackForMode(this.stack, this.mc.thePlayer);
+		this.stack = this.getStackToRender();
 		if (this.stack != null) {
 			int xPos = this.getLeft();
 			int yPos = this.getTop();

@@ -28,7 +28,6 @@ import net.minecraftforge.fml.client.config.DummyConfigElement;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
-
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 
@@ -42,45 +41,46 @@ import zeldaswordskills.ref.ModInfo;
  * 
  */
 public class GuiConfigZeldaSwordSkills extends GuiConfig {
-	
+
 	private GuiButtonExt fakeScreen;
-	
-	public GuiConfigZeldaSwordSkills(GuiScreen parentScreen){
+
+	public GuiConfigZeldaSwordSkills(GuiScreen parentScreen) {
 		super(parentScreen, getElements(), ModInfo.ID, GuiConfig.getAbridgedConfigPath(Config.config.toString()), false, false, I18n.format("config.zss.parent.title"));
 		fakeScreen = new GuiButtonExt(26, 0, 50, 300, 18, "Overlay Customizer");//TODO add lang key
 	}
-	
+
 	@Override
-	public void initGui(){
+	public void initGui() {
 		buttonList.add(this.fakeScreen);
 		super.initGui();
 	}
-	
+
 	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks){
+	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.fakeScreen.xPosition = this.entryList.width / 2 - fakeScreen.width / 2;
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
-	
+
 	@Override
-	public void actionPerformed(GuiButton button){
-		if(button.id == 26)
+	public void actionPerformed(GuiButton button) {
+		if (button.id == 26) {
 			this.mc.displayGuiScreen(new GuiZSSFakeScreen(this));
+		}
 		super.actionPerformed(button);
 	}
-	
+
 	@Override
-	public void onGuiClosed(){
+	public void onGuiClosed() {
 		super.onGuiClosed();
 	}
-	
+
 	/**
 	 * @return the list of elements to display on the ZSS GuiConfig screen. The list returned is displayed on the main configuration screen, 
 	 * and contains the categories of ZSS configurations that open into child screens.
 	 */
-	private static List<IConfigElement> getElements(){
+	private static List<IConfigElement> getElements() {
 		List<IConfigElement> categories = new ArrayList<>();
-		
+
 		//Create the hierarchy of elements to be displayed to the ConfigGui screen
 		List<IConfigElement> general = new ConfigElement(Config.config.getCategory("general")).getChildElements();
 		List<IConfigElement> client = new ConfigElement(Config.config.getCategory("client")).getChildElements();
@@ -94,7 +94,7 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 		List<IConfigElement> trades = new ConfigElement(Config.config.getCategory("trade")).getChildElements();
 		List<IConfigElement> mobSpawning = new ConfigElement(Config.config.getCategory("mob spawns")).getChildElements();
 		List<IConfigElement> recipes = new ConfigElement(Config.config.getCategory("recipes")).getChildElements();
-		
+
 		/*
 		 * Add each category to the list to display
 		 * Utilizing this versus a ConfigElement of the category type allows for capitalizing the name in the button, and lets you set the lang key
@@ -112,14 +112,13 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 		categories.add(new DummyConfigElement.DummyCategoryElement("Trades", "config.zss.trade.title", trades));
 		categories.add(new DummyConfigElement.DummyCategoryElement("Mob Spawns", "config.zss.mob_spawns.title", mobSpawning).setRequiresMcRestart(true));
 		categories.add(new DummyConfigElement.DummyCategoryElement("Recipes", "config.zss.recipes.title", recipes).setRequiresMcRestart(true));
-		
+
 		//This config is the only one of its category. Add to the main GuiConfig screen as its own element, since it is an independent Property
 		categories.add(new ConfigElement(Config.config.get("mod support", "Can Offhand Master Swords", false, "[BattleGear2] Allow Master Swords to be held in the off-hand")));
 
 		List<IConfigElement> list = new ArrayList<>();
 		list.add(new DummyConfigElement.DummyCategoryElement("Configurations", "", categories));//TODO add lang key
-		
+
 		return list;
 	}
-	
 }

@@ -101,9 +101,24 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 		return this.info.getMaxMagic() > 0;
 	}
 
+	/** Returns the current max magic value */
+	protected float getMaxMagic() {
+		return (this.info == null ? 0F : this.info.getMaxMagic());
+	}
+
+	/** Returns the current magic value */
+	protected float getCurrentMagic() {
+		return (this.info == null ? 0F : this.info.getCurrentMagic());
+	}
+
+	/** True if the player's mana is currently unlimited */
+	protected boolean isUnlimited() {
+		return (this.mc.thePlayer == null ? false : ZSSEntityInfo.get(this.mc.thePlayer).isBuffActive(Buff.UNLIMITED_MAGIC));
+	}
+
 	@Override
 	protected void setup(ScaledResolution resolution) {
-		this.inner_bar = MathHelper.clamp_int(MathHelper.floor_float((this.info.getMaxMagic() / 50) * INCREMENT), MathHelper.floor_float(INCREMENT), MAX_WIDTH);
+		this.inner_bar = MathHelper.clamp_int(MathHelper.floor_float((this.getMaxMagic() / 50) * INCREMENT), MathHelper.floor_float(INCREMENT), MAX_WIDTH);
 		if (Config.isMagicMeterHorizontal) {
 			this.width = MAX_WIDTH; // so offsets work the same for bars of differing sizes
 			this.height = METER_HEIGHT;
@@ -139,13 +154,12 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 	protected void render(ScaledResolution resolution) {
 		int xPos = this.getLeft();
 		int yPos = this.getTop();
-		int current = MathHelper.floor_float((this.info.getCurrentMagic() / this.info.getMaxMagic()) * this.inner_bar);
-		boolean unlimited = ZSSEntityInfo.get(this.mc.thePlayer).isBuffActive(Buff.UNLIMITED_MAGIC);
+		int current = MathHelper.floor_float((this.getCurrentMagic() / this.getMaxMagic()) * this.inner_bar);
 		GlStateManager.pushAttrib();
 		GlStateManager.disableLighting();
 		GlStateManager.enableAlpha();
 		GlStateManager.enableBlend();
-		if (unlimited) {
+		if (this.isUnlimited()) {
 			GlStateManager.color(0.5F, 0.5F, 1.0F, 1.0F);
 		} else {
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

@@ -31,6 +31,10 @@ public interface IGuiOverlay
 		public HALIGN next() {
 			return HALIGN.values()[(this.ordinal() + 1) % HALIGN.values().length];
 		}
+		public HALIGN prev() {
+			int i = (this.ordinal() < 1 ? HALIGN.values().length : this.ordinal());
+			return HALIGN.values()[(i - 1) % HALIGN.values().length];
+		}
 		/** Returns the offset such that it will behave similarly for all alignments */
 		public int getOffset(int offset) {
 			return this == RIGHT ? -offset : offset;
@@ -47,6 +51,10 @@ public interface IGuiOverlay
 		TOP, CENTER, BOTTOM;
 		public VALIGN next() {
 			return VALIGN.values()[(this.ordinal() + 1) % VALIGN.values().length];
+		}
+		public VALIGN prev() {
+			int i = (this.ordinal() < 1 ? VALIGN.values().length : this.ordinal());
+			return VALIGN.values()[(i - 1) % VALIGN.values().length];
 		}
 		/** Returns the offset such that it will behave similarly for all alignments */
 		public int getOffset(int offset) {
