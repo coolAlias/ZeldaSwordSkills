@@ -142,10 +142,10 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	 * Renders the default rectangular border around the overlay
 	 */
 	protected void renderOverlayBorder(IGuiOverlay overlay) {
-		this.drawHorizontalLine(overlay.getLeft(), overlay.getRight(), overlay.getTop(), 0xFF000000);
-		this.drawHorizontalLine(overlay.getLeft(), overlay.getRight(), overlay.getBottom(), 0xFF000000);
-		this.drawVerticalLine(overlay.getLeft(), overlay.getTop(), overlay.getBottom(), 0xFF000000);
-		this.drawVerticalLine(overlay.getRight(), overlay.getTop(), overlay.getBottom(), 0xFF000000);
+		this.drawHorizontalLine(overlay.getLeft() - 1, overlay.getRight(), overlay.getTop() - 1, 0xFF000000);
+		this.drawHorizontalLine(overlay.getLeft() - 1, overlay.getRight(), overlay.getBottom(), 0xFF000000);
+		this.drawVerticalLine(overlay.getLeft() - 1, overlay.getTop() - 1, overlay.getBottom(), 0xFF000000);
+		this.drawVerticalLine(overlay.getRight(), overlay.getTop() - 1, overlay.getBottom(), 0xFF000000);
 	}
 
 	/**
