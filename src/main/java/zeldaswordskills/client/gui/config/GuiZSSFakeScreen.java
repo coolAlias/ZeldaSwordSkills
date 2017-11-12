@@ -109,7 +109,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		//Draws the background
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		this.mc.getTextureManager().bindTexture(ZSS_FAKE_GUI);
-		this.drawModalRectWithCustomSizedTexture(0, 0, 0.0F, 0.0F, mc.currentScreen.width, mc.currentScreen.height, mc.currentScreen.width, mc.currentScreen.height);
+		GuiScreen.drawModalRectWithCustomSizedTexture(0, 0, 0.0F, 0.0F, mc.currentScreen.width, mc.currentScreen.height, mc.currentScreen.width, mc.currentScreen.height);
 		
 		//Render the overlays
 		GlStateManager.enableAlpha();
@@ -244,28 +244,28 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 				case Keyboard.KEY_LBRACKET:
 					if(Config.magicMeterIncrements > 1){
 						Config.magicMeterIncrements -= 1;
-						this.setNumIncrements(Config.magicMeterIncrements);
+						GuiMagicMeter.setNumIncrements(Config.magicMeterIncrements);
 						magicMeterIncrements.set(Config.magicMeterIncrements);
 					}
 					break;
 				case Keyboard.KEY_RBRACKET:
 					if(Config.magicMeterIncrements < 10){
 						Config.magicMeterIncrements += 1;
-						this.setNumIncrements(Config.magicMeterIncrements);
+						GuiMagicMeter.setNumIncrements(Config.magicMeterIncrements);
 						magicMeterIncrements.set(Config.magicMeterIncrements);
 					}
 					break;
 				case Keyboard.KEY_ADD:
 					if(Config.magicMeterWidth < 100){
 						Config.magicMeterWidth += 1;
-						this.setMaxWidth(Config.magicMeterWidth);
+						GuiMagicMeter.setMaxWidth(Config.magicMeterWidth);
 						magicMeterWidth.set(Config.magicMeterWidth);
 					}
 					break;
 				case Keyboard.KEY_SUBTRACT:
 					if(Config.magicMeterWidth > 25){
 						Config.magicMeterWidth -= 1;
-						this.setMaxWidth(Config.magicMeterWidth);
+						GuiMagicMeter.setMaxWidth(Config.magicMeterWidth);
 						magicMeterWidth.set(Config.magicMeterWidth);
 					}
 					break;
@@ -285,9 +285,9 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 			Config.isMagicMeterHorizontal = isMagicMeterHorizontal.setToDefault().getBoolean();
 			Config.isMagicBarLeft = isMagicMeterHorizontal.setToDefault().getBoolean();
 			Config.magicMeterWidth = magicMeterWidth.setToDefault().getInt();
-			this.setMaxWidth(Config.magicMeterWidth);
+			GuiMagicMeter.setMaxWidth(Config.magicMeterWidth);
 			Config.magicMeterIncrements = magicMeterIncrements.setToDefault().getInt();
-			this.setNumIncrements(Config.magicMeterIncrements);
+			GuiMagicMeter.setNumIncrements(Config.magicMeterIncrements);
 		}
 
 		@Override
