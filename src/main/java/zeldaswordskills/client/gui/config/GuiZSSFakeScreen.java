@@ -29,6 +29,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
@@ -80,7 +82,7 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		overlays.add(magicMeterDummy);
 		overlays.add(new FakeGuiMagicMeterText(mc, magicMeterDummy));
 		overlays.add(new FakeGuiBuffBar(mc));
-		//overlays.add(new FakeGuiItemModeOverlay(mc));
+		overlays.add(new FakeGuiItemModeOverlay(mc));
 		overlays.add(new FakeComboOverlay(mc));
 		overlays.add(new FakeGuiEndingBlowOverlay(mc));
 		
@@ -650,16 +652,31 @@ public final class GuiZSSFakeScreen extends GuiScreen{
 		private final Property itemModeVAlign = Config.config.get(CATEGORY, "Item Mode HUD Y-axis Alignment", "top");
 		private final Property itemModeOffsetX = Config.config.get(CATEGORY, "Item Mode HUD X Offset", 0);
 		private final Property itemModeOffsetY = Config.config.get(CATEGORY, "Item Mode HUD Y Offset", 0);
-		
+		private final ItemStack renderStack;
+
 		public FakeGuiItemModeOverlay(Minecraft mc){
 			super(mc);
+			this.renderStack = new ItemStack(Items.arrow, 64);
 		}
 
 		@Override
 		public boolean shouldRender(){return Config.isItemModeEnabled;}
 
 		@Override
-		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {return false;}
+		protected ItemStack getStackToRender() {
+			return this.renderStack;
+		}
+
+		@Override
+		public boolean renderElement(ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
+			if(this.renderOverlay(res, rendered)){
+				if(isActive){
+					this.renderInfoPanel();
+					this.renderOverlayBorder();
+				}
+				return true;
+			}else return false;
+		}
 
 		@Override
 		public void renderInfoPanel() {/*TODO Unsupported*/}
