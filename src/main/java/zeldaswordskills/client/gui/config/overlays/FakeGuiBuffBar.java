@@ -1,6 +1,9 @@
 package zeldaswordskills.client.gui.config.overlays;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.lwjgl.input.Keyboard;
 
@@ -46,8 +49,15 @@ public final class FakeGuiBuffBar extends GuiBuffBar implements IOverlayButton {
 	}
 
 	@Override
-	public void renderInfoPanel() {
-		// TODO Unsupported
+	public Map<String, String> getPanelInfo() {
+		Map<String, String> info = new LinkedHashMap<String, String>();
+		info.put("Buff Bar HAlign", "Left/Right Arrow Keys \u2190 \u2192");
+		info.put("Buff Bar VAlign", "Up/Down Arrow Keys \u2191 \u2193");
+		info.put("X Axis Offset", "A and D Keys");
+		info.put("Y Axis Offset", "W and S Keys");
+		info.put("Is Horizontal/Vertical", "Forward Slash /");
+		info.put("Max Icons to Display Per Row/Column", "Numpad +/- Keys");
+		return info;
 	}
 
 	@Override

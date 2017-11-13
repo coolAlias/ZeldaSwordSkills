@@ -20,6 +20,7 @@ package zeldaswordskills.client.gui.config.overlays;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.lwjgl.input.Keyboard;
 
@@ -29,7 +30,9 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
@@ -57,6 +60,9 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	private final List<IOverlayButton> overlays = new ArrayList<IOverlayButton>();
 
 	private IOverlayButton activeElement;
+	
+	private long startTime = 0;
+	private final int DISPLAY_TIME = 3000;
 
 	public GuiZSSFakeScreen(GuiConfigZeldaSwordSkills parent) {
 		this.parent = parent;
@@ -79,6 +85,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 		// The done button
 		this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 25, I18n.format("gui.done")));
+		this.startTime = Minecraft.getSystemTime();
 	}
 
 	@Override
@@ -106,14 +113,21 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		}
 		rendered.clear();
 
-		// Draws the Done button
+		// Draws the Done button and Help hint
+		if (Minecraft.getSystemTime() - startTime < DISPLAY_TIME && this.mc.currentScreen.equals(this)) {
+			String help = StatCollector.translateToLocal("config.zss.overlays.help");
+			int width = mc.fontRendererObj.getStringWidth(help);
+			int textPadding = 5;
+
+			this.drawRect(this.width / 2 - (width / 2 + textPadding), this.height / 2 - (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), this.width / 2 + (width / 2 + textPadding), this.height / 2 + (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), 0x80000000);
+			this.drawCenteredString(mc.fontRendererObj, help, this.width / 2, this.height / 2 - mc.fontRendererObj.FONT_HEIGHT / 2, 0xFFFFFFFF);
+		}
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
 	protected boolean renderElement(IOverlayButton overlay, ScaledResolution res, List<IGuiOverlay> rendered, boolean isActive) {
 		if (overlay.renderOverlay(res, rendered)) {
 			if (isActive) {
-				overlay.renderInfoPanel();
 				if (!overlay.renderOverlayBorder()) {
 					this.renderOverlayBorder(overlay);
 				}
@@ -140,9 +154,11 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	 */
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
-		if (keyCode == Keyboard.KEY_Z) {}
-		// TODO open panel
+		if (keyCode == Keyboard.KEY_Z) {} // TODO open panel
 		if (this.activeElement != null) {
+			if (keyCode == Keyboard.KEY_H) {
+				mc.displayGuiScreen(new ZSSOverlayHelpScreen(this, activeElement));
+			}
 			activeElement.adjustOverlay(typedChar, keyCode);
 		}
 		super.keyTyped(typedChar, keyCode);

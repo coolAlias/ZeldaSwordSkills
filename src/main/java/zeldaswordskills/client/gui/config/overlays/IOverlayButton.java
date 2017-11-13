@@ -1,5 +1,7 @@
 package zeldaswordskills.client.gui.config.overlays;
 
+import java.util.Map;
+
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.IGuiOverlay;
 
@@ -10,8 +12,7 @@ import zeldaswordskills.client.gui.IGuiOverlay;
  */
 public interface IOverlayButton extends IGuiOverlay {
 
-	/** This method is used rendering the panel containing the information specific to an overlay */
-	void renderInfoPanel();
+	Map<String, String> getPanelInfo();
 
 	/**
 	 * By default, a rectangular border will be rendered; if a more specialized

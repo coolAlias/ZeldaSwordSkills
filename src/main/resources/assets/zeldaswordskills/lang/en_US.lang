@@ -1277,6 +1277,8 @@ config.zss.mob_spawns.wizzrobe.rate.tooltip=The spawn pool weight for Wizzrobe (
 config.zss.mod_support.enable_offhand_master=Can Offhand Master Swords
 config.zss.mod_support.enable_offhand_master.tooltip=[BattleGear2] Allow Master Swords to be held in the off-hand
 
+config.zss.overlays.help=Press 'H' to open Help for an Overlay
+
 config.zss.parent.title=Zelda Sword Skills at the Tip of a Sword
 
 config.zss.recipes.title=Recipes
