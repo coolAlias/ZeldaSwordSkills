@@ -137,14 +137,15 @@ public class ContainerPedestal extends Container
 				{
 					int l = itemstack1.stackSize + stack.stackSize;
 
-					if (l <= stack.getMaxStackSize() && l <= slot.getSlotStackLimit()) {
+					int slotLimit = Math.min(stack.getMaxStackSize(), slot.getSlotStackLimit());
+					if (l <= slotLimit) {
 						stack.stackSize = 0;
 						itemstack1.stackSize = l;
 						pedestal.markDirty();
 						flag1 = true;
-					} else if (itemstack1.stackSize < stack.getMaxStackSize() && l < slot.getSlotStackLimit()) {
-						stack.stackSize -= stack.getMaxStackSize() - itemstack1.stackSize;
-						itemstack1.stackSize = stack.getMaxStackSize();
+					} else if (itemstack1.stackSize < slotLimit) {
+						stack.stackSize -= slotLimit - itemstack1.stackSize;
+						itemstack1.stackSize = slotLimit;
 						pedestal.markDirty();
 						flag1 = true;
 					}
