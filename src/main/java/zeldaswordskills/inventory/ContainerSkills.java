@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package zeldaswordskills.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -32,9 +32,9 @@ import zeldaswordskills.skills.SkillBase;
  * each skill the player has, but cannot be taken or moved.
  *
  */
-public class ContainerSkills extends Container
+public class ContainerSkills extends AbstractContainer
 {
-	private final InventoryBasic inventory;
+	private final IInventory inventory;
 
 	public ContainerSkills(EntityPlayer player) {
 		ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
@@ -55,7 +55,6 @@ public class ContainerSkills extends Container
 				flag = true;
 				continue;
 			}
-
 			int bottom = 3;
 			int sideBar = 5;
 			int rightSide = bottom + sideBar;
@@ -67,7 +66,6 @@ public class ContainerSkills extends Container
 				x = 44 + (i1 - 1) * 21;
 				y = 120;
 			}
-
 			addSlotToContainer(new Slot(inventory, i, x, y));
 		}
 	}

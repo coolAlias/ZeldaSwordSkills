@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,37 +18,27 @@
 package zeldaswordskills.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.item.ItemPendant;
 
-public class ContainerPedestal extends Container
+public class ContainerPedestal extends AbstractContainer
 {
-	private TileEntityPedestal pedestal;
-
 	/** Slot indices; Pedestal has 3 slots (0, 1, 2) */
-	private static final int INV_START = 3, INV_END = INV_START+26,
-			HOTBAR_START = INV_END+1, HOTBAR_END = HOTBAR_START+8;
+	private static final int INV_START = 3;
+	private static final int INV_END = INV_START+26;
+	private static final int HOTBAR_START = INV_END+1;
+	private static final int HOTBAR_END = HOTBAR_START+8;
 
-	public ContainerPedestal(InventoryPlayer inv, TileEntityPedestal pedestal) {
+	private final TileEntityPedestal pedestal;
+
+	public ContainerPedestal(EntityPlayer player, TileEntityPedestal pedestal) {
 		this.pedestal = pedestal;
 		addSlotToContainer(new SlotPedestal(pedestal, 0, 80, 19));
 		addSlotToContainer(new SlotPedestal(pedestal, 1, 49, 50));
 		addSlotToContainer(new SlotPedestal(pedestal, 2, 111, 50));
-
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 9; ++j) {
-				addSlotToContainer(new Slot(inv, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
-			}
-		}
-
-		for (int i = 0; i < 9; ++i) {
-			addSlotToContainer(new Slot(inv, i, 8 + i * 18, 142));
-		}
+		addPlayerInventory(player, true);
 	}
 
 	@Override
@@ -60,12 +50,9 @@ public class ContainerPedestal extends Container
 	public ItemStack transferStackInSlot(EntityPlayer player, int slotIndex) {
 		ItemStack stack = null;
 		Slot slot = (Slot) this.inventorySlots.get(slotIndex);
-
-		if (slot != null && slot.getHasStack())
-		{
+		if (slot != null && slot.getHasStack()) {
 			ItemStack itemstack1 = slot.getStack();
 			stack = itemstack1.copy();
-
 			if (slotIndex < INV_START) {
 				if (!mergeItemStack(itemstack1, INV_START, HOTBAR_END+1, true)) {
 					return null;
@@ -82,20 +69,16 @@ public class ContainerPedestal extends Container
 			} else if (slotIndex >= HOTBAR_START && slotIndex < HOTBAR_END + 1 && !mergeItemStack(itemstack1, INV_START, INV_END + 1, false)) {
 				return null;
 			}
-
 			if (itemstack1.stackSize == 0) {
 				slot.putStack((ItemStack) null);
 			} else {
 				slot.onSlotChanged();
 			}
-
 			if (itemstack1.stackSize == stack.stackSize) {
 				return null;
 			}
-
 			slot.onPickupFromSlot(player, itemstack1);
 		}
-
 		return stack;
 	}
 
@@ -107,96 +90,24 @@ public class ContainerPedestal extends Container
 			return super.slotClick(slot, par2, par3, player);
 		}
 	}
-
-	/**
-	 * Vanilla method fails to account for stacks of size one, as well as whether stack
-	 * is valid for slot
-	 */
-	@Override
-	protected boolean mergeItemStack(ItemStack stack, int start, int end, boolean backwards)
-	{
-		boolean flag1 = false;
-		int k = (backwards ? end - 1 : start);
-		Slot slot;
-		ItemStack itemstack1;
-
-		if (stack.isStackable()) {
-			while (stack.stackSize > 0 && (!backwards && k < end || backwards && k >= start))
-			{
-				slot = (Slot) inventorySlots.get(k);
-				itemstack1 = slot.getStack();
-
-				if (!slot.isItemValid(stack)) {
-					k += (backwards ? -1 : 1);
-					continue;
-				}
-
-				if (itemstack1 != null && itemstack1.getItem() == stack.getItem() &&
-						(!stack.getHasSubtypes() || stack.getItemDamage() == itemstack1.getItemDamage()) &&
-						ItemStack.areItemStackTagsEqual(stack, itemstack1))
-				{
-					int l = itemstack1.stackSize + stack.stackSize;
-
-					int slotLimit = Math.min(stack.getMaxStackSize(), slot.getSlotStackLimit());
-					if (l <= slotLimit) {
-						stack.stackSize = 0;
-						itemstack1.stackSize = l;
-						pedestal.markDirty();
-						flag1 = true;
-					} else if (itemstack1.stackSize < slotLimit) {
-						stack.stackSize -= slotLimit - itemstack1.stackSize;
-						itemstack1.stackSize = slotLimit;
-						pedestal.markDirty();
-						flag1 = true;
-					}
-				}
-
-				k += (backwards ? -1 : 1);
-			}
-		}
-
-		if (stack.stackSize > 0) {
-			k = (backwards ? end - 1 : start);
-			while (!backwards && k < end || backwards && k >= start) {
-				slot = (Slot) inventorySlots.get(k);
-				itemstack1 = slot.getStack();
-				if (!slot.isItemValid(stack)) {
-					k += (backwards ? -1 : 1);
-					continue;
-				}
-
-				if (itemstack1 == null) {
-					int l = stack.stackSize;
-					if (l <= slot.getSlotStackLimit()) {
-						slot.putStack(stack.copy());
-						stack.stackSize = 0;
-						pedestal.markDirty();
-						flag1 = true;
-						break;
-					} else {
-						putStackInSlot(k, new ItemStack(stack.getItem(), slot.getSlotStackLimit(), stack.getItemDamage()));
-						stack.stackSize -= slot.getSlotStackLimit();
-						pedestal.markDirty();
-						flag1 = true;
-					}
-				}
-
-				k += (backwards ? -1 : 1);
-			}
-		}
-
-		return flag1;
-	}
 }
 
-class SlotPedestal extends Slot {
+class SlotPedestal extends Slot
+{
+	private final TileEntityPedestal pedestal;
 
-	public SlotPedestal(IInventory inv, int index, int x, int y) {
-		super(inv, index, x, y);
+	public SlotPedestal(TileEntityPedestal pedestal, int index, int x, int y) {
+		super(pedestal, index, x, y);
+		this.pedestal = pedestal;
 	}
 
 	@Override
 	public boolean isItemValid(ItemStack stack) {
 		return stack != null && stack.getItem() instanceof ItemPendant && stack.getItemDamage() == slotNumber;
+	}
+
+	@Override
+	public void onSlotChanged() {
+		this.pedestal.markDirty();
 	}
 }

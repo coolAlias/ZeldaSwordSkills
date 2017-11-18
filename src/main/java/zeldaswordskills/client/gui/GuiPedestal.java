@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,18 +17,17 @@
 
 package zeldaswordskills.client.gui;
 
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.util.ResourceLocation;
-
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import zeldaswordskills.block.tileentity.TileEntityPedestal;
 import zeldaswordskills.inventory.ContainerPedestal;
 import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiPedestal extends GuiContainer
@@ -37,8 +36,8 @@ public class GuiPedestal extends GuiContainer
 
 	private final TileEntityPedestal pedestal;
 
-	public GuiPedestal(InventoryPlayer inv, TileEntityPedestal pedestal) {
-		super(new ContainerPedestal(inv, pedestal));
+	public GuiPedestal(EntityPlayer player, TileEntityPedestal pedestal) {
+		super(new ContainerPedestal(player, pedestal));
 		this.pedestal = pedestal;
 	}
 

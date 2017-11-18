@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2017> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ public class GuiHandler implements IGuiHandler
 		case GUI_PEDESTAL:
 			TileEntity te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
-				return new ContainerPedestal(player.inventory, (TileEntityPedestal) te);
+				return new ContainerPedestal(player, (TileEntityPedestal) te);
 			}
 			return null;
 		case GUI_MASK_TRADER:
@@ -80,7 +80,7 @@ public class GuiHandler implements IGuiHandler
 		switch(id) {
 		case GUI_PEDESTAL:
 			if (te instanceof TileEntityPedestal) {
-				return new GuiPedestal(player.inventory, (TileEntityPedestal) te);
+				return new GuiPedestal(player, (TileEntityPedestal) te);
 			}
 			return null;
 		case GUI_MASK_TRADER:
