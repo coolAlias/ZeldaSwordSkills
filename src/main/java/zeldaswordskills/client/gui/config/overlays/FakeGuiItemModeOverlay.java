@@ -8,6 +8,7 @@ import org.lwjgl.input.Keyboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -18,6 +19,7 @@ public final class FakeGuiItemModeOverlay extends GuiItemModeOverlay implements 
 
 	private final String CATEGORY = "item mode hud";
 
+	private final Property isItemModeEnabled = Config.config.get(CATEGORY, "Display Item Mode HUD", true);
 	private final Property itemModeHAlign = Config.config.get(CATEGORY, "Item Mode HUD X-axis Alignment", "left");
 	private final Property itemModeVAlign = Config.config.get(CATEGORY, "Item Mode HUD Y-axis Alignment", "top");
 	private final Property itemModeOffsetX = Config.config.get(CATEGORY, "Item Mode HUD X Offset", 0);
@@ -35,8 +37,25 @@ public final class FakeGuiItemModeOverlay extends GuiItemModeOverlay implements 
 	}
 
 	@Override
+	public void setShouldRender() {
+		Config.isItemModeEnabled = !Config.isItemModeEnabled;
+		isItemModeEnabled.set(Config.isItemModeEnabled);
+	}
+
+	@Override
 	protected ItemStack getStackToRender() {
 		return this.renderStack;
+	}
+
+	@Override
+	public String getName() {
+		String key = this.getLangKey() + ".title";
+		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Item Mode HUD";
+	}
+
+	@Override
+	public String getLangKey() {
+		return "config.zss.item_mode";
 	}
 
 	@Override

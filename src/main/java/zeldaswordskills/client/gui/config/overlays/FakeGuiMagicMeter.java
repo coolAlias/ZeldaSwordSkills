@@ -6,6 +6,7 @@ import java.util.Map;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.GuiMagicMeter;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -16,6 +17,7 @@ public final class FakeGuiMagicMeter extends GuiMagicMeter implements IOverlayBu
 
 	private final String CATEGORY = "magic meter";
 
+	private final Property isMagicMeterEnabled = Config.config.get(CATEGORY, "Display Magic Meter", true);
 	private final Property magicMeterHAlign = Config.config.get(CATEGORY, "Magic Meter Horizontal Alignment", "center");
 	private final Property magicMeterVAlign = Config.config.get(CATEGORY, "Magic Meter Vertical Alignment", "bottom");
 	private final Property magicMeterOffsetX = Config.config.get(CATEGORY, "Magic Meter Horizontal Offset", 47);
@@ -35,6 +37,12 @@ public final class FakeGuiMagicMeter extends GuiMagicMeter implements IOverlayBu
 	}
 
 	@Override
+	public void setShouldRender() {
+		Config.isMagicMeterEnabled = !Config.isMagicMeterEnabled;
+		isMagicMeterEnabled.set(Config.isMagicMeterEnabled);
+	}
+
+	@Override
 	protected float getMaxMagic() {
 		return 50.0F;
 	}
@@ -47,6 +55,17 @@ public final class FakeGuiMagicMeter extends GuiMagicMeter implements IOverlayBu
 	@Override
 	protected boolean isUnlimited() {
 		return false;
+	}
+
+	@Override
+	public String getName() {
+		String key = this.getLangKey() + ".title";
+		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Magic Meter";
+	}
+
+	@Override
+	public String getLangKey() {
+		return "config.zss.magic_meter";
 	}
 
 	@Override

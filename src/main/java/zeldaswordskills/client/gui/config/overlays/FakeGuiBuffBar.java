@@ -8,6 +8,7 @@ import java.util.Map;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -20,6 +21,7 @@ public final class FakeGuiBuffBar extends GuiBuffBar implements IOverlayButton {
 
 	private final String CATEGORY = "buff bar hud";
 
+	private final Property isBuffBarEnabled = Config.config.get(CATEGORY, "Buff Bar Displays at All Times", true);
 	private final Property buffBarMaxIcons = Config.config.get(CATEGORY, "Number of Icons to Display on Buff", 5);
 	private final Property isBuffBarHorizontal = Config.config.get(CATEGORY, "Display Buff Bar Horizontally", true);
 	private final Property buffBarHAlign = Config.config.get(CATEGORY, "Buff HUD X-axis Alignment", "right");
@@ -46,6 +48,23 @@ public final class FakeGuiBuffBar extends GuiBuffBar implements IOverlayButton {
 	@Override
 	public boolean shouldRender() {
 		return Config.isBuffBarEnabled;
+	}
+
+	@Override
+	public void setShouldRender() {
+		Config.isBuffBarEnabled = !Config.isBuffBarEnabled;
+		isBuffBarEnabled.set(Config.isBuffBarEnabled);
+	}
+
+	@Override
+	public String getName() {
+		String key = this.getLangKey() + ".title";
+		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Buff Bar";
+	}
+
+	@Override
+	public String getLangKey() {
+		return "config.zss.buff_bar";
 	}
 
 	@Override

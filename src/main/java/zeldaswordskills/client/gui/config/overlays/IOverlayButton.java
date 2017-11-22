@@ -12,7 +12,13 @@ import zeldaswordskills.client.gui.IGuiOverlay;
  */
 public interface IOverlayButton extends IGuiOverlay {
 
+	String getName();
+	
+	String getLangKey();
+
 	Map<String, String> getPanelInfo();
+
+	void setShouldRender();
 
 	/**
 	 * By default, a rectangular border will be rendered; if a more specialized

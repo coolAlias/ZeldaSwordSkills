@@ -1204,8 +1204,6 @@ config.zss.magic_meter.magic_meter_halign=Magic Meter Horizontal Alignment
 config.zss.magic_meter.magic_meter_halign.tooltip=Alignment on the X axis [left|center|right]
 config.zss.magic_meter.magic_meter_valign=Magic Meter Vertical Alignment
 config.zss.magic_meter.magic_meter_valign.tooltip=Alignment on the Y axis [top|center|bottom]
-config.zss.magic_meter.isMagic_meter_text_enabled=Display Magic Points Numerically
-config.zss.magic_meter.isMagic_meter_text_enabled.tooltip=Enable text display of current Magic Points
 config.zss.magic_meter.is_magic_meter_enabled=Display Magic Meter
 config.zss.magic_meter.is_magic_meter_enabled.tooltip=Enable the Magic Meter HUD display
 config.zss.magic_meter.magic_meter_offset_x=Magic Meter Horizontal Offset
@@ -1220,6 +1218,8 @@ config.zss.magic_meter.magic_meter_width=Magic Meter Width
 config.zss.magic_meter.magic_meter_width.tooltip=Maximum width of the magic meter
 config.zss.magic_meter.magic_meter_increments=Number of Meter Increments
 config.zss.magic_meter.magic_meter_increments.tooltip=Number of increments required to max out the magic meter, where each increment is 50 magic points
+
+config.zss.magic_meter.text.title=Magic Meter Text
 
 config.zss.mob_spawns.title=Mob Spawning
 config.zss.mob_spawns.title.tooltip=These configurations are used to edit the settings of mob spawning

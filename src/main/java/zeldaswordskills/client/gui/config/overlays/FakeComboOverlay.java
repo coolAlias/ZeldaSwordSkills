@@ -6,6 +6,7 @@ import java.util.Map;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -18,6 +19,7 @@ public final class FakeComboOverlay extends ComboOverlay implements IOverlayButt
 
 	private final String CATEGORY = "combo hud";
 
+	private final Property isComboHudEnabled = Config.config.get(CATEGORY, "Display Combo Counter", true);
 	private final Property hitsToDisplay = Config.config.get(CATEGORY, "Hits to Display in Combo HUD", 3);
 	private final Property comboHudHAlign = Config.config.get(CATEGORY, "Combo HUD X-axis Alignment", "left");
 	private final Property comboHudVAlign = Config.config.get(CATEGORY, "Combo HUD Y-axis Alignment", "top");
@@ -35,6 +37,23 @@ public final class FakeComboOverlay extends ComboOverlay implements IOverlayButt
 	public boolean shouldRender() {
 		this.displayStartTime = Minecraft.getSystemTime();
 		return Config.isComboHudEnabled;
+	}
+
+	@Override
+	public void setShouldRender() {
+		Config.isComboHudEnabled = !Config.isComboHudEnabled;
+		isComboHudEnabled.set(Config.isComboHudEnabled);
+	}
+
+	@Override
+	public String getName() {
+		String key = this.getLangKey() + ".title";
+		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Combo Overlay";
+	}
+
+	@Override
+	public String getLangKey() {
+		return "config.zss.combo_hud";
 	}
 
 	@Override

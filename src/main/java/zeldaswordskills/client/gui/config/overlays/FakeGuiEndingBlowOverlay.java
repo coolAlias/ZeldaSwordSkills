@@ -6,6 +6,7 @@ import java.util.Map;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -16,6 +17,7 @@ public final class FakeGuiEndingBlowOverlay extends GuiEndingBlowOverlay impleme
 
 	private final String CATEGORY = "ending blow hud";
 
+	private final Property isEndingBlowHudEnabled = Config.config.get(CATEGORY, "Display Ending Blow HUD", true);
 	private final Property endingBlowHudHAlign = Config.config.get(CATEGORY, "Ending Blow HUD X Alignment", "center");
 	private final Property endingBlowHudVAlign = Config.config.get(CATEGORY, "Ending Blow HUD Y Alignment", "top");
 	private final Property endingBlowHudOffsetX = Config.config.get(CATEGORY, "Ending Blow HUD X Offset", 0);
@@ -29,6 +31,23 @@ public final class FakeGuiEndingBlowOverlay extends GuiEndingBlowOverlay impleme
 	@Override
 	public boolean shouldRender() {
 		return Config.isEndingBlowHudEnabled;
+	}
+
+	@Override
+	public void setShouldRender() {
+		Config.isEndingBlowHudEnabled = !Config.isEndingBlowHudEnabled;
+		isEndingBlowHudEnabled.set(Config.isEndingBlowHudEnabled);
+	}
+
+	@Override
+	public String getName() {
+		String key = this.getLangKey() + ".title";
+		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Ending Blow HUD";
+	}
+
+	@Override
+	public String getLangKey() {
+		return "config.zss.ending_blow";
 	}
 
 	@Override

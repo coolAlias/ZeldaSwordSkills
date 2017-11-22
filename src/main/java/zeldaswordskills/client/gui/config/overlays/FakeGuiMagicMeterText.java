@@ -19,6 +19,7 @@ public final class FakeGuiMagicMeterText extends GuiMagicMeterText implements IO
 
 	private final String CATEGORY = "magic meter";
 
+	private final Property isMagicMeterTextEnabled = Config.config.get(CATEGORY, "Display Current Magic Points", false);
 	private final Property magicMeterHAlign = Config.config.get(CATEGORY, "Magic Meter Horizontal Alignment", "center");
 	private final Property magicMeterVAlign = Config.config.get(CATEGORY, "Magic Meter Vertical Alignment", "bottom");
 	private final Property magicMeterOffsetX = Config.config.get(CATEGORY, "Magic Meter Horizontal Offset", 47);
@@ -31,6 +32,12 @@ public final class FakeGuiMagicMeterText extends GuiMagicMeterText implements IO
 	@Override
 	public boolean shouldRender() {
 		return Config.isMagicMeterTextEnabled;
+	}
+
+	@Override
+	public void setShouldRender() {
+		Config.isMagicMeterTextEnabled = !Config.isMagicMeterTextEnabled;
+		isMagicMeterTextEnabled.set(Config.isMagicMeterTextEnabled);
 	}
 
 	@Override
@@ -53,6 +60,17 @@ public final class FakeGuiMagicMeterText extends GuiMagicMeterText implements IO
 	@Override
 	protected void render(ScaledResolution resolution) {
 		this.mc.fontRendererObj.drawString(this.text, this.getLeft(), this.getTop(), 0xFFFFFF, true);
+	}
+
+	@Override
+	public String getName() {
+		String key = this.getLangKey() + ".title";
+		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Magic Meter Text";
+	}
+
+	@Override
+	public String getLangKey() {
+		return "config.zss.magic_meter.text";
 	}
 
 	@Override

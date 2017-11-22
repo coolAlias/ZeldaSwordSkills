@@ -27,8 +27,11 @@ import org.lwjgl.input.Keyboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiSlot;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -43,7 +46,8 @@ import zeldaswordskills.ref.ModInfo;
 /**
  * This screen provides dummy versions of Zelda Sword Skills' in-game overlays that can be edited with this
  * interface. The keys for controlling the interfaces are relatively the same; WASD controls integer offset
- * for any overlay, and the arrow keys control {@code HALIGN} and {@code VALIGN}.
+ * for any overlay, and the arrow keys control {@code HALIGN} and {@code VALIGN}. Press 'H' when an overlay
+ * is highlighted for specific help.
  * 
  * @author Spitfyre03
  */
@@ -57,10 +61,11 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	/** The parent screen. The only time this Screen is constructed is from {@link GuiConfigZeldaSwordSkills} or {@link GuiHUDPanel} */
 	protected GuiConfigZeldaSwordSkills parent;
 
-	private final List<IOverlayButton> overlays = new ArrayList<IOverlayButton>();
+	protected final List<IOverlayButton> overlays = new ArrayList<IOverlayButton>();
 
 	private IOverlayButton activeElement;
-	
+	private OverlayToggleList toggleList;
+
 	private long startTime = 0;
 	private final int DISPLAY_TIME = 3000;
 
@@ -76,6 +81,19 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		overlays.add(new FakeGuiItemModeOverlay(mc));
 		overlays.add(new FakeComboOverlay(mc));
 		overlays.add(new FakeGuiEndingBlowOverlay(mc));
+
+		// Set up the OverlayToggleList
+		int maxWidth = 0;
+
+		for (IOverlayButton b : this.overlays) {
+			String name = b.getName();
+			int entryWidth = this.mc.fontRendererObj.getStringWidth(name);
+			if (entryWidth > maxWidth) {
+				maxWidth = entryWidth;
+			}
+		}
+		// Pad 5 on both sides of the button width to give the longest entry a little room to write
+		toggleList = new OverlayToggleList(this, maxWidth + 10);
 	}
 
 	@Override
@@ -85,7 +103,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 		// The done button
 		this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 25, I18n.format("gui.done")));
-		this.startTime = Minecraft.getSystemTime();
+		this.startTime = Minecraft.getSystemTime();// For the Help pop-up
 	}
 
 	@Override
@@ -104,6 +122,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 		// Render the overlays
 		GlStateManager.enableAlpha();
+		GlStateManager.enableBlend();
 		ScaledResolution res = new ScaledResolution(this.mc);
 		List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
 		for (IOverlayButton overlay : this.overlays) {
@@ -122,6 +141,9 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 			this.drawRect(this.width / 2 - (width / 2 + textPadding), this.height / 2 - (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), this.width / 2 + (width / 2 + textPadding), this.height / 2 + (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), 0x80000000);
 			this.drawCenteredString(mc.fontRendererObj, help, this.width / 2, this.height / 2 - mc.fontRendererObj.FONT_HEIGHT / 2, 0xFFFFFFFF);
 		}
+		GlStateManager.disableAlpha();
+		GlStateManager.disableBlend();
+
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
@@ -154,14 +176,21 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	 */
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
-		if (keyCode == Keyboard.KEY_Z) {} // TODO open panel
-		if (this.activeElement != null) {
+		if (keyCode == Keyboard.KEY_Z) {
+			this.mc.displayGuiScreen(this.toggleList);
+		}
+		else if (keyCode == Keyboard.KEY_ESCAPE) {
+			this.mc.displayGuiScreen(this.parent);
+		}
+		else if (this.activeElement != null) {
 			if (keyCode == Keyboard.KEY_H) {
 				mc.displayGuiScreen(new ZSSOverlayHelpScreen(this, activeElement));
 			}
 			activeElement.adjustOverlay(typedChar, keyCode);
 		}
-		super.keyTyped(typedChar, keyCode);
+		else {
+			super.keyTyped(typedChar, keyCode);
+		}
 	}
 
 	/** Used to designate the overlay focus of the {@code GuiZSSFakeScreen} */
@@ -175,6 +204,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 				this.activeElement = null;
 			}
 		}
+		this.toggleList.handleMouseInput();
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 

@@ -545,7 +545,7 @@ public class Config
 		magicMeterHAlign = HALIGN.fromString(config.getString("Magic Meter Horizontal Alignment", category, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.magic_meter.magic_meter_halign"));
 		magicMeterVAlign = VALIGN.fromString(config.getString("Magic Meter Vertical Alignment", category, "bottom", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.magic_meter.magic_meter_valign"));
 		isMagicMeterTextEnabled = config.getBoolean("Display Current Magic Points", category, false, "Enable text display of current Magic Points", "config.magic_meter.is_magic_meter_text_enabled");
-		isMagicMeterEnabled = config.getBoolean("Dsiplay Magic Meter", category, true, "Enable the Magic Meter HUD display", "config.magic_meter.is_magic_meter_enabled");
+		isMagicMeterEnabled = config.getBoolean("Display Magic Meter", category, true, "Enable the Magic Meter HUD display", "config.magic_meter.is_magic_meter_enabled");
 		magicMeterOffsetX = config.get(category, "Magic Meter Horizontal Offset", 47, "Moves the Meter left (-) or right (+) this number of pixels").setLanguageKey("config.magic_meter.magic_meter_offset_x").getInt();
 		magicMeterOffsetY = config.get(category, "Magic Meter Vertical Offset", -40, "Moves the Meter up (-) or down (+) this number of pixels").setLanguageKey("config.magic_meter.magic_meter_offset_y").getInt();
 		isMagicMeterHorizontal = config.getBoolean("Magic Meter Displays Horizontally", category, true,"True for a horizontal magic meter, or false for a vertical one", "config.magic_meter.is_magic_meter_horizontal");
