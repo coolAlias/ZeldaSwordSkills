@@ -68,6 +68,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 
 	private long startTime = 0;
 	private final int DISPLAY_TIME = 3000;
+	private static boolean hasDisplayedHelp = false;
 
 	public GuiZSSFakeScreen(GuiConfigZeldaSwordSkills parent) {
 		this.parent = parent;
@@ -133,7 +134,10 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		rendered.clear();
 
 		// Draws the Done button and Help hint
-		if (Minecraft.getSystemTime() - startTime < DISPLAY_TIME && this.mc.currentScreen.equals(this)) {
+		if (Minecraft.getSystemTime() - startTime > DISPLAY_TIME && !hasDisplayedHelp) {
+			hasDisplayedHelp = true;
+		}
+		else if (!hasDisplayedHelp && this.mc.currentScreen.equals(this)) {
 			String help = StatCollector.translateToLocal("config.zss.overlays.help");
 			int width = mc.fontRendererObj.getStringWidth(help);
 			int textPadding = 5;
