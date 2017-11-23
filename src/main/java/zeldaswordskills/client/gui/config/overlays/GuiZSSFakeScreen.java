@@ -204,7 +204,6 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 				this.activeElement = null;
 			}
 		}
-		this.toggleList.handleMouseInput();
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 
