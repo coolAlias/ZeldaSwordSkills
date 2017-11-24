@@ -949,21 +949,18 @@ config.zss.bonus_gear.enable_navi=
 config.zss.bonus_gear.enable_navi.tooltip=
 
 config.zss.buff_bar.title=
-config.zss.buff_bar.title.tooltip=
 config.zss.buff_bar.buff_bar_max_icons=
-config.zss.buff_bar.buff_bar_max_icons.tooltip=
-config.zss.buff_bar.is_buff_bar_enabled=
-config.zss.buff_bar.is_buff_bar_enabled.tooltip=
+config.zss.buff_bar.buff_bar_max_icons.controls=
 config.zss.buff_bar.is_buff_bar_horizontal=
-config.zss.buff_bar.is_buff_bar_horizontal.tooltip=
+config.zss.buff_bar.is_buff_bar_horizontal.controls=
 config.zss.buff_bar.buff_bar_halign=
-config.zss.buff_bar.buff_bar_halign.tooltip=
+config.zss.buff_bar.buff_bar_halign.controls=
 config.zss.buff_bar.buff_bar_valign=
-config.zss.buff_bar.buff_bar_valign.tooltip=
+config.zss.buff_bar.buff_bar_valign.controls=
 config.zss.buff_bar.buff_bar_offset_x=
-config.zss.buff_bar.buff_bar_offset_x.tooltip=
+config.zss.buff_bar.buff_bar_offset_x.controls=
 config.zss.buff_bar.buff_bar_offset_y=
-config.zss.buff_bar.buff_bar_offset_y.tooltip=
+config.zss.buff_bar.buff_bar_offset_y.controls=
 
 config.zss.client.title=
 config.zss.client.title.tooltip=
@@ -983,19 +980,16 @@ config.zss.client.can_target_players=
 config.zss.client.can_target_players.tooltip=
 
 config.zss.combo_hud.title=
-config.zss.combo_hud.title.tooltip=
-config.zss.combo_hud.is_combo_hud_enabled=
-config.zss.combo_hud.is_combo_hud_enabled.tooltip=
 config.zss.combo_hud.hits_to_display=
-config.zss.combo_hud.hits_to_display.tooltip=
+config.zss.combo_hud.hits_to_display.controls=
 config.zss.combo_hud.combo_hud_halign=
-config.zss.combo_hud.combo_hud_halign.tooltip=
+config.zss.combo_hud.combo_hud_halign.controls=
 config.zss.combo_hud.combo_hud_valign=
-config.zss.combo_hud.combo_hud_valign.tooltip=
+config.zss.combo_hud.combo_hud_valign.controls=
 config.zss.combo_hud.combo_hud_offset_x=
-config.zss.combo_hud.combo_hud_offset_x.tooltip=
+config.zss.combo_hud.combo_hud_offset_x.controls=
 config.zss.combo_hud.combo_hud_offset_y=
-config.zss.combo_hud.combo_hud_offset_y.tooltip=
+config.zss.combo_hud.combo_hud_offset_y.controls=
 
 #Ready for the pun??
 config.zss.dun_gen.title=
@@ -1042,17 +1036,14 @@ config.zss.dun_gen.no_gen_z=
 config.zss.dun_gen.no_gen_z.tooltip=
 
 config.zss.ending_blow.title=
-config.zss.ending_blow.title.tooltip=
-config.zss.ending_blow.is_ending_blow_hud_enabled=
-config.zss.ending_blow.is_ending_blow_hud_enabled.tooltip=
 config.zss.ending_blow.ending_blow_hud_halign=
-config.zss.ending_blow.ending_blow_hud_halign.tooltip=
-config.zss.ending_blow.ending_blowHud_valign=
-config.zss.ending_blow.ending_blowHud_valign.tooltip=
+config.zss.ending_blow.ending_blow_hud_halign.controls=
+config.zss.ending_blow.ending_blow_hud_valign=
+config.zss.ending_blow.ending_blow_hud_valign.controls=
 config.zss.ending_blow.ending_blow_hud_offset_x=
-config.zss.ending_blow.ending_blow_hud_offset_x.tooltip=
+config.zss.ending_blow.ending_blow_hud_offset_x.controls=
 config.zss.ending_blow.ending_blow_hud_offset_y=
-config.zss.ending_blow.ending_blow_hud_offset_y.tooltip=
+config.zss.ending_blow.ending_blow_hud_offset_y.controls=
 
 config.zss.general.title=
 config.zss.general.title.tooltip=
@@ -1151,17 +1142,14 @@ config.zss.item.whip_range=
 config.zss.item.whip_range.tooltip=
 
 config.zss.item_mode.title=
-config.zss.item_mode.title.tooltip=
-config.zss.item_mode.is_item_mode_enabled=
-config.zss.item_mode.is_item_mode_enabled.tooltip=
 config.zss.item_mode.item_mode_halign=
-config.zss.item_mode.item_mode_halign.tooltip=
+config.zss.item_mode.item_mode_halign.controls=
 config.zss.item_mode.item_mode_valign=
-config.zss.item_mode.item_mode_valign.tooltip=
+config.zss.item_mode.item_mode_valign.controls=
 config.zss.item_mode.item_mode_offset_x=
-config.zss.item_mode.item_mode_offset_x.tooltip=
+config.zss.item_mode.item_mode_offset_x.controls=
 config.zss.item_mode.item_mode_offset_y=
-config.zss.item_mode.item_mode_offset_y.tooltip=
+config.zss.item_mode.item_mode_offset_y.controls=
 
 config.zss.loot.title=
 config.zss.loot.title.tooltip=
@@ -1199,27 +1187,24 @@ config.zss.loot.enable_heart_loot=
 config.zss.loot.enable_heart_loot.tooltip=
 
 config.zss.magic_meter.title=
-config.zss.magic_meter.title.tooltip=
 config.zss.magic_meter.magic_meter_halign=
-config.zss.magic_meter.magic_meter_halign.tooltip=
+config.zss.magic_meter.magic_meter_halign.controls=
 config.zss.magic_meter.magic_meter_valign=
-config.zss.magic_meter.magic_meter_valign.tooltip=
-config.zss.magic_meter.isMagic_meter_text_enabled=
-config.zss.magic_meter.isMagic_meter_text_enabled.tooltip=
-config.zss.magic_meter.is_magic_meter_enabled=
-config.zss.magic_meter.is_magic_meter_enabled.tooltip=
+config.zss.magic_meter.magic_meter_valign.controls=
 config.zss.magic_meter.magic_meter_offset_x=
-config.zss.magic_meter.magic_meter_offset_x.tooltip=
+config.zss.magic_meter.magic_meter_offset_x.controls=
 config.zss.magic_meter.magic_meter_offset_y=
-config.zss.magic_meter.magic_meter_offset_y.tooltip=
+config.zss.magic_meter.magic_meter_offset_y.controls=
 config.zss.magic_meter.is_magic_meter_horizontal=
-config.zss.magic_meter.is_magic_meter_horizontal.tooltip=
+config.zss.magic_meter.is_magic_meter_horizontal.controls=
 config.zss.magic_meter.is_magic_bar_left=
-config.zss.magic_meter.is_magic_bar_left.tooltip=
+config.zss.magic_meter.is_magic_bar_left.controls=
 config.zss.magic_meter.magic_meter_width=
-config.zss.magic_meter.magic_meter_width.tooltip=
+config.zss.magic_meter.magic_meter_width.controls=
 config.zss.magic_meter.magic_meter_increments=
-config.zss.magic_meter.magic_meter_increments.tooltip=
+config.zss.magic_meter.magic_meter_increments.controls=
+
+config.zss.magic_meter.text.title=
 
 config.zss.mob_spawns.title=
 config.zss.mob_spawns.title.tooltip=
@@ -1278,6 +1263,14 @@ config.zss.mod_support.enable_offhand_master=
 config.zss.mod_support.enable_offhand_master.tooltip=
 
 config.zss.parent.title=
+#This is for the Configurations button in the first config menu
+config.zss.parent.configs=
+config.zss.parent.configs.tooltip=
+
+#This is for the Overlays Customizer button and the Help pop-up
+config.zss.parent.overlays=
+config.zss.parent.overlays.tooltip=
+config.zss.overlays.help=
 
 config.zss.recipes.title=
 config.zss.recipes.title.tooltip=
