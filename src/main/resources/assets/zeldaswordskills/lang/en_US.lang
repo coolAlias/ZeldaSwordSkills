@@ -949,21 +949,18 @@ config.zss.bonus_gear.enable_navi=Start With Navi
 config.zss.bonus_gear.enable_navi.tooltip=Start the game with Navi in a bottle (you can always acquire her later if false)
 
 config.zss.buff_bar.title=Buff Bar HUD
-config.zss.buff_bar.title.tooltip=Use this to dynamically edit the Buff Bar overlay
-config.zss.buff_bar.buff_bar_max_icons=Number of Icons to Display on Buff
-config.zss.buff_bar.buff_bar_max_icons.tooltip=Maximum number of icons to display per row or column
-config.zss.buff_bar.is_buff_bar_enabled=Buff Bar Displays at All Times
-config.zss.buff_bar.is_buff_bar_enabled.tooltip=Whether the buff bar should be displayed at all times
-config.zss.buff_bar.is_buff_bar_horizontal=Display Buff Bar Horizontally
-config.zss.buff_bar.is_buff_bar_horizontal.tooltip=Whether the buff bar should be displayed horizontally
-config.zss.buff_bar.buff_bar_halign=Buff HUD X-axis Alignment
-config.zss.buff_bar.buff_bar_halign.tooltip=Alignment on the X axis [left|center|right]
-config.zss.buff_bar.buff_bar_valign=Buff HUD Y-axis Alignment
-config.zss.buff_bar.buff_bar_valign.tooltip=Alignment on the Y axis [top|center|bottom]
-config.zss.buff_bar.buff_bar_offset_x=Buff HUD X Offset
-config.zss.buff_bar.buff_bar_offset_x.tooltip=Moves the HUD element left (-) or right (+) this number of pixels
-config.zss.buff_bar.buff_bar_offset_y=Buff HUD Y Offset
-config.zss.buff_bar.buff_bar_offset_y.tooltip=Moves the HUD element up (-) or down (+) this number of pixels
+config.zss.buff_bar.buff_bar_max_icons=Number of Buffs per Row/Column
+config.zss.buff_bar.buff_bar_max_icons.controls=Numpad +/- Keys
+config.zss.buff_bar.is_buff_bar_horizontal=Display Bar Horizontally/Vertically
+config.zss.buff_bar.is_buff_bar_horizontal.controls=Forward Slash /
+config.zss.buff_bar.buff_bar_halign=Buff HUD X Alignment
+config.zss.buff_bar.buff_bar_halign.controls=Left/Right Arrow Keys
+config.zss.buff_bar.buff_bar_valign=Buff HUD Y Alignment
+config.zss.buff_bar.buff_bar_valign.controls=Up/Down Arrow Keys
+config.zss.buff_bar.buff_bar_offset_x=Buff Bar X Offset
+config.zss.buff_bar.buff_bar_offset_x.controls=A and D Keys
+config.zss.buff_bar.buff_bar_offset_y=Buff Bar Y Offset
+config.zss.buff_bar.buff_bar_offset_y.controls=W and S Keys
 
 config.zss.client.title=Client
 config.zss.client.title.tooltip=This category contains client side settings; i.e. they are not synchronized with the server.
@@ -983,19 +980,16 @@ config.zss.client.can_target_players=Can Target Players
 config.zss.client.can_target_players.tooltip=Whether players can be targeted (toggle in game: '.' while sneaking)
 
 config.zss.combo_hud.title=Combo Display HUD
-config.zss.combo_hud.title.tooltip=Use this to dynamically edit the Combo overlay
-config.zss.combo_hud.is_combo_hud_enabled=Display Combo Counter
-config.zss.combo_hud.is_combo_hud_enabled.tooltip=Whether the combo hit counter will display by default (toggle in game: 'v')
 config.zss.combo_hud.hits_to_display=Hits to Display in Combo HUD
-config.zss.combo_hud.hits_to_display.tooltip=Max hits to display in Combo HUD
-config.zss.combo_hud.combo_hud_halign=Combo HUD X-axis Alignment
-config.zss.combo_hud.combo_hud_halign.tooltip=Alignment on the X axis [left|center|right]
-config.zss.combo_hud.combo_hud_valign=Combo HUD Y-axis Alignment
-config.zss.combo_hud.combo_hud_valign.tooltip=Alignment on the Y axis [top|center|bottom]
+config.zss.combo_hud.hits_to_display.controls=Numpad +/- Keys
+config.zss.combo_hud.combo_hud_halign=Combo HUD X Alignment
+config.zss.combo_hud.combo_hud_halign.controls=Left/Right Arrow Keys
+config.zss.combo_hud.combo_hud_valign=Combo HUD Y Alignment
+config.zss.combo_hud.combo_hud_valign.controls=Up/Down Arrow Keys
 config.zss.combo_hud.combo_hud_offset_x=Combo HUD X Offset
-config.zss.combo_hud.combo_hud_offset_x.tooltip=Moves the HUD element left (-) or right (+) this number of pixels
+config.zss.combo_hud.combo_hud_offset_x.controls=A and D Keys
 config.zss.combo_hud.combo_hud_offset_y=Combo HUD Y Offset
-config.zss.combo_hud.combo_hud_offset_y.tooltip=Moves the HUD element up (-) or down (+) this number of pixels
+config.zss.combo_hud.combo_hud_offset_y.controls=W and S Keys
 
 #Ready for the pun??
 config.zss.dun_gen.title=Dungeon Generation
@@ -1042,17 +1036,14 @@ config.zss.dun_gen.no_gen_z=Structure Gen Z Limit
 config.zss.dun_gen.no_gen_z.tooltip=Starting chunk coordinate Z for the structure free zone
 
 config.zss.ending_blow.title=Ending Blow HUD
-config.zss.ending_blow.title.tooltip=Use this to dynamically edit the Ending Blow overlay
-config.zss.ending_blow.is_ending_blow_hud_enabled=Display Ending Blow HUD
-config.zss.ending_blow.is_ending_blow_hud_enabled.tooltip=Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use)
 config.zss.ending_blow.ending_blow_hud_halign=Ending Blow HUD X Alignment
-config.zss.ending_blow.ending_blow_hud_halign.tooltip=Alignment on the X axis [left|center|right]
-config.zss.ending_blow.ending_blowHud_valign=Ending Blow HUD Y Alignment
-config.zss.ending_blow.ending_blowHud_valign.tooltip=Alignment on the Y axis [top|center|bottom]
+config.zss.ending_blow.ending_blow_hud_halign.controls=Left/Right Arrow Keys
+config.zss.ending_blow.ending_blow_hud_valign=Ending Blow HUD Y Alignment
+config.zss.ending_blow.ending_blow_hud_valign.controls=Up/Down Arrow Keys
 config.zss.ending_blow.ending_blow_hud_offset_x=Ending Blow HUD X Offset
-config.zss.ending_blow.ending_blow_hud_offset_x.tooltip=Moves the HUD element left (-) or right (+) this number of pixels
+config.zss.ending_blow.ending_blow_hud_offset_x.controls=A and D Keys
 config.zss.ending_blow.ending_blow_hud_offset_y=Ending Blow HUD Y Offset
-config.zss.ending_blow.ending_blow_hud_offset_y.tooltip=Moves the HUD element up (-) or down (+) this number of pixels
+config.zss.ending_blow.ending_blow_hud_offset_y.controls=W and S Keys
 
 config.zss.general.title=General
 config.zss.general.title.tooltip=General Settings for Zelda Sword Skills
@@ -1151,17 +1142,14 @@ config.zss.item.whip_range=Whip Range
 config.zss.item.whip_range.tooltip=Range, in blocks, of the standard whip
 
 config.zss.item_mode.title=Item Mode HUD
-config.zss.item_mode.title.tooltip=Use this to dynamically edit the Item Mode overlay
-config.zss.item_mode.is_item_mode_enabled=Display Item Mode HUD
-config.zss.item_mode.is_item_mode_enabled.tooltip=Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)
-config.zss.item_mode.item_mode_halign=Item Mode HUD X-axis Alignment
-config.zss.item_mode.item_mode_halign.tooltip=Alignment on the X axis [left|center|right]
-config.zss.item_mode.item_mode_valign=Item Mode HUD Y-axis Alignment
-config.zss.item_mode.item_mode_valign.tooltip=Alignment on the Y axis [top|center|bottom]
+config.zss.item_mode.item_mode_halign=Item Mode HUD X Alignment
+config.zss.item_mode.item_mode_halign.controls=Left/Right Arrow Keys
+config.zss.item_mode.item_mode_valign=Item Mode HUD Y Alignment
+config.zss.item_mode.item_mode_valign.controls=Up/Down Arrow Keys
 config.zss.item_mode.item_mode_offset_x=Item Mode HUD X Offset
-config.zss.item_mode.item_mode_offset_x.tooltip=Moves the HUD element left (-) or right (+) this number of pixels
+config.zss.item_mode.item_mode_offset_x.controls=A and D Keys
 config.zss.item_mode.item_mode_offset_y=Item Mode HUD Y Offset
-config.zss.item_mode.item_mode_offset_y.tooltip=Moves the HUD element up (-) or down (+) this number of pixels
+config.zss.item_mode.item_mode_offset_y.controls=W and S Keys
 
 config.zss.loot.title=Loot
 config.zss.loot.title.tooltip=The Loot category. Theses configurations allow the player to adjust the weight of certain ZSS items in loot tables
@@ -1199,25 +1187,22 @@ config.zss.loot.enable_heart_loot=Heart Pieces in Chests
 config.zss.loot.enable_heart_loot.tooltip=Enable heart pieces in vanilla chests
 
 config.zss.magic_meter.title=Magic Meter
-config.zss.magic_meter.title.tooltip=Use this to dynamically edit the ZSS Magic Meter
-config.zss.magic_meter.magic_meter_halign=Magic Meter Horizontal Alignment
-config.zss.magic_meter.magic_meter_halign.tooltip=Alignment on the X axis [left|center|right]
-config.zss.magic_meter.magic_meter_valign=Magic Meter Vertical Alignment
-config.zss.magic_meter.magic_meter_valign.tooltip=Alignment on the Y axis [top|center|bottom]
-config.zss.magic_meter.is_magic_meter_enabled=Display Magic Meter
-config.zss.magic_meter.is_magic_meter_enabled.tooltip=Enable the Magic Meter HUD display
-config.zss.magic_meter.magic_meter_offset_x=Magic Meter Horizontal Offset
-config.zss.magic_meter.magic_meter_offset_x.tooltip=Moves the Meter left (-) or right (+) this number of pixels
-config.zss.magic_meter.magic_meter_offset_y=Magic Meter Vertical Offset
-config.zss.magic_meter.magic_meter_offset_y.tooltip=Moves the Meter up (-) or down (+) this number of pixels
+config.zss.magic_meter.magic_meter_halign=Magic Meter X Alignment
+config.zss.magic_meter.magic_meter_halign.controls=Left/Right Arrow Keys
+config.zss.magic_meter.magic_meter_valign=Magic Meter Y Alignment
+config.zss.magic_meter.magic_meter_valign.controls=Up/Down Arrow Keys
+config.zss.magic_meter.magic_meter_offset_x=Magic Meter X Offset
+config.zss.magic_meter.magic_meter_offset_x.controls=A and D Keys
+config.zss.magic_meter.magic_meter_offset_y=Magic Meter Y Offset
+config.zss.magic_meter.magic_meter_offset_y.controls=W and S Keys
 config.zss.magic_meter.is_magic_meter_horizontal=Meter is Horizontal
-config.zss.magic_meter.is_magic_meter_horizontal.tooltip=True for a horizontal magic meter, or false for a vertical one
-config.zss.magic_meter.is_magic_bar_left=Drains from Right to Left
-config.zss.magic_meter.is_magic_bar_left.tooltip=True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite
+config.zss.magic_meter.is_magic_meter_horizontal.controls=Forward Slash /
+config.zss.magic_meter.is_magic_bar_left=Drains from Right to Left/Top to Bottom
+config.zss.magic_meter.is_magic_bar_left.controls=Tab Key
 config.zss.magic_meter.magic_meter_width=Magic Meter Width
-config.zss.magic_meter.magic_meter_width.tooltip=Maximum width of the magic meter
+config.zss.magic_meter.magic_meter_width.controls=Numpad +/- Keys
 config.zss.magic_meter.magic_meter_increments=Number of Meter Increments
-config.zss.magic_meter.magic_meter_increments.tooltip=Number of increments required to max out the magic meter, where each increment is 50 magic points
+config.zss.magic_meter.magic_meter_increments.controls=Left/Right Bracket []
 
 config.zss.magic_meter.text.title=Magic Meter Text
 
@@ -1277,9 +1262,15 @@ config.zss.mob_spawns.wizzrobe.rate.tooltip=The spawn pool weight for Wizzrobe (
 config.zss.mod_support.enable_offhand_master=Can Offhand Master Swords
 config.zss.mod_support.enable_offhand_master.tooltip=[BattleGear2] Allow Master Swords to be held in the off-hand
 
-config.zss.overlays.help=Press 'H' to open Help for an Overlay
-
 config.zss.parent.title=Zelda Sword Skills at the Tip of a Sword
+#This is for the Configurations button in the first config menu
+config.zss.parent.configs=Configurations
+config.zss.parent.configs.tooltip=This is for all configurations unrelated to overlays
+
+#This is for the Overlays Customizer button and the Help pop-up
+config.zss.parent.overlays=Overlay Customizer
+config.zss.parent.overlays.tooltip=Use this to edit the ZSS overlays
+config.zss.overlays.help=Press 'H' to open Help for an Overlay
 
 config.zss.recipes.title=Recipes
 config.zss.recipes.title.tooltip=The category for configuring certain ZSS recipes. All crafting recipes are registered at start-up. Any changes made to these configurations will not take effect in the current MC session

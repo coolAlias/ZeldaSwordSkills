@@ -1,14 +1,11 @@
 package zeldaswordskills.client.gui.config.overlays;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.GuiBuffBar;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -16,16 +13,17 @@ import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.util.StringUtils;
 
 public final class FakeGuiBuffBar extends GuiBuffBar implements IOverlayButton {
 
 	private final String CATEGORY = "buff bar hud";
 
 	private final Property isBuffBarEnabled = Config.config.get(CATEGORY, "Buff Bar Displays at All Times", true);
-	private final Property buffBarMaxIcons = Config.config.get(CATEGORY, "Number of Icons to Display on Buff", 5);
+	private final Property buffBarMaxIcons = Config.config.get(CATEGORY, "Number of Buffs per Row/Column", 5);
 	private final Property isBuffBarHorizontal = Config.config.get(CATEGORY, "Display Buff Bar Horizontally", true);
-	private final Property buffBarHAlign = Config.config.get(CATEGORY, "Buff HUD X-axis Alignment", "right");
-	private final Property buffBarVAlign = Config.config.get(CATEGORY, "Buff HUD Y-axis Alignment", "top");
+	private final Property buffBarHAlign = Config.config.get(CATEGORY, "Buff HUD X Alignment", "right");
+	private final Property buffBarVAlign = Config.config.get(CATEGORY, "Buff HUD Y Alignment", "top");
 	private final Property buffBarOffsetX = Config.config.get(CATEGORY, "Buff HUD X Offset", 0);
 	private final Property buffBarOffsetY = Config.config.get(CATEGORY, "Buff HUD Y Offset", 0);
 
@@ -51,15 +49,15 @@ public final class FakeGuiBuffBar extends GuiBuffBar implements IOverlayButton {
 	}
 
 	@Override
-	public void setShouldRender() {
+	public boolean setShouldRender() {
 		Config.isBuffBarEnabled = !Config.isBuffBarEnabled;
 		isBuffBarEnabled.set(Config.isBuffBarEnabled);
+		return shouldRender();
 	}
 
 	@Override
-	public String getName() {
-		String key = this.getLangKey() + ".title";
-		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Buff Bar";
+	public String getDisplayName() {
+		return StringUtils.translateKey(this.getLangKey() + ".title");
 	}
 
 	@Override
@@ -68,15 +66,15 @@ public final class FakeGuiBuffBar extends GuiBuffBar implements IOverlayButton {
 	}
 
 	@Override
-	public Map<String, String> getPanelInfo() {
-		Map<String, String> info = new LinkedHashMap<String, String>();
-		info.put("Buff Bar HAlign", "Left/Right Arrow Keys \u2190 \u2192");
-		info.put("Buff Bar VAlign", "Up/Down Arrow Keys \u2191 \u2193");
-		info.put("X Axis Offset", "A and D Keys");
-		info.put("Y Axis Offset", "W and S Keys");
-		info.put("Is Horizontal/Vertical", "Forward Slash /");
-		info.put("Max Icons to Display Per Row/Column", "Numpad +/- Keys");
-		return info;
+	public List<Property> getPanelInfo() {
+		List<Property> props = new ArrayList<Property>();
+		props.add(buffBarHAlign);
+		props.add(buffBarVAlign);
+		props.add(buffBarOffsetX);
+		props.add(buffBarOffsetY);
+		props.add(isBuffBarHorizontal);
+		props.add(buffBarMaxIcons);
+		return props;
 	}
 
 	@Override

@@ -17,6 +17,8 @@
 
 package zeldaswordskills.util;
 
+import net.minecraft.util.StatCollector;
+
 public class StringUtils {
 
 	/**
@@ -83,5 +85,18 @@ public class StringUtils {
 		}
 		string = wrapped.toString();
 		return string.split("\n", -1);
+	}
+	
+	/**
+	 * Translates a provided key to the local language using {@code StatCollector}. If no key is found
+	 * for the locale, the default English version is returned instead, as any reference to a language
+	 * key in ZSS should have an English return
+	 * @param key the language key to be translated
+	 * 
+	 * @return the translation for the provided key in the current language, or the English translation if the key
+	 *         does not exist in the current language
+	 */
+	public static String translateKey(String key) {
+		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : StatCollector.translateToFallback(key);
 	}
 }

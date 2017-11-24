@@ -20,28 +20,22 @@ package zeldaswordskills.client.gui.config.overlays;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiSlot;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import zeldaswordskills.client.gui.IGuiOverlay;
 import zeldaswordskills.client.gui.config.GuiConfigZeldaSwordSkills;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.util.StringUtils;
 
 /**
  * This screen provides dummy versions of Zelda Sword Skills' in-game overlays that can be edited with this
@@ -87,7 +81,8 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		int maxWidth = 0;
 
 		for (IOverlayButton b : this.overlays) {
-			String name = b.getName();
+			String key = b.getLangKey() + ".title";
+			String name = StringUtils.translateKey(key);
 			int entryWidth = this.mc.fontRendererObj.getStringWidth(name);
 			if (entryWidth > maxWidth) {
 				maxWidth = entryWidth;
@@ -103,19 +98,12 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		this.buttonList.clear();
 
 		// The done button
-		this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 25, I18n.format("gui.done")));
+		this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 25, StringUtils.translateKey("gui.done")));
 		this.startTime = Minecraft.getSystemTime();// For the Help pop-up
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		// Adjusting the Minecraft screen size (e.g. fullscreen to minimized, or by click-and-drag on
-		// the borders creates a render issue with the background and buttons. This fixes that issue
-		if (previousWidth != width) {
-			this.initGui();
-			previousWidth = width;
-		}
-
 		// Draws the background
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		this.mc.getTextureManager().bindTexture(ZSS_FAKE_GUI);
@@ -138,13 +126,14 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 			hasDisplayedHelp = true;
 		}
 		else if (!hasDisplayedHelp && this.mc.currentScreen.equals(this)) {
-			String help = StatCollector.translateToLocal("config.zss.overlays.help");
+			String help = StringUtils.translateKey("config.zss.overlays.help");
 			int width = mc.fontRendererObj.getStringWidth(help);
 			int textPadding = 5;
 
 			this.drawRect(this.width / 2 - (width / 2 + textPadding), this.height / 2 - (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), this.width / 2 + (width / 2 + textPadding), this.height / 2 + (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), 0x80000000);
 			this.drawCenteredString(mc.fontRendererObj, help, this.width / 2, this.height / 2 - mc.fontRendererObj.FONT_HEIGHT / 2, 0xFFFFFFFF);
 		}
+		// Clean up my mess
 		GlStateManager.disableAlpha();
 		GlStateManager.disableBlend();
 

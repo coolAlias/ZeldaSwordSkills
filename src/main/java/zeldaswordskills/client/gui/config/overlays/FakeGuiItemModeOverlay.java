@@ -1,27 +1,27 @@
 package zeldaswordskills.client.gui.config.overlays;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.GuiItemModeOverlay;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
 import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.util.StringUtils;
 
 public final class FakeGuiItemModeOverlay extends GuiItemModeOverlay implements IOverlayButton {
 
 	private final String CATEGORY = "item mode hud";
 
 	private final Property isItemModeEnabled = Config.config.get(CATEGORY, "Display Item Mode HUD", true);
-	private final Property itemModeHAlign = Config.config.get(CATEGORY, "Item Mode HUD X-axis Alignment", "left");
-	private final Property itemModeVAlign = Config.config.get(CATEGORY, "Item Mode HUD Y-axis Alignment", "top");
+	private final Property itemModeHAlign = Config.config.get(CATEGORY, "Item Mode HUD X Alignment", "left");
+	private final Property itemModeVAlign = Config.config.get(CATEGORY, "Item Mode HUD Y Alignment", "top");
 	private final Property itemModeOffsetX = Config.config.get(CATEGORY, "Item Mode HUD X Offset", 0);
 	private final Property itemModeOffsetY = Config.config.get(CATEGORY, "Item Mode HUD Y Offset", 0);
 	private final ItemStack renderStack;
@@ -37,9 +37,10 @@ public final class FakeGuiItemModeOverlay extends GuiItemModeOverlay implements 
 	}
 
 	@Override
-	public void setShouldRender() {
+	public boolean setShouldRender() {
 		Config.isItemModeEnabled = !Config.isItemModeEnabled;
 		isItemModeEnabled.set(Config.isItemModeEnabled);
+		return shouldRender();
 	}
 
 	@Override
@@ -48,9 +49,8 @@ public final class FakeGuiItemModeOverlay extends GuiItemModeOverlay implements 
 	}
 
 	@Override
-	public String getName() {
-		String key = this.getLangKey() + ".title";
-		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Item Mode HUD";
+	public String getDisplayName() {
+		return StringUtils.translateKey(this.getLangKey() + ".title");
 	}
 
 	@Override
@@ -59,13 +59,13 @@ public final class FakeGuiItemModeOverlay extends GuiItemModeOverlay implements 
 	}
 
 	@Override
-	public Map<String, String> getPanelInfo() {
-		Map<String, String> info = new LinkedHashMap<String, String>();
-		info.put("Item Mode HAlign", "Left/Right Arrow Keys \u2190 \u2192");
-		info.put("Item Mode VAlign", "Up/Down Arrow Keys \u2191 \u2193");
-		info.put("X Axis Offset", "A and D Keys");
-		info.put("Y Axis Offset", "W and S Keys");
-		return info;
+	public List<Property> getPanelInfo() {
+		List<Property> props = new ArrayList<Property>();
+		props.add(itemModeHAlign);
+		props.add(itemModeVAlign);
+		props.add(itemModeOffsetX);
+		props.add(itemModeOffsetY);
+		return props;
 	}
 
 	@Override

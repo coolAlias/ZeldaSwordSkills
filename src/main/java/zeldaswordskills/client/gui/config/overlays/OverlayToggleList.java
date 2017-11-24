@@ -6,9 +6,7 @@ import java.util.List;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiUtils;
 
@@ -50,7 +48,7 @@ public class OverlayToggleList extends GuiScreen {
 	}
 
 	protected void drawSlot(int slotIndex, int x, int y) {
-		String overlayTitle = overlays.get(slotIndex).getName();
+		String overlayTitle = overlays.get(slotIndex).getDisplayName();
 		this.mc.currentScreen.drawCenteredString(fontRendererObj, overlayTitle, x, y, 0xFFFFFFFF);
 	}
 
@@ -66,7 +64,7 @@ public class OverlayToggleList extends GuiScreen {
 		private final IOverlayButton overlay;
 
 		public OverlayToggleButton(int buttonId, int x, int y, int widthIn, int heightIn, IOverlayButton overlay) {
-			super(buttonId, x, y, widthIn, heightIn, overlay.getName());
+			super(buttonId, x, y, widthIn, heightIn, overlay.getDisplayName());
 			this.overlay = overlay;
 			this.packedFGColour = overlay.shouldRender() ? GuiUtils.getColorCode('2', true) : GuiUtils.getColorCode('4', true);
 		}
@@ -74,8 +72,7 @@ public class OverlayToggleList extends GuiScreen {
 		@Override
 		public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
 			if (super.mousePressed(mc, mouseX, mouseY)) {
-				this.overlay.setShouldRender();
-				this.packedFGColour = overlay.shouldRender() ? GuiUtils.getColorCode('2', true) : GuiUtils.getColorCode('4', true);
+				this.packedFGColour = this.overlay.setShouldRender() ? GuiUtils.getColorCode('2', true) : GuiUtils.getColorCode('4', true);
 				return true;
 			}
 			else {

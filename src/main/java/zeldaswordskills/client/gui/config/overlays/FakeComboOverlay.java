@@ -1,12 +1,11 @@
 package zeldaswordskills.client.gui.config.overlays;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -14,6 +13,7 @@ import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.Combo;
 import zeldaswordskills.skills.SkillBase;
+import zeldaswordskills.util.StringUtils;
 
 public final class FakeComboOverlay extends ComboOverlay implements IOverlayButton {
 
@@ -21,8 +21,8 @@ public final class FakeComboOverlay extends ComboOverlay implements IOverlayButt
 
 	private final Property isComboHudEnabled = Config.config.get(CATEGORY, "Display Combo Counter", true);
 	private final Property hitsToDisplay = Config.config.get(CATEGORY, "Hits to Display in Combo HUD", 3);
-	private final Property comboHudHAlign = Config.config.get(CATEGORY, "Combo HUD X-axis Alignment", "left");
-	private final Property comboHudVAlign = Config.config.get(CATEGORY, "Combo HUD Y-axis Alignment", "top");
+	private final Property comboHudHAlign = Config.config.get(CATEGORY, "Combo HUD X Alignment", "left");
+	private final Property comboHudVAlign = Config.config.get(CATEGORY, "Combo HUD Y Alignment", "top");
 	private final Property comboHudOffsetX = Config.config.get(CATEGORY, "Combo HUD X Offset", 0);
 	private final Property comboHudOffsetY = Config.config.get(CATEGORY, "Combo HUD Y Offset", 0);
 
@@ -40,15 +40,15 @@ public final class FakeComboOverlay extends ComboOverlay implements IOverlayButt
 	}
 
 	@Override
-	public void setShouldRender() {
+	public boolean setShouldRender() {
 		Config.isComboHudEnabled = !Config.isComboHudEnabled;
 		isComboHudEnabled.set(Config.isComboHudEnabled);
+		return shouldRender();
 	}
 
 	@Override
-	public String getName() {
-		String key = this.getLangKey() + ".title";
-		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Combo Overlay";
+	public String getDisplayName() {
+		return StringUtils.translateKey(this.getLangKey() + ".title");
 	}
 
 	@Override
@@ -57,14 +57,14 @@ public final class FakeComboOverlay extends ComboOverlay implements IOverlayButt
 	}
 
 	@Override
-	public Map<String, String> getPanelInfo() {
-		Map<String, String> info = new LinkedHashMap<String, String>();
-		info.put("Combo HAlign", "Left/Right Arrow Keys \u2190 \u2192");
-		info.put("Combo VAlign", "Up/Down Arrow Keys \u2191 \u2193");
-		info.put("X Axis Offset", "A and D Keys");
-		info.put("Y Axis Offset", "W and S Keys");
-		info.put("Hits to Display in Combo HUD", "Numpad +/- Keys");
-		return info;
+	public List<Property> getPanelInfo() {
+		List<Property> props = new ArrayList<Property>();
+		props.add(comboHudHAlign);
+		props.add(comboHudVAlign);
+		props.add(comboHudOffsetX);
+		props.add(comboHudOffsetY);
+		props.add(hitsToDisplay);
+		return props;
 	}
 
 	@Override

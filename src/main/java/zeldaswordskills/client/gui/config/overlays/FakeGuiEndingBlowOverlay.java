@@ -1,17 +1,17 @@
 package zeldaswordskills.client.gui.config.overlays;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
 import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.util.StringUtils;
 
 public final class FakeGuiEndingBlowOverlay extends GuiEndingBlowOverlay implements IOverlayButton {
 
@@ -34,15 +34,10 @@ public final class FakeGuiEndingBlowOverlay extends GuiEndingBlowOverlay impleme
 	}
 
 	@Override
-	public void setShouldRender() {
+	public boolean setShouldRender() {
 		Config.isEndingBlowHudEnabled = !Config.isEndingBlowHudEnabled;
 		isEndingBlowHudEnabled.set(Config.isEndingBlowHudEnabled);
-	}
-
-	@Override
-	public String getName() {
-		String key = this.getLangKey() + ".title";
-		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Ending Blow HUD";
+		return shouldRender();
 	}
 
 	@Override
@@ -51,13 +46,18 @@ public final class FakeGuiEndingBlowOverlay extends GuiEndingBlowOverlay impleme
 	}
 
 	@Override
-	public Map<String, String> getPanelInfo() {
-		Map<String, String> info = new LinkedHashMap<String, String>();
-		info.put("Ending Blow HAlign", "Left/Right Arrow Keys \u2190 \u2192");
-		info.put("Ending Blow VAlign", "Up/Down Arrow Keys \u2191 \u2193");
-		info.put("X Axis Offset", "A and D Keys");
-		info.put("Y Axis Offset", "W and S Keys");
-		return info;
+	public String getDisplayName() {
+		return StringUtils.translateKey(this.getLangKey() + ".title");
+	}
+
+	@Override
+	public List<Property> getPanelInfo() {
+		List<Property> props = new ArrayList<Property>();
+		props.add(endingBlowHudHAlign);
+		props.add(endingBlowHudVAlign);
+		props.add(endingBlowHudOffsetX);
+		props.add(endingBlowHudOffsetY);
+		return props;
 	}
 
 	@Override

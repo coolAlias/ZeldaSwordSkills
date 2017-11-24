@@ -1,7 +1,7 @@
 package zeldaswordskills.client.gui.config.overlays;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
@@ -14,16 +14,17 @@ import zeldaswordskills.client.gui.GuiMagicMeterText;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
 import zeldaswordskills.client.gui.IGuiOverlay.VALIGN;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.util.StringUtils;
 
 public final class FakeGuiMagicMeterText extends GuiMagicMeterText implements IOverlayButton {
 
 	private final String CATEGORY = "magic meter";
 
 	private final Property isMagicMeterTextEnabled = Config.config.get(CATEGORY, "Display Current Magic Points", false);
-	private final Property magicMeterHAlign = Config.config.get(CATEGORY, "Magic Meter Horizontal Alignment", "center");
-	private final Property magicMeterVAlign = Config.config.get(CATEGORY, "Magic Meter Vertical Alignment", "bottom");
-	private final Property magicMeterOffsetX = Config.config.get(CATEGORY, "Magic Meter Horizontal Offset", 47);
-	private final Property magicMeterOffsetY = Config.config.get(CATEGORY, "Magic Meter Vertical Offset", -40);
+	private final Property magicMeterHAlign = Config.config.get(CATEGORY, "Magic Meter X Alignment", "center");
+	private final Property magicMeterVAlign = Config.config.get(CATEGORY, "Magic Meter Y Alignment", "bottom");
+	private final Property magicMeterOffsetX = Config.config.get(CATEGORY, "Magic Meter X Offset", 47);
+	private final Property magicMeterOffsetY = Config.config.get(CATEGORY, "Magic Meter Y Offset", -40);
 
 	public FakeGuiMagicMeterText(Minecraft mc, FakeGuiMagicMeter meter) {
 		super(mc, meter);
@@ -35,9 +36,10 @@ public final class FakeGuiMagicMeterText extends GuiMagicMeterText implements IO
 	}
 
 	@Override
-	public void setShouldRender() {
+	public boolean setShouldRender() {
 		Config.isMagicMeterTextEnabled = !Config.isMagicMeterTextEnabled;
 		isMagicMeterTextEnabled.set(Config.isMagicMeterTextEnabled);
+		return shouldRender();
 	}
 
 	@Override
@@ -63,24 +65,23 @@ public final class FakeGuiMagicMeterText extends GuiMagicMeterText implements IO
 	}
 
 	@Override
-	public String getName() {
-		String key = this.getLangKey() + ".title";
-		return StatCollector.canTranslate(key) ? StatCollector.translateToLocal(key) : "Magic Meter Text";
+	public String getDisplayName() {
+		return StringUtils.translateKey(this.getLangKey() + ".text.title");
 	}
 
 	@Override
 	public String getLangKey() {
-		return "config.zss.magic_meter.text";
+		return "config.zss.magic_meter";
 	}
 
 	@Override
-	public Map<String, String> getPanelInfo() {
-		Map<String, String> info = new LinkedHashMap<String, String>();
-		info.put("Magic Meter HAlign", "Left/Right Arrow Keys \u2190 \u2192");
-		info.put("Magic Meter VAlign", "Up/Down Arrow Keys \u2191 \u2193");
-		info.put("X Axis Offset", "A and D Keys");
-		info.put("Y Axis Offset", "W and S Keys");
-		return info;
+	public List<Property> getPanelInfo() {
+		List<Property> props = new ArrayList<Property>();
+		props.add(magicMeterHAlign);
+		props.add(magicMeterVAlign);
+		props.add(magicMeterOffsetX);
+		props.add(magicMeterOffsetY);
+		return props;
 	}
 
 	@Override
