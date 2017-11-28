@@ -89,8 +89,8 @@ public class FXCycloneRing extends EntityFX {
 		particleGravity = 0;
 		this.yaw = yaw;
 		this.pitch = pitch;
-		axis.rotatePitch(pitch);
-		axis.rotateYaw(yaw);
+		axis = axis.rotatePitch(pitch);
+		axis = axis.rotateYaw(yaw);
 		ringHeight = ascendVelocity; // starts just a bit off the ground
 		baseAngle = 0;
 		this.particleAlpha = alpha;
@@ -140,9 +140,9 @@ public class FXCycloneRing extends EntityFX {
 		float ringWidth = getWidthVSHeight(ringHeight);
 		for (int i = 0; i < puffs.length; i++) {
 			Vec3 vec = new Vec3(ringWidth, 0, 0);
-			vec.rotateYaw(baseAngle + ((float)i) * dAngle);
-			vec.rotatePitch(pitch);
-			vec.rotateYaw(yaw);
+			vec = vec.rotateYaw(baseAngle + ((float)i) * dAngle);
+			vec = vec.rotatePitch(pitch);
+			vec = vec.rotateYaw(yaw);
 			puffs[i].motionX = posX + motionX + vec.xCoord - puffs[i].posX;
 			puffs[i].motionY = posY + motionY + vec.yCoord - puffs[i].posY;
 			puffs[i].motionZ = posZ + motionZ + vec.zCoord - puffs[i].posZ;
