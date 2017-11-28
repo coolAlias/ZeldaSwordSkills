@@ -67,6 +67,7 @@ public class ModParticle extends EntityFX {
 
 	@Override
 	public void setAlphaF(float value) {
+		super.setAlphaF(value);
 		setBaseAlpha(value);
 	}
 	protected void setBaseAlpha(float value) {
