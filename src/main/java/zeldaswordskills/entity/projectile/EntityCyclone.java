@@ -263,7 +263,6 @@ public class EntityCyclone extends EntityMobThrowable
 			yaw -= 2*Math.PI;
 
 		if (Math.random() < 0.1) {
-			//if (pitchVelocity < 0.01)
 			pitchVelocity = 0.2f;
 		}
 		pitch += pitchVelocity;
@@ -279,11 +278,7 @@ public class EntityCyclone extends EntityMobThrowable
 		} else {
 			pitch = 0;
 		}
-
-		// This was left from when Cyclone had a predetermined duration in Dota 2 Items:
-		/*if (duration - elapsed < 0.5f && alpha > 0) {
-			alpha -= 0.05f;
-		}*/
+		
 		//TODO: when destroying the cyclone, set the particles to start fading
 
 		EffectRenderer effectRenderer = Minecraft.getMinecraft().effectRenderer;

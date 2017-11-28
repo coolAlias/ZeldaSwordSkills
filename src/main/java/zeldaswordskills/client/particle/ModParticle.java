@@ -75,17 +75,17 @@ public class ModParticle extends EntityFX {
 	}
 
 	protected void setRandomScale(float min, float max) {
-		particleScale = rand.nextFloat()*(max-min) + min;
+		particleScale = rand.nextFloat() * (max - min) + min;
 	}
 
 	protected void setRandomMaxAge(int min, int max) {
-		particleMaxAge = MathHelper.floor_float(rand.nextFloat()*(float)(max-min)) + min;
+		particleMaxAge = MathHelper.floor_float(rand.nextFloat() * (float)(max - min)) + min;
 	}
 
 	protected void randomizeVelocity(double maximum) {
-		this.motionX += (rand.nextDouble()*2-1) * maximum;
-		this.motionY += (rand.nextDouble()*2-1) * maximum;
-		this.motionZ += (rand.nextDouble()*2-1) * maximum;
+		this.motionX += (rand.nextDouble() * 2 - 1) * maximum;
+		this.motionY += (rand.nextDouble() * 2 - 1) * maximum;
+		this.motionZ += (rand.nextDouble() * 2 - 1) * maximum;
 	}
 
 	protected void setTexturePositions(int x, int y) {
@@ -105,7 +105,7 @@ public class ModParticle extends EntityFX {
 		remainingIconStages = iconStages = stages;
 		initialIconIndex = iconStartIndex = y * 16 + x;
 		if (randomStart) {
-			int firstStage = rand.nextInt(stages-1);
+			int firstStage = rand.nextInt(stages - 1);
 			initialIconIndex += firstStage;
 			remainingIconStages -= firstStage;
 		}
@@ -174,7 +174,7 @@ public class ModParticle extends EntityFX {
 		if (ageFraq <= fadeInTime) {
 			return baseAlpha * ageFraq / fadeInTime;
 		} else if (ageFraq >= fadeOutTime) {
-			return baseAlpha * (1f - (ageFraq - fadeOutTime) / (1f-fadeOutTime) );
+			return baseAlpha * (1f - (ageFraq - fadeOutTime) / (1f - fadeOutTime));
 		} else {
 			return baseAlpha;
 		}

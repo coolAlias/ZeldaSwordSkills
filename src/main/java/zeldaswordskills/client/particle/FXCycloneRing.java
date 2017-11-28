@@ -41,19 +41,40 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 @SideOnly(Side.CLIENT)
 public class FXCycloneRing extends EntityFX {
-	public static final EntityDiggingFX.Factory factory = new EntityDiggingFX.Factory();
-	public static float ascendVelocity = 0.2f;
-	public static int puffsPerRing = 8;
-	public static float maxRingHeight = 4;
-	public static float baseAngleVelocity = 0.4f;
 
+	/** The factory giving access to the {@code EntityDiggingFX} constructor for this ring*/
+	public static final EntityDiggingFX.Factory factory = new EntityDiggingFX.Factory();
+	
+	/** How fast the ring rises */
+	public static final float ascendVelocity = 0.2f;
+	
+	/** The number of cyclone particles per ring. Digging particles are extraneous and not counted */
+	public static final int puffsPerRing = 8;
+	
+	/** The maximum height that this effect can rise */
+	public static final float maxRingHeight = 4;
+	
+	/** How quickly the ring rotates per update */
+	public static final float baseAngleVelocity = 0.4f;
+
+	
+	/** The list of particles in this ring */
 	private EntityFX[] puffs;
+	
+	/**
+	 * 
+	 * The angle of rotation of the current ring. This is determined by equally distributing the number of particles
+	 * around the center of this ring (i.e. 8 particles would set the dAngle to PI/4 (45 degrees))
+	 * 
+	 */
 	private float dAngle;
 
 	private float yaw;
 	private float pitch;
 	private Vec3 axis;
 	private float ringHeight;
+	
+	/** The current angle of the working ring. The ring rotates by the rate of the dAngle, and a new particle is created at this position on the vector*/
 	private float baseAngle;
 
 	public FXCycloneRing(World world, double x, double y, double z, double velX, double velY, double velZ,
@@ -79,14 +100,14 @@ public class FXCycloneRing extends EntityFX {
 			if (Math.random() < 0.07) {
 				// Add *dust* of the block below instead of the smoke puff
 				int xInt = MathHelper.floor_double(x);
-				int yInt = MathHelper.floor_double(y) - 1;
+				int yInt = MathHelper.floor_double(y) - 1;// Minus 1 to get the block beneath this entity
 				int zInt = MathHelper.floor_double(z);
 				IBlockState state = world.getBlockState(new BlockPos(xInt, yInt, zInt));
 				if (state.getBlock() != Blocks.air) {
 					// The "y + 0.1" below is a workaround for the bug that digging
 					// particles stayed on the ground and didn't fly up for some reason.
 					// func_174845_l is the new applyColourModifier
-					puffs[i] = ((EntityDiggingFX) factory.getEntityFX(EnumParticleTypes.BLOCK_CRACK.getParticleID(), world, x, y+0.1, z, velX, velY, velZ, Block.getStateId(state))).func_174845_l().multipleParticleScaleBy(0.5f);
+					puffs[i] = ((EntityDiggingFX) factory.getEntityFX(EnumParticleTypes.BLOCK_CRACK.getParticleID(), world, x, y + 0.1, z, velX, velY, velZ, Block.getStateId(state))).func_174845_l().multipleParticleScaleBy(0.5f);
 					//puffs[i] = new EntityDiggingFX(world, x, y+0.1, z, velX, velY, velZ, state).applyColourMultiplier(xInt, yInt, zInt).multipleParticleScaleBy(0.5f);
 					renderer.addEffect(puffs[i]);
 					continue;
@@ -112,7 +133,6 @@ public class FXCycloneRing extends EntityFX {
 
 	@Override
 	public void onUpdate() {
-		//super.onUpdate();
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;
@@ -122,7 +142,7 @@ public class FXCycloneRing extends EntityFX {
 		float ringWidth = getWidthVSHeight(ringHeight);
 		for (int i = 0; i < puffs.length; i++) {
 			Vec3 vec = new Vec3(ringWidth, 0, 0);
-			vec.rotateYaw(baseAngle + ((float)i)*dAngle);
+			vec.rotateYaw(baseAngle + ((float)i) * dAngle);
 			vec.rotatePitch(pitch);
 			vec.rotateYaw(yaw);
 			puffs[i].motionX = posX + motionX + vec.xCoord - puffs[i].posX;
@@ -131,10 +151,6 @@ public class FXCycloneRing extends EntityFX {
 		}
 		if (axis != null) {
 			if (ringHeight < maxRingHeight) {
-				//motionX = axis.xCoord * ascendVelocity;
-				//motionY = axis.yCoord * ascendVelocity;
-				//motionZ = axis.zCoord * ascendVelocity;
-				//moveEntity(motionX, motionY, motionZ);
 				posX += axis.xCoord * ascendVelocity;
 				posY += axis.yCoord * ascendVelocity;
 				posZ += axis.zCoord * ascendVelocity;
@@ -147,12 +163,12 @@ public class FXCycloneRing extends EntityFX {
 			}
 		}
 		baseAngle += baseAngleVelocity;
-		if (baseAngle > 2*Math.PI) {
-			baseAngle -= 2*Math.PI;
+		if (baseAngle > 2 * Math.PI) {
+			baseAngle -= 2 * Math.PI;
 		}
 	}
 
 	public static float getWidthVSHeight(float height) {
-		return height*0.2f + 0.15f;
+		return height * 0.2f + 0.15f;
 	}
 }
