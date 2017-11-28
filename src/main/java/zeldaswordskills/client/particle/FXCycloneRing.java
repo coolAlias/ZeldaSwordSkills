@@ -106,9 +106,7 @@ public class FXCycloneRing extends EntityFX {
 				if (state.getBlock() != Blocks.air) {
 					// The "y + 0.1" below is a workaround for the bug that digging
 					// particles stayed on the ground and didn't fly up for some reason.
-					// func_174845_l is the new applyColourModifier
-					puffs[i] = ((EntityDiggingFX) factory.getEntityFX(EnumParticleTypes.BLOCK_CRACK.getParticleID(), world, x, y + 0.1, z, velX, velY, velZ, Block.getStateId(state))).func_174845_l().multipleParticleScaleBy(0.5f);
-					//puffs[i] = new EntityDiggingFX(world, x, y+0.1, z, velX, velY, velZ, state).applyColourMultiplier(xInt, yInt, zInt).multipleParticleScaleBy(0.5f);
+					puffs[i] = factory.getEntityFX(EnumParticleTypes.BLOCK_CRACK.getParticleID(), world, x, y + 0.1, z, velX, velY, velZ, Block.getStateId(state)).multipleParticleScaleBy(0.5f);
 					renderer.addEffect(puffs[i]);
 					continue;
 				}
