@@ -19,6 +19,8 @@ package zeldaswordskills.entity.mobs;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.entity.EntityLivingBase;
@@ -27,7 +29,10 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
+import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S04PacketEntityEquipment;
 import net.minecraft.util.BlockPos;
@@ -63,8 +68,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
-
-import com.google.common.collect.Lists;
 
 /**
  * 
@@ -395,13 +398,20 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 				}
 				// Hack to prevent infinite loop when attacked by other electrified mobs (other chus, keese, etc)
 			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
-				source.getEntity().attackEntityFrom(getDamageSource(), getAttackStrength());
-				worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				boolean isWood = false;
+				ItemStack stack = ((EntityPlayer) source.getEntity()).getHeldItem();
+				if (stack != null && stack.getItem() instanceof ItemTool) {
+					isWood = ((ItemTool) stack.getItem()).getToolMaterial() == ToolMaterial.WOOD;
+				} else if (stack != null && stack.getItem() instanceof ItemSword) {
+					isWood = ((ItemSword) stack.getItem()).getToolMaterialName().equals(ToolMaterial.WOOD.toString());
+				}
+				if (!isWood) {
+					source.getEntity().attackEntityFrom(getDamageSource(), getAttackStrength());
+					worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				}
 			}
-
 			return false;
 		}
-
 		return super.attackEntityFrom(source, amount);
 	}
 
