@@ -19,7 +19,9 @@ package zeldaswordskills.client.particle;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -128,15 +130,13 @@ public class ModParticle extends EntityFX {
 
 	@Override
 	public void renderParticle(WorldRenderer renderer, Entity entity, float partialTick, float rotX, float rotXZ, float rotZ, float rotYZ, float rotXY) {
-		/*
-		renderer.finishDrawing();
+		Tessellator tess = Tessellator.getInstance();
+		tess.draw();
 		Minecraft.getMinecraft().renderEngine.bindTexture(modParticles);
-		renderer.startDrawingQuads();
-		renderer.setBrightness(getBrightnessForRender(partialTick));
+		renderer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
 		super.renderParticle(renderer, entity, partialTick, rotX, rotXZ, rotZ, rotYZ, rotXY);
-		renderer.finishDrawing();
-		renderer.startDrawingQuads();
-		*/
+		tess.draw();
+		renderer.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
 		Minecraft.getMinecraft().renderEngine.bindTexture(minecraftParticles);
 	}
 
