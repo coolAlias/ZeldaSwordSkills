@@ -19,6 +19,11 @@ package zeldaswordskills.entity.mobs;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
+import cpw.mods.fml.common.eventhandler.Event.Result;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.particle.EntityBreakingFX;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.EntityLiving;
@@ -27,7 +32,10 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
+import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
@@ -53,12 +61,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
-
-import com.google.common.collect.Lists;
-
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -391,13 +393,20 @@ public class EntityChu extends EntityLiving implements IMob, IEntityBombEater, I
 				}
 				// Hack to prevent infinite loop when attacked by other electrified mobs (other chus, keese, etc)
 			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
-				source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
-				worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				boolean isWood = false;
+				ItemStack stack = ((EntityPlayer) source.getEntity()).getHeldItem();
+				if (stack != null && stack.getItem() instanceof ItemTool) {
+					isWood = ((ItemTool) stack.getItem()).func_150913_i() == ToolMaterial.WOOD;
+				} else if (stack != null && stack.getItem() instanceof ItemSword) {
+					isWood = ((ItemSword) stack.getItem()).getToolMaterialName().equals(ToolMaterial.WOOD.toString());
+				}
+				if (!isWood) {
+					source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
+					worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				}
 			}
-
 			return false;
 		}
-
 		return super.attackEntityFrom(source, amount);
 	}
 
