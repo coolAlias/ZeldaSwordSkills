@@ -27,7 +27,8 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
+import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S04PacketEntityEquipment;
 import net.minecraft.util.BlockPos;
@@ -394,11 +395,28 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 					setShockTime(0);
 				}
 				// Hack to prevent infinite loop when attacked by other electrified mobs (other chus, keese, etc)
-			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
-				source.getEntity().attackEntityFrom(getDamageSource(), getAttackStrength());
-				worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer) {
+				boolean isWood = false;
+				EntityPlayer player = (EntityPlayer)source.getEntity();
+				ItemStack stack = player.getHeldItem();
+				if (source.damageType.equals("thorns")) {
+					return false;
+				}
+				if (stack != null) {
+					Item attackItem = stack.getItem();
+					if (attackItem instanceof ItemTool) {
+						isWood = ((ItemTool)attackItem).getToolMaterial() == ToolMaterial.WOOD;
+					} else if (attackItem instanceof ItemSword) {
+						isWood = ((ItemSword)attackItem).getToolMaterialName().equals(ToolMaterial.WOOD.toString());
+					}
+				}
+				if (isWood) {
+					return super.attackEntityFrom(source, amount);
+				} else {
+					source.getEntity().attackEntityFrom(getDamageSource(), getAttackStrength());
+					worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
+				}
 			}
-
 			return false;
 		}
 
