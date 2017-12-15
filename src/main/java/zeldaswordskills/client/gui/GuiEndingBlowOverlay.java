@@ -31,7 +31,7 @@ import zeldaswordskills.skills.sword.EndingBlow;
 public class GuiEndingBlowOverlay extends AbstractGuiOverlay
 {
 	/** Time at which the current combo first started displaying */
-	private long displayStartTime;
+	protected long displayStartTime;
 
 	/** Length of time combo pop-up will display */
 	private static final long DISPLAY_TIME = 1000;

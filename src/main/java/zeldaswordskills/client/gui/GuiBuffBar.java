@@ -45,7 +45,7 @@ public class GuiBuffBar extends AbstractGuiOverlay
 	private static final int ICON_SPACING = ICON_SIZE + DEFAULT_PADDING;
 	private static final ResourceLocation BUFF_ICONS = new ResourceLocation(ModInfo.ID, "textures/gui/bufficons.png");
 	/** Currently rendering Buffs; set each render cycle during {@link #shouldRender()} */
-	private Collection<BuffBase> buffs;
+	protected Collection<BuffBase> buffs;
 
 	public GuiBuffBar(Minecraft mc) {
 		super(mc);

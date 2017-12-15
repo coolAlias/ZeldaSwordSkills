@@ -25,9 +25,9 @@ import zeldaswordskills.ref.Config;
 
 public class GuiMagicMeterText extends AbstractGuiOverlay
 {
-	private final GuiMagicMeter meter;
+	protected final GuiMagicMeter meter;
 	private ZSSPlayerInfo info;
-	private String text;
+	protected String text;
 
 	public GuiMagicMeterText(Minecraft mc, GuiMagicMeter meter) {
 		super(mc);

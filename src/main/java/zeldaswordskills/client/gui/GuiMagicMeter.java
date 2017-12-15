@@ -34,8 +34,8 @@ import zeldaswordskills.ref.ModInfo;
 @SideOnly(Side.CLIENT)
 public class GuiMagicMeter extends AbstractGuiOverlay
 {
-	private static final ResourceLocation HORIZONTAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_horizontal.png");
-	private static final ResourceLocation VERTICAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_vertical.png");
+	protected static final ResourceLocation HORIZONTAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_horizontal.png");
+	protected static final ResourceLocation VERTICAL_BAR = new ResourceLocation(ModInfo.ID, "textures/gui/magic_meter_vertical.png");
 	public static final int PADDING = 1;
 	public static final int METER_HEIGHT = 9;
 	private static int NUM_INCREMENTS = 2;
@@ -43,7 +43,7 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 	private static float INCREMENT;
 	private ZSSPlayerInfo info;
 	/** The width (or height if vertical) of the inner portion of the mana bar */
-	private int inner_bar;
+	protected int inner_bar;
 
 	/**
 	 * Call this method if Config settings change while in game.
@@ -54,7 +54,9 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 		MAX_WIDTH = MathHelper.clamp_int(value, 25, 100);
 		INCREMENT = (float) MAX_WIDTH / (float) NUM_INCREMENTS;
 	}
-
+	
+	public static int getMaxWidth(){return MAX_WIDTH;}
+	
 	/**
 	 * Call this method if Config settings change while in game.
 	 * Sets the number of increments required to max out the magic meter.
@@ -64,6 +66,10 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 		NUM_INCREMENTS = MathHelper.clamp_int(value, 1, 10);
 		INCREMENT = (float) MAX_WIDTH / (float) NUM_INCREMENTS;
 	}
+
+	public static int getNumIncrements(){return NUM_INCREMENTS;}
+	
+	public static float getIncrementLength(){return INCREMENT;}
 
 	public GuiMagicMeter(Minecraft mc) {
 		super(mc);
@@ -95,9 +101,24 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 		return this.info.getMaxMagic() > 0;
 	}
 
+	/** Returns the current max magic value */
+	protected float getMaxMagic() {
+		return (this.info == null ? 0F : this.info.getMaxMagic());
+	}
+
+	/** Returns the current magic value */
+	protected float getCurrentMagic() {
+		return (this.info == null ? 0F : this.info.getCurrentMagic());
+	}
+
+	/** True if the player's mana is currently unlimited */
+	protected boolean isUnlimited() {
+		return (this.mc.thePlayer == null ? false : ZSSEntityInfo.get(this.mc.thePlayer).isBuffActive(Buff.UNLIMITED_MAGIC));
+	}
+
 	@Override
 	protected void setup(ScaledResolution resolution) {
-		this.inner_bar = MathHelper.clamp_int(MathHelper.floor_float((this.info.getMaxMagic() / 50) * INCREMENT), MathHelper.floor_float(INCREMENT), MAX_WIDTH);
+		this.inner_bar = MathHelper.clamp_int(MathHelper.floor_float((this.getMaxMagic() / 50) * INCREMENT), MathHelper.floor_float(INCREMENT), MAX_WIDTH);
 		if (Config.isMagicMeterHorizontal) {
 			this.width = MAX_WIDTH; // so offsets work the same for bars of differing sizes
 			this.height = METER_HEIGHT;
@@ -133,13 +154,12 @@ public class GuiMagicMeter extends AbstractGuiOverlay
 	protected void render(ScaledResolution resolution) {
 		int xPos = this.getLeft();
 		int yPos = this.getTop();
-		int current = MathHelper.floor_float((this.info.getCurrentMagic() / this.info.getMaxMagic()) * this.inner_bar);
-		boolean unlimited = ZSSEntityInfo.get(this.mc.thePlayer).isBuffActive(Buff.UNLIMITED_MAGIC);
+		int current = MathHelper.floor_float((this.getCurrentMagic() / this.getMaxMagic()) * this.inner_bar);
 		GlStateManager.pushAttrib();
 		GlStateManager.disableLighting();
 		GlStateManager.enableAlpha();
 		GlStateManager.enableBlend();
-		if (unlimited) {
+		if (this.isUnlimited()) {
 			GlStateManager.color(0.5F, 0.5F, 1.0F, 1.0F);
 		} else {
 			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

@@ -136,34 +136,45 @@ public class ZSSEntities
 	 */
 	public static void postInit(Configuration config) {
 		// REGISTER ENTITY SPAWN DATA
-		int rate = config.get("Mob Spawns", "[Spawn Rate] Chuchu spawn rate (0 to disable)[0+]", 10).getInt();
+		String category = "mob spawns";
+		int rate = config.getInt("[Spawn Rate] Chuchu Spawn Rate", category, 10, 0, 10000, "The spawn pool weight for Chuchu (0 to disable)", "config.zss.mob_spawns.chuchu.rate");
 		addSpawnableEntityData(EntityChu.class, EnumCreatureType.MONSTER, 4, 4, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Darknut spawn rate (0 to disable)[0+]", 5).getInt();
+		rate = config.getInt("[Spawn Rate] Darknut Spawn Rate", category, 5, 0, 10000, "The spawn pool weight for Darknut (0 to disable)", "config.zss.mob_spawns.darknut.rate");
 		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.MONSTER, 1, 1, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba spawn rate (0 to disable)[0+]", 10).getInt();
+		rate = config.getInt("[Spawn Rate] Deku Baba Spawn Rate", category, 10, 0 , 10000, "The spawn pool weight for Deku Baba (0 to disable)", "config.zss.mob_spawns.dekubaba.rate");
 		addSpawnableEntityData(EntityDekuBaba.class, EnumCreatureType.MONSTER, 1, 3, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Fire) spawn rate (0 to disable)[0+]", 2).getInt();
+		rate = config.getInt("[Spawn Rate] Deku Baba (Fire) Spawn Rate", category, 2, 0, 10000, "The spawn pool weight for Deku Baba (Fire) (0 to disable)", "config.zss.mob_spawns.dekufire.rate");
 		addSpawnableEntityData(EntityDekuFire.class, EnumCreatureType.MONSTER, 1, 3, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Withered) spawn rate (0 to disable)[0+]", 5).getInt();
+		rate = config.getInt("[Spawn Rate] Deku Baba (Withered) Spawn Rate", category, 5, 0, 10000, "The spawn pool weight for Deku Baba (Withered) (0 to disable)", "config.zss.mob_spawns.dekuwithered.rate");
 		addSpawnableEntityData(EntityDekuWithered.class, EnumCreatureType.MONSTER, 1, 3, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Fairy (wild) spawn rate (0 to disable)[0+]", 1).getInt();
+		rate = config.getInt("[Spawn Rate] Fairy (wild) Spawn Rate", category, 1, 0, 10000, "The spawn pool weight for Fairy (wild) (0 to disable)", "config.zss.mob_spawns.fairy.rate");
 		addSpawnableEntityData(EntityFairy.class, EnumCreatureType.AMBIENT, 1, 3, rate);
 		// Gorons are an exception, as they are not spawned using vanilla mechanics
-		spawnGoron = config.get("Mob Spawns", "[Spawn Rate] Goron spawn rate, as a ratio of regular villagers to Gorons (0 to disable)[0+]", 4).getInt();
-		rate = config.get("Mob Spawns", "[Spawn Rate] Keese spawn rate (0 to disable)[0+]", 1).getInt();
+		spawnGoron = config.getInt("[Spawn Rate] Goron Spawn Rate", category, 4, 0, 1000, "Goron spawn rate, as a ratio of regular villagers to Gorons (a Goron per how many villagers) (0 to disable)", "config.zss.mob_spawns.goron.rate");
+		rate = config.getInt("[Spawn Rate] Keese Spawn Rate", category, 1, 0, 10000, "The spawn pool weight for Keese (0 to disable)", "config.zss.mob_spawns.keese.rate");
 		addSpawnableEntityData(EntityKeese.class, EnumCreatureType.AMBIENT, 4, 4, rate); // TODO should use monster type???
-		rate = config.get("Mob Spawns", "[Spawn Rate] Octorok spawn rate (0 to disable)[0+]", 8).getInt();
+		rate = config.getInt("[Spawn Rate] Octorok Spawn Rate", category, 8, 0, 10000, "The spawn pool weight for Octorok (0 to disable)", "config.zss.mob_spawns.octorok.rate");
 		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.WATER_CREATURE, 2, 4, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Skulltula spawn rate (0 to disable)[0+]", 8).getInt();
+		rate = config.getInt("[Spawn Rate] Skulltula Spawn Rate", category, 8, 0, 10000, "The spawn pool weight for Skulltula (0 to disable)", "config.zss.mob_spawns.skulltula.rate");
 		addSpawnableEntityData(EntitySkulltula.class, EnumCreatureType.MONSTER, 2, 4, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
+		rate = config.getInt("[Spawn Rate] Wizzrobe Spawn Rate", category, 10, 0, 10000, "The spawn pool weight for Wizzrobe (0 to disable)", "config.zss.mob_spawns.wizzrobe.rate");
 		addSpawnableEntityData(EntityWizzrobe.class, EnumCreatureType.MONSTER, 1, 1, rate);
 		// ALLOWED BIOMES
 		for (Class<? extends EntityLiving> entity : defaultSpawnLists.keySet()) {
 			String[] defaultBiomes = defaultSpawnLists.get(entity);
 			SpawnableEntityData spawnData = spawnableEntityData.get(entity);
 			if (defaultBiomes != null && spawnData != null && spawnData.spawnRate > 0) {
-				String[] biomes = config.get("Mob Spawns", String.format("[Spawn Biomes] List of biomes in which %s are allowed to spawn", entity.getName().substring(entity.getName().lastIndexOf(".") + 1)), defaultBiomes).getStringList();
+				
+				//The name of each entity, pulled from the class name
+				String name = entity.getName().substring(entity.getName().lastIndexOf(".") + 7);
+				//The reference key for each Property to be created
+				String propKey = "[Spawn Biomes] " + name + " Biomes";
+				//The comment for each Property
+				String comment = String.format("List of biomes in which %s are allowed to spawn", name);
+				//The language key for each Property
+				String langKey = "config.zss.mob_spawns." + name.toLowerCase() + ".biomes";
+				
+				String[] biomes = config.getStringList(propKey, category, defaultBiomes, comment, (String[]) null, langKey);
 				if (biomes != null) {
 					addSpawns(entity, biomes, spawnData);
 				}
