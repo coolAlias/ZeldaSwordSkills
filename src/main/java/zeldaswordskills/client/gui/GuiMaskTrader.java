@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,9 @@ public class GuiMaskTrader extends GuiContainer
 	public void initGui() {
 		super.initGui();
 		buttonList.clear();
-		borrow = new GuiButton(0, guiLeft + 68, guiTop + 142, 40, 20, "Borrow");
+		String label = I18n.format("gui.zss.mask_trader.borrow.text");
+		int stringWidth = 10 + mc.fontRendererObj.getStringWidth(label);
+		borrow = new GuiButton(0, guiLeft + 68, guiTop + 142, stringWidth, 20, label);
 		borrow.enabled = ((ContainerMaskTrader) inventorySlots).canBorrow();
 		buttonList.add(borrow);
 	}
@@ -61,7 +63,7 @@ public class GuiMaskTrader extends GuiContainer
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
-		String s = I18n.format("gui.mask_trader.name");
+		String s = I18n.format("gui.zss.mask_trader.name");
 		fontRendererObj.drawString(s, xSize / 2 - fontRendererObj.getStringWidth(s) / 2, ySize - 56, 4210752);
 	}
 
