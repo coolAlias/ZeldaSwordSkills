@@ -23,13 +23,18 @@ import java.util.List;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.DummyConfigElement;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
+import scala.actors.threadpool.Arrays;
+import zeldaswordskills.client.gui.config.overlays.GuiZSSFakeScreen;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
+import zeldaswordskills.util.StringUtils;
 
 /**
  * 
@@ -46,7 +51,9 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 
 	public GuiConfigZeldaSwordSkills(GuiScreen parentScreen) {
 		super(parentScreen, getElements(), ModInfo.ID, GuiConfig.getAbridgedConfigPath(Config.config.toString()), false, false, I18n.format("config.zss.parent.title"));
-		fakeScreen = new GuiButtonExt(26, 0, 50, 300, 18, "Overlay Customizer");//TODO add lang key
+		String key = "config.zss.parent.overlays";
+		String overlayTitle = StringUtils.translateKey(key);
+		fakeScreen = new GuiButtonExt(26, 0, 50, 300, 18, overlayTitle);
 	}
 
 	@Override
@@ -59,6 +66,12 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.fakeScreen.xPosition = this.entryList.width / 2 - fakeScreen.width / 2;
 		super.drawScreen(mouseX, mouseY, partialTicks);
+		if (this.fakeScreen.isMouseOver()) {
+			String title = EnumChatFormatting.GREEN + fakeScreen.displayString;
+			String key = "config.zss.parent.overlays.tooltip";
+			String tooltip = EnumChatFormatting.YELLOW + StringUtils.translateKey(key);
+			this.drawToolTip(Arrays.asList((title + "\n" + tooltip).split("\n")), mouseX, mouseY);
+		}
 	}
 
 	@Override
@@ -117,7 +130,7 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 		categories.add(new ConfigElement(Config.config.get("mod support", "Can Offhand Master Swords", false, "[BattleGear2] Allow Master Swords to be held in the off-hand")));
 
 		List<IConfigElement> list = new ArrayList<>();
-		list.add(new DummyConfigElement.DummyCategoryElement("Configurations", "", categories));//TODO add lang key
+		list.add(new DummyConfigElement.DummyCategoryElement("Configurations", "config.zss.parent.configs", categories));
 
 		return list;
 	}

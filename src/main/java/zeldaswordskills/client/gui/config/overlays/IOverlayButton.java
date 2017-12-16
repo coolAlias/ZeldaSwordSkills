@@ -1,4 +1,6 @@
-package zeldaswordskills.client.gui.config;
+package zeldaswordskills.client.gui.config.overlays;
+
+import java.util.List;
 
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.client.gui.IGuiOverlay;
@@ -10,8 +12,27 @@ import zeldaswordskills.client.gui.IGuiOverlay;
  */
 public interface IOverlayButton extends IGuiOverlay {
 
-	/** This method is used rendering the panel containing the information specific to an overlay */
-	void renderInfoPanel();
+	/**
+	 * @return the translated title for an overlay, or the English default if no translation is present
+	 */
+	String getDisplayName();
+
+	/**
+	 * @return the language key used by this overlay
+	 */
+	String getLangKey();
+
+	/**
+	 * Provides the list of Properties used by this overlay so that {@code ZSSOverlayHelpScreen} can provide translated
+	 * names and controls for the overlay's settings
+	 * 
+	 */
+	List<Property> getPanelInfo();
+
+	/**
+	 * @return whether or not the overlay is currently enabled after being set
+	 */
+	boolean setShouldRender();
 
 	/**
 	 * By default, a rectangular border will be rendered; if a more specialized
