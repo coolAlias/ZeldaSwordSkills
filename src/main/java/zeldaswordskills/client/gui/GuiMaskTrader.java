@@ -45,7 +45,9 @@ public class GuiMaskTrader extends GuiContainer
 	public void initGui() {
 		super.initGui();
 		buttonList.clear();
-		borrow = new GuiButton(0, guiLeft + 68, guiTop + 142, 40, 20, "Borrow");
+		String label = I18n.format("gui.zss.mask_trader.borrow.text");
+		int stringWidth = 10 + mc.fontRenderer.getStringWidth(label);
+		borrow = new GuiButton(0, guiLeft + 68, guiTop + 142, stringWidth, 20, label);
 		borrow.enabled = ((ContainerMaskTrader) inventorySlots).canBorrow();
 		buttonList.add(borrow);
 	}

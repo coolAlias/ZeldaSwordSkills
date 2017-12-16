@@ -1021,6 +1021,7 @@ entity.zeldaswordskills.wizzrobe_grand.name=Grand Wizzrobe
 gui.zss.gossip_stone.name=Gossip Stone Secret Message
 gui.zss.magic_meter.text=MP %1$d/%2$d
 gui.zss.mask_trader.name=Welcome to the Happy Mask Shop!
+gui.zss.mask_trader.borrow.text=Borrow
 
 itemGroup.zss.blocks=Zelda Blocks
 itemGroup.zss.combat=Zelda Combat
