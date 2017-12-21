@@ -192,6 +192,7 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 
 	@Override
 	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+		ZSSPlayerInfo.get(player).armSwing = 0.5F;
 		if (this == ZSSItems.rodTornado) {
 			player.fallDistance = 0.0F;
 		}
@@ -208,6 +209,11 @@ public class ItemMagicRod extends Item implements IFairyUpgrade, ISacredFlame, I
 				handleUpdateTick(stack, player.worldObj, player, ticksInUse);
 			}
 		}
+	}
+
+	@Override
+	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksInUse) {
+		ZSSPlayerInfo.get(player).armSwing = 0.0F;
 	}
 
 	/**
