@@ -75,7 +75,7 @@ public class ZSSKeyHandler
 	public ZSSKeyHandler() {
 		this.mc = Minecraft.getMinecraft();
 		for (int i = 0; i < desc.length; ++i) {
-			keys[i] = new KeyBinding("key.zss." + desc[i] + ".desc", keyValues[i], StatCollector.translateToLocal("key.zss.label"));
+			keys[i] = new KeyBinding("key.zss." + desc[i] + ".desc", keyValues[i], "key.zss.label");
 			ClientRegistry.registerKeyBinding(keys[i]);
 		}
 	}
