@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package zeldaswordskills.entity.player;
 import java.util.EnumMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -33,9 +35,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
@@ -142,6 +141,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	/** Reduces fall damage next impact; used for Rising Cut */
 	public float reduceFallAmount = 0.0F;
+
+	/** Used by certain skills for controlling the player's main arm rendering */
+	public float armSwing = 0.0F;
 
 	public ZSSPlayerInfo(EntityPlayer player) {
 		this.player = player;

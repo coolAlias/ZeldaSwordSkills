@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -189,6 +189,7 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 
 	@Override
 	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+		ZSSPlayerInfo.get(player).armSwing = 0.5F;
 		if (this == ZSSItems.rodTornado) {
 			player.fallDistance = 0.0F;
 		}
@@ -205,6 +206,11 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 				handleUpdateTick(stack, player.worldObj, player, ticksInUse);
 			}
 		}
+	}
+
+	@Override
+	public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int ticksInUse) {
+		ZSSPlayerInfo.get(player).armSwing = 0.0F;
 	}
 
 	/**

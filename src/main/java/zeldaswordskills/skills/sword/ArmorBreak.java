@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -78,6 +77,8 @@ public class ArmorBreak extends SkillActive
 	 * will furiously swing his arm at it, as though trying to break it. Perhaps it is better
 	 * to set the key state to false as before and track 'buttonstate' from within the skill,
 	 * though in that case it needs to listen for key releases as well as presses.
+	 * Note that this is the default vanilla behavior for holding down the attack key, so
+	 * perhaps it is best to leave it as is.
 	 */
 	private boolean requiresReset;
 
@@ -178,16 +179,20 @@ public class ArmorBreak extends SkillActive
 	 */
 	@Override
 	protected boolean sendClientUpdate() {
-		return false;
+		return true;
 	}
 
 	@Override
 	protected boolean onActivated(World world, EntityPlayer player) {
 		activeTimer = 1; // needs to be active for hurt event to process correctly
-		// Attack first so skill still active upon impact, then set timer to zero
-		ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
-		if (skill != null && skill.isLockedOn()) {
-			player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
+		if (world.isRemote) {
+			player.swingItem();
+		} else {
+			// Attack first so skill still active upon impact, then set timer to zero
+			ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
+			if (skill != null && skill.isLockedOn()) {
+				player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
+			}
 		}
 		// Armor Break is never added to the list of active skills, since the skill is
 		// typically on longer active after attacking; luckily, it doesn't need to be
@@ -198,6 +203,7 @@ public class ArmorBreak extends SkillActive
 	protected void onDeactivated(World world, EntityPlayer player) {
 		activeTimer = 0;
 		charge = 0;
+		ZSSPlayerInfo.get(player).armSwing = 0.0F;
 	}
 
 	@Override
@@ -205,8 +211,9 @@ public class ArmorBreak extends SkillActive
 		if (isCharging(player)) {
 			if (isKeyPressed() && PlayerUtils.isWeapon(player.getHeldItem())) {
 				if (!player.isSwingInProgress) {
-					if (charge < (getChargeTime(player) - 1)) {
-						Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
+					int maxCharge = getChargeTime(player);
+					if (charge < maxCharge - 1) {
+						ZSSPlayerInfo.get(player).armSwing = 0.25F + 0.75F * ((float)(maxCharge - charge) / (float) maxCharge);
 					}
 					--charge;
 				}
@@ -222,26 +229,27 @@ public class ArmorBreak extends SkillActive
 					SwordBasic skill = (SwordBasic) ZSSPlayerSkills.get(player).getPlayerSkill(swordBasic);
 					if (skill != null && skill.onAttack(player)) {
 						PacketDispatcher.sendToServer(new ActivateSkillPacket(this, true));
+					} else { // player missed - swing arm manually since no activation packet will be sent
+						player.swingItem();
 					}
 				}
 			} else {
+				ZSSPlayerInfo.get(player).armSwing = 0.0F;
 				charge = 0;
 			}
+		} else {
+			ZSSPlayerInfo.get(player).armSwing = 0.0F;
 		}
-
 		if (isActive()) {
 			activeTimer = 0;
 		}
 	}
 
 	/**
-	 * WARNING: Something REALLY dirty is about to go down here.
-	 * Uses a custom accessor class planted in net.minecraft.entity package to access
-	 * protected method {@link EntityLivingBase#damageEntity damageEntity}; sets the
-	 * event amount to zero and deactivates the skill to prevent further processing
-	 * during this event cycle; LivingHurtEvent is posted again from damageEntity, at
-	 * which point ArmorBreak will no longer be active and the event may continue as
-	 * normal, but with armor-ignoring damage.
+	 * Deactivates this skill and inflicts armor-ignoring damage directly to the
+	 * target; note that this causes the LivingHurtEvent to repost, but since the
+	 * skill is no longer active it will behave normally. The current event's
+	 * damage is set to zero to avoid double damage.
 	 */
 	public void onImpact(EntityPlayer player, LivingHurtEvent event) {
 		activeTimer = 0;

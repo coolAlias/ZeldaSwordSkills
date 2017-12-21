@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -285,6 +285,7 @@ public class SpinAttack extends SkillActive
 		currentSpin = 0.0F;
 		arc = 0.0F;
 		isBombos = false;
+		ZSSPlayerInfo.get(player).armSwing = 0.0F;
 	}
 
 	@Override
@@ -292,8 +293,9 @@ public class SpinAttack extends SkillActive
 		// isCharging can only be true on the client, which is where charging is handled
 		if (isCharging()) { // check isRemote before accessing @client stuff anyway, just in case charge somehow set on server
 			if (PlayerUtils.isWeapon(player.getHeldItem()) && player.worldObj.isRemote && isKeyPressed()) {
-				if (charge < (getChargeTime() - 1)) {
-					Minecraft.getMinecraft().playerController.sendUseItem(player, player.worldObj, player.getHeldItem());
+				int maxCharge = getChargeTime();
+				if (charge < maxCharge) {
+					ZSSPlayerInfo.get(player).armSwing = 1F - 0.5F * ((float)(maxCharge - charge) / (float) maxCharge);
 				}
 				--charge;
 				if (charge == 0 && canExecute(player)) {
@@ -301,6 +303,7 @@ public class SpinAttack extends SkillActive
 				}
 			} else {
 				charge = 0;
+				ZSSPlayerInfo.get(player).armSwing = 0.0F;
 			}
 		} else if (isActive()) {
 			incrementSpin(player);
@@ -322,7 +325,7 @@ public class SpinAttack extends SkillActive
 				}
 			}
 			spawnParticles(player);
-			player.swingProgress = 0.5F;
+			ZSSPlayerInfo.get(player).armSwing = 0.5F;
 			player.setAngles((clockwise ? getSpinSpeed() : -getSpinSpeed()), 0);
 		}
 		return true;

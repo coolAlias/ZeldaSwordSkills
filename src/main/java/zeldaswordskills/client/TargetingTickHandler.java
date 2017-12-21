@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.client.render.EntityRendererAlt;
+import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
-import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillActive;
 
@@ -58,9 +58,10 @@ public class TargetingTickHandler
 			if (mc.thePlayer != null && ZSSPlayerSkills.get(mc.thePlayer) != null) {
 				// TODO updateRenderer();
 				ZSSPlayerSkills.get(mc.thePlayer).onRenderTick(event.renderTickTime);
-				// Hack for magic rods, since the item's update tick isn't called frequently enough
-				if (mc.thePlayer.getItemInUse() != null && mc.thePlayer.getItemInUse().getItem() instanceof ItemMagicRod) {
-					mc.thePlayer.swingProgress = 0.5F;
+				float swing = ZSSPlayerInfo.get(mc.thePlayer).armSwing;
+				if (swing > 0.0F) {
+					mc.thePlayer.swingProgress = swing;
+					mc.thePlayer.prevSwingProgress = swing;
 				}
 			}
 		}
