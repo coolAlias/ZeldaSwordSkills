@@ -55,20 +55,54 @@ public class ZSSKeyHandler
 {
 	private final Minecraft mc;
 
-	/** Key index for easy handling and retrieval of keys and key descriptions */
-	public static final byte KEY_SKILL_ACTIVATE = 0, KEY_NEXT_TARGET = 1, KEY_ATTACK = 2,
-			KEY_LEFT = 3, KEY_RIGHT = 4, KEY_DOWN = 5, KEY_BLOCK = 6, KEY_BOMB = 7,
-			KEY_TOGGLE_AUTOTARGET = 8, KEY_TOGGLE_BUFFBAR = 9, KEY_SKILLS_GUI = 10,
-			KEY_PREV_MODE = 11, KEY_NEXT_MODE = 12;
+	// Key index for easy handling and retrieval of keys and key descriptions
+	public static final byte KEY_SKILL_ACTIVATE = 0;
+	public static final byte KEY_NEXT_TARGET = 1;
+	public static final byte KEY_ATTACK = 2;
+	public static final byte KEY_LEFT = 3;
+	public static final byte KEY_RIGHT = 4;
+	public static final byte KEY_DOWN = 5;
+	public static final byte KEY_BLOCK = 6;
+	public static final byte KEY_BOMB = 7;
+	public static final byte KEY_TOGGLE_AUTOTARGET = 8;
+	public static final byte KEY_TOGGLE_BUFFBAR = 9;
+	public static final byte KEY_SKILLS_GUI = 10;
+	public static final byte KEY_PREV_MODE = 11;
+	public static final byte KEY_NEXT_MODE = 12;
 
 	/** Key descriptions - this is what the player sees when changing key bindings in-game */
-	public static final String[] desc = { "activate","next","attack","left","right","down",
-		"block","bomb","toggleat","togglebuff", "skills_gui", "prev_mode", "next_mode"};
+	public static final String[] desc = {
+			"activate",
+			"next",
+			"attack",
+			"left",
+			"right",
+			"down",
+			"block",
+			"bomb",
+			"toggleat",
+			"togglebuff",
+			"skills_gui",
+			"prev_mode",
+			"next_mode"
+	};
 
 	/** Default key values */
-	private static final int[] keyValues = {Keyboard.KEY_X, Keyboard.KEY_TAB, Keyboard.KEY_UP,
-		Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_DOWN, Keyboard.KEY_RCONTROL,
-		Keyboard.KEY_B, Keyboard.KEY_PERIOD, Keyboard.KEY_V, Keyboard.KEY_P, Keyboard.KEY_LBRACKET, Keyboard.KEY_RBRACKET};
+	private static final int[] keyValues = {
+			Keyboard.KEY_X, // Activate lockon
+			Keyboard.KEY_TAB, // Next target
+			Keyboard.KEY_UP, // Attack
+			Keyboard.KEY_LEFT,
+			Keyboard.KEY_RIGHT,
+			Keyboard.KEY_DOWN,
+			Keyboard.KEY_RCONTROL, // Block / use item
+			Keyboard.KEY_B, // Get bomb
+			Keyboard.KEY_PERIOD, // Toggle auto-targeting
+			Keyboard.KEY_V, // Toggle buff bar
+			Keyboard.KEY_P, // Open skill GUI
+			Keyboard.KEY_LBRACKET, // Previous item mode
+			Keyboard.KEY_RBRACKET // Next item mode
+	};
 
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 
@@ -117,23 +151,17 @@ public class ZSSKeyHandler
 				PacketDispatcher.sendToServer(new GetBombPacket());
 			} else if (kb == keys[KEY_TOGGLE_AUTOTARGET].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.toggletp",
-							(Config.toggleTargetPlayers()
-									? new ChatComponentTranslation("chat.zss.key.enable")
-									: new ChatComponentTranslation("chat.zss.key.disable")));
+					ChatComponentTranslation desc = new ChatComponentTranslation(Config.toggleTargetPlayers() ? "chat.zss.key.enable" : "chat.zss.key.disable");
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.toggletp", desc);
 				} else {
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.toggleat",
-							(Config.toggleAutoTarget()
-									? new ChatComponentTranslation("chat.zss.key.enable")
-									: new ChatComponentTranslation("chat.zss.key.disable")));
+					ChatComponentTranslation desc = new ChatComponentTranslation(Config.toggleAutoTarget() ? "chat.zss.key.enable" : "chat.zss.key.disable");
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.toggleat", desc);
 				}
 			} else if (kb == keys[KEY_TOGGLE_BUFFBAR].getKeyCode()) {
 				if (mc.thePlayer.isSneaking()) {
 					Config.isComboHudEnabled = !Config.isComboHudEnabled;
-					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.togglehud",
-							(Config.isComboHudEnabled
-									? new ChatComponentTranslation("chat.zss.key.enable")
-									: new ChatComponentTranslation("chat.zss.key.disable")));
+					ChatComponentTranslation desc = new ChatComponentTranslation(Config.isComboHudEnabled ? "chat.zss.key.enable" : "chat.zss.key.disable");
+					PlayerUtils.sendTranslatedChat(mc.thePlayer, "chat.zss.key.togglehud", desc);
 				} else {
 					Config.isBuffBarEnabled = !Config.isBuffBarEnabled;
 				}
@@ -163,7 +191,6 @@ public class ZSSKeyHandler
 		ILockOnTarget skill = skills.getTargetingSkill();
 		// key interaction is disabled if the player is stunned or a skill animation is in progress
 		boolean canInteract = skills.canInteract() && !ZSSEntityInfo.get(mc.thePlayer).isBuffActive(Buff.STUN);
-
 		if (skill == null || !skill.isLockedOn()) {
 			return;
 		}
@@ -206,10 +233,10 @@ public class ZSSKeyHandler
 	}
 
 	/**
-	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found
+	 * Returns the KeyBinding corresponding to the key code given, or NULL if no key binding is found.
 	 * Currently handles all custom keys, plus the following vanilla keys:
-	 * 	Always allowed: keyBindForward, keyBindJump
-	 * 	{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack
+	 * <br>Always allowed: keyBindForward, keyBindJump
+	 * <br>{@link Config#allowVanillaControls}: keyBindLeft, keyBindRight, keyBindBack
 	 * @param keyCode	Will be a negative number for mouse keys, or positive for keyboard
 	 * @param mc		Pass in Minecraft instance as a workaround to get vanilla KeyBindings
 	 */
@@ -234,16 +261,6 @@ public class ZSSKeyHandler
 				return mc.gameSettings.keyBindBack;
 			}
 		}
-		// Doesn't seem to be an easy way to get the KeyBinding from the key code...
-		/* curse cpw for making both the key bind array and hash lookup private >.<
-		Iterator iterator = KeyBinding.keybindArray.iterator();
-		while (iterator.hasNext()) {
-			KeyBinding kb = (KeyBinding) iterator.next();
-			if (kb.getKeyCode() == keyCode) {
-				return kb;
-			}
-		}
-		 */
 		return null;
 	}
 }
