@@ -38,6 +38,7 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.ILockOnTarget;
 import zeldaswordskills.skills.SkillActive;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 
 /**
@@ -190,7 +191,7 @@ public class ArmorBreak extends SkillActive
 		} else {
 			// Attack first so skill still active upon impact, then set timer to zero
 			ILockOnTarget skill = ZSSPlayerSkills.get(player).getTargetingSkill();
-			if (skill != null && skill.isLockedOn()) {
+			if (skill != null && skill.isLockedOn() && TargetUtils.canReachTarget(player, skill.getCurrentTarget())) {
 				player.attackTargetEntityWithCurrentItem(skill.getCurrentTarget());
 			}
 		}
