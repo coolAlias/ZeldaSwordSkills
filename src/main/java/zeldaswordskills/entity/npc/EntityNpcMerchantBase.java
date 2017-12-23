@@ -31,7 +31,7 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-import zeldaswordskills.api.entity.ICustomMerchant;
+import zeldaswordskills.api.entity.merchant.ICustomMerchant;
 import zeldaswordskills.item.ItemCustomEgg;
 
 /**
