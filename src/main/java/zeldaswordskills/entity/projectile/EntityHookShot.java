@@ -339,15 +339,20 @@ public class EntityHookShot extends EntityThrowable
 		EntityLivingBase thrower = getThrower();
 		if (thrower != null && isInGround()) {
 			thrower.fallDistance = 0.0F;
-			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_POS_X), dataWatcher.getWatchableObjectFloat(HIT_POS_Y), dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
-
+			final double threshold = 1.0D;
+			double y = dataWatcher.getWatchableObjectFloat(HIT_POS_Y);
+			// Fixes player spinning endlessly when hooking to top of block
+			if (thrower.posY > y) {
+				y = thrower.posY;
+			}
+			double d = thrower.getDistanceSq(dataWatcher.getWatchableObjectFloat(HIT_POS_X), y, dataWatcher.getWatchableObjectFloat(HIT_POS_Z));
 			if (!reachedHook) {
-				reachedHook = d < 1.0D;
+				reachedHook = d < threshold;
 			}
 			if (reachedHook && thrower.isSneaking()) {
 				thrower.motionX = thrower.motionZ = 0.0D;
 				thrower.motionY = -0.15D;
-			} else if (reachedHook && d < 1.0D) {
+			} else if (reachedHook && d < threshold) {
 				thrower.motionX = thrower.motionY = thrower.motionZ = 0.0D;
 			} else {
 				double dx = 0.15D * (dataWatcher.getWatchableObjectFloat(HIT_POS_X) - thrower.posX);
