@@ -40,6 +40,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IHandleToss;
+import zeldaswordskills.api.item.INbtComparable;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
@@ -62,7 +63,7 @@ import zeldaswordskills.util.PlayerUtils;
  * storing the time in NBT instead works nicely.
  *
  */
-public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IRupeeValue.IMetaRupeeValue, IUnenchantable
+public class ItemBomb extends Item implements IHandlePickup, IHandleToss, INbtComparable, IRupeeValue.IMetaRupeeValue, IUnenchantable
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -157,12 +158,7 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IRupee
 	 */
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-		if (!stack.hasTagCompound()) {
-			stack.setTagCompound(new NBTTagCompound());
-			stack.getTagCompound().setInteger("time", 0);
-			stack.getTagCompound().setBoolean("inWater", false);
-		}
-
+		stack = this.setDefaultNBT(stack);
 		if (isHeld || getType(stack) == BombType.BOMB_FLOWER) {
 			if (entity instanceof EntityPlayer) {
 				if (world.isRemote && Minecraft.getMinecraft().currentScreen == null) {
@@ -175,6 +171,44 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IRupee
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
+	}
+
+	/**
+	 * Compares the two stacks' tags ignoring the "time" and "inWater" entries
+	 */
+	@Override
+	public boolean areTagsEquivalent(ItemStack a, ItemStack b) {
+		NBTTagCompound x = a.getTagCompound();
+		NBTTagCompound y = b.getTagCompound();
+		if (x == null || y == null) {
+			return true;
+		}
+		x = removeDefaultTags((NBTTagCompound) x.copy());
+		y = removeDefaultTags((NBTTagCompound) y.copy());
+		return x.equals(y);
+	}
+
+	private NBTTagCompound removeDefaultTags(NBTTagCompound tag) {
+		tag.removeTag("time");
+		tag.removeTag("inWater");
+		return tag;
+	}
+
+	/**
+	 * Adds the required NBT tags to the stack's NBT, setting a new tag compound if necessary 
+	 */
+	public ItemStack setDefaultNBT(ItemStack stack) {
+		if (!stack.hasTagCompound()) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		NBTTagCompound tag = stack.getTagCompound();
+		if (!tag.hasKey("time")) {
+			tag.setInteger("time", 0);
+		}
+		if (!tag.hasKey("inWater")) {
+			tag.setBoolean("inWater", false);
+		}
+		return stack;
 	}
 
 	@Override
@@ -201,7 +235,6 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IRupee
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
-
 		BombType type = getType(stack);
 		if (type != BombType.BOMB_WATER && world.getBlock((int) entity.posX, (int) entity.posY + 1, (int) entity.posZ).getMaterial() == Material.water) {
 			stack.getTagCompound().setInteger("time", 0);
