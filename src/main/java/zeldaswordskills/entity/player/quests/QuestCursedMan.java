@@ -19,14 +19,16 @@ package zeldaswordskills.entity.player.quests;
 
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
+import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.entity.player.ZSSPlayerWallet;
 import zeldaswordskills.item.ItemBombBag;
+import zeldaswordskills.item.ItemRupee.Rupee;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
@@ -90,7 +92,7 @@ public final class QuestCursedMan extends QuestBase
 		if (this.tokens < MAX_SKULLTULA_TOKENS || data == null || !(data[0] instanceof EntityVillager)) {
 			return false;
 		}
-		ItemStack reward = new ItemStack(Items.emerald, 64);
+		ItemStack reward = new ItemStack(ZSSItems.rupee, 1, Rupee.GOLD_RUPEE.ordinal());
 		new TimedChatDialogue(player, new ChatComponentTranslation("chat.zss.npc.cursed_man.token." + this.tokens), new ChatComponentTranslation("chat.zss.npc.cursed_man.reward." + this.tokens, new ChatComponentTranslation(reward.getUnlocalizedName() + ".name")));
 		new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
 		if (Config.getSkulltulaRewardRate() > 0) {
@@ -125,8 +127,12 @@ public final class QuestCursedMan extends QuestBase
 			reward = new ItemStack(ZSSItems.tunicZoraChest);
 			break;
 		case 30:
-			reward = new ItemStack(ZSSItems.bombBag);
-			((ItemBombBag) reward.getItem()).addBombs(reward, new ItemStack(ZSSItems.bomb, 10));
+			if (ZSSPlayerWallet.get(player).getWallet().canUpgrade()) {
+				reward = new ItemStack(ZSSItems.walletUpgrade);
+			} else {
+				reward = new ItemStack(ZSSItems.bombBag);
+				((ItemBombBag) reward.getItem()).addBombs(reward, new ItemStack(ZSSItems.bomb, 10));
+			}
 			break;
 		case 40:
 			reward = new ItemStack(ZSSItems.keyBig, 1, player.worldObj.rand.nextInt(BossType.values().length));
@@ -139,7 +145,15 @@ public final class QuestCursedMan extends QuestBase
 				}
 			}
 			if (reward == null) {
-				reward = new ItemStack(ZSSItems.arrowLight, 16);
+				reward = new ItemStack(ZSSItems.arrowLight, 20);
+			}
+			break;
+		case 75:
+			if (ZSSPlayerWallet.get(player).getWallet().canUpgrade()) {
+				reward = new ItemStack(ZSSItems.walletUpgrade);
+			} else {
+				reward = new ItemStack(ZSSItems.bombBag);
+				((ItemBombBag) reward.getItem()).addBombs(reward, new ItemStack(ZSSItems.bomb, 10, BombType.BOMB_FIRE.ordinal()));
 			}
 			break;
 		case MAX_SKULLTULA_TOKENS:
