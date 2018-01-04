@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,7 @@ public final class QuestPendants extends QuestBase
 	}
 
 	@Override
-	public boolean canComplete(EntityPlayer player) {
+	public boolean canComplete(EntityPlayer player, Object... data) {
 		return false; // can only complete via #update
 	}
 

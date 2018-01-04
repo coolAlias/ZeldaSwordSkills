@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ public class QuestMaskShop extends QuestBase
 	}
 
 	@Override
-	public boolean canComplete(EntityPlayer player) {
+	public boolean canComplete(EntityPlayer player, Object... data) {
 		// This quest is special in that it can be continually 'completed', i.e. villagers
 		// can be converted into Mask Salesmen at any time by giving them Zelda's Letter
 		return isHoldingZeldasLetter(player);
