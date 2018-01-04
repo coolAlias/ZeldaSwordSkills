@@ -43,8 +43,9 @@ public interface IQuest {
 
 	/**
 	 * True if this quest is able to be completed at this time
+	 * @param data Allows additional data to be provided; implementing class should provide documentation
 	 */
-	boolean canComplete(EntityPlayer player);
+	boolean canComplete(EntityPlayer player, Object... data);
 
 	/**
 	 * Call this to complete the quest; {@link #isComplete()} should now return true

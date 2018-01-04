@@ -103,7 +103,7 @@ public abstract class QuestBase implements IQuest
 	}
 
 	@Override
-	public boolean canComplete(EntityPlayer player) {
+	public boolean canComplete(EntityPlayer player, Object... data) {
 		return !isComplete(player);
 	}
 
@@ -209,7 +209,7 @@ public abstract class QuestBase implements IQuest
 				handler.onQuestBegun(quest, player);
 				changed = true;
 			}
-		} else if (quest.canComplete(player)) {
+		} else if (quest.canComplete(player, data)) {
 			if (quest.complete(player, data)) {
 				handler.onQuestCompleted(quest, player);
 				changed = true;
