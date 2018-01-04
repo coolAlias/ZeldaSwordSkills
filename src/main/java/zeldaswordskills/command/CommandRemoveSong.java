@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.api.SongAPI;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
@@ -48,7 +49,7 @@ public class CommandRemoveSong extends CommandBase
 	}
 
 	/**
-	 * removesong <song | all>
+	 * removesong <player> <song | all>
 	 */
 	@Override
 	public String getCommandUsage(ICommandSender player) {
@@ -57,29 +58,44 @@ public class CommandRemoveSong extends CommandBase
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
-		if (args.length != 1) {
+		if (args == null || args.length != 2) {
 			throw new WrongUsageException(getCommandUsage(sender));
 		}
-		EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
+		EntityPlayerMP player = getPlayer(sender, args[0]);
 		ZSSPlayerSongs info = ZSSPlayerSongs.get(player);
-		if (("all").equals(args[0])) {
+		if (("all").equals(args[1])) {
 			info.resetKnownSongs();
-			PlayerUtils.sendTranslatedChat(player, "commands.removesong.all");
+			PlayerUtils.sendTranslatedChat(commandSender, "commands.removesong.all", player.getCommandSenderName());
+			if (player != commandSender) {
+				PlayerUtils.sendTranslatedChat(player, "commands.removesong.notify.all", commandSender.getCommandSenderName());
+			}
 		} else {
-			AbstractZeldaSong song = SongAPI.getSongByName(args[0]);
+			AbstractZeldaSong song = SongAPI.getSongByName(args[1]);
 			if (song == null) {
-				throw new CommandException("commands.song.generic.unknown", args[0]);
+				throw new CommandException("commands.song.generic.unknown", args[1]);
 			}
 			if (info.removeSong(song)) {
-				PlayerUtils.sendTranslatedChat(player, "commands.removesong.one", new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.removesong.one", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
+				if (player != commandSender) {
+					PlayerUtils.sendTranslatedChat(player, "commands.removesong.notify.one", commandSender.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
+				}
 			} else {
-				PlayerUtils.sendTranslatedChat(player, "commands.removesong.fail", new ChatComponentTranslation(song.getTranslationString()));
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.removesong.fail", player.getCommandSenderName(), new ChatComponentTranslation(song.getTranslationString()));
 			}
 		}
 	}
 
 	@Override
 	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
-		return args.length == 1 ? getListOfStringsMatchingLastWord(args, SongAPI.getRegisteredNames().toArray(new String[SongAPI.getTotalSongs()])) : null;
+		switch (args.length) {
+		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
+		case 2: return getListOfStringsMatchingLastWord(args, SongAPI.getRegisteredNames().toArray(new String[SongAPI.getTotalSongs()]));
+		default: return null;
+		}
+	}
+
+	protected String[] getPlayers() {
+		return MinecraftServer.getServer().getAllUsernames();
 	}
 }

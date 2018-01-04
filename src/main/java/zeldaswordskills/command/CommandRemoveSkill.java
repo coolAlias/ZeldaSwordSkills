@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.skills.SkillBase;
@@ -47,7 +48,7 @@ public class CommandRemoveSkill extends CommandBase
 	}
 
 	/**
-	 * removeskill <skill | all>
+	 * removeskill <player> <skill | all>
 	 */
 	@Override
 	public String getCommandUsage(ICommandSender player) {
@@ -56,36 +57,51 @@ public class CommandRemoveSkill extends CommandBase
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
-		if (args != null && args.length == 1) {
-			boolean all = ("all").equals(args[0]);
-			SkillBase skill = null;
-			if (!all) {
-				skill = SkillBase.getSkillByName(args[0]);
-				if (skill == null) {
-					throw new CommandException("commands.skill.generic.unknown", args[0]);
-				}
-			}
-			EntityPlayerMP player = getCommandSenderAsPlayer(sender);
-			if (ZSSPlayerSkills.get(player).removeSkill(args[0])) {
-				if (all) {
-					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.all", player.getCommandSenderName());
-				} else {
-					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
-				}
-			} else { // player didn't have this skill
-				if (all) {
-					throw new CommandException("commands.removeskill.failure.all", player.getCommandSenderName());
-				} else {
-					throw new CommandException("commands.removeskill.failure.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
-				}
-			}
-		} else {
+		if (args == null || args.length != 2) {
 			throw new WrongUsageException(getCommandUsage(sender));
+		}
+		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
+		EntityPlayerMP player = getPlayer(sender, args[0]);
+		ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
+		boolean all = ("all").equals(args[1]);
+		SkillBase skill = null;
+		if (!all) {
+			skill = SkillBase.getSkillByName(args[1]);
+			if (skill == null) {
+				throw new CommandException("commands.skill.generic.unknown", args[1]);
+			}
+		}
+		if (skills.removeSkill(args[1])) {
+			if (all) {
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.all", player.getCommandSenderName());
+				if (player != commandSender) {
+					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.notify.all", commandSender.getCommandSenderName());
+				}
+			} else {
+				PlayerUtils.sendTranslatedChat(commandSender, "commands.removeskill.success.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
+				if (player != commandSender) {
+					PlayerUtils.sendTranslatedChat(player, "commands.removeskill.notify.one", commandSender.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
+				}
+			}
+		} else { // player didn't have this skill
+			if (all) {
+				throw new CommandException("commands.removeskill.failure.all", player.getCommandSenderName());
+			} else {
+				throw new CommandException("commands.removeskill.failure.one", player.getCommandSenderName(), new ChatComponentTranslation(skill.getTranslationString()));
+			}
 		}
 	}
 
 	@Override
 	public List addTabCompletionOptions(ICommandSender sender, String[] args) {
-		return args.length == 1 ? getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames()) : null;
+		switch (args.length) {
+		case 1: return getListOfStringsMatchingLastWord(args, getPlayers());
+		case 2: return getListOfStringsMatchingLastWord(args, SkillBase.getSkillNames());
+		default: return null;
+		}
+	}
+
+	protected String[] getPlayers() {
+		return MinecraftServer.getServer().getAllUsernames();
 	}
 }
