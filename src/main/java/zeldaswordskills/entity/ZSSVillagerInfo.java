@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,21 +34,14 @@ import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
-import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.player.quests.QuestMaskSales;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
-import zeldaswordskills.item.ItemBombBag;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.skills.SkillBase;
-import zeldaswordskills.util.BossType;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import zeldaswordskills.util.TimedAddItem;
-import zeldaswordskills.util.TimedChatDialogue;
 
 /**
  * 
@@ -70,6 +63,9 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** The index of the mask that this villager wants, or NONE; initial value is masks.size() as a flag */
 	private int desiredMask;
+
+	/** Used for the Cursed Man's quest's potentially recurring reward */
+	private long nextSkulltulaReward;
 
 	/** Trade mapping for a single Treasure enum type key to the full trade recipe output */
 	private static final Map<Treasures, MerchantRecipe> treasureTrades = new EnumMap<Treasures, MerchantRecipe>(Treasures.class);
@@ -114,58 +110,12 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		return (desiredMask != NONE ? QuestMaskSales.getMask(desiredMask) : null);
 	}
 
-	public void handleSkulltulaTrade(ItemStack stack, EntityPlayer player) {
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
-		String s = "chat.zss.npc.cursed_man.";
-		if (villager.isChild()) {
-			PlayerUtils.sendTranslatedChat(player, s + "child");
-		} else if (info.canIncrementSkulltulaTokens()) {
-			if (info.incrementSkulltulaTokens()) {
-				int n = info.getSkulltulaTokens();
-				ItemStack reward = null;
-				switch (n) {
-				case 1: PlayerUtils.sendTranslatedChat(player, s + "token." + n); break;
-				case 10: reward = new ItemStack(ZSSItems.whip); break;
-				case 20: reward = new ItemStack(ZSSItems.tunicZoraChest); break;
-				case 30:
-					reward = new ItemStack(ZSSItems.bombBag);
-					((ItemBombBag) reward.getItem()).addBombs(reward, new ItemStack(ZSSItems.bomb, 10));
-					break;
-				case 40: reward = new ItemStack(ZSSItems.keyBig, 1, player.worldObj.rand.nextInt(BossType.values().length)); break;
-				case 50:
-					ZSSPlayerSkills skills = ZSSPlayerSkills.get(player);
-					for (SkillBase skill : SkillBase.getSkills()) {
-						if (skill.getId() != SkillBase.bonusHeart.getId() && skills.getSkillLevel(skill) < skill.getMaxLevel() && (reward == null || player.worldObj.rand.nextInt(4) == 0)) {
-							reward = new ItemStack(ZSSItems.skillOrb, 1, skill.getId());
-						}
-					}
-					if (reward == null) {
-						reward = new ItemStack(ZSSItems.arrowLight, 16);
-					}
-					break;
-				case 100:
-					reward = new ItemStack(Items.emerald, 64);
-					if (Config.getSkulltulaRewardRate() > 0) {
-						villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getTotalWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
-					}
-					break;
-				default: PlayerUtils.sendTranslatedChat(player, s + "amount", n);
-				}
-				if (reward != null) {
-					new TimedChatDialogue(player, new ChatComponentTranslation(s + "token." + n), new ChatComponentTranslation(s + "reward." + n, new ChatComponentTranslation(reward.getUnlocalizedName() + ".name")));
-					new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
-				}
-			} else { // probably an impossible case
-				PlayerUtils.sendTranslatedChat(player, s + villager.worldObj.rand.nextInt(4));
-			}
-		} else if (Config.getSkulltulaRewardRate() > 0 && player.worldObj.getTotalWorldTime() > villager.getEntityData().getLong("NextSkulltulaReward")) {
-			ItemStack reward = new ItemStack(Items.emerald, 64);
-			new TimedChatDialogue(player, new ChatComponentTranslation(s + "complete"), new ChatComponentTranslation(s + "reward.100", new ChatComponentTranslation(reward.getUnlocalizedName() + ".name")));
-			new TimedAddItem(player, reward, 2500, Sounds.SUCCESS);
-			villager.getEntityData().setLong("NextSkulltulaReward", player.worldObj.getTotalWorldTime() + (24000 * Config.getSkulltulaRewardRate()));
-		} else {
-			PlayerUtils.sendTranslatedChat(player, s + "complete");
-		}
+	public long getNextSkulltulaReward() {
+		return this.nextSkulltulaReward;
+	}
+
+	public void setNextSkulltulaReward(long nextSkulltulaReward) {
+		this.nextSkulltulaReward = nextSkulltulaReward;
 	}
 
 	/** Returns true if this villager is any type of Hunter */
@@ -325,12 +275,14 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public void saveNBTData(NBTTagCompound compound) {
 		compound.setTag(SAVE_KEY, data);
 		compound.setInteger("desiredMask", desiredMask);
+		compound.setLong("NextSkulltulaReward", nextSkulltulaReward);
 	}
 
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
 		data = (compound.hasKey(SAVE_KEY) ? compound.getCompoundTag(SAVE_KEY) : new NBTTagCompound());
 		desiredMask = compound.getInteger("desiredMask");
+		nextSkulltulaReward = compound.getLong("NextSkulltulaReward");
 	}
 
 	/**

@@ -29,7 +29,6 @@ import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -66,7 +65,6 @@ import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityDarknut;
@@ -672,22 +670,7 @@ public class ZSSItems
 		}).setUnlocalizedName("zss.deku_nut").setCreativeTab(ZSSCreativeTabs.tabTools);
 		jellyChu = new ItemChuJelly().setUnlocalizedName("zss.jelly_chu");
 		treasure = new ItemTreasure().setUnlocalizedName("zss.treasure");
-		skulltulaToken = (new ItemMiscZSS(20) {
-			@Override
-			protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
-				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
-				if (villager.getClass() == EntityVillager.class && ("Cursed Man").equals(villager.getCustomNameTag())) {
-					villagerInfo.handleSkulltulaTrade(stack, player);
-				} else if (villager.isChild()) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
-				} else if (villagerInfo.isHunter()) {
-					villagerInfo.addHunterTrade(player, new ItemStack(this), sellPrice);
-				} else {
-					int i = villager.getProfession();
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.skulltula_token.villager." + (i > 4 ? "custom" : i));
-				}
-			}
-		}).setUnlocalizedName("zss.skulltula_token");
+		skulltulaToken = new ItemSkulltulaToken().setUnlocalizedName("zss.skulltula_token");
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "chat.zss.links_house.fail", "deku_nut").setUnlocalizedName("zss.links_house");
 		instrument = new ItemInstrument();
 		bombFlowerSeed = new ItemBombFlowerSeed().setUnlocalizedName("zss.seed_bomb_flower");

@@ -202,6 +202,23 @@ public class ZSSEntityEvents
 			if (!Config.areVanillaBuffsDisabled() && event.entity instanceof EntityLivingBase) {
 				initBuffs((EntityLivingBase) event.entity);
 			}
+			// Clean up old villager data
+			if (event.entity instanceof EntityVillager) {
+				ZSSEntityEvents.convertVillagerData((EntityVillager) event.entity);
+			}
+		}
+	}
+
+	/**
+	 * Cleans up old villager data
+	 */
+	private static void convertVillagerData(EntityVillager villager) {
+		if (villager.getEntityData() != null && villager.getEntityData().hasKey("NextSkulltulaReward")) {
+			ZSSVillagerInfo info = ZSSVillagerInfo.get(villager);
+			if (info != null) {
+				info.setNextSkulltulaReward(villager.getEntityData().getLong("NextSkulltulaReward"));
+			}
+			villager.getEntityData().removeTag("NextSkulltulaReward");
 		}
 	}
 

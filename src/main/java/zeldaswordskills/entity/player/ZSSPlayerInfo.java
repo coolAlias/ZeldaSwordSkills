@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,6 @@ import zeldaswordskills.network.client.SyncPlayerInfoPacket;
 import zeldaswordskills.network.client.SyncQuestsPacket;
 import zeldaswordskills.network.server.RequestCurrentMagicPacket;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.util.PlayerUtils;
 
 public class ZSSPlayerInfo implements IExtendedEntityProperties
 {
@@ -118,10 +117,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	@Deprecated
 	private int maskStage = 0;
 
-	/** Maximum number of skulltula tokens which can be turned in */
-	public static final int MAX_SKULLTULA_TOKENS = 100;
-
-	/** Number of Gold Skulltula Tokens this player has turned in */
+	@Deprecated
 	private int skulltulaTokens = 0;
 
 	/** [Hero's Bow] Stores the currently nocked arrow in order to avoid the graphical glitch caused by writing to the stack's NBT */
@@ -381,29 +377,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		return maskStage;
 	}
 
-	/**
-	 * Returns true if the player is able to turn in more Skulltula Tokens
-	 */
-	public boolean canIncrementSkulltulaTokens() {
-		return skulltulaTokens < MAX_SKULLTULA_TOKENS;
-	}
-
-	/**
-	 * Returns number of skulltula tokens this player has given to the Cursed Man
-	 */
+	@Deprecated
 	public int getSkulltulaTokens() {
 		return skulltulaTokens;
-	}
-
-	/**
-	 * Attempts to turn in (i.e. consume) a skulltula token, returning true on success.
-	 */
-	public boolean incrementSkulltulaTokens() {
-		if (canIncrementSkulltulaTokens() && PlayerUtils.consumeHeldItem(player, ZSSItems.skulltulaToken, 1)) {
-			++skulltulaTokens;
-			return true;
-		}
-		return false;
 	}
 
 	/**
