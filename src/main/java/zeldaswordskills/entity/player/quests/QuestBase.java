@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -109,7 +109,7 @@ public abstract class QuestBase implements IQuest
 
 	@Override
 	public boolean complete(EntityPlayer player, Object... data) {
-		if (canComplete(player) && onComplete(player, data)) {
+		if (onComplete(player, data)) {
 			set(FLAG_COMPLETE);
 			return true;
 		}

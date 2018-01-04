@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -48,6 +48,7 @@ public interface IQuest {
 
 	/**
 	 * Call this to complete the quest; {@link #isComplete()} should now return true
+	 * <br>Be sure to check {@link #canComplete(EntityPlayer, Object...)} first if calling this method manually.
 	 * @param data Allows additional data to be provided; implementing class should provide documentation
 	 * @return false if for some reason the quest failed to complete
 	 */
