@@ -29,7 +29,6 @@ import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -63,7 +62,6 @@ import zeldaswordskills.block.BlockSacredFlame;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityDarknut;
@@ -638,22 +636,7 @@ public class ZSSItems
 		masterOre = new ItemMasterOre(24).setUnlocalizedName("master_ore");
 		jellyChu = new ItemChuJelly().setUnlocalizedName("jelly_chu");
 		treasure = new ItemTreasure().setUnlocalizedName("treasure");
-		skulltulaToken = (new ItemMiscZSS(20) {
-			@Override
-			protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
-				ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
-				if (villager.getClass() == EntityVillager.class && ("Cursed Man").equals(villager.getCustomNameTag())) {
-					villagerInfo.handleSkulltulaTrade(stack, player);
-				} else if (villager.isChild()) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
-				} else if (villagerInfo.isHunter()) {
-					villagerInfo.addHunterTrade(player, new ItemStack(this), sellPrice);
-				} else {
-					int i = villager.getProfession();
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.skulltula_token.villager." + (i > 4 ? "custom" : i));
-				}
-			}
-		}).setUnlocalizedName("skulltula_token");
+		skulltulaToken = new ItemSkulltulaToken().setUnlocalizedName("skulltula_token");
 		linksHouse = new ItemBuilderSeed(LinksHouse.class, "chat.zss.links_house.fail").setUnlocalizedName("links_house");
 		instrument = new ItemInstrument();
 		bombFlowerSeed = new ItemBombFlowerSeed().setUnlocalizedName("seed_bomb_flower");
