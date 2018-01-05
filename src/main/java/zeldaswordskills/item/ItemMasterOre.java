@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import zeldaswordskills.ZSSAchievements;
-import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -40,7 +39,7 @@ public class ItemMasterOre extends ItemMiscZSS
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.child");
 		} else if (villager.getClass() != EntityVillager.class) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
-		} else if (villager.getProfession() == 3 && trades != null && trades.size() > Config.getFriendTradesRequired()) {
+		} else if (villager.getProfession() == 3 && trades != null) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.master_ore.smith");
 			if (player.inventory.hasItem(ZSSItems.swordMaster)) {
 				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {

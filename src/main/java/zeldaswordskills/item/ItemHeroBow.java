@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -308,7 +308,7 @@ IAllowItem, ISheathed, ISpecialBow
 		if (Config.areArrowTradesEnabled() && entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 2 && trades != null && trades.size() >= Config.getFriendTradesRequired()) {
+			if (villager.getProfession() == 2 && trades != null) {
 				int level = getLevel(stack);
 				MerchantRecipe trade = null;
 				if (level > 1) {

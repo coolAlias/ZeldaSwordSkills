@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -422,8 +421,6 @@ public class Config
 	private static boolean enableArrowTrades;
 	/** [Masks] Chance that a villager will be interested in purchasing a random mask */
 	private static float maskBuyChance;
-	/** Number of trades required before a villager offers other services */
-	private static int friendTradesRequired;
 	/*================== MOB SPAWNING =====================*/
 	/** Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100] */
 	private static float roomSpawnMobChance;
@@ -443,14 +440,14 @@ public class Config
 		config.load();
 		init();
 	}
-	
+
 	public static void init(){
 		ZSSItems.initConfig(config);
 		/*================== GENERAL =====================*/
-		
+
 		String category = "general";
 		config.setCategoryComment(category, "General Settings for Zelda Sword Skills.");
-		
+
 		enableStunPlayer = config.getBoolean("Players Can Be Stunned", category, false, "Whether players can be stunned; if false, item use is still interrupted", "config.zss.general.enable_stun_player");
 		enableSwingSpeed = config.getBoolean("Enable Swing Speed Timer", category, true, "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", "config.zss.general.enable_swing_speed");
 		baseSwingSpeed = config.getInt("Default Swing Speed", category, 0, 0, 20, "Default swing speed (anti-left-click-spam): Sets base number of ticks between each left-click (0 to disable)", "config.zss.general.base_swing_speed");
@@ -471,7 +468,7 @@ public class Config
 		npcsAreInvulnerable = config.getBoolean("[NPC] Zelda NPCs are Invulnerable", category, true, "Sets whether Zelda NPCs are invulnerable or not", "config.zss.general.npcs_are_invulnerable");
 		naviRange = config.getInt("[NPC][Navi] Navi Sense Range", category, 4, 0, 10, "Range at which Navi can sense secret rooms, in blocks (0 to disable)", "config.zss.general.navi_range");
 		naviFrequency = config.getInt("[NPC][Navi] Navi Sense Frequency", category, 50, 20, 200, "Frequency with which Navi checks the proximity for secret rooms, in ticks", "config.zss.general.navi_frequency");
-		
+
 		/*=================== BUFF BAR HUD ===================*/
 		category = "buff bar hud";
 		
@@ -492,7 +489,7 @@ public class Config
 		comboHudVAlign = VALIGN.fromString(config.getString("Combo HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.combo_hud.combo_hud_valign"));
 		comboHudOffsetX = config.get(category, "Combo HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_x").getInt();
 		comboHudOffsetY = config.get(category, "Combo HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_y").getInt();
-		
+
 		/*================== ENDING BLOW HUD =====================*/
 		category = "ending blow hud";
 		
@@ -501,7 +498,7 @@ public class Config
 		endingBlowHudVAlign = VALIGN.fromString(config.getString("Ending Blow HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.ending_blow.ending_blow_hud_valign"));
 		endingBlowHudOffsetX = config.get(category, "Ending Blow HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_x").getInt();
 		endingBlowHudOffsetY = config.get(category, "Ending Blow HUD Y Offset", 30, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_y").getInt();
-		
+
 		/*================== ITEM MODE HUD =====================*/
 		category = "item mode hud";
 		
@@ -510,14 +507,14 @@ public class Config
 		itemModeVAlign = VALIGN.fromString(config.getString("Item Mode HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.item_mode.item_mode_valign"));
 		itemModeOffsetX = config.get(category, "Item Mode HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_x").getInt();
 		itemModeOffsetY = config.get(category, "Item Mode HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_y").getInt();
-		
+
 		/*================== CLIENT SIDE SETTINGS  =====================*/
 		category = "client";
 		config.addCustomCategoryComment(category,
 				"This category contains client side settings; i.e. they are not synchronized with the server." +
 				"\nNote that HUD elements added by ZSS will dynamically adjust their position so they don't overlap with other ZSS HUD elements." +
 				"\nAs such, it is generally recommended to leave the offset x and y at 0 or set them identically for each element with the same alignment.");
-		
+
 		showSecretMessage = config.getBoolean("[Chat] Alert When Striking Secret Blocks", category, false, "Whether to show a chat message when striking secret blocks", "config.zss.client.show_secret_message");
 		allowVanillaControls = config.getBoolean("[Controls] Use Vanilla Movement Keys for Skills", category, true, "Whether to use vanilla movement keys to activate skills such as Dodge and Parry", "config.zss.client.allow_vanilla_controls");
 		requireDoubleTap = config.getBoolean("[Controls] Double-tap for Movement Skills", category, true, "Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", "config.zss.client.require_double_tap");
@@ -525,7 +522,7 @@ public class Config
 		enableHookshotSound = config.getBoolean("[Sound] Hookshot Miss Plays Item-Break Sound", category, true, "Whether to play the 'itembreak' sound when the hookshot misses", "config.zss.client.enable_hookshot_sound");
 		enableAutoTarget = config.getBoolean("[Targeting] Enable Auto-Targeting", category, true, "Whether auto-targeting is enabled or not (toggle in game: '.')", "config.zss.client.enable_auto_target");
 		canTargetPlayers = config.getBoolean("[Targeting] Can Target Players", category, true, "Whether players can be targeted (toggle in game: '.' while sneaking)", "config.zss.client.can_target_players");
-		
+
 		/*================== MAGIC METER (CLIENT SIDE) =====================*/
 		category = "magic meter";
 		config.addCustomCategoryComment(category,
@@ -554,13 +551,13 @@ public class Config
 		
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		category = "mod support";
-		
+
 		enableOffhandMaster = config.getBoolean("[BattleGear2] Can Offhand Master Swords", category, false, "Allow Master Swords to be held in the off-hand", "config.mod_support.enable_offhand_master");
-		
+
 		/*================== WEAPON REGISTRY =====================*/
 		//TODO ConfigGui has no effect on these
 		category = "weapon registry";
-		
+
 		swords = config.get(category, "Allowed Swords", new String[0], "Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'. Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass. All swords are also considered WEAPONS.").setRequiresMcRestart(true).setLanguageKey("config.zss.weapon_registry.allowed_swords").getStringList();
 		Arrays.sort(swords);
 		weapons = config.get(category, "Allowed Weapons", new String[0], "Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'. Register an item as a generic melee WEAPON. This means it can be used for all\nskills except those that specifically require a sword, as well as some other things.").setRequiresMcRestart(true).setLanguageKey("config.zss.weapon_registry.allowed_weapons").getStringList();
@@ -579,7 +576,7 @@ public class Config
 
 		/*================== ITEMS =====================*/
 		category = "item";
-		
+
 		arrowsConsumeFlame = config.getBoolean("[Arrows] Can Arrows Consume Sacred Flame", category, true , "Whether transforming arrows with the Sacred Flames has a chance to consume the flame", "config.zss.item.arrows_consume_flame");
 		bombFuseTime = config.getInt("[Bombs] Minimum Bomb Fuse Time", category, 56, 0, 128, "Minimum fuse time; set to 0 to disable held bomb ticks", "config.zss.item.bomb_fuse_time");
 		onlyBombSecretStone = config.getBoolean("[Bombs] Can Bombs Grief", category, false, "Whether bombs are non-griefing, i.e. can only destroy secret stone", "config.zss.item.only_bomb_secret_room");
@@ -606,10 +603,10 @@ public class Config
 		slingshotUpgradeOne = config.getInt("[Slingshot] Slingshot First Upgrade Cost", category, 128, 64, 320, "Cost (in emeralds) for first upgrade", "config.zss.item.slingshot_upgrade_one");
 		slingshotUpgradeTwo = config.getInt("[Slingshot] Slingshot Second Upgrade Cost", category, 320, 128, 640, "Cost (in emeralds) for second upgrade", "config.zss.item.slingshot_upgrade_two");
 		whipRange = config.getInt("[Whip] Whip Range", category, 6, 4, 12, "Range, in blocks, of the standard whip", "config.zss.item.whip_range");
-		
+
 		/*================== STARTING GEAR =====================*/
 		category = "bonus gear";
-		
+
 		enableStartingGear = config.getBoolean("Enable Start Equipment", category, true, "Enable bonus starting equipment", "config.zss.bonus_gear.enable_starting_gear");
 		enableAutoEquip = config.getBoolean("Is Starting Gear Equipped", category, true, "Automatically equip starting equipment", "config.zss.bonus_gear.enable_auto_equip");
 		enableLinksHouse = config.getBoolean("Start With Link's House", category, true, "Begin the game with Link's House - place it anywhere you like!", "config.zss.bonus_gear.enable_links_house");
@@ -618,10 +615,10 @@ public class Config
 		enableTunic = config.getBoolean("Start With a Kokiri Tunic", category, true, "Grants only a Kokiri Tunic (if full set is disabled)", "config.zss.bonus_gear.enable_tunic");
 		enableSword = config.getBoolean("Start With a Kokiri Sword", category, true, "Grants a Kokiri sword", "config.zss.bonus_gear.enable_sword");
 		enableNavi = config.getBoolean("Start With Navi", category, false, "Start the game with Navi in a bottle (you can always acquire her later if false)", "config.zss.bonus_gear.enable_navi");
-		
+
 		/*================== SKILLS =====================*/
 		category = "skills";
-		
+
 		maxBonusHearts = config.getInt("Max Bonus Hearts", category, 20, 0, BonusHeart.MAX_BONUS_HEARTS, "The maximum number of hearts a player can have", "config.zss.skills.max_bonus_hearts");
 		allowDisarmorPlayer = config.getBoolean("[Back Slice] Back Slice Can Disarm Players", category, true, "Allow Back Slice to potentially knock off player armor", "config.zss.skills.allow_disarm_player");
 		disarmTimingBonus = 0.001F * config.getFloat("[Parry] Disarm Timing Bonus", category, 25, 0, 50, "Bonus to disarm based on timing: tenths of a percent added per tick remaining on the timer", "config.zss.skills.disarm_timing_bonus");
@@ -629,11 +626,11 @@ public class Config
 		maxMagicPoints = config.getInt("[Magic] Maximum Attainable Magic Points", category, 250, 50, 1000, "Maximum magic points attainable", "config.zss.skills.max_maigc_points");
 		allowUnlimitedNayru = config.getBoolean("[Magic] Can Always Activate Naryu's Love", category, false, "Allow Nayru's Love to be activated even when magic bar is unlimited (such as after drinking a Chateau Romani)", "config.zss.skills.allow_unlimited_nayru");
 		requireFullHealth = config.getBoolean("[Super Spin Attack | Sword Beam] Sword Skills Require Full Health", category, false, "True to require a completely full health bar to use, or false to allow a small amount to be missing per level", "config.zss.skills.require_full_health");
-		
+
 		/*================== DUNGEON GEN =====================*/
 		//TODO add in a later commit
 		category = "dungeon generation";
-		
+
 		avoidModBlocks = config.getBoolean("Avoid Mod Blocks when Generating", category, true, "Whether to prevent ZSS structures from generating if any non-vanilla blocks are detected", "config.zss.dun_gen.avoid_mod_blocks");
 		enableWindows = config.getBoolean("[Boss Dungeon] Boss Dungeons Can Have Windows", category, true, "Whether boss dungeons are allowed to have windows or not", "config.zss.dun_gen.enable_windows");
 		enableBossDungeons = config.getBoolean("[Boss Dungeon] Boss Dungeons Generate", category, true, "Enable Boss Dungeon generation", "config.zss.dun_gen.enable_boss_dungeons");
@@ -654,10 +651,10 @@ public class Config
 		disableStructureGen = config.getBoolean("[No-Gen] Disable Dungeon Generation", category, false, "Disable structure and feature generation entirely within a specified zone", "config.zss.dun_gen.disable_structure_gen");
 		noGenX = config.getInt("[No-Gen] Structure Gen X Limit", category, 0, -1875000, 1875000, "Starting chunk coordinate X for the structure free zone", "config.zss.dun_gen.no_gen_x");
 		noGenZ = config.getInt("[No-Gen] Structure Gen Z Limit", category, 0, -1875000, 1875000, "Starting chunk coordinate Z for the structure free zone", "config.zss.dun_gen.no_gen_z");
-		
+
 		/*================== WORLD GEN =====================*/
 		category = "world generation";
-		
+
 		ancientTabletGenChance = 0.01F * config.getFloat("[Ancient Tablet] Ancient Tablet Spawn Chance", category, 20, 0, 100, "Chance that a random tablet will spawn when a boss dungeon is defeated", "config.zss.world_gen.ancient_tablet_gen_chance");
 		// TODO ancientTabletGenDistance = config.getInt("Ancient Tablet Spawn Distance", category, 0, 0, 8, "Maximum number of chunks from boss dungeon a tablet may generate", "config.zss.world_gen.ancient_tablet_gen_distance");//TODO need a lang key when this is implemented
 		enableBombFlowerGen = config.getBoolean("[Bomb Flowers] Flower Bombs Generate", category, true, "Enable bomb flower generation", "config.zss.world_gen.enable_bomb_flower_gen");
@@ -675,10 +672,10 @@ public class Config
 		maxPillarRange = config.getInt("[Song Pillars] Maximum Pillar Range", category, 64, 16, 64, "Maximum search range; reduce if new chunks are loading too slowly", "config.zss.world_gen.max_pillar_range");
 		minBrokenPillarDistance = config.getInt("[Song Pillars] Broken Pillar Sparceness", category, 32, 4, 128, "Minimum number of chunks between broken pillars", "config.zss.world_gen.min_broken_pillar_distance");
 		minSongPillarDistance = config.getInt("[Song Pillars] Song Pillar Sparceness", category, 64, 8, 128, "Minimum number of chunks between song pillars", "config.zss.world_gen.min_song_pillar_distance");
-		
+
 		/*================== LOOT =====================*/
 		category = "loot";
-		
+
 		masterSwordChance = 0.01F * config.getFloat("Chance a Temple Contains a Master Sword", category, 33, 1, 100, "Chance (as a percent) of a Forest Temple containing a Master Sword", "config.zss.loot.master_sword_chance");
 		lockedChestChance = 0.01F * config.getFloat("Locked Chest Chance", category, 33, 10, 50, "Chance (as a percent) a chest will be locked", "config.zss.loot.locked_chest_chance");
 		doubleChestChance = 0.01F * config.getFloat("Secret Room Double Chest Chance", category, 10, 0, 25, "Chance (as a percent) a secret room may have two chests", "config.zss.loot.double_chest_chance");
@@ -692,11 +689,11 @@ public class Config
 		bigKeyWeight = config.getInt("[Loot Weight] Big Key Loot Weight", category, 4, 1, 10, "The loot weight of a Big Key", "config.zss.loot.big_key_weight");
 		smallKeyWeight = config.getInt("[Loot Weight] Small Key Loot Weight", category, 4, 1, 10, "The loot weight of a Small Key", "config.zss.loot.small_key_weight");
 		lockedLootWeight = config.getInt("[Loot Weight] Locked Chest Content Weight", category, 3, 1, 10, "The maximum weight of the contents in a Locked Chest", "config.zss.loot.locked_loot_weight");
-		
+
 		/*================== DROPS =====================*/
 		//TODO add to GuiConfig in a later commit
 		category = "drops";
-		
+
 		grassDropChance = 0.01F * config.getFloat("Grass Loot Drop Chance", category, 15, 0, 100, "Chance (as a percent) of loot dropping from grass (0 to disable)", "");
 		jarDropChance = 0.01F * config.getFloat("Jar Loot Drop Chance", category, 20, 0, 100, "Chance (as a percent) of loot dropping from empty jars when broken (0 to disable)", "");
 		creeperDrop = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for creepers to drop bombs", 10).getInt(), 0, 100);
@@ -719,30 +716,29 @@ public class Config
 		vanillaWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt(), 0, 100);
 		globalWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt(), 0, 500);
 		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
-		
+
 		/*================== TRADES =====================*/
 		category = "trade";
-		
-		friendTradesRequired = config.getInt("Friendship Trade Minimum", category, 6, 3, 100, "Number of unlocked trades required before a villager considers you 'friend' [3+]", "config.zss.trade.friend_trades_required");
+
 		enableTradeBombBag = config.getBoolean("[Bomb Bag] Barnes Sells Bomb Bags", category, true, "Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", "config.zss.trade.enable_trade_bomb_bag");
 		bombBagPrice = config.getInt("[Bomb Bag] Bomb Bag Cost", category, 64, 32, 64, "Cost of a bomb bag at Barnes' shop (only applied to new trades)", "config.zss.trade.bomb_bag_price");
 		enableTradeBomb = config.getBoolean("[Bombs] Villagers Can Trade Bombs", category, true, "Enable random villager trades for bombs", "config.zss.trade.enable_trade_bomb");
 		enableArrowTrades = config.getBoolean("[Hero's Bow] Can Trade Magic Arrows", category, true, "Whether magic arrows (fire, ice, light) can be purchased", "config.zss.trade.enable_arrow_trades");
 		maskBuyChance = 0.01F * config.getFloat("[Masks] Mask Trade Chance", category, 15, 1, 50, "Chance that a villager will be interested in purchasing a random mask", "config.zss.trade.mask_buy_chance");
-		
+
 		/*================== MOB SPAWNING =====================*/
 		category = "mob spawns";
-		
+
 		config.addCustomCategoryComment(category, "Mobs use the 'Biome Type' lists to populate their individual spawn settings the first time the game is loaded.\nChanging the type lists after this point has no effect UNLESS you also delete the mob spawn locations in the\nconfig - this will force them to re-populate the next time the game is loaded.\nAlternatively, you may add new biomes directly to the individual mob spawn entries and completely ignore biome type.");
-		
+
 		roomSpawnMobChance = 0.01F * config.getFloat("Mob Secret Room Spawn Chance", category, 25, 0, 100, "Chance that a random mob will spawn inside of secret rooms (0 to disable)", "config.zss.mob_spawns.room_spawn_mob_chance");
 		mobVariantChance = 0.01F * config.getFloat("Mob Variant Secret Room Chance", category, 20, 0, 100, "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType", "config.zss.mob_spawns.mob_variant_chance");
 		minDaysToSpawnDarknut = 24000 * config.getInt("Darknut Grace Period", category, 7, 0, 30, "Minimum number of days required to pass before Darknuts may spawn", "config.zss.mob_spawns.min_days_to_spawn_darknut");
 		minDaysToSpawnWizzrobe = 24000 * config.getInt("Wizzrode Grace Period", category, 7, 0, 30, "Minimum number of days required to pass before Wizzrobes may spawn", "config.zss.mob_spawns.min_days_to_spawn_wizzrobe");
-		
+
 		/*================== MAP MAKING =====================*/
 		config.addCustomCategoryComment("map making", "Configuration settings related to map making; none of these have any impact on normal play.");
-		
+
 		if (config.hasChanged()) {
 			config.save();
 		}
@@ -766,9 +762,8 @@ public class Config
 		ZSSEntities.postInit(config);
 		postPropInit();
 	}
-	
+
 	public static void postPropInit() {
-		
 		/*================== SONGS =====================*/
 		//TODO add to GuiConfig
 		minSongIntervalStorm = MathHelper.clamp_int(config.get("Songs", "[Song of Storms] Time required between each use of the song (by anybody) [0-24000]", 600).getInt(), 0, 24000);
@@ -954,7 +949,6 @@ public class Config
 	public static int getBombBagPrice() { return bombBagPrice; }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return maskBuyChance; }
-	public static int getFriendTradesRequired() { return friendTradesRequired; }
 	/*================== MOB SPAWNING =====================*/
 	public static float getRoomSpawnMobChance() { return roomSpawnMobChance; }
 	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
