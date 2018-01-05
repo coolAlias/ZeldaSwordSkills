@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -35,6 +36,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.SyncQuestsPacket;
 
 /**
  * 
@@ -136,6 +139,17 @@ public class ZSSQuests implements IExtendedEntityProperties
 	 */
 	public void setBorrowedMask(Item item) {
 		borrowedMask = item;
+	}
+
+	/**
+	 * Clears all quest progress
+	 */
+	public void reset() {
+		this.quests.clear();
+		this.setBorrowedMask(null);
+		if (this.player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncQuestsPacket(this), (EntityPlayerMP) this.player);
+		}
 	}
 
 	/**
