@@ -128,7 +128,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.returning");
 			} else if (mask != null) {
 				new TimedChatDialogue(player,
-						new ChatComponentTranslation("chat.zss.npc.mask_salesman.borrowed.0", mask.getItemStackDisplayName(new ItemStack(mask))),
+						new ChatComponentTranslation("chat.zss.npc.mask_salesman.borrowed.0", new ChatComponentTranslation(mask.getUnlocalizedName(new ItemStack(mask)))),
 						new ChatComponentTranslation("chat.zss.npc.mask_salesman.borrowed.1"));
 			} else {
 				playLivingSound();

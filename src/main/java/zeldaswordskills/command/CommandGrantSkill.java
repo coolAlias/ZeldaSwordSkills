@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -92,7 +92,7 @@ public class CommandGrantSkill extends CommandBase
 			if (level > oldLevel) { // grants skill up to level or max level, whichever is reached first
 				/*
 				if (!Config.isSkillEnabled(skill.getId())) {
-					throw new CommandException("commands.grantskill.failure.disabled", skill.getDisplayName());
+					throw new CommandException("commands.grantskill.failure.disabled", new ChatComponentTranslation(skill.getTranslationString()));
 				} else if (skills.grantSkill(skill.getId(), (byte) level)) {
 				 */ 
 				if (skills.grantSkill(skill.getId(), (byte) level)) {
