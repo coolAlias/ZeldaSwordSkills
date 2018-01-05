@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -128,9 +128,9 @@ public class BlockWarpStone extends Block implements ILiftable, ISmashable
 			if (song != null && !world.isRemote) {
 				WarpPoint warp = new WarpPoint(world.provider.getDimensionId(), pos);
 				WarpPoint previous = Config.setDefaultWarpPoint(song, warp);
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.warp_stone.set_default", song.getDisplayName(), warp.toString());
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.block.warp_stone.set_default", new ChatComponentTranslation(song.getTranslationString()), warp.toString());
 				if (previous != null) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.block.warp_stone.previous", song.getDisplayName(), previous.toString());
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.block.warp_stone.previous", new ChatComponentTranslation(song.getTranslationString()), previous.toString());
 				}
 			}
 		} else {
