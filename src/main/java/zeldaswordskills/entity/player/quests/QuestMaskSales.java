@@ -17,6 +17,9 @@
 
 package zeldaswordskills.entity.player.quests;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -32,9 +35,6 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 public final class QuestMaskSales extends QuestBase
 {
@@ -55,17 +55,6 @@ public final class QuestMaskSales extends QuestBase
 	private int currentStage;
 
 	public QuestMaskSales() {}
-
-	/**
-	 * Special constructor for backwards compatibility: starts the quest at the given stage
-	 */
-	public QuestMaskSales(int stage) {
-		set(FLAG_BEGIN);
-		currentStage = Math.min(MASKS.size() * NUM_STAGES, Math.max(0, stage));
-		if (currentStage >= (MASKS.size() * NUM_STAGES)) {
-			set(FLAG_COMPLETE);
-		}
-	}
 
 	/**
 	 * Returns the ItemMask stored at i, or null

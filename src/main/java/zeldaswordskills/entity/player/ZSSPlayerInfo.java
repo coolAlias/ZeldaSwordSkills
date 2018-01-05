@@ -118,12 +118,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public int hoverTime = 0;
 
 	@Deprecated
-	private Item borrowedMask = null;
-
-	@Deprecated
-	private int maskStage = 0;
-
-	@Deprecated
 	private int skulltulaTokens = 0;
 
 	/** [Hero's Bow] Stores the currently nocked arrow in order to avoid the graphical glitch caused by writing to the stack's NBT */
@@ -391,21 +385,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	}
 
 	@Deprecated
-	public Item getBorrowedMask() {
-		return borrowedMask;
-	}
-
-	@Deprecated
-	public void setBorrowedMask(Item item) {
-		borrowedMask = item;
-	}
-
-	@Deprecated
-	public int getCurrentMaskStage() {
-		return maskStage;
-	}
-
-	@Deprecated
 	public int getSkulltulaTokens() {
 		return skulltulaTokens;
 	}
@@ -586,9 +565,6 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			lastHelmWorn = new ItemStack(helm);
 		}
 		// For backwards compatibility:
-		int maskID = compound.getInteger("borrowedMask");
-		borrowedMask = maskID > -1 ? Item.getItemById(maskID) : null;
-		maskStage = compound.getInteger("maskStage");
 		slingshotMode = compound.getInteger("slingshotMode");
 		skulltulaTokens = compound.getInteger("skulltulaTokens");
 	}

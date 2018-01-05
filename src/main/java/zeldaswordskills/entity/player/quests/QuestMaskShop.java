@@ -22,7 +22,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import zeldaswordskills.ZSSAchievements;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
@@ -76,7 +75,7 @@ public class QuestMaskShop extends QuestBase
 	public void forceComplete(EntityPlayer player, Object... data) {
 		set(FLAG_COMPLETE);
 		player.triggerAchievement(ZSSAchievements.maskTrader);
-		ZSSQuests.get(player).add(new QuestMaskSales(ZSSPlayerInfo.get(player).getCurrentMaskStage()));
+		ZSSQuests.get(player).add(new QuestMaskSales());
 	}
 
 	@Override

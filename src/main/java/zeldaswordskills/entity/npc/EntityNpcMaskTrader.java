@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,6 @@ import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.INpcVillager;
 import zeldaswordskills.api.entity.ISongTeacher;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.QuestBase;
@@ -116,9 +115,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 		}
 		ZSSQuests quests = ZSSQuests.get(player);
 		IQuest quest = quests.add(new QuestMaskSales());
-		if (QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, this)) {
-			return true;
-		} else if (quest.isComplete(player)) {
+		if (quest.isComplete(player)) {
 			Item mask = quests.getBorrowedMask();
 			if (mask != null && stack != null && stack.getItem() == mask) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.returning");
@@ -131,8 +128,9 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 				setCustomer(player);
 				player.openGui(ZSSMain.instance, GuiHandler.GUI_MASK_TRADER, worldObj, getEntityId(), 0, 0);
 			}
+			return true;
 		}
-		return true;
+		return QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, this);
 	}
 
 	@Override
@@ -153,23 +151,12 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 	 */
 	public boolean checkShopStatus(EntityPlayer player, boolean isVillager, boolean leftClick) {
 		IQuest quest = ZSSQuests.get(player).add(new QuestMaskShop());
-		if (!isVillager && quest.isComplete(player)) { // not a villager, so don't need to convert
+		// Salesman already converted and player has already completed the quest - nothing to do
+		if (!isVillager && quest.isComplete(player)) {
 			return false;
-		}
-		// for compatibility with old saves - player already started mask trading sequence
-		else if (!isVillager && ZSSPlayerInfo.get(player).getCurrentMaskStage() > 0) {
-			quest.forceComplete(player); // completes the first quest and begins or possibly completes QuestMaskSales
-			// both quests require updating the client
-			if (player instanceof EntityPlayerMP) {
-				PacketDispatcher.sendTo(new SyncQuestPacket(quest), (EntityPlayerMP) player);
-				quest = ZSSQuests.get(player).get(QuestMaskSales.class);
-				if (quest != null) {
-					PacketDispatcher.sendTo(new SyncQuestPacket(quest), (EntityPlayerMP) player);
-				}
-			}
-			return false;
-		} else if (leftClick) { // try to complete the quest
-			if (quest.complete(player)) {
+		} else if (leftClick) {
+			// Check if player can (re-)complete the conversion quest
+			if (quest.canComplete(player) && quest.complete(player)) {
 				if (player instanceof EntityPlayerMP) {
 					PacketDispatcher.sendTo(new SyncQuestPacket(quest), (EntityPlayerMP) player);
 				}
@@ -203,8 +190,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 
 	@Override
 	public TeachingResult getTeachingResult(ItemStack stack, EntityPlayer player) {
-		// check shop status here, too, to make sure quests are updated for old saves
-		if (!isEntityAlive() || player.isSneaking() || checkShopStatus(player, false, false)) {
+		if (!isEntityAlive() || player.isSneaking()) {
 			return null;
 		}
 		String deny = "chat.zss.npc.mask_salesman.ocarina.begin";
