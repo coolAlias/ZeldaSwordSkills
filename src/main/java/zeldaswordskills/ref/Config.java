@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -417,8 +417,6 @@ public class Config
 	private static boolean enableArrowTrades;
 	/** [Masks] Chance that a villager will be interested in purchasing a random mask */
 	private static float maskBuyChance;
-	/** Number of trades required before a villager offers other services */
-	private static int friendTradesRequired;
 	/*================== MOB SPAWNING =====================*/
 	/** Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100] */
 	private static float roomSpawnMobChance;
@@ -658,7 +656,6 @@ public class Config
 		globalWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt(), 0, 500);
 		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
 		/*================== TRADES =====================*/
-		friendTradesRequired = Math.max(config.get("Trade", "Number of unlocked trades required before a villager considers you 'friend' [3+]", 6).getInt(), 3);
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
 		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [32-64]", 64).getInt(), 32, 64);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
@@ -870,7 +867,6 @@ public class Config
 	public static int getBombBagPrice() { return bombBagPrice; }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return maskBuyChance; }
-	public static int getFriendTradesRequired() { return friendTradesRequired; }
 	/*================== MOB SPAWNING =====================*/
 	public static float getRoomSpawnMobChance() { return roomSpawnMobChance; }
 	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
