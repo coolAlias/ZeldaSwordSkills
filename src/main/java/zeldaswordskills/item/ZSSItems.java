@@ -145,8 +145,6 @@ public class ZSSItems
 	private static boolean allowGoldSmelting;
 	/** Enable crafting of the Wooden Hammer used to bypass wooden pegs */
 	private static boolean enableCraftingHammer;
-	/** Enable application of hookshot upgrades via crafting */
-	private static boolean enableCraftingHookshot;
 	/** Enable crafting recipe to make copies of the Book of Mudora */
 	private static boolean enableCraftingMudora;
 	/** Enable crafting throwing rocks from cobblestone and back */
@@ -342,7 +340,6 @@ public class ZSSItems
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);
-		enableCraftingHookshot = config.get("Recipes", "Enable application of hookshot upgrades via crafting", true).getBoolean(true);
 		enableCraftingMudora = config.get("Recipes", "Enable crafting recipe to make copies of the Book of Mudora", true).getBoolean(true);
 		enableCraftingThrowingRock = config.get("Recipes", "Enable crafting throwing rocks from cobblestone and back", false).getBoolean(false);
 	}
@@ -801,15 +798,13 @@ public class ZSSItems
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log, 's', Items.stick);
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log2, 's', Items.stick);
 		}
-		if (enableCraftingHookshot) {
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.EXTENSION.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.STONECLAW.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.STONECLAW.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.EXTENSION.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.MULTI.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.MULTI.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.EXTENSION.ordinal()));
-		}
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.EXTENSION.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.STONECLAW.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.STONECLAW.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.EXTENSION.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.MULTI.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.MULTI.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshotAddon, 1, ItemHookShotUpgrade.AddonType.EXTENSION.ordinal()));
 		if (enableCraftingMudora) {
 			GameRegistry.addShapelessRecipe(new ItemStack(bookMudora, 2), bookMudora, Items.book, Items.feather, new ItemStack(Items.dye, 1, 0));
 		}

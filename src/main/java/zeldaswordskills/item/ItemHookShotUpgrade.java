@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,42 +19,36 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
-import zeldaswordskills.handler.TradeHandler;
-import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-/**
- * 
- * All HookShot add-ons belong to this class. Handles adding tooltip and custom trades.
- *
- */
 public class ItemHookShotUpgrade extends Item implements IUnenchantable
 {
 	/** Current types of add-ons available */
-	public static enum AddonType { EXTENSION, STONECLAW, MULTI };
-
-	protected static final String[] addonNames = {"Extender","Claw","Multi"};
+	public static enum AddonType {
+		EXTENSION("extender"),
+		STONECLAW("claw"),
+		MULTI("multi");
+		public final String unlocalizedName;
+		private AddonType(String unlocalizedName) {
+			this.unlocalizedName = unlocalizedName;
+		}
+	};
 
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -81,10 +75,9 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity.getClass() == EntityVillager.class) {
-			if (stack.getItem() instanceof ItemHookShotUpgrade) {
-				addSpecialTrade(stack, player, (EntityVillager) entity);
-			}
+		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
+			int profession = ((EntityVillager) entity).getProfession();
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.hookshot.upgrade." + profession);
 		}
 		return true;
 	}
@@ -118,56 +111,13 @@ public class ItemHookShotUpgrade extends Item implements IUnenchantable
 	public void registerIcons(IIconRegister register) {
 		iconArray = new IIcon[AddonType.values().length];
 		for (int i = 0; i < AddonType.values().length; ++i) {
-			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + addonNames[getType(i).ordinal()].toLowerCase());
+			iconArray[i] = register.registerIcon(ModInfo.ID + ":" + AddonType.values()[i].unlocalizedName);
 		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.upgrade.desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.upgrade.desc.1"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.upgrade.desc.2"));
-	}
-
-	/**
-	 * Adds first appropriate trade to blacksmith's trade list, if any
-	 */
-	public void addSpecialTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
-		if (!player.worldObj.isRemote) {
-			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 3 && trades != null) {
-				MerchantRecipe trade = getHookShotTradeFromInventory(stack, player, trades);
-				if (trade != null && trades.size() >= Config.getFriendTradesRequired()) {
-					MerchantRecipeHelper.addUniqueTrade(trades, trade);
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.new.0");
-				} else {
-					trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
-					if (MerchantRecipeHelper.addToListWithCheck(trades, trade) || player.worldObj.rand.nextFloat() < 0.5F) {
-						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
-					} else {
-						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
-					}
-				}
-			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
-			}
-		}
-	}
-
-	/**
-	 * Returns the first extendable HookShot trade for which the type of base hookshot found 
-	 * that also doesn't have a trade recipe already in the merchant's list, or null
-	 */
-	private MerchantRecipe getHookShotTradeFromInventory(ItemStack stack, EntityPlayer player, MerchantRecipeList list) {
-		AddonType type = ((ItemHookShotUpgrade) stack.getItem()).getType(stack.getItemDamage());
-		for (ItemStack invStack : player.inventory.mainInventory) {
-			if (invStack != null && invStack.getItem() instanceof ItemHookShot) {
-				if (!MerchantRecipeHelper.doesListContain(list, TradeHandler.getTrade(type, invStack))) {
-					return TradeHandler.getTrade(type, invStack);
-				}
-			}
-		}
-		return null;
+	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean advanced) {
+		list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.upgrade." + getType(stack.getItemDamage()).unlocalizedName));
 	}
 }
