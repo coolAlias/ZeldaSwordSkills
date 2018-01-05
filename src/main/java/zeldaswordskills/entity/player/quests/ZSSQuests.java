@@ -34,7 +34,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSMain;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.SyncQuestsPacket;
 
@@ -126,12 +125,6 @@ public class ZSSQuests implements IExtendedEntityProperties
 	 * Returns the last mask borrowed, or null if no mask has been borrowed
 	 */
 	public Item getBorrowedMask() {
-		// For backwards compatibility, check for old mask and swap it out
-		Item mask = ZSSPlayerInfo.get(player).getBorrowedMask();
-		if (mask != null) {
-			borrowedMask = mask;
-			ZSSPlayerInfo.get(player).setBorrowedMask(null);
-		}
 		return borrowedMask;
 	}
 
