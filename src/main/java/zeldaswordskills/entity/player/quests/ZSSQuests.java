@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import cpw.mods.fml.common.registry.GameData;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -31,9 +35,8 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
-import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import zeldaswordskills.network.PacketDispatcher;
+import zeldaswordskills.network.client.SyncQuestsPacket;
 
 /**
  * 
@@ -135,6 +138,17 @@ public class ZSSQuests implements IExtendedEntityProperties
 	 */
 	public void setBorrowedMask(Item item) {
 		borrowedMask = item;
+	}
+
+	/**
+	 * Clears all quest progress
+	 */
+	public void reset() {
+		this.quests.clear();
+		this.setBorrowedMask(null);
+		if (this.player instanceof EntityPlayerMP) {
+			PacketDispatcher.sendTo(new SyncQuestsPacket(this), (EntityPlayerMP) this.player);
+		}
 	}
 
 	/**
