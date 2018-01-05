@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,76 +17,18 @@
 
 package zeldaswordskills.handler;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
-import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.entity.ZSSVillagerInfo;
-import zeldaswordskills.item.ItemHookShotUpgrade.UpgradeType;
-import zeldaswordskills.item.ZSSItems;
 
 public class TradeHandler // TODO implements IVillageTradeHandler
 {
-	/** Trade mapping for a single HookShot ItemStack key to a full Extended HookShot trade recipe output */
-	public static final Map<List<Integer>, MerchantRecipe> hookshotAddonTrades = new HashMap<List<Integer>, MerchantRecipe>();
-
-	/**
-	 * Adds the trade recipe to the map with the AddonType and  ItemStack as key
-	 */
-	public static final void addTradeToMap(UpgradeType type, ItemStack stack, MerchantRecipe trade) {
-		hookshotAddonTrades.put(Arrays.asList(type.ordinal(), Item.getIdFromItem(stack.getItem()), stack.getItemDamage()), trade);
-	}
-
-	/**
-	 * Returns the appropriate MerchantRecipe for the stack and Addon Type, or null if none was found
-	 */
-	public static final MerchantRecipe getTrade(UpgradeType type, ItemStack stack) {
-		return hookshotAddonTrades.get(Arrays.asList(type.ordinal(), Item.getIdFromItem(stack.getItem()), stack.getItemDamage()));
-	}
-
 	public static void registerTrades() {
 		for (int i = 0; i < 5; ++i) {
 			// TODO VillagerRegistry.instance().registerVillageTradeHandler(i, new TradeHandler());
 		}
-
-		addTradeToMap(UpgradeType.EXTENDER, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()), 
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()),
-						new ItemStack(ZSSItems.hookshotUpgrade,1,UpgradeType.EXTENDER.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal())));
-		addTradeToMap(UpgradeType.EXTENDER, new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()),
-						new ItemStack(ZSSItems.hookshotUpgrade,1,UpgradeType.EXTENDER.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal())));
-		addTradeToMap(UpgradeType.EXTENDER, new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal()),
-						new ItemStack(ZSSItems.hookshotUpgrade,1,UpgradeType.EXTENDER.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT_EXT.ordinal())));
-
-		addTradeToMap(UpgradeType.CLAW, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()), 
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT.ordinal()),
-						new ItemStack(ZSSItems.hookshotUpgrade,1,UpgradeType.CLAW.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal())));
-		addTradeToMap(UpgradeType.CLAW, new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.WOOD_SHOT_EXT.ordinal()),
-						new ItemStack(ZSSItems.hookshotUpgrade,1,UpgradeType.CLAW.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal())));
-
-		addTradeToMap(UpgradeType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()), 
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT.ordinal()),
-						new ItemStack(ZSSItems.hookshotUpgrade,1,UpgradeType.MULTI.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT.ordinal())));
-		addTradeToMap(UpgradeType.MULTI, new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal()),
-				new MerchantRecipe(new ItemStack(ZSSItems.hookshot,1,HookshotType.CLAW_SHOT_EXT.ordinal()),
-						new ItemStack(ZSSItems.hookshotUpgrade,1,UpgradeType.MULTI.ordinal()),
-						new ItemStack(ZSSItems.hookshot,1,HookshotType.MULTI_SHOT_EXT.ordinal())));
-
 		ZSSVillagerInfo.initTrades();
 	}
 

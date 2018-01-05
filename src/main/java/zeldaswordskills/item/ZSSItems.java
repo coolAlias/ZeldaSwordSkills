@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -139,8 +139,6 @@ public class ZSSItems
 	private static boolean allowGoldSmelting;
 	/** Enable crafting of the Wooden Hammer used to bypass wooden pegs */
 	private static boolean enableCraftingHammer;
-	/** Enable application of hookshot upgrades via crafting */
-	private static boolean enableCraftingHookshot;
 	/** Enable crafting recipe to make copies of the Book of Mudora */
 	private static boolean enableCraftingMudora;
 	/** Enable crafting throwing rocks from cobblestone and back */
@@ -334,7 +332,6 @@ public class ZSSItems
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.getBoolean("Can Smelt Pigmen Swords", "recipes", false, "Smelt all those disarmed pigmen swords into gold ingots", "config.zss.recipes.allow_gold_smelting");
 		enableCraftingHammer = config.getBoolean("Can Craft the Wooden Hammer", "recipes", true, "Enable crafting of the Wooden Hammer used to bypass wooden pegs", "config.zss.recipes.enable_crafting_hammer");
-		enableCraftingHookshot = config.getBoolean("Can Craft Hookshot Upgrades", "recipes", false, "Enable application of hookshot upgrades via crafting", "config.zss.recipes.enable_crafting_hookshot");
 		enableCraftingMudora = config.getBoolean("Can Copy Book of Mudora by Crafting", "recipes", true, "Enable crafting recipe to make copies of the Book of Mudora", "config.zss.recipes.enable_crafting_mudora");
 		enableCraftingThrowingRock = config.getBoolean("Can Craft Throwing Rocks", "recipes", false, "Enable crafting throwing rocks from cobblestone and back", "config.zss.recipes.enable_crafting_throwing_rock");
 	}
@@ -770,15 +767,13 @@ public class ZSSItems
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log, 's', Items.stick);
 			GameRegistry.addRecipe(new ItemStack(hammer), "lll"," s "," s ", 'l', Blocks.log2, 's', Items.stick);
 		}
-		if (enableCraftingHookshot) {
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.CLAW.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.CLAW.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.MULTI.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.MULTI.ordinal()));
-			GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
-		}
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.CLAW.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.WOOD_SHOT_EXT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.CLAW.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.MULTI.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.CLAW_SHOT_EXT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.MULTI.ordinal()));
+		GameRegistry.addShapelessRecipe(new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT_EXT.ordinal()), new ItemStack(hookshot, 1, IHookable.HookshotType.MULTI_SHOT.ordinal()), new ItemStack(hookshotUpgrade, 1, ItemHookShotUpgrade.UpgradeType.EXTENDER.ordinal()));
 		if (enableCraftingMudora) {
 			GameRegistry.addShapelessRecipe(new ItemStack(bookMudora, 2), bookMudora, Items.book, Items.feather, new ItemStack(Items.dye, 1, EnumDyeColor.BLACK.getDyeDamage()));
 		}
