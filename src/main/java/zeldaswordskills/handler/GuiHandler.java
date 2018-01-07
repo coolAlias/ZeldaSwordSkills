@@ -65,14 +65,19 @@ public class GuiHandler implements IGuiHandler
 	public static final int GUI_RUPEE_SHOP = 8;
 	/** Gui for Entity-based rupee trading (player is selling) interface; expects parameter 'x' to be the IRupeeMerchant's entity ID */
 	public static final int GUI_RUPEE_SALES = 9;
+	/** Gui for TileEntity-based rupee trading (player is buying) interface; expects parameters x/y/z to be the IRupeeMerchant's TileEntity coordinates  */
+	public static final int GUI_RUPEE_TILE_SHOP = 10;
+	/** Gui for TileEntity-based rupee trading (player is selling) interface; expects parameters x/y/z to be the IRupeeMerchant's TileEntity coordinates */
+	public static final int GUI_RUPEE_TILE_SALES = 11;
 
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+		TileEntity te;
 		Entity entity;
 		IRupeeMerchant merchant;
 		switch(id) {
 		case GUI_PEDESTAL:
-			TileEntity te = world.getTileEntity(x, y, z);
+			te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				return new ContainerPedestal(player, (TileEntityPedestal) te);
 			}
@@ -87,6 +92,20 @@ public class GuiHandler implements IGuiHandler
 		case GUI_RUPEE_SALES:
 			entity = world.getEntityByID(x);
 			merchant = RupeeMerchantHelper.getRupeeMerchant(entity);
+			if (merchant != null) {
+				return new ContainerRupeeMerchant.Sales(player, merchant);
+			}
+			return null;
+		case GUI_RUPEE_TILE_SHOP:
+			te = world.getTileEntity(x, y, z);
+			merchant = RupeeMerchantHelper.getRupeeMerchant(te);
+			if (merchant != null) {
+				return new ContainerRupeeMerchant.Shop(player, merchant);
+			}
+			return null;
+		case GUI_RUPEE_TILE_SALES:
+			te = world.getTileEntity(x, y, z);
+			merchant = RupeeMerchantHelper.getRupeeMerchant(te);
 			if (merchant != null) {
 				return new ContainerRupeeMerchant.Sales(player, merchant);
 			}
@@ -107,11 +126,12 @@ public class GuiHandler implements IGuiHandler
 
 	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-		TileEntity te = world.getTileEntity(x, y, z);
+		TileEntity te;
 		Entity entity;
 		IRupeeMerchant merchant;
 		switch(id) {
 		case GUI_PEDESTAL:
+			te = world.getTileEntity(x, y, z);
 			if (te instanceof TileEntityPedestal) {
 				return new GuiPedestal(player, (TileEntityPedestal) te);
 			}
@@ -136,11 +156,26 @@ public class GuiHandler implements IGuiHandler
 				return new GuiRupeeMerchant.Sales(player, merchant).setRenderEntity(entity);
 			}
 			return null;
+		case GUI_RUPEE_TILE_SHOP:
+			te = world.getTileEntity(x, y, z);
+			merchant = RupeeMerchantHelper.getRupeeMerchant(te);
+			if (merchant != null) {
+				return new GuiRupeeMerchant.Shop(player, merchant);
+			}
+			return null;
+		case GUI_RUPEE_TILE_SALES:
+			te = world.getTileEntity(x, y, z);
+			merchant = RupeeMerchantHelper.getRupeeMerchant(te);
+			if (merchant != null) {
+				return new GuiRupeeMerchant.Sales(player, merchant);
+			}
+			return null;
 		case GUI_SKILLS:
 			return new GuiSkills(player);
 		case GUI_OCARINA:
 			return new GuiOcarina(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 		case GUI_EDIT_GOSSIP_STONE:
+			te = world.getTileEntity(x, y, z);
 			if (te == null) {
 				// modeled after vanilla sign editor handling, since TE is not yet available on client
 				te = new TileEntityGossipStone();
