@@ -21,11 +21,13 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.entity.VanillaRupeeMerchant;
+import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.item.ZSSItems;
 
 public class RupeeTradeLists
@@ -49,6 +51,9 @@ public class RupeeTradeLists
 	private static void createDefaultNpcTradeFiles() {
 		RupeeTradeList<RupeeTrade> buys = new RupeeTradeList<RupeeTrade>(RupeeTradeList.WILL_BUY);
 		RupeeTradeList<RupeeTrade> sells = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
+		// BARNES
+		sells.add(new RupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), 8));
+		RupeeMerchantHelper.writeTradesToFile(null, sells, EntityNpcBarnes.DEFAULT_RUPEE_TRADES);
 	}
 
 	/**
