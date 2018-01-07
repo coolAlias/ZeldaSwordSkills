@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -44,6 +44,7 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IWeapon;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.ref.ModInfo;
@@ -81,7 +82,7 @@ public class ItemBrokenSword extends BaseModItem implements IUnenchantable, IWea
 				stack.setItemDamage(1);
 				brokenItem = ZSSItems.swordOrdon;
 			}
-			if (villager.getProfession() == 3 || isGoron) {
+			if (EnumVillager.BLACKSMITH.is(villager) || isGoron) {
 				if (brokenItem != ZSSItems.swordGiant) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.sword.broken");
 					MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 5), new ItemStack(brokenItem)));

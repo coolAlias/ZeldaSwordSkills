@@ -80,6 +80,7 @@ import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
@@ -309,7 +310,7 @@ IAllowItem, ISheathed, ISpecialBow
 		if (Config.areArrowTradesEnabled() && entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 2 && trades != null) {
+			if (EnumVillager.PRIEST.is(villager) && trades != null) {
 				int level = getLevel(stack);
 				MerchantRecipe trade = null;
 				if (level > 1) {

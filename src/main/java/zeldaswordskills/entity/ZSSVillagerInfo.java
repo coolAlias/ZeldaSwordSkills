@@ -60,6 +60,16 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		private EnumVillager(String name) {
 			this.unlocalizedName = name;
 		}
+		/** Return the EnumVillager type based on the villager's profession */
+		public static EnumVillager get(EntityVillager villager) {
+			return EnumVillager.values()[villager.getProfession() % EnumVillager.values().length];
+		}
+		/**
+		 * Returns true if the villager's profession is this one
+		 */
+		public boolean is(EntityVillager villager) {
+			return villager.getProfession() == this.ordinal();
+		}
 	}
 
 	private static final String SAVE_KEY = "zssVillagerInfo";
@@ -132,7 +142,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** Returns true if this villager is any type of Hunter */
 	public boolean isHunter() {
-		return !villager.isChild() && villager.getProfession() == EnumVillager.BUTCHER.ordinal() && villager.getCustomNameTag() != null && villager.getCustomNameTag().contains("Hunter");
+		return !villager.isChild() && EnumVillager.BUTCHER.is(villager) && villager.getCustomNameTag() != null && villager.getCustomNameTag().contains("Hunter");
 	}
 
 	/** Returns true if this villager is a Monster Hunter */
@@ -196,7 +206,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** Returns whether this villager deals at all in Chu Jellies */
 	public boolean isChuTrader() {
-		return !villager.isChild() && villager.getProfession() == EnumVillager.LIBRARIAN.ordinal() && villager.getCustomNameTag().contains("Doc");
+		return !villager.isChild() && EnumVillager.LIBRARIAN.is(villager) && villager.getCustomNameTag().contains("Doc");
 	}
 
 	/**

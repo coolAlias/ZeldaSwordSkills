@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;
 import zeldaswordskills.entity.projectile.EntityHookShot;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -116,7 +117,7 @@ public class ItemHookShot extends BaseModItem implements IUnenchantable
 		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 3) {
+			if (EnumVillager.BLACKSMITH.is(villager)) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 				if (MerchantRecipeHelper.addToListWithCheck(trades, trade) || player.worldObj.rand.nextFloat() < 0.5F) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");

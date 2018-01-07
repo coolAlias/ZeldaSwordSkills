@@ -37,7 +37,7 @@ public class TradeHandler // TODO implements IVillageTradeHandler
 	@Override
 	public void manipulateTradesForVillager(EntityVillager villager, MerchantRecipeList trades, Random rand) {
 		if (villager instanceof EntityGoron && Config.enableTradeBomb()) {
-			float bombChance = (villager.getProfession() == EnumVillager.BLACKSMITH.ordinal() ? 0.6F : 0.3F);
+			float bombChance = (EnumVillager.BLACKSMITH.is(villager) ? 0.6F : 0.3F);
 			for (BombType bomb : BombType.values()) {
 				addTrade(trades, rand, bombChance, new MerchantRecipe(new ItemStack(Items.emerald, 8 + (bomb.ordinal() * 4) + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
 			}

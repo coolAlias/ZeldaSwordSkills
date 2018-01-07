@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -93,7 +93,7 @@ public class ItemWhip extends BaseModItem implements IFairyUpgrade
 		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == EnumVillager.BUTCHER.ordinal() && trades != null) {
+			if (EnumVillager.BUTCHER.is(villager) && trades != null) {
 				switch(WhipType.fromDamage(stack.getItemDamage())) {
 				case WHIP_SHORT:
 					MerchantRecipe trade = new MerchantRecipe(new ItemStack(this, 1, WhipType.WHIP_SHORT.ordinal()), new ItemStack(Items.emerald, 64), new ItemStack(this, 1, WhipType.WHIP_LONG.ordinal()));
