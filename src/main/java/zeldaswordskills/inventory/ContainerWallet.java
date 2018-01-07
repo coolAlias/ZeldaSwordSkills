@@ -126,6 +126,7 @@ class SlotWallet extends Slot
 		int limit = (int)(remaining / value);
 		ItemStack stack = this.getStack();
 		if (stack != null) {
+			// TODO compare slot rupee value to stack rupee value and adjust accordingly
 			limit += stack.stackSize;
 		}
 		return Math.min(limit, super.getSlotStackLimit());
@@ -137,6 +138,19 @@ class SlotWallet extends Slot
 			return false;
 		}
 		return ItemRupee.Rupee.byDamage(stack.getItemDamage()).ordinal() == this.getSlotIndex();
+	}
+
+	@Override
+	public void putStack(ItemStack stack) {
+		// TODO impossible without an ItemStack-sensitive getSlotStackLimit unless overriding Container#slotClick
+		//		in which case, may not need to override this method
+		if (stack != null) {
+			ItemStack current = this.getStack();
+			if (current != null && current.getItemDamage() != stack.getItemDamage()) {
+				// TODO parse
+			}
+		}
+		super.putStack(stack);
 	}
 
 	@Override
