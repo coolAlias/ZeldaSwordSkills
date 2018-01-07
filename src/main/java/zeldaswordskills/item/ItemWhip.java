@@ -107,7 +107,7 @@ public class ItemWhip extends Item implements IFairyUpgrade
 		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == EnumVillager.BUTCHER.ordinal() && trades != null) {
+			if (EnumVillager.BUTCHER.is(villager) && trades != null) {
 				switch(getType(stack)) {
 				case WHIP_SHORT:
 					MerchantRecipe trade = new MerchantRecipe(new ItemStack(this, 1, WhipType.WHIP_SHORT.ordinal()), new ItemStack(Items.emerald, 64), new ItemStack(this, 1, WhipType.WHIP_LONG.ordinal()));

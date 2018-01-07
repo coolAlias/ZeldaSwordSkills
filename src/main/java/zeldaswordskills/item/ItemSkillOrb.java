@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,7 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.util.MerchantRecipeHelper;
@@ -108,7 +109,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 1 && trades != null) {
+			if (EnumVillager.LIBRARIAN.is(villager) && trades != null) {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");

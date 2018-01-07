@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
@@ -101,15 +102,15 @@ public class ItemBombBag extends Item implements IUnenchantable
 		} else if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() != 1 && trades != null) {
+			if (EnumVillager.LIBRARIAN.is(villager) || trades == null) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
+			} else {
 				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
 				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
 				}
-			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;

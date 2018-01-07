@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -82,7 +83,7 @@ public class ItemPendant extends Item implements IUnenchantable
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
 			EntityVillager villager = (EntityVillager) entity;
-			if (villager.getProfession() == 2) {
+			if (EnumVillager.PRIEST.is(villager)) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.priest.0");
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.pendant.priest.1");
 			} else {

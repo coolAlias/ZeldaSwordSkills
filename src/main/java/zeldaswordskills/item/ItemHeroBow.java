@@ -72,6 +72,7 @@ import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowElemental;
 import zeldaswordskills.entity.projectile.EntityArrowElemental.ElementType;
 import zeldaswordskills.handler.BattlegearEvents;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -291,7 +292,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		if (Config.areArrowTradesEnabled() && entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
 			MerchantRecipeList trades = villager.getRecipes(player);
-			if (villager.getProfession() == 2 && trades != null) {
+			if (EnumVillager.PRIEST.is(villager) && trades != null) {
 				int level = getLevel(stack);
 				MerchantRecipe trade = null;
 				if (level > 1) {

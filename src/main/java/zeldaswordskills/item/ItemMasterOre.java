@@ -23,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -39,7 +40,7 @@ public class ItemMasterOre extends ItemMiscZSS
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.child");
 		} else if (villager.getClass() != EntityVillager.class) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
-		} else if (villager.getProfession() == 3 && trades != null) {
+		} else if (EnumVillager.BLACKSMITH.is(villager) && trades != null) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.masterore.smith");
 			if (player.inventory.hasItem(ZSSItems.swordMaster)) {
 				if (MerchantRecipeHelper.addToListWithCheck(trades, new MerchantRecipe(new ItemStack(ZSSItems.masterOre,2), new ItemStack(ZSSItems.swordMaster), new ItemStack(ZSSItems.swordTempered)))) {

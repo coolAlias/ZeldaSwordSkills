@@ -45,6 +45,16 @@ public class TradeHandler implements IVillageTradeHandler
 		private EnumVillager(String name) {
 			this.unlocalizedName = name;
 		}
+		/** Return the EnumVillager type based on the villager's profession */
+		public static EnumVillager get(EntityVillager villager) {
+			return EnumVillager.values()[villager.getProfession() % EnumVillager.values().length];
+		}
+		/**
+		 * Returns true if the villager's profession is this one
+		 */
+		public boolean is(EntityVillager villager) {
+			return villager.getProfession() == this.ordinal();
+		}
 	}
 
 	public static void registerTrades() {
@@ -57,7 +67,7 @@ public class TradeHandler implements IVillageTradeHandler
 	@Override
 	public void manipulateTradesForVillager(EntityVillager villager, MerchantRecipeList trades, Random rand) {
 		if (villager instanceof EntityGoron && Config.enableTradeBomb()) {
-			float bombChance = (villager.getProfession() == EnumVillager.BLACKSMITH.ordinal() ? 0.6F : 0.3F);
+			float bombChance = (EnumVillager.BLACKSMITH.is(villager) ? 0.6F : 0.3F);
 			for (BombType bomb : BombType.values()) {
 				addTrade(trades, rand, bombChance, new MerchantRecipe(new ItemStack(Items.emerald, 8 + (bomb.ordinal() * 4) + rand.nextInt(6)), new ItemStack(ZSSItems.bomb, 1, bomb.ordinal())));
 			}
