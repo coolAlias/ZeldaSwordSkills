@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,24 +19,22 @@ package zeldaswordskills.item;
 
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
+import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
+import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -87,22 +85,13 @@ public class ItemMiscZSS extends Item implements IRightClickEntity, IUnenchantab
 	}
 
 	/**
-	 * Called when left-clicking a villager with the item in hand
+	 * Called when left- or right-clicking a villager with the item in hand
 	 * @param stack The player's currently held item (stack.getItem() is 'this')
 	 */
 	protected void handleTrade(ItemStack stack, EntityPlayer player, EntityVillager villager) {
-		MerchantRecipeList trades = villager.getRecipes(player);
-		if (villager.isChild()) {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
-		} else if (villager.getClass() != EntityVillager.class) {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
-		} else if (trades != null && sellPrice > 0) {
-			MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, sellPrice));
-			if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.0");
-			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
-			}
+		if (this.sellPrice > 0) {
+			RupeeTrade trade = new RupeeTrade(new ItemStack(stack.getItem(), 1, stack.getItemDamage()), this.sellPrice);
+			RupeeMerchantHelper.addVillagerRupeeTrade(player, trade, villager, null, EntityVillager.class, 0.2F);
 		} else {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 		}
