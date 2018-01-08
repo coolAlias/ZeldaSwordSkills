@@ -24,7 +24,6 @@ import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -36,13 +35,14 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
+import zeldaswordskills.entity.player.ZSSPlayerWallet;
 import zeldaswordskills.entity.player.quests.QuestMaskSales;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
+import zeldaswordskills.util.TimedChatDialogue;
 
 /**
  * 
@@ -141,20 +141,28 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Adds any item to this hunter's list of things to buy (does nothing if {@link #isHunter()} is false)
-	 * @param toBuy ItemStack that the hunter will purchase
-	 * @param price Base price the hunter should pay for the item in question
+	 * Handles hunter trading interactions for the player
+	 * @param player
+	 * @param stack  The stack to trade, one of which will be consumed if successful
+	 * @param reward The number of rupees to reward the player
+	 * @param isLeftClick True if the player is using left-click (i.e. turning in the trade)
 	 */
-	public void addHunterTrade(EntityPlayer player, ItemStack toBuy, int price) {
-		if (!isHunter()) {
-			return;
-		}
-		price = isMonsterHunter() ? price + price / 2 : price;
-		if (MerchantRecipeHelper.addToListWithCheck(villager.getRecipes(player), new MerchantRecipe(toBuy, new ItemStack(Items.emerald, price)))) {
-			PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.hunter.new", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
+	public void handleHunterTrade(EntityPlayer player, ItemStack stack, int reward, boolean isLeftClick) {
+		if (isLeftClick) {
+			if (ZSSPlayerWallet.get(player).addRupees(reward)) {
+				if (PlayerUtils.consumeHeldItem(player, stack.getItem(), stack.getItemDamage(), 1)) {
+					PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.hunter.trade." + player.worldObj.rand.nextInt(4));
+				} else {
+					ZSSPlayerWallet.get(player).spendRupees(reward); // take rupees back
+				}
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.wallet.insufficient");
+			}
 		} else {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.hunter.old", new ChatComponentTranslation(toBuy.getUnlocalizedName() + ".name"));
+			new TimedChatDialogue(player, 0, 1000,
+					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.0", new ChatComponentTranslation(stack.getUnlocalizedName() + ".name")),
+					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.1", reward));
 		}
 	}
 
@@ -167,11 +175,6 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	public MerchantRecipe getTreasureTrade(Treasures treasure) {
 		if (treasureTrades.containsKey(treasure) && treasureVillager.get(treasure) == villager.getProfession()) {
 			return treasureTrades.get(treasure);
-		} else if (isHunter() && treasure.canSell()) {
-			boolean flag = ("Monster Hunter").equals(villager.getCustomNameTag());
-			int price = treasure.getValue();
-			price = flag ? price + (price / 2) : price;
-			return new MerchantRecipe(new ItemStack(ZSSItems.treasure, 1, treasure.ordinal()), new ItemStack(Items.emerald, price));
 		}
 		return null;
 	}

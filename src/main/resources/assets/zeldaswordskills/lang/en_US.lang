@@ -685,6 +685,7 @@ chat.zss.trade.whip.sorry=They sure could use that whip down at Lon Lon Ranch.
 chat.zss.wallet_upgrade.fail=You already have the biggest wallet!
 
 # General / hunter treasure trades
+chat.zss.trade.wallet.insufficient=Looks like you need a bigger wallet!
 chat.zss.treasure.generic.give.0=No thanks, I'm not into that kind of thing.
 chat.zss.treasure.generic.give.1=Why are you giving this to me? I don't want it.
 chat.zss.treasure.generic.give.2=I think you had better keep that.

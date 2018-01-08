@@ -71,16 +71,16 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 		EYE_DROPS("eye_drops", true),
 		EYEBALL_FROG("eyeball_frog", true),
 		GORON_SWORD("goron_sword", true),
-		JELLY_BLOB("jelly_blob", "generic", 32, 64, false),
-		MONSTER_CLAW("monster_claw", "generic", 24, 64, false),
+		JELLY_BLOB("jelly_blob", "generic", 10, 64, false),
+		MONSTER_CLAW("monster_claw", "generic", 10, 64, false),
 		ODD_MUSHROOM("odd_mushroom", true),
 		ODD_POTION("odd_potion", true),
 		POACHER_SAW("poacher_saw", true),
 		POCKET_EGG("pocket_egg", true),
 		PRESCRIPTION("prescription", true),
-		TENTACLE("tentacle", "generic", 16, 64, true),
+		TENTACLE("tentacle", "generic", 10, 64, true),
 		ZELDAS_LETTER("zeldas_letter"),
-		KNIGHTS_CREST("knights_crest", "knights_crest", 32, 64, false);
+		KNIGHTS_CREST("knights_crest", "knights_crest", 20, 64, false);
 
 		public final String name;
 		/** Unlocalized string used to retrieve chat comment when an NPC is not interested in trading */
@@ -111,7 +111,7 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 		/** Whether this treasure is salable (currently used only for monster parts) */
 		public boolean canSell() { return value > 0; }
 		/** The price at which the hunter will buy this treasure */
-		public int getValue() { return value; }
+		public int getValue(boolean isMonsterHunter) { return (isMonsterHunter ? value + (value / 2) : value); }
 		/** The maximum stack size for this treasure */
 		public int getMaxStackSize() { return maxStackSize; }
 		/** True for items that are part of Biggoron's Trading sequence */
@@ -208,11 +208,18 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 	 */
 	public boolean handleVillagerTrade(ItemStack stack, EntityPlayer player, EntityVillager villager, boolean isLeftClick) {
 		Treasures treasure = Treasures.byDamage(stack.getItemDamage());
-		ZSSVillagerInfo villagerInfo = ZSSVillagerInfo.get(villager);
-		MerchantRecipe trade = villagerInfo.getTreasureTrade(treasure);
+		ZSSVillagerInfo info = ZSSVillagerInfo.get(villager);
+		MerchantRecipe trade = info.getTreasureTrade(treasure);
 		villager.playLivingSound();
 		if (villager.isChild()) {
 			handleChildTrade(stack, player, isLeftClick);
+		} else if (info.isHunter()) {
+			if (treasure.canSell()) {
+				int reward = treasure.getValue(info.isMonsterHunter());
+				info.handleHunterTrade(player, stack, reward, isLeftClick);
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.uninterested");
+			}
 		} else if (trade == null) {
 			return false;
 		} else if (isLeftClick) {
@@ -226,20 +233,12 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 				} else {
 					player.setCurrentItemOrArmor(0, trade.getItemToSell().copy());
 				}
-				if (villagerInfo.isHunter()) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.hunter.trade." + itemRand.nextInt(4));
-				} else {
-					new TimedChatDialogue(player, 0, 500,
-							new ChatComponentTranslation("chat.zss.treasure." + treasure.name + ".trade"),
-							new ChatComponentTranslation("chat.zss.treasure.generic.received", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name")));
-				}
+				new TimedChatDialogue(player, 0, 500,
+						new ChatComponentTranslation("chat.zss.treasure." + treasure.name + ".trade"),
+						new ChatComponentTranslation("chat.zss.treasure.generic.received", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name")));
 			} else { // can only be true when required stack is not null
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.trade.fail", required.stackSize, new ChatComponentTranslation(required.getUnlocalizedName() + ".name"));
 			}
-		} else if (villagerInfo.isHunter()) {
-			new TimedChatDialogue(player, 0, 1000,
-					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.0", new ChatComponentTranslation(trade.getItemToBuy().getUnlocalizedName() + ".name")),
-					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.1", trade.getItemToSell().stackSize));
 		} else {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.interested", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name"));
 		}

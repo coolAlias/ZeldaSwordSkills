@@ -89,7 +89,8 @@ public class ItemSkulltulaToken extends Item implements IRightClickEntity, IUnen
 		} else if (villager.isChild()) {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
 		} else if (info.isHunter()) {
-			info.addHunterTrade(player, new ItemStack(this), 20);
+			int reward = (info.isMonsterHunter() ? 30 : 20);
+			info.handleHunterTrade(player, stack, reward, isLeftClick);
 		} else {
 			int i = villager.getProfession();
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.skulltula_token.villager." + (i > 4 ? "custom" : i));
