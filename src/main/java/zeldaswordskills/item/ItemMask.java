@@ -207,7 +207,6 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 	 * then adding any potion effect, and finally calling {@link #applyCustomModifiers}
 	 */
 	public final void applyModifiers(ItemStack stack, EntityPlayer player) {
-		removeModifiers(stack, player);
 		if (tickingEffect != null) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
 		}
@@ -304,13 +303,10 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 		}
 		@Override
 		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
-			/*
-			// TODO
 			DirtyEntityAccessor.setSize(player, player.width * 3.0F, player.height * 3.0F);
 			if (player.worldObj.isRemote) {
 				player.stepHeight += 1.0F;
 			}
-			 */
 		}
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
