@@ -53,8 +53,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
@@ -63,6 +61,10 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.EnumVillager;
+import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
+import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
+import zeldaswordskills.api.entity.merchant.RupeeTrade;
+import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.ICyclableItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -86,7 +88,6 @@ import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 
@@ -252,30 +253,50 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (Config.areArrowTradesEnabled() && entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
-			MerchantRecipeList trades = villager.getRecipes(player);
-			if (EnumVillager.PRIEST.is(villager) && trades != null) {
-				int level = getLevel(stack);
-				MerchantRecipe trade = null;
-				if (level > 1) {
-					trade = new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.arrowFire, 4));
-					if (MerchantRecipeHelper.doesListContain(trades, trade)) {
-						trade = new MerchantRecipe(new ItemStack(Items.emerald, 20), new ItemStack(ZSSItems.arrowIce, 4));
-						if (level > 2 && MerchantRecipeHelper.doesListContain(trades, trade)) {
-							trade = new MerchantRecipe(new ItemStack(Items.emerald, 40), new ItemStack(ZSSItems.arrowLight, 4));
-						}
-					}
-				}
-				if (trade != null && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.arrow");
+			if (EnumVillager.PRIEST.is(villager)) {
+				IRupeeMerchant merchant = RupeeMerchantHelper.getRupeeMerchant(villager);
+				if (merchant.getRupeeCustomer() != null) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.merchant.busy");
 				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
+					this.addArrowTrades(stack, player, merchant);
 				}
 			} else {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
-
 		return true;
+	}
+
+	/**
+	 * Adds special arrow trades if appropriate for the merchant
+	 */
+	private void addArrowTrades(ItemStack stack, EntityPlayer player, IRupeeMerchant merchant) {
+		// Fetch the merchant's list of goods for sale to the current player
+		RupeeTradeList trades = RupeeMerchantHelper.getRupeeTrades(merchant, true, player);
+		if (trades == null) {
+			merchant.setRupeeTrades(new RupeeTradeList(RupeeTradeList.FOR_SALE), true);
+			trades = merchant.getRupeeTrades(true);
+		}
+		if (trades != null) {
+			int level = this.getLevel(stack);
+			RupeeTrade trade = null;
+			if (level > 1) {
+				trade = new RupeeTrade(new ItemStack(ZSSItems.arrowFire, 4), 20);
+				if (trades.containsTrade(trade)) {
+					trade = new RupeeTrade(new ItemStack(ZSSItems.arrowIce, 4), 20);
+					if (level > 2 && trades.containsTrade(trade)) {
+						trade = new RupeeTrade(new ItemStack(ZSSItems.arrowLight, 4), 50);
+					}
+				}
+			}
+			if (trade != null && trades.addOrUpdateTrade(trade)) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.arrow");
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
+			}
+		} else {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
+		}
 	}
 
 	@Override

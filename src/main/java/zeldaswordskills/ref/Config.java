@@ -496,7 +496,7 @@ public class Config
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
 		disableAllUnenchantables = config.get("Item", "[Enchantments] Disable the vanilla behavior allowing unenchantable items to be enchanted using the anvil", false).getBoolean(false);
 		enableMegaSmashQuake = config.get("Item", "[Hammer] True to allow the Megaton Hammer to break Quake Stone (also requires player to have Golden Gauntlets in inventory)", true).getBoolean(true);
-		heroBowUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Hero's Bow] Cost (in rupees) to upgrade, per level [128-640]", 192).getInt(), 128, 640);
+		heroBowUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Hero's Bow] Cost (in rupees) to upgrade, per level [100-1000]", 200).getInt(), 100, 1000);
 		enableFireArrowIgnite = config.get("Item", "[Hero's Bow] Whether the fire arrow can ignite affected blocks", true).getBoolean(true);
 		enableFireArrowMelt = config.get("Item", "[Hero's Bow] Whether the fire arrow can melt unbreakable ice blocks", false).getBoolean(false);
 		enableLightArrowNoClip = config.get("Item", "[Hero's Bow] Whether the light arrow can penetrate blocks", true).getBoolean(true);
