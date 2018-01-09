@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,21 @@ package zeldaswordskills.util;
 
 import java.util.Iterator;
 
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import zeldaswordskills.ZSSMain;
+import zeldaswordskills.item.ItemArmorBoots;
+import zeldaswordskills.item.ItemArmorTunic;
+import zeldaswordskills.item.ItemBomb;
+import zeldaswordskills.item.ItemBrokenSword;
+import zeldaswordskills.item.ItemMiscZSS;
+import zeldaswordskills.item.ItemZeldaArrow;
+import zeldaswordskills.item.ItemZeldaShield;
+import zeldaswordskills.item.ItemZeldaSword;
+import zeldaswordskills.item.ZSSItems;
 
 /**
  * 
@@ -159,6 +171,43 @@ public class MerchantRecipeHelper {
 					return true;
 				}
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * Converts old villager trades to the new system
+	 */
+	public static void convertVillagerData(EntityVillager villager) {
+		try {
+			MerchantRecipeList trades = villager.getRecipes(null);
+			ZSSMain.logger.info("Updating villager trades for villager: " + villager);
+			// Remove any no longer viable trades
+			for (Iterator<MerchantRecipe> iterator = trades.iterator(); iterator.hasNext();) {
+				MerchantRecipe trade = iterator.next();
+				if (MerchantRecipeHelper.canRemoveTrade(trade.getItemToBuy().getItem())) {
+					ZSSMain.logger.info("Removed old trade: " + trade.getItemToBuy() + " + " + trade.getSecondItemToBuy() + " => " + trade.getItemToSell());
+					iterator.remove();
+				}
+			}
+		} catch (NullPointerException e) {
+			// ignore if #getRecipes required a non-null EntityPlayer
+		}
+	}
+
+	/**
+	 * Returns true if the Item is one of any number of items that could previously be sold for emeralds;
+	 * these can usually be added to the rupee trade list by left-clicking on the merchant with the item.
+	 */
+	private static boolean canRemoveTrade(Item item) {
+		if (item instanceof ItemZeldaArrow) {
+			return true; // remove all special arrow trades
+		} else if (item instanceof ItemArmorBoots || item instanceof ItemArmorTunic || item == ZSSItems.bombBag || item instanceof ItemBomb || item instanceof ItemMiscZSS || item instanceof ItemZeldaShield || item instanceof ItemZeldaSword) {
+			return true; // various items that could only be sold
+		} else if (item == ZSSItems.skulltulaToken) {
+			return true; // hunter trade
+		} else if (item == ZSSItems.treasure) {
+			return true; // hunter trades plus one EVIL_CRYSTAL trade
 		}
 		return false;
 	}

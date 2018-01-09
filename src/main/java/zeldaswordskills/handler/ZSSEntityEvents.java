@@ -60,6 +60,7 @@ import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.LeapingBlow;
+import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 
 /**
@@ -267,6 +268,7 @@ public class ZSSEntityEvents
 			}
 			villager.getEntityData().removeTag("NextSkulltulaReward");
 		}
+		MerchantRecipeHelper.convertVillagerData(villager);
 	}
 
 	@SubscribeEvent
