@@ -69,7 +69,7 @@ public class QuestLightArrows extends QuestBase {
 
 	@Override
 	protected boolean onComplete(EntityPlayer player, Object... data) {
-		ItemStack reward = new ItemStack(ZSSItems.arrowLight, 8);
+		ItemStack reward = new ItemStack(ZSSItems.arrowLight, 32);
 		new TimedChatDialogue(player,
 				new ChatComponentTranslation("chat.zss.npc.zelda.arrow_light.complete"),
 				new ChatComponentTranslation("chat.zss.treasure.generic.received.plural", new ChatComponentTranslation(reward.getUnlocalizedName() + ".name"), reward.stackSize));
