@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -52,13 +52,13 @@ public class GetBombPacket extends AbstractServerMessage<GetBombPacket>
 			for (ItemStack invStack : player.inventory.mainInventory) {
 				if (invStack != null && invStack.getItem() instanceof ItemBombBag) {
 					ItemBombBag bombBag = (ItemBombBag) invStack.getItem();
-					if (player.capabilities.isCreativeMode || bombBag.removeBomb(invStack)) {
+					ItemStack bomb = bombBag.removeBomb(player, invStack);
+					if (bomb != null) {
 						// TODO attempt to merge stackable items with inventory before dropping
 						if (heldItem != null && (heldItem.isStackable() || !player.inventory.addItemStackToInventory(heldItem))) {
 							player.dropPlayerItemWithRandomChoice(heldItem, false);
 						}
-						int type = bombBag.getBagBombType(invStack);
-						player.setCurrentItemOrArmor(0, new ItemStack(ZSSItems.bomb, 1, (type > 0 ? type : 0)));
+						player.setCurrentItemOrArmor(0, bomb);
 						break;
 					}
 				}

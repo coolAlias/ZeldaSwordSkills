@@ -497,20 +497,20 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 					arrow = stack;
 				} else if (stack.getItem() instanceof ItemBombBag) {
 					ItemBombBag bombBag = (ItemBombBag) stack.getItem();
-					int bagType = bombBag.getBagBombType(stack);
-					if (bagType >= 0 && bombBag.getBombsHeld(stack) > 0) {
-						BombType type = BombType.values()[bagType % BombType.values().length];
+					ItemStack bomb = bombBag.removeBomb(player, stack);
+					if (bomb != null) {
+						BombType type = ItemBomb.getType(bomb);
 						ItemStack bombArrow = new ItemStack(bombArrowMap.inverse().get(type),1,0);
-						if (hasAutoArrow || player.capabilities.isCreativeMode) {
+						if (player.capabilities.isCreativeMode) {
 							arrow = bombArrow;
+						} else if (hasAutoArrow) {
+							arrow = bombArrow;
+							bombBag.addBombs(stack, bomb);
 						} else if (hasArrow && player.inventory.addItemStackToInventory(bombArrow)) {
-							if (bombBag.removeBomb(stack)) {
-								if (player.inventory.consumeInventoryItem(Items.arrow)) {
-									arrow = bombArrow;
-								} else {
-									bombBag.addBombs(stack, bombArrow);
-								}
+							if (player.inventory.consumeInventoryItem(Items.arrow)) {
+								arrow = bombArrow;
 							} else {
+								bombBag.addBombs(stack, bomb);
 								PlayerUtils.consumeInventoryItem(player, bombArrow, 1);
 							}
 						}

@@ -84,12 +84,12 @@ public class ItemBombBag extends Item implements IUnenchantable
 
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if (player.capabilities.isCreativeMode || removeBomb(stack)) {
+		ItemStack bomb = this.removeBomb(player, stack);
+		if (bomb != null) {
 			if (!player.inventory.addItemStackToInventory(stack)) {
 				player.dropPlayerItemWithRandomChoice(stack, false);
 			}
-			int type = getBagBombType(stack);
-			return new ItemStack(ZSSItems.bomb, 1, (type > 0 ? type : 0));
+			return bomb;
 		}
 		return stack;
 	}
@@ -210,15 +210,15 @@ public class ItemBombBag extends Item implements IUnenchantable
 	}
 
 	/**
-	 * Returns true if a bomb was removed from the bag
+	 * Returns the removed bomb ItemStack or null if no bombs were available
+	 * @param player If the player is in Creative mode, a bomb is always returned without removing any
 	 */
-	public boolean removeBomb(ItemStack stack) {
-		if (getBombsHeld(stack) > 0) {
-			addBombs(stack, -1);
-			return true;
-		} else {
-			return false;
+	public ItemStack removeBomb(EntityPlayer player, ItemStack stack) {
+		int type = this.getBagBombType(stack);
+		if (player.capabilities.isCreativeMode || this.addBombs(stack, -1) == 0) {
+			return new ItemStack(ZSSItems.bomb, 1, type);
 		}
+		return null;
 	}
 
 	/**
