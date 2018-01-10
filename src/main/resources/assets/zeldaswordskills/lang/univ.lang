@@ -1472,7 +1472,7 @@ entity.zeldaswordskills.wizzrobe.name.2=
 entity.zeldaswordskills.wizzrobe.name.3=
 entity.zeldaswordskills.wizzrobe_grand.name=
 
-gui.gossip_stone.name=
+gui.zss.gossip_stone.name=
 gui.zss.magic_meter.text=
 gui.zss.mask_trader.name=
 gui.zss.mask_trader.borrow.text=
