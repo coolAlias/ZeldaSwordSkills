@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -103,7 +103,7 @@ public class RecipeBagToBombArrows implements IRecipe {
 		for (int i = 0; i < grid.getSizeInventory(); ++i) {
 			ItemStack stack = grid.getStackInSlot(i);
 			if (stack != null && stack.getItem() instanceof ItemBombBag) {
-				((ItemBombBag) stack.getItem()).removeBomb(stack);
+				((ItemBombBag) stack.getItem()).addBombs(stack, -1);
 				stacks[i] = stack;
 			} else {
 				stacks[i] = null;
