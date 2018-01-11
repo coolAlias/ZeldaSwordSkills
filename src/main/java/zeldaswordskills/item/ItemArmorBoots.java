@@ -33,17 +33,16 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.EnumVillager;
+import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
+import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IEquipTrigger;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -54,8 +53,6 @@ import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.InLiquidPacket;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.util.MerchantRecipeHelper;
-import zeldaswordskills.util.PlayerUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -104,19 +101,9 @@ public class ItemArmorBoots extends ItemArmor implements IEquipTrigger, IUnencha
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
-			EntityVillager villager = (EntityVillager) entity;
-			MerchantRecipeList trades = villager.getRecipes(player);
-			if (EnumVillager.BLACKSMITH.is(villager) && trades != null) {
-				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
-				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");
-				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
-				}
-			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
-			}
+		if (!player.worldObj.isRemote && entity instanceof EntityVillager) {
+			RupeeTrade trade = new RupeeTrade(new ItemStack(stack.getItem(), 1, stack.getItemDamage()), 20);
+			RupeeMerchantHelper.addVillagerRupeeTrade(player, trade, (EntityVillager) entity, EnumVillager.BLACKSMITH, null, 0.2F);
 		}
 		return true;
 	}
