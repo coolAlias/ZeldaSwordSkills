@@ -475,29 +475,28 @@ public class Config
 		/*=================== BUFF BAR HUD ===================*/
 		category = "buff bar hud";
 		
-		buffBarMaxIcons = config.getInt("Number of Icons to Display on Buff", category, 5, 1, 10, "Maximum number of icons to display per row or column", "config.zss.buff_bar.buff_bar_max_icons");
-		isBuffBarEnabled = config.getBoolean("Buff Bar Displays at All Times", category, true, "Whether the buff bar should be displayed at all times", "config.zss.buff_bar.is_buff_bar_enabled");
+		buffBarMaxIcons = config.getInt("Number of Buffs per Row/Column", category, 5, 1, 10, "Maximum number of icons to display per row or column", "config.zss.buff_bar.buff_bar_max_icons");
+		isBuffBarEnabled = config.getBoolean("Buff Bar Displays at All Times", category, true, "Whether the buff bar should be displayed at all times");
 		isBuffBarHorizontal = config.getBoolean("Display Buff Bar Horizontally", category, true, "Whether the buff bar should be displayed horizontally", "config.zss.buff_bar.is_buff_bar_horizontal");
-		buffBarHAlign = HALIGN.fromString(config.getString("Buff HUD X-axis Alignment", category, "right", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.buff_bar.buff_bar_halign"));
-		buffBarVAlign = VALIGN.fromString(config.getString("Buff HUD Y-axis Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.buff_bar.buff_bar_valign"));
-		//Configuration without min/max int must use this form
-		buffBarOffsetX = config.get(category, "Buff HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.buffBar.buffBarOffsetX").getInt();
-		buffBarOffsetY = config.get(category, "Buff HUD Y Offset", 0,"Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.buffBar.buffBarOffsetY").getInt();
+		buffBarHAlign = HALIGN.fromString(config.getString("Buff HUD X Alignment", category, "right", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.buff_bar.buff_bar_halign"));
+		buffBarVAlign = VALIGN.fromString(config.getString("Buff HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.buff_bar.buff_bar_valign"));
+		buffBarOffsetX = config.get(category, "Buff HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.buff_bar.buff_bar_offset_x").getInt();
+		buffBarOffsetY = config.get(category, "Buff HUD Y Offset", 0,"Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.buff_bar.buff_bar_offset_y").getInt();
 		
 		/*=================== COMBO HUD ===================*/
 		category = "combo hud";
 		
-		isComboHudEnabled = config.getBoolean("Display Combo Counter", category, true, "Whether the combo hit counter will display by default (toggle in game: 'v')", "config.zss.combo_hud.is_combo_hud_enabled");
+		isComboHudEnabled = config.getBoolean("Display Combo Counter", category, true, "Whether the combo hit counter will display by default (toggle in game: 'v')");
 		hitsToDisplay = config.getInt("Hits to Display in Combo HUD", category, 3, 0, 12, "Max hits to display in Combo HUD", "config.zss.combo_hud.hits_to_display");
-		comboHudHAlign = HALIGN.fromString(config.getString("Combo HUD X-axis Alignment", category, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.combo_hud.combo_hud_halign"));
-		comboHudVAlign = VALIGN.fromString(config.getString("Combo HUD Y-axis Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.combo_hud.combo_hud_valign"));
+		comboHudHAlign = HALIGN.fromString(config.getString("Combo HUD X Alignment", category, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.combo_hud.combo_hud_halign"));
+		comboHudVAlign = VALIGN.fromString(config.getString("Combo HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.combo_hud.combo_hud_valign"));
 		comboHudOffsetX = config.get(category, "Combo HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_x").getInt();
 		comboHudOffsetY = config.get(category, "Combo HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_y").getInt();
 		
 		/*================== ENDING BLOW HUD =====================*/
 		category = "ending blow hud";
 		
-		isEndingBlowHudEnabled = config.getBoolean("Display Ending Blow HUD", category, true, "Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use)", "config.zss.ending_blow.is_ending_blow_hud_enabled");
+		isEndingBlowHudEnabled = config.getBoolean("Display Ending Blow HUD", category, true, "Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use)");
 		endingBlowHudHAlign = HALIGN.fromString(config.getString("Ending Blow HUD X Alignment", category, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.ending_blow.ending_blow_hud_halign"));
 		endingBlowHudVAlign = VALIGN.fromString(config.getString("Ending Blow HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.ending_blow.ending_blow_hud_valign"));
 		endingBlowHudOffsetX = config.get(category, "Ending Blow HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_x").getInt();
@@ -506,9 +505,9 @@ public class Config
 		/*================== ITEM MODE HUD =====================*/
 		category = "item mode hud";
 		
-		isItemModeEnabled = config.getBoolean("Display Item Mode HUD", category, true, "Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)", "config.zss.item_mode.is_item_mode_enabled");
-		itemModeHAlign = HALIGN.fromString(config.getString("Item Mode HUD X-axis Alignment", category, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.item_mode.item_mode_halign"));
-		itemModeVAlign = VALIGN.fromString(config.getString("Item Mode HUD Y-axis Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.item_mode.item_mode_valign"));
+		isItemModeEnabled = config.getBoolean("Display Item Mode HUD", category, true, "Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)");
+		itemModeHAlign = HALIGN.fromString(config.getString("Item Mode HUD X Alignment", category, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.item_mode.item_mode_halign"));
+		itemModeVAlign = VALIGN.fromString(config.getString("Item Mode HUD Y Alignment", category, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.item_mode.item_mode_valign"));
 		itemModeOffsetX = config.get(category, "Item Mode HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_x").getInt();
 		itemModeOffsetY = config.get(category, "Item Mode HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_y").getInt();
 		
@@ -542,16 +541,16 @@ public class Config
 				"\nAbove Hunger Bar, drains from right to left: x=47, y=-40, orientation=true, orientation:mana=true, halign=center, valign=bottom" +
 				"\nAny Corner: x=0, y=0, halign=left|right, valign=top|bottom");
 		
-		magicMeterHAlign = HALIGN.fromString(config.getString("Magic Meter Horizontal Alignment", category, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.magic_meter.magic_meter_halign"));
-		magicMeterVAlign = VALIGN.fromString(config.getString("Magic Meter Vertical Alignment", category, "bottom", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.magic_meter.magic_meter_valign"));
-		isMagicMeterTextEnabled = config.getBoolean("Display Current Magic Points", category, false, "Enable text display of current Magic Points", "config.magic_meter.is_magic_meter_text_enabled");
-		isMagicMeterEnabled = config.getBoolean("Dsiplay Magic Meter", category, true, "Enable the Magic Meter HUD display", "config.magic_meter.is_magic_meter_enabled");
-		magicMeterOffsetX = config.get(category, "Magic Meter Horizontal Offset", 47, "Moves the Meter left (-) or right (+) this number of pixels").setLanguageKey("config.magic_meter.magic_meter_offset_x").getInt();
-		magicMeterOffsetY = config.get(category, "Magic Meter Vertical Offset", -40, "Moves the Meter up (-) or down (+) this number of pixels").setLanguageKey("config.magic_meter.magic_meter_offset_y").getInt();
-		isMagicMeterHorizontal = config.getBoolean("Magic Meter Displays Horizontally", category, true,"True for a horizontal magic meter, or false for a vertical one", "config.magic_meter.is_magic_meter_horizontal");
-		isMagicBarLeft = config.getBoolean("Drain Magic Bar To the Bottom/Left", category, true, "True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", "config.magic_meter.is_magic_bar_left");
-		magicMeterWidth = config.getInt("Magic Meter Width", category, 75, 25, 100, "Maximum width of the magic meter", "config.magic_meter.magic_meter_width");
-		magicMeterIncrements = config.getInt("Number of Meter Increments", category, 2, 1, 10, "Number of increments required to max out the magic meter, where each increment is 50 magic points", "config.magic_meter.magic_meter_increments");
+		magicMeterHAlign = HALIGN.fromString(config.getString("Magic Meter X Alignment", category, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.magic_meter.magic_meter_halign"));
+		magicMeterVAlign = VALIGN.fromString(config.getString("Magic Meter Y Alignment", category, "bottom", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.magic_meter.magic_meter_valign"));
+		isMagicMeterTextEnabled = config.getBoolean("Display Current Magic Points", category, false, "Enable text display of current Magic Points");
+		isMagicMeterEnabled = config.getBoolean("Display Magic Meter", category, true, "Enable the Magic Meter HUD display");
+		magicMeterOffsetX = config.get(category, "Magic Meter X Offset", 47, "Moves the Meter left (-) or right (+) this number of pixels").setLanguageKey("config.zss.magic_meter.magic_meter_offset_x").getInt();
+		magicMeterOffsetY = config.get(category, "Magic Meter Y Offset", -40, "Moves the Meter up (-) or down (+) this number of pixels").setLanguageKey("config.zss.magic_meter.magic_meter_offset_y").getInt();
+		isMagicMeterHorizontal = config.getBoolean("Magic Meter Displays Horizontally", category, true,"True for a horizontal magic meter, or false for a vertical one", "config.zss.magic_meter.is_magic_meter_horizontal");
+		isMagicBarLeft = config.getBoolean("Drain Magic Bar To the Bottom/Left", category, true, "True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", "config.zss.magic_meter.is_magic_bar_left");
+		magicMeterWidth = config.getInt("Magic Meter Width", category, 75, 25, 100, "Maximum width of the magic meter", "config.zss.magic_meter.magic_meter_width");
+		magicMeterIncrements = config.getInt("Number of Meter Increments", category, 2, 1, 10, "Number of increments required to max out the magic meter, where each increment is 50 magic points", "config.zss.magic_meter.magic_meter_increments");
 		
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		category = "mod support";
