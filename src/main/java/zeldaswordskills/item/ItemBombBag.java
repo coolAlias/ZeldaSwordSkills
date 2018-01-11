@@ -23,23 +23,22 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.EnumVillager;
+import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
+import zeldaswordskills.api.entity.merchant.RupeeTrade;
+import zeldaswordskills.api.item.INbtComparable;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
@@ -66,7 +65,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * bag, it will simply be removed rather than dropping to the ground. This is vanilla behavior.
  * 
  */
-public class ItemBombBag extends Item implements IUnenchantable
+public class ItemBombBag extends Item implements INbtComparable, IUnenchantable
 {
 	private static final int BASE_CAPACITY = 10, MAX_CAPACITY = 50;
 
@@ -81,6 +80,14 @@ public class ItemBombBag extends Item implements IUnenchantable
 		setMaxDamage(0);
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
+	}
+
+	/**
+	 * Matches if both bags have the same bomb type
+	 */
+	@Override
+	public boolean areTagsEquivalent(ItemStack a, ItemStack b) {
+		return this.getBagBombType(a) == this.getBagBombType(b);
 	}
 
 	@Override
@@ -101,16 +108,11 @@ public class ItemBombBag extends Item implements IUnenchantable
 			return ((EntityBomb) entity).disarm(entity.worldObj);
 		} else if (entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
-			MerchantRecipeList trades = villager.getRecipes(player);
-			if (EnumVillager.LIBRARIAN.is(villager) || trades == null) {
+			if (EnumVillager.LIBRARIAN.is(villager)) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			} else {
-				MerchantRecipe trade = new MerchantRecipe(stack.copy(), new ItemStack(Items.emerald, 16));
-				if (player.worldObj.rand.nextFloat() < 0.2F && MerchantRecipeHelper.addToListWithCheck(trades, trade)) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell.1");
-				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
-				}
+				RupeeTrade trade = new RupeeTrade(new ItemStack(this), 20);
+				RupeeMerchantHelper.addVillagerRupeeTrade(player, trade, (EntityVillager) entity, null, null, 0.2F);
 			}
 		}
 		return true;
