@@ -238,12 +238,7 @@ public class ItemTreasure extends BaseModItem implements IRightClickEntity, IUne
 	}
 
 	private boolean handleBiggoronQuest(ItemStack stack, EntityPlayer player, Entity entity, boolean isLeftClick) {
-		ZSSQuests quests = ZSSQuests.get(player);
-		IQuest quest = quests.get(QuestBiggoronSword.class);
-		if (quest == null) {
-			quest = new QuestBiggoronSword();
-			quests.add(quest);
-		}
+		IQuest quest = ZSSQuests.get(player).add(new QuestBiggoronSword());
 		if (QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, entity, isLeftClick)) {
 			return true;
 		} else if (entity instanceof EntityVillager && ((EntityVillager) entity).isChild()) {

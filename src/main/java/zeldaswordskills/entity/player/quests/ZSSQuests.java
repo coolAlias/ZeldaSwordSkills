@@ -88,15 +88,17 @@ public class ZSSQuests implements IExtendedEntityProperties
 	}
 
 	/**
-	 * Adds the IQuest to this player's list of quests
-	 * @param quest Null is expected in some cases and is handled appropriately
+	 * Adds the IQuest only if not already present
+	 * @param quest New quest instance to add if not already present
+	 * @return the existing or newly added quest instance
 	 */
-	public boolean add(IQuest quest) {
-		if (quest == null || quests.containsKey(quest.getClass())) {
-			return false;
+	public IQuest add(IQuest quest) {
+		if (quest == null) {
+			throw new IllegalArgumentException("IQuest parameter must not be NULL");
+		} else if (!this.quests.containsKey(quest.getClass())) {
+			this.quests.put(quest.getClass(), quest);
 		}
-		quests.put(quest.getClass(), quest);
-		return true;
+		return this.quests.get(quest.getClass());
 	}
 
 	/**
@@ -190,8 +192,12 @@ public class ZSSQuests implements IExtendedEntityProperties
 		for (int i = 0; i < questList.tagCount(); ++i) {
 			NBTTagCompound tag = (NBTTagCompound) questList.getCompoundTagAt(i);
 			IQuest quest = QuestBase.loadFromNBT(tag);
-			if (quest != null && !this.add(quest)) {
+			if (quest == null) {
+				ZSSMain.logger.error("Failed to load IQuest from NBT: " + tag);
+			} else if (this.quests.containsKey(quest.getClass())) {
 				ZSSMain.logger.warn("Duplicate quest entry loaded from NBT: " + quest);
+			} else {
+				this.quests.put(quest.getClass(), quest);
 			}
 		}
 		if (compound.hasKey("borrowedMask", Constants.NBT.TAG_STRING)) {
