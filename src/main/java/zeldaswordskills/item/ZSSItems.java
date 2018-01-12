@@ -66,13 +66,13 @@ import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShotDeku;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
-import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.item.IRupeeValue.IMetaRupeeValue;
 import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.crafting.RecipeCombineBombBag;
@@ -361,7 +361,7 @@ public class ZSSItems
 	public static void onServerStarting() {
 		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
-		TradeHandler.registerTrades();
+		ZSSVillagerInfo.initTrades();	
 		// Register mappings for all addon items now, so ZSS items always appear first
 		for (Item item : addonItems) {
 			ZSSItems.registerItemComparatorMapping(item);
