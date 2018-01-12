@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -161,9 +161,8 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 		} else if (worldObj.isRemote) {
 			return false;
 		}
-		if (quests.get(QuestZeldaTalk.class) == null) {
-			quests.add(new QuestZeldaTalk());
-		}
+		// Make sure the initial quest is started prior to checking quest progress
+		quests.add(new QuestZeldaTalk());
 		for (Class<? extends IQuest> clazz : EntityNpcZelda.QUEST_LIST) {
 			IQuest quest = quests.get(clazz);
 			if (quest != null && QuestBase.checkQuestProgress(player, quest, this)) {
@@ -180,12 +179,7 @@ public class EntityNpcZelda extends EntityNpcMerchantBase implements INpcVillage
 		if (villager.getClass() != EntityVillager.class || villager.isChild()) {
 			return Result.DEFAULT;
 		}
-		ZSSQuests quests = ZSSQuests.get(player);
-		QuestZeldaTalk quest = (QuestZeldaTalk) quests.get(QuestZeldaTalk.class);
-		if (quest == null) { // can be null if someone else converted the villager
-			quest = new QuestZeldaTalk();
-			quests.add(quest);
-		}
+		IQuest quest = ZSSQuests.get(player).add(new QuestZeldaTalk());
 		// Even though the held item is checked in #begin, it needs to be checked here as well
 		ItemStack stack = player.getHeldItem();
 		if (stack != null && stack.getItem() instanceof ItemInstrument && ((ItemInstrument) stack.getItem()).getInstrument(stack) == ItemInstrument.Instrument.OCARINA_FAIRY) {

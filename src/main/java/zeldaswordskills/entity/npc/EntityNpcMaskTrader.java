@@ -115,11 +115,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 			return true;
 		}
 		ZSSQuests quests = ZSSQuests.get(player);
-		IQuest quest = quests.get(QuestMaskSales.class);
-		if (quest == null) { // might be null for old saves
-			quest = new QuestMaskSales();
-			quests.add(quest);
-		}
+		IQuest quest = quests.add(new QuestMaskSales());
 		if (QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, this)) {
 			return true;
 		} else if (quest.isComplete(player)) {
@@ -156,7 +152,7 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 	 * @return true if the quest status changed (i.e. interaction should be cancelled)
 	 */
 	public boolean checkShopStatus(EntityPlayer player, boolean isVillager, boolean leftClick) {
-		IQuest quest = getMaskQuest(player);
+		IQuest quest = ZSSQuests.get(player).add(new QuestMaskShop());
 		if (!isVillager && quest.isComplete(player)) { // not a villager, so don't need to convert
 			return false;
 		}
@@ -192,23 +188,12 @@ public class EntityNpcMaskTrader extends EntityNpcBase implements INpcVillager, 
 	@Override
 	public Result canLeftClickConvert(EntityPlayer player, EntityVillager villager) {
 		if (!villager.worldObj.isRemote && villager.getClass() == EntityVillager.class && !villager.isChild()) {
-			if (getMaskQuest(player).complete(player)) {
+			IQuest quest = ZSSQuests.get(player).add(new QuestMaskShop());
+			if (quest.complete(player)) {
 				return Result.ALLOW;
 			}
 		}
 		return Result.DEFAULT;
-	}
-
-	/**
-	 * Adds or retrieves the player's Mask Shop quest instance
-	 */
-	private IQuest getMaskQuest(EntityPlayer player) {
-		IQuest quest = ZSSQuests.get(player).get(QuestMaskShop.class);
-		if (quest == null) {
-			quest = new QuestMaskShop();
-			ZSSQuests.get(player).add(quest);
-		}
-		return quest;
 	}
 
 	@Override
