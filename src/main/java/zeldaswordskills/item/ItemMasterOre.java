@@ -23,7 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import zeldaswordskills.ZSSAchievements;
-import zeldaswordskills.handler.TradeHandler.EnumVillager;
+import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 

@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.item.ZSSItems;
@@ -34,29 +35,6 @@ import zeldaswordskills.ref.Config;
 
 public class TradeHandler implements IVillageTradeHandler
 {
-	/** Define villager types for easier to read code */
-	public enum EnumVillager {
-		FARMER("farmer"),
-		LIBRARIAN("librarian"),
-		PRIEST("priest"),
-		BLACKSMITH("blacksmith"),
-		BUTCHER("butcher");
-		public final String unlocalizedName;
-		private EnumVillager(String name) {
-			this.unlocalizedName = name;
-		}
-		/** Return the EnumVillager type based on the villager's profession */
-		public static EnumVillager get(EntityVillager villager) {
-			return EnumVillager.values()[villager.getProfession() % EnumVillager.values().length];
-		}
-		/**
-		 * Returns true if the villager's profession is this one
-		 */
-		public boolean is(EntityVillager villager) {
-			return villager.getProfession() == this.ordinal();
-		}
-	}
-
 	public static void registerTrades() {
 		for (int i = 0; i < 5; ++i) {
 			VillagerRegistry.instance().registerVillageTradeHandler(i, new TradeHandler());
