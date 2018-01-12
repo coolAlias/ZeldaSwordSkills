@@ -679,12 +679,19 @@ chat.zss.trade.sword.broken.giant.2=But still... give it here and I'll see what 
 chat.zss.trade.sword.big=That will make a mighty big sword!
 chat.zss.trade.sword.later=Come back when you're strong enough to wield it.
 chat.zss.trade.sword.sorry=Sorry, I can't help you with that.
-chat.zss.trade.whip.upgrade.new=Oh, a whip! I can lengthen it, if you want.
-chat.zss.trade.whip.upgrade.old=I could make that whip longer for you...
-chat.zss.trade.whip.long=Sorry, that's as long as I can make it.
-chat.zss.trade.whip.magic=Wow, where in Hyrule did you find THAT?!
-chat.zss.trade.whip.sorry=They sure could use that whip down at Lon Lon Ranch.
 chat.zss.wallet_upgrade.fail=You already have the biggest wallet!
+chat.zss.whip.butcher.complete=There! If you need another, I know how to make them.
+chat.zss.whip.butcher.long.new=Would you look at that! Bet I could make one just like it!
+chat.zss.whip.butcher.long.old=Sorry, that's as long as I can make it.
+chat.zss.whip.butcher.magic=Wow, where in Hyrule did you find THAT?!
+chat.zss.whip.butcher.repeat=Yeah I can make it longer, but not for less than %d rupees.
+chat.zss.whip.hint.blacksmith=I work metal, kid, not leather. Scram.
+chat.zss.whip.hint.butcher=Oh, a whip! I can lengthen it, but I'll need %d rupees.
+chat.zss.whip.hint.farmer=Going to try your hand at herding cattle, eh?
+chat.zss.whip.hint.librarian=I hope you don't expect me to run off on some adventure.
+chat.zss.whip.hint.priest=This is no place for rough-housing. Run along.
+chat.zss.whip.hint.generic=Hm, looks like something a butcher could make.
+chat.zss.whip.generic=They sure could use that whip down at Lon Lon Ranch.
 
 # General / hunter treasure trades
 chat.zss.trade.wallet.insufficient=Looks like you need a bigger wallet!

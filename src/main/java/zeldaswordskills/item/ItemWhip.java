@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,14 +29,11 @@ import net.minecraft.entity.INpc;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
-import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.EnumVillager;
@@ -44,10 +41,13 @@ import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
+import zeldaswordskills.entity.player.quests.IQuest;
+import zeldaswordskills.entity.player.quests.QuestBase;
+import zeldaswordskills.entity.player.quests.QuestWhipTrader;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.entity.projectile.EntityWhip;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 
@@ -106,29 +106,41 @@ public class ItemWhip extends Item implements IFairyUpgrade, IRupeeValue.IMetaRu
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager villager = (EntityVillager) entity;
-			MerchantRecipeList trades = villager.getRecipes(player);
-			if (EnumVillager.BUTCHER.is(villager) && trades != null) {
-				switch(getType(stack)) {
+			IQuest quest = ZSSQuests.get(player).add(new QuestWhipTrader());
+			if (EnumVillager.BUTCHER.is(villager)) {
+				switch (getType(stack)) {
 				case WHIP_SHORT:
-					MerchantRecipe trade = new MerchantRecipe(new ItemStack(this, 1, WhipType.WHIP_SHORT.ordinal()), new ItemStack(Items.emerald, 64), new ItemStack(this, 1, WhipType.WHIP_LONG.ordinal()));
-					if (MerchantRecipeHelper.addUniqueTrade(trades, trade)) {
-						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.upgrade.new");
+					if (quest.isComplete(player)) {
+						// Try to manually complete again to swap the short whip for long if player has enough rupees
+						if (!quest.complete(player, villager)) {
+							int price = ((QuestWhipTrader) quest).getPrice(player);
+							PlayerUtils.sendTranslatedChat(player, "chat.zss.whip.butcher.repeat", price);
+						}
 					} else {
-						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.upgrade.old");
+						// Handles beginning, updating, and completing the quest
+						QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, villager);
 					}
 					break;
 				case WHIP_LONG:
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.long");
+					if (quest.isComplete(player)) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.whip.butcher.long.old");
+					} else {
+						quest.forceComplete(player, villager);
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.whip.butcher.long.new");
+					}
 					break;
 				case WHIP_MAGIC:
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.magic");
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.whip.butcher.magic");
 					break;
 				}
+			} else if (quest.isComplete(player)) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.whip.sorry");
 			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.sorry");
+				// Gives a hint based on the current villager's profession
+				QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, villager);
 			}
 		} else if (!player.worldObj.isRemote && entity instanceof INpc) {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.whip.sorry");
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.whip.generic");
 		}
 		return true;
 	}

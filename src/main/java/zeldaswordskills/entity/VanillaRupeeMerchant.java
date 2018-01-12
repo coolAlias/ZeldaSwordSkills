@@ -32,12 +32,15 @@ import net.minecraft.village.Village;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
 import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.api.item.RupeeValueRegistry;
+import zeldaswordskills.entity.player.quests.QuestWhipTrader;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -227,6 +230,10 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 		// Customize items the merchant will sell
 		if (this.waresToSell == null) {
 			this.waresToSell = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
+		}
+		if (EnumVillager.BUTCHER.is(this.villager)) {
+			flag = ZSSQuests.get(player).hasCompleted(QuestWhipTrader.class);
+			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_SHORT.ordinal()), -1), flag);
 		}
 		if (EnumVillager.PRIEST.is(this.villager)) {
 			// Add or remove magic arrow trades based on config settings and player achievements
