@@ -136,7 +136,7 @@ public class PlayerUtils
 	 * ignoring the stack's damage value
 	 */
 	public static boolean hasItem(EntityPlayer player, Item item) {
-		return hasItem(player, item, -1);
+		return hasItem(player, item, -1, 1);
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class PlayerUtils
 	 * checks Item and damage values, ignoring stack size and NBT.
 	 */
 	public static boolean hasItem(EntityPlayer player, ItemStack stack) {
-		return hasItem(player, stack.getItem(), stack.getItemDamage());
+		return hasItem(player, stack.getItem(), stack.getItemDamage(), 1);
 	}
 
 	/**
@@ -153,10 +153,24 @@ public class PlayerUtils
 	 * @param meta use -1 to ignore the stack's damage value
 	 */
 	public static boolean hasItem(EntityPlayer player, Item item, int meta) {
+		return hasItem(player, item, meta, 1);
+	}
+
+	/**
+	 * Returns true if the player has the Item somewhere in the inventory, with
+	 * optional metadata for subtyped items
+	 * @param meta use -1 to ignore the stack's damage value
+	 * @param count minimum required combined stack size of all matching items
+	 */
+	public static boolean hasItem(EntityPlayer player, Item item, int meta, int count) {
+		int n = 0;
 		for (ItemStack stack : player.inventory.mainInventory) {
 			if (stack != null && stack.getItem() == item) {
 				if (meta == -1 || stack.getItemDamage() == meta) {
-					return true;
+					n += stack.stackSize;
+					if (n >= count) {
+						return true;
+					}
 				}
 			}
 		}
