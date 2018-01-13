@@ -87,10 +87,11 @@ public class QuestMaskShop extends QuestBase
 	@Override
 	public IChatComponent getHint(EntityPlayer player, Object... data) {
 		if (isComplete(player)) {
-			if (ZSSQuests.get(player).hasCompleted(QuestMaskSales.class) || !isHoldingZeldasLetter(player)) {
+			if (!isHoldingZeldasLetter(player)) {
 				return null;
 			}
-			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.opening");
+			boolean flag = ZSSQuests.get(player).hasCompleted(QuestMaskSales.class);
+			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop." + (flag ? "open" : "opening"));
 		} else if (canComplete(player)) {
 			return new ChatComponentTranslation("chat.zss.npc.mask_salesman.shop.hint.letter");
 		} else if (ZSSQuests.get(player).hasCompleted(QuestZeldasLetter.class)) {
