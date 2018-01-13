@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -41,11 +41,12 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
 import zeldaswordskills.entity.npc.EntityNpcOrca;
+import zeldaswordskills.entity.npc.EntityNpcZelda;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.QuestBase;
 import zeldaswordskills.entity.player.quests.QuestBiggoronSword;
-import zeldaswordskills.entity.player.quests.QuestMaskSales;
 import zeldaswordskills.entity.player.quests.QuestMaskShop;
+import zeldaswordskills.entity.player.quests.QuestZeldaTalk;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -170,22 +171,26 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 			}
 			return true;
 		} else if (entity instanceof INpc) {
+			// Note that these interactions occur before Entity#onInteract, thus the special cases
 			if (entity instanceof EntityAgeable && ((EntityAgeable) entity).isChild()) {
 				handleChildTrade(stack, player, isLeftClick);
 			} else if (treasure == Treasures.ZELDAS_LETTER && entity instanceof EntityNpcMaskTrader) {
+				IQuest quest = ZSSQuests.get(player).add(new QuestMaskShop());
+				IChatComponent hint = quest.getHint(player);
+				if (hint == null) {
+					return false;
+				}
+				player.addChatMessage(hint);
+			} else if (treasure == Treasures.ZELDAS_LETTER && entity instanceof EntityNpcZelda) {
 				ZSSQuests quests = ZSSQuests.get(player);
-				if (quests.hasCompleted(QuestMaskSales.class)) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.shop.open");
+				if (!quests.hasCompleted(QuestZeldaTalk.class)) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.zelda.letter.early");
+				} else if (quests.hasCompleted(QuestMaskShop.class)) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.zelda.letter.complete");
+				} else if (quests.hasBegun(QuestMaskShop.class)) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.zelda.letter.hurry");
 				} else {
-					IQuest quest = quests.get(QuestMaskShop.class);
-					if (quest != null) {
-						IChatComponent hint = quest.getHint(player);
-						if (hint != null) {
-							player.addChatMessage(hint);
-						}
-					} else {
-						PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.mask_salesman.shop.hint." + itemRand.nextInt(4));
-					}
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.zelda.letter.barnes");
 				}
 			} else if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.uninterested + ".uninterested.orca");
