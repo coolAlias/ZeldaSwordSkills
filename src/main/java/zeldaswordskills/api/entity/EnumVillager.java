@@ -34,9 +34,13 @@ public enum EnumVillager {
 	private EnumVillager(String name) {
 		this.unlocalizedName = name;
 	}
-	/** Return the EnumVillager type based on the villager's profession */
+	/** Return the EnumVillager type based on the villager's profession, or null for non-vanilla professions */
 	public static EnumVillager get(EntityVillager villager) {
-		return EnumVillager.values()[villager.getProfession() % EnumVillager.values().length];
+		int i = villager.getProfession();
+		if (i < 0 || i > EnumVillager.values().length) {
+			return null;
+		}
+		return EnumVillager.values()[i];
 	}
 	/**
 	 * Returns true if the villager's profession is this one
