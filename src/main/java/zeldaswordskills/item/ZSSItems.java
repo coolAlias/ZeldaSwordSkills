@@ -66,7 +66,6 @@ import zeldaswordskills.client.render.item.RenderItemDungeonBlock;
 import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
@@ -361,7 +360,6 @@ public class ZSSItems
 	public static void onServerStarting() {
 		ZSSItems.addGrassDrops();
 		ZSSItems.addVanillaDungeonLoot();
-		ZSSVillagerInfo.initTrades();	
 		// Register mappings for all addon items now, so ZSS items always appear first
 		for (Item item : addonItems) {
 			ZSSItems.registerItemComparatorMapping(item);

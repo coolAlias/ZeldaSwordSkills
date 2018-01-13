@@ -17,9 +17,6 @@
 
 package zeldaswordskills.entity;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -28,7 +25,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
@@ -37,8 +33,6 @@ import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.player.ZSSPlayerWallet;
 import zeldaswordskills.entity.player.quests.QuestMaskSales;
-import zeldaswordskills.item.ItemTreasure.Treasures;
-import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -70,12 +64,6 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** Used for the Cursed Man's quest's potentially recurring reward */
 	private long nextSkulltulaReward;
-
-	/** Trade mapping for a single Treasure enum type key to the full trade recipe output */
-	private static final Map<Treasures, MerchantRecipe> treasureTrades = new EnumMap<Treasures, MerchantRecipe>(Treasures.class);
-
-	/** Maps the villager profession capable of trading for the treasure trade to the Treasure enum type key */
-	private static final Map<Treasures, Integer> treasureVillager = new EnumMap<Treasures, Integer>(Treasures.class);
 
 	/** Temporarily stores nearby village when needed for mating */
 	private Village village;
@@ -164,27 +152,6 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.0", new ChatComponentTranslation(stack.getUnlocalizedName() + ".name")),
 					new ChatComponentTranslation("chat.zss.treasure.hunter.interested.1", reward));
 		}
-	}
-
-	/**
-	 * Returns what the villager is willing to trade for the treasure, if anything.
-	 * Note that the first item to buy is always a stack containing one of the treasure.
-	 * @param treasure the treasure to be traded
-	 * @return may be null
-	 */
-	public MerchantRecipe getTreasureTrade(Treasures treasure) {
-		if (treasureTrades.containsKey(treasure) && treasureVillager.get(treasure) == villager.getProfession()) {
-			return treasureTrades.get(treasure);
-		}
-		return null;
-	}
-
-	/**
-	 * Returns true if the villager is interested in the specified treasure
-	 * @param stack the player's currently held item, which should be the treasure item
-	 */
-	public boolean isInterested(Treasures treasure, ItemStack stack) {
-		return treasureTrades.containsKey(treasure) && treasureVillager.get(treasure) == villager.getProfession();
 	}
 
 	/** Adds the given amount of chu jellies to the current amount */
@@ -301,24 +268,5 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		desiredMask = compound.getInteger("desiredMask");
 		nextSkulltulaReward = compound.getLong("NextSkulltulaReward");
 		this.rupeeMerchant.readFromNBT(compound);
-	}
-
-	/**
-	 * Adds every component involved in a treasure trade
-	 * @param treasure the treasure to be traded
-	 * @param villager the profession of the villager allowed to have this trade, or null for no requirement
-	 * @param required the itemstack required for the trade in addition to the Treasure
-	 * @param output the itemstack to be traded for
-	 */
-	private static final void addTreasureTrade(Treasures treasure, EnumVillager villager, ItemStack required, ItemStack output) {
-		treasureVillager.put(treasure, (villager != null ? villager.ordinal() : null));
-		treasureTrades.put(treasure, new MerchantRecipe(new ItemStack(ZSSItems.treasure,1,treasure.ordinal()), required, output));
-	}
-
-	/**
-	 * Initializes all custom trade maps for custom villager trades
-	 */
-	public static void initTrades() {
-		addTreasureTrade(Treasures.EVIL_CRYSTAL,EnumVillager.PRIEST,new ItemStack(ZSSItems.arrowLight,16),new ItemStack(ZSSItems.crystalSpirit));
 	}
 }

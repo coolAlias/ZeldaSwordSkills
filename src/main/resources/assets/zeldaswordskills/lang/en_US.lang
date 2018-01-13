@@ -693,6 +693,17 @@ chat.zss.whip.hint.priest=This is no place for rough-housing. Run along.
 chat.zss.whip.hint.generic=Hm, looks like something a butcher could make.
 chat.zss.whip.generic=They sure could use that whip down at Lon Lon Ranch.
 
+chat.zss.treasure.evil_crystal.complete.0=Light, banish the darkness!
+chat.zss.treasure.evil_crystal.complete.1=Now it's just an ordinary crystal. Here you go.
+chat.zss.treasure.evil_crystal.hint.blacksmith=Egads, no! I want nothing to do with that!
+chat.zss.treasure.evil_crystal.hint.butcher=<sharpening knives> My... birthday present, precious?
+chat.zss.treasure.evil_crystal.hint.farmer=<makes a sign to ward away the Evil Eye>
+chat.zss.treasure.evil_crystal.hint.librarian=I... could... be... master... aaaahhh!
+chat.zss.treasure.evil_crystal.hint.priest=That is an object of great evil. We should cleanse it.
+chat.zss.treasure.evil_crystal.hint.generic=Is that thing going to make you hurt me?
+chat.zss.treasure.evil_crystal.insufficient=We'll need more light than that, but it's a start.
+chat.zss.treasure.evil_crystal.none=Great darkness can only be overcome with great light.
+
 # General / hunter treasure trades
 chat.zss.trade.wallet.insufficient=Looks like you need a bigger wallet!
 chat.zss.treasure.generic.give.0=No thanks, I'm not into that kind of thing.
@@ -724,7 +735,6 @@ chat.zss.treasure.hunter.trade.0=This will make a nice trophy, thanks!
 chat.zss.treasure.hunter.trade.1=If you find any more, you know where to find me.
 chat.zss.treasure.hunter.trade.2=You're quite the monster hunter yourself, partner!
 chat.zss.treasure.hunter.trade.3=Do you use a whip? I hear it's good for trophy hunting.
-chat.zss.treasure.evil_crystal.trade=Mwa ha ha, thank you! Here is your reward!
 chat.zss.treasure.knights_crest.uninterested=Did you know old man Orca used to collect those? It's true.
 chat.zss.treasure.knights_crest.uninterested.orca=I collected those once, but I didn't find too many...
 

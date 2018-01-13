@@ -32,7 +32,6 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
-import net.minecraft.village.MerchantRecipe;
 import zeldaswordskills.api.entity.NpcHelper;
 import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -44,11 +43,11 @@ import zeldaswordskills.entity.npc.EntityNpcZelda;
 import zeldaswordskills.entity.player.quests.IQuest;
 import zeldaswordskills.entity.player.quests.QuestBase;
 import zeldaswordskills.entity.player.quests.QuestBiggoronSword;
+import zeldaswordskills.entity.player.quests.QuestEvilCrystal;
 import zeldaswordskills.entity.player.quests.QuestMaskShop;
 import zeldaswordskills.entity.player.quests.QuestZeldaTalk;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.ref.ModInfo;
-import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TimedAddItem;
 import zeldaswordskills.util.TimedChatDialogue;
@@ -191,6 +190,8 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 				} else {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.zelda.letter.barnes");
 				}
+			} else if (treasure == Treasures.EVIL_CRYSTAL) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.evil_crystal.hint.generic");
 			} else if (treasure == Treasures.KNIGHTS_CREST && entity instanceof EntityNpcOrca) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure." + treasure.uninterested + ".uninterested.orca");
 			} else {
@@ -204,12 +205,11 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 	/**
 	 * Attempts to sell the item to a villager, returning true if any chat message occurred.
 	 * If the villager is a child, the child interaction is performed instead.
-	 * @return only false if {@link ZSSVillagerInfo#getTreasureTrade} returns null
+	 * @return true if entity interaction should be canceled
 	 */
 	public boolean handleVillagerTrade(ItemStack stack, EntityPlayer player, EntityVillager villager, boolean isLeftClick) {
 		Treasures treasure = Treasures.byDamage(stack.getItemDamage());
 		ZSSVillagerInfo info = ZSSVillagerInfo.get(villager);
-		MerchantRecipe trade = info.getTreasureTrade(treasure);
 		villager.playLivingSound();
 		if (villager.isChild()) {
 			handleChildTrade(stack, player, isLeftClick);
@@ -220,27 +220,22 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 			} else {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.uninterested");
 			}
-		} else if (trade == null) {
-			return false;
-		} else if (isLeftClick) {
-			// 1st item to buy is always the treasure itself, which is in hand and will be replaced
-			ItemStack required = trade.getSecondItemToBuy();
-			if (required == null || PlayerUtils.consumeInventoryItem(player, required, required.stackSize)) {
-				PlayerUtils.playSound(player, Sounds.SUCCESS, 1.0F, 1.0F);
-				if (stack.stackSize > 1) {
-					--stack.stackSize;
-					PlayerUtils.addItemToInventory(player, trade.getItemToSell().copy());
-				} else {
-					player.setCurrentItemOrArmor(0, trade.getItemToSell().copy());
+		} else if (treasure == Treasures.EVIL_CRYSTAL) {
+			IQuest quest = ZSSQuests.get(player).add(new QuestEvilCrystal());
+			if (quest.isComplete(player) && isLeftClick) {
+				// Manually check if player can repeat the quest
+				if (!quest.canComplete(player, villager, isLeftClick) || !quest.complete(player, villager, isLeftClick)) {
+					if (!PlayerUtils.hasItem(player, ZSSItems.arrowLight, -1, 1)) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.evil_crystal.none");
+					} else {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.evil_crystal.insufficient");
+					}
 				}
-				new TimedChatDialogue(player, 0, 500,
-						new ChatComponentTranslation("chat.zss.treasure." + treasure.name + ".trade"),
-						new ChatComponentTranslation("chat.zss.treasure.generic.received", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name")));
-			} else { // can only be true when required stack is not null
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.trade.fail", required.stackSize, new ChatComponentTranslation(required.getUnlocalizedName() + ".name"));
+				return true;
 			}
+			return QuestBase.checkQuestProgress(player, quest, QuestBase.DEFAULT_QUEST_HANDLER, villager, isLeftClick);
 		} else {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.treasure.generic.interested", new ChatComponentTranslation(trade.getItemToSell().getUnlocalizedName() + ".name"));
+			return false; // nothing special happened
 		}
 		return true;
 	}
