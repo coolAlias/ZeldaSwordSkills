@@ -315,16 +315,13 @@ public class ZSSItems
 	 * Initializes mod item indices from configuration file
 	 */
 	public static void initConfig(Configuration config) {
-		/*================== GRASS DROPS =====================*/
-		enableGrassArrowDrop = config.get("Drops", "Enable arrow drops from grass (must use sword)", true).getBoolean(true);
-		enableGrassBombDrop = config.get("Drops", "Enable bomb drops from grass (must use sword)", false).getBoolean(false);
-		enableGrassEmeraldDrop = config.get("Drops", "Enable emerald drops from grass (must use sword)", true).getBoolean(true);
-
-		/*================== LOOT IN VANILLA CHESTS =====================*/
+		/*================== LOOT SETTINGS =====================*/
+		enableGrassArrowDrop = config.get("Loot", "Enable arrow drops from grass (must use sword)", true).getBoolean(true);
+		enableGrassBombDrop = config.get("Loot", "Enable bomb drops from grass (must use sword)", false).getBoolean(false);
+		enableGrassEmeraldDrop = config.get("Loot", "Enable emerald drops from grass (must use sword)", true).getBoolean(true);
 		enableBombLoot = config.get("Loot", "Enable bombs in vanilla chests", false).getBoolean(false);
 		enableBombBagLoot = config.get("Loot", "Enable bomb bags in vanilla chests", false).getBoolean(false);
 		enableHeartLoot = config.get("Loot", "Enable heart pieces in vanilla chests", false).getBoolean(false);
-
 		/*================== RECIPES =====================*/
 		allowGoldSmelting = config.get("Recipes", "Smelt all those disarmed pigmen swords into gold ingots", false).getBoolean(false);
 		enableCraftingHammer = config.get("Recipes", "Enable crafting of the Wooden Hammer used to bypass wooden pegs", true).getBoolean(true);

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ public class ModInfo {
 	public static final String CHANNEL = "zss_channel";
 	public static final String CLIENT_PROXY = "zeldaswordskills.ClientProxy";
 	public static final String COMMON_PROXY = "zeldaswordskills.CommonProxy";
-	public static final String CONFIG_PATH = ("/" + ID + ".cfg");
+	public static final String CONFIG_PATH = ("/" + ID + "/");
 
 	/** Identifier for custom tiles added to Antique Atlas */
 	public static final String ATLAS_DUNGEON_ID = "zss_dungeon";

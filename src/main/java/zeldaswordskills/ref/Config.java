@@ -142,15 +142,6 @@ public class Config
 	/*================== MOD INTER-COMPATIBILITY =====================*/
 	/** [SYNC] [BattleGear2] Allow Master Swords to be held in the off-hand */
 	private static boolean enableOffhandMaster;
-	/*================== WEAPON REGISTRY =====================*/
-	/** Items that are considered Swords for all intents and purposes */
-	private static String[] swords = new String[0];
-	/** Items that are considered Melee Weapons for all intents and purposes */
-	private static String[] weapons = new String[0];
-	/** Items that are forbidden from being considered as Swords */
-	private static String[] forbidden_swords = new String[0];
-	/** Items that are forbidden from being considered as Melee Weapons */
-	private static String[] forbidden_weapons = new String[0];
 	/*================== GENERAL =====================*/
 	/** [SYNC] Whether players can be stunned; if false, item use is still interrupted */
 	private static boolean enableStunPlayer;
@@ -174,10 +165,6 @@ public class Config
 	private static int bossNumber;
 	/** [Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items */
 	private static boolean enableJarUpdates;
-	/** [Mobs][Keese] Chance of Keese spawning in a swarm */
-	private static float keeseSwarmChance;
-	/** [Mobs][Keese] Maximum number of Keese that can spawn in a swarm */
-	private static int keeseSwarmSize;
 	/** [Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30] */
 	private static int sacredRefreshRate;
 	/** [Skulltula Tokens] Number of days between each recurring reward for completing the quest (0 to disable recurring reward) [0-30] */
@@ -359,6 +346,10 @@ public class Config
 	/** [Song Pillars] Minimum number of chunks between song pillars [8-64] */
 	private static int minSongPillarDistance;
 	/*================== LOOT =====================*/
+	/** Chance of grass dropping loot (set to zero to disable) */
+	private static float grassDropChance;
+	/** Chance of empty jars dropping loot (set to zero to disable) */
+	private static float jarDropChance;
 	/** Chance (as a percent) of a Forest Temple containing a Master Sword [1-100] */
 	private static float masterSwordChance;
 	/** Chance (as a percent) a chest will be locked */
@@ -383,11 +374,24 @@ public class Config
 	private static int lockedLootWeight;
 	/** [Skill Orbs] Whether this skill may appear as random loot, such as in Boss chests */
 	private static Set<Byte> lootableOrbs = new HashSet<Byte>();
-	/*================== DROPS =====================*/
-	/** Chance of grass dropping loot (set to zero to disable) */
-	private static float grassDropChance;
-	/** Chance of empty jars dropping loot (set to zero to disable) */
-	private static float jarDropChance;
+	/*================== TRADES =====================*/
+	/** [Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb) */
+	private static boolean enableTradeBombBag;
+	/** [Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) */
+	private static int bombBagPrice;
+	/** [Bombs] Enable random villager trades for bombs */
+	private static boolean enableTradeBomb;
+	/** [Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased */
+	private static boolean enableArrowTrades;
+	/** [Masks] Chance that a villager will be interested in purchasing a random mask */
+	private static float maskBuyChance;
+	/*================== MAP MAKING =====================*/
+	private static final String WARP_LOCATIONS_KEY = "Default Warp Locations: one per line with format 'song_name:[dimension_id,x,y,z]'";
+	/** [Warp Stone] Default warp locations */
+	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
+	/*================== MOBS =====================*/
+	private static Configuration mobConfig;
+	//--- DROPS ---//
 	/** Creeper bomb drop chance */
 	private static float creeperDrop;
 	/** Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common] */
@@ -408,34 +412,32 @@ public class Config
 	private static float globalWhipLootChance;
 	/** [Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately) */
 	private static boolean hurtOnSteal;
-	/*================== TRADES =====================*/
-	/** [Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb) */
-	private static boolean enableTradeBombBag;
-	/** [Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) */
-	private static int bombBagPrice;
-	/** [Bombs] Enable random villager trades for bombs */
-	private static boolean enableTradeBomb;
-	/** [Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased */
-	private static boolean enableArrowTrades;
-	/** [Masks] Chance that a villager will be interested in purchasing a random mask */
-	private static float maskBuyChance;
-	/*================== MOB SPAWNING =====================*/
+	//--- SPAWNING ---//
 	/** Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100] */
 	private static float roomSpawnMobChance;
+	/** [Keese] Chance of Keese spawning in a swarm */
+	private static float keeseSwarmChance;
+	/** [Keese] Maximum number of Keese that can spawn in a swarm */
+	private static int keeseSwarmSize;
 	/** Minimum number of days required to pass before Darknuts may spawn [0-30] */
 	private static int minDaysToSpawnDarknut;
 	/** Minimum number of days required to pass before Wizzrobes may spawn [0-30] */
 	private static int minDaysToSpawnWizzrobe;
-	/*================== MAP MAKING =====================*/
-	private static final String WARP_LOCATIONS_KEY = "Default Warp Locations: one per line with format 'song_name:[dimension_id,x,y,z]'";
-	/** [Warp Stone] Default warp locations */
-	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
+	/*================== WEAPON REGISTRY =====================*/
+	private static Configuration weaponConfig;
+	/** Items that are considered Swords for all intents and purposes */
+	private static String[] swords = new String[0];
+	/** Items that are considered Melee Weapons for all intents and purposes */
+	private static String[] weapons = new String[0];
+	/** Items that are forbidden from being considered as Swords */
+	private static String[] forbidden_swords = new String[0];
+	/** Items that are forbidden from being considered as Melee Weapons */
+	private static String[] forbidden_weapons = new String[0];
 
 	public static void preInit(FMLPreInitializationEvent event) {
-		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
+		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH + "zss_server.cfg"));
 		config.load();
 		ZSSItems.initConfig(config);
-
 		/*================== CLIENT SIDE SETTINGS  =====================*/
 		String category = "client";
 		config.addCustomCategoryComment(category,
@@ -499,22 +501,6 @@ public class Config
 		magicMeterIncrements = config.get(category, "[Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10]", 2).getInt();
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		enableOffhandMaster = config.get("Mod Support", "[BattleGear2] Allow Master Swords to be held in the off-hand", false).getBoolean(false);
-		/*================== WEAPON REGISTRY =====================*/
-		swords = config.get("Weapon Registry", "[Allowed Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass.\nAll swords are also considered WEAPONS.").getStringList();
-		Arrays.sort(swords);
-		weapons = config.get("Weapon Registry", "[Allowed Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item as a generic melee WEAPON. This means it can be used for all\nskills except those that specifically require a sword, as well as some other things.").getStringList();
-		Arrays.sort(weapons);
-		// Battlegear2 weapons ALL extend ItemSword, but are not really swords
-		String[] forbidden = new String[]{
-				"battlegear2:dagger.wood","battlegear2:dagger.stone","battlegear2:dagger.gold","battlegear2:dagger.iron","battlegear2:dagger.diamond",	
-				"battlegear2:mace.wood","battlegear2:mace.stone","battlegear2:mace.gold","battlegear2:mace.iron","battlegear2:mace.diamond",
-				"battlegear2:spear.wood","battlegear2:spear.stone","battlegear2:spear.gold","battlegear2:spear.iron","battlegear2:spear.diamond",
-				"battlegear2:waraxe.wood","battlegear2:waraxe.stone","battlegear2:waraxe.gold","battlegear2:waraxe.iron","battlegear2:waraxe.diamond"
-		};
-		forbidden_swords = config.get("Weapon Registry", "[Forbidden Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", forbidden, "Forbid one or more items from acting as SWORDs, e.g. if a mod item extends ItemSword but is not really a sword").getStringList();
-		Arrays.sort(forbidden_swords);
-		forbidden_weapons = config.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
-		Arrays.sort(forbidden_weapons);
 		/*================== GENERAL =====================*/
 		enableStunPlayer = config.get("General", "Whether players can be stunned; if false, item use is still interrupted", false).getBoolean(false);
 		enableSwingSpeed = config.get("General", "Whether the swing speed timer prevents all left-clicks, or only items that use swing speeds", true).getBoolean(true);
@@ -527,8 +513,6 @@ public class Config
 		bossHealthFactor = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]", 250).getInt(), 100, 500);
 		bossNumber = MathHelper.clamp_int(config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]", 4).getInt(), 1, 8);
 		enableJarUpdates = config.get("General", "[Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items", true).getBoolean(true);
-		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt(), 0, 100);
-		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt(), 4, 16);
 		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt(), 0, 30);
 		skulltulaRewardRate = MathHelper.clamp_int(config.get("General", "[Skulltula Tokens] Number of days between each recurring reward for completing the quest (0 to disable recurring reward) [0-30]", 7).getInt(), 0, 30);
 		disableVanillaBuffs = config.get("General", "[Mob Buff] Disable all buffs (resistances and weaknesses) for vanilla mobs", false).getBoolean(false);
@@ -560,8 +544,8 @@ public class Config
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
 		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
 		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 50).getInt(), 0, 500);
-		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64- 320]", 128).getInt(), 64, 320);
-		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128 - 640]", 320).getInt(), 128, 640);
+		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for first upgrade [64-320]", 128).getInt(), 64, 320);
+		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in emeralds) for second upgrade [128-640]", 320).getInt(), 128, 640);
 		whipRange = MathHelper.clamp_int(config.get("Item", "[Whip] Range, in blocks, of the standard whip [4-12]", 6).getInt(), 4, 12);
 		/*================== STARTING GEAR =====================*/
 		enableStartingGear = config.get("Bonus Gear", "Enable bonus starting equipment", true).getBoolean(true);
@@ -620,12 +604,14 @@ public class Config
 		minBrokenPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between broken pillars [4-128]", 32).getInt(), 4, 128);
 		minSongPillarDistance = MathHelper.clamp_int(config.get("WorldGen", "[Song Pillars] Minimum number of chunks between song pillars [8-128]", 64).getInt(), 8, 128);
 		/*================== LOOT =====================*/
+		grassDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of loot dropping from grass [0-100]", 15).getInt(), 0, 100);
+		jarDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of loot dropping from empty jars when broken [0-100]", 20).getInt(), 0, 100);
 		masterSwordChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a Forest Temple containing a Master Sword [1-100]", 33).getInt(), 1, 100);
-		lockedChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a chest will be locked [10-50]", 33).getInt(), 10, 50);
-		doubleChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-25]", 10).getInt(), 0, 25);
-		barredRoomChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [1-50]", 25).getInt(), 1, 50);
+		lockedChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a chest will be locked [0-100]", 33).getInt(), 0, 100);
+		doubleChestChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) a secret room may have two chests [0-100]", 10).getInt(), 0, 100);
+		barredRoomChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance that a secret room's entrance will be barred by some obstacle [0-100]", 25).getInt(), 0, 100);
 		heartPieceChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a heart piece generating in secret room chests [0-100]", 15).getInt(), 0, 100);
-		randomBossItemChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a random boss-level item being added to locked chest loot table [0-50]", 25).getInt(), 0, 50);
+		randomBossItemChance = 0.01F * (float) MathHelper.clamp_int(config.get("Loot", "Chance (as a percent) of a random boss-level item being added to locked chest loot table [0-100]", 25).getInt(), 0, 100);
 		minNumChestItems = MathHelper.clamp_int(config.get("Loot", "Minimum number of random chest contents for first chest [1-10]", 4).getInt(), 1, 10);
 		bombWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb [1-10]", 5).getInt(), 1, 10);
 		bombBagWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Bomb Bag (locked chest weight only) [1-10]", 3).getInt(), 1, 10);
@@ -633,56 +619,73 @@ public class Config
 		bigKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Big [1-10]", 4).getInt(), 1, 10);
 		smallKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Small [1-10]", 4).getInt(), 1, 10);
 		lockedLootWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Locked Chest Content [1-10]", 3).getInt(), 1, 10);
-		/*================== DROPS =====================*/
-		grassDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from grass [0-100]", 15).getInt(), 0, 100);
-		jarDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) of loot dropping from empty jars when broken [0-100]", 20).getInt(), 0, 100);
-		creeperDrop = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt(), 0, 100);
-		mobConsumableFrequency = MathHelper.clamp_int(config.get("Drops", "Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common]", 5).getInt(), 0, 10);
-		enableOrbDrops = config.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
-		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
-		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
-		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
-		for (SkillBase skill : SkillBase.getSkills()) {
-			if (skill.canDrop()) {
-				int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable) [0-10]", 5).getInt(), 0, 10);
-				orbDropChance.put(skill.getId(), (0.001F * (float) i));
-			}
-			if (skill.isLoot() && config.get("Loot", "[Skill Orbs] Whether " + skill.getDisplayName() + " orbs may appear as random loot, such as in Boss chests", true).getBoolean(true)) {
-				lootableOrbs.add(skill.getId());
-			}
-		}
-		powerDropRate = Math.max(config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt(), 20);
-		// TODO playerWhipLootChance = config.get("Drops", "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)[0-100]", 15).getInt();
-		vanillaWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt(), 0, 100);
-		globalWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt(), 0, 500);
-		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
 		/*================== TRADES =====================*/
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
 		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [32-64]", 64).getInt(), 32, 64);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
-		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-50]", 15).getInt(), 1, 50);
-		/*================== MOB SPAWNING =====================*/
-		config.addCustomCategoryComment("Mob Spawns", "Mobs use the 'Biome Type' lists to populate their individual spawn settings the first time the game is loaded.\nChanging the type lists after this point has no effect UNLESS you also delete the mob spawn locations in the\nconfig - this will force them to re-populate the next time the game is loaded.\nAlternatively, you may add new biomes directly to the individual mob spawn entries and completely ignore biome type.");
-		roomSpawnMobChance = 0.01F * (float) MathHelper.clamp_int(config.get("Mob Spawns", "Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100]", 25).getInt(), 0, 100);
-		minDaysToSpawnDarknut = 24000 * MathHelper.clamp_int(config.get("Mob Spawns", "Minimum number of days required to pass before Darknuts may spawn [0-30]", 7).getInt(), 0, 30);
-		minDaysToSpawnWizzrobe = 24000 * MathHelper.clamp_int(config.get("Mob Spawns", "Minimum number of days required to pass before Wizzrobes may spawn [0-30]", 7).getInt(), 0, 30);
+		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-100]", 15).getInt(), 1, 100);
 		/*================== MAP MAKING =====================*/
 		config.addCustomCategoryComment("Map Making", "Configuration settings related to map making; none of these have any impact on normal play.");
-
 		config.save();
+		Config.initSubConfigs(event);
+	}
+
+	private static void initSubConfigs(FMLPreInitializationEvent event) {
+		/*================== MOBS =====================*/
+		mobConfig = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH + "zss_mobs.cfg"));
+		mobConfig.load();
+		//--- DROPS ---//
+		creeperDrop = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Drops", "Chance (as a percent) for creepers to drop bombs [0-100]", 10).getInt(), 0, 100);
+		mobConsumableFrequency = MathHelper.clamp_int(mobConfig.get("Drops", "Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common]", 5).getInt(), 0, 10);
+		enableOrbDrops = mobConfig.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
+		randomDropChance = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
+		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
+		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (skill.canDrop()) {
+				int i = MathHelper.clamp_int(mobConfig.get("Drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " to drop (0 to disable) [0-1000]", 5).getInt(), 0, 1000);
+				orbDropChance.put(skill.getId(), (0.001F * (float) i));
+			}
+		}
+		powerDropRate = Math.max(mobConfig.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt(), 20);
+		// TODO playerWhipLootChance = mobConfig.get("Drops", "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)[0-100]", 15).getInt();
+		vanillaWhipLootChance = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt(), 0, 100);
+		globalWhipLootChance = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt(), 0, 500);
+		hurtOnSteal = mobConfig.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
+		//--- SPAWNING ---///
+		mobConfig.addCustomCategoryComment("Mob Spawns", "Mobs use the 'Biome Type' lists to populate their individual spawn settings the first time the game is loaded.\nChanging the type lists after this point has no effect UNLESS you also delete the mob spawn locations in the\nconfig - this will force them to re-populate the next time the game is loaded.\nAlternatively, you may add new biomes directly to the individual mob spawn entries and completely ignore biome type.");
+		roomSpawnMobChance = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Mob Spawns", "Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100]", 25).getInt(), 0, 100);
+		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(mobConfig.get("Mob Spawns", "[Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt(), 0, 100);
+		keeseSwarmSize = MathHelper.clamp_int(mobConfig.get("Mob Spawns", "[Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt(), 4, 16);
+		minDaysToSpawnDarknut = 24000 * MathHelper.clamp_int(mobConfig.get("Mob Spawns", "Minimum number of days required to pass before Darknuts may spawn [0-30]", 7).getInt(), 0, 30);
+		minDaysToSpawnWizzrobe = 24000 * MathHelper.clamp_int(mobConfig.get("Mob Spawns", "Minimum number of days required to pass before Wizzrobes may spawn [0-30]", 7).getInt(), 0, 30);
+		mobConfig.save();
+		/*================== WEAPON REGISTRY =====================*/
+		weaponConfig = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH + "zss_weapon_registry.cfg"));
+		weaponConfig.load();
+		swords = weaponConfig.get("Weapon Registry", "[Allowed Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item so that it is considered a SWORD by ZSS, i.e. it be used with skills that\nrequire swords, as well as other interactions that require swords, such as cutting grass.\nAll swords are also considered WEAPONS.").getStringList();
+		Arrays.sort(swords);
+		weapons = weaponConfig.get("Weapon Registry", "[Allowed Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Register an item as a generic melee WEAPON. This means it can be used for all\nskills except those that specifically require a sword, as well as some other things.").getStringList();
+		Arrays.sort(weapons);
+		// Battlegear2 weapons ALL extend ItemSword, but are not really swords
+		String[] forbidden = new String[]{
+				"battlegear2:dagger.wood","battlegear2:dagger.stone","battlegear2:dagger.gold","battlegear2:dagger.iron","battlegear2:dagger.diamond",	
+				"battlegear2:mace.wood","battlegear2:mace.stone","battlegear2:mace.gold","battlegear2:mace.iron","battlegear2:mace.diamond",
+				"battlegear2:spear.wood","battlegear2:spear.stone","battlegear2:spear.gold","battlegear2:spear.iron","battlegear2:spear.diamond",
+				"battlegear2:waraxe.wood","battlegear2:waraxe.stone","battlegear2:waraxe.gold","battlegear2:waraxe.iron","battlegear2:waraxe.diamond"
+		};
+		forbidden_swords = weaponConfig.get("Weapon Registry", "[Forbidden Swords] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", forbidden, "Forbid one or more items from acting as SWORDs, e.g. if a mod item extends ItemSword but is not really a sword").getStringList();
+		Arrays.sort(forbidden_swords);
+		forbidden_weapons = weaponConfig.get("Weapon Registry", "[Forbidden Weapons] Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'", new String[0], "Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").getStringList();
+		Arrays.sort(forbidden_weapons);
+		weaponConfig.save();
 	}
 
 	public static void postInit() {
-		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
-		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
-		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
-		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 		// load boss types last because they rely on blocks, mobs, etc. to already have been initialized
 		// other biome-related stuff just so all biomes can be sure to have loaded
-		BiomeType.postInit(config);
 		BossType.postInit(config);
-		ZSSEntities.postInit(config);
 		/*================== SONGS =====================*/
 		minSongIntervalStorm = MathHelper.clamp_int(config.get("Songs", "[Song of Storms] Time required between each use of the song (by anybody) [0-24000]", 600).getInt(), 0, 24000);
 		minSongIntervalSun = MathHelper.clamp_int(config.get("Songs", "[Sun's Song] Time required between each use of the song (by anybody) [0-24000]", 1200).getInt(), 0, 24000);
@@ -712,6 +715,18 @@ public class Config
 		if (config.hasChanged()) {
 			config.save();
 		}
+		/*================== MOB SPAWNING =====================*/
+		BiomeType.postInit(mobConfig);
+		ZSSEntities.postInit(mobConfig);
+		if (mobConfig.hasChanged()) {
+			mobConfig.save();
+		}
+		/*================== WEAPON REGISTRY =====================*/
+		// This doesn't modify the weapon registry config, so no need to save
+		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);
+		WeaponRegistry.INSTANCE.registerItems(weapons, "Config", false);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_swords, "Config", true);
+		WeaponRegistry.INSTANCE.forbidItems(forbidden_weapons, "Config", false);
 	}
 
 	/*================== CLIENT SIDE SETTINGS  =====================*/
@@ -740,9 +755,6 @@ public class Config
 	public static boolean areNpcsInvulnerable() { return npcsAreInvulnerable; }
 	public static int getNaviRange() { return naviRange; }
 	public static int getNaviFrequency() { return naviFrequency; }
-	/*================== MOBS =====================*/
-	public static float getKeeseSwarmChance() { return keeseSwarmChance; }
-	public static int getKeeseSwarmSize() { return keeseSwarmSize; }
 	/*================== ITEMS =====================*/
 	public static boolean getArrowsConsumeFlame() { return arrowsConsumeFlame; }
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
@@ -831,6 +843,8 @@ public class Config
 	public static int getBrokenPillarMin() { return minBrokenPillarDistance; }
 	public static int getSongPillarMin() { return minSongPillarDistance; }
 	/*================== LOOT =====================*/
+	public static float getGrassDropChance() { return grassDropChance; }
+	public static float getJarDropChance() { return jarDropChance; }
 	public static float getMasterSwordChance() { return masterSwordChance; }
 	public static float getLockedChestChance() { return lockedChestChance; }
 	public static float getDoubleChestChance() { return doubleChestChance; }
@@ -847,9 +861,7 @@ public class Config
 	public static boolean isLootableSkill(SkillBase skill) {
 		return lootableOrbs.contains(skill.getId());
 	}
-	/*================== DROPS =====================*/
-	public static float getGrassDropChance() { return grassDropChance; }
-	public static float getJarDropChance() { return jarDropChance; }
+	/*================== MOB DROPS =====================*/
 	public static float getCreeperDropChance() { return creeperDrop; }
 	public static int getMobConsumableFrequency() { return mobConsumableFrequency; }
 	public static boolean areOrbDropsEnabled() { return enableOrbDrops; }
@@ -862,16 +874,18 @@ public class Config
 	public static float getVanillaWhipLootChance() { return vanillaWhipLootChance; }
 	public static float getWhipLootMultiplier() { return globalWhipLootChance; }
 	public static boolean getHurtOnSteal() { return hurtOnSteal; }
+	/*================== MOB SPAWNING =====================*/
+	public static float getRoomSpawnMobChance() { return roomSpawnMobChance; }
+	public static float getKeeseSwarmChance() { return keeseSwarmChance; }
+	public static int getKeeseSwarmSize() { return keeseSwarmSize; }
+	public static int getTimeToSpawnDarknut() { return minDaysToSpawnDarknut; }
+	public static int getTimeToSpawnWizzrobe() { return minDaysToSpawnWizzrobe; }
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
 	public static int getBombBagPrice() { return bombBagPrice; }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return maskBuyChance; }
-	/*================== MOB SPAWNING =====================*/
-	public static float getRoomSpawnMobChance() { return roomSpawnMobChance; }
-	public static int getTimeToSpawnDarknut() { return minDaysToSpawnDarknut; }
-	public static int getTimeToSpawnWizzrobe() { return minDaysToSpawnWizzrobe; }
 
 	/**
 	 * Returns the default warp point for the given song, if any
