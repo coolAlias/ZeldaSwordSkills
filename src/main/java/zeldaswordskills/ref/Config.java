@@ -29,6 +29,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.client.gui.IGuiOverlay.HALIGN;
@@ -405,6 +406,10 @@ public class Config
 	private static final String WARP_LOCATIONS_KEY = "Default Warp Locations: one per line with format 'song_name:[dimension_id,x,y,z]'";
 	/** [Warp Stone] Default warp locations */
 	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
+	/*================== RUPEE VALUE REGISTRY =====================*/
+	private static Configuration rupeeRegistryConfig;
+	/** Rupee value entries for items. Format is "mod_id:item_registry_name@damage=value" */
+	private static String[] rupeeValues = new String[0];
 	/*================== MOBS =====================*/
 	private static Configuration mobConfig;
 	//--- DROPS ---//
@@ -692,6 +697,10 @@ public class Config
 		minDaysToSpawnDarknut = 24000 * MathHelper.clamp_int(mobConfig.get("Mob Spawns", "Minimum number of days required to pass before Darknuts may spawn [0-30]", 7).getInt(), 0, 30);
 		minDaysToSpawnWizzrobe = 24000 * MathHelper.clamp_int(mobConfig.get("Mob Spawns", "Minimum number of days required to pass before Wizzrobes may spawn [0-30]", 7).getInt(), 0, 30);
 		mobConfig.save();
+		/*================== RUPEE VALUE REGISTRY =====================*/
+		rupeeRegistryConfig = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH + "zss_rupee_registry.cfg"));
+		rupeeRegistryConfig.load();
+		rupeeRegistryConfig.save();
 		/*================== WEAPON REGISTRY =====================*/
 		weaponConfig = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH + "zss_weapon_registry.cfg"));
 		weaponConfig.load();
@@ -752,6 +761,14 @@ public class Config
 		if (mobConfig.hasChanged()) {
 			mobConfig.save();
 		}
+		/*================== RUPEE VALUE REGISTRY =====================*/
+		String[] defaultRupeeValues = ZSSItems.getDefaultRupeeValues();
+		rupeeValues = rupeeRegistryConfig.get("Rupee Value Registry", "Item Rupee Values", defaultRupeeValues, "Standard cost to purchase an item, in rupees [min=0, max=9999].\nThis is only used for prices that might otherwise be hard-coded, such as trades added as part of a quest.\nFormat is 'mod_id:item_registry_name=value' or 'mod_id:item_registry_name@damage=value' if item damage changes the price.").getStringList();
+		Arrays.sort(rupeeValues);
+		if (rupeeRegistryConfig.hasChanged()) {
+			rupeeRegistryConfig.save();
+		}
+		RupeeValueRegistry.INSTANCE.registerItems(rupeeValues, "Config");
 		/*================== WEAPON REGISTRY =====================*/
 		// This doesn't modify the weapon registry config, so no need to save
 		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);

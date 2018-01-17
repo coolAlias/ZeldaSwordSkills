@@ -19,6 +19,7 @@ package zeldaswordskills.item;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,7 @@ import zeldaswordskills.entity.projectile.EntitySeedShot;
 import zeldaswordskills.entity.projectile.EntitySeedShotDeku;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.handler.TradeHandler;
+import zeldaswordskills.item.IRupeeValue.IMetaRupeeValue;
 import zeldaswordskills.item.ItemInstrument.Instrument;
 import zeldaswordskills.item.crafting.RecipeCombineBombBag;
 import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
@@ -759,6 +761,43 @@ public class ZSSItems
 			ZSSMain.logger.error("Error registering items:");
 			e.printStackTrace();
 		}
+	}
+
+	public static String[] getDefaultRupeeValues() {
+		try {
+			List<String> defaults = new ArrayList<String>();
+			for (Field f: ZSSItems.class.getFields()) {
+				if (Item.class.isAssignableFrom(f.getType())) {
+					Item item = (Item) f.get(null);
+					if (item instanceof IRupeeValue) {
+						List<String> s = getRupeeValueString(item, (IRupeeValue) item);
+						if (s != null && !s.isEmpty()) {
+							defaults.addAll(s);
+						}
+					}
+				}
+			}
+			return defaults.toArray(new String[defaults.size()]);
+		} catch(Exception e) {
+			ZSSMain.logger.error("Error loading default rupee values:");
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private static List<String> getRupeeValueString(Item item, IRupeeValue value) {
+		String name = Item.itemRegistry.getNameForObject(item);
+		if (item.getHasSubtypes() && item instanceof IMetaRupeeValue) {
+			List<ItemStack> stacks = ((IMetaRupeeValue) item).getRupeeValueSubItems();
+			if (stacks != null && !stacks.isEmpty()) {
+				List<String> entries = new ArrayList<String>();
+				for (ItemStack stack : stacks) {
+					entries.add(String.format("%s@%d=%d", name, stack.getItemDamage(), value.getDefaultRupeeValue(stack)));
+				}
+				return entries;
+			}
+		}
+		return Arrays.asList(name + "=" + value.getDefaultRupeeValue(new ItemStack(item)));
 	}
 
 	private static void registerRecipes() {

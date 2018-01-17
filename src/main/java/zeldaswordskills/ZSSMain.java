@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.command.ZSSCommands;
@@ -135,6 +136,7 @@ public class ZSSMain
 	@Mod.EventHandler
 	public void processMessages(FMLInterModComms.IMCEvent event) {
 		for (final FMLInterModComms.IMCMessage msg : event.getMessages()) {
+			RupeeValueRegistry.INSTANCE.processMessage(msg);
 			WeaponRegistry.INSTANCE.processMessage(msg);
 		}
 	}
