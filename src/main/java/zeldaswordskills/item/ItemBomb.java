@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,11 @@
 
 package zeldaswordskills.item;
 
+import java.util.Arrays;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -47,8 +50,6 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -61,7 +62,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * storing the time in NBT instead works nicely.
  *
  */
-public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenchantable
+public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IRupeeValue.IMetaRupeeValue, IUnenchantable
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -174,6 +175,21 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, IUnenc
 			stack.getTagCompound().setInteger("time", 0);
 			stack.getTagCompound().setBoolean("inWater", false);
 		}
+	}
+
+	@Override
+	public int getDefaultRupeeValue(ItemStack stack) {
+		return getType(stack).defaultRupeeValue;
+	}
+
+	@Override
+	public List<ItemStack> getRupeeValueSubItems() {
+		return Arrays.asList(new ItemStack[]{
+				new ItemStack(this, 1, BombType.BOMB_STANDARD.ordinal()),
+				new ItemStack(this, 1, BombType.BOMB_WATER.ordinal()),
+				new ItemStack(this, 1, BombType.BOMB_FIRE.ordinal())
+				// BOMB_FLOWER not available as a trade
+		});
 	}
 
 	/**

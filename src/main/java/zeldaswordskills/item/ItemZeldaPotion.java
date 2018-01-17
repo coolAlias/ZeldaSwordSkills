@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,11 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.buff.BuffBase;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 
-public class ItemZeldaPotion extends ItemDrinkable implements IUnenchantable
+public class ItemZeldaPotion extends ItemDrinkable implements IRupeeValue, IUnenchantable
 {
+	/** Default purchase price, in rupees */
+	private final int price;
+
 	/** Amount of HP to restore when consumed */
 	private final float restoreHP;
 
@@ -53,20 +56,27 @@ public class ItemZeldaPotion extends ItemDrinkable implements IUnenchantable
 	private float buffProbability;
 
 	/** Creates a potion with no healing or hunger-restoring properties */
-	public ItemZeldaPotion(String name) {
-		this(name, 0.0F, 0.0F);
+	public ItemZeldaPotion(String name, int price) {
+		this(name, price, 0.0F, 0.0F);
 	}
 
 	/**
+	 * @param price default purchase price, in rupees
 	 * @param restoreHP amount of HP drinking this potion immediately restores
 	 * @param restoreMP amount of MP drinking this potion immediately restores
 	 */
-	public ItemZeldaPotion(String name, float restoreHP, float restoreMP) {
+	public ItemZeldaPotion(String name, int price, float restoreHP, float restoreMP) {
 		super(name);
+		this.price = price;
 		this.restoreHP = restoreHP;
 		this.restoreMP = restoreMP;
 		setMaxStackSize(1);
 		setCreativeTab(ZSSCreativeTabs.tabTools);
+	}
+
+	@Override
+	public int getDefaultRupeeValue(ItemStack stack) {
+		return this.price;
 	}
 
 	@Override

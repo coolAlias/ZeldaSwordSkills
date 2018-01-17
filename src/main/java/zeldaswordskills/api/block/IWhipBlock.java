@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -31,15 +31,19 @@ public interface IWhipBlock
 {
 	public static enum WhipType {
 		/** Standard whip can latch on to all 'post'-like blocks: fences, logs, levers, ladders, signs, etc. */
-		WHIP_SHORT(false),
+		WHIP_SHORT(50, false),
 		/** Same as the standard whip, but with twice the range */
-		WHIP_LONG(true),
+		WHIP_LONG(150, true),
 		/** The magic whip can latch on to any solid surface and has the same range as the long whip */
-		WHIP_MAGIC(true);
+		WHIP_MAGIC(300, true);
+
+		/** The default rupee value of an ItemBomb of this bomb type */
+		public final int defaultRupeeValue;
 
 		private final boolean isExtended;
 
-		private WhipType(boolean isExtended) {
+		private WhipType(int defaultRupeeValue, boolean isExtended) {
+			this.defaultRupeeValue = defaultRupeeValue;
 			this.isExtended = isExtended;
 		}
 

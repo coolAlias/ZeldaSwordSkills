@@ -553,13 +553,13 @@ public class ZSSItems
 		boomerangMagic = new ItemBoomerang(6.0F, 24).setCaptureAll().setUnlocalizedName("zss.boomerang_magic");
 
 		heroBow = new ItemHeroBow().setUnlocalizedName("zss.bow_hero");
-		arrowBomb = new ItemZeldaArrow("arrow_bomb", 1);
-		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire", 1);
-		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water", 1);
-		arrowFire = new ItemZeldaArrow.ItemMagicArrow("arrow_fire", 2, 2.5F);
-		arrowIce = new ItemZeldaArrow.ItemMagicArrow("arrow_ice", 2, 2.5F);
-		arrowLight = new ItemZeldaArrow.ItemMagicArrow("arrow_light", 3, 5.0F);
-		arrowSilver = new ItemZeldaArrow("arrow_silver", 3);
+		arrowBomb = new ItemZeldaArrow("arrow_bomb", 8, 1);
+		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire", 10, 1);
+		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water", 12, 1);
+		arrowFire = new ItemZeldaArrow.ItemMagicArrow("arrow_fire", 20, 2, 2.5F);
+		arrowIce = new ItemZeldaArrow.ItemMagicArrow("arrow_ice", 20, 2, 2.5F);
+		arrowLight = new ItemZeldaArrow.ItemMagicArrow("arrow_light", 50, 3, 5.0F);
+		arrowSilver = new ItemZeldaArrow("arrow_silver", 40, 3);
 
 		slingshot = new ItemSlingshot().setUnlocalizedName("zss.slingshot");
 		scattershot = new ItemSlingshot(3, 30F).setUnlocalizedName("zss.scattershot");
@@ -586,10 +586,10 @@ public class ZSSItems
 		gauntletsGolden = new ItemPowerGauntlets(BlockWeight.VERY_HEAVY).setUnlocalizedName("zss.gauntlets_golden");
 		magicMirror = new ItemMagicMirror().setUnlocalizedName("zss.magicmirror");
 		fairyBottle = new ItemFairyBottle().setUnlocalizedName("zss.fairybottle");
-		potionRed = new ItemZeldaPotion("potion_red", 20.0F, 0.0F);
-		potionGreen = new ItemZeldaPotion("potion_green", 0.0F, 100.0F);
-		potionBlue = new ItemZeldaPotion("potion_blue", 40.0F, 100.0F);
-		potionYellow = new ItemZeldaPotion("potion_yellow").setBuffEffect(Buff.RESIST_SHOCK, 6000, 100, 1.0F);
+		potionRed = new ItemZeldaPotion("potion_red", 10, 20.0F, 0.0F);
+		potionGreen = new ItemZeldaPotion("potion_green", 20, 0.0F, 100.0F);
+		potionBlue = new ItemZeldaPotion("potion_blue", 60, 40.0F, 100.0F);
+		potionYellow = new ItemZeldaPotion("potion_yellow", 40).setBuffEffect(Buff.RESIST_SHOCK, 6000, 100, 1.0F);
 		potionPurple = new ItemDrinkable.ItemPotionPurple("potion_purple", 20, 40.0F);
 		lonlonMilk = new ItemLonLonMilk("lon_lon_milk", 2, 10.0F);
 		lonlonSpecial = new ItemDrinkable.ItemLonLonSpecial("lon_lon_special");

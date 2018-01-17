@@ -33,20 +33,29 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Battlegear2's quiver system.
  *
  */
-public class ItemZeldaArrow extends Item implements ISpecialAmmunition
+public class ItemZeldaArrow extends Item implements IRupeeValue, ISpecialAmmunition
 {
+	/** Default purchase price, in rupees */
+	private final int price;
+
 	/** Required level of Hero's Bow to fire this arrow */
 	private final int level;
 
 	/**
 	 * @param name Used as texture name; unlocalized name is 'zss.name'
 	 */
-	public ItemZeldaArrow(String name, int level) {
+	public ItemZeldaArrow(String name, int price, int level) {
 		super();
+		this.price = price;
 		this.level = level;
 		setUnlocalizedName("zss." + name);
 		setTextureName(ModInfo.ID + ":" + name);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
+	}
+
+	@Override
+	public int getDefaultRupeeValue(ItemStack stack) {
+		return this.price;
 	}
 
 	@Override
@@ -59,8 +68,8 @@ public class ItemZeldaArrow extends Item implements ISpecialAmmunition
 		/** Magic cost to shoot this arrow */
 		private final float magic;
 
-		public ItemMagicArrow(String name, int level, float magic) {
-			super(name, level);
+		public ItemMagicArrow(String name, int price, int level, float magic) {
+			super(name, price, level);
 			this.magic = magic;
 		}
 

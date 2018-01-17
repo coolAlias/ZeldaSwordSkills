@@ -17,8 +17,11 @@
 
 package zeldaswordskills.item;
 
+import java.util.Arrays;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -38,6 +41,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.projectile.EntityWhip;
@@ -46,11 +50,8 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
-// TODO BG2 dual-wielding compatibility
-public class ItemWhip extends Item implements IFairyUpgrade
+public class ItemWhip extends Item implements IFairyUpgrade, IRupeeValue.IMetaRupeeValue
 {
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
@@ -134,20 +135,38 @@ public class ItemWhip extends Item implements IFairyUpgrade
 
 	@Override
 	public void handleFairyUpgrade(EntityItem item, EntityPlayer player, TileEntityDungeonCore core) {
-		if (getType(item.getEntityItem()) == WhipType.WHIP_LONG && core.consumeRupees(320)) {
-			item.setDead();
-			WorldUtils.spawnItemWithRandom(core.getWorldObj(), new ItemStack(ZSSItems.whip, 1, WhipType.WHIP_MAGIC.ordinal()), core.xCoord, core.yCoord + 2, core.zCoord);
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
-			//player.triggerAchievement(ZSSAchievements.magicWhip);
-		} else {
-			core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
+		if (this.getType(item.getEntityItem()) == WhipType.WHIP_LONG) {
+			ItemStack stack = new ItemStack(this, 1, WhipType.WHIP_MAGIC.ordinal());
+			int cost = RupeeValueRegistry.getRupeeValue(stack, this.getDefaultRupeeValue(stack));
+			if (core.consumeRupees(cost)) {
+				item.setDead();
+				WorldUtils.spawnItemWithRandom(core.getWorldObj(), stack, core.xCoord, core.yCoord + 2, core.zCoord);
+				core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.SECRET_MEDLEY, 1.0F, 1.0F);
+				//player.triggerAchievement(ZSSAchievements.magicWhip);
+			} else {
+				core.getWorldObj().playSoundEffect(core.xCoord + 0.5D, core.yCoord + 1, core.zCoord + 0.5D, Sounds.FAIRY_LAUGH, 1.0F, 1.0F);
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.fairy.laugh.unworthy");
+			}
 		}
 	}
 
 	@Override
 	public boolean hasFairyUpgrade(ItemStack stack) {
 		return (getType(stack) != WhipType.WHIP_MAGIC);
+	}
+
+	@Override
+	public int getDefaultRupeeValue(ItemStack stack) {
+		return this.getType(stack).defaultRupeeValue;
+	}
+
+	@Override
+	public List<ItemStack> getRupeeValueSubItems() {
+		return Arrays.asList(new ItemStack[]{
+				new ItemStack(this, 1, WhipType.WHIP_SHORT.ordinal()),
+				new ItemStack(this, 1, WhipType.WHIP_LONG.ordinal()),
+				new ItemStack(this, 1, WhipType.WHIP_MAGIC.ordinal()) // price to upgrade at a fairy pool
+		});
 	}
 
 	@Override
