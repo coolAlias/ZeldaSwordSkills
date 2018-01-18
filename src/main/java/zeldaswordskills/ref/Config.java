@@ -541,7 +541,7 @@ public class Config
 		arrowsConsumeFlame = config.get("Item", "[Arrows] Whether transforming arrows with the Sacred Flames has a chance to consume the flame", true).getBoolean(true);
 		bombFuseTime = MathHelper.clamp_int(config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt(), 0, 128);
 		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone", false).getBoolean(false);
-		// TODO bombsGriefAdventure = config.get("Item", "[Bombs] Whether bombs can destroy regular blocks in Adventure Mode", false).getBoolean(false);
+		bombsGriefAdventure = config.get("Item", "[Bombs] Whether bombs can destroy regular blocks in Adventure Mode", false).getBoolean(false);
 		enableBoomerangDenude = config.get("Item", "[Boomerang] Allow Boomerang to destroy grass and similar blocks", true).getBoolean(true);
 		enableDekuDenude = config.get("Item", "[Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves", true).getBoolean(true);
 		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);

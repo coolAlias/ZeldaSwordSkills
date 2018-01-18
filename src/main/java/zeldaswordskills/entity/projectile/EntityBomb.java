@@ -19,11 +19,13 @@ package zeldaswordskills.entity.projectile;
 
 import java.util.List;
 
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -37,9 +39,7 @@ import zeldaswordskills.api.entity.IEntityBombIngestible;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBombIngestible
 {
@@ -162,9 +162,10 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		return this;
 	}
 
-	// TODO @Override // this is not yet implemented
-	public boolean canGriefAdventureMode() {
-		return Config.canGriefAdventure();
+	@Override
+	public EntityPlayer getBombThrower() {
+		EntityLivingBase thrower = this.getThrower();
+		return (thrower instanceof EntityPlayer ? (EntityPlayer) thrower : null);
 	}
 
 	/**

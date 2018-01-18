@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package zeldaswordskills.entity.projectile;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
@@ -30,7 +31,6 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.IEntityBomb;
 import zeldaswordskills.item.ItemBomb;
-import zeldaswordskills.ref.Config;
 
 public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 {
@@ -78,9 +78,9 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 		return this;
 	}
 
-	// TODO @Override
-	public boolean canGriefAdventureMode() {
-		return Config.canGriefAdventure();
+	@Override
+	public EntityPlayer getBombThrower() {
+		return (this.shootingEntity instanceof EntityPlayer ? (EntityPlayer) this.shootingEntity : null);
 	}
 
 	/**
