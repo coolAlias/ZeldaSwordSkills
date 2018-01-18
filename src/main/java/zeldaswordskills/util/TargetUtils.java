@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -147,13 +147,21 @@ public class TargetUtils
 	}
 
 	/**
+	 * Calls {@link TargetUtils#acquireLookTarget(EntityLivingBase, int, double, boolean, Class)}
+	 * with no specific class to prioritize.
+	 */
+	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius, boolean closestToSeeker) {
+		return acquireLookTarget(seeker, distance, radius, closestToSeeker, null);
+	}
+	/**
 	 * Returns the EntityLivingBase closest to the point at which the entity is looking and within the distance and radius specified
 	 * @param distance max distance to check for target, in blocks; negative value will check to MAX_DISTANCE
 	 * @param radius max distance, in blocks, to search on either side of the vector's path
 	 * @param closestToEntity if true, the target closest to the seeker and still within the line of sight search radius is returned
+	 * @param targetClass Optional preferred entity class (or interface) to prioritize above all others
 	 * @return the entity the seeker is looking at or null if no entity within sight search range
 	 */
-	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius, boolean closestToSeeker) {
+	public static final EntityLivingBase acquireLookTarget(EntityLivingBase seeker, int distance, double radius, boolean closestToSeeker, Class<?> targetClass) {
 		if (distance < 0 || distance > MAX_DISTANCE) {
 			distance = MAX_DISTANCE;
 		}
@@ -164,25 +172,28 @@ public class TargetUtils
 		double targetY = seeker.posY + seeker.getEyeHeight() - 0.10000000149011612D;
 		double targetZ = seeker.posZ;
 		double distanceTraveled = 0;
-
 		while ((int) distanceTraveled < distance) {
 			targetX += vec3.xCoord;
 			targetY += vec3.yCoord;
 			targetZ += vec3.zCoord;
 			distanceTraveled += vec3.lengthVector();
+			boolean foundClass = (targetClass == null);
 			AxisAlignedBB bb = new AxisAlignedBB(targetX-radius, targetY-radius, targetZ-radius, targetX+radius, targetY+radius, targetZ+radius);
 			List<EntityLivingBase> list = seeker.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase target : list) {
 				if (target != seeker && target.canBeCollidedWith() && isTargetInSight(vec3, seeker, target)) {
 					double newDistance = (closestToSeeker ? target.getDistanceSqToEntity(seeker) : target.getDistanceSq(targetX, targetY, targetZ));
-					if (newDistance < currentDistance) {
+					boolean closer = (newDistance < currentDistance);
+					if (closer || (!foundClass && targetClass != null && targetClass.isAssignableFrom(target.getClass()))) {
 						currentTarget = target;
 						currentDistance = newDistance;
+						if (!closer) {
+							foundClass = true;
+						}
 					}
 				}
 			}
 		}
-
 		return currentTarget;
 	}
 
@@ -200,7 +211,6 @@ public class TargetUtils
 		double targetY = seeker.posY + seeker.getEyeHeight() - 0.10000000149011612D;
 		double targetZ = seeker.posZ;
 		double distanceTraveled = 0;
-
 		while ((int) distanceTraveled < distance) {
 			targetX += vec3.xCoord;
 			targetY += vec3.yCoord;
@@ -216,7 +226,6 @@ public class TargetUtils
 				}
 			}
 		}
-
 		return targets;
 	}
 

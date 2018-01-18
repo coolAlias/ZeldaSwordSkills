@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.StatCollector;
@@ -177,7 +178,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 			if (!isComboInProgress()) {
 				combo = null;
 			}
-			currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true);
+			currentTarget = TargetUtils.acquireLookTarget(player, getRange(), getRange(), true, IMob.class);
 		}
 		return true;
 	}
@@ -247,6 +248,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public final void getNextTarget(EntityPlayer player) {
 		EntityLivingBase nextTarget = null;
 		double dTarget = 0;
+		boolean priority = !Config.preferTargetingMobs();
 		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getRange(), getRange());
 		for (EntityLivingBase entity : list) {
 			if (entity == player) { continue; }
@@ -256,9 +258,13 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 					nextTarget = entity;
 				} else {
 					double distance = player.getDistanceSqToEntity(entity);
-					if (distance < dTarget) {
+					boolean closer = (distance < dTarget);
+					if (closer || (!priority && IMob.class.isAssignableFrom(entity.getClass()))) {
 						nextTarget = entity;
 						dTarget = distance;
+						if (!closer) {
+							priority = true;
+						}
 					}
 				}
 			}

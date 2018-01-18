@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -177,7 +178,8 @@ public class Dash extends SkillActive
 		if (skill != null && skill.isLockedOn()) {
 			target = skill.getCurrentTarget();
 		} else {
-			target = TargetUtils.acquireLookTarget(player, (int) getRange(), getRange(), true);
+			Class<?> targetClass = (Config.preferTargetingMobs() ? IMob.class : null);
+			target = TargetUtils.acquireLookTarget(player, (int) getRange(), getRange(), true, targetClass);
 		}
 		if (target != null && world.isRemote) {
 			double d0 = (target.posX - player.posX);

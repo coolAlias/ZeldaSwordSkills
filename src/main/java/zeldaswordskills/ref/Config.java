@@ -157,6 +157,8 @@ public class Config
 	private static int resetNotesInterval;
 	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
 	public static boolean enableHookshotSound;
+	/** [Targeting] Prioritize mobs over other entity types when targeting */
+	private static boolean targetMobs;
 	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
 	public static boolean enableAutoTarget;
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
@@ -522,6 +524,7 @@ public class Config
 		requireDoubleTap = config.getBoolean("[Controls] Double-tap for Movement Skills", category, true, "Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", "config.zss.client.require_double_tap");
 		resetNotesInterval = config.getInt("[Song GUI] Ticks Between Notes Before Clear", category, 30, 5, 100, "Number of ticks allowed between notes before played notes are cleared", "config.zss.client.reset_notes_interval");
 		enableHookshotSound = config.getBoolean("[Sound] Hookshot Miss Plays Item-Break Sound", category, true, "Whether to play the 'itembreak' sound when the hookshot misses", "config.zss.client.enable_hookshot_sound");
+		targetMobs = config.getBoolean("[Targeting] Prioritize mobs", category, true, "Prioritize mobs over other entity types when targeting", "config.zss.client.target_mobs");
 		enableAutoTarget = config.getBoolean("[Targeting] Enable Auto-Targeting", category, true, "Whether auto-targeting is enabled or not (toggle in game: '.')", "config.zss.client.enable_auto_target");
 		canTargetPlayers = config.getBoolean("[Targeting] Can Target Players", category, true, "Whether players can be targeted (toggle in game: '.' while sneaking)", "config.zss.client.can_target_players");
 
@@ -801,6 +804,7 @@ public class Config
 
 	/*================== CLIENT SIDE SETTINGS  =====================*/
 	public static int getHitsToDisplay() { return hitsToDisplay; }
+	public static boolean preferTargetingMobs() { return targetMobs; }
 	public static boolean toggleAutoTarget() { enableAutoTarget = !enableAutoTarget; return enableAutoTarget; }
 	public static boolean toggleTargetPlayers() { canTargetPlayers = !canTargetPlayers; return canTargetPlayers; }
 	public static int getNoteResetInterval() { return resetNotesInterval; }
