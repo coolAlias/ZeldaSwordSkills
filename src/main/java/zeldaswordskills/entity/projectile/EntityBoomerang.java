@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.block.IBoomerangBlock;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
@@ -161,7 +162,9 @@ public class EntityBoomerang extends EntityMobThrowable
 			}
 			captureDrops();
 			captureXpOrbs();
-			destroyVines();
+			if (Config.canBoomerangDenude()) {
+				destroyVines();
+			}
 			updateMotion();
 			super.onUpdate();
 		}
@@ -255,7 +258,7 @@ public class EntityBoomerang extends EntityMobThrowable
 			} else {
 				block.onEntityCollidedWithBlock(worldObj, pos, this);
 				float hardness = block.getBlockHardness(worldObj, pos);
-				if (block.getMaterial() != Material.air && hardness >= 0.0F && hardness < 0.1F && !worldObj.isRemote) {
+				if (Config.canBoomerangDenude() && !worldObj.isRemote && block.getMaterial() != Material.air && hardness >= 0.0F && hardness < 0.1F) {
 					worldObj.destroyBlock(pos, true);
 				} else if (block instanceof BlockButton || (block instanceof BlockLever &&
 						getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {

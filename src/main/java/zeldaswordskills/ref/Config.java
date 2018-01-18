@@ -203,6 +203,8 @@ public class Config
 	private static boolean onlyBombSecretStone;
 	/** [Bombs] Whether bombs can destroy regular blocks in Adventure Mode */
 	private static boolean bombsGriefAdventure;
+	/** [Boomerang] Allow Boomerang to destroy grass and similar blocks */
+	private static boolean enableBoomerangDenude;
 	/** [Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves */
 	private static boolean enableDekuDenude;
 	/** [Din's Fire] Whether Din's Fire can set blocks on fire */
@@ -581,6 +583,7 @@ public class Config
 		bombFuseTime = config.getInt("[Bombs] Minimum Bomb Fuse Time", category, 56, 0, 128, "Minimum fuse time; set to 0 to disable held bomb ticks", "config.zss.item.bomb_fuse_time");
 		onlyBombSecretStone = config.getBoolean("[Bombs] Can Bombs Grief", category, false, "Whether bombs are non-griefing, i.e. can only destroy secret stone", "config.zss.item.only_bomb_secret_room");
 		//bombsGriefAdventure = config.getBoolean("[Bombs] Can Bombs Grief in Adventure Mode", category, false, "Whether bombs can destroy regular blocks in Adventure Mode", "config.zss.item.bombs_grief_adventure");
+		enableBoomerangDenude = config.getBoolean("[Boomerang] Can Boomerang destroy grass", category, true, "Allow Boomerang to destroy grass and similar blocks", "config.zss.item.enable_boomerang_denude");
 		enableDekuDenude = config.getBoolean("[Deku Leaf] Can Whirlwind Strip Trees", category, true, "Allow Deku Leaf whirlwind to destroy leaves", "config.zss.item.enable_deku_denude");
 		enableDinIgnite = config.getBoolean("[Din's Fire] Can Din's Fire Ignite Blocks", category, false, "Whether Din's Fire can set blocks on fire", "config.zss.item.enable_din_ignite");
 		enableDinMelt = config.getBoolean("[Din's Fire] Can Din's Fire Melt Ice", category, true, "Whether Din's Fire can melt unbreakable ice blocks", "config.zss.item.enable_din_melt");
@@ -830,6 +833,7 @@ public class Config
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
 	public static boolean canGriefAdventure() { return bombsGriefAdventure; }
 	public static int getBombFuseTime() { return bombFuseTime; }
+	public static boolean canBoomerangDenude() { return enableBoomerangDenude; }
 	public static boolean canDekuDenude() { return enableDekuDenude; }
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
