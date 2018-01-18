@@ -199,6 +199,8 @@ public class Config
 	private static boolean onlyBombSecretStone;
 	/** [Bombs] Whether bombs can destroy regular blocks in Adventure Mode */
 	private static boolean bombsGriefAdventure;
+	/** [Boomerang] Allow Boomerang to destroy grass and similar blocks */
+	private static boolean enableBoomerangDenude;
 	/** [Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves */
 	private static boolean enableDekuDenude;
 	/** [Din's Fire] Whether Din's Fire can set blocks on fire */
@@ -540,6 +542,7 @@ public class Config
 		bombFuseTime = MathHelper.clamp_int(config.get("Item", "[Bombs] Minimum fuse time; set to 0 to disable held bomb ticks [0-128]", 56).getInt(), 0, 128);
 		onlyBombSecretStone = config.get("Item", "[Bombs] Whether bombs are non-griefing, i.e. can only destroy secret stone", false).getBoolean(false);
 		// TODO bombsGriefAdventure = config.get("Item", "[Bombs] Whether bombs can destroy regular blocks in Adventure Mode", false).getBoolean(false);
+		enableBoomerangDenude = config.get("Item", "[Boomerang] Allow Boomerang to destroy grass and similar blocks", true).getBoolean(true);
 		enableDekuDenude = config.get("Item", "[Deku Leaf] Allow Deku Leaf whirlwind to destroy leaves", true).getBoolean(true);
 		enableDinIgnite = config.get("Item", "[Din's Fire] Whether Din's Fire can set blocks on fire", false).getBoolean(false);
 		enableDinMelt = config.get("Item", "[Din's Fire] Whether Din's Fire can melt unbreakable ice blocks", true).getBoolean(true);
@@ -748,6 +751,7 @@ public class Config
 	public static boolean onlyBombSecretStone() { return onlyBombSecretStone; }
 	public static boolean canGriefAdventure() { return bombsGriefAdventure; }
 	public static int getBombFuseTime() { return bombFuseTime; }
+	public static boolean canBoomerangDenude() { return enableBoomerangDenude; }
 	public static boolean canDekuDenude() { return enableDekuDenude; }
 	public static boolean isDinIgniteEnabled() { return enableDinIgnite; }
 	public static boolean isDinMeltEnabled() { return enableDinMelt; }
