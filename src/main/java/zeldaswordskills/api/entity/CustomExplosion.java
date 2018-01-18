@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -112,16 +112,20 @@ public class CustomExplosion extends Explosion
 	 * CustomExplosion object from scratch rather than using the static methods and
 	 * call doExplosionA(), then doExplosionB().
 	 * @param damage Use 0.0F for vanilla explosion damage; amounts above zero will cause a flat amount regardless of distance
+	 * @param canGrief If false, explosion will not damage any blocks; if true, affected blocks may still be limited by e.g. Adventure Mode
 	 */
 	public static void createExplosion(IEntityBomb bomb, World world, double x, double y, double z, float radius, float damage, boolean canGrief) {
 		CustomExplosion explosion = new CustomExplosion(world, (Entity) bomb, x, y, z, radius, canGrief, false).setDamage(damage);
 		BombType type = bomb.getType();
-		// TODO Adventure Mode is only set per player, not per world
-		//boolean isAdventureMode = (world.getWorldInfo().getGameType() == GameType.ADVENTURE);
-		boolean restrictBlocks = false; // (isAdventureMode && !bomb.canGriefAdventureMode());
+		// Griefing configs allow non-adventure players playing with adventure players to have different settings
+		boolean restrictBlocks = Config.onlyBombSecretStone();
+		if (!restrictBlocks && !Config.canGriefAdventure()) {
+			EntityPlayer thrower = bomb.getBombThrower();
+			restrictBlocks = (thrower instanceof EntityPlayerMP && ((EntityPlayerMP) thrower).theItemInWorldManager.getGameType().isAdventure());
+		}
 		explosion.setMotionFactor(bomb.getMotionFactor());
 		explosion.scalesWithDistance = (damage == 0.0F);
-		explosion.targetBlock = ((restrictBlocks || Config.onlyBombSecretStone()) ? ZSSBlocks.secretStone : null);
+		explosion.targetBlock = (restrictBlocks ? ZSSBlocks.secretStone : null);
 		explosion.ignoreLiquidType = type.ignoreLiquidType;
 		float f = bomb.getDestructionFactor();
 		// TODO doesn't allow for any other 'hell' type dimensions...
@@ -273,7 +277,6 @@ public class CustomExplosion extends Explosion
 		} else {
 			worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D);
 		}
-
 		Iterator<BlockPos> iterator;
 		BlockPos blockpos;
 		Block block;
@@ -285,7 +288,6 @@ public class CustomExplosion extends Explosion
 				explodeBlockAt(block, blockpos, spawnExtraParticles);
 			}
 		}
-
 		if (isFlaming) {
 			iterator = affectedBlockPositions.iterator();
 			while (iterator.hasNext()) {
@@ -296,7 +298,6 @@ public class CustomExplosion extends Explosion
 				}
 			}
 		}
-
 		notifyClients();
 	}
 
@@ -353,7 +354,6 @@ public class CustomExplosion extends Explosion
 						double d0 = explosionX;
 						double d1 = explosionY;
 						double d2 = explosionZ;
-
 						for (float f2 = 0.3F; f1 > 0.0F; f1 -= 0.22500001F)
 						{
 							int l = MathHelper.floor_double(d0);
@@ -378,7 +378,6 @@ public class CustomExplosion extends Explosion
 							{
 								hashset.add(blockpos);
 							}
-
 							d0 += d3 * (double)f2;
 							d1 += d4 * (double)f2;
 							d2 += d5 * (double)f2;
@@ -387,7 +386,6 @@ public class CustomExplosion extends Explosion
 				}
 			}
 		}
-
 		affectedBlockPositions.addAll(hashset);
 	}
 

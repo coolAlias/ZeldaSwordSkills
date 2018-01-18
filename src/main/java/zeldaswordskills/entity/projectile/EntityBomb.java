@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -38,7 +39,6 @@ import zeldaswordskills.api.entity.IEntityBombIngestible;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
-import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBombIngestible
@@ -162,9 +162,10 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		return this;
 	}
 
-	// TODO @Override // this is not yet implemented
-	public boolean canGriefAdventureMode() {
-		return Config.canGriefAdventure();
+	@Override
+	public EntityPlayer getBombThrower() {
+		EntityLivingBase thrower = this.getThrower();
+		return (thrower instanceof EntityPlayer ? (EntityPlayer) thrower : null);
 	}
 
 	/**

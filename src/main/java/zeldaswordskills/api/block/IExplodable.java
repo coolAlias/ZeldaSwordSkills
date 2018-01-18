@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,10 +20,10 @@ package zeldaswordskills.api.block;
 import zeldaswordskills.api.entity.CustomExplosion;
 
 /**
- * NOTE: Not currently working for Adventure Mode...
  * Flags blocks that may be affected by {@link CustomExplosion custom explosions}
- * even in Adventure Mode or when the explosion is targeting a specific block. If
- * the explosion is non-griefing, no blocks will be affected.
+ * even in Adventure Mode or when the explosion is targeting a specific block.
+ * <br><br>
+ * Non-griefing explosions do not affect any blocks, even IExplodable ones.
  *
  */
 public interface IExplodable {

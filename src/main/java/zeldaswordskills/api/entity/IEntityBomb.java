@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package zeldaswordskills.api.entity;
 
+import net.minecraft.entity.player.EntityPlayer;
+import zeldaswordskills.api.block.IExplodable;
 
 /**
  * 
@@ -41,10 +43,11 @@ public interface IEntityBomb {
 	float getDestructionFactor();
 
 	/**
-	 * Return false to restrict this bomb's destruction in Adventure Mode,
-	 * allowing it to affect only {@link IExplodable} blocks
+	 * Used to determine if the bomb's thrower is a player in Adventure Mode, in which
+	 * case only {@link IExplodable} blocks may be affected depending on config settings.
+	 * @return the EntityPlayer who is responsible for this bomb, or null
 	 */
-	// TODO boolean canGriefAdventureMode();
+	EntityPlayer getBombThrower();
 
 	/**
 	 * Return true if {@link BombType#postExplosionEffect} should be called
