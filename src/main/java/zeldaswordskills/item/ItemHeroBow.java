@@ -38,6 +38,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
@@ -651,7 +652,8 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		Item arrowItem = arrowStack.getItem();
 		arrowEntity.setArrowItem(arrowItem);
 		if (player.getCurrentArmor(ArmorIndex.WORN_HELM) != null && player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() == ZSSItems.maskHawkeye) {
-			EntityLivingBase target = TargetUtils.acquireLookTarget(player, 64, 1.0F);
+			// Config.preferTargetingMobs() is a per-client setting; Hawkeye Mask will just assume it prefers enemies
+			EntityLivingBase target = TargetUtils.acquireLookTarget(player, 64, 1.0F, false, IMob.class);
 			if (target != null) {
 				arrowEntity.setHomingArrow(true);
 				arrowEntity.setTarget(target);

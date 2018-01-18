@@ -112,6 +112,8 @@ public class Config
 	private static int resetNotesInterval;
 	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
 	public static boolean enableHookshotSound;
+	/** [Targeting] Prioritize mobs over other entity types when targeting */
+	private static boolean targetMobs;
 	/** [Targeting] Whether auto-targeting is enabled or not (toggle in game by pressing '.') */
 	public static boolean enableAutoTarget;
 	/** [Targeting] Whether players can be targeted (toggle in game by pressing '.' while sneaking) */
@@ -472,6 +474,7 @@ public class Config
 		itemModeOffsetY = config.get(category, "[Item Mode HUD][Offset: Y] Moves the HUD element up (-) or down (+) this number of pixels", 0).getInt();
 		resetNotesInterval = MathHelper.clamp_int(config.get(category, "[Song GUI] Number of ticks allowed between notes before played notes are cleared [5-100]", 30).getInt(), 5, 100);
 		enableHookshotSound = config.get(category, "[Sound] Whether to play the 'itembreak' sound when the hookshot misses", true).getBoolean(true);
+		targetMobs = config.get(category, "[Targeting] Prioritize mobs over other entity types when targeting", true).getBoolean(true);
 		enableAutoTarget = config.get(category, "[Targeting] Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
 		canTargetPlayers = config.get(category, "[Targeting] Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);
 		/*================== MAGIC METER (CLIENT SIDE) =====================*/
@@ -719,6 +722,7 @@ public class Config
 
 	/*================== CLIENT SIDE SETTINGS  =====================*/
 	public static int getHitsToDisplay() { return hitsToDisplay; }
+	public static boolean preferTargetingMobs() { return targetMobs; }
 	public static boolean toggleAutoTarget() { enableAutoTarget = !enableAutoTarget; return enableAutoTarget; }
 	public static boolean toggleTargetPlayers() { canTargetPlayers = !canTargetPlayers; return canTargetPlayers; }
 	public static int getNoteResetInterval() { return resetNotesInterval; }
