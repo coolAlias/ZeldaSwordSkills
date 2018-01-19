@@ -243,6 +243,8 @@ public class Config
 	private static int temperedRequiredKills;
 	/** [SYNC] [Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal */
 	private static boolean allMasterSwordsProvidePower;
+	/** [Rupoor] Number of rupees player loses when picking up a Rupoor [1-9999] */
+	private static int rupoorValue;
 	/** [Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500] */
 	private static int numSkelKeyUses;
 	/** [Slingshot] Cost (in rupees) for first upgrade */
@@ -509,6 +511,7 @@ public class Config
 		rodFireGriefing = config.get("Item", "[Magic Rods] Enable fire rod to set blocks on fire", true).getBoolean(true);
 		temperedRequiredKills = MathHelper.clamp_int(config.get("Item", "[Master Sword] Number of mobs that need to be killed to upgrade the Tempered Sword [100-1000]", 300).getInt(), 100, 1000);
 		allMasterSwordsProvidePower = config.get("Item", "[Master Sword] Whether ALL master swords provide power when placed in a Sword Pedestal", true).getBoolean(true);
+		rupoorValue = MathHelper.clamp_int(config.get("Item", "[Rupoor] Number of rupees player loses when picking up a Rupoor [1-9999]", 10).getInt(), 1, 9999);
 		numSkelKeyUses = MathHelper.clamp_int(config.get("Item", "[Skeleton Key] Number of locked chests which can be opened before key breaks (0 for no limit) [0-500]", 50).getInt(), 0, 500);
 		slingshotUpgradeOne = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in rupees) for first upgrade [64-320]", 128).getInt(), 64, 320);
 		slingshotUpgradeTwo = MathHelper.clamp_int(config.get("Item", "[Slingshot] Cost (in rupees) for second upgrade [128-640]", 320).getInt(), 128, 640);
@@ -828,6 +831,7 @@ public class Config
 	public static boolean getRodFireGriefing() { return rodFireGriefing; }
 	public static int getRequiredKills() { return temperedRequiredKills - 1; }
 	public static boolean getMasterSwordsProvidePower() { return allMasterSwordsProvidePower; }
+	public static int getRupoorValue() { return rupoorValue; }
 	public static int getNumSkelKeyUses() { return numSkelKeyUses; }
 	public static int getSlingshotCostOne() { return slingshotUpgradeOne; }
 	public static int getSlingshotCostTwo() { return slingshotUpgradeTwo; }

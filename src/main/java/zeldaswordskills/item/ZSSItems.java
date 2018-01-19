@@ -204,6 +204,7 @@ public class ZSSItems
 	//================ TREASURES TAB ================//
 	public static Item
 	rupee,
+	rupoor,
 	instrument,
 	bookMudora,
 	pendant,
@@ -712,6 +713,7 @@ public class ZSSItems
 		bookMudora = new Item().setUnlocalizedName("zss.book_mudora").setTextureName(ModInfo.ID + ":book_mudora").setMaxDamage(0).setCreativeTab(ZSSCreativeTabs.tabMisc);
 		medallion = new ItemMedallion().setUnlocalizedName("zss.medallion");
 		rupee = new ItemRupee();
+		rupoor = new ItemPickupOnly.ItemRupoor("rupoor");
 		walletUpgrade = new ItemWalletUpgrade();
 	}
 

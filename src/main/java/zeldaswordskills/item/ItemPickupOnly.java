@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
+import zeldaswordskills.entity.player.ZSSPlayerWallet;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -66,6 +67,25 @@ public abstract class ItemPickupOnly extends Item implements IHandlePickup, IUne
 				--stack.stackSize;
 				info.restoreMagic(restoreMp);
 				PlayerUtils.playSound(player, Sounds.SUCCESS_MAGIC, 0.6F, 1.0F);
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public static class ItemRupoor extends ItemPickupOnly
+	{
+		public ItemRupoor(String name) {
+			super(name);
+			setCreativeTab(ZSSCreativeTabs.tabMisc);
+		}
+		@Override
+		public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
+			ZSSPlayerWallet wallet = ZSSPlayerWallet.get(player);
+			if (stack.stackSize > 0 && wallet.getRupees() > 0) {
+				--stack.stackSize;
+				wallet.addRupees(-Config.getRupoorValue());
+				PlayerUtils.playRandomizedSound(player, Sounds.GRUNT, 0.3F, 0.8F);
 				return true;
 			}
 			return false;
