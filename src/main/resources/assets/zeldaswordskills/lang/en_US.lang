@@ -1000,11 +1000,10 @@ entity.zeldaswordskills.arrowcustom.name=Arrow
 entity.zeldaswordskills.arrowelemental.name=Magic Arrow
 entity.zeldaswordskills.magicspell.name=Spell
 
-entity.zeldaswordskills.chu.name=Chu
-entity.zeldaswordskills.chu.name.0=Red Chu
-entity.zeldaswordskills.chu.name.1=Green Chu
-entity.zeldaswordskills.chu.name.2=Blue Chu
-entity.zeldaswordskills.chu.name.3=Yellow Chu
+entity.zeldaswordskills.chu_red.name=Red Chu
+entity.zeldaswordskills.chu_green.name=Green Chu
+entity.zeldaswordskills.chu_blue.name=Blue Chu
+entity.zeldaswordskills.chu_yellow.name=Yellow Chu
 entity.zeldaswordskills.darknut.name.0=Darknut
 entity.zeldaswordskills.darknut.name.1=Mighty Darknut
 entity.zeldaswordskills.darknut_boss.name=Black Knight

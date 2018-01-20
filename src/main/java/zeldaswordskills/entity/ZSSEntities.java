@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -41,6 +41,7 @@ import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.ZSSMain;
@@ -58,6 +59,7 @@ import zeldaswordskills.client.render.entity.RenderDekuBaba;
 import zeldaswordskills.client.render.entity.RenderEntityBomb;
 import zeldaswordskills.client.render.entity.RenderEntityBoomerang;
 import zeldaswordskills.client.render.entity.RenderEntityChu;
+import zeldaswordskills.client.render.entity.RenderEntityChuElectric;
 import zeldaswordskills.client.render.entity.RenderEntityFairy;
 import zeldaswordskills.client.render.entity.RenderEntityHookShot;
 import zeldaswordskills.client.render.entity.RenderEntityJar;
@@ -69,7 +71,10 @@ import zeldaswordskills.client.render.entity.RenderEntityWhip;
 import zeldaswordskills.client.render.entity.RenderEntityWizzrobe;
 import zeldaswordskills.client.render.entity.RenderGenericLiving;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
-import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityChuBlue;
+import zeldaswordskills.entity.mobs.EntityChuGreen;
+import zeldaswordskills.entity.mobs.EntityChuRed;
+import zeldaswordskills.entity.mobs.EntityChuYellow;
 import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityDekuBaba;
 import zeldaswordskills.entity.mobs.EntityDekuFire;
@@ -127,7 +132,10 @@ public class ZSSEntities
 	 */
 	public static void preInit() {
 		registerEntities();
-		addSpawnLocations(EntityChu.class, EntityChu.getDefaultBiomes());
+		addSpawnLocations(EntityChuRed.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.PLAINS));
+		addSpawnLocations(EntityChuGreen.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.JUNGLE, BiomeType.RIVER));
+		addSpawnLocations(EntityChuBlue.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.RIVER, BiomeType.TAIGA));
+		addSpawnLocations(EntityChuYellow.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.PLAINS, BiomeType.JUNGLE));
 		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
 		addSpawnLocations(EntityDekuBaba.class, EntityDekuBaba.getDefaultBiomes());
 		addSpawnLocations(EntityDekuFire.class, EntityDekuFire.getDefaultBiomes());
@@ -143,15 +151,22 @@ public class ZSSEntities
 	 */
 	public static void postInit(Configuration config) {
 		// REGISTER ENTITY SPAWN DATA
-		int rate = config.get("Mob Spawns", "[Spawn Rate] Chuchu spawn rate (0 to disable)[0+]", 10).getInt();
-		addSpawnableEntityData(EntityChu.class, EnumCreatureType.monster, 4, 4, rate);
+		int rate = 0;
+		rate = config.get("Mob Spawns", "[Spawn Rate][Chu] Blue Chu spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityChuBlue.class, EnumCreatureType.monster, 4, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Chu] Green Chu spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityChuGreen.class, EnumCreatureType.monster, 4, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Chu] Red Chu spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityChuRed.class, EnumCreatureType.monster, 4, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Chu] Yellow Chu spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityChuYellow.class, EnumCreatureType.monster, 4, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Darknut spawn rate (0 to disable)[0+]", 5).getInt();
 		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.monster, 1, 1, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba spawn rate (0 to disable)[0+]", 10).getInt();
+		rate = config.get("Mob Spawns", "[Spawn Rate][Deku Baba] Deku Baba spawn rate (0 to disable)[0+]", 10).getInt();
 		addSpawnableEntityData(EntityDekuBaba.class, EnumCreatureType.monster, 1, 3, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Fire) spawn rate (0 to disable)[0+]", 2).getInt();
+		rate = config.get("Mob Spawns", "[Spawn Rate][Deku Baba] Fire Baba spawn rate (0 to disable)[0+]", 2).getInt();
 		addSpawnableEntityData(EntityDekuFire.class, EnumCreatureType.monster, 1, 3, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Deku Baba (Withered) spawn rate (0 to disable)[0+]", 5).getInt();
+		rate = config.get("Mob Spawns", "[Spawn Rate][Deku Baba] Withered Baba spawn rate (0 to disable)[0+]", 5).getInt();
 		addSpawnableEntityData(EntityDekuWithered.class, EnumCreatureType.monster, 1, 3, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Fairy (wild) spawn rate (0 to disable)[0+]", 1).getInt();
 		addSpawnableEntityData(EntityFairy.class, EnumCreatureType.ambient, 1, 3, rate);
@@ -242,8 +257,10 @@ public class ZSSEntities
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 80, 0xADFF2F, 0xFFFF00);
 		EntityRegistry.registerModEntity(EntityNavi.class, "navi", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 
-		EntityRegistry.registerModEntity(EntityChu.class, "chu", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-		CustomEntityList.addMapping(EntityChu.class, "chu", 0x008000, 0xDC143C, 0x008000, 0x00EE00, 0x008000, 0x3A5FCD, 0x008000, 0xFFFF00);
+		registerEntity(EntityChuRed.class, "chu_red", ++modEntityIndex, 80, 0x008000, 0xDC143C);
+		registerEntity(EntityChuGreen.class, "chu_green", ++modEntityIndex, 80, 0x008000, 0x00EE00);
+		registerEntity(EntityChuBlue.class, "chu_blue", ++modEntityIndex, 80, 0x008000, 0x3A5FCD);
+		registerEntity(EntityChuYellow.class, "chu_yellow", ++modEntityIndex, 80, 0x008000, 0xFFFF00);
 
 		EntityRegistry.registerModEntity(EntityDarknut.class, "darknut", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityDarknut.class, "darknut", 0x1E1E1E, 0x8B2500, 0x1E1E1E, 0xFB2500);
@@ -280,7 +297,14 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityBombosFireball.class, new RenderSnowball(Items.fire_charge));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang());
 		RenderingRegistry.registerEntityRenderingHandler(EntityCeramicJar.class, new RenderEntityJar());
-		RenderingRegistry.registerEntityRenderingHandler(EntityChu.class, new RenderEntityChu());
+		RenderingRegistry.registerEntityRenderingHandler(EntityChuRed.class,
+				new RenderEntityChu(new ResourceLocation(ModInfo.ID, "textures/entity/chu_red.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityChuGreen.class,
+				new RenderEntityChu(new ResourceLocation(ModInfo.ID, "textures/entity/chu_green.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityChuBlue.class,
+				new RenderEntityChuElectric(new ResourceLocation(ModInfo.ID, "textures/entity/chu_blue.png"), new ResourceLocation(ModInfo.ID, "textures/entity/chu_blue_shock.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityChuYellow.class,
+				new RenderEntityChuElectric(new ResourceLocation(ModInfo.ID, "textures/entity/chu_yellow.png"), new ResourceLocation(ModInfo.ID, "textures/entity/chu_yellow_shock.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing());
 		RenderingRegistry.registerEntityRenderingHandler(EntityDarknut.class, new RenderGenericLiving(
 				new ModelDarknut(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/darknut_standard.png"));

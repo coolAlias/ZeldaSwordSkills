@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,49 +17,34 @@
 
 package zeldaswordskills.client.render.entity;
 
+import org.lwjgl.opengl.GL11;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelSlime;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-
 import zeldaswordskills.entity.mobs.EntityChu;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityChu extends RenderLiving
 {
-	private static final ResourceLocation redChu = new ResourceLocation(ModInfo.ID, "textures/entity/chu_red.png");
-	private static final ResourceLocation greenChu = new ResourceLocation(ModInfo.ID, "textures/entity/chu_green.png");
-	private static final ResourceLocation blueChu = new ResourceLocation(ModInfo.ID, "textures/entity/chu_blue.png");
-	private static final ResourceLocation blueChuShock = new ResourceLocation(ModInfo.ID, "textures/entity/chu_blue_shock.png");
-	private static final ResourceLocation yellowChu = new ResourceLocation(ModInfo.ID, "textures/entity/chu_yellow.png");
-	private static final ResourceLocation yellowChuShock = new ResourceLocation(ModInfo.ID, "textures/entity/chu_yellow_shock.png");
-	private ModelBase scaleAmount;
+	protected final ModelBase scaleAmount;
 
-	public RenderEntityChu() {
+	protected final ResourceLocation texture;
+
+	public RenderEntityChu(ResourceLocation texture) {
 		super(new ModelSlime(16), 0.25F);
-		scaleAmount = new ModelSlime(0);
+		this.texture = texture;
+		this.scaleAmount = new ModelSlime(0);
 	}
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		return getChuTexture((EntityChu) entity);
-	}
-
-	protected ResourceLocation getChuTexture(EntityChu chu) {
-		switch(chu.getType()) {
-		case RED: return redChu;
-		case GREEN: return greenChu;
-		case BLUE: return (chu.getShockTime() % 8 > 5 ? blueChuShock : blueChu);
-		case YELLOW: return (chu.getShockTime() % 8 > 5 ? yellowChuShock : yellowChu);
-		default: return redChu;
-		}
+		return this.texture;
 	}
 
 	/**
@@ -79,7 +64,6 @@ public class RenderEntityChu extends RenderLiving
 				GL11.glDisable(GL11.GL_BLEND);
 				GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			}
-
 			return -1;
 		}
 	}
