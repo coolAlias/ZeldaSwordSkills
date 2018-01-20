@@ -78,8 +78,6 @@ public class Config
 	private static int bossNumber;
 	/** [Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items */
 	private static boolean enableJarUpdates;
-	/** [Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100] */
-	private static float keeseCursedChance;
 	/** [Mobs][Keese] Chance of Keese spawning in a swarm */
 	private static float keeseSwarmChance;
 	/** [Mobs][Keese] Maximum number of Keese that can spawn in a swarm */
@@ -463,7 +461,6 @@ public class Config
 		bossHealthFactor = 0.01F * config.getFloat("[Boss] Boss Health Multiplier", category, 250, 100, 500, "Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses)", "config.zss.general.boss_health_factor");
 		bossNumber = config.getInt("[Boss] Number of Mobs Spawned in Boss Dungeons", category, 4, 1, 8, "Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses)", "config.zss.general.boss_number");
 		enableJarUpdates = config.getBoolean("[Ceramic Jars] Jars Can Store Dropped Items", category, true, "Whether ceramic jar tile entities update each tick, allowing them to store dropped items", "config.zss.general.enable_jar_updates");
-		keeseCursedChance = 0.01F * config.getFloat("[Mobs][Keese] Chance of Cursed Keese Spawning", category, 25, 0, 100, "Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)", "config.zss.general.keese_cursed_chance");
 		keeseSwarmChance = 0.01F * config.getFloat("[Mobs][Keese] Chance of Keese to Spawn in a Swarm", category, 25, 0, 100, "Chance of Keese spawning in a swarm (0 to disable)", "config.zss.general.keese_swarm_chance");
 		keeseSwarmSize = config.getInt("[Mobs][Keese] Number of Keese to Spawn in a Swarm", category, 6, 4, 16, "Maximum number of Keese that can spawn in a swarm", "config.zss.general.keese_swarm_size");
 		sacredRefreshRate = config.getInt("[Sacred Flames] Frequency of Rekindling Sacred Flame", category, 7, 0, 30, "Number of days before flame rekindles itself (0 to disable)", "config.zss.general.sacred_refresh_rate");
@@ -578,7 +575,6 @@ public class Config
 		Arrays.sort(forbidden_swords);
 		forbidden_weapons = config.get(category, "Forbidden Weapons", new String[0], "Enter items as modid:registered_item_name, each on a separate line between the '<' and '>'. Forbid one or more items from acting as WEAPONs, e.g. if an item is added by IMC and you don't want it to be usable with skills.\nNote that this will also prevent the item from behaving as a SWORD.").setRequiresMcRestart(true).setLanguageKey("config.zss.weapon_registry.forbidden_weapons").getStringList();
 		Arrays.sort(forbidden_weapons);
-
 		/*================== ITEMS =====================*/
 		category = "item";
 
@@ -829,7 +825,6 @@ public class Config
 	public static int getNaviRange() { return naviRange; }
 	public static int getNaviFrequency() { return naviFrequency; }
 	/*================== MOBS =====================*/
-	public static float getKeeseCursedChance() { return keeseCursedChance; }
 	public static float getKeeseSwarmChance() { return keeseSwarmChance; }
 	public static int getKeeseSwarmSize() { return keeseSwarmSize; }
 	/*================== ITEMS =====================*/

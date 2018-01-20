@@ -64,7 +64,6 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityDarknut;
-import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
@@ -305,7 +304,6 @@ public class ZSSItems
 	public static Item
 	eggSpawner, // for all Entities with only one type
 	eggDarknut,
-	eggKeese,
 	eggOctorok,
 	eggSkulltula,
 	eggWizzrobe;
@@ -682,7 +680,6 @@ public class ZSSItems
 		//===================== SPAWN EGGS TAB =====================//
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("spawn_egg");
 		eggDarknut = new ItemCustomVariantEgg(EntityDarknut.class, "darknut").setUnlocalizedName("egg_darknut");
-		eggKeese = new ItemCustomVariantEgg(EntityKeese.class, "keese").setUnlocalizedName("egg_keese");
 		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("egg_octorok");
 		eggSkulltula = new ItemCustomVariantEgg(EntitySkulltula.class, "skulltula").setUnlocalizedName("egg_skulltula");
 		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("egg_wizzrobe");

@@ -18,44 +18,45 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderBat;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 
-/**
- * 
- * @author credits to Jones7789 for most of the Keese textures
- *
- */
 @SideOnly(Side.CLIENT)
-public class RenderEntityKeese extends RenderBat
+public class RenderEntityKeeseElectric extends RenderEntityKeese
 {
-	protected final ResourceLocation texture;
+	protected final ResourceLocation shockTexture;
 
-	public RenderEntityKeese(RenderManager renderManager, ResourceLocation texture) {
-		super(renderManager);
-		this.texture = texture;
+	public RenderEntityKeeseElectric(RenderManager manager, ResourceLocation texture, ResourceLocation shockTexture) {
+		super(manager, texture);
+		this.shockTexture = shockTexture;
 	}
 
 	@Override
 	protected ResourceLocation getEntityTexture(EntityBat entity) {
-		return this.texture;
+		return this.getKeeseTexture((EntityKeeseThunder) entity);
 	}
 
-	public static class Factory implements IRenderFactory<EntityBat>
+	protected ResourceLocation getKeeseTexture(EntityKeeseThunder entity) {
+		return (entity.getShockTime() % 8 > 5 ? this.shockTexture : this.texture);
+	}
+
+	public static class Factory implements IRenderFactory<EntityKeeseThunder>
 	{
 		private final ResourceLocation texture;
-		public Factory(ResourceLocation texture) {
+		private final ResourceLocation shockTexture;
+		public Factory(ResourceLocation texture, ResourceLocation shockTexture) {
 			this.texture = texture;
+			this.shockTexture = shockTexture;
 		}
 
 		@Override
 		public Render<? super EntityBat> createRenderFor(RenderManager manager) {
-			return new RenderEntityKeese(manager, this.texture);
+			return new RenderEntityKeeseElectric(manager, this.texture, this.shockTexture);
 		}
 	}
 }

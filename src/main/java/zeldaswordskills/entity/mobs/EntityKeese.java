@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -19,87 +19,63 @@ package zeldaswordskills.entity.mobs;
 
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
-import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
-import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
-import zeldaswordskills.api.damage.IDamageSourceStun;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.BiomeType;
 
-public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEntityVariant
+public class EntityKeese extends EntityBat implements IMob, IEntityLootable
 {
-	/** The different varieties of Keese */
-	public static enum KeeseType {
-		NORMAL(8.0F, BiomeType.PLAINS, BiomeType.FOREST),
-		FIRE(12.0F, BiomeType.FIERY, BiomeType.JUNGLE),
-		ICE(12.0F, BiomeType.COLD, BiomeType.TAIGA),
-		THUNDER(12.0F, BiomeType.ARID, BiomeType.BEACH),
-		CURSED(16.0F, null, null); // special spawn chance
-
-		/** Default max health for this Keese Type */
-		public final float maxHealth;
-
-		/** Biome in which this type spawns most frequently (or possibly exclusively) */
-		public final BiomeType favoredBiome;
-
-		/** Secondary biome, if any, in which this type spawns most frequently (or possibly exclusively) */
-		public final BiomeType secondBiome;
-
-		private KeeseType(float maxHealth, BiomeType favoredBiome, BiomeType secondBiome) {
-			this.maxHealth = maxHealth;
-			this.favoredBiome = favoredBiome;
-			this.secondBiome = secondBiome;
-		}
-	}
-
 	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
+	 * Returns an EntityKeese instance appropriate to the current biome type
+	 * @param world
+	 * @param variance Chance for each successive appropriate Keese type to be used instead of previous
+	 * @param pos
+	 * @return Null if no appropriate Keese type found for this biome
 	 */
-	public static String[] getDefaultBiomes() {
-		List<BiomeType> biomes = Lists.newArrayList(BiomeType.RIVER, BiomeType.MOUNTAIN);
-		for (KeeseType type : KeeseType.values()) {
-			if (type.favoredBiome != null) {
-				biomes.add(type.favoredBiome);
+	public static EntityKeese getRandomKeeseForLocation(World world, float variance, BlockPos pos) {
+		BiomeGenBase biome = world.getBiomeGenForCoords(pos);
+		if (biome != null) {
+			// Note that Keese use the AMBIENT spawn list instead of MONSTER
+			List<SpawnListEntry> spawns = biome.getSpawnableList(EnumCreatureType.AMBIENT);
+			Class<?> toSpawn = null;
+			for (SpawnListEntry entry : spawns) {
+				if (EntityKeese.class.isAssignableFrom(entry.entityClass) && (toSpawn == null || world.rand.nextFloat() < variance)) {
+					toSpawn = entry.entityClass;
+				}
 			}
-			if (type.secondBiome != null) {
-				biomes.add(type.secondBiome);
+			if (toSpawn != null) {
+				try {
+					return (EntityKeese) toSpawn.getConstructor(World.class).newInstance(world);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
-		return BiomeType.getBiomeArray(null, biomes.toArray(new BiomeType[biomes.size()]));
+		return null;
 	}
 
 	/** Chunk coordinates toward which this Keese is currently heading */
@@ -108,119 +84,34 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	/** Replacement for removed 'attackTime' */
 	protected int attackTime;
 
-	/** Data watcher index for this Keese's type */
-	private static final int TYPE_INDEX = 17;
-
-	/** Data watcher index for shock time so entity can render appropriately */
-	private static final int SHOCK_INDEX = 18;
-
 	/** Whether this Keese has spawned a swarm already */
 	private boolean swarmSpawned;
 
 	public EntityKeese(World world) {
 		super(world);
-		setSize(0.5F, 0.9F);
-		setIsBatHanging(true);
-		setType(KeeseType.NORMAL);
+		this.experienceValue = 1;
+	}
+
+	/** Create a new Keese instance of this same type for swarming */
+	protected EntityKeese createInstance() {
+		return new EntityKeese(this.worldObj);
 	}
 
 	@Override
-	protected void entityInit() {
-		super.entityInit();
-		dataWatcher.addObject(TYPE_INDEX, (byte)(KeeseType.NORMAL.ordinal()));
-		dataWatcher.addObject(SHOCK_INDEX, 0);
+	protected void applyEntityAttributes() {
+		super.applyEntityAttributes();
+		this.getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(2.0D);
+		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0F);
+		ZSSEntityInfo.get(this).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 50);
 	}
 
-	/** Returns this Keese's type */
-	public KeeseType getType() {
-		return KeeseType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX) % KeeseType.values().length];
-	}
-
-	/** Sets this Keese's type */
-	public void setType(KeeseType type) {
-		dataWatcher.updateObject(TYPE_INDEX, (byte)(type.ordinal()));
-		applyTypeTraits();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(getType().maxHealth);
-		setHealth(getMaxHealth());
-	}
-
-	@Override
-	public EntityKeese setType(int type) {
-		setType(KeeseType.values()[type % KeeseType.values().length]);
-		return this;
-	}
-
-	/**
-	 * Sets the Keese's type when spawned
-	 */
-	private void setTypeOnSpawn() {
-		if (worldObj.provider.getDimensionId() == -1 && rand.nextFloat() < Config.getKeeseCursedChance()) {
-			setType(KeeseType.CURSED);
-		} else if (rand.nextFloat() < Config.getKeeseCursedChance()) { // second chance for both Hell and everywhere else
-			setType(KeeseType.CURSED);
-		} else if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
-			setType(rand.nextInt(KeeseType.values().length));
-		} else {
-			BiomeGenBase biome = worldObj.getBiomeGenForCoords(new BlockPos(this));
-			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
-			for (KeeseType t : KeeseType.values()) {
-				if (t.favoredBiome == biomeType || t.secondBiome == biomeType) {
-					setType(t);
-					return;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Applies traits based on Keese's type
-	 */
-	private void applyTypeTraits() {
-		ZSSEntityInfo info = ZSSEntityInfo.get(this);
-		info.removeAllBuffs();
-		info.applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 50);
-		switch(getType()) {
-		case CURSED:
-			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
-			info.applyBuff(Buff.WEAKNESS_HOLY, Integer.MAX_VALUE, 100);
-			experienceValue = 7;
-			break;
-		case FIRE:
-			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
-			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
-			isImmuneToFire = true;
-			experienceValue = 3;
-			break;
-		case ICE:
-			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
-			info.applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 100);
-			experienceValue = 3;
-			break;
-		case THUNDER:
-			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
-			experienceValue = 5;
-			break;
-		default: experienceValue = 1;
-		}
-	}
-
-	/** Whether this Keese type can shock */
-	protected boolean canShock() {
-		return (getType() == KeeseType.THUNDER);
-	}
-
-	/** Returns the amount of time remaining for which this Keese is electrified */
-	public int getShockTime() {
-		return dataWatcher.getWatchableObjectInt(SHOCK_INDEX);
-	}
-
-	/** Sets the amount of time this Keese will remain electrified */
-	public void setShockTime(int time) {
-		dataWatcher.updateObject(SHOCK_INDEX, time);
+	/** Returns the entity's attack damage attribute value */
+	protected float getDamage() {
+		return (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 	}
 
 	/** Whether this Keese may spawn a swarm in the near future */
-	public boolean getSpawnSwarm() {
+	public boolean canSpawnSwarm() {
 		return !swarmSpawned;
 	}
 
@@ -231,39 +122,18 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 	}
 
 	/**
-	 * Returns amount of damage this type of Keese inflicts
-	 */
-	private float getDamage() {
-		return 2.0F;
-	}
-
-	/**
 	 * Returns the DamageSource this type of Keese inflicts
 	 */
-	private DamageSource getDamageSource() {
-		if (getShockTime() > 0) {
-			return new DamageSourceShock("shock", this, worldObj.getDifficulty().getDifficultyId() * 50, 1.0F);
-		}
-		switch(getType()) {
-		case FIRE: return new EntityDamageSource("mob", this).setFireDamage();
-		case ICE: return new DamageSourceIce("mob", this, 100, 0);
-		default: return new EntityDamageSource("mob", this);
-		}
+	protected DamageSource getDamageSource() {
+		return new EntityDamageSource("mob", this);
 	}
 
 	@Override
 	protected void addRandomDrop() {
-		int rarity = rand.nextInt(8);
-		if (getType() == KeeseType.CURSED) {
-			switch(rarity) {
-			case 0: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal()), 0.0F); break;
-			default: entityDropItem(new ItemStack(rand.nextInt(8) == 0 ? ZSSItems.smallHeart : ZSSItems.heartPiece), 0.0F);
-			}
-		} else {
-			switch(rarity) {
-			case 0: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.MONSTER_CLAW.ordinal()), 0.0F); break;
-			default: entityDropItem(new ItemStack(rand.nextInt(3) == 1 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
-			}
+		int rarity = this.rand.nextInt(8);
+		switch (rarity) {
+		case 1: this.entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.MONSTER_CLAW.ordinal()), 0.0F); break;
+		default: this.entityDropItem(new ItemStack(this.rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
 		}
 	}
 
@@ -274,10 +144,10 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
-		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
-			return new ItemStack(ZSSItems.treasure,1, (getType() == KeeseType.CURSED ? Treasures.EVIL_CRYSTAL.ordinal() : Treasures.MONSTER_CLAW.ordinal()));
+		if (this.rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
+			return new ItemStack(ZSSItems.treasure, 1, Treasures.MONSTER_CLAW.ordinal());
 		}
-		return new ItemStack(rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart);
+		return new ItemStack(this.rand.nextInt(3) > 0 ? Items.emerald : ZSSItems.smallHeart);
 	}
 
 	@Override
@@ -290,61 +160,36 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 		return true;
 	}
 
+	/**
+	 * Allows secondary effects to be applied when the player is damaged by this Chu
+	 */
+	protected void applySecondaryEffects(EntityPlayer player) {}
+
 	@Override
 	public void onCollideWithPlayer(EntityPlayer player) {
-		if (attackTime == 0 && canEntityBeSeen(player) && getDistanceSqToEntity(player) < 1.5D
-				&& (player.getCurrentArmor(ArmorIndex.WORN_HELM) == null || player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != ZSSItems.maskSkull)
-				&& player.attackEntityFrom(getDamageSource(), getDamage()))
+		if (attackTime < 1 && canEntityBeSeen(player) && getDistanceSqToEntity(player) < 2.0D
+				&& (player.getCurrentArmor(ArmorIndex.WORN_HELM) == null || player.getCurrentArmor(ArmorIndex.WORN_HELM).getItem() != ZSSItems.maskSkull))
 		{
-			attackTime = rand.nextInt(20) + 20;
-			playSound(Sounds.BAT_HURT, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
-			int t = getShockTime();
-			if (t > 0) {
-				setShockTime(Math.max(0, t - rand.nextInt(50) - 25));
-			}
-			switch(getType()) {
-			case CURSED:
-				applyRandomCurse(player);
-				break;
-			case FIRE:
-				if (rand.nextFloat() < 0.5F) {
-					player.setFire(rand.nextInt(4) + 4);
+			float damage = this.getDamage();
+			int i = 0;
+			damage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), player.getCreatureAttribute());
+			i += EnchantmentHelper.getKnockbackModifier(this);
+			boolean flag = player.attackEntityFrom(this.getDamageSource(), damage);
+			if (flag) {
+				this.attackTime = this.rand.nextInt(20) + 20;
+				playSound(Sounds.BAT_HURT, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
+				if (i > 0) {
+					player.addVelocity((double)(-MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F), 0.1D, (double)(MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F));
 				}
-				break;
-			default:
+				int j = EnchantmentHelper.getFireAspectModifier(this);
+				if (j > 0) {
+					player.setFire(j * 4);
+				}
+				this.applyEnchantments(this, player);
+				this.applySecondaryEffects(player);
 			}
 		}
 	}
-
-	/**
-	 * Applies a random negative effect to the player, or possibly no effect
-	 */
-	private void applyRandomCurse(EntityPlayer player) {
-		switch (rand.nextInt(16)) {
-		case 0: ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_DOWN, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
-		case 1: ZSSEntityInfo.get(player).applyBuff(Buff.DEFENSE_DOWN, rand.nextInt(500) + 100, rand.nextInt(26) + 25); break;
-		case 2: ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
-		case 3: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_COLD, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
-		case 4: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_FIRE, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
-		case 5: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_MAGIC, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
-		case 6: ZSSEntityInfo.get(player).applyBuff(Buff.WEAKNESS_SHOCK, rand.nextInt(500) + 100, rand.nextInt(51) + 50); break;
-		case 7: player.addPotionEffect(new PotionEffect(Potion.confusion.id, rand.nextInt(500) + 100, 1)); break;
-		case 8: player.addPotionEffect(new PotionEffect(Potion.blindness.id, rand.nextInt(500) + 100, 1)); break;
-		case 9: player.addPotionEffect(new PotionEffect(Potion.poison.id, rand.nextInt(100) + 50, rand.nextInt(9) / 8)); break;
-		case 10:
-		case 11:
-			float drain = 6.0F + rand.nextInt(player.worldObj.getDifficulty().getDifficultyId() * 10);
-			drain = Math.min(drain, ZSSPlayerInfo.get(player).getCurrentMagic());
-			if (ZSSPlayerInfo.get(player).getCurrentMagic() < 5.0F) {
-				player.addPotionEffect(new PotionEffect(Potion.harm.id, 1, rand.nextInt(9) / 8));
-			}
-			ZSSPlayerInfo.get(player).consumeMagic(drain);
-			heal(drain / 2);
-			break;
-		default:
-		}
-	}
-
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
@@ -356,21 +201,13 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 			if (rand.nextFloat() < Config.getKeeseSwarmChance()) {
 				int n = Config.getKeeseSwarmSize() - rand.nextInt(Config.getKeeseSwarmSize());
 				for (int i = 0; i < n; ++i) {
-					EntityKeese k = new EntityKeese(worldObj);
+					EntityKeese k = this.createInstance();
 					double x = this.posX + rand.nextFloat() * 2.0F;
 					double z = this.posZ + rand.nextFloat() * 2.0F;
 					k.setPosition(x, this.posY, z);
-					k.setTypeOnSpawn();
 					k.swarmSpawned = true;
 					worldObj.spawnEntityInWorld(k);
 				}
-			}
-		}
-		int time = getShockTime();
-		if (time > 0) {
-			setShockTime(time - 1);
-			if (time % 8 > 6 && rand.nextInt(4) == 0) {
-				worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 			}
 		}
 		if (!worldObj.isRemote && worldObj.getDifficulty() == EnumDifficulty.PEACEFUL) {
@@ -413,71 +250,31 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable, IEn
 			rotationYaw += f1;
 			if (attackingPlayer == null && rand.nextInt(100) == 0 && worldObj.getBlockState(pos.up()).getBlock().isNormalCube()) {
 				setIsBatHanging(true);
-			} else if (canShock() && getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
-				if (attackingPlayer != null && ((recentlyHit > 0 && rand.nextInt(20) == 0) || rand.nextInt(300) == 0)) {
-					setShockTime(rand.nextInt(50) + (worldObj.getDifficulty().getDifficultyId() * (rand.nextInt(20) + 10)));
-				}
 			}
 		}
 	}
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
-		if (isEntityInvulnerable(source)) {
+		if (this.isEntityInvulnerable(source)) {
 			return false;
-		} else {
-			if (!worldObj.isRemote && getIsBatHanging()) {
-				setIsBatHanging(false);
-			}
-			if (getShockTime() > 0) {
-				if (source instanceof EntityDamageSourceIndirect) {
-					if (source.isMagicDamage()) {
-						return super.attackEntityFrom(source, amount);
-					} else if (source.isExplosion()) {
-						ZSSEntityInfo.get(this).stun(20 + rand.nextInt((int)(amount * 5) + 1));
-						setShockTime(0);
-					} else if (source instanceof IDamageSourceStun) {
-						setShockTime(0);
-					}
-					// Hack to prevent infinite loop when attacked by other electrified mobs (other keese, chus, etc)
-				} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
-					boolean isWood = false;
-					ItemStack stack = ((EntityPlayer) source.getEntity()).getHeldItem();
-					if (stack != null && stack.getItem() instanceof ItemTool) {
-						isWood = ((ItemTool) stack.getItem()).getToolMaterial() == ToolMaterial.WOOD;
-					} else if (stack != null && stack.getItem() instanceof ItemSword) {
-						isWood = ((ItemSword) stack.getItem()).getToolMaterialName().equals(ToolMaterial.WOOD.toString());
-					}
-					if (!isWood) {
-						source.getEntity().attackEntityFrom(getDamageSource(), getDamage());
-						worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
-					}
-				}
-				return false;
-			}
-			return super.attackEntityFrom(source, amount);
 		}
+		if (!this.worldObj.isRemote && this.getIsBatHanging()) {
+			this.setIsBatHanging(false);
+		}
+		return super.attackEntityFrom(source, amount);
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		swarmSpawned = compound.getBoolean("SpawnedSwarm");
-		dataWatcher.updateObject(TYPE_INDEX, compound.getByte("KeeseType"));
 	}
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setBoolean("SpawnedSwarm", swarmSpawned);
-		compound.setByte("KeeseType", dataWatcher.getWatchableObjectByte(TYPE_INDEX));
-	}
-
-	@Override
-	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
-		data = super.onInitialSpawn(difficulty, data);
-		setTypeOnSpawn();
-		return data;
 	}
 
 	@Override
