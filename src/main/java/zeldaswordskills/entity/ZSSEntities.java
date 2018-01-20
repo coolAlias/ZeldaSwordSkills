@@ -64,6 +64,7 @@ import zeldaswordskills.client.render.entity.RenderEntityFairy;
 import zeldaswordskills.client.render.entity.RenderEntityHookShot;
 import zeldaswordskills.client.render.entity.RenderEntityJar;
 import zeldaswordskills.client.render.entity.RenderEntityKeese;
+import zeldaswordskills.client.render.entity.RenderEntityKeeseElectric;
 import zeldaswordskills.client.render.entity.RenderEntityMagicSpell;
 import zeldaswordskills.client.render.entity.RenderEntityOctorok;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
@@ -81,6 +82,10 @@ import zeldaswordskills.entity.mobs.EntityDekuFire;
 import zeldaswordskills.entity.mobs.EntityDekuWithered;
 import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityKeeseCursed;
+import zeldaswordskills.entity.mobs.EntityKeeseFire;
+import zeldaswordskills.entity.mobs.EntityKeeseIce;
+import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.npc.EntityGoron;
@@ -141,7 +146,11 @@ public class ZSSEntities
 		addSpawnLocations(EntityDekuFire.class, EntityDekuFire.getDefaultBiomes());
 		addSpawnLocations(EntityDekuWithered.class, EntityDekuWithered.getDefaultBiomes());
 		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
-		addSpawnLocations(EntityKeese.class, EntityKeese.getDefaultBiomes());
+		addSpawnLocations(EntityKeese.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.PLAINS, BiomeType.MOUNTAIN));
+		addSpawnLocations(EntityKeeseCursed.class, BiomeType.getBiomeArray(null, BiomeType.FIERY, BiomeType.JUNGLE, BiomeType.RIVER));
+		addSpawnLocations(EntityKeeseFire.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.JUNGLE));
+		addSpawnLocations(EntityKeeseIce.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.TAIGA));
+		addSpawnLocations(EntityKeeseThunder.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.BEACH, BiomeType.MOUNTAIN));
 		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
 		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
 	}
@@ -172,8 +181,17 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityFairy.class, EnumCreatureType.ambient, 1, 3, rate);
 		// Gorons are an exception, as they are not spawned using vanilla mechanics
 		spawnGoron = config.get("Mob Spawns", "[Spawn Rate] Goron spawn rate, as a ratio of regular villagers to Gorons (0 to disable)[0+]", 4).getInt();
-		rate = config.get("Mob Spawns", "[Spawn Rate] Keese spawn rate (0 to disable)[0+]", 1).getInt();
-		addSpawnableEntityData(EntityKeese.class, EnumCreatureType.ambient, 4, 4, rate); // TODO should use monster type???
+		// Keese use the #ambient instead of #monster type so they don't count against the total number of mobs that can spawn in a given area
+		rate = config.get("Mob Spawns", "[Spawn Rate][Keese] Keese (regular) spawn rate (0 to disable)[0+]", 5).getInt();
+		addSpawnableEntityData(EntityKeese.class, EnumCreatureType.ambient, 4, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Keese] Cursed Keese spawn rate (0 to disable)[0+]", 1).getInt();
+		addSpawnableEntityData(EntityKeeseCursed.class, EnumCreatureType.ambient, 4, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Keese] Fire Keese spawn rate (0 to disable)[0+]", 3).getInt();
+		addSpawnableEntityData(EntityKeeseFire.class, EnumCreatureType.ambient, 4, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Keese] Ice Keese spawn rate (0 to disable)[0+]", 3).getInt();
+		addSpawnableEntityData(EntityKeeseIce.class, EnumCreatureType.ambient, 4, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Keese] Thunder Keese spawn rate (0 to disable)[0+]", 2).getInt();
+		addSpawnableEntityData(EntityKeeseThunder.class, EnumCreatureType.ambient, 4, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Octorok spawn rate (0 to disable)[0+]", 8).getInt();
 		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.waterCreature, 2, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
@@ -269,8 +287,11 @@ public class ZSSEntities
 		registerEntity(EntityDekuFire.class, "baba_fire", ++modEntityIndex, 80, 0xFF0000, 0x0000FF);
 		registerEntity(EntityDekuWithered.class, "baba_withered", ++modEntityIndex, 80, 0x8B5A00, 0x0000FF);
 
-		EntityRegistry.registerModEntity(EntityKeese.class, "keese", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-		CustomEntityList.addMapping(EntityKeese.class, "keese", 0x000000, 0x555555, 0x000000, 0xFF4500, 0x000000, 0x40E0D0, 0x000000, 0xFFD700, 0x000000, 0x800080);
+		registerEntity(EntityKeese.class, "keese", ++modEntityIndex, 80, 0x000000, 0x555555);
+		registerEntity(EntityKeeseCursed.class, "keese_cursed", ++modEntityIndex, 80, 0x000000, 0x800080);
+		registerEntity(EntityKeeseFire.class, "keese_fire", ++modEntityIndex, 80, 0x000000, 0xFF4500);
+		registerEntity(EntityKeeseIce.class, "keese_ice", ++modEntityIndex, 80, 0x000000, 0x40E0D0);
+		registerEntity(EntityKeeseThunder.class, "keese_thunder", ++modEntityIndex, 80, 0x000000, 0xFFD700);
 
 		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
@@ -320,7 +341,12 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy());
 		RenderingRegistry.registerEntityRenderingHandler(EntityGoron.class, new RenderGenericLiving(
 				new ModelGoron(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/goron.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese());
+		RenderingRegistry.registerEntityRenderingHandler(EntityKeese.class, new RenderEntityKeese(new ResourceLocation(ModInfo.ID, "textures/entity/keese.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityKeeseCursed.class, new RenderEntityKeese(new ResourceLocation(ModInfo.ID, "textures/entity/keese_cursed.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityKeeseFire.class, new RenderEntityKeese(new ResourceLocation(ModInfo.ID, "textures/entity/keese_fire.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityKeeseIce.class, new RenderEntityKeese(new ResourceLocation(ModInfo.ID, "textures/entity/keese_ice.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityKeeseThunder.class,
+				new RenderEntityKeeseElectric(new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder.png"), new ResourceLocation(ModInfo.ID, "textures/entity/keese_thunder_shock.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityHookShot.class, new RenderEntityHookShot());
 		RenderingRegistry.registerEntityRenderingHandler(EntityLeapingBlow.class, new RenderNothing());
 		RenderingRegistry.registerEntityRenderingHandler(EntityMagicSpell.class, new RenderEntityMagicSpell());

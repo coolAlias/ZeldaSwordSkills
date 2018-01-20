@@ -174,8 +174,6 @@ public class Config
 	private static int bossNumber;
 	/** [Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items */
 	private static boolean enableJarUpdates;
-	/** [Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100] */
-	private static float keeseCursedChance;
 	/** [Mobs][Keese] Chance of Keese spawning in a swarm */
 	private static float keeseSwarmChance;
 	/** [Mobs][Keese] Maximum number of Keese that can spawn in a swarm */
@@ -531,7 +529,6 @@ public class Config
 		bossHealthFactor = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]", 250).getInt(), 100, 500);
 		bossNumber = MathHelper.clamp_int(config.get("General", "[Boss] Number of boss mobs to spawn in Boss Dungeons (does not apply to real bosses) [1-8]", 4).getInt(), 1, 8);
 		enableJarUpdates = config.get("General", "[Ceramic Jars] Whether ceramic jar tile entities update each tick, allowing them to store dropped items", true).getBoolean(true);
-		keeseCursedChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of a Cursed Keese spawning instead of a normal Keese (0 to disable)[0-100]", 25).getInt(), 0, 100);
 		keeseSwarmChance = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Chance of Keese spawning in a swarm (0 to disable)[0-100]", 25).getInt(), 0, 100);
 		keeseSwarmSize = MathHelper.clamp_int(config.get("General", "[Mobs][Keese] Maximum number of Keese that can spawn in a swarm [4-16]", 6).getInt(), 4, 16);
 		sacredRefreshRate = MathHelper.clamp_int(config.get("General", "[Sacred Flames] Number of days before flame rekindles itself (0 to disable) [0-30]", 7).getInt(), 0, 30);
@@ -747,7 +744,6 @@ public class Config
 	public static int getNaviRange() { return naviRange; }
 	public static int getNaviFrequency() { return naviFrequency; }
 	/*================== MOBS =====================*/
-	public static float getKeeseCursedChance() { return keeseCursedChance; }
 	public static float getKeeseSwarmChance() { return keeseSwarmChance; }
 	public static int getKeeseSwarmSize() { return keeseSwarmSize; }
 	/*================== ITEMS =====================*/

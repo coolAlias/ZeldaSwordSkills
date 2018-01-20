@@ -19,27 +19,26 @@ package zeldaswordskills.client.render.entity;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.entity.RenderBat;
-import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 
-/**
- * 
- * @author credits to Jones7789 for most of the Keese textures
- *
- */
 @SideOnly(Side.CLIENT)
-public class RenderEntityKeese extends RenderBat
+public class RenderEntityKeeseElectric extends RenderEntityKeese
 {
-	protected final ResourceLocation texture;
+	protected final ResourceLocation shockTexture;
 
-	public RenderEntityKeese(ResourceLocation texture) {
-		super();
-		this.texture = texture;
+	public RenderEntityKeeseElectric(ResourceLocation texture, ResourceLocation shockTexture) {
+		super(texture);
+		this.shockTexture = shockTexture;
 	}
 
 	@Override
-	protected ResourceLocation getEntityTexture(EntityBat entity) {
-		return this.texture;
+	protected ResourceLocation getEntityTexture(Entity entity) {
+		return this.getKeeseTexture((EntityKeeseThunder) entity);
+	}
+
+	protected ResourceLocation getKeeseTexture(EntityKeeseThunder entity) {
+		return (entity.getShockTime() % 8 > 5 ? this.shockTexture : this.texture);
 	}
 }

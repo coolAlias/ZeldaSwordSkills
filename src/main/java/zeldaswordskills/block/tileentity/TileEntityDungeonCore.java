@@ -47,6 +47,10 @@ import zeldaswordskills.entity.mobs.EntityChuRed;
 import zeldaswordskills.entity.mobs.EntityChuYellow;
 import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
+import zeldaswordskills.entity.mobs.EntityKeeseCursed;
+import zeldaswordskills.entity.mobs.EntityKeeseFire;
+import zeldaswordskills.entity.mobs.EntityKeeseIce;
+import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
@@ -293,8 +297,11 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 			mob = new EntityOctorok(worldObj);
 			type = (rarity < 8 ? 1 : 0);
 		} else if (block.getMaterial() == Material.lava) {
-			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
-			type = (rarity > 7 ? EntityKeese.KeeseType.FIRE.ordinal() : EntityKeese.KeeseType.CURSED.ordinal());
+			if (rarity > 7) {
+				mob = new EntityKeeseFire(this.worldObj).setSpawnSwarm(false);
+			} else {
+				mob = new EntityKeeseCursed(this.worldObj).setSpawnSwarm(false);
+			}
 			// START rarity 'switch', starting with most likely cases
 		} else if (rarity > 50) {
 			mob = new EntityZombie(worldObj);
@@ -305,7 +312,23 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		} else if (rarity > 20) {
 			mob = new EntityCreeper(worldObj);
 		} else if (rarity > 10) {
-			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
+			// Try for a biome-appropriate Keese
+			mob = EntityKeese.getRandomKeeseForLocation(this.worldObj, 0.5F, this.xCoord, this.yCoord, this.zCoord);
+			// Otherwise just generate a random one
+			if (mob == null) {
+				switch (worldObj.rand.nextInt(10)) {
+				case 0: mob = new EntityKeeseCursed(worldObj); break;
+				case 1: mob = new EntityKeeseThunder(worldObj); break;
+				case 2: // fall-through
+				case 3: mob = new EntityKeeseIce(worldObj); break;
+				case 4: // fall-through
+				case 5: mob = new EntityKeeseFire(worldObj); break;
+				default: mob = new EntityKeese(worldObj); break;
+				}
+			}
+			if (mob instanceof EntityKeese) {
+				((EntityKeese) mob).setSpawnSwarm(false);
+			}
 		} else if (rarity > 4) {
 			// Try for a biome-appropriate Chu
 			mob = EntityChu.getRandomChuForLocation(this.worldObj, 0.5F, this.xCoord, this.yCoord, this.zCoord);
