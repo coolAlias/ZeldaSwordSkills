@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -45,6 +45,10 @@ import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.mobs.EntityChu;
+import zeldaswordskills.entity.mobs.EntityChuBlue;
+import zeldaswordskills.entity.mobs.EntityChuGreen;
+import zeldaswordskills.entity.mobs.EntityChuRed;
+import zeldaswordskills.entity.mobs.EntityChuYellow;
 import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityOctorok;
@@ -307,7 +311,18 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements ITi
 		} else if (rarity > 10) {
 			mob = new EntityKeese(worldObj).setSpawnSwarm(false);
 		} else if (rarity > 4) {
-			mob = new EntityChu(worldObj);
+			// Try for a biome-appropriate Chu
+			mob = EntityChu.getRandomChuForLocation(this.worldObj, 0.5F, this.getPos());
+			// Otherwise just generate a random one
+			if (mob == null) {
+				switch (this.worldObj.rand.nextInt(8)) {
+				case 0: mob = new EntityChuBlue(this.worldObj); break;
+				case 1: mob = new EntityChuYellow(this.worldObj); break;
+				case 2: // fall-through
+				case 3: mob = new EntityChuGreen(this.worldObj); break;
+				default: mob = new EntityChuRed(this.worldObj); break;
+				}
+			}
 		} else if (rarity > -2) {
 			mob = new EntityWizzrobe(worldObj);
 			// TODO ((EntityWizzrobe) mob).getTeleportAI().setTeleBounds(box);

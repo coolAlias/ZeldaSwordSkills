@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,27 +18,27 @@
 package zeldaswordskills.entity.mobs;
 
 import java.util.List;
+import java.util.UUID;
 
-import com.google.common.collect.Lists;
-
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.IParticleFactory;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
-import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S04PacketEntityEquipment;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyInstance;
@@ -47,121 +47,82 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ClientProxy;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIce;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceShock;
-import zeldaswordskills.api.damage.IDamageSourceStun;
 import zeldaswordskills.api.entity.IEntityBombEater;
 import zeldaswordskills.api.entity.IEntityBombIngestible;
 import zeldaswordskills.api.entity.IEntityLootable;
-import zeldaswordskills.entity.IEntityVariant;
-import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
 
 /**
  * 
- * Chuchu traits:
- * 
- * All chus are capable of merging back together when injured, making them especially
+ * Chus are capable of merging back together when injured, making them especially
  * challenging to defeat for the unwary.
  * 
- * Red:
- * The weakest of the Chu types, but highly resistant to fire. Drops red chu jelly.
- * These are most often found in swamps.
+ * Upon death, they typically drop a Chu Jelly matching the Chu's color.
  * 
- * Green:
- * Slightly stronger than the Red Chu, but no special resistances. Drops green chu jelly.
- * These are most often found in plains and are known to cause weakness.
- * 
- * Blue:
- * Blue Chus are the rarest type of all, dropping blue chu jelly.
- * They are known to occasionally electrify, like the Yellow Chu, are highly resistant to both
- * magic and cold, and cause cold damage when not electrified. They are most often found in taiga biomes.
- * 
- * Yellow:
- * Yellow chus are the most difficult to defeat, producing an electrical aura when they
- * sense danger or take damage. While the aura is active, they chu is immune to all damage
- * and attacking it directly will cause shock damage to the attacker. Stun effects and
- * explosions are effective in forcing the chu to drop its aura, or one can simply wait.
- * Magic damage, however, is able to penetrate their defenses no matter what.
- * Drops yellow chu jelly. These are most often found in deserts.
- *
  */
-public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityLootable, IEntityVariant
+public abstract class EntityChu extends EntitySlime implements IEntityAdditionalSpawnData, IEntityBombEater, IEntityLootable
 {
 	/** Chuchu types, in order of rarity and strength */
-	public static enum ChuType {
-		RED(1, BiomeType.RIVER, BiomeType.FIERY),
-		GREEN(2, BiomeType.PLAINS, BiomeType.FOREST),
-		BLUE(3, BiomeType.TAIGA, BiomeType.COLD),
-		YELLOW(4, BiomeType.ARID, BiomeType.JUNGLE);
-		/** Modifier for damage, experience, and possibly other things */
-		public final int modifier;
-		/** Biome in which this type spawns most frequently (or possibly exclusively) */
-		public final BiomeType favoredBiome;
-		/** Secondary biome in which this type spawns most frequently (or possibly exclusively) */
-		public final BiomeType secondBiome;
-		private ChuType(int modifier, BiomeType favoredBiome, BiomeType secondBiome) {
-			this.modifier = modifier;
-			this.favoredBiome = favoredBiome;
-			this.secondBiome = secondBiome;
-		}
-		/** Returns the Chu type by item damage */
-		public static final ChuType fromDamage(int damage) {
-			return ChuType.values()[damage % ChuType.values().length];
-		}
-	}
+	public static enum ChuType { RED, GREEN, BLUE, YELLOW; }
 
 	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
+	 * Returns an EntityChu instance appropriate to the current biome type
+	 * @param world
+	 * @param variance Chance for each successive appropriate Chu type to be used instead of previous
+	 * @param pos
+	 * @return Null if no appropriate Chu type found for this biome
 	 */
-	public static String[] getDefaultBiomes() {
-		List<BiomeType> biomes = Lists.newArrayList(BiomeType.BEACH, BiomeType.MOUNTAIN);
-		for (ChuType type : ChuType.values()) {
-			biomes.add(type.favoredBiome);
-			biomes.add(type.secondBiome);
+	public static EntityChu getRandomChuForLocation(World world, float variance, BlockPos pos) {
+		BiomeGenBase biome = world.getBiomeGenForCoords(pos);
+		if (biome != null) {
+			List<SpawnListEntry> spawns = biome.getSpawnableList(EnumCreatureType.MONSTER);
+			Class<?> toSpawn = null;
+			for (SpawnListEntry entry : spawns) {
+				if (EntityChu.class.isAssignableFrom(entry.entityClass) && (toSpawn == null || world.rand.nextFloat() < variance)) {
+					toSpawn = entry.entityClass;
+				}
+			}
+			if (toSpawn != null) {
+				try {
+					return (EntityChu) toSpawn.getConstructor(World.class).newInstance(world);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		return BiomeType.getBiomeArray(null, biomes.toArray(new BiomeType[biomes.size()]));
+		return null;
 	}
 
-	/** Data watcher index for this Chu's type */
-	private static final int CHU_TYPE_INDEX = 17;
+	/** UUID for size-based damage modifier */
+	protected static final UUID sizeDamageModiferUUID = UUID.fromString("28FCAB28-E297-4C07-A130-5302B4ED4E3C");
 
-	/** Data watcher index for shock time so entity can render appropriately */
-	private static final int SHOCK_INDEX = 18;
+	/** Damage modifier based on current size */
+	protected static final AttributeModifier sizeDamageModifier = (new AttributeModifier(sizeDamageModiferUUID, "Size Damage Modifier", 1.0D, 0)).setSaved(true);
 
 	/** Number of times this Chu has merged */
 	private int timesMerged;
 
 	public EntityChu(World world) {
 		super(world);
-		setType(ChuType.RED);
+		setSlimeSize((1 << rand.nextInt(3)));
 	}
 
 	@Override
-	protected void entityInit() {
-		super.entityInit();
-		dataWatcher.addObject(CHU_TYPE_INDEX, (byte)(ChuType.RED.ordinal()));
-		dataWatcher.addObject(SHOCK_INDEX, 0);
-	}
-
-	@Override
-	protected EntityChu createInstance() {
-		EntityChu chu = new EntityChu(worldObj);
-		chu.setType(getType());
-		chu.timesMerged = this.timesMerged;
-		return chu;
+	protected void applyEntityAttributes() {
+		super.applyEntityAttributes();
+		this.getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(this.getType().ordinal());
 	}
 
 	@Override
@@ -169,92 +130,25 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		return 0.625F * height;
 	}
 
-	/** Returns this Chu's type */
-	public ChuType getType() {
-		return ChuType.values()[dataWatcher.getWatchableObjectByte(CHU_TYPE_INDEX)];
-	}
+	/** Create a new instance of the Chu's type */
+	protected abstract EntityChu createInstance();
 
-	/** Sets this Chu's type */
-	public void setType(ChuType type) {
-		dataWatcher.updateObject(CHU_TYPE_INDEX, (byte)(type.ordinal()));
-		applyTypeTraits();
-	}
-
-	@Override
-	public EntityChu setType(int type) {
-		setType(ChuType.values()[type % ChuType.values().length]);
-		return this;
-	}
-
-	private void setTypeOnSpawn() {
-		if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
-			setType(rand.nextInt(ChuType.values().length));
-		} else {
-			BiomeGenBase biome = worldObj.getBiomeGenForCoords(new BlockPos(this));
-			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
-			for (ChuType t : ChuType.values()) {
-				if (t.favoredBiome == biomeType || t.secondBiome == biomeType) {
-					setType(t);
-					return;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Applies traits based on Chu's type
-	 */
-	private void applyTypeTraits() {
-		ZSSEntityInfo info = ZSSEntityInfo.get(this);
-		info.removeAllBuffs();
-		switch(getType()) {
-		case RED:
-			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
-			break;
-		case BLUE:
-			info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
-			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
-			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
-			break;
-		case YELLOW:
-			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
-			break;
-		default:
-		}
-	}
-
-	/** Whether this chu type can shock; always true for Yellow, sometimes true for Blue */
-	protected boolean canChuTypeShock() {
-		return (getType() == ChuType.YELLOW || (getType() == ChuType.BLUE && rand.nextInt(80) == 0));
-	}
-
-	/** Returns the amount of time remaining for which this Chu is electrified */
-	public int getShockTime() {
-		return dataWatcher.getWatchableObjectInt(SHOCK_INDEX);
-	}
-
-	/** Sets the amount of time this Chu will remain electrified */
-	public void setShockTime(int time) {
-		dataWatcher.updateObject(SHOCK_INDEX, time);
-	}
-
-	/** Returns max time affected entities will be stunned when shocked */
-	protected int getMaxStunTime() {
-		return (getSlimeSize() * worldObj.getDifficulty().getDifficultyId() * 10);
-	}
-
-	/** Random interval between shocks */
-	protected int getShockInterval() {
-		return (getType() == ChuType.YELLOW ? 160 : 320);
-	}
+	protected void applyTypeTraits() {}
 
 	@Override
 	protected void setSlimeSize(int size) {
 		super.setSlimeSize(size);
 		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue((double)((size + 1) * (size + 1)));
 		setHealth(getMaxHealth());
-		experienceValue += getType().modifier + 1;
+		experienceValue = size + (getType().ordinal() + 1);
+		IAttributeInstance damageAttribute = this.getEntityAttribute(SharedMonsterAttributes.attackDamage);
+		damageAttribute.removeModifier(sizeDamageModifier);
+		AttributeModifier newModifier = (new AttributeModifier(sizeDamageModiferUUID, "Size Damage Modifier", size, 0)).setSaved(true);
+		damageAttribute.applyModifier(newModifier);
 	}
+
+	/** Returns this Chu's type */
+	public abstract ChuType getType();
 
 	@Override
 	public boolean canBreatheUnderwater() {
@@ -298,7 +192,7 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
 		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
-			return new ItemStack(ZSSItems.treasure,1,Treasures.JELLY_BLOB.ordinal());
+			return new ItemStack(ZSSItems.treasure, 1, Treasures.JELLY_BLOB.ordinal());
 		}
 		return new ItemStack(ZSSItems.jellyChu, 1, getType().ordinal());
 	}
@@ -377,91 +271,68 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 			if (rand.nextInt(10) == 0 && chunk.getRandomWithSeed(432191789L).nextInt(10) == 0 && posY < 50.0D) {
 				return super.getCanSpawnHere();
 			}
-
-			return false;
 		}
+		return false;
 	}
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
 		if (source == DamageSource.inWall) {
 			return false;
-		} else if (getShockTime() > 0) {
-			if (source instanceof EntityDamageSourceIndirect) {
-				if (source.isMagicDamage()) {
-					return super.attackEntityFrom(source, amount);
-				} else if (source.isExplosion()) {
-					ZSSEntityInfo.get(this).stun(20 + rand.nextInt((int)(amount * 5) + 1));
-					setShockTime(0);
-				} else if (source instanceof IDamageSourceStun) {
-					setShockTime(0);
-				}
-				// Hack to prevent infinite loop when attacked by other electrified mobs (other chus, keese, etc)
-			} else if (source instanceof EntityDamageSource && source.getEntity() instanceof EntityPlayer && !source.damageType.equals("thorns")) {
-				boolean isWood = false;
-				ItemStack stack = ((EntityPlayer) source.getEntity()).getHeldItem();
-				if (stack != null && stack.getItem() instanceof ItemTool) {
-					isWood = ((ItemTool) stack.getItem()).getToolMaterial() == ToolMaterial.WOOD;
-				} else if (stack != null && stack.getItem() instanceof ItemSword) {
-					isWood = ((ItemSword) stack.getItem()).getToolMaterialName().equals(ToolMaterial.WOOD.toString());
-				}
-				if (!isWood) {
-					source.getEntity().attackEntityFrom(getDamageSource(), getAttackStrength());
-					worldObj.playSoundAtEntity(this, Sounds.SHOCK, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
-				}
-			}
-			return false;
 		}
 		return super.attackEntityFrom(source, amount);
 	}
 
-	/** The amount of damage this chu will cause when attacking */
 	@Override
 	protected int getAttackStrength() {
-		return super.getAttackStrength() + getType().modifier;
+		return MathHelper.floor_float(this.getDamage());
+	}
+
+	/** Returns the Chu's attack damage attribute value */
+	protected float getDamage() {
+		return (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 	}
 
 	/**
-	 * Gets the type-specific damage source, taking shock time into account
+	 * Gets the type-specific damage source
 	 */
-	private DamageSource getDamageSource() {
-		if (getShockTime() > 0) {
-			return new DamageSourceShock("shock", this, getMaxStunTime(), getAttackStrength());
-		}
-		switch(getType()) {
-		case BLUE: return new DamageSourceIce("mob", this, 50, (getSlimeSize() > 2 ? 1 : 0));
-		default: return new EntityDamageSource("mob", this);
-		}
+	protected DamageSource getDamageSource() {
+		return new EntityDamageSource("mob", this);
 	}
+
+	/**
+	 * Allows secondary effects to be applied when an entity is damaged by this Chu
+	 */
+	protected void applySecondaryEffects(EntityLivingBase target) {}
 
 	/**
 	 * Called when slime collides with player
 	 */
 	@Override
 	protected void func_175451_e(EntityLivingBase target) {
-		int size = getSlimeSize();
-		double min_distance = 0.6D * 0.6D * size * size;
-		if (canEntityBeSeen(target) && getDistanceSqToEntity(target) < min_distance && target.attackEntityFrom(getDamageSource(), getAttackStrength())) {
-			playSound(Sounds.SLIME_ATTACK, 1.0F, (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F);
-			if (rand.nextFloat() < (0.25F * getSlimeSize())) {
-				applySecondaryEffects(target);
+		// Minimum reach of 1, max of 3; typical mob has a reach of 2
+		double reach = MathHelper.clamp_double(1.0D + ((double) this.getSlimeSize() * 0.5D), 1.0D, 3.0D);
+		float damage = this.getDamage();
+		damage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), target.getCreatureAttribute());
+		if (this.canEntityBeSeen(target) && this.getDistanceToEntity(target) < reach) {
+			boolean flag = target.attackEntityFrom(this.getDamageSource(), damage);
+			if (flag) {
+				this.playSound(Sounds.SLIME_ATTACK, 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+				// Copied from EntityMob
+				int i = EnchantmentHelper.getKnockbackModifier(this);
+				if (i > 0) {
+					target.addVelocity((double)(-MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F), 0.1D, (double)(MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F) * (float)i * 0.5F));
+					this.motionX *= 0.6D;
+					this.motionZ *= 0.6D;
+				}
+				int j = EnchantmentHelper.getFireAspectModifier(this);
+				if (j > 0) {
+					target.setFire(j * 4);
+				}
+				this.applyEnchantments(this, target);
+				// Apply additional secondary effects based on Chu's type
+				this.applySecondaryEffects(target);
 			}
-			int t = getShockTime();
-			if (t > 0) {
-				setShockTime(Math.max(0, t - rand.nextInt(100) - 50));
-			}
-			applyEnchantments(this, target);
-		}
-	}
-
-	/**
-	 * Handles any secondary effects that may occur when the target is damaged by this Chu
-	 */
-	private void applySecondaryEffects(EntityLivingBase target) {
-		switch(getType()) {
-		case GREEN: ZSSEntityInfo.get(target).applyBuff(Buff.ATTACK_DOWN, 200, 50); break;
-		case BLUE: ZSSEntityInfo.get(target).applyBuff(Buff.WEAKNESS_COLD, 200, 50); break;
-		default:
 		}
 	}
 
@@ -482,22 +353,6 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		// End hack, start copy/pasta:
 		if (onGround && !wasOnGround && worldObj.isRemote) {
 			spawnParticlesOnLanding();
-			/*
-			int i = this.getSlimeSize();
-
-			for (int j = 0; j < i * 8; ++j)
-			{
-				float f = this.rand.nextFloat() * (float)Math.PI * 2.0F;
-				float f1 = this.rand.nextFloat() * 0.5F + 0.5F;
-				float f2 = MathHelper.sin(f) * (float)i * 0.5F * f1;
-				float f3 = MathHelper.cos(f) * (float)i * 0.5F * f1;
-				World world = this.worldObj;
-				EnumParticleTypes enumparticletypes = this.func_180487_n();
-				double d0 = this.posX + (double)f2;
-				double d1 = this.posZ + (double)f3;
-				world.spawnParticle(enumparticletypes, d0, this.getEntityBoundingBox().minY, d1, 0.0D, 0.0D, 0.0D, new int[0]);
-			}
-			 */
 			if (makesSoundOnLand()) {
 				playSound(getJumpSound(), getSoundVolume(), ((rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F) / 0.8F);
 			}
@@ -507,9 +362,6 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		}
 		wasOnGround = onGround;
 		alterSquishAmount();
-		if (canChuTypeShock()) {
-			updateShockState();
-		}
 		if (onGround && timesMerged < 4) {
 			attemptMerge();
 		}
@@ -599,41 +451,9 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		this.movedDistance += f2;
 	}
 
-	private void entityLivingUpdate() {
+	protected void entityLivingUpdate() {
 		if (!worldObj.isRemote) {
 			updateLeashedState();
-		}
-	}
-
-	/*
-	@Override
-	public void onUpdate() {
-		super.onUpdate();
-		if (canChuTypeShock()) {
-			updateShockState();
-		}
-		if (onGround && getEntityData().getInteger("timesMerged") < 4) {
-			attemptMerge();
-		}
-	}
-	 */
-
-	/**
-	 * Updates the Chu's shock status; only called if canChuTypeShock() returns true
-	 */
-	protected void updateShockState() {
-		if (getShockTime() == 0 && !ZSSEntityInfo.get(this).isBuffActive(Buff.STUN)) {
-			EntityPlayer player = worldObj.getClosestPlayerToEntity(this, 16.0D);
-			if (player != null && (recentlyHit > 0 || rand.nextInt(getShockInterval()) == 0)) {
-				setShockTime(rand.nextInt(getSlimeSize() * 50) + (worldObj.getDifficulty().getDifficultyId() * (rand.nextInt(20) + 10)));
-			}
-		}
-		if (getShockTime() % 8 > 5 && rand.nextInt(4) == 0) {
-			worldObj.playSoundAtEntity(this, Sounds.SHOCK, getSoundVolume(), 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
-		}
-		int time = getShockTime();
-		if (time > 0) {
-			setShockTime(time - 1);
 		}
 	}
 
@@ -674,16 +494,33 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 		}
 	}
 
+	@Override
+	public void setDead() {
+		int i = getSlimeSize();
+		if (!worldObj.isRemote && i > 1 && getHealth() <= 0.0F) {
+			int j = 2 + rand.nextInt(3);
+			for (int k = 0; k < j; ++k) {
+				float f = ((float)(k % 2) - 0.5F) * (float) i / 4.0F;
+				float f1 = ((float)(k / 2) - 0.5F) * (float) i / 4.0F;
+				EntityChu chu = createInstance();
+				chu.setSlimeSize(i / 2);
+				chu.setLocationAndAngles(posX + (double) f, posY + 0.5D, posZ + (double) f1, rand.nextFloat() * 360.0F, 0.0F);
+				chu.timesMerged = this.timesMerged;
+				worldObj.spawnEntityInWorld(chu);
+			}
+		}
+		super.setDead();
+	}
+
 	private void attemptMerge() {
 		int i = getSlimeSize();
 		if (!worldObj.isRemote && i < 3 && getHealth() < (getMaxHealth() / 2) && rand.nextInt(16) == 0) {
-			List<EntityChu> list = worldObj.getEntitiesWithinAABB(EntityChu.class, getEntityBoundingBox().expand(2.0D, 1.0D, 2.0D));
+			List<EntityChu> list = this.worldObj.getEntitiesWithinAABB(this.getClass(), this.getEntityBoundingBox().expand(2.0D, 1.0D, 2.0D));
 			for (EntityChu chu : list) {
 				if (chu != this && chu.isEntityAlive() && chu.getSlimeSize() == this.getSlimeSize() && chu.getHealth() < (chu.getMaxHealth() / 2)) {
 					worldObj.playSoundAtEntity(this, Sounds.CHU_MERGE, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
 					EntityChu newChu = createInstance();
 					newChu.setSlimeSize(i * 2);
-					newChu.setType(this.getType().ordinal() < chu.getType().ordinal() ? chu.getType() : this.getType());
 					newChu.setLocationAndAngles((this.posX + chu.posX) / 2, posY + 0.5D, (this.posZ + chu.posZ) / 2 , rand.nextFloat() * 360.0F, 0.0F);
 					newChu.timesMerged = rand.nextInt(4) + 1 + this.timesMerged;
 					worldObj.spawnEntityInWorld(newChu);
@@ -719,21 +556,30 @@ public class EntityChu extends EntitySlime implements IEntityBombEater, IEntityL
 	@Override
 	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
 		data = super.onInitialSpawn(difficulty, data);
-		setTypeOnSpawn();
+		this.applyTypeTraits();
 		return data;
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {}
+
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		// DataWatcher has been updated by the spawn packet, but we need to call #setSize to apply appropriate modifiers
+		this.setSlimeSize(this.getSlimeSize());
 	}
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setInteger("ChuType", getType().ordinal());
+		compound.setInteger("Size", getSlimeSize() - 1);
 		compound.setInteger("timesMerged", timesMerged);
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		dataWatcher.updateObject(CHU_TYPE_INDEX, (byte) compound.getInteger("ChuType"));
+		setSlimeSize(compound.getInteger("Size") + 1);
 		timesMerged = compound.getInteger("timesMerged");
 	}
 }

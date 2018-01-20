@@ -54,13 +54,18 @@ public class ItemChuJelly extends BaseModItem implements IUnenchantable
 		setCreativeTab(ZSSCreativeTabs.tabMisc);
 	}
 
+	/** Safe method for obtaining chu type from the stack, regardless of stack damage value */
+	private ChuType getType(ItemStack stack) {
+		return ChuType.values()[stack.getItemDamage() % ChuType.values().length];
+	}
+
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
 		if (!player.worldObj.isRemote && entity.getClass() == EntityVillager.class) {
 			EntityVillager entityVillager = (EntityVillager) entity;
 			ZSSVillagerInfo villager = ZSSVillagerInfo.get(entityVillager);
 			MerchantRecipeList trades = entityVillager.getRecipes(player);
-			ChuType type = ChuType.fromDamage(stack.getItemDamage());
+			ChuType type = this.getType(stack);
 			Item potion = ItemChuJelly.getPotionFromChuType(type);
 			entityVillager.playLivingSound();
 			if (villager != null && villager.isChuTrader() && potion != null) {
@@ -93,7 +98,7 @@ public class ItemChuJelly extends BaseModItem implements IUnenchantable
 
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
-		return getUnlocalizedName() + "_" + ChuType.fromDamage(stack.getItemDamage()).name().toLowerCase();
+		return getUnlocalizedName() + "_" + this.getType(stack).name().toLowerCase();
 	}
 
 	@Override
