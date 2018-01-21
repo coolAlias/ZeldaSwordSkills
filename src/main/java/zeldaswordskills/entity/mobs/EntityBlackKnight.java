@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.skills.SkillBase;
 
-public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
+public class EntityBlackKnight extends EntityDarknutMighty implements IBossDisplayData
 {
 	public EntityBlackKnight(World world) {
 		super(world);
@@ -53,16 +53,6 @@ public class EntityBlackKnight extends EntityDarknut implements IBossDisplayData
 	@Override
 	protected boolean canDespawn() {
 		return false;
-	}
-
-	@Override
-	public int getType() {
-		return 1;	// considered 'Mighty'
-	}
-
-	@Override
-	public EntityBlackKnight setType(int type) {
-		return this; // only one type, nothing to set
 	}
 
 	@Override

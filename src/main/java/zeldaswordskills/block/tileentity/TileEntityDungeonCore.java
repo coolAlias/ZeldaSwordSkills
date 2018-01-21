@@ -50,6 +50,7 @@ import zeldaswordskills.entity.mobs.EntityChuGreen;
 import zeldaswordskills.entity.mobs.EntityChuRed;
 import zeldaswordskills.entity.mobs.EntityChuYellow;
 import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityDarknutMighty;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityKeeseCursed;
 import zeldaswordskills.entity.mobs.EntityKeeseFire;
@@ -350,7 +351,11 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements ITi
 			mob = new EntityWizzrobe(worldObj);
 			// TODO ((EntityWizzrobe) mob).getTeleportAI().setTeleBounds(box);
 		} else {
-			mob = new EntityDarknut(worldObj);
+			if (this.worldObj.rand.nextFloat() < (0.05F * f)) {
+				mob = new EntityDarknutMighty(this.worldObj);
+			} else {
+				mob = new EntityDarknut(this.worldObj);
+			}
 		}
 		if (mob != null) {
 			mob.setPosition(pos.getX() + 0.5D, pos.getY() + 1.5D, pos.getZ() + 0.5D);

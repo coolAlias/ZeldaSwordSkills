@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,6 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 	private ModelRenderer hornLeft;
 	private ModelRenderer hornRight;
 	private ModelRenderer hornHolderRight;
-	private ModelRenderer cape;
 
 	/** Whether the model should be rendered holding an item in the left hand, and if that item is a block. */
 	private int heldItemLeft;
@@ -224,11 +223,6 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 		hornLeft.setRotationPoint(1.5F, 1.75F, 0F);
 		setRotation(hornLeft, 0F, 0F, -((float) Math.PI / 8.0F));
 		hornHolderLeft.addChild(hornLeft);
-
-		cape = new ModelRenderer(this, 32, 45);
-		cape.addBox(-5F, 0F, 0F, 10, 16, 1);
-		cape.setRotationPoint(0F, 0F, 3F);
-		cape.setTextureSize(textureWidth, textureHeight);
 	}
 
 	@Override
@@ -247,16 +241,13 @@ public class ModelDarknut extends ModelBase implements IModelBiped
 	/**
 	 * Call to render the Darknut's armor, if it has not been removed
 	 */
-	private void renderArmor(EntityDarknut entity, float f, float f1, float f2, float f3, float f4, float f5) {
+	protected void renderArmor(EntityDarknut entity, float f, float f1, float f2, float f3, float f4, float f5) {
 		if (entity.isArmored()) {
 			shoulderPlateRight.render(f5);
 			shoulderPlateLeft.render(f5);
 			upperArmor.render(f5);
 			lowerArmor.render(f5);
 			helmBackPlate.render(f5);
-		}
-		if (entity.isWearingCape()) {
-			cape.render(f5);
 		}
 	}
 
