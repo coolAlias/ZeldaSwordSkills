@@ -47,6 +47,7 @@ import net.minecraftforge.common.config.Configuration;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.LootableEntityRegistry;
 import zeldaswordskills.client.model.ModelDarknut;
+import zeldaswordskills.client.model.ModelDarknutMighty;
 import zeldaswordskills.client.model.ModelDekuBaba;
 import zeldaswordskills.client.model.ModelDekuFire;
 import zeldaswordskills.client.model.ModelDekuWithered;
@@ -77,6 +78,7 @@ import zeldaswordskills.entity.mobs.EntityChuGreen;
 import zeldaswordskills.entity.mobs.EntityChuRed;
 import zeldaswordskills.entity.mobs.EntityChuYellow;
 import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityDarknutMighty;
 import zeldaswordskills.entity.mobs.EntityDekuBaba;
 import zeldaswordskills.entity.mobs.EntityDekuFire;
 import zeldaswordskills.entity.mobs.EntityDekuWithered;
@@ -141,7 +143,8 @@ public class ZSSEntities
 		addSpawnLocations(EntityChuGreen.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.JUNGLE, BiomeType.RIVER));
 		addSpawnLocations(EntityChuBlue.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.RIVER, BiomeType.TAIGA));
 		addSpawnLocations(EntityChuYellow.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.PLAINS, BiomeType.JUNGLE));
-		addSpawnLocations(EntityDarknut.class, EntityDarknut.getDefaultBiomes());
+		addSpawnLocations(EntityDarknut.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.MOUNTAIN, BiomeType.PLAINS));
+		addSpawnLocations(EntityDarknutMighty.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.MOUNTAIN, BiomeType.PLAINS));
 		addSpawnLocations(EntityDekuBaba.class, EntityDekuBaba.getDefaultBiomes());
 		addSpawnLocations(EntityDekuFire.class, EntityDekuFire.getDefaultBiomes());
 		addSpawnLocations(EntityDekuWithered.class, EntityDekuWithered.getDefaultBiomes());
@@ -169,8 +172,10 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityChuRed.class, EnumCreatureType.monster, 4, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate][Chu] Yellow Chu spawn rate (0 to disable)[0+]", 10).getInt();
 		addSpawnableEntityData(EntityChuYellow.class, EnumCreatureType.monster, 4, 4, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Darknut spawn rate (0 to disable)[0+]", 5).getInt();
+		rate = config.get("Mob Spawns", "[Spawn Rate][Darknut] Darknut spawn rate (0 to disable)[0+]", 5).getInt();
 		addSpawnableEntityData(EntityDarknut.class, EnumCreatureType.monster, 1, 1, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Darknut] Mighty Darknut spawn rate (0 to disable)[0+]", 1).getInt();
+		addSpawnableEntityData(EntityDarknutMighty.class, EnumCreatureType.monster, 1, 1, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate][Deku Baba] Deku Baba spawn rate (0 to disable)[0+]", 10).getInt();
 		addSpawnableEntityData(EntityDekuBaba.class, EnumCreatureType.monster, 1, 3, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate][Deku Baba] Fire Baba spawn rate (0 to disable)[0+]", 2).getInt();
@@ -275,18 +280,15 @@ public class ZSSEntities
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 80, 0xADFF2F, 0xFFFF00);
 		EntityRegistry.registerModEntity(EntityNavi.class, "navi", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 
+		registerEntity(EntityDekuBaba.class, "baba_deku", ++modEntityIndex, 80, 0x33CC33, 0x0000FF);
+		registerEntity(EntityDekuFire.class, "baba_fire", ++modEntityIndex, 80, 0xFF0000, 0x0000FF);
+		registerEntity(EntityDekuWithered.class, "baba_withered", ++modEntityIndex, 80, 0x8B5A00, 0x0000FF);
 		registerEntity(EntityChuRed.class, "chu_red", ++modEntityIndex, 80, 0x008000, 0xDC143C);
 		registerEntity(EntityChuGreen.class, "chu_green", ++modEntityIndex, 80, 0x008000, 0x00EE00);
 		registerEntity(EntityChuBlue.class, "chu_blue", ++modEntityIndex, 80, 0x008000, 0x3A5FCD);
 		registerEntity(EntityChuYellow.class, "chu_yellow", ++modEntityIndex, 80, 0x008000, 0xFFFF00);
-
-		EntityRegistry.registerModEntity(EntityDarknut.class, "darknut", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-		CustomEntityList.addMapping(EntityDarknut.class, "darknut", 0x1E1E1E, 0x8B2500, 0x1E1E1E, 0xFB2500);
-
-		registerEntity(EntityDekuBaba.class, "baba_deku", ++modEntityIndex, 80, 0x33CC33, 0x0000FF);
-		registerEntity(EntityDekuFire.class, "baba_fire", ++modEntityIndex, 80, 0xFF0000, 0x0000FF);
-		registerEntity(EntityDekuWithered.class, "baba_withered", ++modEntityIndex, 80, 0x8B5A00, 0x0000FF);
-
+		registerEntity(EntityDarknut.class, "darknut", ++modEntityIndex, 80, 0x1E1E1E, 0x8B2500);
+		registerEntity(EntityDarknutMighty.class, "darknut_mighty", ++modEntityIndex, 80, 0x1E1E1E, 0xFB2500);
 		registerEntity(EntityKeese.class, "keese", ++modEntityIndex, 80, 0x000000, 0x555555);
 		registerEntity(EntityKeeseCursed.class, "keese_cursed", ++modEntityIndex, 80, 0x000000, 0x800080);
 		registerEntity(EntityKeeseFire.class, "keese_fire", ++modEntityIndex, 80, 0x000000, 0xFF4500);
@@ -329,8 +331,10 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityCyclone.class, new RenderNothing());
 		RenderingRegistry.registerEntityRenderingHandler(EntityDarknut.class, new RenderGenericLiving(
 				new ModelDarknut(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
+		RenderingRegistry.registerEntityRenderingHandler(EntityDarknutMighty.class, new RenderGenericLiving(
+				new ModelDarknutMighty(), 0.5F, 1.5F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBlackKnight.class, new RenderGenericLiving(
-				new ModelDarknut(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
+				new ModelDarknutMighty(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityDekuBaba.class, new RenderDekuBaba(
 				new ModelDekuBaba(), 0.5F, 1.25F, ModInfo.ID + ":textures/entity/deku_baba.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityDekuFire.class, new RenderDekuBaba(

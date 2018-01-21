@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,6 @@ import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IParryModifier;
 import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ai.EntityAIPowerAttack;
 import zeldaswordskills.entity.ai.IPowerAttacker;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
@@ -62,21 +61,13 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.Parry;
-import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntityEvil, IEntityLootable, IParryModifier, IPowerAttacker, IEntityVariant
+public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntityEvil, IEntityLootable, IParryModifier, IPowerAttacker
 {
-	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
-	 */
-	public static String[] getDefaultBiomes() {
-		return BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.BEACH, BiomeType.FIERY, BiomeType.MOUNTAIN, BiomeType.PLAINS);
-	}
-
 	/** Bonus to knockback resistance when wearing armor */
 	private static final UUID armorKnockbackModifierUUID = UUID.fromString("71AF0F88-82E5-49DE-B9CC-844048E33D69");
 	private static final AttributeModifier armorKnockbackModifier = (new AttributeModifier(armorKnockbackModifierUUID, "Armor Knockback Resistance", 1.0D, 0)).setSaved(false);
@@ -103,14 +94,8 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	/** Flag for model to animate spin attack motion, updated via health update */
 	private static final byte SPIN_FLAG = 0x9;
 
-	/** DataWatcher for Darknut type: 0 - normal, 1 - Mighty */
-	private final static int TYPE_INDEX = 16;
-
 	/** DataWatcher for armor health */
-	private final static int ARMOR_INDEX = 17;
-
-	/** DataWatcher for cape */
-	private final static int CAPE_INDEX = 18;
+	private final static int ARMOR_INDEX = 16;
 
 	/** Timer for attack animation; negative swings one way, positive the other */
 	@SideOnly(Side.CLIENT)
@@ -161,9 +146,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	@Override
 	public void entityInit() {
 		super.entityInit();
-		dataWatcher.addObject(TYPE_INDEX, (byte) 0);
 		dataWatcher.addObject(ARMOR_INDEX, 20.0F);
-		dataWatcher.addObject(CAPE_INDEX, (byte) 0);
 	}
 
 	@Override
@@ -174,27 +157,6 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.225D);
 		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(0.25D);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(40.0D);
-	}
-
-	/**
-	 * Returns the Darknut's type: 0 - normal, 1 - Mighty
-	 */
-	public int getType() {
-		return (int) dataWatcher.getWatchableObjectByte(TYPE_INDEX);
-	}
-
-	/**
-	 * Sets the Darknut's type: 0 - normal, 1 - Mighty
-	 */
-	@Override
-	public EntityDarknut setType(int type) {
-		dataWatcher.updateObject(TYPE_INDEX, (byte) type);
-		setWearingCape((type > 0 ? (byte) 60 : (byte) 0));
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue((type > 0 ? 100.0D : 50.0D));
-		getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue((type > 0 ? 7.0D : 5.0D));
-		setHealth(getMaxHealth());
-		experienceValue = (type > 0 ? 20 : 12);
-		return this;
 	}
 
 	protected float getArmorDamage() {
@@ -248,7 +210,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	 * Adds or removes knockback resistance and movement attribute modifiers for wearing armor
 	 * Also adds / removes specific AI tasks
 	 */
-	private void applyArmorAttributeModifiers(boolean wearingArmor) {
+	protected void applyArmorAttributeModifiers(boolean wearingArmor) {
 		IAttributeInstance moveAttribute = getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 		moveAttribute.removeModifier(armorMoveBonus);
 		IAttributeInstance knockbackAttribute = getEntityAttribute(SharedMonsterAttributes.knockbackResistance);
@@ -265,30 +227,6 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	@Override
 	public int getTotalArmorValue() {
 		return Math.min(20, super.getTotalArmorValue() + (2 * worldObj.difficultySetting.getDifficultyId()));
-	}
-
-	public boolean isWearingCape() {
-		return (dataWatcher.getWatchableObjectByte(CAPE_INDEX) > (byte) 0);
-	}
-
-	/**
-	 * Grants the Darknut a cape with the given amount for health (i.e. ticks of fire damage required to burn through it)
-	 */
-	protected void setWearingCape(byte ticksRequired) {
-		dataWatcher.updateObject(CAPE_INDEX, ticksRequired);
-	}
-
-	/**
-	 * Damages the cape by 1 point
-	 */
-	private void damageCape() {
-		byte b = dataWatcher.getWatchableObjectByte(CAPE_INDEX);
-		if (b > 0) {
-			setWearingCape((byte)(b - 1));
-			if (b == (byte) 1) {
-				extinguish();
-			}
-		}
 	}
 
 	@Override
@@ -308,10 +246,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 				return false; // don't allow cacti or falling blocks to damage Darknut while armored
 			} // all other vanilla null-entity damage sources should damage Darknut; can't handle modded ones
 			return super.attackEntityFrom(source, amount);
-		} else if (isWearingCape()) {
-			if (source.isFireDamage()) {
-				setFire(3);
-			}
+		} else if (!canAttackArmor(source, amount)) {
 			return false;
 		} else if (source.isExplosion() && isArmored()) {
 			amount = damageDarknutArmor(amount * (1.25F - (0.25F * (float) worldObj.difficultySetting.getDifficultyId())));
@@ -355,6 +290,15 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 			}
 		}
 		return super.attackEntityFrom(source, amount);
+	}
+
+	/**
+	 * Called from {@link #attackEntityFrom(DamageSource, float)} prior to attempting to damage
+	 * armor in case Darknut is invulnerable to further damage or attack has been otherwise handled
+	 * @return true if attack processing should continue, or false if already handled
+	 */
+	protected boolean canAttackArmor(DamageSource source, float amount) {
+		return true;
 	}
 
 	/**
@@ -449,12 +393,8 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	 * Handle consequences of armor destroyed, e.g. setting current chest piece to null
 	 */
 	protected void onArmorDestroyed() {
-		if (getType() > 0) {
-			setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, new ItemStack(Items.chainmail_chestplate));
-		} else {
-			setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, null);
-		}
-		applyArmorAttributeModifiers(false);
+		this.setCurrentItemOrArmor(ArmorIndex.EQUIPPED_CHEST, null);
+		this.applyArmorAttributeModifiers(false);
 	}
 
 	@Override
@@ -602,9 +542,6 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public void onLivingUpdate() {
-		if (isWearingCape() && isBurning()) {
-			damageCape();
-		}
 		super.onLivingUpdate();
 		if (parryTimer > 0) {
 			--parryTimer;
@@ -696,7 +633,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	@Override
 	protected void dropRareDrop(int rarity) {
 		switch(rarity) {
-		case 1: entityDropItem(new ItemStack(ZSSItems.treasure,1,Treasures.KNIGHTS_CREST.ordinal()), 0.0F); break;
+		case 1: entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.KNIGHTS_CREST.ordinal()), 0.0F); break;
 		default: entityDropItem(new ItemStack(Items.painting), 0.0F);
 		}
 	}
@@ -708,7 +645,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
-		return new ItemStack(ZSSItems.treasure,1,Treasures.KNIGHTS_CREST.ordinal());
+		return new ItemStack(ZSSItems.treasure, 1, Treasures.KNIGHTS_CREST.ordinal());
 	}
 
 	@Override
@@ -733,9 +670,6 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data) {
 		data = super.onSpawnWithEgg(data);
 		addRandomArmor();
-		if (rand.nextFloat() < (0.05F * (float) worldObj.difficultySetting.getDifficultyId())) {
-			setType(1);
-		}
 		return data;
 	}
 
@@ -743,8 +677,6 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setFloat("ArmorHealth", getArmorDamage());
-		compound.setByte("DarknutType", dataWatcher.getWatchableObjectByte(TYPE_INDEX));
-		compound.setByte("CapeHealth", dataWatcher.getWatchableObjectByte(CAPE_INDEX));
 	}
 
 	@Override
@@ -752,7 +684,5 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 		super.readEntityFromNBT(compound);
 		setArmorDamage(compound.getFloat("ArmorHealth"));
 		applyArmorAttributeModifiers(isArmored());
-		dataWatcher.updateObject(TYPE_INDEX, compound.getByte("DarknutType"));
-		dataWatcher.updateObject(CAPE_INDEX, compound.getByte("CapeHealth"));
 	}
 }

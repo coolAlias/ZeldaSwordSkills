@@ -66,7 +66,6 @@ import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.mobs.EntityDarknut;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
@@ -313,7 +312,6 @@ public class ZSSItems
 	//================ SPAWN EGGS TAB ================//
 	public static Item
 	eggSpawner, // for all Entities with only one type
-	eggDarknut,
 	eggOctorok,
 	eggWizzrobe;
 
@@ -712,7 +710,6 @@ public class ZSSItems
 
 		// Custom Spawn Eggs
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("zss.spawn_egg");
-		eggDarknut = new ItemCustomVariantEgg(EntityDarknut.class, "darknut").setUnlocalizedName("zss.eggDarknut");
 		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
 		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("zss.eggWizzrobe");
 
@@ -846,7 +843,6 @@ public class ZSSItems
 
 	private static void addDispenserBehaviors() {
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggSpawner, new BehaviorDispenseCustomMobEgg());
-		BlockDispenser.dispenseBehaviorRegistry.putObject(eggDarknut, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggOctorok, new BehaviorDispenseCustomMobEgg());
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggWizzrobe, new BehaviorDispenseCustomMobEgg());
 	}

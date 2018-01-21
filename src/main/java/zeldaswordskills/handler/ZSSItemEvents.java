@@ -70,6 +70,7 @@ import zeldaswordskills.api.item.ISmashBlock;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityDarknut;
+import zeldaswordskills.entity.mobs.EntityDarknutMighty;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityKeeseCursed;
 import zeldaswordskills.entity.mobs.EntityKeeseFire;
@@ -372,8 +373,9 @@ public class ZSSItemEvents
 		addDrop(EntityPigZombie.class, SkillBase.parry);
 		addDrop(EntityOcelot.class, SkillBase.parry);
 		addDrop(EntityOctorok.class, SkillBase.risingCut);
-		addDrop(EntityBlaze.class, SkillBase.spinAttack);
+		addDrop(EntityBlaze.class, SkillBase.risingCut);
 		addDrop(EntityDarknut.class, SkillBase.spinAttack);
+		addDrop(EntityDarknutMighty.class, SkillBase.spinAttack);
 		addDrop(EntityZombie.class, SkillBase.swordBasic);
 		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
 		addDrop(EntityGhast.class, SkillBase.swordBeam);
