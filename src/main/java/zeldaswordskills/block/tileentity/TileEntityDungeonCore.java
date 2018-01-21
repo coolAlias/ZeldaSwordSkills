@@ -53,6 +53,10 @@ import zeldaswordskills.entity.mobs.EntityKeeseIce;
 import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
+import zeldaswordskills.entity.mobs.EntityWizzrobeIce;
+import zeldaswordskills.entity.mobs.EntityWizzrobeThunder;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerInfo.Stats;
 import zeldaswordskills.ref.Config;
@@ -343,7 +347,17 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 				}
 			}
 		} else if (rarity > -2) {
-			mob = new EntityWizzrobe(worldObj);
+			// Try for a biome-appropriate Wizzrobe
+			mob = EntityWizzrobe.getRandomWizzrobeForLocation(this.worldObj, 0.5F, this.xCoord, this.yCoord, this.zCoord);
+			// Otherwise just generate a random one
+			if (mob == null) {
+				switch (worldObj.rand.nextInt(4)) {
+				case 0: mob = new EntityWizzrobeFire(worldObj); break;
+				case 1: mob = new EntityWizzrobeGale(worldObj); break;
+				case 2: mob = new EntityWizzrobeIce(worldObj); break;
+				default: mob = new EntityWizzrobeThunder(worldObj); break;
+				}
+			}
 			//((EntityWizzrobe) mob).getTeleportAI().setTeleBounds(box);
 		} else {
 			mob = new EntityDarknut(worldObj);

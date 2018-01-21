@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,10 @@ import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
+import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ai.EntityAILevitate;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
@@ -42,19 +44,42 @@ import zeldaswordskills.skills.SkillBase;
  */
 public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayData
 {
+	/** Data watcher index for the Grand Wizzrobe's current magic type */
+	protected static final int TYPE_INDEX = 16;
+
 	/** Transformation timer for boss version */
 	private int transformTimer;
 
 	public EntityGrandWizzrobe(World world) {
 		super(world);
-		tasks.addTask(0, new EntityAILevitate(this, 2.5D));
-		targetTasks.taskEntries.clear();
-		targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-		targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
-		func_110163_bv(); // sets persistence required to true, meaning will not despawn
-		setType(rand.nextInt(WizzrobeType.values().length));
-		setSize(1.0F, 3.0F);
-		experienceValue = 50;
+		this.tasks.addTask(0, new EntityAILevitate(this, 2.5D));
+		this.targetTasks.taskEntries.clear();
+		this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
+		this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
+		this.func_110163_bv(); // sets persistence required to true, meaning will not despawn
+		this.setType(this.rand.nextInt(MagicType.values().length));
+		this.setSize(1.0F, 3.0F);
+		this.experienceValue = 50;
+	}
+
+	@Override
+	public MagicType getMagicType() {
+		return MagicType.values()[this.dataWatcher.getWatchableObjectByte(TYPE_INDEX) % MagicType.values().length];
+	}
+
+	/** Set the current Magic Type */
+	private void setType(MagicType type) {
+		this.dataWatcher.updateObject(TYPE_INDEX, (byte)(type.ordinal()));
+		this.applyTypeTraits();
+	}
+
+	/** Set the current Magic Type by index */
+	private void setType(int type) {
+		// Skip water type
+		if (type == MagicType.WATER.ordinal()) {
+			type += 1 + this.rand.nextInt(MagicType.values().length - 1);
+		}
+		this.setType(MagicType.values()[type % MagicType.values().length]);
 	}
 
 	@Override
@@ -73,10 +98,28 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(300.0D);
 	}
 
-	@Override
 	protected void applyTypeTraits() {
-		super.applyTypeTraits();
-		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
+		ZSSEntityInfo info = ZSSEntityInfo.get(this);
+		info.removeAllBuffs();
+		info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 50);
+		info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
+		switch (this.getMagicType()) {
+		case FIRE:
+			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
+			break;
+		case ICE:
+			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 100);
+			break;
+		case LIGHTNING:
+			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+			break;
+		case WIND:
+			break;
+		case WATER:
+			break;
+		}
 	}
 
 	@Override
@@ -115,6 +158,13 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	}
 
 	@Override
+	protected float getReflectedDamage(float damage) {
+		// Note that Wizzrobes have 50% magic resistance as well as e.g. 50% Fire Resist
+		float i = 1.0F + (2 * Math.max(1, this.worldObj.difficultySetting.getDifficultyId()));
+		return Math.max(damage, this.getMaxHealth() / i);
+	}
+
+	@Override
 	protected float getMinInterruptDamage() {
 		return 8.0F;
 	}
@@ -146,7 +196,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 		super.onUpdate();
 		if (transformTimer > 0) {
 			if (--transformTimer == 0 && !worldObj.isRemote) {
-				setType(rand.nextInt(WizzrobeType.values().length));
+				this.setType(this.rand.nextInt(MagicType.values().length));
 			}
 		}
 	}
@@ -154,16 +204,28 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	@Override
 	protected void dropFewItems(boolean recentlyHit, int lootingLevel) {
 		super.dropFewItems(recentlyHit, lootingLevel);
-		entityDropItem(new ItemStack(ZSSItems.skillOrb,1,SkillBase.bonusHeart.getId()), 0.0F);
+		this.entityDropItem(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), 0.0F);
 	}
 
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
-		return new ItemStack(ZSSItems.treasure,1,Treasures.EVIL_CRYSTAL.ordinal());
+		return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
 	}
 
 	@Override
 	public boolean onLootStolen(EntityPlayer player, boolean wasItemStolen) {
 		return wasItemStolen;
+	}
+
+	@Override
+	public void writeEntityToNBT(NBTTagCompound compound) {
+		super.writeEntityToNBT(compound);
+		compound.setByte("MagicType", this.dataWatcher.getWatchableObjectByte(TYPE_INDEX));
+	}
+
+	@Override
+	public void readEntityFromNBT(NBTTagCompound compound) {
+		super.readEntityFromNBT(compound);
+		this.dataWatcher.updateObject(TYPE_INDEX, compound.getByte("MagicType"));
 	}
 }

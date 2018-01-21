@@ -77,7 +77,10 @@ import zeldaswordskills.entity.mobs.EntityKeeseFire;
 import zeldaswordskills.entity.mobs.EntityKeeseIce;
 import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
-import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
+import zeldaswordskills.entity.mobs.EntityWizzrobeIce;
+import zeldaswordskills.entity.mobs.EntityWizzrobeThunder;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.item.ItemHeldBlock;
 import zeldaswordskills.item.ZSSItems;
@@ -380,6 +383,9 @@ public class ZSSItemEvents
 		addDrop(EntitySkeleton.class, SkillBase.swordBasic);
 		addDrop(EntityGhast.class, SkillBase.swordBeam);
 		addDrop(EntityWitch.class, SkillBase.swordBeam);
-		addDrop(EntityWizzrobe.class, SkillBase.swordBreak);
+		addDrop(EntityWizzrobeFire.class, SkillBase.swordBreak);
+		addDrop(EntityWizzrobeGale.class, SkillBase.swordBreak);
+		addDrop(EntityWizzrobeIce.class, SkillBase.swordBreak);
+		addDrop(EntityWizzrobeThunder.class, SkillBase.swordBreak);
 	}
 }

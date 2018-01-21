@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,11 @@
 
 package zeldaswordskills.client.render.entity;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
@@ -28,46 +33,32 @@ import net.minecraft.entity.boss.BossStatus;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-
 import zeldaswordskills.client.model.ModelCube;
 import zeldaswordskills.client.model.ModelWizzrobe;
-import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityWizzrobe extends RenderLiving
 {
-	private static final ResourceLocation fireWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_fire.png");
-	private static final ResourceLocation iceWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice.png");
-	private static final ResourceLocation lightningWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_lightning.png");
-	private static final ResourceLocation windWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_wind.png");
-	private static final ResourceLocation grandFireWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_fire_grand.png");
-	private static final ResourceLocation grandIceWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice_grand.png");
-	private static final ResourceLocation grandLightningWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_lightning_grand.png");
-	private static final ResourceLocation grandWindWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_wind_grand.png");
-
 	/** Dummy entity for the model cube rendering */
-	private final EntityMagicSpell spell;
+	protected final EntityMagicSpell spell;
 
 	/** Wizzrobe model provides easy means of knowing if spell should be rendered */
-	private final ModelWizzrobe model;
+	protected final ModelWizzrobe model;
 
 	/** Boxes for spell rendering */
-	private final ModelCube box1 = new ModelCube(4), box2 = new ModelCube(4);
+	protected final ModelCube box1 = new ModelCube(4), box2 = new ModelCube(4);
 
-	private final float scale;
+	protected final float scale;
 
-	public RenderEntityWizzrobe(ModelWizzrobe model, float scale) {
+	protected final ResourceLocation texture;
+
+	public RenderEntityWizzrobe(ModelWizzrobe model, float scale, ResourceLocation texture) {
 		super(model, 0.5F);
 		this.model = model;
 		this.scale = scale;
+		this.texture = texture;
 		this.spell = new EntityMagicSpell(Minecraft.getMinecraft().theWorld);
 	}
 
@@ -114,12 +105,6 @@ public class RenderEntityWizzrobe extends RenderLiving
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		boolean grand = (entity instanceof EntityGrandWizzrobe);
-		switch(((EntityWizzrobe) entity).getMagicType()) {
-		case FIRE: return (grand ? grandFireWizTexture : fireWizTexture);
-		case ICE: return (grand ? grandIceWizTexture : iceWizTexture);
-		case LIGHTNING: return (grand ? grandLightningWizTexture : lightningWizTexture);
-		default: return (grand ? grandWindWizTexture : windWizTexture);
-		}
+		return this.texture;
 	}
 }

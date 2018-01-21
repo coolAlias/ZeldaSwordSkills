@@ -71,6 +71,7 @@ import zeldaswordskills.client.render.entity.RenderEntityOctorok;
 import zeldaswordskills.client.render.entity.RenderEntitySwordBeam;
 import zeldaswordskills.client.render.entity.RenderEntityWhip;
 import zeldaswordskills.client.render.entity.RenderEntityWizzrobe;
+import zeldaswordskills.client.render.entity.RenderEntityWizzrobeGrand;
 import zeldaswordskills.client.render.entity.RenderGenericLiving;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
 import zeldaswordskills.entity.mobs.EntityChuBlue;
@@ -89,7 +90,10 @@ import zeldaswordskills.entity.mobs.EntityKeeseFire;
 import zeldaswordskills.entity.mobs.EntityKeeseIce;
 import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
-import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
+import zeldaswordskills.entity.mobs.EntityWizzrobeIce;
+import zeldaswordskills.entity.mobs.EntityWizzrobeThunder;
 import zeldaswordskills.entity.npc.EntityGoron;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.entity.npc.EntityNpcMaskTrader;
@@ -154,8 +158,11 @@ public class ZSSEntities
 		addSpawnLocations(EntityKeeseFire.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.JUNGLE));
 		addSpawnLocations(EntityKeeseIce.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.TAIGA));
 		addSpawnLocations(EntityKeeseThunder.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.BEACH, BiomeType.MOUNTAIN));
-		addSpawnLocations(EntityWizzrobe.class, EntityWizzrobe.getDefaultBiomes());
 		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
+		addSpawnLocations(EntityWizzrobeFire.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY));
+		addSpawnLocations(EntityWizzrobeGale.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.MOUNTAIN));
+		addSpawnLocations(EntityWizzrobeIce.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.TAIGA));
+		addSpawnLocations(EntityWizzrobeThunder.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.MOUNTAIN));
 	}
 
 	/**
@@ -199,8 +206,14 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityKeeseThunder.class, EnumCreatureType.ambient, 4, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate] Octorok spawn rate (0 to disable)[0+]", 8).getInt();
 		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.waterCreature, 2, 4, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
-		addSpawnableEntityData(EntityWizzrobe.class, EnumCreatureType.monster, 1, 1, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Wizzrobe] Fire Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityWizzrobeFire.class, EnumCreatureType.monster, 1, 1, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Wizzrobe] Gale Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityWizzrobeGale.class, EnumCreatureType.monster, 1, 1, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Wizzrobe] Ice Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityWizzrobeIce.class, EnumCreatureType.monster, 1, 1, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Wizzrobe] Thunder Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
+		addSpawnableEntityData(EntityWizzrobeThunder.class, EnumCreatureType.monster, 1, 1, rate);
 
 		// ALLOWED BIOMES
 		for (Class<? extends EntityLiving> entity : defaultSpawnLists.keySet()) {
@@ -298,8 +311,10 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
 
-		EntityRegistry.registerModEntity(EntityWizzrobe.class, "wizzrobe", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-		CustomEntityList.addMapping(EntityWizzrobe.class, "wizzrobe", 0x8B2500, 0xFF0000, 0x8B2500, 0x00B2EE, 0x8B2500, 0xEEEE00, 0x8B2500, 0x00EE76);
+		registerEntity(EntityWizzrobeFire.class, "wizzrobe_fire", ++modEntityIndex, 80, 0x8B2500, 0xFF0000);
+		registerEntity(EntityWizzrobeGale.class, "wizzrobe_gale", ++modEntityIndex, 80, 0x8B2500, 0x00EE76);
+		registerEntity(EntityWizzrobeIce.class, "wizzrobe_ice", ++modEntityIndex, 80, 0x8B2500, 0x00B2EE);
+		registerEntity(EntityWizzrobeThunder.class, "wizzrobe_thunder", ++modEntityIndex, 80, 0x8B2500, 0xEEEE00);
 
 		// BOSSES
 		registerEntity(EntityGrandWizzrobe.class, "wizzrobe_grand", ++modEntityIndex, 80, 0x8B2500, 0x1E1E1E);
@@ -367,8 +382,11 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
 		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(ZSSItems.throwingRock));
 		RenderingRegistry.registerEntityRenderingHandler(EntityWhip.class, new RenderEntityWhip());
-		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobe.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F));
-		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.5F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeFire.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_fire.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeGale.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_wind.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeIce.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeThunder.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_lightning.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobeGrand(new ModelWizzrobe(), 1.5F));
 	}
 
 	/**

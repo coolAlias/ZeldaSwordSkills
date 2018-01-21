@@ -1025,12 +1025,11 @@ entity.zeldaswordskills.npc.orca.name=Orca
 entity.zeldaswordskills.octorok.name=Octorok
 entity.zeldaswordskills.octorok.name.0=Octorok
 entity.zeldaswordskills.octorok.name.1=Octorok
-entity.zeldaswordskills.wizzrobe.name=Wizzrobe
-entity.zeldaswordskills.wizzrobe.name.0=Fire Wizzrobe
-entity.zeldaswordskills.wizzrobe.name.1=Ice Wizzrobe
-entity.zeldaswordskills.wizzrobe.name.2=Thunder Wizzrobe
-entity.zeldaswordskills.wizzrobe.name.3=Gale Wizzrobe
+entity.zeldaswordskills.wizzrobe_fire.name=Fire Wizzrobe
+entity.zeldaswordskills.wizzrobe_gale.name=Gale Wizzrobe
 entity.zeldaswordskills.wizzrobe_grand.name=Grand Wizzrobe
+entity.zeldaswordskills.wizzrobe_ice.name=Ice Wizzrobe
+entity.zeldaswordskills.wizzrobe_thunder.name=Thunder Wizzrobe
 
 gui.zss.gossip_stone.name=Gossip Stone Secret Message
 gui.zss.magic_meter.text=MP %1$d/%2$d
