@@ -63,7 +63,6 @@ import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
@@ -301,7 +300,6 @@ public class ZSSItems
 	//================ SPAWN EGGS TAB ================//
 	public static Item
 	eggSpawner, // for all Entities with only one type
-	eggOctorok,
 	eggSkulltula;
 
 	/**
@@ -675,7 +673,6 @@ public class ZSSItems
 
 		//===================== SPAWN EGGS TAB =====================//
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("spawn_egg");
-		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("egg_octorok");
 		eggSkulltula = new ItemCustomVariantEgg(EntitySkulltula.class, "skulltula").setUnlocalizedName("egg_skulltula");
 	}
 

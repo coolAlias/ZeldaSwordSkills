@@ -39,7 +39,7 @@ import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
-import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorokPink;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
 import zeldaswordskills.item.ItemBrokenSword;
 import zeldaswordskills.item.ItemHookShotUpgrade.UpgradeType;
@@ -67,7 +67,7 @@ public enum BossType implements IStringSerializable
 	DESERT("temple_desert", "Desert Temple", 1, DesertBattle.class, EntityBlaze.class, 1, ZeldaSongs.songWarpSpirit, "desert", "deserthills"),
 	FOREST("temple_forest", "Forest Temple", 2, ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
 	TAIGA("temple_ice", "Ice Temple", 3, BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
-	OCEAN("temple_water", "Water Temple", 4, OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
+	OCEAN("temple_water", "Water Temple", 4, OceanBattle.class, EntityOctorokPink.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
 	SWAMP("temple_wind", "Wind Temple", 5, SwampBattle.class, EntityWizzrobeGrand.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
 	MOUNTAIN("temple_earth", "Earth Temple", 6, EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");

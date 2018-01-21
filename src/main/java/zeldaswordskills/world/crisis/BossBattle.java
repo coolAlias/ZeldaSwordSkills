@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,6 @@ import zeldaswordskills.block.BlockAncientTablet;
 import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
@@ -381,9 +380,6 @@ public class BossBattle extends AbstractCrisis
 				skeleton.setCurrentItemOrArmor(0, ranged);
 			}
 		} else {
-			if (entity instanceof EntityOctorok) {
-				((EntityOctorok) entity).setType((byte) 1);
-			}
 			IAttributeInstance iattribute = entity.getEntityAttribute(SharedMonsterAttributes.attackDamage);
 			AttributeModifier modifier = (new AttributeModifier(UUID.randomUUID(), "Boss Attack Bonus", difficulty * 2.0D, 0)).setSaved(true);
 			iattribute.applyModifier(modifier);

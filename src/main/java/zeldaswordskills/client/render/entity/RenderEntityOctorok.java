@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,21 +27,15 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntityOctorok;
-import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityOctorok extends RenderLiving<EntityOctorok>
 {
-	private static final ResourceLocation texture1 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok1.png");
-	private static final ResourceLocation texture2 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok2.png");
+	protected final ResourceLocation texture;
 
-	public RenderEntityOctorok(RenderManager renderManager, ModelBase model, float shadowSize) {
-		super(renderManager, model, shadowSize);
-	}
-
-	@Override
-	public void doRender(EntityOctorok entity, double dx, double dy, double dz, float f, float f1) {
-		super.doRender(entity, dx, dy, dz, f, f1);
+	public RenderEntityOctorok(RenderManager manager, ModelBase model, float shadowSize, ResourceLocation texture) {
+		super(manager, model, shadowSize);
+		this.texture = texture;
 	}
 
 	@Override
@@ -62,20 +56,22 @@ public class RenderEntityOctorok extends RenderLiving<EntityOctorok>
 
 	@Override
 	protected ResourceLocation getEntityTexture(EntityOctorok entity) {
-		return (entity.getType() == 0 ? texture1 : texture2);
+		return this.texture;
 	}
 
 	public static class Factory implements IRenderFactory<EntityOctorok>
 	{
 		protected final ModelBase model;
 		protected final float shadowSize;
-		public Factory(ModelBase model, float shadowSize) {
+		protected final ResourceLocation texture;
+		public Factory(ModelBase model, float shadowSize, ResourceLocation texture) {
 			this.model = model;
 			this.shadowSize = shadowSize;
+			this.texture = texture;
 		}
 		@Override
 		public Render<? super EntityOctorok> createRenderFor(RenderManager manager) {
-			return new RenderEntityOctorok(manager, this.model, this.shadowSize);
+			return new RenderEntityOctorok(manager, this.model, this.shadowSize, this.texture);
 		}
 	}
 }

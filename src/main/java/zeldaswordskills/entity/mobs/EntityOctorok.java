@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,6 @@
 
 package zeldaswordskills.entity.mobs;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -34,39 +30,22 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
-import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.IEntityLootable;
-import zeldaswordskills.entity.IEntityVariant;
-import zeldaswordskills.entity.projectile.EntityBomb;
+import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.util.BiomeType;
+import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.TargetUtils;
 
-// TODO switch attack logic to use AI system
-public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootable, IEntityVariant
+public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootable
 {
-	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
-	 */
-	public static String[] getDefaultBiomes() {
-		List<String> biomes = new ArrayList<String>();
-		biomes.addAll(Arrays.asList(BiomeType.BEACH.defaultBiomes));
-		biomes.addAll(Arrays.asList(BiomeType.OCEAN.defaultBiomes));
-		return biomes.toArray(new String[biomes.size()]);
-	}
-
-	/** Squid type data watcher index (skeleton's use 13) */
-	private static final int OCTOROK_TYPE_INDEX = 13;
-
 	/** Squid-related fields for random movement and rendering */
 	public float squidPitch;
 	public float prevSquidPitch;
@@ -96,28 +75,6 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	}
 
 	@Override
-	public void entityInit() {
-		super.entityInit();
-		dataWatcher.addObject(OCTOROK_TYPE_INDEX, (byte)(rand.nextInt(5) == 0 ? 1 : 0));
-	}
-
-	/**
-	 * Returns the octorok's type: 0 - normal, 1 - bomb shooter
-	 */
-	public int getType() {
-		return dataWatcher.getWatchableObjectByte(OCTOROK_TYPE_INDEX);
-	}
-
-	/**
-	 * Sets the octorok's type: 0 - normal, 1 - bomb shooter
-	 */
-	@Override
-	public EntityOctorok setType(int type) {
-		dataWatcher.updateObject(OCTOROK_TYPE_INDEX, (byte)(type % 2));
-		return this;
-	}
-
-	@Override
 	protected float getSoundVolume() {
 		return 0.4F;
 	}
@@ -129,7 +86,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 
 	@Override
 	public boolean canAttackClass(Class<? extends EntityLivingBase> clazz) {
-		return super.canAttackClass(clazz) && clazz != EntityOctorok.class;
+		return !EntityOctorok.class.isAssignableFrom(clazz) && super.canAttackClass(clazz);
 	}
 
 	@Override
@@ -160,7 +117,6 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 			if (squidRotation < (float) Math.PI) {
 				f = squidRotation / (float) Math.PI;
 				tentacleAngle = MathHelper.sin(f * f * (float) Math.PI) * (float) Math.PI * 0.25F;
-
 				if ((double) f > 0.75D) {
 					randomMotionSpeed = 1.0F;
 					field_70871_bB = 1.0F;
@@ -213,6 +169,8 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		EntityLivingBase entityToAttack = getAttackTarget();
 		if (entityToAttack == null) {
 			entityToAttack = findPlayerToAttack();
+		} else if (entityToAttack instanceof EntityPlayer && ((EntityPlayer) entityToAttack).capabilities.disableDamage) {
+			entityToAttack = findPlayerToAttack();
 		} else if (entityToAttack.isEntityAlive() && canAttackClass(entityToAttack.getClass())) {
 			distance = entityToAttack.getDistanceToEntity(this);
 			if (distance > 16.0F) {
@@ -264,19 +222,35 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 
 	@Override
 	public boolean attackEntityFrom(DamageSource source, float amount) {
-		if (isEntityInvulnerable(source) || source.isExplosion()) {
+		if (this.isEntityInvulnerable(source) || source.isExplosion()) {
 			return false;
+		} else if (source.getSourceOfDamage() instanceof IReflectableOrigin && ((IReflectableOrigin) source.getSourceOfDamage()).getReflectedOriginEntity() == this) {
+			// Auto-kill when hit by its own reflected projectile
+			return super.attackEntityFrom(source, Math.max(amount, this.getHealth() * 2.0F));
+		} else if (source.getEntity() instanceof EntityOctorok) {
+			return false; // don't want octoroks killing their own kind
 		} else if (super.attackEntityFrom(source, amount)) {
 			Entity entity = source.getEntity();
 			if (entity != this && entity instanceof EntityLivingBase && riddenByEntity != entity && ridingEntity != entity) {
 				setAttackTarget((EntityLivingBase) entity);
-				return true;
-			} else {
-				return true;
 			}
-		} else {
-			return false;
+			return true;
 		}
+		return false;
+	}
+
+	/**
+	 * Return the number of ticks that must pass before the Octorok may make another attack
+	 * @param melee True if the last attack was a melee attack
+	 * @return
+	 */
+	protected int getNextAttackTime(boolean melee) {
+		if (melee) {
+			return 20;
+		}
+		// Minimum ticks between each ranged attack depends on difficulty
+		int min = 20 * (4 - this.worldObj.getDifficulty().getDifficultyId());
+		return min + this.rand.nextInt(21) + this.rand.nextInt(21);
 	}
 
 	/**
@@ -284,7 +258,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	 */
 	@Override
 	public boolean attackEntityAsMob(Entity entity) {
-		attackTime = 20;
+		this.attackTime = this.getNextAttackTime(true);
 		float damage = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 		int knockback = 0;
 		if (entity instanceof EntityLivingBase) {
@@ -302,51 +276,46 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 			if (j > 0) {
 				entity.setFire(j * 4);
 			}
-			if (entity instanceof EntityLivingBase) {
-				EnchantmentHelper.applyThornEnchantments((EntityLivingBase) entity, this);
-			}
-			EnchantmentHelper.applyArthropodEnchantments(this, entity);
+			this.applyEnchantments(this, entity);
 		}
 		return flag;
-	}
-
-	/**
-	 * Attack entity with ranged attack
-	 */
-	protected void attackEntityWithRangedAttack(EntityLivingBase entity) {
-		attackTime = rand.nextInt(20) + rand.nextInt(20) + 20;
-		float f = (float) getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-		Entity projectile;
-		int difficulty = worldObj.getDifficulty().getDifficultyId();
-		if (getType() == 1) {
-			projectile = new EntityBomb(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
-					setType(BombType.BOMB_WATER).setFuseTime(12 - (difficulty * 2)).setNoGrief().setMotionFactor(0.25F).setDamage(f * 2.0F * difficulty);
-		} else {
-			projectile = new EntityThrowingRock(worldObj, this, (EntityLivingBase) entity, 1.0F, (float)(14 - difficulty * 4)).
-					setIgnoreWater().setDamage(f * difficulty);
-		}
-		// TODO worldObj.playSoundAtEntity(this, ModInfo.SOUND_WEB_SPLAT, 1.0F, 1.0F / (rand.nextFloat() * 0.4F + 1.0F));
-		if (!worldObj.isRemote) {
-			worldObj.spawnEntityInWorld(projectile);
-		}
 	}
 
 	/**
 	 * Determines which type of attack (melee or ranged) to perform against the target entity
 	 */
 	protected void attackEntity(Entity entity, float distance) {
-		if (attackTime <= 0) {
-			if (distance < 2.0F && entity.getEntityBoundingBox().maxY > getEntityBoundingBox().minY && entity.getEntityBoundingBox().minY < getEntityBoundingBox().maxY) {
-				attackEntityAsMob(entity);
-			} else if (rand.nextInt(60) == 0 && entity instanceof EntityLivingBase) {
-				attackEntityWithRangedAttack((EntityLivingBase) entity);
+		if (this.attackTime > 0) {
+			// can't attack right now
+		} else if (distance < 2.0F) {
+			if (entity.getEntityBoundingBox().maxY > getEntityBoundingBox().minY && entity.getEntityBoundingBox().minY < getEntityBoundingBox().maxY) {
+				this.attackEntityAsMob(entity);
+			}
+		} else if (this.rand.nextInt(60) == 0 && entity instanceof EntityLivingBase && TargetUtils.isTargetInSight(this, entity)) {
+			this.attackTime = this.getNextAttackTime(false);
+			float damage = (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+			Entity projectile = this.getProjectile((EntityLivingBase) entity, damage);
+			if (!this.worldObj.isRemote && projectile != null) {
+				this.worldObj.playSoundAtEntity(this, Sounds.CORK, 1.0F, 1.0F / (this.rand.nextFloat() * 0.4F + 1.0F));
+				this.worldObj.spawnEntityInWorld(projectile);
 			}
 		}
 	}
 
+	/**
+	 * @return the projectile to shoot at the given target
+	 */
+	protected Entity getProjectile(EntityLivingBase target, float damage) {
+		int difficulty = worldObj.getDifficulty().getDifficultyId();
+		return new EntityThrowingRock(worldObj, this, target, 0.2F + (difficulty * 0.1F), (float)(14 - difficulty * 4))
+				.setIgnoreWater()
+				.setDamage(damage * difficulty)
+				.setGravityVelocity(0.001F);
+	}
+
 	@Override
 	protected Item getDropItem() {
-		return (getType() > 0 || rand.nextFloat() < 0.5F ? Items.dye : ZSSItems.throwingRock);
+		return ZSSItems.throwingRock;
 	}
 
 	@Override
@@ -359,16 +328,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 
 	@Override
 	protected void addRandomDrop() {
-		switch(rand.nextInt(8)) {
-		case 0:
-			entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal()), 0.0F);
-			break;
-		default:
-			if (getType() == 1) {
-				entityDropItem(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 0.0F);
-			} else {
-				entityDropItem(new ItemStack(rand.nextInt(3) == 0 ? Items.emerald : ZSSItems.smallHeart), 0.0F);
-			}
+		switch (rand.nextInt(8)) {
+		case 1: this.entityDropItem(new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal()), 0.0F); break;
+		default: this.entityDropItem(rand.nextInt(3) == 0 ? new ItemStack(Items.emerald) : new ItemStack(ZSSItems.smallHeart), 0.0F);
 		}
 	}
 
@@ -380,9 +342,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	@Override
 	public ItemStack getEntityLoot(EntityPlayer player, WhipType whip) {
 		if (rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
-			return new ItemStack(ZSSItems.treasure, 1, Treasures.TENTACLE.ordinal());
-		} else if (getType() == 1 && rand.nextFloat() < (0.1F * (1 + whip.ordinal()))) {
-			return new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal());
+			return new ItemStack(ZSSItems.treasure,1,Treasures.TENTACLE.ordinal());
 		}
 		return new ItemStack(getDropItem(), 1, 0);
 	}
@@ -395,20 +355,6 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	@Override
 	public boolean isHurtOnTheft(EntityPlayer player, WhipType whip) {
 		return Config.getHurtOnSteal();
-	}
-
-	@Override
-	public void writeEntityToNBT(NBTTagCompound compound) {
-		super.writeEntityToNBT(compound);
-		compound.setByte("octorokType", (byte) getType());
-	}
-
-	@Override
-	public void readEntityFromNBT(NBTTagCompound compound) {
-		super.readEntityFromNBT(compound);
-		if (compound.hasKey("octorokType")) {
-			setType(compound.getByte("octorokType"));
-		}
 	}
 
 	//========================= Below this line copied from EntitySquid ===================//

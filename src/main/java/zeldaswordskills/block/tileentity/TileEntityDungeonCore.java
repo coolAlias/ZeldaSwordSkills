@@ -57,6 +57,7 @@ import zeldaswordskills.entity.mobs.EntityKeeseFire;
 import zeldaswordskills.entity.mobs.EntityKeeseIce;
 import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorokPink;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
@@ -298,8 +299,11 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements ITi
 		int rarity = worldObj.rand.nextInt(64) - MathHelper.floor_double(f * 2);
 		int type = -1; // for IEntityVariants to set a specific type
 		if (block.getMaterial() == Material.water) {
-			mob = new EntityOctorok(worldObj);
-			type = (rarity < 8 ? 1 : 0);
+			if (rarity < 8) {
+				mob = new EntityOctorokPink(this.worldObj);
+			} else {
+				mob = new EntityOctorok(this.worldObj);
+			}
 		} else if (block.getMaterial() == Material.lava) {
 			if (rarity > 7) {
 				mob = new EntityKeeseFire(this.worldObj).setSpawnSwarm(false);
