@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,6 @@ import zeldaswordskills.api.entity.ai.EntityAction;
 import zeldaswordskills.api.entity.ai.IEntityDynamicAI;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
@@ -40,13 +39,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class EntityDekuFire extends EntityDekuBaba implements IEntityAdditionalSpawnData, IRangedAttackMob
 {
-	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
-	 */
-	public static String[] getDefaultBiomes() {
-		return BiomeType.getBiomeArray(new String[]{"hell"}, BiomeType.FIERY, BiomeType.JUNGLE, BiomeType.PLAINS);
-	}
-
 	public static final EntityAction ACTION_SPIT = new EntityAction(EntityDekuBase.flag_index++, 16, 7);
 	static {
 		EntityDekuBaba.registerAction(ACTION_SPIT);

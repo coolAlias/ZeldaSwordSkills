@@ -150,10 +150,10 @@ public class ZSSEntities
 		addSpawnLocations(EntityChuYellow.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.PLAINS, BiomeType.JUNGLE));
 		addSpawnLocations(EntityDarknut.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.MOUNTAIN, BiomeType.PLAINS));
 		addSpawnLocations(EntityDarknutMighty.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.MOUNTAIN, BiomeType.PLAINS));
-		addSpawnLocations(EntityDekuBaba.class, EntityDekuBaba.getDefaultBiomes());
-		addSpawnLocations(EntityDekuFire.class, EntityDekuFire.getDefaultBiomes());
-		addSpawnLocations(EntityDekuWithered.class, EntityDekuWithered.getDefaultBiomes());
-		addSpawnLocations(EntityFairy.class, BiomeType.RIVER.defaultBiomes);
+		addSpawnLocations(EntityDekuBaba.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.JUNGLE, BiomeType.PLAINS, BiomeType.RIVER));
+		addSpawnLocations(EntityDekuFire.class, BiomeType.getBiomeArray(new String[]{"hell"}, BiomeType.FIERY, BiomeType.JUNGLE, BiomeType.PLAINS));
+		addSpawnLocations(EntityDekuWithered.class, BiomeType.getBiomeArray(new String[]{"hell"}, BiomeType.FIERY, BiomeType.ARID, BiomeType.PLAINS));
+		addSpawnLocations(EntityFairy.class, BiomeType.getBiomeArray(null, BiomeType.RIVER));
 		addSpawnLocations(EntityKeese.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.PLAINS, BiomeType.MOUNTAIN));
 		addSpawnLocations(EntityKeeseCursed.class, BiomeType.getBiomeArray(null, BiomeType.FIERY, BiomeType.JUNGLE, BiomeType.RIVER));
 		addSpawnLocations(EntityKeeseFire.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.JUNGLE));
@@ -295,8 +295,7 @@ public class ZSSEntities
 
 		// NATURALLY SPAWNING MOBS
 		registerEntity(EntityFairy.class, "fairy", ++modEntityIndex, 80, 0xADFF2F, 0xFFFF00);
-		EntityRegistry.registerModEntity(EntityNavi.class, "navi", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-
+		EntityRegistry.registerModEntity(EntityNavi.class, "fairy.navi", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
 		registerEntity(EntityDekuBaba.class, "baba_deku", ++modEntityIndex, 80, 0x33CC33, 0x0000FF);
 		registerEntity(EntityDekuFire.class, "baba_fire", ++modEntityIndex, 80, 0xFF0000, 0x0000FF);
 		registerEntity(EntityDekuWithered.class, "baba_withered", ++modEntityIndex, 80, 0x8B5A00, 0x0000FF);

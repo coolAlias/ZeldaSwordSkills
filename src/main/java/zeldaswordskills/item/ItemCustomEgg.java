@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -42,7 +41,6 @@ import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.CustomEntityList;
-import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.ref.ModInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -50,8 +48,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 /**
  * 
  * Spawn eggs for custom mod entities, using {@link CustomEntityList#addMapping(Class, String, Integer...) CustomEntityList.addMapping}
- * to add the entity ID mapping to the custom egg list. Entities that implement {@link IEntityVariant}
- * should use {@link ItemCustomVariantEgg} instead. 
+ * to add the entity ID mapping to the custom egg list.
  *
  */
 public class ItemCustomEgg extends Item implements IRightClickEntity, IUnenchantable
@@ -161,7 +158,7 @@ public class ItemCustomEgg extends Item implements IRightClickEntity, IUnenchant
 				entity.setLocationAndAngles(x, y, z, MathHelper.wrapAngleTo180_float(world.rand.nextFloat() * 360.0F), 0.0F);
 				entityliving.rotationYawHead = entityliving.rotationYaw;
 				entityliving.renderYawOffset = entityliving.rotationYaw;
-				entityliving.onSpawnWithEgg((IEntityLivingData) null);
+				entityliving.onSpawnWithEgg(null);
 				world.spawnEntityInWorld(entity);
 				entityliving.playLivingSound();
 			}
