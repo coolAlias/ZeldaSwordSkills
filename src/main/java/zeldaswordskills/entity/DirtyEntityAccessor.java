@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,19 +24,26 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import zeldaswordskills.ZSSMain;
 
-public class DirtyEntityAccessor {
+public class DirtyEntityAccessor
+{
+	/** Accessible reference to {@code EntityThrowable#thrower */
+	private static Field throwableThrower;
 
 	/** Accessible reference to {@code EntityLivingBase#damageEntity} */
 	private static Method damageEntity;
+
 	/** Accessible reference to {@code EntityLivingBase#applyPotionDamageCalculations */
 	private static Method applyPotionDamageCalculations;
+
 	/** Accessible reference to {@code Entity#setSize */
 	private static Method setSize;
+
 	/** Accessible reference to {@code EntityLiving#experienceValue */
 	private static Field experienceValue;
 
@@ -127,6 +134,20 @@ public class DirtyEntityAccessor {
 			}
 		} else {
 			ZSSMain.logger.warn("Attempted to restore original size without any available data");
+		}
+	}
+
+	/**
+	 * Sets the value of the entity returned by {@link EntityThrowable#getThrower()}
+	 */
+	public static void setThrowableThrower(EntityThrowable throwable, EntityLivingBase thrower) {
+		if (throwableThrower == null) {
+			throwableThrower = ReflectionHelper.findField(EntityThrowable.class, "field_70192_c", "thrower");
+		}
+		try {
+			throwableThrower.set(throwable, thrower);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

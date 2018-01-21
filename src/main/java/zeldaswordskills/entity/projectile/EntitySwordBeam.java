@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
@@ -214,11 +215,16 @@ public class EntitySwordBeam extends EntityThrowable implements IReflectable, IE
 	}
 
 	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, Entity shooter) {
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
 		return 0.0F; // not able to be reflected
 	}
 
 	@Override
-	public void onReflected(ItemStack shield, EntityPlayer player, Entity shooter, Entity oldEntity) {}
+	public float getReflectedWobble(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return -1.0F; // default randomized wobble
+	}
+
+	@Override
+	public void onReflected(ItemStack shield, EntityPlayer player, DamageSource source) {}
 
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -20,18 +20,23 @@ package zeldaswordskills.entity.projectile;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
+import zeldaswordskills.entity.DirtyEntityAccessor;
 
 /**
  * 
  * Abstract class that provides constructor for throwing entity as a mob
  *
  */
-public abstract class EntityMobThrowable extends EntityThrowable implements IEntityAdditionalSpawnData
+public abstract class EntityMobThrowable extends EntityThrowable implements IEntityAdditionalSpawnData, IReflectableOrigin
 {
 	/** The throwing entity's ID, in case it is not a player. Only used after loading from NBT */
 	private int throwerId;
@@ -41,6 +46,15 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 
 	/** Projectile gravity velocity */
 	private float gravity = 0.03F;
+
+	/** Entity ID of the original thrower, set when the projectile is reflected; not synced to client by default */
+	protected int originId = -1;
+
+	/** Set to true if this projectile gets reflected back toward the original thrower */
+	protected boolean wasReflected;
+
+	/** Whether this projectile ignores water during motion updates */
+	protected boolean ignoreWater;
 
 	public EntityMobThrowable(World world) {
 		super(world);
@@ -81,9 +95,19 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 		EntityLivingBase thrower = super.getThrower();
 		if (thrower == null) {
 			Entity entity = worldObj.getEntityByID(throwerId);
-			return (entity instanceof EntityLivingBase ? (EntityLivingBase) entity : null);
+			if (entity instanceof EntityLivingBase) {
+				thrower = (EntityLivingBase) entity;
+				this.setThrower(thrower); // save for next time
+			}
 		}
 		return thrower;
+	}
+
+	/**
+	 * Sets this projectile's thrower
+	 */
+	public void setThrower(EntityLivingBase thrower) {
+		DirtyEntityAccessor.setThrowableThrower(this, thrower);
 	}
 
 	/** Returns the amount of damage this entity will cause upon impact */
@@ -121,6 +145,28 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 	}
 
 	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return 1.0F;
+	}
+
+	@Override
+	public float getReflectedWobble(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return -1.0F; // default randomized wobble
+	}
+
+	@Override
+	public void onReflected(ItemStack shield, EntityPlayer player, DamageSource source) {
+		this.wasReflected = true;
+		this.originId = (this.getThrower() == null ? -1 : this.getThrower().getEntityId());
+		this.setThrower(player);
+	}
+
+	@Override
+	public Entity getReflectedOriginEntity() {
+		return (this.originId > -1 ? this.worldObj.getEntityByID(this.originId) : null);
+	}
+
+	@Override
 	public void onUpdate() {
 		super.onUpdate();
 		if ((!gravityCheck() || posY > 255.0F) && !worldObj.isRemote) {
@@ -140,6 +186,7 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
 		compound.setInteger("throwerId", (getThrower() == null ? -1 : getThrower().getEntityId()));
+		compound.setInteger("originId", originId);
 		compound.setFloat("damage", damage);
 		compound.setFloat("gravity", gravity);
 	}
@@ -148,6 +195,7 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		throwerId = compound.getInteger("throwerId");
+		originId = compound.getInteger("originId");
 		damage = compound.getFloat("damage");
 		gravity = compound.getFloat("gravity");
 	}
@@ -155,10 +203,13 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
 		buffer.writeFloat(gravity);
+		this.throwerId = (this.getThrower() == null ? -1 : this.getThrower().getEntityId());
+		buffer.writeInt(this.throwerId);
 	}
 
 	@Override
 	public void readSpawnData(ByteBuf buffer) {
 		gravity = buffer.readFloat();
+		this.throwerId = buffer.readInt();
 	}
 }

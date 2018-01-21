@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -170,7 +170,7 @@ public class ZSSCombatEvents
 				ItemZeldaShield shield = (ItemZeldaShield) stack.getItem();
 				if (ZSSPlayerInfo.get(player).canBlock() && shield.canBlockDamage(stack, event.source)) {
 					Entity opponent = event.source.getEntity();
-					if (opponent != null && TargetUtils.isTargetInFrontOf(opponent, player, 60)) {
+					if (opponent != null && TargetUtils.isTargetInFrontOf(player, opponent, 60)) {
 						event.ammount = shield.onBlock(player, stack, event.source, event.ammount);
 						event.setCanceled(event.ammount < 0.1F);
 					}

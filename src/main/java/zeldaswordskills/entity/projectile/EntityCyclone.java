@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
@@ -29,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -43,9 +46,6 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.client.particle.FXCycloneRing;
 import zeldaswordskills.ref.Config;
@@ -62,10 +62,13 @@ public class EntityCyclone extends EntityMobThrowable
 
 	/** Watchable object index for cyclone's area of effect */
 	private static final int AREA_INDEX = 23;
+
 	/** Keeps track of entities already affected so they don't get attacked twice */
 	private List<Integer> affectedEntities = new ArrayList<Integer>(); 
+
 	/** ItemStack version of captured drops is more efficient for NBT storage */
 	private List<ItemStack> capturedItems = new ArrayList<ItemStack>();
+
 	/** Whether this cyclone can destroy blocks */
 	private boolean canGrief = true;
 
@@ -137,6 +140,11 @@ public class EntityCyclone extends EntityMobThrowable
 
 	@Override
 	protected float getGravityVelocity() {
+		return 0.0F;
+	}
+
+	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
 		return 0.0F;
 	}
 
@@ -278,7 +286,7 @@ public class EntityCyclone extends EntityMobThrowable
 		} else {
 			pitch = 0;
 		}
-		
+
 		//TODO: when destroying the cyclone, set the particles to start fading
 
 		EffectRenderer effectRenderer = Minecraft.getMinecraft().effectRenderer;
