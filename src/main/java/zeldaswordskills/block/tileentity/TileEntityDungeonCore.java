@@ -43,7 +43,6 @@ import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
-import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityChuBlue;
 import zeldaswordskills.entity.mobs.EntityChuGreen;
@@ -298,7 +297,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements ITi
 		EntityLiving mob = null;
 		float f = worldObj.getDifficultyForLocation(pos).getClampedAdditionalDifficulty();
 		int rarity = worldObj.rand.nextInt(64) - MathHelper.floor_double(f * 2);
-		int type = -1; // for IEntityVariants to set a specific type
 		if (block.getMaterial() == Material.water) {
 			if (rarity < 8) {
 				mob = new EntityOctorokPink(this.worldObj);
@@ -380,9 +378,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements ITi
 		if (mob != null) {
 			mob.setPosition(pos.getX() + 0.5D, pos.getY() + 1.5D, pos.getZ() + 0.5D);
 			mob.onInitialSpawn(worldObj.getDifficultyForLocation(pos), null);
-			if (type > -1 && mob instanceof IEntityVariant) {
-				((IEntityVariant) mob).setType(type);
-			}
 			worldObj.spawnEntityInWorld(mob);
 			mob.playLivingSound();
 		}

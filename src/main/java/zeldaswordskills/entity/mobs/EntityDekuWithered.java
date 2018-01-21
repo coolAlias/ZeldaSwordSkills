@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2016> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,17 +22,9 @@ import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
-import zeldaswordskills.util.BiomeType;
 
 public class EntityDekuWithered extends EntityDekuBase
 {
-	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
-	 */
-	public static String[] getDefaultBiomes() {
-		return BiomeType.getBiomeArray(new String[]{"hell"}, BiomeType.FIERY, BiomeType.ARID, BiomeType.PLAINS);
-	}
-
 	public EntityDekuWithered(World world) {
 		super(world);
 		this.experienceValue = 2;

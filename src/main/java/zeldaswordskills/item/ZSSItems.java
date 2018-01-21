@@ -63,7 +63,6 @@ import zeldaswordskills.block.ZSSBlocks;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
@@ -298,9 +297,7 @@ public class ZSSItems
 	maskMajora;
 
 	//================ SPAWN EGGS TAB ================//
-	public static Item
-	eggSpawner, // for all Entities with only one type
-	eggSkulltula;
+	public static Item eggSpawner; // egg item for all ZSS spawnable entities
 
 	/**
 	 * Initializes mod item indices from configuration file
@@ -673,7 +670,6 @@ public class ZSSItems
 
 		//===================== SPAWN EGGS TAB =====================//
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("spawn_egg");
-		eggSkulltula = new ItemCustomVariantEgg(EntitySkulltula.class, "skulltula").setUnlocalizedName("egg_skulltula");
 	}
 
 	/**

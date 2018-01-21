@@ -426,8 +426,6 @@ public class Config
 	/*================== MOB SPAWNING =====================*/
 	/** Chance that a random mob will spawn inside of secret rooms (0 to disable) [0-100] */
 	private static float roomSpawnMobChance;
-	/** Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType [0-100] */
-	private static float mobVariantChance;
 	/** Minimum number of days required to pass before Darknuts may spawn [0-30] */
 	private static int minDaysToSpawnDarknut;
 	/** Minimum number of days required to pass before Wizzrobes may spawn [0-30] */
@@ -734,7 +732,6 @@ public class Config
 		config.addCustomCategoryComment(category, "Mobs use the 'Biome Type' lists to populate their individual spawn settings the first time the game is loaded.\nChanging the type lists after this point has no effect UNLESS you also delete the mob spawn locations in the\nconfig - this will force them to re-populate the next time the game is loaded.\nAlternatively, you may add new biomes directly to the individual mob spawn entries and completely ignore biome type.");
 
 		roomSpawnMobChance = 0.01F * config.getFloat("Mob Secret Room Spawn Chance", category, 25, 0, 100, "Chance that a random mob will spawn inside of secret rooms (0 to disable)", "config.zss.mob_spawns.room_spawn_mob_chance");
-		mobVariantChance = 0.01F * config.getFloat("Mob Variant Secret Room Chance", category, 20, 0, 100, "Chance that mobs with subtypes spawn with a random variation instead of being determined solely by BiomeType", "config.zss.mob_spawns.mob_variant_chance");
 		minDaysToSpawnDarknut = 24000 * config.getInt("Darknut Grace Period", category, 7, 0, 30, "Minimum number of days required to pass before Darknuts may spawn", "config.zss.mob_spawns.min_days_to_spawn_darknut");
 		minDaysToSpawnWizzrobe = 24000 * config.getInt("Wizzrode Grace Period", category, 7, 0, 30, "Minimum number of days required to pass before Wizzrobes may spawn", "config.zss.mob_spawns.min_days_to_spawn_wizzrobe");
 
@@ -954,8 +951,6 @@ public class Config
 	public static float getMaskBuyChance() { return maskBuyChance; }
 	/*================== MOB SPAWNING =====================*/
 	public static float getRoomSpawnMobChance() { return roomSpawnMobChance; }
-	public static boolean areMobVariantsAllowed() { return mobVariantChance > 0; }
-	public static float getMobVariantChance() { return mobVariantChance; }
 	public static int getTimeToSpawnDarknut() { return minDaysToSpawnDarknut; }
 	public static int getTimeToSpawnWizzrobe() { return minDaysToSpawnWizzrobe; }
 

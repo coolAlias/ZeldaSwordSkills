@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -48,15 +48,13 @@ import zeldaswordskills.api.item.IRightClickEntity;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.CustomEntityList;
-import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.item.dispenser.BehaviorDispenseCustomMobEgg;
 import zeldaswordskills.ref.ModInfo;
 
 /**
  * 
  * Spawn eggs for custom mod entities, using {@link CustomEntityList#addMapping(Class, String, Integer...) CustomEntityList.addMapping}
- * to add the entity ID mapping to the custom egg list. Entities that implement {@link IEntityVariant}
- * should use {@link ItemCustomVariantEgg} instead. 
+ * to add the entity ID mapping to the custom egg list.
  *
  */
 public class ItemCustomEgg extends BaseModItem implements ICustomDispenserBehavior, IRightClickEntity, IUnenchantable

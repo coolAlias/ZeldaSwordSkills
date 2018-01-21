@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -53,19 +53,11 @@ import zeldaswordskills.api.entity.ai.IEntityDynamicAI;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 
 public class EntityDekuBaba extends EntityDekuBase implements IEntityBombEater, IEntityDynamic, IEntityCustomTarget
 {
-	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
-	 */
-	public static String[] getDefaultBiomes() {
-		return BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.JUNGLE, BiomeType.PLAINS, BiomeType.RIVER);
-	}
-
 	/** Health update flag signaling that a bomb was ingested */
 	public static final byte BOMB_INGESTED = EntityDekuBase.flag_index++;
 	public static final EntityAction ACTION_SPROUT = new EntityAction(EntityDekuBase.flag_index++, 11, 5);
