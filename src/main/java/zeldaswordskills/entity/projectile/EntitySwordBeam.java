@@ -17,13 +17,13 @@
 
 package zeldaswordskills.entity.projectile;
 
-import io.netty.buffer.ByteBuf;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -31,17 +31,11 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils;
-import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SwordBeam;
 import zeldaswordskills.util.WorldUtils;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * 
@@ -53,7 +47,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * entities in its direct path.
  *
  */
-public class EntitySwordBeam extends EntityThrowable implements IReflectable, IEntityAdditionalSpawnData
+public class EntitySwordBeam extends EntityMobThrowable
 {
 	/** Damage that will be inflicted on impact */
 	private float damage = 4.0F;
@@ -146,20 +140,19 @@ public class EntitySwordBeam extends EntityThrowable implements IReflectable, IE
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (!worldObj.isRemote) {
-			EntityPlayer player = (getThrower() instanceof EntityPlayer ? (EntityPlayer) getThrower() : null);
+			EntityLivingBase thrower = this.getThrower();
+			EntityPlayer player = (thrower instanceof EntityPlayer ? (EntityPlayer) thrower : null);
 			SwordBeam skill = (player != null ? (SwordBeam) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
 			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
-				if (entity == player) { return; }
-				if (player != null) {
-					if (skill != null) {
-						skill.onImpact(player, false);
-					}
-					if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, player).setProjectile(), damage)) {
-						WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_SUCCESSFUL_HIT, 0.4F, 0.5F);
-					}
-					damage *= 0.8F;
+				if (entity == thrower) { return; }
+				if (player != null && skill != null) {
+					skill.onImpact(player, false);
 				}
+				if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, thrower).setProjectile(), damage)) {
+					WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_SUCCESSFUL_HIT, 0.4F, 0.5F);
+				}
+				damage *= 0.8F;
 				if (!isMaster) {
 					setDead();
 				}
@@ -175,24 +168,6 @@ public class EntitySwordBeam extends EntityThrowable implements IReflectable, IE
 					setDead();
 				}
 			}
-		}
-	}
-
-	@Override
-	public void writeSpawnData(ByteBuf buffer) {
-		String throwerName = "";
-		if (getThrower() != null) {
-			throwerName = getThrower().getCommandSenderName();
-		}
-		ByteBufUtils.writeUTF8String(buffer, throwerName);
-	}
-
-	@Override
-	public void readSpawnData(ByteBuf buffer) {
-		String throwerName = ByteBufUtils.readUTF8String(buffer);
-		if (getThrower() == null && throwerName != null && throwerName.length() > 0) {
-			// EntityThrowable#thrower is private with no setter -.-
-			ReflectionHelper.setPrivateValue(EntityThrowable.class, this, worldObj.getPlayerEntityByName(throwerName), "field_70192_c", "thrower");
 		}
 	}
 
@@ -218,13 +193,4 @@ public class EntitySwordBeam extends EntityThrowable implements IReflectable, IE
 	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
 		return 0.0F; // not able to be reflected
 	}
-
-	@Override
-	public float getReflectedWobble(ItemStack shield, EntityPlayer player, DamageSource source) {
-		return -1.0F; // default randomized wobble
-	}
-
-	@Override
-	public void onReflected(ItemStack shield, EntityPlayer player, DamageSource source) {}
-
 }
