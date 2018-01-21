@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -85,13 +85,13 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 
 	/** Percent of damage from magical AoE attacks that is blocked, if any */
 	private final float magicReduction;
-	
+
 	/** Time for which blocking will be disabled after a successful block */
 	private final int recoveryTime;
-	
+
 	/** Rate at which BG2 stamina bar will decay per tick */
 	private final float bg2DecayRate;
-	
+
 	/** Rate at which BG2 stamina bar will recover per tick; 0.012F takes 5 seconds */
 	private final float bg2RecoveryRate;
 
@@ -169,7 +169,7 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
 				float chance = (source.isMagicDamage() ? (1F / 3F) : 1.0F);
 				if (source.getSourceOfDamage() instanceof IReflectable) {
-					((IReflectable) source.getSourceOfDamage()).getReflectChance(shield, player, source.getEntity());
+					((IReflectable) source.getSourceOfDamage()).getReflectChance(shield, player, source);
 				}
 				if (player.worldObj.rand.nextFloat() < chance) {
 					Entity projectile = null;
@@ -189,9 +189,14 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 						double motionX = (double)(-MathHelper.sin(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
 						double motionZ = (double)(MathHelper.cos(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
 						double motionY = (double)(-MathHelper.sin(player.rotationPitch / 180.0F * (float) Math.PI));
-						TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, 2.0F + (20.0F * player.worldObj.rand.nextFloat()), false);
+						float wobble = 2.0F + (20.0F * player.worldObj.rand.nextFloat());
 						if (projectile instanceof IReflectable) {
-							((IReflectable) projectile).onReflected(shield, player, source.getEntity(), source.getSourceOfDamage());
+							float alt_wobble = ((IReflectable) projectile).getReflectedWobble(shield, player, source);
+							wobble = (alt_wobble < 0.0F ? wobble : alt_wobble);
+						}
+						TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, wobble, false);
+						if (projectile instanceof IReflectable) {
+							((IReflectable) projectile).onReflected(shield, player, source);
 						}
 						player.worldObj.spawnEntityInWorld(projectile);
 					}

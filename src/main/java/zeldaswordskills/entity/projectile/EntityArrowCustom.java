@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -39,6 +39,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.TargetUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
@@ -52,7 +53,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * multiple overridable steps
  *
  */
-public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalSpawnData
+public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalSpawnData, IReflectable
 {
 	/** Watchable object index for whether this arrow is a homing arrow */
 	private static final int HOMING_DATAWATCHER_INDEX = 23;
@@ -172,6 +173,25 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	public EntityArrowCustom setArrowItem(Item item) {
 		arrowItem = item;
 		return this;
+	}
+
+	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return 1.0F;
+	}
+
+	@Override
+	public float getReflectedWobble(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return -1.0F; // default randomized wobble
+	}
+
+	@Override
+	public void onReflected(ItemStack shield, EntityPlayer player, DamageSource source) {
+		this.shootingEntity = player;
+		if (this.isHomingArrow()) {
+			this.setHomingArrow(false);
+			this.setTarget(null);
+		}
 	}
 
 	@Override

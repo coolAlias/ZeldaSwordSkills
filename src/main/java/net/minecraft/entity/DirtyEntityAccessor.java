@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,19 @@
 
 package net.minecraft.entity;
 
+import java.lang.reflect.Field;
+
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import zeldaswordskills.ZSSMain;
 
-public class DirtyEntityAccessor {
+public class DirtyEntityAccessor
+{
+	/** Accessible reference to {@code EntityThrowable#thrower */
+	private static Field throwableThrower;
 
 	/** Damages the target for the amount of damage using the vanilla method; posts LivingHurtEvent */
 	public static void damageEntity(EntityLivingBase target, DamageSource source, float amount) {
@@ -75,6 +82,20 @@ public class DirtyEntityAccessor {
 			}
 		} else {
 			ZSSMain.logger.warn("Attempted to restore original size without any available data");
+		}
+	}
+
+	/**
+	 * Sets the value of the entity returned by {@link EntityThrowable#getThrower()}
+	 */
+	public static void setThrowableThrower(EntityThrowable throwable, EntityLivingBase thrower) {
+		if (throwableThrower == null) {
+			throwableThrower = ReflectionHelper.findField(EntityThrowable.class, "field_70192_c", "thrower");
+		}
+		try {
+			throwableThrower.set(throwable, thrower);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -42,7 +41,6 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
-import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.ref.Sounds;
@@ -61,7 +59,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Set the MagicType and AoE before spawning the entity or the client side will not know about it.
  *
  */
-public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
+public class EntityMagicSpell extends EntityMobThrowable
 {
 	/** The spell's magic type */
 	private MagicType type = MagicType.FIRE;
@@ -161,11 +159,11 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 	 * Returns a damage source corresponding to the magic type (e.g. fire for fire, etc.)
 	 */
 	protected DamageSource getDamageSource() {
-		DamageSource source = new DamageSourceFireIndirect("blast.fire", this, getThrower(), true).setProjectile().setMagicDamage();
+		DamageSource source = new DamageSourceFireIndirect("blast.fire", this, getThrower(), true).setMagicDamage();
 		switch(getType()) {
-		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1, true).setStunDamage(60, 10, true).setProjectile().setMagicDamage(); break;
-		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1, true).setProjectile().setMagicDamage(); break;
-		case WIND: source = new DamageSourceBaseIndirect("blast.wind", this, getThrower(), true).setProjectile().setMagicDamage(); break;
+		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1, true).setStunDamage(60, 10, true).setMagicDamage(); break;
+		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1, true).setMagicDamage(); break;
+		case WIND: source = new DamageSourceBaseIndirect("blast.wind", this, getThrower(), true).setMagicDamage(); break;
 		default: break; // fire
 		}
 		if (bypassesArmor) {
@@ -175,12 +173,14 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 	}
 
 	@Override
-	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, Entity shooter) {
+	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, DamageSource source) {
 		return (reflectChance < 0 ? 1.0F - (getArea() / 4.0F) : reflectChance);
 	}
 
 	@Override
-	public void onReflected(ItemStack mirrorShield, EntityPlayer player, Entity shooter, Entity oldEntity) {}
+	public float getReflectedWobble(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return 2.0F + this.rand.nextFloat() * 13.0F;
+	}
 
 	@Override
 	protected float func_70182_d() {
@@ -208,6 +208,17 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
+		// Give attacked entity a chance to block / reflect the projectile
+		if (mop.entityHit instanceof EntityLivingBase) {
+			if (mop.entityHit.attackEntityFrom(getDamageSource().setProjectile(), getDamage()) && !mop.entityHit.isDead) {
+				handlePostDamageEffects((EntityLivingBase) mop.entityHit);
+			}
+		}
+		// Skip AoE if projectile was reflected during above attack resolution
+		if (this.wasReflected) {
+			this.wasReflected = false; // set back to false so next impact can process
+			return;
+		}
 		double x = (mop.entityHit != null ? mop.entityHit.posX : mop.blockX + 0.5D);
 		double y = (mop.entityHit != null ? mop.entityHit.posY : mop.blockY + 0.5D);
 		double z = (mop.entityHit != null ? mop.entityHit.posZ : mop.blockZ + 0.5D);
@@ -215,6 +226,9 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 		List<EntityLivingBase> list = worldObj.getEntitiesWithinAABB(EntityLivingBase.class,
 				AxisAlignedBB.getBoundingBox(x - r, y - r, z - r, x + r, y + r, z + r));
 		for (EntityLivingBase entity : list) {
+			if (entity == mop.entityHit) {
+				continue; // already attacked entity struck directly
+			}
 			Vec3 vec3 = Vec3.createVectorHelper(posX - motionX, posY - motionY, posZ - motionZ);
 			Vec3 vec31 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
 			MovingObjectPosition mop1 = worldObj.rayTraceBlocks(vec3, vec31);
@@ -224,6 +238,7 @@ public class EntityMagicSpell extends EntityMobThrowable implements IReflectable
 					continue;
 				}
 			}
+			// Not projectile damage any longer
 			if (entity.attackEntityFrom(getDamageSource(), getDamage()) && !entity.isDead) {
 				handlePostDamageEffects(entity);
 			}

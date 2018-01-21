@@ -21,6 +21,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
@@ -137,6 +138,11 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	@Override
 	protected boolean shouldSpawnParticles() {
 		return true;
+	}
+
+	@Override
+	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, DamageSource source) {
+		return 0.0F; // Never called anyway since bombs only cause damage via explosions
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,9 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -143,6 +145,11 @@ public class EntityArrowElemental extends EntityArrowCustom
 	@Override
 	protected boolean shouldSpawnParticles() {
 		return true;
+	}
+
+	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return (this.getType() == ElementType.LIGHT ? 1.0F : 1.0F / 3.0F);
 	}
 
 	@Override

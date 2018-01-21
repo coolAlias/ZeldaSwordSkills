@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
@@ -220,6 +221,11 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	}
 
 	@Override
+	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, DamageSource source) {
+		return 0.0F; // Never called anyway since bombs only cause damage via explosions
+	}
+
+	@Override
 	public void onUpdate() {
 		super.onUpdate();
 		prevPosX = posX;
@@ -229,7 +235,6 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		// func_145771_j is pushOutOfBlocks
 		noClip = func_145771_j(posX, (boundingBox.minY + boundingBox.maxY) / 2.0D, posZ);
 		moveEntity(motionX, motionY, motionZ);
-
 		float f = 0.98F;
 		if (onGround) {
 			f = 0.58800006F;
@@ -238,20 +243,16 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 				f = block.slipperiness * 0.98F;
 			}
 		}
-
 		motionX *= (double) f;
 		motionY *= 0.9800000190734863D;
 		motionZ *= (double) f;
-
 		if (onGround) {
 			motionY *= -0.5D;
 		}
-
 		if (!worldObj.isRemote && ticksExisted > 5 && wasBombEaten()) {
 			setDead(); // make sure it's dead
 			return;
 		}
-
 		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
 		// func_147470_e is isBoundingBoxBurning
 		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
@@ -261,7 +262,6 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		} else if (ticksExisted % 20 == 0) {
 			playSound(Sounds.BOMB_FUSE, 1.0F, 2.0F + rand.nextFloat() * 0.4F);
 		}
-
 		if (!worldObj.isRemote && shouldExplode(inFire)) {
 			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, getRadius(), getDamage(), canGrief);
 			setDead();
@@ -303,7 +303,6 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 				return true;
 			}
 		}
-
 		return false;
 	}
 

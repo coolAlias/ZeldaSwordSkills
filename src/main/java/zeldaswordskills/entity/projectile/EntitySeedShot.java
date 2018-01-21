@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -188,7 +188,6 @@ public class EntitySeedShot extends EntityMobThrowable
 						mop.entityHit.addVelocity(motionX * d, 0.1D, motionZ * d);
 					}
 				}
-
 				if (mop.entityHit instanceof EntityLivingBase) {
 					EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
 					switch(getType()) {
@@ -196,15 +195,12 @@ public class EntitySeedShot extends EntityMobThrowable
 					case PUMPKIN: entity.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id,100,0)); break;
 					default:
 					}
-
 					if (getThrower() instanceof EntityLivingBase) {
 						// func_151384_a is the new way Thorns is handled
 						EnchantmentHelper.func_151384_a((EntityLivingBase) mop.entityHit, getThrower());
-						// TODO not sure what the following does yet, but it's in EntityArro
 						EnchantmentHelper.func_151385_b((EntityLivingBase) getThrower(), mop.entityHit);
 					}
 				}
-
 				if (!(mop.entityHit instanceof EntityEnderman)) {
 					setDead();
 				}
@@ -238,7 +234,7 @@ public class EntitySeedShot extends EntityMobThrowable
 			}
 		}
 		// Only spawn particles if it hit something for sure
-		if (!isEntityAlive()) {
+		if (!isEntityAlive() && worldObj.isRemote) {
 			String particle = getType().particleName;
 			for (int i = 0; i < 4; ++i) {
 				worldObj.spawnParticle(particle,
