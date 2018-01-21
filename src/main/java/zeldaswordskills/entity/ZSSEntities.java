@@ -89,6 +89,7 @@ import zeldaswordskills.entity.mobs.EntityKeeseFire;
 import zeldaswordskills.entity.mobs.EntityKeeseIce;
 import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorokPink;
 import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
@@ -158,7 +159,8 @@ public class ZSSEntities
 		addSpawnLocations(EntityKeeseFire.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY, BiomeType.JUNGLE));
 		addSpawnLocations(EntityKeeseIce.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.TAIGA));
 		addSpawnLocations(EntityKeeseThunder.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.BEACH, BiomeType.MOUNTAIN));
-		addSpawnLocations(EntityOctorok.class, BiomeType.OCEAN.defaultBiomes);
+		addSpawnLocations(EntityOctorok.class, BiomeType.getBiomeArray(null, BiomeType.RIVER, BiomeType.OCEAN));
+		addSpawnLocations(EntityOctorokPink.class, BiomeType.getBiomeArray(null, BiomeType.OCEAN));
 		addSpawnLocations(EntityWizzrobeFire.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY));
 		addSpawnLocations(EntityWizzrobeGale.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.MOUNTAIN));
 		addSpawnLocations(EntityWizzrobeIce.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.TAIGA));
@@ -204,8 +206,10 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityKeeseIce.class, EnumCreatureType.ambient, 4, 4, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate][Keese] Thunder Keese spawn rate (0 to disable)[0+]", 2).getInt();
 		addSpawnableEntityData(EntityKeeseThunder.class, EnumCreatureType.ambient, 4, 4, rate);
-		rate = config.get("Mob Spawns", "[Spawn Rate] Octorok spawn rate (0 to disable)[0+]", 8).getInt();
+		rate = config.get("Mob Spawns", "[Spawn Rate][Octorok] Purple Octorok spawn rate (0 to disable)[0+]", 8).getInt();
 		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.waterCreature, 2, 4, rate);
+		rate = config.get("Mob Spawns", "[Spawn Rate][Octorok] Pink Octorok spawn rate (0 to disable)[0+]", 3).getInt();
+		addSpawnableEntityData(EntityOctorokPink.class, EnumCreatureType.waterCreature, 1, 2, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate][Wizzrobe] Fire Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
 		addSpawnableEntityData(EntityWizzrobeFire.class, EnumCreatureType.monster, 1, 1, rate);
 		rate = config.get("Mob Spawns", "[Spawn Rate][Wizzrobe] Gale Wizzrobe spawn rate (0 to disable)[0+]", 10).getInt();
@@ -307,10 +311,8 @@ public class ZSSEntities
 		registerEntity(EntityKeeseFire.class, "keese_fire", ++modEntityIndex, 80, 0x000000, 0xFF4500);
 		registerEntity(EntityKeeseIce.class, "keese_ice", ++modEntityIndex, 80, 0x000000, 0x40E0D0);
 		registerEntity(EntityKeeseThunder.class, "keese_thunder", ++modEntityIndex, 80, 0x000000, 0xFFD700);
-
-		EntityRegistry.registerModEntity(EntityOctorok.class, "octorok", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-		CustomEntityList.addMapping(EntityOctorok.class, "octorok", 0x68228B, 0xBA55D3, 0x68228B, 0xFF00FF);
-
+		registerEntity(EntityOctorok.class, "octorok_purple", ++modEntityIndex, 80, 0x68228B, 0xBA55D3);
+		registerEntity(EntityOctorokPink.class, "octorok_pink", ++modEntityIndex, 80, 0x68228B, 0xFF00FF);
 		registerEntity(EntityWizzrobeFire.class, "wizzrobe_fire", ++modEntityIndex, 80, 0x8B2500, 0xFF0000);
 		registerEntity(EntityWizzrobeGale.class, "wizzrobe_gale", ++modEntityIndex, 80, 0x8B2500, 0x00EE76);
 		registerEntity(EntityWizzrobeIce.class, "wizzrobe_ice", ++modEntityIndex, 80, 0x8B2500, 0x00B2EE);
@@ -377,7 +379,8 @@ public class ZSSEntities
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_orca.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityNpcZelda.class, new RenderGenericLiving(
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_zelda.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(new ModelSquid(), 0.7F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(new ModelSquid(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_purple.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityOctorokPink.class, new RenderEntityOctorok(new ModelSquid(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_pink.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(ZSSItems.dekuNut));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySwordBeam.class, new RenderEntitySwordBeam());
 		RenderingRegistry.registerEntityRenderingHandler(EntityThrowingRock.class, new RenderSnowball(ZSSItems.throwingRock));

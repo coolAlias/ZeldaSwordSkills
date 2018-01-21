@@ -38,7 +38,7 @@ import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
-import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorokPink;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
 import zeldaswordskills.item.ItemHookShotUpgrade.AddonType;
 import zeldaswordskills.item.ItemPendant.PendantType;
@@ -65,7 +65,7 @@ public enum BossType
 	DESERT("temple_desert", DesertBattle.class, EntityBlaze.class, 1, ZeldaSongs.songWarpSpirit, "desert", "deserthills"),
 	FOREST("temple_forest", ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
 	TAIGA("temple_ice", BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
-	OCEAN("temple_water", OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
+	OCEAN("temple_water", OceanBattle.class, EntityOctorokPink.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
 	SWAMP("temple_wind", SwampBattle.class, EntityWizzrobeGrand.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
 	MOUNTAIN("temple_earth", EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,29 +17,27 @@
 
 package zeldaswordskills.client.render.entity;
 
+import org.lwjgl.opengl.GL11;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-
 import zeldaswordskills.client.model.ModelOctorok;
 import zeldaswordskills.entity.mobs.EntityOctorok;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityOctorok extends RenderLiving
 {
-	private static final ResourceLocation texture1 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok1.png");
-	private static final ResourceLocation texture2 = new ResourceLocation(ModInfo.ID + ":textures/entity/octorok2.png");
+	protected final ResourceLocation texture;
 
-	public RenderEntityOctorok(ModelBase model, float shadowSize) {
+	public RenderEntityOctorok(ModelBase model, float shadowSize, ResourceLocation texture) {
 		super(new ModelOctorok(), shadowSize);
+		this.texture = texture;
 	}
 
 	public void renderLivingSquid(EntityOctorok entity, double dx, double dy, double dz, float f, float f1) {
@@ -77,6 +75,6 @@ public class RenderEntityOctorok extends RenderLiving
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		return (((EntityOctorok) entity).getType() == 0 ? texture1 : texture2);
+		return this.texture;
 	}
 }

@@ -66,7 +66,6 @@ import zeldaswordskills.client.render.item.RenderItemShield;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
-import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
@@ -309,9 +308,7 @@ public class ZSSItems
 	maskMajora;
 
 	//================ SPAWN EGGS TAB ================//
-	public static Item
-	eggSpawner, // for all Entities with only one type
-	eggOctorok;
+	public static Item eggSpawner; // same item for all custom entities with spawn eggs
 
 	/**
 	 * Initializes mod item indices from configuration file
@@ -708,7 +705,6 @@ public class ZSSItems
 
 		// Custom Spawn Eggs
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("zss.spawn_egg");
-		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("zss.eggOctorok");
 
 		// NEW ITEMS
 		bookMudora = new Item().setUnlocalizedName("zss.book_mudora").setTextureName(ModInfo.ID + ":book_mudora").setMaxDamage(0).setCreativeTab(ZSSCreativeTabs.tabMisc);
@@ -840,6 +836,5 @@ public class ZSSItems
 
 	private static void addDispenserBehaviors() {
 		BlockDispenser.dispenseBehaviorRegistry.putObject(eggSpawner, new BehaviorDispenseCustomMobEgg());
-		BlockDispenser.dispenseBehaviorRegistry.putObject(eggOctorok, new BehaviorDispenseCustomMobEgg());
 	}
 }

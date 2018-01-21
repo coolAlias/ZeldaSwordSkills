@@ -39,7 +39,6 @@ import zeldaswordskills.block.BlockSecretStone;
 import zeldaswordskills.block.BlockWarpStone;
 import zeldaswordskills.block.IDungeonBlock;
 import zeldaswordskills.block.ZSSBlocks;
-import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.mobs.EntityChu;
 import zeldaswordskills.entity.mobs.EntityChuBlue;
 import zeldaswordskills.entity.mobs.EntityChuGreen;
@@ -52,6 +51,7 @@ import zeldaswordskills.entity.mobs.EntityKeeseFire;
 import zeldaswordskills.entity.mobs.EntityKeeseIce;
 import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityOctorokPink;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
@@ -296,10 +296,12 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		Block block = worldObj.getBlock(xCoord, yCoord + 1, zCoord);
 		EntityLiving mob = null;
 		int rarity = worldObj.rand.nextInt(64) - (worldObj.difficultySetting.getDifficultyId() * 2);
-		int type = -1; // for IEntityVariants to set a specific type
 		if (block.getMaterial() == Material.water) {
-			mob = new EntityOctorok(worldObj);
-			type = (rarity < 8 ? 1 : 0);
+			if (rarity < 8) {
+				mob = new EntityOctorokPink(worldObj);
+			} else {
+				mob = new EntityOctorok(worldObj);
+			}
 		} else if (block.getMaterial() == Material.lava) {
 			if (rarity > 7) {
 				mob = new EntityKeeseFire(this.worldObj).setSpawnSwarm(false);
@@ -365,9 +367,6 @@ public class TileEntityDungeonCore extends TileEntityDungeonBlock
 		if (mob != null) {
 			mob.setPosition(xCoord + 0.5D, yCoord + 1.5D, zCoord + 0.5D);
 			mob.onSpawnWithEgg(null);
-			if (type > -1 && mob instanceof IEntityVariant) {
-				((IEntityVariant) mob).setType(type);
-			}
 			worldObj.spawnEntityInWorld(mob);
 			mob.playLivingSound();
 		}
