@@ -65,7 +65,6 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
-import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
@@ -303,8 +302,7 @@ public class ZSSItems
 	public static Item
 	eggSpawner, // for all Entities with only one type
 	eggOctorok,
-	eggSkulltula,
-	eggWizzrobe;
+	eggSkulltula;
 
 	/**
 	 * Initializes mod item indices from configuration file
@@ -679,7 +677,6 @@ public class ZSSItems
 		eggSpawner = new ItemCustomEgg().setUnlocalizedName("spawn_egg");
 		eggOctorok = new ItemCustomVariantEgg(EntityOctorok.class, "octorok").setUnlocalizedName("egg_octorok");
 		eggSkulltula = new ItemCustomVariantEgg(EntitySkulltula.class, "skulltula").setUnlocalizedName("egg_skulltula");
-		eggWizzrobe = new ItemCustomVariantEgg(EntityWizzrobe.class, "wizzrobe").setUnlocalizedName("egg_wizzrobe");
 	}
 
 	/**

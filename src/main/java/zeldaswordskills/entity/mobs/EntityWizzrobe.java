@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import java.util.List;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -39,13 +39,13 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.entity.IEntityLootable;
+import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
 import zeldaswordskills.api.entity.MagicType;
-import zeldaswordskills.entity.IEntityVariant;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.ai.EntityAINearestAttackableTargetNight;
 import zeldaswordskills.entity.ai.EntityAIRangedMagic;
@@ -58,45 +58,37 @@ import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.BiomeType;
 import zeldaswordskills.util.WorldUtils;
 
-import com.google.common.collect.Lists;
-
-public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntityTeleport, IEntityVariant, IMagicUser
+public abstract class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntityTeleport, IMagicUser
 {
-	/** Separate Wizzrobe enum to allow more magic types without screwing up Wizzrobe spawn eggs and such */
-	public static enum WizzrobeType {
-		FIRE_WIZ(MagicType.FIRE, BiomeType.FIERY),
-		ICE_WIZ(MagicType.ICE, BiomeType.COLD),
-		LIGHTNING_WIZ(MagicType.LIGHTNING, BiomeType.MOUNTAIN),
-		WIND_WIZ(MagicType.WIND, BiomeType.FOREST);
-
-		/** The magic type this wizzrobe uses */
-		public final MagicType magicType;
-
-		/** Biome in which this type spawns most frequently (or possibly exclusively) */
-		public final BiomeType favoredBiome;
-
-		private WizzrobeType(MagicType type, BiomeType favoredBiome) {
-			this.magicType = type;
-			this.favoredBiome = favoredBiome;
-		}
-	}
-
 	/**
-	 * Returns array of default biomes in which this entity may spawn naturally
+	 * Returns an EntityWizzrobe instance appropriate to the current biome type
+	 * @param world
+	 * @param variance Chance for each successive appropriate Wizzrobe class to be used instead of previous
+	 * @param pos
+	 * @return Null if no appropriate Wizzrobe class found for this biome
 	 */
-	public static String[] getDefaultBiomes() {
-		List<BiomeType> biomes = Lists.newArrayList(BiomeType.ARID, BiomeType.JUNGLE, BiomeType.PLAINS, BiomeType.RIVER, BiomeType.TAIGA);
-		for (WizzrobeType type : WizzrobeType.values()) {
-			biomes.add(type.favoredBiome);
+	public static EntityWizzrobe getRandomWizzrobeForLocation(World world, float variance, BlockPos pos) {
+		BiomeGenBase biome = world.getBiomeGenForCoords(pos);
+		if (biome != null) {
+			List<SpawnListEntry> spawns = biome.getSpawnableList(EnumCreatureType.MONSTER);
+			Class<?> toSpawn = null;
+			for (SpawnListEntry entry : spawns) {
+				if (EntityWizzrobe.class.isAssignableFrom(entry.entityClass) && (toSpawn == null || world.rand.nextFloat() < variance)) {
+					toSpawn = entry.entityClass;
+				}
+			}
+			if (toSpawn != null) {
+				try {
+					return (EntityWizzrobe) toSpawn.getConstructor(World.class).newInstance(world);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		return BiomeType.getBiomeArray(null, biomes.toArray(new BiomeType[biomes.size()]));
+		return null;
 	}
-
-	/** Data watcher index for this Wizzrobe's type */
-	protected static final int TYPE_INDEX = 16;
 
 	/** Datawatcher index for current casting time, used for rendering arm positions */
 	protected static final int CASTING_TIME = 17;
@@ -127,7 +119,6 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		targetTasks.addTask(2, new EntityAINearestAttackableTargetNight<EntityPlayer>(this, EntityPlayer.class, 0, true, 0.5F));
 		experienceValue = 8; // normal mobs are 5
 		setSize(0.6F, 1.8F);
-		setType(WizzrobeType.WIND_WIZ);
 	}
 
 	@Override
@@ -156,91 +147,19 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 		getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25D);
 		getEntityAttribute(SharedMonsterAttributes.knockbackResistance).setBaseValue(1.0D);
 		getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(40.0D);
+		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 50);
+		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 50);
 	}
 
 	@Override
 	protected void entityInit() {
 		super.entityInit();
-		dataWatcher.addObject(TYPE_INDEX, (byte)(WizzrobeType.WIND_WIZ.ordinal()));
 		dataWatcher.addObject(CASTING_TIME, 0);
 		dataWatcher.addObject(MAX_CAST_TIME, 0);
 	}
 
 	/** Returns the Wizzrobe's Magic Type; this determines which spell will be cast */
-	public MagicType getMagicType() {
-		return getWizzrobeType().magicType;
-	}
-
-	/** Returns this Wizzrobe's type */
-	public WizzrobeType getWizzrobeType() {
-		return WizzrobeType.values()[dataWatcher.getWatchableObjectByte(TYPE_INDEX) % WizzrobeType.values().length];
-	}
-
-	/** Sets the Wizzrobe's type; this determines the Wizzrobe's Magic Type */
-	public void setType(WizzrobeType type) {
-		dataWatcher.updateObject(TYPE_INDEX, (byte)(type.ordinal()));
-		applyTypeTraits();
-	}
-
-	@Override
-	public EntityWizzrobe setType(int type) {
-		setType(WizzrobeType.values()[type % WizzrobeType.values().length]);
-		return this;
-	}
-
-	private void setTypeOnSpawn() {
-		if (Config.areMobVariantsAllowed() && rand.nextFloat() < Config.getMobVariantChance()) {
-			setType(rand.nextInt(WizzrobeType.values().length));
-		} else {
-			BiomeGenBase biome = worldObj.getBiomeGenForCoords(new BlockPos(this));
-			BiomeType biomeType = BiomeType.getBiomeTypeFor(biome);
-			for (WizzrobeType t : WizzrobeType.values()) {
-				if (t.favoredBiome == biomeType) {
-					setType(t);
-					return;
-				}
-			}
-			// no favored biome was found, set based on remaining biome types
-			if (biomeType != null) {
-				switch (biomeType) {
-				case ARID:
-					setType(rand.nextFloat() < 0.5F ? WizzrobeType.LIGHTNING_WIZ : WizzrobeType.FIRE_WIZ);
-					break;
-				case RIVER: // swamps and rivers are same as Jungle
-				case JUNGLE:
-					setType(rand.nextFloat() < 0.5F ? WizzrobeType.WIND_WIZ : WizzrobeType.LIGHTNING_WIZ);
-					break;
-				case TAIGA:
-					setType(rand.nextFloat() < 0.5F ? WizzrobeType.WIND_WIZ : WizzrobeType.ICE_WIZ);
-					break;
-				default:
-				}
-			}
-		}
-	}
-
-	protected void applyTypeTraits() {
-		ZSSEntityInfo info = ZSSEntityInfo.get(this);
-		info.removeAllBuffs();
-		info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 50);
-		info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 50);
-		switch (getMagicType()) {
-		case FIRE:
-			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 50);
-			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
-			break;
-		case ICE:
-			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 50);
-			info.applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 100);
-			break;
-		case LIGHTNING:
-			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
-			break;
-		case WIND:
-			break;
-		default:
-		}
-	}
+	public abstract MagicType getMagicType();
 
 	/** The base time required to cast a spell */
 	protected int getBaseCastingTime() {
@@ -295,12 +214,10 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	public boolean attackEntityFrom(DamageSource source, float amount) {
 		if (!worldObj.isRemote) {
 			boolean wasReflected = false;
-			if (source.getSourceOfDamage() instanceof EntityMagicSpell) {
-				EntityMagicSpell spell = (EntityMagicSpell) source.getSourceOfDamage();
-				wasReflected = spell.getEntityData().getBoolean("isReflected");
-				if (spell.getThrower() == this && !wasReflected) {
-					return false;
-				}
+			Entity spell = source.getSourceOfDamage();
+			if (spell instanceof IReflectableOrigin && ((IReflectableOrigin) spell).getReflectedOriginEntity() == this) {
+				wasReflected = true;
+				amount = this.getReflectedDamage(amount);
 			}
 			if (!wasReflected && canTelevade(source) && teleportAI.teleportRandomly()) {
 				return false;
@@ -345,7 +262,18 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	 * @return negative values use default EntityMagicSpell handling
 	 */
 	protected float getReflectChance() {
-		return -1.0F; // use default handling
+		return 1.0F; // 100% reflect chance
+	}
+
+	/**
+	 * Damage the Wizzrobe will take when hit with its own reflected spells
+	 * @param damage original damage amount
+	 * @return new amount of damage to take
+	 */
+	protected float getReflectedDamage(float damage) {
+		// Note that Wizzrobes have 50% magic resistance as well as e.g. 50% Fire Resist
+		float i = Math.max(1, this.worldObj.getDifficulty().getDifficultyId());
+		return Math.max(damage, 2.0F + (this.getMaxHealth() / i));
 	}
 
 	/**
@@ -506,7 +434,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	/**
 	 * @param modifier	Applied to book enchantment level
 	 */
-	private ItemStack getRareDrop(int modifier) {
+	protected ItemStack getRareDrop(int modifier) {
 		int rarity = rand.nextInt(8);
 		if (rarity == 0) {
 			return new ItemStack(ZSSItems.treasure, 1, Treasures.EVIL_CRYSTAL.ordinal());
@@ -515,12 +443,7 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 			EnchantmentHelper.addRandomEnchantment(rand, book, rand.nextInt(8) + rand.nextInt(8) + modifier);
 			return book;
 		}
-		switch (getWizzrobeType()) {
-		case FIRE_WIZ: return new ItemStack(ZSSItems.arrowFire);
-		case ICE_WIZ: return new ItemStack(ZSSItems.arrowIce);
-		case LIGHTNING_WIZ: return new ItemStack(ZSSItems.arrowLight);
-		default: return null;
-		}
+		return null;
 	}
 
 	@Override
@@ -552,16 +475,8 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	}
 
 	@Override
-	public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData data) {
-		data = super.onInitialSpawn(difficulty, data);
-		setTypeOnSpawn();
-		return data;
-	}
-
-	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setByte("WizzrobeType", dataWatcher.getWatchableObjectByte(TYPE_INDEX));
 		AxisAlignedBB box = teleportAI.getTeleBounds();
 		if (box != null) {
 			NBTTagCompound bounds = new NBTTagCompound();
@@ -578,7 +493,6 @@ public class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntit
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		dataWatcher.updateObject(TYPE_INDEX, compound.getByte("WizzrobeType"));
 		if (compound.hasKey("teleBounds")) {
 			NBTTagCompound bounds = compound.getCompoundTag("teleBounds");
 			double minX = bounds.getDouble("minX");

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -34,38 +34,30 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.model.ModelCube;
 import zeldaswordskills.client.model.ModelWizzrobe;
-import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
-import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntityWizzrobe extends RenderLiving<EntityWizzrobe>
 {
-	private static final ResourceLocation fireWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_fire.png");
-	private static final ResourceLocation iceWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice.png");
-	private static final ResourceLocation lightningWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_lightning.png");
-	private static final ResourceLocation windWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_wind.png");
-	private static final ResourceLocation grandFireWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_fire_grand.png");
-	private static final ResourceLocation grandIceWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice_grand.png");
-	private static final ResourceLocation grandLightningWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_lightning_grand.png");
-	private static final ResourceLocation grandWindWizTexture = new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_wind_grand.png");
-
 	/** Dummy entity for the model cube rendering */
-	private final EntityMagicSpell spell;
+	protected final EntityMagicSpell spell;
 
 	/** Wizzrobe model provides easy means of knowing if spell should be rendered */
-	private final ModelWizzrobe model;
+	protected final ModelWizzrobe model;
 
 	/** Boxes for spell rendering */
-	private final ModelCube box1 = new ModelCube(4), box2 = new ModelCube(4);
+	protected final ModelCube box1 = new ModelCube(4), box2 = new ModelCube(4);
 
-	private final float scale;
+	protected final float scale;
 
-	public RenderEntityWizzrobe(RenderManager renderManager, ModelWizzrobe model, float scale) {
-		super(renderManager, model, 0.5F);
+	protected final ResourceLocation texture;
+
+	public RenderEntityWizzrobe(RenderManager manager, ModelWizzrobe model, float scale, ResourceLocation texture) {
+		super(manager, model, 0.5F);
 		this.model = model;
 		this.scale = scale;
+		this.texture = texture;
 		this.spell = new EntityMagicSpell(Minecraft.getMinecraft().theWorld);
 	}
 
@@ -111,26 +103,23 @@ public class RenderEntityWizzrobe extends RenderLiving<EntityWizzrobe>
 
 	@Override
 	protected ResourceLocation getEntityTexture(EntityWizzrobe entity) {
-		boolean grand = (entity instanceof EntityGrandWizzrobe);
-		switch(entity.getMagicType()) {
-		case FIRE: return (grand ? grandFireWizTexture : fireWizTexture);
-		case ICE: return (grand ? grandIceWizTexture : iceWizTexture);
-		case LIGHTNING: return (grand ? grandLightningWizTexture : lightningWizTexture);
-		default: return (grand ? grandWindWizTexture : windWizTexture);
-		}
+		return this.texture;
 	}
 
 	public static class Factory implements IRenderFactory<EntityWizzrobe>
 	{
 		protected final ModelWizzrobe model;
 		protected final float shadowSize;
-		public Factory(ModelWizzrobe model, float shadowSize) {
+		protected final ResourceLocation texture;
+		public Factory(ModelWizzrobe model, float shadowSize, ResourceLocation texture) {
 			this.model = model;
 			this.shadowSize = shadowSize;
+			this.texture = texture;
 		}
+
 		@Override
 		public Render<? super EntityWizzrobe> createRenderFor(RenderManager manager) {
-			return new RenderEntityWizzrobe(manager, this.model, this.shadowSize);
+			return new RenderEntityWizzrobe(manager, this.model, this.shadowSize, this.texture);
 		}
 	}
 }
