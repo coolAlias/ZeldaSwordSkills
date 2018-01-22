@@ -18,7 +18,6 @@
 package zeldaswordskills.client.render.entity;
 
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -41,17 +40,6 @@ public class RenderEntityOctorok extends RenderLiving<EntityOctorok>
 	@Override
 	protected float handleRotationFloat(EntityOctorok entity, float f) {
 		return entity.prevTentacleAngle + (entity.tentacleAngle - entity.prevTentacleAngle) * f;
-	}
-
-	@Override
-	protected void rotateCorpse(EntityOctorok entity, float dx, float dy, float dz) {
-		float f3 = entity.prevSquidPitch + (entity.squidPitch - entity.prevSquidPitch) * dz;
-		float f4 = entity.prevSquidYaw + (entity.squidYaw - entity.prevSquidYaw) * dz;
-		GlStateManager.translate(0.0F, 0.5F, 0.0F);
-		GlStateManager.rotate(180.0F - dy, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotate(f3, 1.0F, 0.0F, 0.0F);
-		GlStateManager.rotate(f4, 0.0F, 1.0F, 0.0F);
-		GlStateManager.translate(0.0F, -1.2F, 0.0F);
 	}
 
 	@Override

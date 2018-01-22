@@ -61,6 +61,7 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	private float randomMotionVecX;
 	private float randomMotionVecY;
 	private float randomMotionVecZ;
+	protected int fleeingTick;
 
 	/** Replacement for removed 'attackTime' */
 	protected int attackTime;
@@ -131,13 +132,13 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 			if (!worldObj.isRemote) {
 				Entity target = getAttackTarget();
 				if (target != null) {
-					TargetUtils.setEntityHeading(this, randomMotionVecX, randomMotionVecY, randomMotionVecZ, 0.25F, 1.0F, false);
-					faceEntity(target, 30.0F, 120.0F); // squid model values: 30.0F, 210.0F
-				} else {
-					motionX = (double)(randomMotionVecX * randomMotionSpeed);
-					motionY = (double)(randomMotionVecY * randomMotionSpeed);
-					motionZ = (double)(randomMotionVecZ * randomMotionSpeed);
+					if (fleeingTick < 1) {
+						faceEntity(target, 30.0F, 30.0F); // same as EntityCreature
+					}
 				}
+				motionX = (double)(randomMotionVecX * randomMotionSpeed);
+				motionY = (double)(randomMotionVecY * randomMotionSpeed);
+				motionZ = (double)(randomMotionVecZ * randomMotionSpeed);
 			}
 			renderYawOffset += (-((float) Math.atan2(motionX, motionZ)) * 180.0F / (float) Math.PI - renderYawOffset) * 0.1F;
 			rotationYaw = renderYawOffset;
@@ -153,6 +154,10 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 				motionY *= 0.9800000190734863D;
 				motionZ = 0.0D;
 			}
+			// Prevent 'drowning' when treading water
+			if (this.worldObj.getBlockState(this.getPosition().down()).getBlock().getMaterial() == Material.water) {
+				this.setAir(300);
+			}
 		}
 	}
 
@@ -166,23 +171,35 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	 */
 	protected void updateAttackTarget() {
 		float distance = 0.0F;
-		EntityLivingBase entityToAttack = getAttackTarget();
+		EntityLivingBase entityToAttack = this.getAttackTarget();
+		// Duplicating some code from parents since not calling super.updateEntityActionState
+		if (this.attackTime > 0) {
+			--this.attackTime;
+		}
+		if (this.fleeingTick < 0) {
+			++this.fleeingTick;
+		} else if (this.fleeingTick > 0) {
+			--this.fleeingTick;
+			if (this.fleeingTick == 0) {
+				this.fleeingTick = -20 - this.rand.nextInt(41); // fleeing reset time
+			}
+		}
 		if (entityToAttack == null) {
-			entityToAttack = findPlayerToAttack();
+			entityToAttack = this.findPlayerToAttack();
 		} else if (entityToAttack instanceof EntityPlayer && ((EntityPlayer) entityToAttack).capabilities.disableDamage) {
-			entityToAttack = findPlayerToAttack();
+			entityToAttack = this.findPlayerToAttack();
 		} else if (entityToAttack.isEntityAlive() && canAttackClass(entityToAttack.getClass())) {
 			distance = entityToAttack.getDistanceToEntity(this);
 			if (distance > 16.0F) {
 				entityToAttack = null;
-			} else if (canEntityBeSeen(entityToAttack)) {
-				attackEntity(entityToAttack, distance);
+			} else if ((distance < 2.0F || this.fleeingTick < 1) && this.canEntityBeSeen(entityToAttack)) {
+				this.attackEntity(entityToAttack, distance);
 			}
 		} else {
 			entityToAttack = null;
 		}
-		if (entityToAttack != getAttackTarget()) {
-			setAttackTarget(entityToAttack);
+		if (entityToAttack != this.getAttackTarget()) {
+			this.setAttackTarget(entityToAttack);
 		}
 	}
 
@@ -216,6 +233,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 
 	// @Override
 	protected EntityLivingBase findPlayerToAttack() {
+		if (this.fleeingTick > 0) {
+			return null;
+		}
 		EntityPlayer entityplayer = worldObj.getClosestPlayerToEntity(this, 16.0D);
 		return entityplayer != null && canEntityBeSeen(entityplayer) ? entityplayer : null;
 	}
@@ -368,29 +388,69 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 		return randomMotionVecX != 0.0F || randomMotionVecY != 0.0F || randomMotionVecZ != 0.0F;
 	}
 
-	class AIMoveRandom extends EntityAIBase {
+	class AIMoveRandom extends EntityAIBase
+	{
 		private EntityOctorok entity = EntityOctorok.this;
+
 		@Override
 		public boolean shouldExecute() {
 			return true;
 		}
+
 		@Override
 		public void updateTask() {
-			int i = entity.getAge();
-			Entity target = entity.getAttackTarget();
+			int i = this.entity.getAge();
+			Entity target = this.entity.getAttackTarget();
 			if (i > 100) {
-				entity.setRandomMotion(0.0F, 0.0F, 0.0F);
-			} else if (target != null && entity.getRNG().nextInt(25) == 0) {
-				float dx = (float)(target.posX - posX) * 0.015F;
-				float dy = (float)(1 + target.posY - posY) * 0.015F;
-				float dz = (float)(target.posZ - posZ) * 0.015F;
-				entity.setRandomMotion(dx, dy, dz);
-			} else if (entity.getRNG().nextInt(50) == 0 || !entity.inWater || !entity.isMovingRandomly()) {
-				float f = entity.getRNG().nextFloat() * (float)Math.PI * 2.0F;
+				this.entity.setRandomMotion(0.0F, 0.0F, 0.0F);
+			} else if (target != null && this.entity.getRNG().nextInt(25) == 0) {
+				float dx = (float)(target.posX - this.entity.posX) * 0.015F;
+				float dy = (float)(1 + target.posY - this.entity.posY) * 0.015F;
+				float dz = (float)(target.posZ - this.entity.posZ) * 0.015F;
+				this.entity.setRandomMotion(dx, dy, dz);
+			}
+			// Non-random movement when attacking
+			if (target != null && this.entity.inWater) {
+				float dx, dy, dz;
+				float distance = target.getDistanceToEntity(this.entity);
+				boolean canMoveUp = (this.entity.worldObj.getBlockState(this.entity.getPosition().up()).getBlock().getMaterial() == Material.water);
+				if (this.entity.posY < target.posY) {
+					if (canMoveUp) {
+						canMoveUp = (this.entity.worldObj.getBlockState(this.entity.getPosition().up()).getBlock().getMaterial() == Material.water);
+						dy = (canMoveUp ? 0.2F : 0.1F);
+					} else {
+						dy = 0.0F;
+					}
+				} else if (this.entity.posY > target.posY + this.entity.height) {
+					dy = -0.15F;
+				} else {
+					dy = -0.1F + this.entity.getRNG().nextFloat() * 0.3F;
+				}
+				if (this.entity.fleeingTick > 0) {
+					dx = MathHelper.clamp_float((float)(this.entity.posX - target.posX), -1.0F, 1.0F) * 0.3F;
+					dz = MathHelper.clamp_float((float)(this.entity.posZ - target.posZ), -1.0F, 1.0F) * 0.3F;
+				} else if (distance > 12.0F) {
+					// Move closer to target when too far away and not fleeing
+					dx = MathHelper.clamp_float((float)(target.posX - this.entity.posX), -1.0F, 1.0F) * 0.2F;
+					dz = MathHelper.clamp_float((float)(target.posZ - this.entity.posZ), -1.0F, 1.0F) * 0.2F;
+				} else if (distance < 5.0F && this.entity.attackTime == 0 && this.entity.fleeingTick == 0) {
+					// Flee from target when too close
+					this.entity.fleeingTick = 60;
+					dx = MathHelper.clamp_float((float)(this.entity.posX - target.posX), -1.0F, 1.0F) * 0.3F;
+					dz = MathHelper.clamp_float((float)(this.entity.posZ - target.posZ), -1.0F, 1.0F) * 0.3F;
+				} else {
+					// Very small motion towards target helps Octorok face them to attack
+					float f = (distance > 7.0F ? 0.15F : 0.05F);
+					dx = MathHelper.clamp_float((float)(target.posX - this.entity.posX), -1.0F, 1.0F) * f;
+					dz = MathHelper.clamp_float((float)(target.posZ - this.entity.posZ), -1.0F, 1.0F) * f;
+				}
+				this.entity.setRandomMotion(dx, dy, dz);
+			} else if (!this.entity.inWater || this.entity.getRNG().nextInt(50) == 0 || !this.entity.isMovingRandomly()) {
+				float f = this.entity.getRNG().nextFloat() * (float) Math.PI * 2.0F;
 				float dx = MathHelper.cos(f) * 0.2F;
-				float dy = -0.1F + entity.getRNG().nextFloat() * 0.2F;
+				float dy = -0.1F + this.entity.getRNG().nextFloat() * 0.3F;
 				float dz = MathHelper.sin(f) * 0.2F;
-				entity.setRandomMotion(dx, dy, dz);
+				this.entity.setRandomMotion(dx, dy, dz);
 			}
 		}
 	}
