@@ -226,7 +226,6 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		prevPosX = posX;
 		prevPosY = posY;
 		prevPosZ = posZ;
-		motionY -= 0.03999999910593033D;
 		noClip = pushOutOfBlocks(posX, (getEntityBoundingBox().minY + getEntityBoundingBox().maxY) / 2.0D, posZ);
 		moveEntity(motionX, motionY, motionZ);
 		float f = 0.98F;
