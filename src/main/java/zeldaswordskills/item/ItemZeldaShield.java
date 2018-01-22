@@ -26,6 +26,7 @@ import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -33,6 +34,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -41,7 +43,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -168,46 +169,73 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		} else if (toolMaterial == ToolMaterial.EMERALD) {
 			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
 				float chance = (source.isMagicDamage() ? (1F / 3F) : 1.0F);
-				if (source.getSourceOfDamage() instanceof IReflectable) {
-					((IReflectable) source.getSourceOfDamage()).getReflectChance(shield, player, source);
+				Entity projectile = source.getSourceOfDamage();
+				if (projectile instanceof IReflectable) {
+					chance = ((IReflectable) projectile).getReflectChance(shield, player, source);
 				}
 				if (player.worldObj.rand.nextFloat() < chance) {
-					Entity projectile = null;
-					try {
-						projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj); 
-					} catch (Exception e) {
-						;
-					}
-					if (projectile != null) {
-						NBTTagCompound data = new NBTTagCompound();
-						source.getSourceOfDamage().writeToNBT(data);
-						projectile.readFromNBT(data);
-						projectile.getEntityData().setBoolean("isReflected", true);
-						projectile.posX -= projectile.motionX;
-						projectile.posY -= projectile.motionY;
-						projectile.posZ -= projectile.motionZ;
-						double motionX = (double)(-MathHelper.sin(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
-						double motionZ = (double)(MathHelper.cos(player.rotationYaw / 180.0F * (float) Math.PI) * MathHelper.cos(player.rotationPitch / 180.0F * (float) Math.PI));
-						double motionY = (double)(-MathHelper.sin(player.rotationPitch / 180.0F * (float) Math.PI));
-						float wobble = 2.0F + (20.0F * player.worldObj.rand.nextFloat());
-						if (projectile instanceof IReflectable) {
-							float alt_wobble = ((IReflectable) projectile).getReflectedWobble(shield, player, source);
-							wobble = (alt_wobble < 0.0F ? wobble : alt_wobble);
-						}
-						TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, wobble, false);
-						if (projectile instanceof IReflectable) {
-							((IReflectable) projectile).onReflected(shield, player, source);
-						}
-						player.worldObj.spawnEntityInWorld(projectile);
-					}
-				} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) { // failed to reflect projectile
+					this.reflectProjectile(shield, player, source);
+				} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
 					damageBlocked *= magicReduction;
 				}
+			} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
+				damageBlocked *= magicReduction;
 			}
 		} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
 			damageBlocked *= magicReduction; // default shield behavior blocks half damage from AoE magic attacks
 		}
 		return (damage - damageBlocked);
+	}
+
+	/**
+	 * Sends the projectile back toward its initiator
+	 * @param shield
+	 * @param player
+	 * @param source {@link DamageSource#getSourceOfDamage} should return the projectile
+	 */
+	protected void reflectProjectile(ItemStack shield, EntityPlayer player, DamageSource source) {
+		// Create a new instance in case projectile calls #setDead on itself due to the impact
+		Entity projectile = null;
+		try {
+			projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj);
+			NBTTagCompound data = new NBTTagCompound();
+			// This *should* make an exact copy of the projectile to reflect
+			source.getSourceOfDamage().writeToNBT(data);
+			projectile.readFromNBT(data);
+		} catch (Exception e) {
+			ZSSMain.logger.error(String.format("Mirror Shield unable to reflect projectile class %s: %s", source.getSourceOfDamage().getClass().getSimpleName(), e.getMessage()));
+		}
+		if (projectile == null) {
+			return;
+		}
+		projectile.getEntityData().setBoolean("isReflected", true);
+		projectile.posX -= projectile.motionX;
+		projectile.posY -= projectile.motionY;
+		projectile.posZ -= projectile.motionZ;
+		// Set new trajectory based on player's look vector a la EntityFireball
+		Vec3 vec = player.getLookVec();
+		double motionX = vec.xCoord;
+		double motionY = vec.yCoord;
+		double motionZ = vec.zCoord;
+		float wobble = 2.0F + (20.0F * player.worldObj.rand.nextFloat());
+		if (projectile instanceof IReflectable) {
+			float alt_wobble = ((IReflectable) projectile).getReflectedWobble(shield, player, source);
+			wobble = (alt_wobble < 0.0F ? wobble : alt_wobble);
+		}
+		TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, wobble, false);
+		if (projectile instanceof IReflectable) {
+			((IReflectable) projectile).onReflected(shield, player, source);
+		} else {
+			// Handle common non-IReflectable projectiles
+			if (projectile instanceof EntityThrowable) {
+				DirtyEntityAccessor.setThrowableThrower((EntityThrowable) projectile, player);
+			} else if (projectile instanceof EntityArrow) {
+				((EntityArrow) projectile).shootingEntity = player;
+			}
+			// Make sure original projectile is dead; IReflectables are given the power to skip this
+			source.getSourceOfDamage().setDead();
+		}
+		player.worldObj.spawnEntityInWorld(projectile);
 	}
 
 	@Override
