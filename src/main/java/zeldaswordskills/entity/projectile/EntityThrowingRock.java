@@ -22,7 +22,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
@@ -30,8 +29,6 @@ import net.minecraft.world.World;
 
 public class EntityThrowingRock extends EntityMobThrowable
 {
-	private static final int IGNORE_WATER = 22;
-
 	public EntityThrowingRock(World world) {
 		super(world);
 	}
@@ -48,26 +45,9 @@ public class EntityThrowingRock extends EntityMobThrowable
 		super(world, shooter, target, velocity, wobble);
 	}
 
-	/** Sets this throwing rock to ignore water during motion updates */
-	public EntityThrowingRock setIgnoreWater() {
-		dataWatcher.updateObject(IGNORE_WATER, (byte) 1);
-		return this;
-	}
-
-	/** Whether this throwing rock ignores water for motion updates */
-	public boolean getIgnoresWater() {
-		return dataWatcher.getWatchableObjectByte(IGNORE_WATER) != 0;
-	}
-
 	@Override
 	public void entityInit() {
-		dataWatcher.addObject(IGNORE_WATER, (byte) 0);
 		setDamage(2.0F);
-	}
-
-	@Override
-	public boolean handleWaterMovement() {
-		return !getIgnoresWater();
 	}
 
 	@Override
@@ -96,20 +76,6 @@ public class EntityThrowingRock extends EntityMobThrowable
 			}
 		} else {
 			setDead();
-		}
-	}
-
-	@Override
-	public void writeEntityToNBT(NBTTagCompound compound) {
-		super.writeEntityToNBT(compound);
-		compound.setByte("ignoreWater", getIgnoresWater() ? (byte) 1 : (byte) 0);
-	}
-
-	@Override
-	public void readEntityFromNBT(NBTTagCompound compound) {
-		super.readEntityFromNBT(compound);
-		if (compound.getByte("ignoreWater") != 0) {
-			setIgnoreWater();
 		}
 	}
 }

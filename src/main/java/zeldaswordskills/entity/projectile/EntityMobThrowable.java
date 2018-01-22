@@ -146,6 +146,19 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 		return this;
 	}
 
+	/**
+	 * Sets this projectile to ignore water during motion updates
+	 */
+	public EntityMobThrowable setIgnoreWater() {
+		this.ignoreWater = true;
+		return this;
+	}
+
+	@Override
+	public boolean handleWaterMovement() {
+		return !this.ignoreWater;
+	}
+
 	@Override
 	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
 		if (shield != null && shield.getItem() instanceof IReflective) {
@@ -194,6 +207,7 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 		compound.setInteger("originId", originId);
 		compound.setFloat("damage", damage);
 		compound.setFloat("gravity", gravity);
+		compound.setBoolean("ignoreWater", ignoreWater);
 	}
 
 	@Override
@@ -203,18 +217,21 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 		originId = compound.getInteger("originId");
 		damage = compound.getFloat("damage");
 		gravity = compound.getFloat("gravity");
+		ignoreWater = compound.getBoolean("ignoreWater");
 	}
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
-		buffer.writeFloat(gravity);
 		this.throwerId = (this.getThrower() == null ? -1 : this.getThrower().getEntityId());
 		buffer.writeInt(this.throwerId);
+		buffer.writeFloat(this.gravity);
+		buffer.writeBoolean(this.ignoreWater);
 	}
 
 	@Override
 	public void readSpawnData(ByteBuf buffer) {
-		gravity = buffer.readFloat();
 		this.throwerId = buffer.readInt();
+		this.gravity = buffer.readFloat();
+		this.ignoreWater = buffer.readBoolean();
 	}
 }
