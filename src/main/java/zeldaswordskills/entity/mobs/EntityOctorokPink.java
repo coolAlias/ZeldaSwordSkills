@@ -41,7 +41,7 @@ public class EntityOctorokPink extends EntityOctorok
 		int difficulty = worldObj.difficultySetting.getDifficultyId();
 		return new EntityBomb(worldObj, this, target, 0.2F + (difficulty * 0.1F), (float)(14 - difficulty * 4))
 				.setType(BombType.BOMB_WATER)
-				.setFuseTime(12 - (difficulty * 2))
+				.setFuseTime(-1) // explode on impact
 				.setMotionFactor(0.25F)
 				.setNoGrief()
 				.setIgnoreWater()

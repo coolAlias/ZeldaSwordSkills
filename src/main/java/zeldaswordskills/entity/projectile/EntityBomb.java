@@ -20,6 +20,7 @@ package zeldaswordskills.entity.projectile;
 import java.util.List;
 
 import cpw.mods.fml.common.eventhandler.Event.Result;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -44,7 +45,7 @@ import zeldaswordskills.ref.Sounds;
 
 public class EntityBomb extends EntityMobThrowable implements IEntityBombIngestible
 {
-	/** Time until explosion */
+	/** Time until explosion; if less than 0, bomb will explode on impact */
 	private int fuseTime = 24;
 
 	/** Uses ItemBomb's radius if this value is zero */
@@ -121,15 +122,17 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 
 	@Override
 	public EntityBomb setFuseTime(int time) {
-		fuseTime = Math.max(time, 1);
+		this.fuseTime = Math.max(time, -1);
 		return this;
 	}
 
 	/**
-	 * Adds time to bomb's fuse
+	 * Adds time to bomb's fuse unless it is set to explode on impact
 	 */
 	public EntityBomb addTime(int time) {
-		fuseTime = Math.max(fuseTime + time, fuseTime);
+		if (this.fuseTime > -1) {
+			this.fuseTime = Math.max(this.fuseTime + time, this.fuseTime);
+		}
 		return this;
 	}
 
@@ -248,18 +251,20 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		if (onGround) {
 			motionY *= -0.5D;
 		}
+		// Bombs set to explode on impact don't care about inFire's value
+		boolean inFire = this.isBurning();
 		if (!worldObj.isRemote && ticksExisted > 5 && wasBombEaten()) {
 			setDead(); // make sure it's dead
-			return;
-		}
-		Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
-		// func_147470_e is isBoundingBoxBurning
-		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
-		if (isDud(inFire)) {
-			fuseTime += 10;
-			disarm(worldObj);
-		} else if (ticksExisted % 20 == 0) {
-			playSound(Sounds.BOMB_FUSE, 1.0F, 2.0F + rand.nextFloat() * 0.4F);
+		} else if (this.fuseTime > -1) {
+			Material material = worldObj.getBlock(MathHelper.floor_double(posX), MathHelper.floor_double(posY), MathHelper.floor_double(posZ)).getMaterial();
+			// func_147470_e is isBoundingBoxBurning
+			inFire = inFire || (material == Material.lava || material == Material.fire) || worldObj.func_147470_e(boundingBox);
+			if (isDud(inFire)) {
+				this.addTime(10);
+				disarm(worldObj);
+			} else if (ticksExisted % 20 == 0) {
+				playSound(Sounds.BOMB_FUSE, 1.0F, 2.0F + rand.nextFloat() * 0.4F);
+			}
 		}
 		if (!worldObj.isRemote && shouldExplode(inFire)) {
 			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, getRadius(), getDamage(), canGrief);
@@ -306,10 +311,17 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	}
 
 	@Override
-	protected void onImpact(MovingObjectPosition movingobjectposition) {
-		motionX *= 0.5F;
-		motionY *= -0.5F;
-		motionZ *= 0.5F;
+	protected void onImpact(MovingObjectPosition mop) {
+		if (this.fuseTime < 0) {
+			if (!this.worldObj.isRemote) {
+				CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, getRadius(), getDamage(), canGrief);
+				this.setDead();
+			}
+		} else {
+			motionX *= 0.5F;
+			motionY *= -0.5F;
+			motionZ *= 0.5F;
+		}
 	}
 
 	/**
@@ -330,6 +342,8 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	private boolean shouldExplode(boolean inFire) {
 		if (!isEntityAlive()) {
 			return false;
+		} else if (fuseTime < 0) {
+			return onGround; // cleans up any that failed to explode via #onImpact
 		} else if ((inFire || worldObj.provider.isHellWorld) && getType() != BombType.BOMB_FIRE) {
 			return true;
 		}
@@ -356,5 +370,17 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 		motionFactor = compound.getFloat("motionFactor");
 		destructionFactor = compound.getFloat("destructionFactor");
 		canGrief = compound.getBoolean("canGrief");
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		super.writeSpawnData(buffer);
+		buffer.writeInt(this.fuseTime);
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		super.readSpawnData(buffer);
+		this.fuseTime = buffer.readInt();
 	}
 }
