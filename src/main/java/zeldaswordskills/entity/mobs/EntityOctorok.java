@@ -17,6 +17,7 @@
 
 package zeldaswordskills.entity.mobs;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -123,13 +124,13 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 			}
 			if (!worldObj.isRemote) {
 				if (entityToAttack != null) {
-					TargetUtils.setEntityHeading(this, randomMotionVecX, randomMotionVecY, randomMotionVecZ, 0.25F, 1.0F, false);
-					faceEntity(entityToAttack, 30.0F, 120.0F); // squid model values: 30.0F, 210.0F
-				} else {
-					motionX = (double)(randomMotionVecX * randomMotionSpeed);
-					motionY = (double)(randomMotionVecY * randomMotionSpeed);
-					motionZ = (double)(randomMotionVecZ * randomMotionSpeed);
+					if (fleeingTick < 1) {
+						faceEntity(entityToAttack, 30.0F, 30.0F); // same as EntityCreature
+					}
 				}
+				motionX = (double)(randomMotionVecX * randomMotionSpeed);
+				motionY = (double)(randomMotionVecY * randomMotionSpeed);
+				motionZ = (double)(randomMotionVecZ * randomMotionSpeed);
 			}
 			renderYawOffset += (-((float) Math.atan2(motionX, motionZ)) * 180.0F / (float) Math.PI - renderYawOffset) * 0.1F;
 			rotationYaw = renderYawOffset;
@@ -145,6 +146,14 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 				motionY *= 0.9800000190734863D;
 				motionZ = 0.0D;
 			}
+			// Prevent 'drowning' when treading water
+			int x = MathHelper.floor_double(this.posX);
+			int y = MathHelper.floor_double(this.boundingBox.minY);
+			int z = MathHelper.floor_double(this.posZ);
+			Block block = this.worldObj.getBlock(x, y - 1, z);
+			if (block != null && block.getMaterial() == Material.water) {
+				this.setAir(300);
+			}
 		}
 	}
 
@@ -156,7 +165,16 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 	@Override
 	protected void updateEntityActionState() {
 		float distance = 0.0F;
-		++entityAge;
+		// Duplicating some code from parents since not calling super.updateEntityActionState
+		++this.entityAge;
+		if (this.fleeingTick < 0) {
+			++this.fleeingTick;
+		} else if (this.fleeingTick > 0) {
+			--this.fleeingTick;
+			if (this.fleeingTick == 0) {
+				this.fleeingTick = -20 - this.rand.nextInt(41); // fleeing reset time
+			}
+		}
 		if (entityToAttack == null) {
 			entityToAttack = findPlayerToAttack();
 		} else if (entityToAttack instanceof EntityPlayer && ((EntityPlayer) entityToAttack).capabilities.disableDamage) {
@@ -165,25 +183,53 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 			distance = entityToAttack.getDistanceToEntity(this);
 			if (distance > 16.0F) {
 				entityToAttack = null;
-			} else if (canEntityBeSeen(entityToAttack)) {
+			} else if ((distance < 2.0F || this.fleeingTick < 1) && this.canEntityBeSeen(this.entityToAttack)) {
 				attackEntity(entityToAttack, distance);
 			}
 		} else {
 			entityToAttack = null;
 		}
-		if (entityAge > 100) {
-			randomMotionVecX = randomMotionVecY = randomMotionVecZ = 0.0F;
-		} else if (rand.nextInt(entityToAttack != null ? 25 : 50) == 0 || !inWater || randomMotionVecX == 0.0F && randomMotionVecY == 0.0F && randomMotionVecZ == 0.0F) {
-			if (entityToAttack != null && distance > 5.0F) {
-				randomMotionVecX = (float)(entityToAttack.posX - posX) * 0.015F;
-				randomMotionVecY = (float)(1 + entityToAttack.posY - posY) * 0.015F;
-				randomMotionVecZ = (float)(entityToAttack.posZ - posZ) * 0.015F;
-			} else {
-				float f = rand.nextFloat() * (float) Math.PI * 2.0F;
-				randomMotionVecX = MathHelper.cos(f) * 0.2F;
-				randomMotionVecY = -0.1F + rand.nextFloat() * 0.3F;
-				randomMotionVecZ = MathHelper.sin(f) * 0.2F;
+		// Non-random movement when attacking
+		if (this.entityToAttack != null && this.inWater) {
+			int x = MathHelper.floor_double(this.posX);
+			int y = MathHelper.floor_double(this.boundingBox.minY);
+			int z = MathHelper.floor_double(this.posZ);
+			Block block = this.worldObj.getBlock(x, y, z);
+			boolean canMoveUp = (block != null && block.getMaterial() == Material.water);
+			if (this.posY < this.entityToAttack.posY) {
+				if (canMoveUp) {
+					block = this.worldObj.getBlock(x, y + 1, z);
+					canMoveUp = (block != null && block.getMaterial() == Material.water);
+					this.randomMotionVecY = (canMoveUp ? 0.2F : 0.1F);
+				} else {
+					this.randomMotionVecY = 0.0F;
+				}
+			} else if (this.posY > this.entityToAttack.posY + this.height) {
+				this.randomMotionVecY = -0.15F;
 			}
+			if (this.fleeingTick > 0) {
+				this.randomMotionVecX = MathHelper.clamp_float((float)(this.posX - this.entityToAttack.posX), -1.0F, 1.0F) * 0.3F;
+				this.randomMotionVecZ = MathHelper.clamp_float((float)(this.posZ - this.entityToAttack.posZ), -1.0F, 1.0F) * 0.3F;
+			} else if (distance > 12.0F) {
+				// Move closer to target when too far away and not fleeing
+				this.randomMotionVecX = MathHelper.clamp_float((float)(this.entityToAttack.posX - this.posX), -1.0F, 1.0F) * 0.2F;
+				this.randomMotionVecZ = MathHelper.clamp_float((float)(this.entityToAttack.posZ - this.posZ), -1.0F, 1.0F) * 0.2F;
+			} else if (distance < 5.0F && this.attackTime == 0 && this.fleeingTick == 0) {
+				// Flee from target when too close
+				this.fleeingTick = 60;
+				this.randomMotionVecX = MathHelper.clamp_float((float)(this.posX - this.entityToAttack.posX), -1.0F, 1.0F) * 0.3F;
+				this.randomMotionVecZ = MathHelper.clamp_float((float)(this.posZ - this.entityToAttack.posZ), -1.0F, 1.0F) * 0.3F;
+			} else {
+				// Very small motion towards target helps Octorok face them to attack
+				float f = (distance > 7.0F ? 0.15F : 0.05F);
+				this.randomMotionVecX = MathHelper.clamp_float((float)(this.entityToAttack.posX - this.posX), -1.0F, 1.0F) * f;
+				this.randomMotionVecZ = MathHelper.clamp_float((float)(this.entityToAttack.posZ - this.posZ), -1.0F, 1.0F) * f;
+			}
+		} else if (!this.inWater || this.rand.nextInt(50) == 0 || (this.randomMotionVecX == 0.0F && this.randomMotionVecY == 0.0F && this.randomMotionVecZ == 0.0F)) {
+			float f = this.rand.nextFloat() * (float) Math.PI * 2.0F;
+			this.randomMotionVecX = MathHelper.cos(f) * 0.2F;
+			this.randomMotionVecY = -0.1F + this.rand.nextFloat() * 0.3F;
+			this.randomMotionVecZ = MathHelper.sin(f) * 0.2F;
 		}
 		despawnEntity();
 	}
@@ -218,6 +264,9 @@ public class EntityOctorok extends EntityWaterMob implements IMob, IEntityLootab
 
 	@Override
 	protected Entity findPlayerToAttack() {
+		if (this.fleeingTick > 0) {
+			return null;
+		}
 		EntityPlayer entityplayer = worldObj.getClosestVulnerablePlayerToEntity(this, 16.0D);
 		return entityplayer != null && canEntityBeSeen(entityplayer) ? entityplayer : null;
 	}

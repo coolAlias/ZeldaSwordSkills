@@ -17,8 +17,6 @@
 
 package zeldaswordskills.client.render.entity;
 
-import org.lwjgl.opengl.GL11;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.model.ModelBase;
@@ -44,33 +42,18 @@ public class RenderEntityOctorok extends RenderLiving
 		super.doRender(entity, dx, dy, dz, f, f1);
 	}
 
-	protected void rotateSquidsCorpse(EntityOctorok octorok, float dx, float dy, float dz) {
-		float f3 = octorok.prevSquidPitch + (octorok.squidPitch - octorok.prevSquidPitch) * dz;
-		float f4 = octorok.prevSquidYaw + (octorok.squidYaw - octorok.prevSquidYaw) * dz;
-		GL11.glTranslatef(0.0F, 0.5F, 0.0F);
-		GL11.glRotatef(180.0F - dy, 0.0F, 1.0F, 0.0F);
-		GL11.glRotatef(f3, 1.0F, 0.0F, 0.0F);
-		GL11.glRotatef(f4, 0.0F, 1.0F, 0.0F);
-		GL11.glTranslatef(0.0F, -1.2F, 0.0F);
-	}
-
 	protected float handleRotationFloat(EntityOctorok octorok, float f) {
 		return octorok.prevTentacleAngle + (octorok.tentacleAngle - octorok.prevTentacleAngle) * f;
 	}
 
 	@Override
 	public void doRender(EntityLiving entity, double dx, double dy, double dz, float f, float f1) {
-		renderLivingSquid((EntityOctorok) entity, dx, dy, dz, f, f1);
+		this.renderLivingSquid((EntityOctorok) entity, dx, dy, dz, f, f1);
 	}
 
 	@Override
 	protected float handleRotationFloat(EntityLivingBase entity, float f) {
-		return handleRotationFloat((EntityOctorok) entity, f);
-	}
-
-	@Override
-	protected void rotateCorpse(EntityLivingBase entity, float dx, float dy, float dz) {
-		rotateSquidsCorpse((EntityOctorok) entity, dx, dy, dz);
+		return this.handleRotationFloat((EntityOctorok) entity, f);
 	}
 
 	@Override
