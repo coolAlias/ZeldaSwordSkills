@@ -31,23 +31,22 @@ public class EntityThrowingRock extends EntityMobThrowable
 {
 	public EntityThrowingRock(World world) {
 		super(world);
+		this.setDamage(2.0F);
 	}
 
 	public EntityThrowingRock(World world, EntityLivingBase entity) {
 		super(world, entity);
+		this.setDamage(2.0F);
 	}
 
 	public EntityThrowingRock(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		this.setDamage(2.0F);
 	}
 
 	public EntityThrowingRock(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
-	}
-
-	@Override
-	public void entityInit() {
-		setDamage(2.0F);
+		this.setDamage(2.0F);
 	}
 
 	@Override
