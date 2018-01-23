@@ -751,7 +751,8 @@ public class ZSSItems
 				}
 			}
 		} catch(Exception e) {
-
+			ZSSMain.logger.error("Error registering items:");
+			e.printStackTrace();
 		}
 	}
 
