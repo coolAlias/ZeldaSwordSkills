@@ -148,6 +148,16 @@ public class EntityBoomerang extends EntityMobThrowable
 		return 0.0F;
 	}
 
+	public boolean isMagicBoomerang() {
+		ItemStack stack = this.getBoomerang();
+		return (stack != null && stack.getItem() == ZSSItems.boomerangMagic);
+	}
+
+	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
+		return 0.0F; // can't be reflected, though it can be deflected by blocking
+	}
+
 	@Override
 	public void onUpdate() {
 		--distance;
@@ -218,6 +228,17 @@ public class EntityBoomerang extends EntityMobThrowable
 		}
 	}
 
+	/**
+	 * Reverses the boomerang's course if not already reversed (i.e. noClip is still false)
+	 */
+	protected void reverseCourse() {
+		if (!this.noClip) {
+			this.noClip = true;
+			this.distance = Math.min(this.distance, 0);
+			this.setThrowableHeading(-this.motionX, -this.motionY, -this.motionZ, this.getVelocity(), 1.0F);
+		}
+	}
+
 	@Override
 	public void onCollideWithPlayer(EntityPlayer player) {
 		if (distance < 0 && !worldObj.isRemote) {
@@ -241,11 +262,21 @@ public class EntityBoomerang extends EntityMobThrowable
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.typeOfHit == MovingObjectType.ENTITY) {
-			if (mop.entityHit != getThrower() && mop.entityHit.attackEntityFrom(getDamageSource(), getDamage())) {
-				playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-				if (mop.entityHit instanceof EntityLivingBase && getThrower() != null) {
-					EnchantmentHelper.applyThornEnchantments((EntityLivingBase) mop.entityHit, getThrower());
-					EnchantmentHelper.applyArthropodEnchantments(getThrower(), mop.entityHit);
+			EntityLivingBase thrower = this.getThrower();
+			if (mop.entityHit != thrower || this.wasReflected) {
+				boolean flag = mop.entityHit.attackEntityFrom(this.getDamageSource(), this.getDamage());
+				if (flag) {
+					playSound(Sounds.DAMAGE_SUCCESSFUL_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+					if (mop.entityHit instanceof EntityLivingBase && thrower != null) {
+						EnchantmentHelper.applyThornEnchantments((EntityLivingBase) mop.entityHit, getThrower());
+						EnchantmentHelper.applyArthropodEnchantments(getThrower(), mop.entityHit);
+					}
+				} else if (mop.entityHit instanceof EntityPlayer && !this.isMagicBoomerang()) {
+					boolean isBlocking = PlayerUtils.isBlocking((EntityPlayer) mop.entityHit);
+					boolean isShield = PlayerUtils.isShield(((EntityPlayer) mop.entityHit).getHeldItem());
+					if (isBlocking && isShield) {
+						this.reverseCourse();
+					}
 				}
 			}
 		} else {
@@ -260,16 +291,13 @@ public class EntityBoomerang extends EntityMobThrowable
 				float hardness = block.getBlockHardness(worldObj, pos);
 				if (Config.canBoomerangDenude() && !worldObj.isRemote && block.getMaterial() != Material.air && hardness >= 0.0F && hardness < 0.1F) {
 					worldObj.destroyBlock(pos, true);
-				} else if (block instanceof BlockButton || (block instanceof BlockLever &&
-						getBoomerang() != null && getBoomerang().getItem() == ZSSItems.boomerangMagic)) {
+				} else if (block instanceof BlockButton || (block instanceof BlockLever && this.isMagicBoomerang())) {
 					WorldUtils.activateButton(worldObj, state, pos);
 					flag = true;
 				}
 			}
-			if (flag && !noClip) {
-				noClip = true;
-				distance = Math.min(distance, 0);
-				setThrowableHeading(-motionX, -motionY, -motionZ, getVelocity(), 1.0F);
+			if (flag) {
+				this.reverseCourse();
 			}
 		}
 	}
