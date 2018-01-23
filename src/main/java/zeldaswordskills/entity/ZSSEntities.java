@@ -93,7 +93,6 @@ import zeldaswordskills.entity.mobs.EntityDarknutMighty;
 import zeldaswordskills.entity.mobs.EntityDekuBaba;
 import zeldaswordskills.entity.mobs.EntityDekuFire;
 import zeldaswordskills.entity.mobs.EntityDekuWithered;
-import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityKeeseCursed;
 import zeldaswordskills.entity.mobs.EntityKeeseFire;
@@ -103,6 +102,7 @@ import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
 import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
 import zeldaswordskills.entity.mobs.EntityWizzrobeIce;
 import zeldaswordskills.entity.mobs.EntityWizzrobeThunder;
 import zeldaswordskills.entity.npc.EntityGoron;
@@ -346,7 +346,7 @@ public class ZSSEntities
 
 		// BOSSES
 		registerEntity(EntityBlackKnight.class, "darknut_boss", ++modEntityIndex, 80, 0x1E1E1E, 0x000000);
-		registerEntity(EntityGrandWizzrobe.class, "wizzrobe_grand", ++modEntityIndex, 80, 0x8B2500, 0x1E1E1E);
+		registerEntity(EntityWizzrobeGrand.class, "wizzrobe_grand", ++modEntityIndex, 80, 0x8B2500, 0x1E1E1E);
 
 		// NPCS
 		registerEntity(EntityGoron.class, "goron", ++modEntityIndex, 80, 0xB8860B, 0x8B5A00);
@@ -413,7 +413,7 @@ public class ZSSEntities
 		// BOSSES
 		RenderingRegistry.registerEntityRenderingHandler(EntityBlackKnight.class, new RenderGenericLiving.Factory( 
 				new ModelDarknutMighty(), 0.5F, 1.8F, ModInfo.ID + ":textures/entity/darknut_standard.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobeGrand.Factory(new ModelWizzrobe(), 1.5F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeGrand.class, new RenderEntityWizzrobeGrand.Factory(new ModelWizzrobe(), 1.5F));
 
 		// NPCS
 		RenderingRegistry.registerEntityRenderingHandler(EntityNpcBarnes.class, new RenderGenericLiving.Factory( 

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -39,8 +39,8 @@ import zeldaswordskills.api.block.IHookable.HookshotType;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.entity.mobs.EntityBlackKnight;
-import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityOctorok;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
 import zeldaswordskills.item.ItemBrokenSword;
 import zeldaswordskills.item.ItemHookShotUpgrade.UpgradeType;
 import zeldaswordskills.item.ItemPendant.PendantType;
@@ -68,7 +68,7 @@ public enum BossType implements IStringSerializable
 	FOREST("temple_forest", "Forest Temple", 2, ForestBattle.class, EntityCaveSpider.class, 4, ZeldaSongs.songWarpForest, "forest", "foresthills"),
 	TAIGA("temple_ice", "Ice Temple", 3, BossBattle.class, EntitySkeleton.class, 5, ZeldaSongs.songWarpLight, "coldtaiga", "coldtaigahills", "iceplains"),
 	OCEAN("temple_water", "Water Temple", 4, OceanBattle.class, EntityOctorok.class, 1, ZeldaSongs.songWarpWater, "ocean", "frozenocean", "deepocean"),
-	SWAMP("temple_wind", "Wind Temple", 5, SwampBattle.class, EntityGrandWizzrobe.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
+	SWAMP("temple_wind", "Wind Temple", 5, SwampBattle.class, EntityWizzrobeGrand.class, 4, ZeldaSongs.songWarpShadow, "swampland"),
 	MOUNTAIN("temple_earth", "Earth Temple", 6, EarthBattle.class, EntityBlackKnight.class, 3, ZeldaSongs.songWarpOrder, "extremehills", "extremehillsedge");
 	//END("temple_shadow", EntityEnderman.class, 7, "sky");
 	// TODO negate Enderman teleport ability when spawned as a boss?, perhaps by adding a new Debuff
@@ -78,7 +78,7 @@ public enum BossType implements IStringSerializable
 	private final String unlocalizedName;
 
 	private final String title;
-	
+
 	/** Default biomes in which this dungeon can generate */
 	private final String[] defaultBiomes;
 

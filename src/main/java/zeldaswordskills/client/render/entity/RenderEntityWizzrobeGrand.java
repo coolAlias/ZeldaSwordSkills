@@ -24,8 +24,8 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.client.model.ModelWizzrobe;
-import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
 import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
@@ -42,10 +42,10 @@ public class RenderEntityWizzrobeGrand extends RenderEntityWizzrobe
 
 	@Override
 	protected ResourceLocation getEntityTexture(EntityWizzrobe entity) {
-		return this.getWizzrobeTexture((EntityGrandWizzrobe) entity);
+		return this.getWizzrobeTexture((EntityWizzrobeGrand) entity);
 	}
 
-	protected ResourceLocation getWizzrobeTexture(EntityGrandWizzrobe wizzrobe) {
+	protected ResourceLocation getWizzrobeTexture(EntityWizzrobeGrand wizzrobe) {
 		switch (wizzrobe.getMagicType()) {
 		case FIRE: return RenderEntityWizzrobeGrand.FIRE;
 		case ICE: return RenderEntityWizzrobeGrand.ICE;
@@ -55,7 +55,7 @@ public class RenderEntityWizzrobeGrand extends RenderEntityWizzrobe
 		}
 	}
 
-	public static class Factory implements IRenderFactory<EntityGrandWizzrobe>
+	public static class Factory implements IRenderFactory<EntityWizzrobeGrand>
 	{
 		protected final ModelWizzrobe model;
 		protected final float shadowSize;
@@ -65,7 +65,7 @@ public class RenderEntityWizzrobeGrand extends RenderEntityWizzrobe
 		}
 
 		@Override
-		public Render<? super EntityGrandWizzrobe> createRenderFor(RenderManager manager) {
+		public Render<? super EntityWizzrobeGrand> createRenderFor(RenderManager manager) {
 			return new RenderEntityWizzrobeGrand(manager, this.model, this.shadowSize);
 		}
 	}
