@@ -83,7 +83,6 @@ import zeldaswordskills.entity.mobs.EntityDarknutMighty;
 import zeldaswordskills.entity.mobs.EntityDekuBaba;
 import zeldaswordskills.entity.mobs.EntityDekuFire;
 import zeldaswordskills.entity.mobs.EntityDekuWithered;
-import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
 import zeldaswordskills.entity.mobs.EntityKeese;
 import zeldaswordskills.entity.mobs.EntityKeeseCursed;
 import zeldaswordskills.entity.mobs.EntityKeeseFire;
@@ -92,6 +91,7 @@ import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
 import zeldaswordskills.entity.mobs.EntityWizzrobeIce;
 import zeldaswordskills.entity.mobs.EntityWizzrobeThunder;
 import zeldaswordskills.entity.npc.EntityGoron;
@@ -317,7 +317,7 @@ public class ZSSEntities
 		registerEntity(EntityWizzrobeThunder.class, "wizzrobe_thunder", ++modEntityIndex, 80, 0x8B2500, 0xEEEE00);
 
 		// BOSSES
-		registerEntity(EntityGrandWizzrobe.class, "wizzrobe_grand", ++modEntityIndex, 80, 0x8B2500, 0x1E1E1E);
+		registerEntity(EntityWizzrobeGrand.class, "wizzrobe_grand", ++modEntityIndex, 80, 0x8B2500, 0x1E1E1E);
 		registerEntity(EntityBlackKnight.class, "darknut_boss", ++modEntityIndex, 80, 0x1E1E1E, 0x000000);
 
 		// NPCS
@@ -386,7 +386,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeGale.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_wind.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeIce.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeThunder.class, new RenderEntityWizzrobe(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_lightning.png")));
-		RenderingRegistry.registerEntityRenderingHandler(EntityGrandWizzrobe.class, new RenderEntityWizzrobeGrand(new ModelWizzrobe(), 1.5F));
+		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeGrand.class, new RenderEntityWizzrobeGrand(new ModelWizzrobe(), 1.5F));
 	}
 
 	/**

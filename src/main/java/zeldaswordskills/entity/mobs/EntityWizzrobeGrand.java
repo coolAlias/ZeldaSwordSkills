@@ -42,7 +42,7 @@ import zeldaswordskills.skills.SkillBase;
  * Boss version of Wizzrobe
  *
  */
-public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayData
+public class EntityWizzrobeGrand extends EntityWizzrobe implements IBossDisplayData
 {
 	/** Data watcher index for the Grand Wizzrobe's current magic type */
 	protected static final int TYPE_INDEX = 16;
@@ -50,7 +50,7 @@ public class EntityGrandWizzrobe extends EntityWizzrobe implements IBossDisplayD
 	/** Transformation timer for boss version */
 	private int transformTimer;
 
-	public EntityGrandWizzrobe(World world) {
+	public EntityWizzrobeGrand(World world) {
 		super(world);
 		this.tasks.addTask(0, new EntityAILevitate(this, 2.5D));
 		this.targetTasks.taskEntries.clear();

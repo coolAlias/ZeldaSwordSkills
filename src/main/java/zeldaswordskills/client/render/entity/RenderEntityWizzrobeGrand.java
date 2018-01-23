@@ -22,7 +22,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import zeldaswordskills.client.model.ModelWizzrobe;
-import zeldaswordskills.entity.mobs.EntityGrandWizzrobe;
+import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
 import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
@@ -39,10 +39,10 @@ public class RenderEntityWizzrobeGrand extends RenderEntityWizzrobe
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		return this.getWizzrobeTexture((EntityGrandWizzrobe) entity);
+		return this.getWizzrobeTexture((EntityWizzrobeGrand) entity);
 	}
 
-	protected ResourceLocation getWizzrobeTexture(EntityGrandWizzrobe wizzrobe) {
+	protected ResourceLocation getWizzrobeTexture(EntityWizzrobeGrand wizzrobe) {
 		switch (wizzrobe.getMagicType()) {
 		case FIRE: return RenderEntityWizzrobeGrand.FIRE;
 		case ICE: return RenderEntityWizzrobeGrand.ICE;
