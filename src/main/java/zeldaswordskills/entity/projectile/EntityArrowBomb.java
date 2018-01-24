@@ -141,7 +141,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	}
 
 	@Override
-	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, DamageSource source) {
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
 		return 0.0F; // Never called anyway since bombs only cause damage via explosions
 	}
 

@@ -141,7 +141,7 @@ public class EntityCyclone extends EntityMobThrowable
 	}
 
 	@Override
-	public float getReflectChance(ItemStack mirrorShield, EntityPlayer player, DamageSource source) {
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
 		return 0.0F;
 	}
 

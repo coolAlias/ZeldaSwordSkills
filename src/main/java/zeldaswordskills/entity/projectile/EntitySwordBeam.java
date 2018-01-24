@@ -215,7 +215,7 @@ public class EntitySwordBeam extends EntityThrowable implements IReflectable, IE
 	}
 
 	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
 		return 0.0F; // not able to be reflected
 	}
 

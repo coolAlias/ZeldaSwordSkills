@@ -22,27 +22,26 @@ import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import zeldaswordskills.item.ItemZeldaShield;
+import zeldaswordskills.api.item.IReflective;
 
 /**
  * 
- * For projectiles that need special handling when blocked by Zelda Shields.
- * TODO make more generic:
- *  - when struck by projectile while any IReflector item is in use
- *  - or at least all Zelda Shields should be able to ineract with this interface (e.g. Deku Shield vs. Octorok rocks)
+ * For projectile entities that may be reflected back at their shooter when blocked by shields.
  *
  */
-public interface IReflectable extends IProjectile {
-
+public interface IReflectable extends IProjectile
+{
 	/**
-	 * Called when the projectile is blocked with a {@link ItemZeldaShield mirror shield}
+	 * Called when the projectile is blocked with a shield to determine how likely it is to be reflected.
+	 * <br>Consider returning {@link IReflective#getReflectChance(ItemStack, EntityPlayer, DamageSource, float) IReflective#getReflectChance} if appropriate.
 	 * @param shield Shield stack used to block the attack
 	 * @param player Defending player that is reflecting the projectile
 	 * @param source The original source of damage; {@link DamageSource#getSourceOfDamage} is the original
 	 *               projectile instance and {@link DamageSource#getEntity} should be the original shooter
+	 * @param damage amount of damage the attack would cause if not reflected
 	 * @return Chance that the projectile will be reflected, between 0.0F and 1.0F inclusive
 	 */
-	float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source);
+	float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage);
 
 	/**
 	 * Called just before setting the reflected projectile instance's trajectory to control accuracy

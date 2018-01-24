@@ -158,7 +158,7 @@ public class EntityBoomerang extends EntityMobThrowable
 	}
 
 	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
 		return 0.0F; // can't be reflected, though it can be deflected by blocking
 	}
 

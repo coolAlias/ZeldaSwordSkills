@@ -26,7 +26,6 @@ import mods.battlegear2.api.shield.IArrowCatcher;
 import mods.battlegear2.api.shield.IArrowDisplay;
 import mods.battlegear2.api.shield.IShield;
 import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -34,7 +33,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -51,9 +49,9 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.IDamageAoE;
-import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.item.IDashItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
+import zeldaswordskills.api.item.IReflective;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -76,7 +74,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 		@Optional.Interface(iface="mods.battlegear2.api.shield.IShield", modid="battlegear2", striprefs=true)
 })
 public class ItemZeldaShield extends Item implements IDashItem, IFairyUpgrade,
-ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
+ISwingSpeed, IUnenchantable, IReflective, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 {
 	/**
 	 * Material used in construction determines various properties:
@@ -119,6 +117,28 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
 	}
 
+	@Override
+	public boolean isMirrorShield(ItemStack shield) {
+		return this.toolMaterial == ToolMaterial.EMERALD;
+	}
+
+	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		if (this.isMirrorShield(shield) && this.canBlockDamage(shield, source)) {
+			return (source.isMagicDamage() ? (1F / 3F) : 1.0F); 
+		}
+		return 0.0F;
+	}
+
+	@Override
+	public void onReflected(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		// #onBlock handles this for Zelda shields unless the damage source is one that can not normally be blocked
+		if (!this.canBlockDamage(shield, source)) {
+			// Call #onBlock manually to set player block time and perhaps damage the shield
+			this.onBlock(player, shield, source, damage, true);
+		}
+	}
+
 	/** Time for which blocking will be disabled after a successful block */
 	public int getRecoveryTime() {
 		return recoveryTime;
@@ -132,29 +152,34 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 		if (toolMaterial == ToolMaterial.WOOD) {
 			return !flag;
 		}
-		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && toolMaterial == ToolMaterial.EMERALD);
+		return !flag || source.isMagicDamage() || source.isFireDamage() || (source.isProjectile() && this.isMirrorShield(shield));
 	}
 
 	/**
 	 * Called when the shield blocks an attack when held in the normal fashion (i.e. non-BG2)
 	 * used by Deku Shield to damage / destroy the stack and by Mirror Shield to reflect projectiles
+	 * @param wasReflected true if the damage source was a projectile and was reflected
 	 * @return	Return the amount of damage remaining, if any; 0 cancels the hurt event
 	 */
-	public float onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage) {
+	public float onBlock(EntityPlayer player, ItemStack shield, DamageSource source, float damage, boolean wasReflected) {
 		ZSSPlayerInfo.get(player).onAttackBlocked(shield, damage);
 		WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 		float damageBlocked = damage;
 		if (toolMaterial == ToolMaterial.WOOD) {
-			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
+			if (wasReflected) {
+				// nothing else to do except damage the shield
+			} else if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() instanceof IProjectile) {
 				if (ZSSMain.isBG2Enabled && player.getHeldItem() == shield && shield.getItem() instanceof IArrowCatcher){
 					if (((IArrowCatcher) shield.getItem()).catchArrow(shield, player, (IProjectile) source.getSourceOfDamage())) {
 						((InventoryPlayerBattle) player.inventory).hasChanged = true;
 					}
 				}
 			} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
+				// Wooden shields don't reduce damage from unblockable damage sources
 				damageBlocked *= magicReduction;
 			}
-			int dmg = Math.round(source.isFireDamage() ? damage + 10.0F : damage - 2.0F);
+			float f = (wasReflected ? 0.5F : 1.0F);
+			int dmg = Math.round(f * (source.isFireDamage() ? damage * 2.0F : damage - 2.0F));
 			if (dmg > 0) {
 				shield.damageItem(dmg, player);
 				if (shield.stackSize <= 0) {
@@ -166,76 +191,13 @@ ISwingSpeed, IUnenchantable, IShield, ISheathed, IArrowCatcher, IArrowDisplay
 					}
 				}
 			}
-		} else if (toolMaterial == ToolMaterial.EMERALD) {
-			if (source.isProjectile() && !source.isExplosion() && source.getSourceOfDamage() != null) {
-				float chance = (source.isMagicDamage() ? (1F / 3F) : 1.0F);
-				Entity projectile = source.getSourceOfDamage();
-				if (projectile instanceof IReflectable) {
-					chance = ((IReflectable) projectile).getReflectChance(shield, player, source);
-				}
-				if (player.worldObj.rand.nextFloat() < chance) {
-					this.reflectProjectile(shield, player, source);
-				} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
-					damageBlocked *= magicReduction;
-				}
-			} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
-				damageBlocked *= magicReduction;
-			}
+		} else if (wasReflected) {
+			// nothing to do
 		} else if (source.isUnblockable() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
-			damageBlocked *= magicReduction; // default shield behavior blocks half damage from AoE magic attacks
+			// all non-wooden zelda shields reduce AoE and unblockable damage by some percentage
+			damageBlocked *= magicReduction;
 		}
 		return (damage - damageBlocked);
-	}
-
-	/**
-	 * Sends the projectile back toward its initiator
-	 * @param shield
-	 * @param player
-	 * @param source {@link DamageSource#getSourceOfDamage} should return the projectile
-	 */
-	protected void reflectProjectile(ItemStack shield, EntityPlayer player, DamageSource source) {
-		// Create a new instance in case projectile calls #setDead on itself due to the impact
-		Entity projectile = null;
-		try {
-			projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj);
-			NBTTagCompound data = new NBTTagCompound();
-			// This *should* make an exact copy of the projectile to reflect
-			source.getSourceOfDamage().writeToNBT(data);
-			projectile.readFromNBT(data);
-		} catch (Exception e) {
-			ZSSMain.logger.error(String.format("Mirror Shield unable to reflect projectile class %s: %s", source.getSourceOfDamage().getClass().getSimpleName(), e.getMessage()));
-		}
-		if (projectile == null) {
-			return;
-		}
-		projectile.getEntityData().setBoolean("isReflected", true);
-		projectile.posX -= projectile.motionX;
-		projectile.posY -= projectile.motionY;
-		projectile.posZ -= projectile.motionZ;
-		// Set new trajectory based on player's look vector a la EntityFireball
-		Vec3 vec = player.getLookVec();
-		double motionX = vec.xCoord;
-		double motionY = vec.yCoord;
-		double motionZ = vec.zCoord;
-		float wobble = 2.0F + (20.0F * player.worldObj.rand.nextFloat());
-		if (projectile instanceof IReflectable) {
-			float alt_wobble = ((IReflectable) projectile).getReflectedWobble(shield, player, source);
-			wobble = (alt_wobble < 0.0F ? wobble : alt_wobble);
-		}
-		TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, wobble, false);
-		if (projectile instanceof IReflectable) {
-			((IReflectable) projectile).onReflected(shield, player, source);
-		} else {
-			// Handle common non-IReflectable projectiles
-			if (projectile instanceof EntityThrowable) {
-				DirtyEntityAccessor.setThrowableThrower((EntityThrowable) projectile, player);
-			} else if (projectile instanceof EntityArrow) {
-				((EntityArrow) projectile).shootingEntity = player;
-			}
-			// Make sure original projectile is dead; IReflectables are given the power to skip this
-			source.getSourceOfDamage().setDead();
-		}
-		player.worldObj.spawnEntityInWorld(projectile);
 	}
 
 	@Override
