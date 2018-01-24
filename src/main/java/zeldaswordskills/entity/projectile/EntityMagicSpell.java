@@ -47,6 +47,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceShockIndirect;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.item.ItemMagicRod;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 
 /**
@@ -174,8 +175,14 @@ public class EntityMagicSpell extends EntityMobThrowable
 	}
 
 	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
-		return (reflectChance < 0 ? 1.0F - (getArea() / 4.0F) : reflectChance);
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		if (this.reflectChance >= 0.0F && PlayerUtils.isMirrorShield(shield)) {
+			return this.reflectChance; // specified reflect chance takes precedence
+		}
+		// AoE modifier reduces reflect chance the greater the spell radius
+		float aoeMod = (this.getArea() / 4.0F);
+		float chance = super.getReflectChance(shield, player, source, damage);
+		return chance - aoeMod;
 	}
 
 	@Override

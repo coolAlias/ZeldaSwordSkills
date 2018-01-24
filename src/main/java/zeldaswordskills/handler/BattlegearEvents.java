@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,11 +27,11 @@ import net.minecraftforge.event.entity.player.ArrowNockEvent;
 import net.minecraftforge.event.entity.player.PlayerUseItemEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import zeldaswordskills.api.item.IReflective;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemHeroBow;
 import zeldaswordskills.item.ItemZeldaArrow;
 import zeldaswordskills.item.ItemZeldaShield;
-
 
 /**
  * 
@@ -42,10 +42,25 @@ public class BattlegearEvents {
 
 	@SubscribeEvent
 	public void onBlocked(ShieldBlockEvent event) {
+		// Event only fires after BG2 has determined a successful block, i.e. player is blocking, opponent is in front, etc.
+		// Ignore ZSSPlayerInfo#canBlock() - only BG2-compatible shields post this event, meaning they use the stamina bar
+		boolean wasReflected = false;
+		if (ZSSCombatEvents.wasProjectileReflected(event.shield, event.entityPlayer, event.source, event.ammount)) {
+			wasReflected = true;
+			if (event.shield.getItem() instanceof IReflective) {
+				((IReflective) event.shield.getItem()).onReflected(event.shield, event.entityPlayer, event.source, event.ammount);
+			} else {
+				ZSSPlayerInfo.get(event.entityPlayer).onAttackBlocked(event.shield, event.ammount);
+			}
+		}
 		if (event.shield.getItem() instanceof ItemZeldaShield) {
-			event.ammountRemaining = ((ItemZeldaShield) event.shield.getItem()).onBlock(event.entityPlayer, event.shield, event.source, event.ammount);
+			event.ammountRemaining = ((ItemZeldaShield) event.shield.getItem()).onBlock(event.entityPlayer, event.shield, event.source, event.ammount, wasReflected);
 			event.performAnimation = false;
 			event.damageShield = false;
+		}
+		// Event can't be directly canceled, so set amount remaining to 0 after processing #onBlock for ZSS shields
+		if (wasReflected) {
+			event.ammountRemaining = 0.0F;
 		}
 	}
 
@@ -87,7 +102,7 @@ public class BattlegearEvents {
 	 * Make sure nocked arrow is set for rendering when drawing from BG2 quiver
 	 */
 	@SubscribeEvent
-    public void onBowStartDraw(PlayerUseItemEvent.Start event) {
+	public void onBowStartDraw(PlayerUseItemEvent.Start event) {
 		if (event.item.getItem() instanceof ItemHeroBow && ZSSPlayerInfo.get(event.entityPlayer).getNockedArrow() == null) {
 			ItemStack arrow = getQuiverArrow(event.item, event.entityPlayer);
 			if (arrow != null) {

@@ -32,6 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.item.IReflective;
 import zeldaswordskills.api.item.IWeapon;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.item.ItemZeldaShield;
@@ -127,6 +128,16 @@ public class PlayerUtils
 			if (stack != null && stack.getItem() instanceof ItemZeldaSword && ((ItemZeldaSword) stack.getItem()).isMasterSword()) {
 				return true;
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether the stack is a mirror shield according to {@link IReflective#isMirrorShield}
+	 */
+	public static boolean isMirrorShield(ItemStack stack) {
+		if (stack != null && stack.getItem() instanceof IReflective) {
+			return ((IReflective) stack.getItem()).isMirrorShield(stack);
 		}
 		return false;
 	}

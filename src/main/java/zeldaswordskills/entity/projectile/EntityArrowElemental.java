@@ -46,6 +46,7 @@ import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 
 /**
@@ -156,8 +157,11 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
-		return (this.getType() == ElementType.LIGHT ? 1.0F : 1.0F / 3.0F);
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		if (this.getType() == ElementType.LIGHT) {
+			return (PlayerUtils.isMirrorShield(shield) ? 1.0F : 0.0F);
+		}
+		return super.getReflectChance(shield, player, source, damage);
 	}
 
 	@Override

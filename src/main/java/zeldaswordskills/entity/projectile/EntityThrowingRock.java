@@ -72,6 +72,11 @@ public class EntityThrowingRock extends EntityMobThrowable
 	}
 
 	@Override
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		return 1.0F; // reflectable by any shield
+	}
+
+	@Override
 	public float getReflectedWobble(ItemStack shield, EntityPlayer player, DamageSource source) {
 		return 2.0F + this.rand.nextFloat() * 13.0F;
 	}

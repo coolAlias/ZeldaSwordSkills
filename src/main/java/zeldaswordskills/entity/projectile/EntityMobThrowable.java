@@ -29,6 +29,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
+import zeldaswordskills.api.item.IReflective;
 import zeldaswordskills.entity.DirtyEntityAccessor;
 
 /**
@@ -145,8 +146,11 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 	}
 
 	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
-		return 1.0F;
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		if (shield != null && shield.getItem() instanceof IReflective) {
+			return ((IReflective) shield.getItem()).getReflectChance(shield, player, source, damage);
+		}
+		return 0.0F;
 	}
 
 	@Override

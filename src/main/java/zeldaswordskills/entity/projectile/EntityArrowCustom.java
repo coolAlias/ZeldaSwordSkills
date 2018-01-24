@@ -46,6 +46,7 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.entity.IReflectable;
+import zeldaswordskills.api.item.IReflective;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.TargetUtils;
 
@@ -173,8 +174,11 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	}
 
 	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source) {
-		return 1.0F;
+	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		if (shield != null && shield.getItem() instanceof IReflective) {
+			return ((IReflective) shield.getItem()).getReflectChance(shield, player, source, damage);
+		}
+		return 0.0F;
 	}
 
 	@Override

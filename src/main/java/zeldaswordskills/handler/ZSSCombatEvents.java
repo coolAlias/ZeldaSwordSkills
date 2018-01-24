@@ -25,8 +25,13 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -34,14 +39,17 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.damage.DamageUtils;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.damage.IDamageAoE;
 import zeldaswordskills.api.damage.IDamageType;
 import zeldaswordskills.api.damage.IPostDamageEffect;
+import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IArmorBreak;
+import zeldaswordskills.api.item.IReflective;
 import zeldaswordskills.api.item.ISwingSpeed;
 import zeldaswordskills.entity.DirtyEntityAccessor;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -62,6 +70,7 @@ import zeldaswordskills.skills.ICombo;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.ArmorBreak;
 import zeldaswordskills.skills.sword.MortalDraw;
+import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 
@@ -159,24 +168,120 @@ public class ZSSCombatEvents
 	}
 
 	/**
-	 * Pre-event to handle shield blocking (only posted when not in BG2 battle mode)
+	 * Pre-event to handle shield blocking
+	 * Note that BG2 ShieldBlockEvent should be getting handled prior to this
 	 */
 	@SubscribeEvent(priority=EventPriority.NORMAL)
 	public void onPreHurt(LivingHurtEvent event) {
 		if (event.entity instanceof EntityPlayer) {
+			Entity opponent = event.source.getEntity();
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ItemStack stack = player.getHeldItem();
-			if (stack != null && stack.getItem() instanceof ItemZeldaShield && player.isUsingItem()) {
+			if (!PlayerUtils.isShield(stack) || !PlayerUtils.isBlocking(player) || !ZSSPlayerInfo.get(player).canBlock()) {
+				return; // nothing to do here if held item is not a shield or not being used to block
+			} else if (opponent == null || !TargetUtils.isTargetInFrontOf(player, opponent, 60)) {
+				return; // opponent is not in front of player, can't block incoming attacks with shield
+			}
+			boolean wasReflected = false;
+			if (ZSSCombatEvents.wasProjectileReflected(stack, player, event.source, event.ammount)) {
+				wasReflected = true;
+				if (stack.getItem() instanceof IReflective) {
+					((IReflective) stack.getItem()).onReflected(stack, player, event.source, event.ammount);
+				} else {
+					ZSSPlayerInfo.get(player).onAttackBlocked(stack, event.ammount);
+				}
+				event.setCanceled(true);
+			}
+			// Check ZSS Shields to call #onBlock even if projectile already reflected
+			if (stack.getItem() instanceof ItemZeldaShield) {
 				ItemZeldaShield shield = (ItemZeldaShield) stack.getItem();
-				if (ZSSPlayerInfo.get(player).canBlock() && shield.canBlockDamage(stack, event.source)) {
-					Entity opponent = event.source.getEntity();
-					if (opponent != null && TargetUtils.isTargetInFrontOf(player, opponent, 60)) {
-						event.ammount = shield.onBlock(player, stack, event.source, event.ammount);
-						event.setCanceled(event.ammount < 0.1F);
-					}
+				if (wasReflected || shield.canBlockDamage(stack, event.source)) {
+					event.ammount = shield.onBlock(player, stack, event.source, event.ammount, wasReflected);
+					event.setCanceled(event.isCanceled() || event.ammount < 0.1F);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Tries to reflect any projectile source back toward its initiator when blocked with a shield
+	 * @param shield the shield used to block the projectile
+	 * @param player the player defending against the attack
+	 * @param source {@link DamageSource#getSourceOfDamage} should return the projectile
+	 * @param damage amount of damage the attack would cause if not reflected
+	 * @return false if for some reason the projectile could not be reflected
+	 */
+	// public so it can be used in Battlegear ShieldBlockEvent handler
+	public static boolean wasProjectileReflected(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
+		if (!source.isProjectile() || source.isExplosion() || source.getSourceOfDamage() == null) {
+			return false;
+		}
+		float chance = 0.0F; // no chance unless IReflective shield or IReflectable projectile says otherwise
+		Entity projectile = source.getSourceOfDamage();
+		// IReflectable chance takes precedence over IReflective
+		if (projectile instanceof IReflectable) {
+			chance = ((IReflectable) projectile).getReflectChance(shield, player, source, damage);
+		} else if (shield.getItem() instanceof IReflective) {
+			chance = ((IReflective) shield.getItem()).getReflectChance(shield, player, source, damage); 
+		}
+		if (player.worldObj.rand.nextFloat() < chance) {
+			return ZSSCombatEvents.reflectProjectile(shield, player, source);
+		}
+		return false;
+	}
+
+	/**
+	 * Sends the projectile back toward its initiator
+	 * @param shield the shield used to block the projectile
+	 * @param player the player defending against the attack
+	 * @param source {@link DamageSource#getSourceOfDamage} should return the projectile
+	 * @param damage amount of damage the attack would cause if not reflected
+	 * @return false if for some reason the projectile could not be reflected
+	 */
+	private static boolean reflectProjectile(ItemStack shield, EntityPlayer player, DamageSource source) {
+		// Create a new instance in case projectile calls #setDead on itself due to the impact
+		Entity projectile = null;
+		try {
+			projectile = source.getSourceOfDamage().getClass().getConstructor(World.class).newInstance(player.worldObj);
+			NBTTagCompound data = new NBTTagCompound();
+			// This *should* make an exact copy of the projectile to reflect
+			source.getSourceOfDamage().writeToNBT(data);
+			projectile.readFromNBT(data);
+		} catch (Exception e) {
+			ZSSMain.logger.error(String.format("Unable to reflect projectile - failed to create new instance of class %s: %s", source.getSourceOfDamage().getClass().getSimpleName(), e.getMessage()));
+		}
+		if (projectile == null) {
+			return false;
+		}
+		projectile.getEntityData().setBoolean("isReflected", true);
+		projectile.posX -= projectile.motionX;
+		projectile.posY -= projectile.motionY;
+		projectile.posZ -= projectile.motionZ;
+		// Set new trajectory based on player's look vector a la EntityFireball
+		Vec3 vec = player.getLookVec();
+		double motionX = vec.xCoord;
+		double motionY = vec.yCoord;
+		double motionZ = vec.zCoord;
+		float wobble = 2.0F + (20.0F * player.worldObj.rand.nextFloat());
+		if (projectile instanceof IReflectable) {
+			float alt_wobble = ((IReflectable) projectile).getReflectedWobble(shield, player, source);
+			wobble = (alt_wobble < 0.0F ? wobble : alt_wobble);
+		}
+		TargetUtils.setEntityHeading(projectile, motionX, motionY, motionZ, 1.0F, wobble, false);
+		if (projectile instanceof IReflectable) {
+			((IReflectable) projectile).onReflected(shield, player, source);
+		} else {
+			// Handle common non-IReflectable projectiles
+			if (projectile instanceof EntityThrowable) {
+				DirtyEntityAccessor.setThrowableThrower((EntityThrowable) projectile, player);
+			} else if (projectile instanceof EntityArrow) {
+				((EntityArrow) projectile).shootingEntity = player;
+			}
+			// Make sure original projectile is dead; IReflectables are given the power to skip this
+			source.getSourceOfDamage().setDead();
+		}
+		player.worldObj.spawnEntityInWorld(projectile);
+		return true;
 	}
 
 	/**
