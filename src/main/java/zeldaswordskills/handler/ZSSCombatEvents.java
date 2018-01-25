@@ -19,6 +19,7 @@ package zeldaswordskills.handler;
 
 import java.util.Set;
 
+import mods.battlegear2.api.core.BattlegearUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -26,12 +27,14 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -142,9 +145,38 @@ public class ZSSCombatEvents
 		if (event.isCanceled()) {
 			return;
 		}
+		// Check if attack is a projectile and can be reflected by player with shield
+		if (event.entity instanceof EntityPlayer && event.source.getEntity() != null) {
+			EntityPlayer player = (EntityPlayer) event.entity;
+			ItemStack stack = PlayerUtils.getHeldItem(player, false); // get offhand item
+			if (stack == null || !PlayerUtils.isBlockingWithShield(player) || !ZSSPlayerInfo.get(player).canBlock()) {
+				// nothing to do here if held item is not a shield or not being used to block
+			} else if (!TargetUtils.isTargetInFrontOf(player, event.source.getEntity(), 60)) {
+				// opponent is not in front of player, can't block incoming attacks with shield
+			} else if (ZSSCombatEvents.wasProjectileReflected(stack, player, event.source, event.ammount)) {
+				if (stack.getItem() instanceof IReflective) {
+					((IReflective) stack.getItem()).onReflected(stack, player, event.source, event.ammount);
+				} else {
+					ZSSPlayerInfo.get(player).onAttackBlocked(stack, event.ammount);
+					// Try to damage non-IReflective shields each time they reflect a projectile
+					stack.damageItem(1, player);
+					if (stack.stackSize <= 0) {
+						ForgeEventFactory.onPlayerDestroyItem(player, stack);
+						if (ZSSMain.isBG2Enabled && BattlegearUtils.isPlayerInBattlemode(player)) {
+							BattlegearUtils.setPlayerOffhandItem(player, null);
+						} else {
+							player.destroyCurrentEquippedItem();
+						}
+					}
+				}
+				event.setCanceled(true);
+			}
+		}
 		// Possible for damage to be negated by resistances, in which case we don't want the hurt animation to play
 		float amount = applyDamageModifiers(event.entityLiving, event.source, event.ammount);
-		if (event.entity instanceof EntityPlayer) {
+		if (event.isCanceled()) {
+			// nothing further to do
+		} else if (event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ZSSPlayerSkills.get(player).onBeingAttacked(event);
 			if (amount < 0.1F) {
@@ -169,34 +201,21 @@ public class ZSSCombatEvents
 
 	/**
 	 * Pre-event to handle shield blocking
-	 * Note that BG2 ShieldBlockEvent should be getting handled prior to this
 	 */
 	@SubscribeEvent(priority=EventPriority.NORMAL)
 	public void onPreHurt(LivingHurtEvent event) {
-		if (event.entity instanceof EntityPlayer) {
-			Entity opponent = event.source.getEntity();
+		// Check ZSS Shields to call #onBlock - projectile was not reflected and not in BG2 slots
+		if (event.entity instanceof EntityPlayer && event.source.getEntity() != null) {
 			EntityPlayer player = (EntityPlayer) event.entity;
 			ItemStack stack = player.getHeldItem();
 			if (!PlayerUtils.isShield(stack) || !PlayerUtils.isBlocking(player) || !ZSSPlayerInfo.get(player).canBlock()) {
-				return; // nothing to do here if held item is not a shield or not being used to block
-			} else if (opponent == null || !TargetUtils.isTargetInFrontOf(player, opponent, 60)) {
-				return; // opponent is not in front of player, can't block incoming attacks with shield
-			}
-			boolean wasReflected = false;
-			if (ZSSCombatEvents.wasProjectileReflected(stack, player, event.source, event.ammount)) {
-				wasReflected = true;
-				if (stack.getItem() instanceof IReflective) {
-					((IReflective) stack.getItem()).onReflected(stack, player, event.source, event.ammount);
-				} else {
-					ZSSPlayerInfo.get(player).onAttackBlocked(stack, event.ammount);
-				}
-				event.setCanceled(true);
-			}
-			// Check ZSS Shields to call #onBlock even if projectile already reflected
-			if (stack.getItem() instanceof ItemZeldaShield) {
+				// nothing to do here if held item is not a shield or not being used to block
+			} else if (!TargetUtils.isTargetInFrontOf(player, event.source.getEntity(), 60)) {
+				// opponent is not in front of player, can't block incoming attacks with shield
+			} else if (stack != null && stack.getItem() instanceof ItemZeldaShield) {
 				ItemZeldaShield shield = (ItemZeldaShield) stack.getItem();
-				if (wasReflected || shield.canBlockDamage(stack, event.source)) {
-					event.ammount = shield.onBlock(player, stack, event.source, event.ammount, wasReflected);
+				if (shield.canBlockDamage(stack, event.source)) {
+					event.ammount = shield.onBlock(player, stack, event.source, event.ammount, true);
 					event.setCanceled(event.isCanceled() || event.ammount < 0.1F);
 				}
 			}
@@ -224,7 +243,11 @@ public class ZSSCombatEvents
 		} else if (shield.getItem() instanceof IReflective) {
 			chance = ((IReflective) shield.getItem()).getReflectChance(shield, player, source, damage); 
 		}
-		if (player.worldObj.rand.nextFloat() < chance) {
+		// Player attacks trigger LivingAttackEvent on both sides; only other players will be reflecting projectiles
+		if (player.worldObj.isRemote) {
+			return chance > 0.49F; // best guess; client side attack event resolution shouldn't really matter too much
+		} else if (player.worldObj.rand.nextFloat() < chance) {
+			WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
 			return ZSSCombatEvents.reflectProjectile(shield, player, source);
 		}
 		return false;
@@ -276,6 +299,12 @@ public class ZSSCombatEvents
 				DirtyEntityAccessor.setThrowableThrower((EntityThrowable) projectile, player);
 			} else if (projectile instanceof EntityArrow) {
 				((EntityArrow) projectile).shootingEntity = player;
+			} else if (projectile instanceof EntityLargeFireball) {
+				// EntityLargeFireball kills ghasts in one hit when reflected by an attack (which results in the player being set as the 'shooting entity')
+				// Only let this happen when using a Mirror Shield or it becomes too easy
+				if (shield.getItem() instanceof IReflective && ((IReflective) shield.getItem()).isMirrorShield(shield)) {
+					((EntityLargeFireball) projectile).shootingEntity = player;
+				}
 			}
 			// Make sure original projectile is dead; IReflectables are given the power to skip this
 			source.getSourceOfDamage().setDead();

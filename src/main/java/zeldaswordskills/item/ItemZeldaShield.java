@@ -38,16 +38,13 @@ import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -243,28 +240,6 @@ ISwapModel, ISwingSpeed, IUnenchantable, IReflective, IShield, ISheathed, IArrow
 			player.setItemInUse(stack, getMaxItemUseDuration(stack));
 		}
 		return stack;
-	}
-
-	@Override
-	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-		if (toolMaterial == ToolMaterial.EMERALD) {
-			if (player.getHeldItem() != null && ZSSPlayerInfo.get(player).canBlock()) {
-				Vec3 vec3 = player.getLookVec();
-				double dx = player.posX + vec3.xCoord * 2.0D;
-				double dy = player.posY + player.getEyeHeight() + vec3.yCoord * 2.0D;
-				double dz = player.posZ + vec3.zCoord * 2.0D;
-				List<EntityFireball> list = player.worldObj.getEntitiesWithinAABB(EntityFireball.class, new AxisAlignedBB(dx - 1, dy - 1, dz - 1, dx + 1, dy + 1, dz + 1));
-				for (EntityFireball fireball : list) {
-					DamageSource source = DamageSource.causeFireballDamage(fireball, fireball.shootingEntity);
-					if (canBlockDamage(stack, source) && fireball.attackEntityFrom(DamageSource.causePlayerDamage(player), 1.0F)) {
-						fireball.getEntityData().setBoolean("isReflected", true);
-						ZSSPlayerInfo.get(player).onAttackBlocked(stack, 1.0F);
-						WorldUtils.playSoundAtEntity(player, Sounds.HAMMER, 0.4F, 0.5F);
-						break;
-					}
-				}
-			}
-		}
 	}
 
 	@Override

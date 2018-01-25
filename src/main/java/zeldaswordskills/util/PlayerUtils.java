@@ -20,6 +20,7 @@ package zeldaswordskills.util;
 import java.util.UUID;
 
 import mods.battlegear2.api.core.IBattlePlayer;
+import mods.battlegear2.api.core.InventoryPlayerBattle;
 import mods.battlegear2.api.shield.IShield;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -60,6 +61,31 @@ public class PlayerUtils
 			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
 		}
 		return false;
+	}
+
+	/**
+	 * Returns whether the player is blocking with a shield, accounting for possibility of Battlegear2 offhand shield use
+	 */
+	public static boolean isBlockingWithShield(EntityPlayer player) {
+		if (player.isBlocking() && PlayerUtils.isShield(player.getHeldItem())) {
+			return true;
+		} else if (ZSSMain.isBG2Enabled) {
+			return ((IBattlePlayer) player).isBattlemode() && ((IBattlePlayer) player).isBlockingWithShield();
+		}
+		return false;
+	}
+
+	/**
+	 * Return the player's currently held item, accounting for BG2 use
+	 * @param player
+	 * @param mainHand Used for BG2 to fetch the main hand (true) or off hand (false)
+	 * @return
+	 */
+	public static ItemStack getHeldItem(EntityPlayer player, boolean mainHand) {
+		if (ZSSMain.isBG2Enabled && ((IBattlePlayer) player).isBattlemode()) {
+			return (mainHand ? ((InventoryPlayerBattle) player.inventory).getCurrentItem() : ((InventoryPlayerBattle) player.inventory).getCurrentOffhandWeapon());
+		}
+		return player.getHeldItem();
 	}
 
 	/**
