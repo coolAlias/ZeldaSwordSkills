@@ -24,8 +24,6 @@ import mods.battlegear2.api.quiver.QuiverArrowRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.player.ArrowNockEvent;
-import zeldaswordskills.api.item.IReflective;
-import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.item.ItemZeldaArrow;
 import zeldaswordskills.item.ItemZeldaShield;
 import cpw.mods.fml.common.eventhandler.EventPriority;
@@ -40,25 +38,11 @@ public class BattlegearEvents {
 
 	@SubscribeEvent
 	public void onBlocked(ShieldBlockEvent event) {
-		// Event only fires after BG2 has determined a successful block, i.e. player is blocking, opponent is in front, etc.
-		// Ignore ZSSPlayerInfo#canBlock() - only BG2-compatible shields post this event, meaning they use the stamina bar
-		boolean wasReflected = false;
-		if (ZSSCombatEvents.wasProjectileReflected(event.shield, event.entityPlayer, event.source, event.ammount)) {
-			wasReflected = true;
-			if (event.shield.getItem() instanceof IReflective) {
-				((IReflective) event.shield.getItem()).onReflected(event.shield, event.entityPlayer, event.source, event.ammount);
-			} else {
-				ZSSPlayerInfo.get(event.entityPlayer).onAttackBlocked(event.shield, event.ammount);
-			}
-		}
+		// Check ZSS Shields to call #onBlock - projectile was not reflected
 		if (event.shield.getItem() instanceof ItemZeldaShield) {
-			event.ammountRemaining = ((ItemZeldaShield) event.shield.getItem()).onBlock(event.entityPlayer, event.shield, event.source, event.ammount, wasReflected);
+			event.ammountRemaining = ((ItemZeldaShield) event.shield.getItem()).onBlock(event.entityPlayer, event.shield, event.source, event.ammount, false);
 			event.performAnimation = false;
 			event.damageShield = false;
-		}
-		// Event can't be directly canceled, so set amount remaining to 0 after processing #onBlock for ZSS shields
-		if (wasReflected) {
-			event.ammountRemaining = 0.0F;
 		}
 	}
 
