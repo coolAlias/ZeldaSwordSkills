@@ -26,6 +26,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
 import zeldaswordskills.api.entity.ai.EntityAIDynamicRangedAction;
 import zeldaswordskills.api.entity.ai.EntityAction;
 import zeldaswordskills.api.entity.ai.IEntityDynamicAI;
@@ -158,6 +159,15 @@ public class EntityDekuFire extends EntityDekuBaba implements IEntityAdditionalS
 				has_gland = false; // set to false client side only after timer so it can still render
 			}
 		}
+	}
+
+	@Override
+	public boolean attackEntityFrom(DamageSource source, float amount) {
+		if (this.isFullyAlert() && source.getSourceOfDamage() instanceof IReflectableOrigin && ((IReflectableOrigin) source.getSourceOfDamage()).getReflectedOriginEntity() == this) {
+			this.prone = true;
+			return true; // immune to fire anyway, so don't need to call super
+		}
+		return super.attackEntityFrom(source, amount);
 	}
 
 	@Override

@@ -412,7 +412,7 @@ public class EntityDekuBaba extends EntityDekuBase implements IEntityBombEater, 
 		} else if (isSourceFatal(source)) {
 			// only give deku nuts if hit while already prone or attacking
 			prone ^= (!isAttack(action.id));
-			return super.attackEntityFrom(source, getMaxHealth());
+			return super.attackEntityFrom(source, Math.max(amount, this.getHealth() * 2.0F));
 		} else if (prone) {
 			if (super.attackEntityFrom(source, getSlashDamage(source, amount))) {
 				this.onProneAttack(source, amount);
@@ -447,7 +447,7 @@ public class EntityDekuBaba extends EntityDekuBase implements IEntityBombEater, 
 		if (prone || amount < 0.5F || source.getEntity() == null) {
 			return false;
 		} else if (source.isExplosion()) {
-			// explosions can always cause baba to go prone and cause decent damage
+			// explosions always cause baba to go prone but cause minimal damage since Baba not already prone
 			flag = super.attackEntityFrom(source, Math.max(0.5F, amount * 0.25F));
 		} else if (source instanceof IPostDamageEffect && ((IPostDamageEffect) source).getDuration(EnumDamageType.STUN) > 0) {
 			// stun attacks do minimal damage, but can always cause baba to go prone
