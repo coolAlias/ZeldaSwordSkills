@@ -54,7 +54,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	/** Whether this bomb is capable of destroying blocks */
 	private boolean canGrief = true;
 
-	/** Factor by which affected entity's motion will be multiplied */
+	/** Value to return for {@link #getMotionFactor} */
 	protected float motionFactor = 1.0F;
 
 	/** Factor by which radius of block destruction is multiplied */
@@ -146,7 +146,7 @@ public class EntityBomb extends EntityMobThrowable implements IEntityBombIngesti
 	}
 
 	/**
-	 * Sets amount by which entity's motion will be multiplied
+	 * Sets the value to return for {@link #getMotionFactor()}
 	 */
 	public EntityBomb setMotionFactor(float amount) {
 		motionFactor = amount;

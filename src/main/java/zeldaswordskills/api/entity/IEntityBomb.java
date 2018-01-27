@@ -32,7 +32,7 @@ public interface IEntityBomb {
 	/** Get this bomb's {@link BombType} */
 	BombType getType();
 
-	/** Factor by which affected entity's motion will be multiplied */
+	/** Factor by which affected entities' motion will be multiplied; in other words, the force of the explosion */
 	float getMotionFactor();
 
 	/**
