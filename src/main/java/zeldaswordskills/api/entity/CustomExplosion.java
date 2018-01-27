@@ -139,7 +139,7 @@ public class CustomExplosion extends Explosion
 	/** Amount of time for which affected entities will be set on fire; only if explosion isFlaming */
 	protected int burnTime = 0;
 
-	/** Factor by which affected entity's motion will be multiplied */
+	/** Factor by which affected entities' motion will be multiplied */
 	protected float motionFactor = 1.0F;
 
 	/** Maximum explosionSize within which blocks can be affected, regardless of explosion size */
@@ -197,7 +197,7 @@ public class CustomExplosion extends Explosion
 	}
 
 	/**
-	 * Sets amount by which entity's motion will be multiplied
+	 * Sets amount by which affected entities' motion will be multiplied
 	 */
 	public CustomExplosion setMotionFactor(float amount) {
 		motionFactor = amount;
