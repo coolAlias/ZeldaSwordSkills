@@ -407,7 +407,7 @@ public class ZSSCombatEvents
 		float defenseUp = info.getBuffAmplifier(Buff.DEFENSE_UP) * 0.01F;
 		float defenseDown = info.getBuffAmplifier(Buff.DEFENSE_DOWN) * 0.01F;
 		amount *= (1.0F + defenseDown - defenseUp);
-		if (source instanceof IDamageType && amount > 0.0F) {
+		if (source instanceof IDamageType) {
 			Set<EnumDamageType> damageTypes = ((IDamageType) source).getEnumDamageTypes();
 			if (damageTypes != null) {
 				for (EnumDamageType type : damageTypes) {
@@ -416,12 +416,14 @@ public class ZSSCombatEvents
 					}
 				}
 			}
-		}
-		if (source.isFireDamage()) {
-			amount *= 1.0F - (info.getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
-		}
-		if (source.isMagicDamage()) {
-			amount *= 1.0F - (info.getBuffAmplifier(Buff.RESIST_MAGIC) * 0.01F);
+		} else {
+			// Handle resistances to vanilla damage types from non-IDamageType damage sources
+			if (source.isFireDamage()) {
+				amount *= 1.0F - (info.getBuffAmplifier(Buff.RESIST_FIRE) * 0.01F);
+			}
+			if (source.isMagicDamage()) {
+				amount *= 1.0F - (info.getBuffAmplifier(Buff.RESIST_MAGIC) * 0.01F);
+			}
 		}
 		return amount;
 	}
@@ -440,12 +442,14 @@ public class ZSSCombatEvents
 					}
 				}
 			}
-		}
-		if (source.isFireDamage()) {
-			amount *= 1.0F + (info.getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
-		}
-		if (source.isMagicDamage()) {
-			amount *= 1.0F + (info.getBuffAmplifier(Buff.WEAKNESS_MAGIC) * 0.01F);
+		} else {
+			// Handle weaknesses to vanilla damage types from non-IDamageType damage sources
+			if (source.isFireDamage()) {
+				amount *= 1.0F + (info.getBuffAmplifier(Buff.WEAKNESS_FIRE) * 0.01F);
+			}
+			if (source.isMagicDamage()) {
+				amount *= 1.0F + (info.getBuffAmplifier(Buff.WEAKNESS_MAGIC) * 0.01F);
+			}
 		}
 		return amount;
 	}

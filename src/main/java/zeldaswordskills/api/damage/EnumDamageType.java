@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -42,17 +42,19 @@ import zeldaswordskills.entity.buff.Buff;
 public enum EnumDamageType {
 	/** Cold damage inflicts a slow effect on the target, modified by total damage */
 	COLD,
-	/** Fire damage has no special effect beyond what vanilla does, but is useful for flagging AoE damage */
+	/** Fire damage has no special effect beyond what vanilla does but is included for resistances and weaknesses */
 	FIRE,
 	/** Holy damage is especially potent against undead creatures */
 	HOLY,
+	/** Magic damage has no special effect beyond what vanilla does but is included for resistances and weaknesses */
+	MAGIC,
 	/** Quake damage results in nausea and slowness on affected entities */
 	QUAKE,
 	/** Shock damage may be resisted with the RESIST_SHOCK buff */
 	SHOCK,
 	/** Stun damage temporarily stuns affected entities */
 	STUN;
-	
+
 	/**
 	 * Handles secondary effects of this damage type upon damaging a living entity
 	 */
@@ -79,21 +81,24 @@ public enum EnumDamageType {
 		default:
 		}
 	}
-	
+
 	/** Map of damage types to resistance types */
 	public static final Map<EnumDamageType, Buff> damageResistMap = new EnumMap<EnumDamageType, Buff>(EnumDamageType.class);
+
 	/** Map of damage types to weakness types */
 	public static final Map<EnumDamageType, Buff> damageWeaknessMap = new EnumMap<EnumDamageType, Buff>(EnumDamageType.class);
-	
+
 	static {
-		// do not include FIRE, since it is handled by isFireDamage()
 		damageResistMap.put(COLD, Buff.RESIST_COLD);
+		damageResistMap.put(FIRE, Buff.RESIST_FIRE);
 		damageResistMap.put(HOLY, Buff.RESIST_HOLY);
+		damageResistMap.put(MAGIC, Buff.RESIST_MAGIC);
 		damageResistMap.put(QUAKE, Buff.RESIST_QUAKE);
 		damageResistMap.put(SHOCK, Buff.RESIST_SHOCK);
-		
 		damageWeaknessMap.put(COLD, Buff.WEAKNESS_COLD);
+		damageWeaknessMap.put(FIRE, Buff.WEAKNESS_FIRE);
 		damageWeaknessMap.put(HOLY, Buff.WEAKNESS_HOLY);
+		damageWeaknessMap.put(MAGIC, Buff.WEAKNESS_MAGIC);
 		damageWeaknessMap.put(QUAKE, Buff.WEAKNESS_QUAKE);
 		damageWeaknessMap.put(SHOCK, Buff.WEAKNESS_SHOCK);
 	}
