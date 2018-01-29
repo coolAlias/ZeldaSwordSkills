@@ -412,7 +412,11 @@ public class ZSSCombatEvents
 			if (damageTypes != null) {
 				for (EnumDamageType type : damageTypes) {
 					if (EnumDamageType.damageResistMap.get(type) != null) {
-						amount *= 1.0F - (info.getBuffAmplifier(EnumDamageType.damageResistMap.get(type)) * 0.01F);
+						int resist = info.getBuffAmplifier(EnumDamageType.damageResistMap.get(type));
+						resist -= ((IDamageType) source).getIgnoreResistAmount(type);
+						if (resist > 0) {
+							amount *= 1.0F - (resist * 0.01F);
+						}
 					}
 				}
 			}

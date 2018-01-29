@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -31,11 +31,17 @@ import java.util.Set;
  * to both would reduce the damage by both resistance amounts.
  *
  */
-public interface IDamageType {
-
+public interface IDamageType
+{
 	/**
 	 * Returns a list of all custom enumerated damage types associated with this DamageSource
 	 */
 	Set<EnumDamageType> getEnumDamageTypes();
+
+	/**
+	 * Return the amount of damage resistance to ignore for the specified damage type
+	 * @return A value between 0 (no change) and 100 (fully negates damage resistance)
+	 */
+	int getIgnoreResistAmount(EnumDamageType type);
 
 }
