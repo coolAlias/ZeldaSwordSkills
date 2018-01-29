@@ -102,7 +102,9 @@ import zeldaswordskills.entity.npc.EntityNpcOrca;
 import zeldaswordskills.entity.npc.EntityNpcZelda;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
-import zeldaswordskills.entity.projectile.EntityArrowElemental;
+import zeldaswordskills.entity.projectile.EntityArrowFire;
+import zeldaswordskills.entity.projectile.EntityArrowIce;
+import zeldaswordskills.entity.projectile.EntityArrowLight;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityBombosFireball;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
@@ -287,9 +289,11 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityHookShot.class, "hookshot", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntitySeedShot.class, "seedshot", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityThrowingRock.class, "rock", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
-		EntityRegistry.registerModEntity(EntityArrowBomb.class, "arrowbomb", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
-		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrowcustom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
-		EntityRegistry.registerModEntity(EntityArrowElemental.class, "arrowelemental", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowBomb.class, "arrow_bomb", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrow_custom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowFire.class, "arrow_fire", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowIce.class, "arrow_ice", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowLight.class, "arrow_light", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityMagicSpell.class, "magicspell", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityWhip.class, "whip", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 
@@ -331,7 +335,11 @@ public class ZSSEntities
 
 	@SideOnly(Side.CLIENT) 
 	public static void registerRenderers() {
-		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow());
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow(new ResourceLocation(ModInfo.ID, "textures/entity/arrow.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowBomb.class, new RenderCustomArrow(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_bomb.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowFire.class, new RenderCustomArrow(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_fire.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowIce.class, new RenderCustomArrow(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_ice.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowLight.class, new RenderCustomArrow(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_light.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb());
 		RenderingRegistry.registerEntityRenderingHandler(EntityBombosFireball.class, new RenderSnowball(Items.fire_charge));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang());

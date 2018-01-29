@@ -550,12 +550,12 @@ public class ZSSItems
 		boomerangMagic = new ItemBoomerang(6.0F, 24).setCaptureAll().setUnlocalizedName("zss.boomerang_magic");
 
 		heroBow = new ItemHeroBow().setUnlocalizedName("zss.bow_hero");
-		arrowBomb = new ItemZeldaArrow("arrow_bomb");
-		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire");
-		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water");
-		arrowFire = new ItemZeldaArrow.ItemMagicArrow("arrow_fire", 2.5F);
-		arrowIce = new ItemZeldaArrow.ItemMagicArrow("arrow_ice", 2.5F);
-		arrowLight = new ItemZeldaArrow.ItemMagicArrow("arrow_light", 5.0F);
+		arrowBomb = new ItemZeldaArrow("arrow_bomb", 1);
+		arrowBombFire = new ItemZeldaArrow("arrow_bomb_fire", 1);
+		arrowBombWater = new ItemZeldaArrow("arrow_bomb_water", 1);
+		arrowFire = new ItemZeldaArrow.ItemMagicArrow("arrow_fire", 2, 2.5F);
+		arrowIce = new ItemZeldaArrow.ItemMagicArrow("arrow_ice", 2, 2.5F);
+		arrowLight = new ItemZeldaArrow.ItemMagicArrow("arrow_light", 3, 5.0F);
 
 		slingshot = new ItemSlingshot().setUnlocalizedName("zss.slingshot");
 		scattershot = new ItemSlingshot(3, 30F).setUnlocalizedName("zss.scattershot");

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -17,35 +17,29 @@
 
 package zeldaswordskills.client.render.entity;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-
-import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
-import zeldaswordskills.entity.projectile.EntityArrowElemental;
-import zeldaswordskills.ref.ModInfo;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class RenderCustomArrow extends Render
 {
-	private static final ResourceLocation vanillaArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow.png");
-	private static final ResourceLocation bombArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_bomb.png");
-	private static final ResourceLocation fireArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_fire.png");
-	private static final ResourceLocation iceArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_ice.png");
-	private static final ResourceLocation lightArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_light.png");
+	protected final ResourceLocation texture;
 
-	public RenderCustomArrow() {}
+	public RenderCustomArrow(ResourceLocation texture) {
+		this.texture = texture;
+	}
 
 	public void renderArrow(EntityArrowCustom arrow, double dx, double dy, double dz, float yaw, float partialTick) {
-		bindEntityTexture(arrow);
+		this.bindEntityTexture(arrow);
 		GL11.glPushMatrix();
 		GL11.glTranslated(dx, dy, dz);
 		GL11.glRotatef(arrow.prevRotationYaw + (arrow.rotationYaw - arrow.prevRotationYaw) * partialTick - 90.0F, 0.0F, 1.0F, 0.0F);
@@ -63,12 +57,10 @@ public class RenderCustomArrow extends Render
 		float f10 = 0.05625F;
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		float f11 = (float) arrow.arrowShake - partialTick;
-
 		if (f11 > 0.0F) {
 			float f12 = -MathHelper.sin(f11 * 3.0F) * f11;
 			GL11.glRotatef(f12, 0.0F, 0.0F, 1.0F);
 		}
-
 		GL11.glRotatef(45.0F, 1.0F, 0.0F, 0.0F);
 		GL11.glScalef(f10, f10, f10);
 		GL11.glTranslatef(-4.0F, 0.0F, 0.0F);
@@ -86,7 +78,6 @@ public class RenderCustomArrow extends Render
 		tessellator.addVertexWithUV(-7.0D, -2.0D, 2.0D, (double)f7, (double)f9);
 		tessellator.addVertexWithUV(-7.0D, -2.0D, -2.0D, (double)f6, (double)f9);
 		tessellator.draw();
-
 		for (int i = 0; i < 4; ++i) {
 			GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
 			GL11.glNormal3f(0.0F, 0.0F, f10);
@@ -97,44 +88,17 @@ public class RenderCustomArrow extends Render
 			tessellator.addVertexWithUV(-8.0D, 2.0D, 0.0D, (double)f2, (double)f5);
 			tessellator.draw();
 		}
-
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 		GL11.glPopMatrix();
 	}
 
 	@Override
 	public void doRender(Entity entity, double dx, double dy, double dz, float yaw, float partialTick) {
-		renderArrow((EntityArrowCustom) entity, dx, dy, dz, yaw, partialTick);
+		this.renderArrow((EntityArrowCustom) entity, dx, dy, dz, yaw, partialTick);
 	}
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		return getArrowTexture((EntityArrowCustom) entity);
-	}
-
-	protected ResourceLocation getArrowTexture(EntityArrowCustom arrow) {
-		if (arrow instanceof EntityArrowBomb) {
-			return getBombArrowTexture((EntityArrowBomb) arrow);
-		} else if (arrow instanceof EntityArrowElemental) {
-			return getElementalArrowTexture((EntityArrowElemental) arrow);
-		}
-		return vanillaArrow;
-	}
-
-	protected ResourceLocation getBombArrowTexture(EntityArrowBomb arrow) {
-		switch(arrow.getType()) {
-		case BOMB_FIRE:
-		case BOMB_WATER:
-		default: return bombArrow;
-		}
-	}
-
-	protected ResourceLocation getElementalArrowTexture(EntityArrowElemental arrow) {
-		switch(arrow.getType()) {
-		case FIRE: return fireArrow;
-		case ICE: return iceArrow;
-		case LIGHT: return lightArrow;
-		default: return vanillaArrow;
-		}
+		return this.texture;
 	}
 }

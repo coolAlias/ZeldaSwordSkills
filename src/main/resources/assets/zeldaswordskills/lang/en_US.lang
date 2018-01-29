@@ -992,6 +992,11 @@ entity.villager.profession.farmer=Farmer
 entity.villager.profession.librarian=Librarian
 entity.villager.profession.priest=Priest
 
+entity.zeldaswordskills.arrow_bomb.name=Bomb Arrow
+entity.zeldaswordskills.arrow_custom.name=Arrow
+entity.zeldaswordskills.arrow_fire.name=Fire Arrow
+entity.zeldaswordskills.arrow_ice.name=Ice Arrow
+entity.zeldaswordskills.arrow_light.name=Light Arrow
 entity.zeldaswordskills.leapingblow.name=Leaping Blow
 entity.zeldaswordskills.swordbeam.name=Sword Beam
 entity.zeldaswordskills.bomb.name=Bomb
@@ -1001,9 +1006,6 @@ entity.zeldaswordskills.jar.name=Jar
 entity.zeldaswordskills.hookshot.name=Hookshot
 entity.zeldaswordskills.seedshot.name=Seedshot
 entity.zeldaswordskills.rock.name=Rock
-entity.zeldaswordskills.arrowbomb.name=Bomb Arrow
-entity.zeldaswordskills.arrowcustom.name=Arrow
-entity.zeldaswordskills.arrowelemental.name=Magic Arrow
 entity.zeldaswordskills.magicspell.name=Spell
 
 entity.zeldaswordskills.chu_red.name=Red Chu

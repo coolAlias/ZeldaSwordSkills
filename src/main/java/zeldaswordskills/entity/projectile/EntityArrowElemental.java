@@ -21,62 +21,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.boss.IBossDisplayData;
-import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceFireIndirect;
-import zeldaswordskills.api.damage.DamageUtils.DamageSourceIceIndirect;
-import zeldaswordskills.api.damage.EnumDamageType;
-import zeldaswordskills.api.entity.IEntityEvil;
-import zeldaswordskills.entity.ZSSEntityInfo;
-import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.Sounds;
-import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.WorldUtils;
 
 /**
  * 
- * Fire Arrow
- * Ignites nearby blocks and enemies, and melts even the coldest of ice
  * 
- * Ice Arrow
- * Freezes water and enemies, as well as turning lava to stone or obsidian, even in the Nether
- * Inflicts double damage on fire-based enemies. Be warned that freezing creepers does
- * not prevent them from exploding.
- * 
- * Light Arrow
- * Ignores armor.
- * Double damage against undead, quad damage against the Wither
- * Slays non-boss Endermen and Wither Skeletons instantly, regardless of health
- * Can also dispel certain magical barriers and pierce through any block,
- * making activating buttons particularly tricky, but possible through walls
+ * Base class for arrows that have some special AoE effect upon impacting blocks.
  *
  */
-public class EntityArrowElemental extends EntityArrowCustom
+public abstract class EntityArrowElemental extends EntityArrowCustom
 {
-	/** Valid element types for elemental arrows */
-	public static enum ElementType {FIRE,ICE,LIGHT};
-
-	/** Particle to spawn, based on element */
-	private static final String[] particles = {"flame","magicCrit","explode"};
-
-	/** Watchable object index for arrow's element type */
-	private static final int ARROWTYPE_DATAWATCHER_INDEX = 25;
-
 	public EntityArrowElemental(World world) {
 		super(world);
 	}
@@ -94,158 +52,16 @@ public class EntityArrowElemental extends EntityArrowCustom
 	}
 
 	@Override
-	public void entityInit() {
-		super.entityInit();
-		setDamage(4.0F); // compensate for lower velocity
-		dataWatcher.addObject(ARROWTYPE_DATAWATCHER_INDEX, ElementType.FIRE.ordinal());
-	}
-
-	/**
-	 * Returns the {@link ElementType} of this arrow
-	 */
-	public ElementType getType() {
-		return ElementType.values()[dataWatcher.getWatchableObjectInt(ARROWTYPE_DATAWATCHER_INDEX)];
-	}
-
-	/**
-	 * Sets this arrow's {@link ElementType}
-	 */
-	public EntityArrowElemental setType(ElementType type) {
-		dataWatcher.updateObject(ARROWTYPE_DATAWATCHER_INDEX, type.ordinal());
-		if (type == ElementType.FIRE) { setFire(100); }
-		return this;
-	}
-
-	@Override
-	protected float getVelocityFactor() {
-		return 1.3F;
-	}
-
-	@Override
-	protected DamageSource getDamageSource(Entity entity) {
-		switch(getType()) {
-		case FIRE: return new DamageSourceFireIndirect("arrow.fire", this, shootingEntity).setProjectile().setMagicDamage();
-		case ICE: return new DamageSourceIceIndirect("arrow.ice", this, shootingEntity, 50, 1).setProjectile().setMagicDamage();
-		case LIGHT: return (entity instanceof EntityEnderman
-				? new DamageSourceBaseDirect("arrow.light", (shootingEntity != null ? shootingEntity : this), EnumDamageType.HOLY).setProjectile().setMagicDamage().setDamageBypassesArmor()
-						: new DamageSourceBaseIndirect("arrow.light", this, shootingEntity, EnumDamageType.HOLY).setProjectile().setMagicDamage().setDamageBypassesArmor());
-		}
-		return super.getDamageSource(entity);
-	}
-
-	@Override
-	protected boolean canTargetEntity(Entity entity) {
-		return getType() == ElementType.LIGHT || super.canTargetEntity(entity);
-	}
-
-	@Override
-	protected String getParticleName() {
-		return particles[getType().ordinal()];
-	}
-
-	@Override
-	protected boolean shouldSpawnParticles() {
-		return true;
-	}
-
-	@Override
-	public float getReflectChance(ItemStack shield, EntityPlayer player, DamageSource source, float damage) {
-		if (this.getType() == ElementType.LIGHT) {
-			return (PlayerUtils.isMirrorShield(shield) ? 1.0F : 0.0F);
-		}
-		return super.getReflectChance(shield, player, source, damage);
-	}
-
-	@Override
-	protected void updateInAir() {
-		super.updateInAir();
-		boolean flag = (getType() == ElementType.FIRE && worldObj.handleMaterialAcceleration(boundingBox, Material.water, this));
-		if (!worldObj.isRemote && getType() == ElementType.ICE &&
-				(worldObj.handleMaterialAcceleration(boundingBox, Material.water, this) ||
-						worldObj.handleMaterialAcceleration(boundingBox, Material.lava, this))) {
-			flag = affectBlocks();
-		}
-		if (flag) {
-			if (getType() == ElementType.FIRE) {
-				worldObj.playSoundEffect(posX, posY, posZ, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-			}
-			if (!worldObj.isRemote) {
-				setDead();
-			}
-		}
+	protected double getBaseDamage() {
+		return 4.0D;
 	}
 
 	@Override
 	protected void onImpactBlock(MovingObjectPosition mop) {
-		boolean flag = (getType() == ElementType.LIGHT && !Config.enableLightArrowNoClip());
-		if (getType() != ElementType.LIGHT || flag) { 
-			super.onImpactBlock(mop);
-			if (!worldObj.isRemote && affectBlocks()) {
-				setDead();
-			}
-			if (flag) {
-				extinguishLightArrow();
-			}
-		} else {
-			if (ticksExisted < 25) {
-				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-				if (block.getMaterial() != Material.air) {
-					block.onEntityCollidedWithBlock(worldObj, mop.blockX, mop.blockY, mop.blockZ, this);
-				}
-			} else {
-				extinguishLightArrow();
-			}
+		super.onImpactBlock(mop);
+		if (!this.worldObj.isRemote && this.affectBlocks()) {
+			this.setDead();
 		}
-	}
-
-	@Override
-	protected void onImpactEntity(MovingObjectPosition mop) {
-		if (getType() == ElementType.LIGHT && mop.entityHit instanceof EntityLivingBase && canOneHitKill(mop.entityHit)) {
-			float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-			EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
-			entity.attackEntityFrom(getDamageSource(entity), entity.getMaxHealth() * 0.425F * velocity);
-			playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-			// TODO render bright flash, different sound effect?
-			if (!worldObj.isRemote) {
-				setDead();
-			}
-		} else {
-			super.onImpactEntity(mop);
-		}
-	}
-
-	@Override
-	protected float calculateDamage(Entity entityHit) {
-		float dmg = super.calculateDamage(entityHit);
-		if (getType() == ElementType.LIGHT && entityHit instanceof IEntityEvil) {
-			dmg = ((IEntityEvil) entityHit).getLightArrowDamage(dmg);
-		}
-		return dmg;
-	}
-
-	@Override
-	protected void handlePostDamageEffects(EntityLivingBase entity) {
-		super.handlePostDamageEffects(entity);
-		if (!entity.isDead && getType() == ElementType.ICE) {
-			ZSSEntityInfo.get(entity).stun(MathHelper.ceiling_float_int(calculateDamage(entity)) * 10, true);
-			int i = MathHelper.floor_double(entity.posX);
-			int j = MathHelper.floor_double(entity.posY);
-			int k = MathHelper.floor_double(entity.posZ);
-			worldObj.setBlock(i, j, k, Blocks.ice);
-			worldObj.setBlock(i, j + 1, k, Blocks.ice);
-			worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-		}
-	}
-
-	/**
-	 * Returns true if the light arrow can kill this entity in one hit (endermen and wither skeletons)
-	 */
-	private boolean canOneHitKill(Entity entity) {
-		if (entity instanceof IEntityEvil) {
-			return ((IEntityEvil) entity).isLightArrowFatal();
-		}
-		boolean flag = (entity instanceof EntitySkeleton && ((EntitySkeleton) entity).getSkeletonType() == 1);
-		return (!(entity instanceof IBossDisplayData)) && (flag || entity instanceof EntityEnderman);
 	}
 
 	/**
@@ -256,77 +72,26 @@ public class EntityArrowElemental extends EntityArrowCustom
 		Set<ChunkPosition> affectedBlocks = new HashSet<ChunkPosition>(WorldUtils.getAffectedBlocksList(worldObj, rand, 1.5F, posX, posY, posZ, null));
 		Block block;
 		int i, j, k;
-
 		for (ChunkPosition position : affectedBlocks) {
 			i = position.chunkPosX;
 			j = position.chunkPosY;
 			k = position.chunkPosZ;
-			block = worldObj.getBlock(i, j, k);
-
-			switch(getType()) {
-			case FIRE:
-				if (block.getMaterial() == Material.air && Config.enableFireArrowIgnite()) {
-					Block block2 = worldObj.getBlock(i, j - 1, k);
-					if (block2.func_149730_j() && rand.nextInt(8) == 0) {
-						worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_IGNITE, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-						worldObj.setBlock(i, j, k, Blocks.fire);
-						flag = true;
-					}
-				} else if (WorldUtils.canMeltBlock(worldObj, block, i, j, k)) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlockToAir(i, j, k);
-					flag = true;
-				}
-				break;
-			case ICE:
-				if (block.getMaterial() == Material.water) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.GLASS_BREAK, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlock(i, j, k, Blocks.ice);
-					flag = true;
-				} else if (block.getMaterial() == Material.lava) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlock(i, j, k, (block == Blocks.lava ? Blocks.obsidian : Blocks.cobblestone));
-					flag = true;
-				} else if (block.getMaterial() == Material.fire) {
-					worldObj.playSoundEffect(i + 0.5D, j + 0.5D, k + 0.5D, Sounds.FIRE_FIZZ, 1.0F, rand.nextFloat() * 0.4F + 0.8F);
-					worldObj.setBlockToAir(i, j, k);
-					flag = true;
-				}
-				break;
-			case LIGHT:
-				// TODO dispel magical barriers
-				break;
+			block = this.worldObj.getBlock(i, j, k);
+			if (this.affectBlock(block, i, j, k)) {
+				flag = true;
 			}
 		}
-
 		return flag;
 	}
 
 	/**
-	 * Sets this arrow to dead after spawning some particles
+	 * Called from {@link #affectBlocks()} for each block in the list
+	 * @param block
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return true if the block was affected and the arrow should be consumed
 	 */
-	private void extinguishLightArrow() {
-		for (int i = 0; i < 10; ++i) {
-			double d0 = rand.nextGaussian() * 0.02D;
-			double d1 = rand.nextGaussian() * 0.02D;
-			double d2 = rand.nextGaussian() * 0.02D;
-			worldObj.spawnParticle("explode", posX + (double)(rand.nextFloat() * width * 2.0F) - (double) width,
-					posY + (double)(rand.nextFloat() * height), posZ + (double)(rand.nextFloat() * width * 2.0F) - (double) width, d0, d1, d2);
-		}
-		if (!worldObj.isRemote) {
-			setDead();
-		}
-	}
+	protected abstract boolean affectBlock(Block block, int x, int y, int z);
 
-	@Override
-	public void writeEntityToNBT(NBTTagCompound compound) {
-		super.writeEntityToNBT(compound);
-		compound.setInteger("arrowType", getType().ordinal());
-	}
-
-	@Override
-	public void readEntityFromNBT(NBTTagCompound compound) {
-		super.readEntityFromNBT(compound);
-		setType(ElementType.values()[compound.getInteger("arrowType") % ElementType.values().length]);
-	}
 }
