@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -224,6 +224,20 @@ public class DamageUtils
 		}
 
 		@Override
+		public DamageSourceBaseDirect setFireDamage() {
+			super.setFireDamage();
+			this.addDamageType(EnumDamageType.FIRE);
+			return this;
+		}
+
+		@Override
+		public DamageSourceBaseDirect setMagicDamage() {
+			super.setMagicDamage();
+			this.addDamageType(EnumDamageType.MAGIC);
+			return this;
+		}
+
+		@Override
 		public final boolean isAoEDamage() {
 			return isAoE;
 		}
@@ -325,6 +339,20 @@ public class DamageUtils
 		public DamageSourceBaseIndirect(String name, Entity direct, Entity indirect, boolean isAoE, EnumDamageType type) {
 			this(name, direct, indirect, isAoE);
 			addDamageType(type);
+		}
+
+		@Override
+		public DamageSourceBaseIndirect setFireDamage() {
+			super.setFireDamage();
+			this.addDamageType(EnumDamageType.FIRE);
+			return this;
+		}
+
+		@Override
+		public DamageSourceBaseIndirect setMagicDamage() {
+			super.setMagicDamage();
+			this.addDamageType(EnumDamageType.MAGIC);
+			return this;
 		}
 
 		@Override
