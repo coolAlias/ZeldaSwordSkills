@@ -18,7 +18,9 @@
 package zeldaswordskills.api.damage;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.entity.Entity;
@@ -182,6 +184,9 @@ public class DamageUtils
 		/** EnumDamageTypes associated with this DamageSource */
 		private final Set<EnumDamageType> enumDamageTypes = new HashSet<EnumDamageType>();
 
+		/** Amount of damage resistance to ignore, if any, for each damage type */
+		private final Map<EnumDamageType, Integer> ignoreResist = new HashMap<EnumDamageType, Integer>();
+
 		/** Maximum base stun time; will also be modified by total damage inflicted */
 		private int stunDuration;
 
@@ -252,6 +257,23 @@ public class DamageUtils
 		}
 
 		/**
+		 * Sets the amount of damage resistance to ignore for the damage type.
+		 * If a target has damage resistance of 75 and the damage source pierces 50,
+		 * only 25 of the target's resistance will apply to the damage calculation.
+		 * @param type The type of damage resistance to ignore
+		 * @param amount Amount of target's damage resistance to ignore, usually as a value between 1 and 100
+		 */
+		public DamageSourceBaseDirect ignoreResistance(EnumDamageType type, int amount) {
+			this.ignoreResist.put(type, amount);
+			return this;
+		}
+
+		@Override
+		public int getIgnoreResistAmount(EnumDamageType type) {
+			return (this.ignoreResist.containsKey(type) ? this.ignoreResist.get(type) : 0);
+		}
+
+		/**
 		 * Adds stun effect to this damage source
 		 * @param duration			Maximum base stun time; will also be modified by total damage inflicted
 		 * @param amplifier			Factor by which stun time will be modified, multiplied by total damage inflicted
@@ -299,6 +321,9 @@ public class DamageUtils
 
 		/** EnumDamageTypes associated with this DamageSource */
 		private final Set<EnumDamageType> enumDamageTypes = new HashSet<EnumDamageType>();
+
+		/** Amount of damage resistance to ignore, if any, for each damage type */
+		private final Map<EnumDamageType, Integer> ignoreResist = new HashMap<EnumDamageType, Integer>();
 
 		/** Maximum base stun time; will also be modified by total damage inflicted */
 		private int stunDuration;
@@ -367,6 +392,23 @@ public class DamageUtils
 		@Override
 		public Set<EnumDamageType> getEnumDamageTypes() {
 			return Collections.unmodifiableSet(enumDamageTypes);
+		}
+
+		/**
+		 * Sets the amount of damage resistance to ignore for the damage type.
+		 * If a target has damage resistance of 75 and the damage source pierces 50,
+		 * only 25 of the target's resistance will apply to the damage calculation.
+		 * @param type The type of damage resistance to ignore
+		 * @param amount Amount of target's damage resistance to ignore, usually as a value between 1 and 100
+		 */
+		public DamageSourceBaseIndirect ignoreResistance(EnumDamageType type, int amount) {
+			this.ignoreResist.put(type, amount);
+			return this;
+		}
+
+		@Override
+		public int getIgnoreResistAmount(EnumDamageType type) {
+			return (this.ignoreResist.containsKey(type) ? this.ignoreResist.get(type) : 0);
 		}
 
 		/**
