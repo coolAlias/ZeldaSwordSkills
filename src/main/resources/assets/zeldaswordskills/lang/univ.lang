@@ -1500,20 +1500,24 @@ entity.villager.profession.farmer=
 entity.villager.profession.librarian=
 entity.villager.profession.priest=
 
-entity.zeldaswordskills.leaping_blow.name=
-entity.zeldaswordskills.sword_beam.name=
+# Projectiles
+entity.zeldaswordskills.arrow_bomb.name=
+entity.zeldaswordskills.arrow_custom.name=
+entity.zeldaswordskills.arrow_fire.name=
+entity.zeldaswordskills.arrow_ice.name=
+entity.zeldaswordskills.arrow_light.name=
 entity.zeldaswordskills.bomb.name=
 entity.zeldaswordskills.boomerang.name=
 entity.zeldaswordskills.cyclone.name=
-entity.zeldaswordskills.jar.name=
 entity.zeldaswordskills.hookshot.name=
-entity.zeldaswordskills.seedshot.name=
-entity.zeldaswordskills.rock.name=
-entity.zeldaswordskills.arrow_bomb.name=
-entity.zeldaswordskills.arrow_custom.name=
-entity.zeldaswordskills.arrow_elemental.name=
+entity.zeldaswordskills.jar.name=
+entity.zeldaswordskills.leaping_blow.name=
 entity.zeldaswordskills.magic_spell.name=
+entity.zeldaswordskills.rock.name=
+entity.zeldaswordskills.seedshot.name=
+entity.zeldaswordskills.sword_beam.name=
 
+# Mobs and NPCs
 entity.zeldaswordskills.baba_deku.name=
 entity.zeldaswordskills.baba_fire.name=
 entity.zeldaswordskills.baba_withered.name=

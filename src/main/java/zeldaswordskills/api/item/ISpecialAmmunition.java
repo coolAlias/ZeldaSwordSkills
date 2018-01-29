@@ -17,20 +17,20 @@
 
 package zeldaswordskills.api.item;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
 /**
  * 
- * Interface for arrows that require magic energy to shoot.
- * Currently only works for arrows shot from the Hero's Bow.
+ * Interface for ammunition that has a minimum 'level' requirement for the bow or other tool.
  *
  */
-public interface IMagicArrow
+public interface ISpecialAmmunition
 {
 	/**
-	 * Amount of magic points required to fire this arrow
+	 * Minimum bow (or other tool) level required to use this ammunition
+	 * @param stack the ammunition stack 
+	 * @return if larger than the tool's maximum level, the ammunition may not be usable at all
 	 */
-	float getMagicCost(ItemStack arrow, EntityPlayer player);
+	int getRequiredLevelForAmmo(ItemStack stack);
 
 }

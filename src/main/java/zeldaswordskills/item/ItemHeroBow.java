@@ -76,6 +76,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IMagicArrow;
+import zeldaswordskills.api.item.ISpecialAmmunition;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
@@ -84,8 +85,9 @@ import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
-import zeldaswordskills.entity.projectile.EntityArrowElemental;
-import zeldaswordskills.entity.projectile.EntityArrowElemental.ElementType;
+import zeldaswordskills.entity.projectile.EntityArrowFire;
+import zeldaswordskills.entity.projectile.EntityArrowIce;
+import zeldaswordskills.entity.projectile.EntityArrowLight;
 import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
@@ -96,10 +98,12 @@ import zeldaswordskills.util.TargetUtils;
 
 /**
  * 
- * The Hero's Bow can fire arrows even when the player has none if it has the infinity
- * enchantment. It is also capable of firing different types of arrows, depending on
- * its level. Standard (level 1) can fire any bomb arrow; level 2 can shoot fire and
- * ice arrows; level 3 can shoot all arrow types
+ * The Hero's Bow can fire arrows even when the player has none if it has the infinity enchantment.
+ * 
+ * The basic Hero's Bow (level 1) can fire any non-{@link ISpecialAmmunition}.
+ * 
+ * ISpecialAmmunition arrows define their own level requirements, and {@link IMagicArrow}
+ * can further define magic requirements.
  *
  */
 @Optional.InterfaceList(value={
@@ -178,9 +182,6 @@ IAllowItem, ISheathed, ISpecialBow
 
 	/** Maps arrow IDs to bomb arrow Bomb Type */
 	private static BiMap<Item, BombType> bombArrowMap;
-
-	/** Maps arrow IDs to elemental arrow Element Type */
-	private static final Map<Item, ElementType> elementalArrowMap = new HashMap<Item, ElementType>();
 
 	/** Static list to store fire handlers; can't set type without requiring BG2 */
 	private static final List<IArrowFireHandler> fireHandlers = new ArrayList<IArrowFireHandler>();
@@ -365,7 +366,6 @@ IAllowItem, ISheathed, ISpecialBow
 			}
 			return;
 		}
-
 		// Default behavior found usable arrow in standard player inventory
 		ItemStack arrowStack = getArrow(player);
 		if (arrowStack != null) { // can be null when hot-swapping to an empty quiver slot
@@ -389,7 +389,6 @@ IAllowItem, ISheathed, ISpecialBow
 			if ((double) charge < 0.1D) {
 				return;
 			}
-
 			EntityArrow arrowEntity = getArrowEntity(arrowStack, player.worldObj, player, charge * 2.0F);
 			if (arrowEntity == null && ZSSMain.isBG2Enabled) { // try to construct BG2 arrow
 				arrowEntity = QuiverArrowRegistry.getArrowType(arrowStack, player.worldObj, player, charge * 2.0F);
@@ -400,13 +399,11 @@ IAllowItem, ISheathed, ISpecialBow
 					applyCustomArrowSettings(event.entityPlayer, event.bow, arrowStack, (EntityArrowCustom) arrowEntity, charge);
 				}
 				player.worldObj.playSoundAtEntity(player, Sounds.BOW_RELEASE, 1.0F, 1.0F / (itemRand.nextFloat() * 0.4F + 1.2F) + charge * 0.5F);
-
 				if (flag) {
 					arrowEntity.canBePickedUp = 2;
 				} else {
 					PlayerUtils.consumeInventoryItem(player, arrowStack, 1);
 				}
-
 				if (!player.worldObj.isRemote) {
 					player.worldObj.spawnEntityInWorld(arrowEntity);
 				}
@@ -433,16 +430,12 @@ IAllowItem, ISheathed, ISpecialBow
 		if (arrowMap.containsKey(arrowItem)) {
 			if (player.capabilities.isCreativeMode) {
 				return true;
-			} else if (arrowItem instanceof IMagicArrow) {
-				if (!ZSSPlayerInfo.get(player).canUseMagic() || ZSSPlayerInfo.get(player).getCurrentMagic() < ((IMagicArrow) arrowItem).getMagicCost(arrowStack, player)) {
-					return false;
-				}
 			}
-			if (elementalArrowMap.containsKey(arrowItem)) {
-				int n = getLevel(bow);
-				if (n < 3) {
-					return (n == 2 && elementalArrowMap.get(arrowItem) != ElementType.LIGHT);
-				}
+			if (arrowItem instanceof ISpecialAmmunition && ((ISpecialAmmunition) arrowItem).getRequiredLevelForAmmo(arrowStack) > this.getLevel(bow)) {
+				return false;
+			}
+			if (arrowItem instanceof IMagicArrow) {
+				return ZSSPlayerInfo.get(player).canUseMagic() && ZSSPlayerInfo.get(player).getCurrentMagic() >= ((IMagicArrow) arrowItem).getMagicCost(arrowStack, player);
 			}
 			return true;
 		}
@@ -482,7 +475,6 @@ IAllowItem, ISheathed, ISpecialBow
 		if (arrow == null && player.capabilities.isCreativeMode) {
 			arrow = new ItemStack(modeArrow == null ? Items.arrow : modeArrow);
 		}
-
 		return arrow;
 	}
 
@@ -506,7 +498,6 @@ IAllowItem, ISheathed, ISpecialBow
 		boolean hasArrow = (player.capabilities.isCreativeMode || player.inventory.hasItem(Items.arrow));
 		// Flag whether the bomb arrow was already determined and items need not be consumed
 		boolean hasAutoArrow = ZSSPlayerInfo.get(player).hasAutoBombArrow;
-
 		for (int i = 0; i < player.inventory.getSizeInventory() && arrow == null; ++i) {
 			ItemStack stack = player.inventory.getStackInSlot(i);
 			if (stack != null) {
@@ -546,7 +537,6 @@ IAllowItem, ISheathed, ISpecialBow
 		if (arrow == null && player.capabilities.isCreativeMode) {
 			arrow = new ItemStack(ZSSItems.arrowBomb);
 		}
-
 		ZSSPlayerInfo.get(player).hasAutoBombArrow = (arrow != null);
 		return arrow;
 	}
@@ -727,8 +717,6 @@ IAllowItem, ISheathed, ISpecialBow
 		if (arrowEntity instanceof EntityArrowBomb && bombArrowMap.containsKey(arrowItem)) {
 			((EntityArrowBomb) arrowEntity).setType(bombArrowMap.get(arrowItem));
 			arrowEntity.setDamage(0.0F);
-		} else if (arrowEntity instanceof EntityArrowElemental && elementalArrowMap.containsKey(arrowItem)) {
-			((EntityArrowElemental) arrowEntity).setType(elementalArrowMap.get(arrowItem));
 		}
 	}
 
@@ -770,19 +758,14 @@ IAllowItem, ISheathed, ISpecialBow
 		arrowMap.put(ZSSItems.arrowBomb, EntityArrowBomb.class);
 		arrowMap.put(ZSSItems.arrowBombFire, EntityArrowBomb.class);
 		arrowMap.put(ZSSItems.arrowBombWater, EntityArrowBomb.class);
-		arrowMap.put(ZSSItems.arrowFire, EntityArrowElemental.class);
-		arrowMap.put(ZSSItems.arrowIce, EntityArrowElemental.class);
-		arrowMap.put(ZSSItems.arrowLight, EntityArrowElemental.class);
-
+		arrowMap.put(ZSSItems.arrowFire, EntityArrowFire.class);
+		arrowMap.put(ZSSItems.arrowIce, EntityArrowIce.class);
+		arrowMap.put(ZSSItems.arrowLight, EntityArrowLight.class);
 		ImmutableBiMap.Builder<Item, BombType> builder = ImmutableBiMap.builder();
 		builder.put(ZSSItems.arrowBomb, BombType.BOMB_STANDARD);
 		builder.put(ZSSItems.arrowBombFire, BombType.BOMB_FIRE);
 		builder.put(ZSSItems.arrowBombWater, BombType.BOMB_WATER);
 		bombArrowMap = builder.build();
-
-		elementalArrowMap.put(ZSSItems.arrowFire, ElementType.FIRE);
-		elementalArrowMap.put(ZSSItems.arrowIce, ElementType.ICE);
-		elementalArrowMap.put(ZSSItems.arrowLight, ElementType.LIGHT);
 	}
 
 	/**

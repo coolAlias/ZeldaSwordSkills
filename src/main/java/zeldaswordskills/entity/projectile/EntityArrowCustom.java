@@ -85,16 +85,19 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	/** Basic constructor is necessary */
 	public EntityArrowCustom(World world) {
 		super(world);
+		this.setDamage(this.getBaseDamage());
 	}
 
 	/** Constructs an arrow at a position, but with no heading or velocity */
 	public EntityArrowCustom(World world, double x, double y, double z) {
 		super(world, x, y, z);
+		this.setDamage(this.getBaseDamage());
 	}
 
 	/** Constructs an arrow with heading based on shooter and velocity, modified by the arrow's velocityFactor */
 	public EntityArrowCustom(World world, EntityLivingBase shooter, float velocity) {
 		super(world);
+		this.setDamage(this.getBaseDamage());
 		renderDistanceWeight = 10.0D;
 		shootingEntity = shooter;
 		if (shooter instanceof EntityPlayer) { canBePickedUp = 1; }
@@ -116,7 +119,8 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	public EntityArrowCustom(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
-		setTarget(target);
+		this.setDamage(this.getBaseDamage());
+		this.setTarget(target);
 	}
 
 	@Override
@@ -240,6 +244,11 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 				setDead();
 			}
 		}
+	}
+
+	/** Return the damage value to set as the default during entity construction */
+	protected double getBaseDamage() {
+		return 2.0D; // default arrow damage value
 	}
 
 	/** Returns the damage source this arrow will use against the entity struck */ 
@@ -382,6 +391,13 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		doBlockCollisions();
 	}
 
+	/**
+	 * Calculates the arrow's velocity based on its current motion
+	 */
+	protected float getCurrentVelocity() {
+		return MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+	}
+
 	/** Returns the arrow's velocity factor */
 	protected float getVelocityFactor() {
 		return 1.5F;
@@ -496,7 +512,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 * Returns amount of damage arrow will inflict to entity impacted
 	 */
 	protected float calculateDamage(Entity entityHit) {
-		float velocity = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+		float velocity = this.getCurrentVelocity();
 		float dmg = (float)(velocity * getDamage());
 		if (getIsCritical()) {
 			dmg += rand.nextInt(MathHelper.ceiling_double_int(dmg) / 2 + 2);

@@ -1500,20 +1500,24 @@ entity.villager.profession.farmer=Farmer
 entity.villager.profession.librarian=Librarian
 entity.villager.profession.priest=Priest
 
-entity.zeldaswordskills.leaping_blow.name=Leaping Blow
-entity.zeldaswordskills.sword_beam.name=Sword Beam
+# Projectiles
+entity.zeldaswordskills.arrow_bomb.name=Bomb Arrow
+entity.zeldaswordskills.arrow_custom.name=Arrow
+entity.zeldaswordskills.arrow_fire.name=Fire Arrow
+entity.zeldaswordskills.arrow_ice.name=Ice Arrow
+entity.zeldaswordskills.arrow_light.name=Light Arrow
 entity.zeldaswordskills.bomb.name=Bomb
 entity.zeldaswordskills.boomerang.name=Boomerang
 entity.zeldaswordskills.cyclone.name=Cyclone
-entity.zeldaswordskills.jar.name=Jar
 entity.zeldaswordskills.hookshot.name=Hookshot
-entity.zeldaswordskills.seedshot.name=Seedshot
-entity.zeldaswordskills.rock.name=Rock
-entity.zeldaswordskills.arrow_bomb.name=Bomb Arrow
-entity.zeldaswordskills.arrow_custom.name=Arrow
-entity.zeldaswordskills.arrow_elemental.name=Magic Arrow
+entity.zeldaswordskills.jar.name=Jar
+entity.zeldaswordskills.leaping_blow.name=Leaping Blow
 entity.zeldaswordskills.magic_spell.name=Spell
+entity.zeldaswordskills.rock.name=Rock
+entity.zeldaswordskills.seedshot.name=Seedshot
+entity.zeldaswordskills.sword_beam.name=Sword Beam
 
+# Mobs and NPCs
 entity.zeldaswordskills.chu_red.name=Red Chu
 entity.zeldaswordskills.chu_green.name=Green Chu
 entity.zeldaswordskills.chu_blue.name=Blue Chu

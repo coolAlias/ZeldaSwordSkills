@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,59 +25,33 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import zeldaswordskills.entity.projectile.EntityArrowBomb;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
-import zeldaswordskills.entity.projectile.EntityArrowElemental;
-import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
 public class RenderCustomArrow extends RenderArrow
 {
-	private static final ResourceLocation bombArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_bomb.png");
-	private static final ResourceLocation fireArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_fire.png");
-	private static final ResourceLocation iceArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_ice.png");
-	private static final ResourceLocation lightArrow = new ResourceLocation(ModInfo.ID, "textures/entity/arrow_light.png");
+	protected final ResourceLocation texture;
 
-	public RenderCustomArrow(RenderManager renderManager) {
-		super(renderManager);
-	}
-
-	@Override
-	public void doRender(EntityArrow entity, double dx, double dy, double dz, float yaw, float partialTick) {
-		super.doRender(entity, dx, dy, dz, yaw, partialTick);
+	public RenderCustomArrow(RenderManager manager, ResourceLocation texture) {
+		super(manager);
+		this.texture = texture;
 	}
 
 	@Override
 	protected ResourceLocation getEntityTexture(EntityArrow arrow) {
-		if (arrow instanceof EntityArrowBomb) {
-			return getBombArrowTexture((EntityArrowBomb) arrow);
-		} else if (arrow instanceof EntityArrowElemental) {
-			return getElementalArrowTexture((EntityArrowElemental) arrow);
-		}
-		return super.getEntityTexture(arrow);
+		return this.texture;
 	}
 
-	protected ResourceLocation getBombArrowTexture(EntityArrowBomb arrow) {
-		switch(arrow.getType()) {
-		case BOMB_FIRE:
-		case BOMB_WATER:
-		default: return bombArrow;
+	public static class Factory implements IRenderFactory<EntityArrowCustom>
+	{
+		protected final ResourceLocation texture;
+		public Factory(ResourceLocation texture) {
+			this.texture = texture;
 		}
-	}
 
-	protected ResourceLocation getElementalArrowTexture(EntityArrowElemental arrow) {
-		switch(arrow.getType()) {
-		case FIRE: return fireArrow;
-		case ICE: return iceArrow;
-		case LIGHT: return lightArrow;
-		default: return super.getEntityTexture(arrow);
-		}
-	}
-
-	public static class Factory implements IRenderFactory<EntityArrowCustom> {
 		@Override
 		public Render<? super EntityArrowCustom> createRenderFor(RenderManager manager) {
-			return new RenderCustomArrow(manager);
+			return new RenderCustomArrow(manager, this.texture);
 		}
 	}
 }

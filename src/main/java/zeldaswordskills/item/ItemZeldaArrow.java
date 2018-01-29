@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.item.IMagicArrow;
+import zeldaswordskills.api.item.ISpecialAmmunition;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 
 /**
@@ -30,15 +31,24 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
  * Battlegear2's quiver system.
  *
  */
-public class ItemZeldaArrow extends BaseModItem
+public class ItemZeldaArrow extends BaseModItem implements ISpecialAmmunition
 {
+	/** Required level of Hero's Bow to fire this arrow */
+	private final int level;
+
 	/**
 	 * @param name Unlocalized name
 	 */
-	public ItemZeldaArrow(String name) {
+	public ItemZeldaArrow(String name, int level) {
 		super();
+		this.level = level;
 		setUnlocalizedName(name);
 		setCreativeTab(ZSSCreativeTabs.tabCombat);
+	}
+
+	@Override
+	public int getRequiredLevelForAmmo(ItemStack stack) {
+		return this.level;
 	}
 
 	public static class ItemMagicArrow extends ItemZeldaArrow implements IMagicArrow
@@ -46,14 +56,14 @@ public class ItemZeldaArrow extends BaseModItem
 		/** Magic cost to shoot this arrow */
 		private final float magic;
 
-		public ItemMagicArrow(String name, float magic) {
-			super(name);
+		public ItemMagicArrow(String name, int level, float magic) {
+			super(name, level);
 			this.magic = magic;
 		}
 
 		@Override
 		public float getMagicCost(ItemStack arrow, EntityPlayer player) {
-			return magic;
+			return this.magic;
 		}
 
 		@Override
