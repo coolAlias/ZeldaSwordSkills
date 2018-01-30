@@ -44,6 +44,8 @@ import net.minecraft.world.World;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
+import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.client.particle.FXCycloneRing;
 import zeldaswordskills.ref.Config;
@@ -114,7 +116,7 @@ public class EntityCyclone extends EntityMobThrowable
 
 	/** Returns a tornado damage source */
 	protected DamageSource getDamageSource() {
-		return new EntityDamageSourceIndirect("blast.wind", this, getThrower()).setProjectile().setMagicDamage();
+		return new DamageSourceBaseIndirect("blast.wind", this, this.getThrower(), false, EnumDamageType.WIND).setProjectile().setMagicDamage();
 	}
 
 	@Override

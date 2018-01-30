@@ -114,10 +114,15 @@ public class EntityWizzrobeGrand extends EntityWizzrobe implements IBossDisplayD
 			break;
 		case LIGHTNING:
 			info.applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 			break;
 		case WIND:
+			info.applyBuff(Buff.RESIST_WIND, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.WEAKNESS_QUAKE, Integer.MAX_VALUE, 100);
 			break;
 		case WATER:
+			info.applyBuff(Buff.RESIST_WATER, Integer.MAX_VALUE, 50);
+			info.applyBuff(Buff.WEAKNESS_SHOCK, Integer.MAX_VALUE, 100);
 			break;
 		}
 	}

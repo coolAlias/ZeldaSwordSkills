@@ -40,6 +40,7 @@ public class EntityChuYellow extends EntityChuElectric
 	@Override
 	protected void applyTypeTraits() {
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
+		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 	}
 
 	@Override

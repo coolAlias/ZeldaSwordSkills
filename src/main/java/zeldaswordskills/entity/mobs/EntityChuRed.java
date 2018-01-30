@@ -45,5 +45,6 @@ public class EntityChuRed extends EntityChu
 	@Override
 	protected void applyTypeTraits() {
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
+		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 	}
 }

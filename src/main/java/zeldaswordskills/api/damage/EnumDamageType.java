@@ -53,7 +53,11 @@ public enum EnumDamageType {
 	/** Shock damage may be resisted with the RESIST_SHOCK buff */
 	SHOCK,
 	/** Stun damage temporarily stuns affected entities */
-	STUN;
+	STUN,
+	/** Water damage has no special effects but is included for resistances and weaknesses */
+	WATER,
+	/** Wind damage has no special effects but is included for resistances and weaknesses */
+	WIND;
 
 	/**
 	 * Handles secondary effects of this damage type upon damaging a living entity
@@ -95,11 +99,15 @@ public enum EnumDamageType {
 		damageResistMap.put(MAGIC, Buff.RESIST_MAGIC);
 		damageResistMap.put(QUAKE, Buff.RESIST_QUAKE);
 		damageResistMap.put(SHOCK, Buff.RESIST_SHOCK);
+		damageResistMap.put(WATER, Buff.RESIST_WATER);
+		damageResistMap.put(WIND, Buff.RESIST_WIND);
 		damageWeaknessMap.put(COLD, Buff.WEAKNESS_COLD);
 		damageWeaknessMap.put(FIRE, Buff.WEAKNESS_FIRE);
 		damageWeaknessMap.put(HOLY, Buff.WEAKNESS_HOLY);
 		damageWeaknessMap.put(MAGIC, Buff.WEAKNESS_MAGIC);
 		damageWeaknessMap.put(QUAKE, Buff.WEAKNESS_QUAKE);
 		damageWeaknessMap.put(SHOCK, Buff.WEAKNESS_SHOCK);
+		damageWeaknessMap.put(WATER, Buff.WEAKNESS_WATER);
+		damageWeaknessMap.put(WIND, Buff.WEAKNESS_WIND);
 	}
 }

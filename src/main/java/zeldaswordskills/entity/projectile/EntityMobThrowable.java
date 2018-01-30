@@ -173,7 +173,7 @@ public abstract class EntityMobThrowable extends EntityThrowable implements IEnt
 	}
 
 	@Override
-	public void onReflected(ItemStack mirrorShield, EntityPlayer player, DamageSource source) {
+	public void onReflected(ItemStack shield, EntityPlayer player, DamageSource source) {
 		this.wasReflected = true;
 		this.originId = (this.getThrower() == null ? -1 : this.getThrower().getEntityId());
 		this.setThrower(player);

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -24,21 +24,24 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.ref.Sounds;
 
 public enum MagicType {
 	/** Causes fire damage, melts ice, ignites blocks */
-	FIRE("fire", true, "textures/blocks/lava_still.png", Sounds.MAGIC_FIRE, "flame"),
+	FIRE("fire", EnumDamageType.FIRE, true, "textures/blocks/lava_still.png", Sounds.MAGIC_FIRE, "flame"),
 	/** Causes cold damage, freezes targets, extinguishes flames and lava */
-	ICE("ice", true, "textures/blocks/ice.png", Sounds.MAGIC_ICE, "snowshovel"),
+	ICE("ice", EnumDamageType.COLD, true, "textures/blocks/ice.png", Sounds.MAGIC_ICE, "snowshovel"),
 	/** Inflicts shock damage */
-	LIGHTNING("lightning", false, "textures/blocks/gold_block.png", Sounds.SHOCK, "cloud"),
+	LIGHTNING("lightning", EnumDamageType.SHOCK, false, "textures/blocks/gold_block.png", Sounds.SHOCK, "cloud"),
 	/** Not currently used */
-	WATER("water", false, "textures/blocks/water_still.png", Sounds.SPLASH, "splash"),
+	WATER("water", EnumDamageType.WATER, false, "textures/blocks/water_still.png", Sounds.SPLASH, "splash"),
 	/** Currently no special effects; used only to give Tornado Rod a dummy magic type */
-	WIND("wind", false, "textures/blocks/emerald_block.png", Sounds.WHIRLWIND, "cloud");
+	WIND("wind", EnumDamageType.WIND, false, "textures/blocks/emerald_block.png", Sounds.WHIRLWIND, "cloud");
 
 	private final String unlocalizedName;
+
+	private final EnumDamageType damageType;
 
 	private final boolean affectsBlocks;
 
@@ -49,8 +52,9 @@ public enum MagicType {
 	// TODO what about non-vanilla particle strings?
 	private final String trailingParticle;
 
-	private MagicType(String name, boolean affectsBlocks, String texture, String moveSound, String trailingParticle) {
+	private MagicType(String name, EnumDamageType damageType, boolean affectsBlocks, String texture, String moveSound, String trailingParticle) {
 		this.unlocalizedName = name;
+		this.damageType = damageType;
 		this.affectsBlocks = affectsBlocks;
 		this.texture = new ResourceLocation(texture);
 		this.moveSound = moveSound;
@@ -68,6 +72,10 @@ public enum MagicType {
 	 */
 	public boolean affectsBlocks(World world, EntityLivingBase caster) {
 		return affectsBlocks && (caster instanceof EntityPlayer || world.getGameRules().getGameRuleBooleanValue("mobGriefing"));
+	}
+
+	public EnumDamageType getDamageType() {
+		return damageType;
 	}
 
 	/**
