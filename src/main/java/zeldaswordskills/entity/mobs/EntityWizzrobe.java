@@ -43,6 +43,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
+import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
 import zeldaswordskills.api.entity.MagicType;
@@ -217,6 +219,10 @@ public abstract class EntityWizzrobe extends EntityMob implements IEntityLootabl
 			Entity spell = source.getSourceOfDamage();
 			if (spell instanceof IReflectableOrigin && ((IReflectableOrigin) spell).getReflectedOriginEntity() == this) {
 				wasReflected = true;
+				// Reflected spells ignore Wizzrobe's magic and element resistance
+				if (source instanceof DamageSourceBaseIndirect) {
+					((DamageSourceBaseIndirect) source).ignoreResistance(EnumDamageType.MAGIC, 100).ignoreResistance(this.getMagicType().getDamageType(), 100);
+				}
 				amount = this.getReflectedDamage(amount);
 			}
 			if (!wasReflected && canTelevade(source) && teleportAI.teleportRandomly()) {
@@ -271,7 +277,7 @@ public abstract class EntityWizzrobe extends EntityMob implements IEntityLootabl
 	 * @return new amount of damage to take
 	 */
 	protected float getReflectedDamage(float damage) {
-		// Note that Wizzrobes have 50% magic resistance as well as e.g. 50% Fire Resist
+		// 1 to 3 reflected spells required to defeat Wizzrobe depending on difficulty level
 		float i = Math.max(1, this.worldObj.getDifficulty().getDifficultyId());
 		return Math.max(damage, 2.0F + (this.getMaxHealth() / i));
 	}

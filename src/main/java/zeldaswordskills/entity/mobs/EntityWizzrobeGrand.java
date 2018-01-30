@@ -164,9 +164,9 @@ public class EntityWizzrobeGrand extends EntityWizzrobe implements IBossDisplayD
 
 	@Override
 	protected float getReflectedDamage(float damage) {
-		// Note that Wizzrobes have 50% magic resistance as well as e.g. 50% Fire Resist
-		float i = 1.0F + (2 * Math.max(1, this.worldObj.getDifficulty().getDifficultyId()));
-		return Math.max(damage, this.getMaxHealth() / i);
+		// 4 to 10 reflected spells required to defeat Grand Wizzrobe depending on difficulty level
+		float i = 1.0F + (3 * Math.max(1, this.worldObj.getDifficulty().getDifficultyId()));
+		return Math.max(damage, 2.0F + this.getMaxHealth() / i);
 	}
 
 	@Override
