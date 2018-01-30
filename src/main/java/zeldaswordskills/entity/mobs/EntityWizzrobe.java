@@ -304,7 +304,7 @@ public abstract class EntityWizzrobe extends EntityMob implements IEntityLootabl
 	 * Return true if the DamageSource is a kind that may be evaded
 	 */
 	protected boolean canEvadeSource(DamageSource source) {
-		return source.getEntity() != null;
+		return source.getEntity() != null && (!source.isMagicDamage() || !source.isUnblockable());
 	}
 
 	/**
