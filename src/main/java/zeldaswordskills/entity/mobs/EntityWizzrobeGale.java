@@ -19,6 +19,8 @@ package zeldaswordskills.entity.mobs;
 
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.MagicType;
+import zeldaswordskills.entity.ZSSEntityInfo;
+import zeldaswordskills.entity.buff.Buff;
 
 public class EntityWizzrobeGale extends EntityWizzrobe
 {
@@ -29,5 +31,12 @@ public class EntityWizzrobeGale extends EntityWizzrobe
 	@Override
 	public MagicType getMagicType() {
 		return MagicType.WIND;
+	}
+
+	@Override
+	protected void applyEntityAttributes() {
+		super.applyEntityAttributes();
+		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_WIND, Integer.MAX_VALUE, 50);
+		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_QUAKE, Integer.MAX_VALUE, 100);
 	}
 }

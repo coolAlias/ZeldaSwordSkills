@@ -59,6 +59,7 @@ public class EntityKeeseThunder extends EntityKeese
 		super.applyEntityAttributes();
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(12.0F);
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 100);
+		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 	}
 
 	/** Returns the amount of time remaining for which this Keese is electrified */

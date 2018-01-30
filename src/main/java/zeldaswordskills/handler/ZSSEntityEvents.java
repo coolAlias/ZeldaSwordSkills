@@ -22,7 +22,6 @@ import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.INpc;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -263,26 +262,25 @@ public class ZSSEntityEvents
 		if (!info.getActiveBuffs().isEmpty()) {
 			return;
 		}
-		// double damage from cold effects, highly resistant to fire damage
+		// double damage from cold and water effects, immune to fire damage
 		if (entity.isImmuneToFire()) {
-			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 75);
+			info.applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 			info.applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
+			info.applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 		}
 		if (entity.getCreatureAttribute() == EnumCreatureAttribute.UNDEAD) {
 			if (!entity.isImmuneToFire()) {
 				info.applyBuff(Buff.WEAKNESS_FIRE, Integer.MAX_VALUE, 50);
+				info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 50);
 			}
 			info.applyBuff(Buff.WEAKNESS_HOLY, Integer.MAX_VALUE, 300);
-			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 50);
 			info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 50);
 		}
 		if (entity instanceof EntityGolem) {
 			info.applyBuff(Buff.RESIST_COLD, Integer.MAX_VALUE, 100);
 			info.applyBuff(Buff.RESIST_STUN, Integer.MAX_VALUE, 100);
 		}
-		if (entity instanceof EntityWitch) {
-			info.applyBuff(Buff.RESIST_MAGIC, Integer.MAX_VALUE, 75);
-		}
+		// EntityWitch has hard-coded 85% magic damage resistance - don't need to add more
 		if (entity instanceof EntityWither) {
 			info.removeBuff(Buff.WEAKNESS_COLD);
 		}

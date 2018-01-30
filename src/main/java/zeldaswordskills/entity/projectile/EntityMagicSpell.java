@@ -161,17 +161,19 @@ public class EntityMagicSpell extends EntityMobThrowable
 	 * Returns a damage source corresponding to the magic type (e.g. fire for fire, etc.)
 	 */
 	protected DamageSource getDamageSource() {
-		DamageSource source = new DamageSourceFireIndirect("blast.fire", this, getThrower(), true).setMagicDamage();
-		switch(getType()) {
-		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, getThrower(), 50, 1, true).setStunDamage(60, 10, true).setMagicDamage(); break;
-		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, getThrower(), 50, 1, true).setMagicDamage(); break;
-		case WIND: source = new DamageSourceBaseIndirect("blast.wind", this, getThrower(), true).setMagicDamage(); break;
+		MagicType type = this.getType();
+		DamageSource source = new DamageSourceFireIndirect("blast.fire", this, getThrower(), true);
+		switch (type) {
+		case ICE: source = new DamageSourceIceIndirect("blast.ice", this, this.getThrower(), 50, 1, true).setStunDamage(60, 10, true); break;
+		case LIGHTNING: source = new DamageSourceShockIndirect("blast.lightning", this, this.getThrower(), 50, 1, true); break;
+		case WATER: source = new DamageSourceBaseIndirect("blast.water", this, this.getThrower(), true, type.getDamageType()); break;
+		case WIND: source = new DamageSourceBaseIndirect("blast.wind", this, this.getThrower(), true, type.getDamageType()); break;
 		default: break; // fire
 		}
 		if (bypassesArmor) {
 			source.setDamageBypassesArmor();
 		}
-		return source;
+		return source.setMagicDamage();
 	}
 
 	@Override

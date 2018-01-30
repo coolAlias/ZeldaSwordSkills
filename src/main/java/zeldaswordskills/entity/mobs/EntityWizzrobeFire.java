@@ -40,6 +40,7 @@ public class EntityWizzrobeFire extends EntityWizzrobe
 		super.applyEntityAttributes();
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 50);
 		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
+		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 	}
 
 	@Override

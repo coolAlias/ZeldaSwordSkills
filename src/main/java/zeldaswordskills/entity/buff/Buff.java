@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,10 @@ import net.minecraft.util.StatCollector;
  */
 public enum Buff
 {
+	/** Increases chance to evade attacks by (amplifier * 0.01F) */
+	EVADE_UP("buff.zss.evade_up", false, 9),
+	/** Reduces chance to evade attacks by (amplifier * 0.01F) */
+	EVADE_DOWN("buff.zss.evade_down", true, 9),
 	/** Multiplies Attack damage by a factor of (1.0F + (amplifier * 0.01F)) */
 	ATTACK_UP("buff.zss.attack_up", false, 8),
 	/** Multiplies Attack damage by a factor of (1.0F - (amplifier * 0.01F)) */
@@ -43,10 +47,6 @@ public enum Buff
 	DEFENSE_UP("buff.zss.defense_up", false, 10),
 	/** Defense penalty: All damage received multiplied by (1.0F + (amplifier * 0.01F)) */
 	DEFENSE_DOWN("buff.zss.defense_down", true, 10),
-	/** Increases chance to evade attacks by (amplifier * 0.01F) */
-	EVADE_UP("buff.zss.evade_up", false, 9),
-	/** Reduces chance to evade attacks by (amplifier * 0.01F) */
-	EVADE_DOWN("buff.zss.evade_down", true, 9),
 	/** Multiplies COLD damage by a factor of (1.0F - (amplifier * 0.01F)) */
 	RESIST_COLD("buff.zss.resist_cold", false, 2),
 	/** Multiplies any type of fire damage by a factor of (1.0F - (amplifier * 0.01F)) */
@@ -55,10 +55,16 @@ public enum Buff
 	RESIST_HOLY("buff.zss.resist_holy", false, 7),
 	/** Multiplies any type of magic damage by a factor of (1.0F - (amplifier * 0.01F)) */
 	RESIST_MAGIC("buff.zss.resist_magic", false, 4),
+	/** Multiplies QUAKE damage by a factor of (1.0F - (amplifier * 0.01F)) */
+	RESIST_QUAKE("buff.zss.resist_quake", false, 12),
 	/** Multiplies SHOCK damage by a factor of (1.0F - (amplifier * 0.01F)) */
 	RESIST_SHOCK("buff.zss.resist_shock", false, 5),
 	/** Multiplies stun time by a factor of (1.0F - (amplifier * 0.01F)) */
 	RESIST_STUN("buff.zss.resist_stun", false, 6),
+	/** Multiplies WATER damage by a factor of (1.0F - (amplifier * 0.01F)) */
+	RESIST_WATER("buff.zss.resist_water", false, 13),
+	/** Multiplies WIND damage by a factor of (1.0F - (amplifier * 0.01F)) */
+	RESIST_WIND("buff.zss.resist_wind", false, 14),
 	/** Prevents affected entity from acting for the duration */
 	STUN("buff.zss.stun", true, false, 6, true),
 	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
@@ -73,20 +79,26 @@ public enum Buff
 	WEAKNESS_SHOCK("buff.zss.weakness_shock", true, 5),
 	/** Increases stun time by a factor of (1.0F + (amplifier * 0.01F)) */
 	WEAKNESS_STUN("buff.zss.weakness_stun", true, 6),
-	/** Multiplies QUAKE damage by a factor of (1.0F - (amplifier * 0.01F)) */
-	RESIST_QUAKE("buff.zss.resist_quake", false, 11),
 	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
-	WEAKNESS_QUAKE("buff.zss.weakness_quake", true, 11),
+	WEAKNESS_QUAKE("buff.zss.weakness_quake", true, 12),
+	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
+	WEAKNESS_WATER("buff.zss.weakness_water", true, 13),
+	/** Increases the amount of damage received by a factor of (1.0F + (amplifier * 0.01F)) */
+	WEAKNESS_WIND("buff.zss.weakness_wind", true, 14),
 	/** Player will not expend magic points while this buff is active; sync to client to change magic bar display */
 	UNLIMITED_MAGIC("buff.zss.unlimited_magic", false, false, -1, true);
 
 	public final String unlocalizedName;
+
 	/** Whether this Buff is a negative effect */
 	public final boolean isDebuff;
+
 	/** Whether this Buff displays an arrow icon overlay */
 	public final boolean displayArrow;
+
 	/** Icon's texture sheet index; 0 and 1 are the buff and debuff icons; negative value means no icon */
 	public final int iconIndex;
+
 	/** Whether this Buff needs to be synchronized to the client(s) when applied to non-player entities */
 	public final boolean syncNonPlayerEntity;
 

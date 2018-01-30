@@ -39,6 +39,7 @@ public class EntityWizzrobeThunder extends EntityWizzrobe
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
+		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 	}
 
 	@Override

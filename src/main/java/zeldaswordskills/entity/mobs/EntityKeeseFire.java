@@ -44,6 +44,7 @@ public class EntityKeeseFire extends EntityKeese
 		this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(12.0F);
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_COLD, Integer.MAX_VALUE, 100);
+		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_WATER, Integer.MAX_VALUE, 100);
 	}
 
 	@Override
