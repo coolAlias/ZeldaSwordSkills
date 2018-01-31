@@ -339,7 +339,7 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	 */
 	protected boolean parryAttack(DamageSource source) {
 		Entity entity = source.getEntity();
-		if (entity == null || source.isExplosion() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
+		if (entity == null || source.isExplosion() || source.isProjectile() || source.isMagicDamage() || source.isDamageAbsolute() || (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage())) {
 			return false;
 		} else if (TargetUtils.isTargetInFrontOf(this, entity, 90) && rand.nextFloat() < (0.5F - (parryTimer * 0.05F))) {
 			worldObj.setEntityState(this, PARRY_FLAG);
