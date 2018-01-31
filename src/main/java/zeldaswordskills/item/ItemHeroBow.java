@@ -75,6 +75,7 @@ import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowFire;
 import zeldaswordskills.entity.projectile.EntityArrowIce;
 import zeldaswordskills.entity.projectile.EntityArrowLight;
+import zeldaswordskills.entity.projectile.EntityArrowSilver;
 import zeldaswordskills.handler.BattlegearEvents;
 import zeldaswordskills.handler.TradeHandler.EnumVillager;
 import zeldaswordskills.ref.Config;
@@ -119,7 +120,8 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		BOMB_WATER(ModInfo.ID + ":zss.arrow_bomb_water", 1),
 		MAGIC_FIRE(ModInfo.ID + ":zss.arrow_fire", 2),
 		MAGIC_ICE(ModInfo.ID + ":zss.arrow_ice", 2),
-		MAGIC_LIGHT(ModInfo.ID + ":zss.arrow_light", 3);
+		MAGIC_LIGHT(ModInfo.ID + ":zss.arrow_light", 3),
+		SILVER(ModInfo.ID + ":zss.arrow_silver", 3);
 		private final String arrowName;
 		private Item arrowItem;
 		private final int level;
@@ -689,6 +691,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		arrowMap.put(ZSSItems.arrowFire, EntityArrowFire.class);
 		arrowMap.put(ZSSItems.arrowIce, EntityArrowIce.class);
 		arrowMap.put(ZSSItems.arrowLight, EntityArrowLight.class);
+		arrowMap.put(ZSSItems.arrowSilver, EntityArrowSilver.class);
 		ImmutableBiMap.Builder<Item, BombType> builder = ImmutableBiMap.builder();
 		builder.put(ZSSItems.arrowBomb, BombType.BOMB_STANDARD);
 		builder.put(ZSSItems.arrowBombFire, BombType.BOMB_FIRE);
@@ -714,6 +717,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowFire, null);
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowIce, null);
 		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowLight, null);
+		QuiverArrowRegistry.addArrowToRegistry(ZSSItems.arrowSilver, null);
 	}
 
 	/** 

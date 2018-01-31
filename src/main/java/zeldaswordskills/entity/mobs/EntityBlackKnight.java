@@ -21,6 +21,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.IBossDisplayData;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -81,12 +82,12 @@ public class EntityBlackKnight extends EntityDarknutMighty implements IBossDispl
 	}
 
 	@Override
-	public boolean isLightArrowFatal() {
+	public boolean isLightArrowFatal(EntityArrow arrow) {
 		return false;
 	}
 
 	@Override
-	public float getLightArrowDamage(float amount) {
+	public float getLightArrowDamage(EntityArrow arrow, float amount) {
 		return (amount * 4.0F);
 	}
 

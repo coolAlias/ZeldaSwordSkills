@@ -17,10 +17,12 @@
 
 package zeldaswordskills.entity.mobs;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.MagicType;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.item.ZSSItems;
 
 public class EntityWizzrobeGale extends EntityWizzrobe
 {
@@ -38,5 +40,14 @@ public class EntityWizzrobeGale extends EntityWizzrobe
 		super.applyEntityAttributes();
 		ZSSEntityInfo.get(this).applyBuff(Buff.RESIST_WIND, Integer.MAX_VALUE, 50);
 		ZSSEntityInfo.get(this).applyBuff(Buff.WEAKNESS_QUAKE, Integer.MAX_VALUE, 100);
+	}
+
+	@Override
+	protected ItemStack getRareDrop(int rarity, int modifier) {
+		ItemStack stack = super.getRareDrop(rarity, modifier);
+		if (stack == null) {
+			stack = new ItemStack(ZSSItems.arrowSilver);
+		}
+		return stack;
 	}
 }

@@ -284,7 +284,8 @@ public class ZSSItems
 	arrowBombFire,
 	arrowFire,
 	arrowIce,
-	arrowLight;
+	arrowLight,
+	arrowSilver;
 
 	//================ MASKS TAB ================//
 	public static Item
@@ -556,6 +557,7 @@ public class ZSSItems
 		arrowFire = new ItemZeldaArrow.ItemMagicArrow("arrow_fire", 2, 2.5F);
 		arrowIce = new ItemZeldaArrow.ItemMagicArrow("arrow_ice", 2, 2.5F);
 		arrowLight = new ItemZeldaArrow.ItemMagicArrow("arrow_light", 3, 5.0F);
+		arrowSilver = new ItemZeldaArrow("arrow_silver", 3);
 
 		slingshot = new ItemSlingshot().setUnlocalizedName("zss.slingshot");
 		scattershot = new ItemSlingshot(3, 30F).setUnlocalizedName("zss.scattershot");
