@@ -141,7 +141,7 @@ public class EntityArrowLight extends EntityArrowElemental
 	protected float calculateDamage(Entity entityHit) {
 		float dmg = super.calculateDamage(entityHit);
 		if (entityHit instanceof IEntityEvil) {
-			dmg = ((IEntityEvil) entityHit).getLightArrowDamage(dmg);
+			dmg = ((IEntityEvil) entityHit).getLightArrowDamage(this, dmg);
 		}
 		return dmg;
 	}
@@ -151,7 +151,7 @@ public class EntityArrowLight extends EntityArrowElemental
 	 */
 	private boolean canOneHitKill(Entity entity) {
 		if (entity instanceof IEntityEvil) {
-			return ((IEntityEvil) entity).isLightArrowFatal();
+			return ((IEntityEvil) entity).isLightArrowFatal(this);
 		}
 		boolean flag = (entity instanceof EntitySkeleton && ((EntitySkeleton) entity).getSkeletonType() == 1);
 		return (!(entity instanceof IBossDisplayData)) && (flag || entity instanceof EntityEnderman || entity instanceof EntityWitch);

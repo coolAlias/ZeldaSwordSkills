@@ -121,6 +121,7 @@ import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowFire;
 import zeldaswordskills.entity.projectile.EntityArrowIce;
 import zeldaswordskills.entity.projectile.EntityArrowLight;
+import zeldaswordskills.entity.projectile.EntityArrowSilver;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.entity.projectile.EntityBombosFireball;
 import zeldaswordskills.entity.projectile.EntityBoomerang;
@@ -276,7 +277,7 @@ public class ZSSEntities
 			LootableEntityRegistry.addLootableEntity(EntitySlime.class, f, new ItemStack(Items.slime_ball));
 			LootableEntityRegistry.addLootableEntity(EntitySnowman.class, f, new ItemStack(Items.snowball));
 			LootableEntityRegistry.addLootableEntity(EntitySpider.class, f, new ItemStack(Items.spider_eye), new ItemStack(Items.string));
-			LootableEntityRegistry.addLootableEntity(EntityWitch.class, f, new ItemStack(Items.potionitem,1,LibPotionID.HEALING.id), new ItemStack(Items.potionitem,1,LibPotionID.SWIFTNESS.id), new ItemStack(Items.potionitem,1,LibPotionID.FIRERESIST.id), new ItemStack(Items.potionitem,1,LibPotionID.WATER_BREATHING.id));
+			LootableEntityRegistry.addLootableEntity(EntityWitch.class, f, new ItemStack(ZSSItems.arrowSilver), new ItemStack(Items.potionitem,1,LibPotionID.HEALING.id), new ItemStack(Items.potionitem,1,LibPotionID.SWIFTNESS.id), new ItemStack(Items.potionitem,1,LibPotionID.FIRERESIST.id), new ItemStack(Items.potionitem,1,LibPotionID.WATER_BREATHING.id));
 			LootableEntityRegistry.addLootableEntity(EntityZombie.class, f, new ItemStack(Items.iron_ingot), new ItemStack(Items.carrot), new ItemStack(Items.potato));
 		}
 	}
@@ -314,6 +315,7 @@ public class ZSSEntities
 		EntityRegistry.registerModEntity(EntityArrowFire.class, "arrow_fire", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowIce.class, "arrow_ice", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowLight.class, "arrow_light", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowSilver.class, "arrow_silver", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityBomb.class, "bomb", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBombosFireball.class, "bombos_fireball", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
 		EntityRegistry.registerModEntity(EntityBoomerang.class, "boomerang", ++modEntityIndex, ZSSMain.instance, 64, 10, true);
@@ -375,6 +377,7 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowFire.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_fire.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowIce.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_ice.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowLight.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_light.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowSilver.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_silver.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBomb.class, new RenderEntityBomb.Factory());
 		RenderingRegistry.registerEntityRenderingHandler(EntityBombosFireball.class, new RenderSnowballFactory(Items.fire_charge));
 		RenderingRegistry.registerEntityRenderingHandler(EntityBoomerang.class, new RenderEntityBoomerang.Factory());

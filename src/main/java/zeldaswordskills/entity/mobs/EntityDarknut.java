@@ -38,6 +38,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -59,6 +60,7 @@ import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.entity.ai.EntityAIPowerAttack;
 import zeldaswordskills.entity.ai.IPowerAttacker;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.entity.projectile.EntityArrowLight;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -440,13 +442,13 @@ public class EntityDarknut extends EntityMob implements IEntityBackslice, IEntit
 	}
 
 	@Override
-	public boolean isLightArrowFatal() {
-		return true;
+	public boolean isLightArrowFatal(EntityArrow arrow) {
+		return (arrow instanceof EntityArrowLight);
 	}
 
 	@Override
-	public float getLightArrowDamage(float amount) {
-		return 0;
+	public float getLightArrowDamage(EntityArrow arrow, float amount) {
+		return amount;
 	}
 
 	/**
