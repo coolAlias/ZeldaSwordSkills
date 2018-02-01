@@ -60,6 +60,7 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.api.item.ICyclableItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IMagicArrow;
 import zeldaswordskills.api.item.ISpecialAmmunition;
