@@ -1520,6 +1520,12 @@ entity.zeldaswordskills.leaping_blow.name=Leaping Blow
 entity.zeldaswordskills.magic_spell.name=Spell
 entity.zeldaswordskills.rock.name=Rock
 entity.zeldaswordskills.seedshot.name=Seedshot
+entity.zeldaswordskills.seedshot_bomb.name=Bombshot
+entity.zeldaswordskills.seedshot_cocoa.name=Cocoashot
+entity.zeldaswordskills.seedshot_deku.name=Dekushot
+entity.zeldaswordskills.seedshot_melon.name=Melonshot
+entity.zeldaswordskills.seedshot_netherwart.name=Netherwartshot
+entity.zeldaswordskills.seedshot_pumpkin.name=Pumpkinshot
 entity.zeldaswordskills.sword_beam.name=Sword Beam
 
 # Mobs and NPCs

@@ -18,6 +18,8 @@
 package zeldaswordskills.api.item;
 
 import net.minecraft.entity.projectile.EntityArrow;
+import zeldaswordskills.api.item.ItemMode.ItemModeEntity;
+import zeldaswordskills.entity.projectile.EntitySeedShot;
 
 /**
  * 
@@ -30,5 +32,8 @@ public class ItemModeRegistry
 {
 	/** Registry of cyclable arrow modes for Hero's Bow */
 	public static final ItemModeSpecialAmmo<EntityArrow> ARROW_MODES = new ItemModeSpecialAmmo<EntityArrow>();
+
+	/** Registry of cyclable seed shot modes for Slingshots */
+	public static final ItemModeEntity<EntitySeedShot> SEED_MODES = new ItemModeEntity<EntitySeedShot>();
 
 }
