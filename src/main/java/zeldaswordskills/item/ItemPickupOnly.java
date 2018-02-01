@@ -32,12 +32,6 @@ import zeldaswordskills.util.PlayerUtils;
 /**
  * 
  * A class for Items that cannot be stored in the inventory, but have some
- * sort of effect when picked up (i.e. collided with)
- *
- */
-/**
- * 
- * A class for Items that cannot be stored in the inventory, but have some
  * sort of effect when picked up (i.e. collided with).
  * 
  * For the item to have an effect, it must extend this class (or use an anonymous class)

@@ -26,7 +26,6 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.item.IUnenchantable;
@@ -124,6 +123,6 @@ public class ItemPendant extends Item implements IUnenchantable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.pendant.desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.pendant.desc.0"));
 	}
 }

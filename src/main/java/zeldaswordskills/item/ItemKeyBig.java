@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
@@ -127,6 +126,6 @@ public class ItemKeyBig extends Item implements IUnenchantable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.keybig.desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.keybig.desc.0"));
 	}
 }

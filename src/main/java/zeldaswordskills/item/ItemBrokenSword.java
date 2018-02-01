@@ -32,7 +32,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
@@ -144,7 +143,7 @@ public class ItemBrokenSword extends Item implements IUnenchantable, IWeapon, IB
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.sword_broken.desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.sword_broken.desc.0"));
 	}
 
 	@Override

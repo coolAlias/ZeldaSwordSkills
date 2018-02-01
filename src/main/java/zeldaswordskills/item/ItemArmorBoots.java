@@ -37,7 +37,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
@@ -207,7 +206,7 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss." + getUnlocalizedName().substring(9) + ".desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss." + getUnlocalizedName().substring(9) + ".desc.0"));
 	}
 	// Multimap modifiers are applied both while wearing and while holding an item
 	/*
@@ -238,6 +237,7 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 		public ItemHeavyBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
 			super(material, renderIndex, resourceLocation);
 		}
+
 		@Override
 		public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 			super.onArmorTick(world, player, stack);
@@ -259,12 +259,14 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 				}
 			}
 		}
+
 		@Override
 		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
 			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).applyModifier(heavyBootsKnockbackModifier);
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(heavyBootsMovePenalty);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, Integer.MAX_VALUE, 50);
 		}
+
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
 			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).removeModifier(heavyBootsKnockbackModifier);
@@ -272,10 +274,13 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_DOWN);
 		}
 	}
-	public static class ItemHoverBoots extends ItemArmorBoots {
+
+	public static class ItemHoverBoots extends ItemArmorBoots
+	{
 		public ItemHoverBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
 			super(material, renderIndex, resourceLocation);
 		}
+
 		@Override
 		public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 			super.onArmorTick(world, player, stack);
@@ -301,6 +306,7 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 			}
 		}
 	}
+
 	public static class ItemPegasusBoots extends ItemArmorBoots
 	{
 		/** Movement bonus for wearing Pegasus Boots */
@@ -310,12 +316,14 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 		public ItemPegasusBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
 			super(material, renderIndex, resourceLocation);
 		}
+
 		@Override
 		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(pegasusBootsMoveBonus);
 			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
 		}
+
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(pegasusBootsMoveBonus);
@@ -323,14 +331,18 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
 		}
 	}
-	public static class ItemRubberBoots extends ItemArmorBoots {
+
+	public static class ItemRubberBoots extends ItemArmorBoots
+	{
 		public ItemRubberBoots(ArmorMaterial material, int renderIndex, String resourceLocation) {
 			super(material, renderIndex, resourceLocation);
 		}
+
 		@Override
 		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
 			ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
 		}
+
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
 			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_SHOCK);

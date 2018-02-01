@@ -30,7 +30,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
@@ -184,6 +183,6 @@ public class ItemWhip extends Item implements IFairyUpgrade
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.whip.desc." + getType(stack).ordinal()));
+		list.add(StatCollector.translateToLocal("tooltip.zss.whip.desc." + getType(stack).ordinal()));
 	}
 }

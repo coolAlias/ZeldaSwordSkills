@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -111,11 +110,11 @@ public class ItemDungeonBlock extends ItemMetadataBlock
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean isHeld) {
 		if (stack.getItemDamage() > 7) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.unbreakable.desc"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.block.unbreakable.desc"));
 		} else {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block." +
+			list.add(StatCollector.translateToLocal("tooltip.zss.block." +
 					(field_150939_a == ZSSBlocks.dungeonCore ? "core" : "dungeon") + ".desc.0"));
 		}
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.dungeon.desc.1"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.block.dungeon.desc.1"));
 	}
 }

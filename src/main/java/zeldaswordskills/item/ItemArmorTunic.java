@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.world.World;
@@ -212,7 +211,7 @@ public class ItemArmorTunic extends ItemArmor
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		String[] tooltips = StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc").split("\\\\n");
 		for (String tooltip : tooltips) {
-			list.add(EnumChatFormatting.ITALIC + tooltip);
+			list.add(tooltip);
 		}
 	}
 }

@@ -29,7 +29,6 @@ import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
@@ -169,8 +168,8 @@ public class ItemMagicMirror extends Item implements IUnenchantable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.magicmirror.desc.1"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.magic_mirror.desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.magic_mirror.desc.1"));
 	}
 
 	/**

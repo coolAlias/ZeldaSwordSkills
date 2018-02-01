@@ -300,9 +300,9 @@ public class ItemSlingshot extends Item implements ICyclableItem, IFairyUpgrade,
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.slingshot.desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.slingshot.desc.0"));
 		if (seedsFired > 1) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.slingshot.desc.1", seedsFired));
+			list.add(StatCollector.translateToLocalFormatted("tooltip.zss.slingshot.desc.1", seedsFired));
 		}
 		ItemStack mode = ItemModeRegistry.SEED_MODES.getStack(this.getMode(stack));
 		if (mode != null) {

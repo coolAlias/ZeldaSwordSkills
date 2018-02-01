@@ -28,7 +28,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.village.MerchantRecipe;
@@ -167,25 +166,25 @@ public class ItemHookShot extends Item implements IUnenchantable
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.0"));
 		switch(getType(stack.getItemDamage())) {
 		case WOOD_SHOT:
 		case WOOD_SHOT_EXT:
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.10"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.11"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.10"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.11"));
 			break;
 		case CLAW_SHOT:
 		case CLAW_SHOT_EXT:
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.20"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.21"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.20"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.21"));
 			break;
 		case MULTI_SHOT:
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.30"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.31"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.30"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.31"));
 			break;
 		case MULTI_SHOT_EXT:
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.32"));
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.hookshot.desc.31"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.32"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.hookshot.desc.31"));
 			break;
 		}
 	}

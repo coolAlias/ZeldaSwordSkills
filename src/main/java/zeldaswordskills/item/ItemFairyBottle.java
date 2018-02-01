@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -147,10 +146,10 @@ public class ItemFairyBottle extends Item implements IUnenchantable
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
 		if (stack.hasDisplayName()) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip." + getUnlocalizedName().substring(5) + ".navi.desc.0", stack.getDisplayName()));
+			list.add(StatCollector.translateToLocalFormatted("tooltip." + getUnlocalizedName().substring(5) + ".navi.desc.0", stack.getDisplayName()));
 		} else {
 			for (int i = 0; i < 4; ++i) {
-				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc." + i));
+				list.add(StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc." + i));
 			}
 		}
 	}

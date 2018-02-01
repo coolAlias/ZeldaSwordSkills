@@ -166,7 +166,7 @@ public class ItemSkillOrb extends Item implements IUnenchantable
 				}
 				list.addAll(skill.getTranslatedTooltip(player));
 			} else {
-				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.skillorb.desc.0"));
+				list.add(StatCollector.translateToLocal("tooltip.zss.skillorb.desc.0"));
 			}
 		}
 	}

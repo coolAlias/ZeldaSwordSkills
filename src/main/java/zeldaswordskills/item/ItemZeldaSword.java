@@ -36,7 +36,6 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -228,17 +227,17 @@ public class ItemZeldaSword extends ItemSword implements IBattlegearWeapon, IFai
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean isHeld) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 		if (stack.getItem() == ZSSItems.swordTempered) {
 			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssHitCount")) {
-				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.sword_tempered.desc.1",stack.getTagCompound().getInteger("zssHitCount")));
+				list.add(StatCollector.translateToLocalFormatted("tooltip.zss.sword_tempered.desc.1",stack.getTagCompound().getInteger("zssHitCount")));
 			}
 		} else if (stack.getItem() == ZSSItems.swordGolden) {
 			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("SacredFlames")) {
 				int level = stack.getTagCompound().getInteger("SacredFlames");
 				for (int i = 1; i < 5; ++i) {
 					if (i != 3 && (level & i) != 0) {
-						list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.sword_golden.desc.1", StatCollector.translateToLocal("misc.zss.sacred_flame.name." + i)));
+						list.add(StatCollector.translateToLocalFormatted("tooltip.zss.sword_golden.desc.1", StatCollector.translateToLocal("misc.zss.sacred_flame.name." + i)));
 					}
 				}
 			}

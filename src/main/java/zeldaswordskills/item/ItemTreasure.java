@@ -29,7 +29,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
@@ -302,6 +301,6 @@ public class ItemTreasure extends Item implements IRightClickEntity, IUnenchanta
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName(stack).substring(5) + ".desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip." + getUnlocalizedName(stack).substring(5) + ".desc.0"));
 	}
 }
