@@ -69,6 +69,8 @@ import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
+import zeldaswordskills.entity.projectile.EntityArrowBombFire;
+import zeldaswordskills.entity.projectile.EntityArrowBombWater;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowFire;
 import zeldaswordskills.entity.projectile.EntityArrowIce;
@@ -646,10 +648,6 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 				arrowEntity.setTarget(target);
 			}
 		}
-		if (arrowEntity instanceof EntityArrowBomb && bombArrowMap.containsKey(arrowItem)) {
-			((EntityArrowBomb) arrowEntity).setType(bombArrowMap.get(arrowItem));
-			arrowEntity.setDamage(0.0F);
-		}
 	}
 
 	/**
@@ -688,8 +686,6 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	public static void initializeArrows() {
 		arrowMap.put(Items.arrow, EntityArrowCustom.class);
 		arrowMap.put(ZSSItems.arrowBomb, EntityArrowBomb.class);
-		arrowMap.put(ZSSItems.arrowBombFire, EntityArrowBomb.class);
-		arrowMap.put(ZSSItems.arrowBombWater, EntityArrowBomb.class);
 		arrowMap.put(ZSSItems.arrowFire, EntityArrowFire.class);
 		arrowMap.put(ZSSItems.arrowIce, EntityArrowIce.class);
 		arrowMap.put(ZSSItems.arrowLight, EntityArrowLight.class);
@@ -698,6 +694,8 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		builder.put(ZSSItems.arrowBombFire, BombType.BOMB_FIRE);
 		builder.put(ZSSItems.arrowBombWater, BombType.BOMB_WATER);
 		bombArrowMap = builder.build();
+		arrowMap.put(ZSSItems.arrowBombFire, EntityArrowBombFire.class);
+		arrowMap.put(ZSSItems.arrowBombWater, EntityArrowBombWater.class);
 	}
 
 	/**
