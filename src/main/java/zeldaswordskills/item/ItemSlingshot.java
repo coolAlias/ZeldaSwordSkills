@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -43,6 +43,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.ZSSAchievements;
+import zeldaswordskills.api.item.ICyclableItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
