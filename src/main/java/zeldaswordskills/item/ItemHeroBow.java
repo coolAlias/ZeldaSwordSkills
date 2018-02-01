@@ -19,9 +19,10 @@ package zeldaswordskills.item;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 import mods.battlegear2.api.IAllowItem;
 import mods.battlegear2.api.ISheathed;
@@ -30,7 +31,9 @@ import mods.battlegear2.api.quiver.ISpecialBow;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry;
 import mods.battlegear2.api.quiver.QuiverArrowRegistry.DefaultArrowFire;
 import mods.battlegear2.enchantments.BaseEnchantment;
+import mods.battlegear2.items.ItemMBArrow;
 import mods.battlegear2.items.ItemQuiver;
+import mods.battlegear2.utils.BattlegearConfig;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
@@ -66,6 +69,7 @@ import zeldaswordskills.api.item.IMagicArrow;
 import zeldaswordskills.api.item.ISpecialAmmunition;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoom;
+import zeldaswordskills.api.item.ItemModeRegistry;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
@@ -86,13 +90,9 @@ import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -112,75 +112,11 @@ import cpw.mods.fml.relauncher.SideOnly;
 })
 public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade, IUnenchantable, IZoom, IAllowItem, ISheathed, ISpecialBow
 {
-	public static enum Mode {
-		/** Default Hero Bow behavior searches for the first usable arrow of any kind */
-		DEFAULT("", 0),
-		STANDARD("minecraft:arrow", 0),
-		BOMB_STANDARD(ModInfo.ID + ":zss.arrow_bomb", 1),
-		BOMB_FIRE(ModInfo.ID + ":zss.arrow_bomb_fire", 1),
-		BOMB_WATER(ModInfo.ID + ":zss.arrow_bomb_water", 1),
-		MAGIC_FIRE(ModInfo.ID + ":zss.arrow_fire", 2),
-		MAGIC_ICE(ModInfo.ID + ":zss.arrow_ice", 2),
-		MAGIC_LIGHT(ModInfo.ID + ":zss.arrow_light", 3),
-		SILVER(ModInfo.ID + ":zss.arrow_silver", 3);
-		private final String arrowName;
-		private Item arrowItem;
-		private final int level;
-		private Mode(String arrowName, int level) {
-			this.arrowName = arrowName;
-			this.level = level;
-		}
-		/**
-		 * Returns the arrow item required for this mode
-		 */
-		public Item getArrowItem() {
-			if (arrowItem == null && arrowName.length() > 0) {
-				String[] parts = arrowName.split(":");
-				arrowItem = GameRegistry.findItem(parts[0], parts[1]);
-			}
-			return arrowItem;
-		}
-		/**
-		 * Returns the next Mode by ordinal position
-		 */
-		public Mode next() {
-			return Mode.values()[(ordinal() + 1) % Mode.values().length];
-		}
-		/**
-		 * Returns the next mode whose level does not exceed that given
-		 */
-		public Mode next(int level) {
-			return cycle(level, true);
-		}
-		/**
-		 * Returns the previous Mode by ordinal position
-		 */
-		public Mode prev() {
-			return Mode.values()[((ordinal() == 0 ? Mode.values().length : ordinal()) - 1) % Mode.values().length];
-		}
-		/**
-		 * Returns the previous mode whose level does not exceed that given
-		 */
-		public Mode prev(int level) {
-			return cycle(level, false);
-		}
-		private Mode cycle(int level, boolean next) {
-			Mode mode = this;
-			do {
-				mode = (next ? mode.next() : mode.prev());
-			} while (mode != this && mode.level > level);
-			return mode;
-		}
-	}
-
 	@SideOnly(Side.CLIENT)
 	private IIcon[] iconArray;
 
-	/** Maps arrow IDs to arrow entity class */
-	private static final Map<Item, Class<? extends EntityArrowCustom>> arrowMap = new HashMap<Item, Class<? extends EntityArrowCustom>>();
-
-	/** Maps arrow IDs to bomb arrow Bomb Type */
-	private static BiMap<Item, BombType> bombArrowMap;
+	/** Maps Bomb Type to correct bomb arrow items */
+	private static EnumMap<BombType, Item> bombArrowMap = Maps.newEnumMap(BombType.class);
 
 	/** Static list to store fire handlers; can't set type without requiring BG2 */
 	private static final List fireHandlers = new ArrayList();
@@ -212,58 +148,78 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		bow.getTagCompound().setInteger("zssBowLevel", level);
 	}
 
-	public Mode getMode(ItemStack stack) {
+	public int getMode(ItemStack stack) {
 		if (!stack.hasTagCompound() || !stack.getTagCompound().hasKey("zssItemMode")) {
-			setMode(stack, Mode.DEFAULT);
+			this.setMode(stack, 0);
 		}
-		return Mode.values()[stack.getTagCompound().getInteger("zssItemMode") % Mode.values().length];
+		return stack.getTagCompound().getInteger("zssItemMode");
 	}
 
-	private void setMode(ItemStack stack, Mode mode) {
+	private void setMode(ItemStack stack, int index) {
 		if (!stack.hasTagCompound()) { stack.setTagCompound(new NBTTagCompound()); }
-		stack.getTagCompound().setInteger("zssItemMode", mode.ordinal());
+		stack.getTagCompound().setInteger("zssItemMode", index);
 	}
 
 	@Override
 	public void nextItemMode(ItemStack stack, EntityPlayer player) {
 		if (!player.isUsingItem()) {
-			setMode(stack, getMode(stack).next(getLevel(stack)));
+			int level = this.getLevel(stack);
+			int current = this.getMode(stack);
+			int mode = current;
+			do {
+				mode = ItemModeRegistry.ARROW_MODES.next(mode, level);
+			} while (mode != current && this.skipMode(mode, player));
+			this.setMode(stack, mode);
 		}
 	}
 
 	@Override
 	public void prevItemMode(ItemStack stack, EntityPlayer player) {
 		if (!player.isUsingItem()) {
-			setMode(stack, getMode(stack).prev(getLevel(stack)));
+			int level = this.getLevel(stack);
+			int current = this.getMode(stack);
+			int mode = current;
+			do {
+				mode = ItemModeRegistry.ARROW_MODES.prev(mode, level);
+			} while (mode != current && this.skipMode(mode, player));
+			this.setMode(stack, mode);
 		}
+	}
+
+	private boolean skipMode(int mode, EntityPlayer player) {
+		if (player.capabilities.isCreativeMode) {
+			return false;
+		}
+		ItemStack stack = ItemModeRegistry.ARROW_MODES.getStack(mode);
+		return stack != null && !PlayerUtils.hasItem(player, stack);
 	}
 
 	@Override
 	public int getCurrentMode(ItemStack stack, EntityPlayer player) {
-		return getMode(stack).ordinal();
+		return this.getMode(stack);
 	}
 
 	@Override
 	public void setCurrentMode(ItemStack stack, EntityPlayer player, int mode) {
-		setMode(stack, Mode.values()[mode % Mode.values().length]);
+		this.setMode(stack, mode);
 	}
 
 	@Override
 	public ItemStack getRenderStackForMode(ItemStack stack, EntityPlayer player) {
-		Item item = getMode(stack).getArrowItem();
-		ItemStack ret = (item == null ? null : new ItemStack(item, 0));
-		if (ret != null) {
+		ItemStack render = ItemModeRegistry.ARROW_MODES.getStack(this.getMode(stack));
+		if (render != null) {
+			render.stackSize = 0;
 			for (ItemStack inv : player.inventory.mainInventory) {
-				if (inv != null && inv.getItem() == ret.getItem()) {
-					ret.stackSize += inv.stackSize;
-					if (ret.stackSize > 98) {
-						ret.stackSize = 99;
+				if (inv != null && inv.getItem() == render.getItem() && (inv.getItemDamage() == render.getItemDamage() || !render.getHasSubtypes())) {
+					render.stackSize += inv.stackSize;
+					if (render.stackSize > 98) {
+						render.stackSize = 99;
 						break;
 					}
 				}
 			}
 		}
-		return ret;
+		return render;
 	}
 
 	/**
@@ -413,7 +369,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	 */
 	public boolean canShootArrow(EntityPlayer player, ItemStack bow, ItemStack arrowStack) {
 		Item arrowItem = (arrowStack == null ? null : arrowStack.getItem());
-		if (arrowMap.containsKey(arrowItem)) {
+		if (ItemModeRegistry.ARROW_MODES.contains(arrowStack)) {
 			if (player.capabilities.isCreativeMode) {
 				return true;
 			}
@@ -434,18 +390,15 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	 * meaning that {@link #canShootArrow} returned true
 	 */
 	private ItemStack getArrowFromInventory(ItemStack bow, EntityPlayer player) {
-		Item modeArrow = getMode(bow).getArrowItem();
+		ItemStack modeArrow = ItemModeRegistry.ARROW_MODES.getStack(this.getMode(bow));
 		ItemStack arrow = null;
 		if (modeArrow == null && Config.enableAutoBombArrows() && player.isSneaking()) {
 			arrow = getAutoBombArrow(bow, player);
 		}
 		// Search specifically for the selected arrow type
-		if (modeArrow != null && canShootArrow(player, bow, new ItemStack(modeArrow))) {
-			for (ItemStack stack : player.inventory.mainInventory) {
-				if (stack != null && stack.getItem() == modeArrow) {
-					arrow = stack;
-					break;
-				}
+		if (modeArrow != null && canShootArrow(player, bow, modeArrow)) {
+			if (player.capabilities.isCreativeMode || PlayerUtils.hasItem(player, modeArrow)) {
+				arrow = modeArrow;
 			}
 		}
 		// No mode selected or arrow could not be shot - search inventory for shootable arrow
@@ -459,7 +412,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		}
 		// If still no arrow and player is in Creative Mode, nock default arrow
 		if (arrow == null && player.capabilities.isCreativeMode) {
-			arrow = new ItemStack(modeArrow == null ? Items.arrow : modeArrow);
+			arrow = new ItemStack(Items.arrow);
 		}
 		return arrow;
 	}
@@ -494,7 +447,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 					ItemStack bomb = bombBag.removeBomb(player, stack);
 					if (bomb != null) {
 						BombType type = ItemBomb.getType(bomb);
-						ItemStack bombArrow = new ItemStack(bombArrowMap.inverse().get(type),1,0);
+						ItemStack bombArrow = new ItemStack(bombArrowMap.get(type), 1, 0);
 						if (player.capabilities.isCreativeMode) {
 							arrow = bombArrow;
 						} else if (hasAutoArrow) {
@@ -510,7 +463,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 						}
 					}
 				} else if (stack.getItem() == ZSSItems.bomb) {
-					ItemStack bombArrow = new ItemStack(bombArrowMap.inverse().get(ItemBomb.getType(stack)),1,0);
+					ItemStack bombArrow = new ItemStack(bombArrowMap.get(ItemBomb.getType(stack)), 1, 0);
 					if (hasAutoArrow || player.capabilities.isCreativeMode) {
 						arrow = bombArrow;
 					} else if (hasArrow && player.inventory.consumeInventoryItem(Items.arrow)) {
@@ -560,9 +513,9 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	public void addInformation(ItemStack stack,	EntityPlayer player, List list, boolean par4) {
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip." + getUnlocalizedName().substring(5) + ".desc.1", getLevel(stack)));
-		Item item = getMode(stack).getArrowItem();
-		if (item != null) {
-			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.mode", new ItemStack(item).getDisplayName()));
+		ItemStack mode = ItemModeRegistry.ARROW_MODES.getStack(this.getMode(stack));
+		if (mode != null) {
+			list.add(EnumChatFormatting.YELLOW + StatCollector.translateToLocalFormatted("tooltip.zss.mode", mode.getDisplayName()));
 		}
 	}
 
@@ -658,13 +611,13 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	 * shooter and charge provided during construction
 	 */
 	@SuppressWarnings("finally")
-	public static final EntityArrowCustom getArrowEntity(ItemStack arrowStack, World world, EntityLivingBase shooter, float charge) {
-		Item arrowItem = (arrowStack == null ? null : arrowStack.getItem());
-		if (arrowMap.containsKey(arrowItem)) {
-			EntityArrowCustom arrow = null;
+	public static final EntityArrow getArrowEntity(ItemStack arrowStack, World world, EntityLivingBase shooter, float charge) {
+		Class<? extends EntityArrow> clazz = ItemModeRegistry.ARROW_MODES.getEntityClass(arrowStack);
+		if (clazz != null) {
+			EntityArrow arrow = null;
 			try {
 				try {
-					arrow = arrowMap.get(arrowItem).getConstructor(World.class, EntityLivingBase.class, float.class).newInstance(world, shooter, charge);
+					arrow = clazz.getConstructor(World.class, EntityLivingBase.class, float.class).newInstance(world, shooter, charge);
 				} catch (InstantiationException e) {
 					e.printStackTrace();
 					return null;
@@ -684,22 +637,32 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	}
 
 	/**
-	 * Adds all custom arrow items to maps - should be done in post-init.
+	 * Initialize arrow modes and bomb -> arrow item mappings; call any time after pre-init
 	 */
 	public static void initializeArrows() {
-		arrowMap.put(Items.arrow, EntityArrowCustom.class);
-		arrowMap.put(ZSSItems.arrowBomb, EntityArrowBomb.class);
-		arrowMap.put(ZSSItems.arrowFire, EntityArrowFire.class);
-		arrowMap.put(ZSSItems.arrowIce, EntityArrowIce.class);
-		arrowMap.put(ZSSItems.arrowLight, EntityArrowLight.class);
-		arrowMap.put(ZSSItems.arrowSilver, EntityArrowSilver.class);
-		ImmutableBiMap.Builder<Item, BombType> builder = ImmutableBiMap.builder();
-		builder.put(ZSSItems.arrowBomb, BombType.BOMB_STANDARD);
-		builder.put(ZSSItems.arrowBombFire, BombType.BOMB_FIRE);
-		builder.put(ZSSItems.arrowBombWater, BombType.BOMB_WATER);
-		bombArrowMap = builder.build();
-		arrowMap.put(ZSSItems.arrowBombFire, EntityArrowBombFire.class);
-		arrowMap.put(ZSSItems.arrowBombWater, EntityArrowBombWater.class);
+		// Bomb type to arrow mappings
+		ItemHeroBow.bombArrowMap.put(BombType.BOMB_STANDARD, ZSSItems.arrowBomb);
+		ItemHeroBow.bombArrowMap.put(BombType.BOMB_FIRE, ZSSItems.arrowBombFire);
+		ItemHeroBow.bombArrowMap.put(BombType.BOMB_WATER, ZSSItems.arrowBombWater);
+		// Arrow mode registry
+		if (ItemModeRegistry.ARROW_MODES.size() > 0) {
+			ZSSMain.logger.error("ItemHeroBow item modes were registered prior to the default ZSS modes; only register item modes during Post Init or later");
+		}
+		ItemModeRegistry.ARROW_MODES.register(null, null); // default 'no item selected' mode
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(Items.arrow), EntityArrowCustom.class);
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(ZSSItems.arrowBomb), EntityArrowBomb.class);
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(ZSSItems.arrowBombFire), EntityArrowBombFire.class);
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(ZSSItems.arrowBombWater), EntityArrowBombWater.class);
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(ZSSItems.arrowFire), EntityArrowFire.class);
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(ZSSItems.arrowIce), EntityArrowIce.class);
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(ZSSItems.arrowLight), EntityArrowLight.class);
+		ItemModeRegistry.ARROW_MODES.register(new ItemStack(ZSSItems.arrowSilver), EntityArrowSilver.class);
+		// Add BG2 arrows
+		if (ZSSMain.isBG2Enabled) {
+			for (int i = 0; i < ItemMBArrow.names.length; ++i) {
+				ItemModeRegistry.ARROW_MODES.register(new ItemStack(BattlegearConfig.MbArrows, 1, i), ItemMBArrow.arrows[i]);
+			}
+		}
 	}
 
 	/**
@@ -745,10 +708,12 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		public EntityArrow getFiredArrow(ItemStack arrow, World world, EntityPlayer player, float charge) {
 			ItemStack bow = player.getHeldItem();
 			if (bow != null && (bow.getItem() instanceof ItemHeroBow || player.capabilities.isCreativeMode)) {
-				EntityArrowCustom arrowEntity = ItemHeroBow.getArrowEntity(arrow, world, player, charge);
+				EntityArrow arrowEntity = ItemHeroBow.getArrowEntity(arrow, world, player, charge);
 				if (arrowEntity != null && (!(bow.getItem() instanceof ItemHeroBow) || ((ItemHeroBow) bow.getItem()).confirmArrowShot(arrow, player))) {
 					// vanilla arrow settings will be applied by BG2's arrow loose event
-					ItemHeroBow.applyCustomArrowSettings(player, bow, arrow, arrowEntity, charge);
+					if (arrowEntity instanceof EntityArrowCustom) {
+						ItemHeroBow.applyCustomArrowSettings(player, bow, arrow, (EntityArrowCustom) arrowEntity, charge);
+					}
 				}
 				return arrowEntity;
 			}

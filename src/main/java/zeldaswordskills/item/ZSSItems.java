@@ -338,9 +338,6 @@ public class ZSSItems
 	public static void preInit() {
 		ZSSItems.initItems();
 		ZSSItems.registerItems();
-		ItemChuJelly.initializeJellies();
-		ItemHeroBow.initializeArrows();
-		ItemSlingshot.initializeSeeds();
 		ZSSItems.addDispenserBehaviors();
 	}
 
@@ -349,6 +346,9 @@ public class ZSSItems
 	 */
 	public static void init() {
 		ZSSItems.registerRecipes();
+		ItemChuJelly.initializeJellies();
+		ItemHeroBow.initializeArrows();
+		ItemSlingshot.initializeSeeds();
 	}
 
 	/**
