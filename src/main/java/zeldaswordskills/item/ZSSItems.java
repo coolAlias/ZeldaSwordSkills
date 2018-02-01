@@ -69,7 +69,7 @@ import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.entity.projectile.EntitySeedShot;
-import zeldaswordskills.entity.projectile.EntitySeedShot.SeedType;
+import zeldaswordskills.entity.projectile.EntitySeedShotDeku;
 import zeldaswordskills.entity.projectile.EntityThrowingRock;
 import zeldaswordskills.handler.TradeHandler;
 import zeldaswordskills.item.ItemInstrument.Instrument;
@@ -648,7 +648,7 @@ public class ZSSItems
 		dekuNut = (new ItemMiscZSS(2) {
 			@Override
 			public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-				EntitySeedShot seedShot = new EntitySeedShot(world, player, 0.5F, 1, 0).setType(SeedType.DEKU);
+				EntitySeedShot seedShot = new EntitySeedShotDeku(world, player, 0.5F, 1, 0);
 				seedShot.setDamage(2.5F);
 				if (!player.capabilities.isCreativeMode) {
 					--stack.stackSize;

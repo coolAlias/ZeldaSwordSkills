@@ -1010,6 +1010,12 @@ entity.zeldaswordskills.cyclone.name=Cyclone
 entity.zeldaswordskills.jar.name=Jar
 entity.zeldaswordskills.hookshot.name=Hookshot
 entity.zeldaswordskills.seedshot.name=Seedshot
+entity.zeldaswordskills.seedshot_bomb.name=Bombshot
+entity.zeldaswordskills.seedshot_cocoa.name=Cocoashot
+entity.zeldaswordskills.seedshot_deku.name=Dekushot
+entity.zeldaswordskills.seedshot_melon.name=Melonshot
+entity.zeldaswordskills.seedshot_netherwart.name=Netherwartshot
+entity.zeldaswordskills.seedshot_pumpkin.name=Pumkinshot
 entity.zeldaswordskills.rock.name=Rock
 entity.zeldaswordskills.magicspell.name=Spell
 
