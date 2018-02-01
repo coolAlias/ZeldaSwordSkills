@@ -36,14 +36,11 @@ import zeldaswordskills.item.ItemBomb;
 
 public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 {
-	/** Watchable object index for bomb's type */
-	private static final int BOMBTYPE_DATAWATCHER_INDEX = 25;
-
 	/** Uses ItemBomb's radius if this value is zero */
-	private float radius = 0.0F;
+	protected float radius = 0.0F;
 
 	/** Whether this bomb is capable of destroying blocks */
-	private boolean canGrief = true;
+	protected boolean canGrief = true;
 
 	public EntityArrowBomb(World world) {
 		super(world);
@@ -59,12 +56,6 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 
 	public EntityArrowBomb(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
-	}
-
-	@Override
-	public void entityInit() {
-		super.entityInit();
-		dataWatcher.addObject(BOMBTYPE_DATAWATCHER_INDEX, BombType.BOMB_STANDARD.ordinal());
 	}
 
 	@Override
@@ -95,15 +86,7 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 
 	@Override
 	public BombType getType() {
-		return BombType.values()[dataWatcher.getWatchableObjectInt(BOMBTYPE_DATAWATCHER_INDEX)];
-	}
-
-	/**
-	 * Sets this bomb's {@link BombType}
-	 */
-	public EntityArrowBomb setType(BombType type) {
-		dataWatcher.updateObject(BOMBTYPE_DATAWATCHER_INDEX, type.ordinal());
-		return this;
+		return BombType.BOMB_STANDARD;
 	}
 
 	@Override
@@ -149,21 +132,29 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (worldObj.provider.getDimensionId() == -1 && ticksInAir > 0 && !worldObj.isRemote && (getType() == BombType.BOMB_STANDARD || getType() == BombType.BOMB_FLOWER)) {
-			CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), (float) getDamage(), canGrief);
-			setDead();
+		if (!this.worldObj.isRemote && this.worldObj.provider.getDimensionId() == -1 && this.ticksInAir > 0 && this.explodesInHell()) {
+			float radius = (this.radius == 0.0F ? ItemBomb.getRadius(this.getType()) : this.radius);
+			CustomExplosion.createExplosion(this, this.worldObj, this.posX, this.posY, this.posZ, radius, (float) this.getDamage(), this.canGrief);
+			this.setDead();
 		}
+	}
+
+	/**
+	 * Whether this bomb should immediately explode in the Nether
+	 */
+	protected boolean explodesInHell() {
+		return this.getType().explodesInHell;
 	}
 
 	@Override
 	protected void onImpact(MovingObjectPosition mop) {
-		Material material = worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial();
-		// func_147470_e is isBoundingBoxBurning
-		boolean inFire = isBurning() || (material == Material.lava || material == Material.fire) || worldObj.isFlammableWithin(getEntityBoundingBox());
-		if (!isDud(inFire)) {
-			if (!worldObj.isRemote) {
-				CustomExplosion.createExplosion(this, worldObj, posX, posY, posZ, (radius == 0.0F ? ItemBomb.getRadius(getType()) : radius), (float) getDamage(), canGrief);
-				setDead();
+		Material material = this.worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial();
+		boolean inFire = this.isBurning() || (material == Material.lava || material == Material.fire) || this.worldObj.isFlammableWithin(this.getEntityBoundingBox());
+		if (!this.isDud(inFire)) {
+			if (!this.worldObj.isRemote) {
+				float radius = (this.radius == 0.0F ? ItemBomb.getRadius(this.getType()) : this.radius);
+				CustomExplosion.createExplosion(this, this.worldObj, this.posX, this.posY, this.posZ, radius, (float) this.getDamage(), this.canGrief);
+				this.setDead();
 			}
 		} else {
 			super.onImpact(mop);
@@ -174,17 +165,13 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	 * Returns true if the bomb is a dud: in the water or a water bomb in the nether
 	 * @param inFire whether this bomb is in fire, lava, or currently burning
 	 */
-	private boolean isDud(boolean inFire) {
-		switch(getType()) {
-		case BOMB_WATER: return inFire || worldObj.provider.getDimensionId() == -1;
-		default: return (worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial() == Material.water);
-		}
+	protected boolean isDud(boolean inFire) {
+		return (this.worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial() == Material.water);
 	}
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound compound) {
 		super.writeEntityToNBT(compound);
-		compound.setInteger("arrowType", getType().ordinal());
 		compound.setFloat("bombRadius", radius);
 		compound.setBoolean("canGrief", canGrief);
 	}
@@ -192,7 +179,6 @@ public class EntityArrowBomb extends EntityArrowCustom implements IEntityBomb
 	@Override
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
-		setType(BombType.values()[compound.getInteger("arrowType") % BombType.values().length]);
 		radius = compound.getFloat("bombRadius");
 		canGrief = compound.getBoolean("canGrief");
 	}

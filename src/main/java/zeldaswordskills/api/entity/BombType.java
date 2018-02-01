@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -36,13 +36,13 @@ import zeldaswordskills.util.WorldUtils;
  */
 public enum BombType {
 	/** Applies vanilla explosion rules */
-	BOMB_STANDARD("standard", IgnoreLiquid.NONE),
+	BOMB_STANDARD("standard", IgnoreLiquid.NONE, true),
 	/** Ignores water when determining which blocks to destroy; less effective in the Nether */
-	BOMB_WATER("water", IgnoreLiquid.WATER),
+	BOMB_WATER("water", IgnoreLiquid.WATER, false),
 	/** Ignores lava when determining which blocks to destroy */
-	BOMB_FIRE("fire", IgnoreLiquid.LAVA),
+	BOMB_FIRE("fire", IgnoreLiquid.LAVA, false),
 	/** Same as BOMB_STANDARD, except some bomb flower seeds may be dispersed */
-	BOMB_FLOWER("flower", IgnoreLiquid.NONE);
+	BOMB_FLOWER("flower", IgnoreLiquid.NONE, true);
 
 	/** The unlocalized name of the bomb type, e.g. 'standard', 'fire', etc. */
 	public final String unlocalizedName;
@@ -50,9 +50,13 @@ public enum BombType {
 	/** Type of liquid to exclude from the explosion calculations */
 	public final IgnoreLiquid ignoreLiquidType;
 
-	private BombType(String name, IgnoreLiquid ignoreLiquidType) {
+	/** Whether this bomb type immediately explodes when in the Nether */
+	public final boolean explodesInHell;
+
+	private BombType(String name, IgnoreLiquid ignoreLiquidType, boolean explodesInHell) {
 		this.unlocalizedName = name;
 		this.ignoreLiquidType = ignoreLiquidType;
+		this.explodesInHell = explodesInHell;
 	}
 
 	/**

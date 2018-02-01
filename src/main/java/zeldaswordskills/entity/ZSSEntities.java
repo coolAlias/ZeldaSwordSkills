@@ -115,6 +115,8 @@ import zeldaswordskills.entity.npc.EntityNpcZelda;
 import zeldaswordskills.entity.passive.EntityFairy;
 import zeldaswordskills.entity.passive.EntityNavi;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
+import zeldaswordskills.entity.projectile.EntityArrowBombFire;
+import zeldaswordskills.entity.projectile.EntityArrowBombWater;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowFire;
 import zeldaswordskills.entity.projectile.EntityArrowIce;
@@ -306,6 +308,8 @@ public class ZSSEntities
 		int modEntityIndex = 0;
 		// PROJECTILES
 		EntityRegistry.registerModEntity(EntityArrowBomb.class, "arrow_bomb", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowBombFire.class, "arrow_bomb_fire", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
+		EntityRegistry.registerModEntity(EntityArrowBombWater.class, "arrow_bomb_water", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowCustom.class, "arrow_custom", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowFire.class, "arrow_fire", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
 		EntityRegistry.registerModEntity(EntityArrowIce.class, "arrow_ice", ++modEntityIndex, ZSSMain.instance, 64, 20, true);
@@ -364,8 +368,10 @@ public class ZSSEntities
 	@SideOnly(Side.CLIENT) 
 	public static void registerRenderers() {
 		// PROJECTILES
-		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowBomb.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_bomb.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowBombFire.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_bomb_fire.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowBombWater.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_bomb_water.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityArrowCustom.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowFire.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_fire.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowIce.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_ice.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityArrowLight.class, new RenderCustomArrow.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/arrow_light.png")));

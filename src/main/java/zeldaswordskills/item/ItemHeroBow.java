@@ -84,6 +84,8 @@ import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSVillagerInfo.EnumVillager;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.projectile.EntityArrowBomb;
+import zeldaswordskills.entity.projectile.EntityArrowBombFire;
+import zeldaswordskills.entity.projectile.EntityArrowBombWater;
 import zeldaswordskills.entity.projectile.EntityArrowCustom;
 import zeldaswordskills.entity.projectile.EntityArrowFire;
 import zeldaswordskills.entity.projectile.EntityArrowIce;
@@ -714,10 +716,6 @@ IAllowItem, ISheathed, ISpecialBow
 				arrowEntity.setTarget(target);
 			}
 		}
-		if (arrowEntity instanceof EntityArrowBomb && bombArrowMap.containsKey(arrowItem)) {
-			((EntityArrowBomb) arrowEntity).setType(bombArrowMap.get(arrowItem));
-			arrowEntity.setDamage(0.0F);
-		}
 	}
 
 	/**
@@ -756,8 +754,8 @@ IAllowItem, ISheathed, ISpecialBow
 	public static void initializeArrows() {
 		arrowMap.put(Items.arrow, EntityArrowCustom.class);
 		arrowMap.put(ZSSItems.arrowBomb, EntityArrowBomb.class);
-		arrowMap.put(ZSSItems.arrowBombFire, EntityArrowBomb.class);
-		arrowMap.put(ZSSItems.arrowBombWater, EntityArrowBomb.class);
+		arrowMap.put(ZSSItems.arrowBombFire, EntityArrowBombFire.class);
+		arrowMap.put(ZSSItems.arrowBombWater, EntityArrowBombWater.class);
 		arrowMap.put(ZSSItems.arrowFire, EntityArrowFire.class);
 		arrowMap.put(ZSSItems.arrowIce, EntityArrowIce.class);
 		arrowMap.put(ZSSItems.arrowLight, EntityArrowLight.class);

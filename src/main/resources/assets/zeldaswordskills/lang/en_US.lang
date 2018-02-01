@@ -1502,6 +1502,8 @@ entity.villager.profession.priest=Priest
 
 # Projectiles
 entity.zeldaswordskills.arrow_bomb.name=Bomb Arrow
+entity.zeldaswordskills.arrow_bomb_fire.name=Fire Bomb Arrow
+entity.zeldaswordskills.arrow_bomb_water.name=Water Bomb Arrow
 entity.zeldaswordskills.arrow_custom.name=Arrow
 entity.zeldaswordskills.arrow_fire.name=Fire Arrow
 entity.zeldaswordskills.arrow_ice.name=Ice Arrow
