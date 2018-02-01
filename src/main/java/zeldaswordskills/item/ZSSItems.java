@@ -328,7 +328,6 @@ public class ZSSItems
 	public static void preInit() {
 		ZSSItems.initItems();
 		ZSSItems.registerItems();
-		ItemHeroBow.initializeArrows();
 	}
 
 	/**
@@ -336,6 +335,7 @@ public class ZSSItems
 	 */
 	public static void init() {
 		ZSSItems.registerRecipes();
+		ItemHeroBow.initializeArrows();
 	}
 
 	/**
