@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,7 @@ import zeldaswordskills.client.ZSSKeyHandler;
 import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.handler.ZSSCombatEvents;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.bidirectional.ActivateSkillPacket;
 import zeldaswordskills.ref.Config;
@@ -229,7 +230,7 @@ public class Dodge extends SkillActive
 	public boolean onBeingAttacked(EntityPlayer player, DamageSource source) {
 		if (dodgeTimer > level) { // still able to dodge (used to use isActive(), but changed for animating)
 			Entity attacker = source.getEntity();
-			if (attacker != null) {
+			if (attacker != null && ZSSCombatEvents.canEvadeDamage(source)) {
 				return (attacker == entityDodged || dodgeAttack(player, attacker));
 			}
 		}
