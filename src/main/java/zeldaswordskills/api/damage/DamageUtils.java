@@ -176,7 +176,7 @@ public class DamageUtils
 		}
 	}
 
-	public static class DamageSourceBaseDirect extends EntityDamageSource implements IDamageAoE, IDamageType, IDamageSourceStun
+	public static class DamageSourceBaseDirect extends EntityDamageSource implements IDamageAoE, IDamageType, IDamageSourceStun, IDamageUnavoidable
 	{
 		/** Whether this particular damage source will result in AoE damage */
 		protected final boolean isAoE;
@@ -195,6 +195,9 @@ public class DamageUtils
 
 		/** If true, this damage source is capable of stunning players unless disabled in the config */
 		private boolean canStunPlayers;
+
+		/** True if this damage source can not be evaded by e.g. the evasion Buff */
+		private boolean isUnavoidable;
 
 		/**
 		 * Creates a non-AoE direct damage source
@@ -312,9 +315,19 @@ public class DamageUtils
 		public boolean alwaysStuns() {
 			return false;
 		}
+
+		public DamageSourceBaseDirect setUnavoidable() {
+			isUnavoidable = true;
+			return this;
+		}
+
+		@Override
+		public boolean isUnavoidable() {
+			return isUnavoidable;
+		}
 	}
 
-	public static class DamageSourceBaseIndirect extends EntityDamageSourceIndirect implements IDamageAoE, IDamageType, IDamageSourceStun
+	public static class DamageSourceBaseIndirect extends EntityDamageSourceIndirect implements IDamageAoE, IDamageType, IDamageSourceStun, IDamageUnavoidable
 	{
 		/** Whether this particular damage source will result in AoE damage */
 		protected final boolean isAoE;
@@ -333,6 +346,9 @@ public class DamageUtils
 
 		/** If true, this damage source is capable of stunning players unless disabled in the config */
 		private boolean canStunPlayers;
+
+		/** True if this damage source can not be evaded by e.g. the evasion Buff */
+		private boolean isUnavoidable;
 
 		/**
 		 * Creates a non-AoE indirect damage source
@@ -449,6 +465,16 @@ public class DamageUtils
 		@Override
 		public boolean alwaysStuns() {
 			return false;
+		}
+
+		public DamageSourceBaseIndirect setUnavoidable() {
+			isUnavoidable = true;
+			return this;
+		}
+
+		@Override
+		public boolean isUnavoidable() {
+			return isUnavoidable;
 		}
 	}
 

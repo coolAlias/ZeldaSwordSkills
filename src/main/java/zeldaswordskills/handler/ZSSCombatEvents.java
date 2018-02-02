@@ -47,6 +47,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceArmorBreak;
 import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.damage.IDamageAoE;
 import zeldaswordskills.api.damage.IDamageType;
+import zeldaswordskills.api.damage.IDamageUnavoidable;
 import zeldaswordskills.api.damage.IPostDamageEffect;
 import zeldaswordskills.api.entity.IReflectable;
 import zeldaswordskills.api.item.ArmorIndex;
@@ -204,7 +205,9 @@ public class ZSSCombatEvents
 	 * Returns true if the DamageSource is a type that can be evaded by e.g. the evasion Buff
 	 */
 	public static boolean canEvadeDamage(DamageSource source) {
-		if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
+		if (source instanceof IDamageUnavoidable && ((IDamageUnavoidable) source).isUnavoidable()) {
+			return false;
+		} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
 			return false;
 		}
 		return true;
