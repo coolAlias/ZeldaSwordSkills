@@ -185,7 +185,9 @@ public class ZSSCombatEvents
 			}
 		} else if (amount < 0.1F) {
 			event.setCanceled(true);
-		} else if (event.source.getEntity() != null && (!(event.source instanceof IDamageAoE) || !((IDamageAoE) event.source).isAoEDamage())) {
+		}
+		// Check if damage can be evaded if not already canceled
+		if (!event.isCanceled() && event.source.getEntity() != null && ZSSCombatEvents.canEvadeDamage(event.source)) {
 			EntityLivingBase entity = event.entityLiving;
 			float evade = ZSSEntityInfo.get(entity).getBuffAmplifier(Buff.EVADE_UP) * 0.01F;
 			if (evade > 0.0F && !ZSSEntityInfo.get(entity).isBuffActive(Buff.STUN)) {
@@ -196,6 +198,16 @@ public class ZSSCombatEvents
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns true if the DamageSource is a type that can be evaded by e.g. the evasion Buff
+	 */
+	public static boolean canEvadeDamage(DamageSource source) {
+		if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
