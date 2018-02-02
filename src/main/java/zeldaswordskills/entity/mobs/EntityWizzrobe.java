@@ -45,6 +45,7 @@ import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.EnumDamageType;
+import zeldaswordskills.api.damage.IDamageUnavoidable;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
 import zeldaswordskills.api.entity.MagicType;
@@ -310,6 +311,9 @@ public abstract class EntityWizzrobe extends EntityMob implements IEntityLootabl
 	 * Return true if the DamageSource is a kind that may be evaded
 	 */
 	protected boolean canEvadeSource(DamageSource source) {
+		if (source instanceof IDamageUnavoidable && ((IDamageUnavoidable) source).isUnavoidable()) {
+			return false;
+		}
 		return source.getEntity() != null && (!source.isMagicDamage() || !source.isUnblockable());
 	}
 
