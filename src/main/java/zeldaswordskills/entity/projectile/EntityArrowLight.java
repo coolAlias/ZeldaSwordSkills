@@ -34,6 +34,7 @@ import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseDirect;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.entity.IEntityEvil;
+import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
@@ -76,7 +77,12 @@ public class EntityArrowLight extends EntityArrowElemental
 		if (entity instanceof EntityEnderman) {
 			return new DamageSourceBaseDirect("arrow.light", (shootingEntity != null ? shootingEntity : this), EnumDamageType.HOLY).setProjectile().setMagicDamage().setDamageBypassesArmor();
 		}
-		DamageSource source = new DamageSourceBaseIndirect("arrow.light", this, shootingEntity, EnumDamageType.HOLY).setProjectile().setDamageBypassesArmor();
+		DamageSourceBaseIndirect source = new DamageSourceBaseIndirect("arrow.light", this, shootingEntity, EnumDamageType.HOLY);
+		source.setProjectile().setDamageBypassesArmor();
+		// Flag as unavoidable vs. teleporting entities
+		if (entity instanceof IEntityTeleport) {
+			source.setUnavoidable();
+		}
 		// Witches have a hard-coded 85% magic damage reduction, plus the Buff; skip setting magic damage so they can be killed
 		return (entity instanceof EntityWitch ? source : source.setMagicDamage());
 	}
