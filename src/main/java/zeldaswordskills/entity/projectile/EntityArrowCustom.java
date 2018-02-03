@@ -17,6 +17,11 @@
 
 package zeldaswordskills.entity.projectile;
 
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -78,6 +83,12 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 
 	// Also private - has a setter, but no getter >.<
 	private int knockbackStrength;
+
+	/** Piercing arrows do not die when hitting entities */
+	private boolean isPiercing;
+
+	/** For Piercing arrows, track entities already hit to avoid duplicates */
+	protected final Set<Integer> entitiesHit = Sets.newHashSet();
 
 	/** The item to return when picked up */
 	private Item arrowItem = Items.arrow;
@@ -142,6 +153,18 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	public void setHomingArrow(boolean isHoming) {
 		dataWatcher.updateObject(HOMING_DATAWATCHER_INDEX, Byte.valueOf((byte)(isHoming ? 1 : 0)));
+	}
+
+	public boolean isPiercing() {
+		return isPiercing;
+	}
+
+	/**
+	 * Flags this as a piercing arrow - it will not die upon impacting an entity
+	 */
+	public EntityArrowCustom setPiercing() {
+		isPiercing = true;
+		return this;
 	}
 
 	/**
@@ -237,7 +260,6 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 			if (canBePickedUp == 1 && !player.inventory.addItemStackToInventory(new ItemStack(arrowItem, 1, 0))) {
 				flag = false;
 			}
-
 			if (flag) {
 				playSound(Sounds.POP, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 				player.onItemPickup(this, 1);
@@ -382,9 +404,14 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	protected void updateInAir() {
 		++ticksInAir;
-		MovingObjectPosition mop = TargetUtils.checkForImpact(worldObj, this, getShooter(), 0.3D, ticksInAir >= 5);
-		if (mop != null) {
-			onImpact(mop);
+		List<MovingObjectPosition> mops = TargetUtils.checkForImpact(this.worldObj, this, getShooter(), 0.3D, this.ticksInAir >= 5, this.isPiercing());
+		if (mops != null) {
+			for (MovingObjectPosition mop : mops) {
+				if (this.inGround || !this.isEntityAlive()) {
+					break; // stop processing targets hit as soon as the arrow dies or hits a solid block
+				}
+				this.onImpact(mop);
+			}
 		}
 		spawnTrailingParticles();
 		updatePosition();
@@ -440,9 +467,12 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 */
 	protected void onImpact(MovingObjectPosition mop) {
 		if (mop.entityHit != null) {
-			onImpactEntity(mop);
+			if (!this.entitiesHit.contains(mop.entityHit.getEntityId())) {
+				this.onImpactEntity(mop);
+				this.entitiesHit.add(mop.entityHit.getEntityId());
+			}
 		} else {
-			onImpactBlock(mop);
+			this.onImpactBlock(mop);
 		}
 	}
 
@@ -450,7 +480,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 * Called when custom arrow impacts another entity
 	 */
 	protected void onImpactEntity(MovingObjectPosition mop) {
-		if (mop.entityHit != null) {
+		if (mop.entityHit != null && !this.inGround) {
 			// make sure shootingEntity is correct, e.g. if loaded from NBT
 			shootingEntity = getShooter();
 			float dmg = calculateDamage(mop.entityHit);
@@ -466,10 +496,10 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 						}
 					}
 					playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-					if (canTargetEntity(mop.entityHit)) {
+					if (this.canTargetEntity(mop.entityHit) && !this.isPiercing()) {
 						setDead();
 					}
-				} else {
+				} else if (!this.isPiercing()) {
 					motionX *= -0.10000000149011612D;
 					motionY *= -0.10000000149011612D;
 					motionZ *= -0.10000000149011612D;
@@ -524,7 +554,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 	 * Handles all secondary effects if entity hit was damaged, such as knockback, thorns, etc.
 	 */
 	protected void handlePostDamageEffects(EntityLivingBase entityHit) {
-		if (!worldObj.isRemote) {
+		if (!this.worldObj.isRemote && !this.isPiercing()) {
 			entityHit.setArrowCountInEntity(entityHit.getArrowCountInEntity() + 1);
 		}
 		int k = getKnockbackStrength();
@@ -555,6 +585,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		compound.setByte("inGround", (byte)(inGround ? 1 : 0));
 		compound.setByte("pickup", (byte) canBePickedUp);
 		compound.setDouble("damage", getDamage());
+		compound.setBoolean("isPiercing", isPiercing);
 		compound.setInteger("arrowId", Item.getIdFromItem(arrowItem));
 		if ((shooterName == null || shooterName.length() == 0) && shootingEntity instanceof EntityPlayer) {
 			shooterName = shootingEntity.getName();
@@ -578,6 +609,7 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 		inGround = compound.getByte("inGround") == 1;
 		setDamage(compound.getDouble("damage"));
 		canBePickedUp = compound.getByte("pickup");
+		isPiercing = compound.getBoolean("isPiercing");
 		arrowItem = (compound.hasKey("arrowId") ? Item.getItemById(compound.getInteger("arrowId")) : Items.arrow);
 		shooterName = compound.getString("shooter");
 		if (shooterName != null && shooterName.length() == 0) {
@@ -588,11 +620,13 @@ public class EntityArrowCustom extends EntityArrow implements IEntityAdditionalS
 
 	@Override
 	public void writeSpawnData(ByteBuf buffer) {
+		buffer.writeBoolean(isPiercing);
 		buffer.writeInt(shootingEntity != null ? shootingEntity.getEntityId() : -1);
 	}
 
 	@Override
 	public void readSpawnData(ByteBuf buffer) {
+		isPiercing = buffer.readBoolean();
 		// Replicate EntityArrow's special spawn packet handling from NetHandlerPlayClient#handleSpawnObject:
 		Entity shooter = worldObj.getEntityByID(buffer.readInt());
 		if (shooter instanceof EntityLivingBase) { // why check for EntityLivingBase when shootingEntity can be an Entity?

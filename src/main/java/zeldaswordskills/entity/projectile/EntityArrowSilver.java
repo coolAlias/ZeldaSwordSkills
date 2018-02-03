@@ -25,6 +25,7 @@ import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.entity.IEntityEvil;
@@ -55,6 +56,12 @@ public class EntityArrowSilver extends EntityArrowCustom
 	}
 
 	@Override
+	protected void entityInit() {
+		super.entityInit();
+		this.setPiercing();
+	}
+
+	@Override
 	protected double getBaseDamage() {
 		return 8.0D;
 	}
@@ -67,6 +74,24 @@ public class EntityArrowSilver extends EntityArrowCustom
 		// Flag as unavoidable vs. teleporting entities
 		DamageSourceBaseIndirect source = new DamageSourceBaseIndirect("arrow.silver", this, this.shootingEntity);
 		return (entity instanceof IEntityTeleport ? source.setUnavoidable().setProjectile() : source.setProjectile());
+	}
+
+	@Override
+	protected void onImpactBlock(MovingObjectPosition mop) {
+		super.onImpactBlock(mop);
+		// Prevent arrows from being reusable after hitting any entity
+		if (!this.entitiesHit.isEmpty()) {
+			this.setDead();
+		}
+	}
+
+	@Override
+	protected void onImpactEntity(MovingObjectPosition mop) {
+		super.onImpactEntity(mop);
+		// Piercing arrows only get to kill one insta-kill mob
+		if (this.canOneHitKill(mop.entityHit) && (!mop.entityHit.isEntityAlive() || (mop.entityHit instanceof EntityLivingBase && ((EntityLivingBase) mop.entityHit).getHealth() <= 0.0F))) {
+			this.setDead();
+		}
 	}
 
 	@Override
