@@ -25,9 +25,10 @@ import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.world.World;
+import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.entity.IEntityEvil;
+import zeldaswordskills.entity.ai.IEntityTeleport;
 
 /**
  * 
@@ -63,7 +64,9 @@ public class EntityArrowSilver extends EntityArrowCustom
 		if (entity instanceof EntityEnderman) {
 			return new EntityDamageSource("arrow.silver", (shootingEntity != null ? shootingEntity : this)).setProjectile();
 		}
-		return new EntityDamageSourceIndirect("arrow.silver", this, this.shootingEntity).setProjectile();
+		// Flag as unavoidable vs. teleporting entities
+		DamageSourceBaseIndirect source = new DamageSourceBaseIndirect("arrow.silver", this, this.shootingEntity);
+		return (entity instanceof IEntityTeleport ? source.setUnavoidable().setProjectile() : source.setProjectile());
 	}
 
 	@Override
