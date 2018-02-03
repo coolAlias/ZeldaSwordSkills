@@ -36,7 +36,6 @@ import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.ref.Config;
-import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 
 /**
@@ -65,6 +64,12 @@ public class EntityArrowLight extends EntityArrowElemental
 
 	public EntityArrowLight(World world, EntityLivingBase shooter, EntityLivingBase target, float velocity, float wobble) {
 		super(world, shooter, target, velocity, wobble);
+	}
+
+	@Override
+	protected void entityInit() {
+		super.entityInit();
+		this.setPiercing();
 	}
 
 	@Override
@@ -109,7 +114,8 @@ public class EntityArrowLight extends EntityArrowElemental
 
 	@Override
 	protected void onImpactBlock(MovingObjectPosition mop) {
-		if (Config.enableLightArrowNoClip()) {
+		// Can only fly through blocks if it hasn't already hit an entity
+		if (Config.enableLightArrowNoClip() && this.entitiesHit.isEmpty()) {
 			if (this.ticksExisted < 25) {
 				Block block = this.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
 				this.affectBlock(block, mop.blockX, mop.blockY, mop.blockZ);
@@ -127,24 +133,21 @@ public class EntityArrowLight extends EntityArrowElemental
 
 	@Override
 	protected void onImpactEntity(MovingObjectPosition mop) {
-		if (mop.entityHit instanceof EntityLivingBase && this.canOneHitKill(mop.entityHit)) {
-			float velocity = this.getCurrentVelocity();
-			EntityLivingBase entity = (EntityLivingBase) mop.entityHit;
-			entity.attackEntityFrom(this.getDamageSource(entity), entity.getMaxHealth() * 0.425F * velocity);
-			this.playSound(Sounds.BOW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
-			// TODO render bright flash, different sound effect?
-			if (!this.worldObj.isRemote) {
-				this.setDead();
-			}
-		} else {
-			super.onImpactEntity(mop);
+		super.onImpactEntity(mop);
+		// Piercing arrows only get to kill one insta-kill mob
+		if (this.canOneHitKill(mop.entityHit) && (!mop.entityHit.isEntityAlive() || (mop.entityHit instanceof EntityLivingBase && ((EntityLivingBase) mop.entityHit).getHealth() <= 0.0F))) {
+			this.setDead();
 		}
 	}
 
 	@Override
 	protected float calculateDamage(Entity entityHit) {
 		float dmg = super.calculateDamage(entityHit);
-		if (entityHit instanceof IEntityEvil) {
+		// One-hit kills take precedence over IEntityEvil#getLightArrowDamage
+		if (entityHit instanceof EntityLivingBase && this.canOneHitKill(entityHit)) {
+			float velocity = this.getCurrentVelocity();
+			dmg = Math.max(dmg, ((EntityLivingBase) entityHit).getMaxHealth() * 0.425F * velocity);
+		} else if (entityHit instanceof IEntityEvil) {
 			dmg = ((IEntityEvil) entityHit).getLightArrowDamage(this, dmg);
 		}
 		return dmg;
