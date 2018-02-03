@@ -23,6 +23,7 @@ import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -135,6 +136,11 @@ public class EntityWizzrobeGrand extends EntityWizzrobe implements IBossDisplayD
 	@Override
 	public int getTotalArmorValue() {
 		return super.getTotalArmorValue() + (worldObj.getDifficulty().getDifficultyId() * 4);
+	}
+
+	@Override
+	public boolean isLightArrowFatal(EntityArrow arrow) {
+		return false;
 	}
 
 	@Override

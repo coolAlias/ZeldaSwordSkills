@@ -31,6 +31,7 @@ import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -46,6 +47,7 @@ import zeldaswordskills.api.block.IWhipBlock.WhipType;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceBaseIndirect;
 import zeldaswordskills.api.damage.EnumDamageType;
 import zeldaswordskills.api.damage.IDamageUnavoidable;
+import zeldaswordskills.api.entity.IEntityEvil;
 import zeldaswordskills.api.entity.IEntityLootable;
 import zeldaswordskills.api.entity.IReflectable.IReflectableOrigin;
 import zeldaswordskills.api.entity.MagicType;
@@ -56,6 +58,7 @@ import zeldaswordskills.entity.ai.EntityAITeleport;
 import zeldaswordskills.entity.ai.IEntityTeleport;
 import zeldaswordskills.entity.ai.IMagicUser;
 import zeldaswordskills.entity.buff.Buff;
+import zeldaswordskills.entity.projectile.EntityArrowSilver;
 import zeldaswordskills.entity.projectile.EntityMagicSpell;
 import zeldaswordskills.item.ItemTreasure.Treasures;
 import zeldaswordskills.item.ZSSItems;
@@ -63,7 +66,7 @@ import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.WorldUtils;
 
-public abstract class EntityWizzrobe extends EntityMob implements IEntityLootable, IEntityTeleport, IMagicUser
+public abstract class EntityWizzrobe extends EntityMob implements IEntityEvil, IEntityLootable, IEntityTeleport, IMagicUser
 {
 	/**
 	 * Returns an EntityWizzrobe instance appropriate to the current biome type
@@ -211,6 +214,16 @@ public abstract class EntityWizzrobe extends EntityMob implements IEntityLootabl
 	@Override
 	public boolean attackEntityAsMob(Entity target) {
 		return false; // no damage on contact
+	}
+
+	@Override
+	public boolean isLightArrowFatal(EntityArrow arrow) {
+		return (arrow instanceof EntityArrowSilver);
+	}
+
+	@Override
+	public float getLightArrowDamage(EntityArrow arrow, float amount) {
+		return amount;
 	}
 
 	@Override
