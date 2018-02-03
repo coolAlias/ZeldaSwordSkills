@@ -17,6 +17,11 @@
 
 package zeldaswordskills.entity.projectile;
 
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -35,6 +40,7 @@ import zeldaswordskills.entity.player.ZSSPlayerSkills;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.skills.SkillBase;
 import zeldaswordskills.skills.sword.SwordBeam;
+import zeldaswordskills.util.TargetUtils;
 import zeldaswordskills.util.WorldUtils;
 
 /**
@@ -49,6 +55,9 @@ import zeldaswordskills.util.WorldUtils;
  */
 public class EntitySwordBeam extends EntityMobThrowable
 {
+	/** Track entities already hit to avoid duplicates */
+	private final Set<Integer> entitiesHit = Sets.newHashSet();
+
 	/** Damage that will be inflicted on impact */
 	private float damage = 4.0F;
 
@@ -130,6 +139,16 @@ public class EntitySwordBeam extends EntityMobThrowable
 		super.onUpdate();
 		if (inGround || ticksExisted > lifespan) {
 			setDead();
+		} else {
+			// should be using this.ticksInAir, but this.ticksExisted should be close enough since ticksInAir is private
+			List<MovingObjectPosition> mops = TargetUtils.checkForImpact(this.worldObj, this, this.getThrower(), 0.3D, this.ticksExisted >= 5, this.isMaster);
+			if (mops != null) {
+				for (MovingObjectPosition mop : mops) {
+					if (this.isEntityAlive()) {
+						this.onImpact(mop);
+					}
+				}
+			}
 		}
 		for (int i = 0; i < 2; ++i) {
 			worldObj.spawnParticle((i % 2 == 1 ? "magicCrit" : "crit"), posX, posY, posZ, motionX + rand.nextGaussian(), 0.01D, motionZ + rand.nextGaussian());
@@ -145,16 +164,18 @@ public class EntitySwordBeam extends EntityMobThrowable
 			SwordBeam skill = (player != null ? (SwordBeam) ZSSPlayerSkills.get(player).getPlayerSkill(SkillBase.swordBeam) : null);
 			if (mop.typeOfHit == MovingObjectType.ENTITY) {
 				Entity entity = mop.entityHit;
-				if (entity == thrower) { return; }
+				if (entity == thrower || this.entitiesHit.contains(entity.getEntityId())) { return; }
 				if (player != null && skill != null) {
 					skill.onImpact(player, false);
 				}
 				if (entity.attackEntityFrom(DamageUtils.causeIndirectComboDamage(this, thrower).setProjectile(), damage)) {
 					WorldUtils.playSoundAtEntity(entity, Sounds.DAMAGE_SUCCESSFUL_HIT, 0.4F, 0.5F);
 				}
-				damage *= 0.8F;
-				if (!isMaster) {
-					setDead();
+				if (this.isMaster && this.damage > 0.5F) {
+					this.damage *= 0.8F; // damage reduces for each entity hit
+					this.entitiesHit.add(entity.getEntityId());
+				} else {
+					this.setDead();
 				}
 			} else {
 				Block block = worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);

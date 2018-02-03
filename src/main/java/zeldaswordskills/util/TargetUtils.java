@@ -20,6 +20,10 @@ package zeldaswordskills.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.Enchantment;
@@ -36,9 +40,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 
 /**
  * 
@@ -76,13 +77,23 @@ public class TargetUtils
 	}
 
 	/**
-	 * Returns MovingObjectPosition of Entity or Block impacted, or null if nothing was struck
-	 * @param entity	The entity checking for impact, e.g. an arrow
-	 * @param shooter	An entity not to be collided with, generally the shooter
-	 * @param hitBox	The amount by which to expand the collided entities' bounding boxes when checking for impact (may be negative)
-	 * @param flag		Optional flag to allow collision with shooter, e.g. (ticksInAir >= 5)
+	 * Returns a single MovingObjectPosition of the Entity or Block impacted, or null if nothing was struck.
+	 * See {@link TargetUtils#checkForImpact(World, Entity, Entity, double, boolean, boolean)}
 	 */
-	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean flag) {
+	public static MovingObjectPosition checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean canHitShooter) {
+		List<MovingObjectPosition> mops = TargetUtils.checkForImpact(world, entity, shooter, hitBox, canHitShooter, false);
+		return (mops != null && mops.size() > 0 ? mops.get(0) : null);
+	}
+
+	/**
+	 * Returns one or all MovingObjectPositions (any number of entities and up to one block), or null if nothing was struck.
+	 * @param entity The entity checking for impact, e.g. an arrow
+	 * @param shooter An entity not to be collided with, generally the shooter
+	 * @param hitBox The amount by which to expand the collided entities' bounding boxes when checking for impact (may be negative)
+	 * @param canHitShooter Optional flag to allow collision with shooter, e.g. (ticksInAir >= 5)
+	 * @param allTargets True to get all impact targets, or false for just one Entity or Block
+	 */
+	public static List<MovingObjectPosition> checkForImpact(World world, Entity entity, Entity shooter, double hitBox, boolean canHitShooter, boolean allTargets) {
 		Vec3 vec3 = Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
 		Vec3 vec31 = Vec3.createVectorHelper(entity.posX + entity.motionX, entity.posY + entity.motionY, entity.posZ + entity.motionZ);
 		// func_147447_a is the ray_trace method
@@ -94,13 +105,18 @@ public class TargetUtils
 		}
 		Entity target = null;
 		List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(entity, entity.boundingBox.addCoord(entity.motionX, entity.motionY, entity.motionZ).expand(1.0D, 1.0D, 1.0D));
+		List<Entity> targets = Lists.newArrayList();
 		double d0 = 0.0D;
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity1 = (Entity) list.get(i);
-			if (entity1.canBeCollidedWith() && (entity1 != shooter || flag)) {
+			if (entity1.canBeCollidedWith() && (entity1 != shooter || canHitShooter)) {
 				AxisAlignedBB axisalignedbb = entity1.boundingBox.expand(hitBox, hitBox, hitBox);
 				MovingObjectPosition mop1 = axisalignedbb.calculateIntercept(vec3, vec31);
-				if (mop1 != null) {
+				if (mop1 == null) {
+					// nothing to do
+				} else if (allTargets) {
+					targets.add(entity1);
+				} else {
 					double d1 = vec3.distanceTo(mop1.hitVec);
 					if (d1 < d0 || d0 == 0.0D) {
 						target = entity1;
@@ -109,15 +125,31 @@ public class TargetUtils
 				}
 			}
 		}
-		if (target != null) {
-			mop = new MovingObjectPosition(target);
+		List<MovingObjectPosition> mops = Lists.newArrayList();
+		if (!targets.isEmpty()) {
+			for (Entity t : targets) {
+				MovingObjectPosition m = TargetUtils.validateEntityMop(new MovingObjectPosition(t), shooter);
+				if (m != null) {
+					mops.add(m);
+				}
+			}
 		}
+		// Target only non-null when not selecting all targets; try and swap block hit for entity hit
+		if (target != null && mops.isEmpty()) {
+			mop = TargetUtils.validateEntityMop(new MovingObjectPosition(target), shooter);
+		}
+		// Always add block (or swapped out entity target) mop last
+		if (mop != null && (target == null || mops.isEmpty())) {
+			mops.add(mop);
+		}
+		return mops;
+	}
+
+	private static MovingObjectPosition validateEntityMop(MovingObjectPosition mop, Entity shooter) {
 		if (mop != null && mop.entityHit instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) mop.entityHit;
-			if (player.capabilities.disableDamage || (shooter instanceof EntityPlayer
-					&& !((EntityPlayer) shooter).canAttackPlayer(player)))
-			{
-				mop = null;
+			if (player.capabilities.disableDamage || (shooter instanceof EntityPlayer && !((EntityPlayer) shooter).canAttackPlayer(player))) {
+				return null;
 			}
 		}
 		return mop;
