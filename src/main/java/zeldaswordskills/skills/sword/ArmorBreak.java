@@ -220,6 +220,7 @@ public class ArmorBreak extends SkillActive
 				}
 				// ArmorBreak triggers here, on the client side first, so onActivated need not process on the client
 				if (charge == 0) {
+					ZSSPlayerInfo.get(player).armSwing = 0.0F;
 					// can't use the standard animation methods to prevent key/mouse input,
 					// since Armor Break will not return true for isActive
 					ZSSPlayerInfo.get(player).setAttackTime(4); // flag for isAnimating? no player parameter; // flag for isAnimating? no player parameter
