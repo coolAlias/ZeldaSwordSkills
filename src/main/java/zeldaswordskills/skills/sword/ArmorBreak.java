@@ -237,8 +237,9 @@ public class ArmorBreak extends SkillActive
 				ZSSPlayerInfo.get(player).armSwing = 0.0F;
 				charge = 0;
 			}
-		} else {
+		} else if (charge > 0) {
 			ZSSPlayerInfo.get(player).armSwing = 0.0F;
+			charge = 0;
 		}
 		if (isActive()) {
 			activeTimer = 0;
