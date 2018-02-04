@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -105,7 +105,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 	@Override
 	protected void setup(ScaledResolution resolution) {
 		// Minimum display of 3 lines: combo name, size and damage
-		int n = Math.min(this.combo.getDamageList().size(), Config.getHitsToDisplay());
+		int n = Math.min(this.combo.getDamageList().size(), Config.hitsToDisplay);
 		this.height = (n + 3) * this.mc.fontRenderer.FONT_HEIGHT;
 		this.label = (this.combo.isFinished() ? StatCollector.translateToLocalFormatted("combo.finished", this.combo.getLabel()) : StatCollector.translateToLocalFormatted("combo.combo", this.combo.getLabel()));
 		this.comboSize = StatCollector.translateToLocalFormatted("combo.size", this.combo.getNumHits(), this.combo.getMaxNumHits());
@@ -125,7 +125,7 @@ public class ComboOverlay extends AbstractGuiOverlay
 		yPos += this.mc.fontRenderer.FONT_HEIGHT;
 		this.mc.fontRenderer.drawString(this.comboDamage, xPos + this.getOffset(this.comboDamage), yPos, 0xFFFFFF, true);
 		List<Float> damageList = this.combo.getDamageList();
-		int n = Math.min(damageList.size(), Config.getHitsToDisplay());
+		int n = Math.min(damageList.size(), Config.hitsToDisplay);
 		for (int i = 0; i < n; ++i) {
 			yPos += this.mc.fontRenderer.FONT_HEIGHT;
 			String s = String.format("+%.1f", damageList.get(damageList.size() - i - 1));

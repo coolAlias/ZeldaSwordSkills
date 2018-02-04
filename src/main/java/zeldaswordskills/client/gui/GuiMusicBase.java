@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -155,7 +155,7 @@ public abstract class GuiMusicBase extends GuiScreen
 			if (ticksSinceLastNote > song.getMinDuration()) {
 				mc.thePlayer.closeScreen();
 			}
-		} else if (ticksSinceLastNote > Config.getNoteResetInterval()) {
+		} else if (ticksSinceLastNote > Config.resetNotesInterval) {
 			ticksSinceLastNote = 0;
 			melody.clear();
 		}

@@ -177,7 +177,7 @@ public class Dash extends SkillActive
 		if (skill != null && skill.isLockedOn()) {
 			target = skill.getCurrentTarget();
 		} else {
-			Class<?> targetClass = (Config.preferTargetingMobs() ? IMob.class : null);
+			Class<?> targetClass = (Config.targetMobs ? IMob.class : null);
 			target = TargetUtils.acquireLookTarget(player, (int) getRange(), getRange(), true, targetClass);
 		}
 		if (target != null && world.isRemote) {

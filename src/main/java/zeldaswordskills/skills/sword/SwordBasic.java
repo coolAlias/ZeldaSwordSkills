@@ -249,7 +249,7 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	public final void getNextTarget(EntityPlayer player) {
 		EntityLivingBase nextTarget = null;
 		double dTarget = 0;
-		boolean priority = !Config.preferTargetingMobs();
+		boolean priority = !Config.targetMobs;
 		List<EntityLivingBase> list = TargetUtils.acquireAllLookTargets(player, getRange(), getRange());
 		for (EntityLivingBase entity : list) {
 			if (entity == player) { continue; }
