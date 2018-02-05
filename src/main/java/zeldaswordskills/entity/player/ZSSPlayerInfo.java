@@ -65,6 +65,8 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	private final ZSSPlayerWallet playerWallet;
 
+	private final ChuJellyTracker jellyTracker;
+
 	/** Current magic points */
 	private float mp, lastMp;
 
@@ -130,6 +132,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		playerSkills = new ZSSPlayerSkills(player);
 		playerSongs = new ZSSPlayerSongs(player);
 		playerWallet = new ZSSPlayerWallet(player);
+		jellyTracker = new ChuJellyTracker();
 		player.getAttributeMap().registerAttribute(maxMagic).setBaseValue(50.0D);
 		mp = getMaxMagic(); // don't use setter here: don't want to send packet
 		initStats();
@@ -255,6 +258,10 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 
 	public ZSSPlayerWallet getPlayerWallet() {
 		return playerWallet;
+	}
+
+	public ChuJellyTracker getChuJellyTracker() {
+		return jellyTracker;
 	}
 
 	/** Whether the player is able to block at this time (block timer is zero) */
@@ -490,6 +497,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		playerSkills.saveNBTData(compound);
 		playerSongs.saveNBTData(compound);
 		playerWallet.saveNBTData(compound);
+		jellyTracker.saveNBTData(compound);
 		compound.setFloat("zssCurrentMagic", mp);
 		compound.setIntArray("zssStats", ArrayUtils.toPrimitive(playerStats.values().toArray(new Integer[playerStats.size()])));
 		compound.setByte("ZSSGearReceived", receivedGear);
@@ -513,6 +521,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 		playerSkills.loadNBTData(compound);
 		playerSongs.loadNBTData(compound);
 		playerWallet.loadNBTData(compound);
+		jellyTracker.loadNBTData(compound);
 		mp = compound.getFloat("zssCurrentMagic");
 		int[] stats = compound.getIntArray("zssStats");
 		for (int i = 0; i < stats.length; ++i) {

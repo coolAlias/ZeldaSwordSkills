@@ -17,17 +17,12 @@
 
 package zeldaswordskills.entity;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
-
-import com.google.common.collect.Lists;
 
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -45,11 +40,11 @@ import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
+import zeldaswordskills.entity.player.ChuJellyTracker;
 import zeldaswordskills.entity.player.quests.QuestWhipTrader;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ItemChuJelly;
-import zeldaswordskills.item.ItemZeldaPotion;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.PlayerUtils;
@@ -173,58 +168,11 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 		this.villager.livingSoundTime = -this.villager.getTalkInterval();
 		this.villager.playSound("mob.villager.yes", 1.0F, this.getSoundPitch());
 		// Purchasing expensive items or using the last of a trade triggers a refresh
-		if (trade.isDisabled() || (getItemsToSell && trade.getPrice() > 49) || this.incrementChuTrades(trade)) {
+		if (trade.isDisabled() || (getItemsToSell && trade.getPrice() > 49)) {
 			this.refreshTimer = 40;
 			this.refreshTrades = true;
 			this.lastCustomer = (this.getRupeeCustomer() == null ? null : this.getRupeeCustomer().getCommandSenderName());
 		}
-	}
-
-	/**
-	 * Increments corresponding Jelly Potion trade's max uses while container still open
-	 * @param trade Trade to check; nothing will be done if it's not a Chu Jelly trade
-	 * @return true if max uses was incremented
-	 */
-	private boolean incrementChuTrades(RupeeTrade trade) {
-		if (trade.getTimesUsed() % 15 == 0 && this.isChuTrader()) {
-			RupeeTrade potionTrade = this.getChuPotionTrade(trade);
-			if (potionTrade != null) {
-				RupeeTrade match = this.waresToSell.getTrade(potionTrade, RupeeTrade.SIMPLE);
-				if (match != null) {
-					match.increaseMaxUses(1);
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the corresponding potion RupeeTrade for any chu jelly trade 
-	 * @param trade any trade
-	 * @return null if the trade parameter did not contain a chu jelly, or the RupeeTrade for the potion
-	 */
-	private RupeeTrade getChuPotionTrade(RupeeTrade trade) {
-		ItemStack stack = trade.getTradeItem();
-		if (stack.getItem() == ZSSItems.jellyChu) {
-			ChuType type = ((ItemChuJelly) stack.getItem()).getType(stack);
-			Item potion = ItemChuJelly.POTION_MAP.get(type);
-			if (potion instanceof ItemZeldaPotion) {
-				ItemStack potionStack = new ItemStack(potion);
-				int price = RupeeValueRegistry.getRupeeValue(potionStack, ((ItemZeldaPotion) potion).getDefaultRupeeValue(potionStack));
-				return new RupeeTrade(potionStack, price, 1, true, false);
-			}
-			ZSSMain.logger.error("Unrecognized chu jelly type " + type.name() + " from stack " + stack);
-		}
-		return null;
-	}
-
-	/** Returns whether this villager deals at all in Chu Jellies */
-	public boolean isChuTrader() {
-		if (this.villager.isChild() || !EnumVillager.LIBRARIAN.is(this.villager)) {
-			return false;
-		}
-		return this.villager.hasCustomNameTag() && this.villager.getCustomNameTag().contains("Doc");
 	}
 
 	/**
@@ -305,6 +253,16 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.arrowSilver), -1), RupeeTrade.SIMPLE, level > 2);
 			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.arrowLight), -1), RupeeTrade.SIMPLE, level > 2);
 		}
+		// Add or remove Chu Jelly Potion trades depending on villager and player
+		boolean isChuTrader = ZSSVillagerInfo.get(this.villager).isChuTrader();
+		ChuJellyTracker jellyTracker = ChuJellyTracker.get(player);
+		for (ChuType type : ChuType.values()) {
+			if (!ItemChuJelly.POTION_MAP.containsKey(type)) {
+				continue;
+			}
+			flag = isChuTrader && jellyTracker.canBuyType(type);
+			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ItemChuJelly.POTION_MAP.get(type)), -1), flag);
+		}
 	}
 
 	/**
@@ -338,40 +296,6 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 		}
 		if (this.waresToSell != null) {
 			RupeeMerchantHelper.refreshTradingList(this.waresToSell, this.rand);
-		}
-		if (this.isChuTrader()) {
-			this.refreshChuTrades();
-		}
-	}
-
-	/**
-	 * Adds new chu potion trades
-	 */
-	private void refreshChuTrades() {
-		List<RupeeTrade> jellies = Lists.<RupeeTrade>newArrayList();
-		if (this.waresToBuy != null) {
-			for (Iterator<RupeeTrade> iterator = this.waresToBuy.iterator(); iterator.hasNext();) {
-				RupeeTrade trade = iterator.next();
-				if (trade.getTimesUsed() < 15) {
-					continue;
-				}
-				RupeeTrade potionTrade = this.getChuPotionTrade(trade);
-				if (potionTrade != null) {
-					RupeeTrade match = this.waresToSell.getTrade(potionTrade, RupeeTrade.SIMPLE);
-					if (match == null) {
-						int n = (trade.getTimesUsed() / 15) - 1;
-						ZSSMain.logger.info(String.format("Adding %d uses for trade used %d times"), n, trade.getTimesUsed());
-						potionTrade.increaseMaxUses(n);
-						jellies.add(potionTrade);
-					}
-				}
-			}
-		}
-		if (!jellies.isEmpty()) {
-			if (this.waresToSell == null) {
-				this.waresToSell = new RupeeTradeList(RupeeTradeList.FOR_SALE);
-			}
-			this.waresToSell.addAll(jellies);
 		}
 	}
 

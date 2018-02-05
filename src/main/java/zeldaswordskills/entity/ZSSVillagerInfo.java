@@ -30,7 +30,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
-import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.player.ZSSPlayerWallet;
 import zeldaswordskills.entity.player.quests.QuestMaskSales;
 import zeldaswordskills.ref.Config;
@@ -154,34 +153,9 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		}
 	}
 
-	/** Adds the given amount of chu jellies to the current amount */
-	public void addJelly(ChuType type, int amount) {
-		data.setInteger(("jelliesReceived" + type.ordinal()), getJelliesReceived(type) + amount);
-	}
-
-	/** Returns the number of jellies of this type that the villager has received */
-	public int getJelliesReceived(ChuType type) {
-		return (data.hasKey("jelliesReceived" + type.ordinal()) ? data.getInteger("jelliesReceived" + type.ordinal()) : 0);
-	}
-
 	/** Returns whether this villager deals at all in Chu Jellies */
 	public boolean isChuTrader() {
-		return !villager.isChild() && EnumVillager.LIBRARIAN.is(villager) && villager.getCustomNameTag().contains("Doc");
-	}
-
-	/**
-	 * Checks that this villager has received enough jellies to trade; if not, attempts
-	 * to fulfill the quota from the stack provided
-	 * @return true if the quota was met
-	 */
-	public boolean canSellType(ChuType type, ItemStack stack) {
-		int jellies = getJelliesReceived(type);
-		while (jellies < 15 && stack.stackSize > 0) {
-			--stack.stackSize;
-			++jellies;
-		}
-		data.setInteger(("jelliesReceived" + type.ordinal()), jellies);
-		return jellies >= 15;
+		return !villager.isChild() && EnumVillager.LIBRARIAN.is(villager) && villager.getCustomNameTag() != null && villager.getCustomNameTag().contains("Doc");
 	}
 
 	/** True if the villager is currently mating */

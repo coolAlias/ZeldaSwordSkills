@@ -172,6 +172,21 @@ chat.zss.block.secret=This tool doesn't seem to be very effective...
 chat.zss.block.warp_stone.activate=Warp coordinates for %s set to %d/%d/%d.
 chat.zss.block.warp_stone.previous=Previous warp location for %1$s: %2$s
 chat.zss.block.warp_stone.set_default=Default warp location for %1$s set to %2$s
+
+chat.zss.chu_jelly.doc.first=Egads! Is that a new kind of Chu Jelly?! Please bring me more!
+chat.zss.chu_jelly.doc.in_stock=I've already got that potion in stock, take a look.
+chat.zss.chu_jelly.doc.new_stock=We've done it, a new Chu Jelly Potion! Here, take a free sample.
+chat.zss.chu_jelly.doc.need_more=If you bring me more of this, I'll give you a free potion!
+chat.zss.chu_jelly.doc.repeat=Well well, you're a real go-getter! Here, on the house!
+chat.zss.chu_jelly.doc.unknown=Hm, it's a Chu Jelly, but not one I can help you with. Odd.
+
+chat.zss.chu_jelly.villager.blacksmith=Go trouble somebody else who isn't working.
+chat.zss.chu_jelly.villager.butcher=I don't know what that is, but I've seen worse.
+chat.zss.chu_jelly.villager.farmer=Say, that don't look fit for human consumption...
+chat.zss.chu_jelly.villager.librarian=Fascinating. Our own Doc Bandam would be delighted by this! 
+chat.zss.chu_jelly.villager.priest=Is it evil? No? Hm. A librarian may be able to help you.
+chat.zss.chu_jelly.villager.generic=Ewww, that's gross!
+
 chat.zss.darunia.cured.wrong=I prefer that other song you played for me.
 chat.zss.darunia.cured.0=You have done us a great service, Brother.
 chat.zss.darunia.cured.1=Thanks to you, our bellies are full of delicious rocks!
@@ -662,11 +677,6 @@ chat.zss.trade.generic.sorry.0=Sorry, what is it you want?
 chat.zss.trade.generic.sorry.1=Sorry, I don't have anything new for you today...
 chat.zss.trade.goron.tunic.repair=Oi, lemme fix that up fer ya!
 chat.zss.trade.goron.tunic.undamaged=That's a shiny set o' scales ya got there.
-chat.zss.trade.jelly.first=Egads! Is that a new kind of Chu Jelly?! Please bring me more!
-chat.zss.trade.jelly.gross=Eeewww, yuck! Get that away from me!
-chat.zss.trade.jelly.in_stock=I've already got that potion in stock, take a look.
-chat.zss.trade.jelly.new_stock=We've done it, a new Chu Jelly Potion! Here, take a free sample.
-chat.zss.trade.jelly.need_more=If you bring me more of this, I'll give you a free potion!
 chat.zss.trade.masterore.child=Cool rock! Can I have it? Pleeease?
 chat.zss.trade.masterore.new=You know, I think I could improve that there sword of yours.
 chat.zss.trade.masterore.old=Just hand it over already and I'll get to work.
