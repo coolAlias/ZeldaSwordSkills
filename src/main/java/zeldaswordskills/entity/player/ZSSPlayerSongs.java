@@ -196,6 +196,13 @@ public class ZSSPlayerSongs
 	}
 
 	/**
+	 * Resets song-related quests that don't have an actual Quest class, such as NPCs cured
+	 */
+	public void resetSongQuests() {
+		this.curedNpcs.clear();
+	}
+
+	/**
 	 * Checks the player's known songs to see if any match the notes played
 	 * @return	The song matching the notes played or null
 	 */

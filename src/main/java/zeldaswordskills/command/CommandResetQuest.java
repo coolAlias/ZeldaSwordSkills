@@ -25,6 +25,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import zeldaswordskills.entity.player.ZSSPlayerSongs;
 import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.util.PlayerUtils;
 
@@ -60,6 +61,7 @@ public class CommandResetQuest extends CommandBase
 		EntityPlayerMP commandSender = getCommandSenderAsPlayer(sender);
 		EntityPlayerMP player = getPlayer(sender, args[0]);
 		ZSSQuests.get(player).reset();
+		ZSSPlayerSongs.get(player).resetSongQuests();
 		PlayerUtils.sendTranslatedChat(commandSender, "commands.zssresetquest.all", player.getCommandSenderName());
 		if (player != commandSender) {
 			PlayerUtils.sendTranslatedChat(player, "commands.zssresetquest.notify.all", commandSender.getCommandSenderName());
