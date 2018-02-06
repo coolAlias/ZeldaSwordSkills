@@ -176,7 +176,9 @@ public class EntityBoomerang extends EntityMobThrowable
 			}
 			captureDrops();
 			captureXpOrbs();
-			destroyVines();
+			if (Config.canBoomerangDenude()) {
+				destroyVines();
+			}
 			updateMotion();
 			super.onUpdate();
 		}
