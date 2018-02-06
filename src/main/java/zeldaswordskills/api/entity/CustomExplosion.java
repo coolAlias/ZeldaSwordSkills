@@ -99,12 +99,16 @@ public class CustomExplosion extends Explosion
 	public static void createExplosion(IEntityBomb bomb, World world, double x, double y, double z, float radius, float damage, boolean canGrief) {
 		CustomExplosion explosion = new CustomExplosion(world, (Entity) bomb, x, y, z, radius).setDamage(damage);
 		BombType type = bomb.getType();
-		EntityPlayer thrower = bomb.getBombThrower();
-		boolean isAdventureMode = (thrower instanceof EntityPlayerMP && ((EntityPlayerMP) thrower).theItemInWorldManager.getGameType().isAdventure());
+		// Griefing configs allow non-adventure players playing with adventure players to have different settings
+		boolean restrictBlocks = Config.onlyBombSecretStone();
+		if (!restrictBlocks && !Config.canGriefAdventure()) {
+			EntityPlayer thrower = bomb.getBombThrower();
+			restrictBlocks = (thrower instanceof EntityPlayerMP && ((EntityPlayerMP) thrower).theItemInWorldManager.getGameType().isAdventure());
+		}
 		explosion.setMotionFactor(bomb.getMotionFactor());
 		explosion.scalesWithDistance = (damage == 0.0F);
 		explosion.isSmoking = canGrief; // if griefing is disabled, not even IExplodable blocks will be affected
-		explosion.targetBlock = ((isAdventureMode || Config.onlyBombSecretStone()) ? ZSSBlocks.secretStone : null);
+		explosion.targetBlock = (restrictBlocks ? ZSSBlocks.secretStone : null);
 		explosion.ignoreLiquidType = type.ignoreLiquidType;
 		float f = bomb.getDestructionFactor();
 		if (world.provider.isHellWorld && type != BombType.BOMB_FIRE) {
