@@ -17,12 +17,15 @@
 
 package zeldaswordskills.item;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,6 +43,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.DamageUtils.DamageSourceFire;
@@ -59,6 +63,7 @@ import zeldaswordskills.entity.projectile.EntityMobThrowable;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.PacketISpawnParticles;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.PlayerUtils;
 import zeldaswordskills.util.TargetUtils;
@@ -79,6 +84,9 @@ import zeldaswordskills.util.WorldUtils;
  */
 public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredFlame, ISpawnParticles, IUnenchantable
 {
+	@SideOnly(Side.CLIENT)
+	private List<ModelResourceLocation> models;
+
 	/** The type of magic this rod uses (e.g. FIRE, ICE, etc.) */
 	private final MagicType magicType;
 
@@ -189,7 +197,7 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 
 	@Override
 	public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-		ZSSPlayerInfo.get(player).armSwing = 0.5F;
+		ZSSPlayerInfo.get(player).armSwing = 0.75F;
 		if (this == ZSSItems.rodTornado) {
 			player.fallDistance = 0.0F;
 		}
@@ -423,5 +431,35 @@ public class ItemMagicRod extends BaseModItem implements IFairyUpgrade, ISacredF
 	@Override
 	public boolean hasFairyUpgrade(ItemStack stack) {
 		return !isUpgraded(stack) && hasAbsorbedFlame(stack);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public ModelResourceLocation getModel(ItemStack stack, EntityPlayer player, int ticksRemaining) {
+		return (player.isUsingItem() ? models.get(1) : models.get(0));
+	}
+
+	@Override
+	public String[] getVariants() {
+		String name = getUnlocalizedName();
+		name = ModInfo.ID + ":" + name.substring(name.lastIndexOf(".") + 1);
+		return new String[]{name, name + "_using"};
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerResources() {
+		String[] variants = getVariants();
+		models = new ArrayList<ModelResourceLocation>(variants.length);
+		for (int i = 0; i < variants.length; ++i) {
+			models.add(new ModelResourceLocation(variants[i], "inventory"));
+		}
+		ModelLoader.registerItemVariants(this, models.toArray(new ModelResourceLocation[0]));
+		ModelLoader.setCustomMeshDefinition(this, new ItemMeshDefinition() {
+			@Override
+			public ModelResourceLocation getModelLocation(ItemStack stack) {
+				return models.get(0);
+			}
+		});
 	}
 }
