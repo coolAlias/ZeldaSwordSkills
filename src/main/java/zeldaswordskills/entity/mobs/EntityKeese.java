@@ -104,7 +104,7 @@ public class EntityKeese extends EntityBat implements IMob, IEntityLootable
 		ZSSEntityInfo.get(this).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 50);
 	}
 
-	/** Returns the Chu's attack damage attribute value */
+	/** Returns the entity's attack damage attribute value */
 	protected float getDamage() {
 		return (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
 	}
