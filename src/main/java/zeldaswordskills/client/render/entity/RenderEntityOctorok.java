@@ -25,7 +25,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
-import zeldaswordskills.client.model.ModelOctorok;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 
 @SideOnly(Side.CLIENT)
@@ -34,7 +33,7 @@ public class RenderEntityOctorok extends RenderLiving
 	protected final ResourceLocation texture;
 
 	public RenderEntityOctorok(ModelBase model, float shadowSize, ResourceLocation texture) {
-		super(new ModelOctorok(), shadowSize);
+		super(model, shadowSize);
 		this.texture = texture;
 	}
 

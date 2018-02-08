@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.model.ModelSquid;
 import net.minecraft.client.renderer.entity.RenderSnowball;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
@@ -53,6 +52,7 @@ import zeldaswordskills.client.model.ModelDekuFire;
 import zeldaswordskills.client.model.ModelDekuWithered;
 import zeldaswordskills.client.model.ModelGoron;
 import zeldaswordskills.client.model.ModelMaskSalesman;
+import zeldaswordskills.client.model.ModelOctorok;
 import zeldaswordskills.client.model.ModelWizzrobe;
 import zeldaswordskills.client.render.RenderNothing;
 import zeldaswordskills.client.render.entity.RenderCustomArrow;
@@ -407,8 +407,8 @@ public class ZSSEntities
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_orca.png"));
 		RenderingRegistry.registerEntityRenderingHandler(EntityNpcZelda.class, new RenderGenericLiving(
 				new ModelBiped(0.0F, 0.0F, 64, 64), 0.5F, 1.0F, ModInfo.ID + ":textures/entity/npc_zelda.png"));
-		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(new ModelSquid(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_purple.png")));
-		RenderingRegistry.registerEntityRenderingHandler(EntityOctorokPink.class, new RenderEntityOctorok(new ModelSquid(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_pink.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok(new ModelOctorok(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_purple.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntityOctorokPink.class, new RenderEntityOctorok(new ModelOctorok(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_pink.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShot.class, new RenderSnowball(Items.wheat_seeds));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShotBomb.class, new RenderSnowball(ZSSItems.bombFlowerSeed));
 		RenderingRegistry.registerEntityRenderingHandler(EntitySeedShotCocoa.class, new RenderSnowball(Items.dye, 3));
