@@ -19,6 +19,7 @@ package zeldaswordskills.entity.mobs;
 
 import java.util.Iterator;
 
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAITasks.EntityAITaskEntry;
@@ -149,18 +150,38 @@ public class EntitySkulltula extends EntitySpider implements IEntityLootable, IW
 		if (worldObj.isRemote) {
 			return;
 		}
-		if (hurtResistantTime == 0 && (getAttackTarget() == null || getAITarget() == null)) {
-			if (isPerched() && getBrightness(1.0F) < 0.5F) {
-				motionY = (worldObj.isSideSolid(new BlockPos(this).up(), EnumFacing.DOWN) || distanceToGround() > 3 ? 0.0D : 0.1D);
-				EntityPlayer target = worldObj.getClosestPlayerToEntity(this, 8.0D);
-				if (target != null && !((EntityPlayer) target).capabilities.disableDamage) {
-					setAttackTarget(target);
-					setPerched(false);
+		if (this.isPerched()) {
+			if (this.hurtResistantTime > 0) {
+				this.setPerched(false);
+			} else if (this.getAttackTarget() != null || this.getAITarget() != null) {
+				EntityLivingBase target = (this.getAttackTarget() == null ? this.getAITarget() : this.getAttackTarget());
+				// Distance check ignoring differences on Y axis to 'leap' at current target
+				BlockPos pos = new BlockPos(target.getPosition().getX(), this.getPosition().getY(), target.getPosition().getZ());
+				if (this.getDistanceSq(pos) < 10.0D) {
+					this.setPerched(false);
 				}
 			}
-		} else {
-			setPerched(false);
+			// If still perched, try to move upward
+			if (this.isPerched()) {
+				boolean moveUp = (this.shouldMoveUpWhilePerched() && (this.distanceToGround() < 3 || this.rand.nextFloat() < 0.1F));
+				this.motionY = (moveUp ? 0.1D : 0.0D);
+			}
 		}
+	}
+
+	/**
+	 * Returns true if the Skulltula could potentially move further up the wall while perched 
+	 */
+	protected boolean shouldMoveUpWhilePerched() {
+		BlockPos up = new BlockPos(this).up();
+		boolean hasFace = false;
+		for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+			if (this.worldObj.isSideSolid(up.offset(facing), facing.getOpposite())) {
+				hasFace = true;
+				break;
+			}
+		}
+		return (hasFace && !this.worldObj.isSideSolid(up, EnumFacing.DOWN));
 	}
 
 	@Override
