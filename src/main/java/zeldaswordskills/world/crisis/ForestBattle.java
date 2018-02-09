@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -21,13 +21,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import zeldaswordskills.block.tileentity.TileEntityDungeonCore;
-import zeldaswordskills.entity.mobs.EntitySkulltula;
+import zeldaswordskills.entity.mobs.EntitySkulltulaGold;
 import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.StructureGenUtils;
 import zeldaswordskills.util.WorldUtils;
 
-public class ForestBattle extends BossBattle {
-
+public class ForestBattle extends BossBattle
+{
 	public ForestBattle(TileEntityDungeonCore core) {
 		super(core);
 	}
@@ -35,12 +35,11 @@ public class ForestBattle extends BossBattle {
 	@Override
 	protected void generateBossMobs(World world, int number) {
 		super.generateBossMobs(world, number);
-		if (world.rand.nextFloat() < (world.rand.nextFloat() - 0.5F)) {
+		if (world.rand.nextFloat() < 0.5F) {
 			int x = (world.rand.nextFloat() < 0.5F ? box.minX + 2 : box.maxX - 2);
 			int z = (world.rand.nextFloat() < 0.5F ? box.minZ + 2 : box.maxZ - 2);
 			int y = box.maxY - 2;
-			EntitySkulltula mob = new EntitySkulltula(world);
-			mob.setType(1); // Golden Skulltula
+			EntitySkulltulaGold mob = new EntitySkulltulaGold(world);
 			WorldUtils.setEntityInStructure(world, mob, new BlockPos(x, y, z));
 			world.spawnEntityInWorld(mob);
 		}

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -29,16 +29,15 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
-import zeldaswordskills.ref.ModInfo;
 
 @SideOnly(Side.CLIENT)
 public class RenderEntitySkulltula extends RenderSpider<EntitySkulltula>
 {
-	private static final ResourceLocation base = new ResourceLocation(ModInfo.ID, "textures/entity/skulltula.png");
-	private static final ResourceLocation golden = new ResourceLocation(ModInfo.ID, "textures/entity/skulltula_gold.png");
+	protected final ResourceLocation texture;
 
-	public RenderEntitySkulltula(RenderManager renderManager) {
-		super(renderManager);
+	public RenderEntitySkulltula(RenderManager manager, ResourceLocation texture) {
+		super(manager);
+		this.texture = texture;
 	}
 
 	@Override
@@ -76,13 +75,18 @@ public class RenderEntitySkulltula extends RenderSpider<EntitySkulltula>
 
 	@Override
 	protected ResourceLocation getEntityTexture(EntitySkulltula entity) {
-		return entity.isGolden() ? golden : base;
+		return this.texture;
 	}
 
-	public static class Factory implements IRenderFactory<EntitySkulltula> {
+	public static class Factory implements IRenderFactory<EntitySkulltula>
+	{
+		protected final ResourceLocation texture;
+		public Factory(ResourceLocation texture) {
+			this.texture = texture;
+		}
 		@Override
 		public Render<? super EntitySkulltula> createRenderFor(RenderManager manager) {
-			return new RenderEntitySkulltula(manager);
+			return new RenderEntitySkulltula(manager, this.texture);
 		}
 	}
 }

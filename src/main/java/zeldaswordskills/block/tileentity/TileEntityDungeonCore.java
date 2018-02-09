@@ -59,6 +59,7 @@ import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityOctorokPink;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
+import zeldaswordskills.entity.mobs.EntitySkulltulaGold;
 import zeldaswordskills.entity.mobs.EntityWizzrobe;
 import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
@@ -316,9 +317,10 @@ public class TileEntityDungeonCore extends TileEntityDungeonStone implements ITi
 		} else if (rarity > 42) {
 			mob = new EntitySkeleton(worldObj);
 		} else if (rarity > 35) {
-			mob = new EntitySkulltula(worldObj);
 			if (worldObj.rand.nextInt(10) == 0) {
-				type = 1;
+				mob = new EntitySkulltulaGold(this.worldObj);
+			} else {
+				mob = new EntitySkulltula(this.worldObj);
 			}
 		} else if (rarity > 28) {
 			mob = (worldObj.rand.nextInt(8) > 1 ? new EntitySpider(worldObj) : new EntityCaveSpider(worldObj));

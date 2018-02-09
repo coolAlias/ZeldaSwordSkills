@@ -101,6 +101,7 @@ import zeldaswordskills.entity.mobs.EntityKeeseThunder;
 import zeldaswordskills.entity.mobs.EntityOctorok;
 import zeldaswordskills.entity.mobs.EntityOctorokPink;
 import zeldaswordskills.entity.mobs.EntitySkulltula;
+import zeldaswordskills.entity.mobs.EntitySkulltulaGold;
 import zeldaswordskills.entity.mobs.EntityWizzrobeFire;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGale;
 import zeldaswordskills.entity.mobs.EntityWizzrobeGrand;
@@ -170,7 +171,8 @@ public class ZSSEntities
 		addSpawnLocations(EntityKeeseThunder.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.BEACH, BiomeType.MOUNTAIN));
 		addSpawnLocations(EntityOctorok.class, BiomeType.getBiomeArray(null, BiomeType.RIVER, BiomeType.OCEAN));
 		addSpawnLocations(EntityOctorokPink.class, BiomeType.getBiomeArray(null, BiomeType.OCEAN));
-		addSpawnLocations(EntitySkulltula.class, EntitySkulltula.getDefaultBiomes());
+		addSpawnLocations(EntitySkulltula.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.JUNGLE, BiomeType.TAIGA));
+		addSpawnLocations(EntitySkulltulaGold.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.JUNGLE, BiomeType.TAIGA));
 		addSpawnLocations(EntityWizzrobeFire.class, BiomeType.getBiomeArray(null, BiomeType.ARID, BiomeType.FIERY));
 		addSpawnLocations(EntityWizzrobeGale.class, BiomeType.getBiomeArray(null, BiomeType.FOREST, BiomeType.MOUNTAIN));
 		addSpawnLocations(EntityWizzrobeIce.class, BiomeType.getBiomeArray(null, BiomeType.COLD, BiomeType.TAIGA));
@@ -221,8 +223,10 @@ public class ZSSEntities
 		addSpawnableEntityData(EntityOctorokPink.class, EnumCreatureType.WATER_CREATURE, 1, 2, rate);
 		rate = config.getInt("[Spawn Rate][Octorok] Purple Octorok Spawn Rate", category, 8, 0, 10000, "The spawn pool weight for Purple Octorok (0 to disable)", "config.zss.mob_spawns.octorok_purple.rate");
 		addSpawnableEntityData(EntityOctorok.class, EnumCreatureType.WATER_CREATURE, 2, 4, rate);
-		rate = config.getInt("[Spawn Rate] Skulltula Spawn Rate", category, 8, 0, 10000, "The spawn pool weight for Skulltula (0 to disable)", "config.zss.mob_spawns.skulltula.rate");
+		rate = config.getInt("[Spawn Rate][Skulltula] Skulltula Spawn Rate", category, 8, 0, 10000, "The spawn pool weight for Skulltula (0 to disable)", "config.zss.mob_spawns.skulltula.rate");
 		addSpawnableEntityData(EntitySkulltula.class, EnumCreatureType.MONSTER, 2, 4, rate);
+		rate = config.getInt("[Spawn Rate][Skulltula] Gold Skulltula Spawn Rate", category, 1, 0, 10000, "The spawn pool weight for Gold Skulltula (0 to disable)", "config.zss.mob_spawns.skulltula_gold.rate");
+		addSpawnableEntityData(EntitySkulltulaGold.class, EnumCreatureType.MONSTER, 1, 1, rate);
 		rate = config.getInt("[Spawn Rate][Wizzrobe] Fire Wizzrobe Spawn Rate", category, 10, 0, 10000, "The spawn pool weight for Fire Wizzrobe (0 to disable)", "config.zss.mob_spawns.wizzrobe_fire.rate");
 		addSpawnableEntityData(EntityWizzrobeFire.class, EnumCreatureType.MONSTER, 1, 1, rate);
 		rate = config.getInt("[Spawn Rate][Wizzrobe] Gale Wizzrobe Spawn Rate", category, 10, 0, 10000, "The spawn pool weight for Gale Wizzrobe (0 to disable)", "config.zss.mob_spawns.wizzrobe_gale.rate");
@@ -336,11 +340,8 @@ public class ZSSEntities
 		registerEntity(EntityKeeseThunder.class, "keese_thunder", ++modEntityIndex, 80, 0x000000, 0xFFD700);
 		registerEntity(EntityOctorokPink.class, "octorok_pink", ++modEntityIndex, 80, 0x68228B, 0xFF00FF);
 		registerEntity(EntityOctorok.class, "octorok_purple", ++modEntityIndex, 80, 0x68228B, 0xBA55D3);
-
-		EntityRegistry.registerModEntity(EntitySkulltula.class, "skulltula", ++modEntityIndex, ZSSMain.instance, 80, 3, true);
-		CustomEntityList.addMapping(EntitySkulltula.class, "skulltula", 0x080808, 0xFFFF00, 0x080808, 0xE68A00);
-		EntitySpawnPlacementRegistry.setPlacementType(EntitySkulltula.class, SpawnPlacementType.ON_GROUND);
-
+		registerEntity(EntitySkulltula.class, "skulltula", ++modEntityIndex, 80, 0x080808, 0xFFFF00);
+		registerEntity(EntitySkulltulaGold.class, "skulltula_gold", ++modEntityIndex, 80, 0x080808, 0xE68A00);
 		registerEntity(EntityWizzrobeFire.class, "wizzrobe_fire", ++modEntityIndex, 80, 0x8B2500, 0xFF0000);
 		registerEntity(EntityWizzrobeGale.class, "wizzrobe_gale", ++modEntityIndex, 80, 0x8B2500, 0x00EE76);
 		registerEntity(EntityWizzrobeIce.class, "wizzrobe_ice", ++modEntityIndex, 80, 0x8B2500, 0x00B2EE);
@@ -407,7 +408,8 @@ public class ZSSEntities
 		RenderingRegistry.registerEntityRenderingHandler(EntityNavi.class, new RenderEntityFairy.Factory());
 		RenderingRegistry.registerEntityRenderingHandler(EntityOctorok.class, new RenderEntityOctorok.Factory(new ModelOctorok(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_purple.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityOctorokPink.class, new RenderEntityOctorok.Factory(new ModelOctorok(), 0.7F, new ResourceLocation(ModInfo.ID + ":textures/entity/octorok_pink.png")));
-		RenderingRegistry.registerEntityRenderingHandler(EntitySkulltula.class, new RenderEntitySkulltula.Factory());
+		RenderingRegistry.registerEntityRenderingHandler(EntitySkulltula.class, new RenderEntitySkulltula.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/skulltula.png")));
+		RenderingRegistry.registerEntityRenderingHandler(EntitySkulltulaGold.class, new RenderEntitySkulltula.Factory(new ResourceLocation(ModInfo.ID, "textures/entity/skulltula_gold.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeFire.class, new RenderEntityWizzrobe.Factory(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_fire.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeGale.class, new RenderEntityWizzrobe.Factory(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_wind.png")));
 		RenderingRegistry.registerEntityRenderingHandler(EntityWizzrobeIce.class, new RenderEntityWizzrobe.Factory(new ModelWizzrobe(), 1.0F, new ResourceLocation(ModInfo.ID, "textures/entity/wizzrobe_ice.png")));
