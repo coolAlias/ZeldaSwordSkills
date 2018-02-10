@@ -163,7 +163,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	@Override
 	public void nextItemMode(ItemStack stack, EntityPlayer player) {
 		if (!player.isUsingItem()) {
-			int level = this.getLevel(stack);
+			int level = (player.capabilities.isCreativeMode ? 3 : this.getLevel(stack));
 			int current = this.getMode(stack);
 			int mode = current;
 			do {
@@ -176,7 +176,7 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 	@Override
 	public void prevItemMode(ItemStack stack, EntityPlayer player) {
 		if (!player.isUsingItem()) {
-			int level = this.getLevel(stack);
+			int level = (player.capabilities.isCreativeMode ? 3 : this.getLevel(stack));
 			int current = this.getMode(stack);
 			int mode = current;
 			do {
