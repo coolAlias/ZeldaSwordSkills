@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -234,7 +233,7 @@ public class ItemInstrument extends BaseModItem implements IRightClickEntity
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.instrument." + getInstrument(stack).getUnlocalizedName() + ".desc"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.instrument." + getInstrument(stack).getUnlocalizedName() + ".desc"));
 	}
 
 	static {

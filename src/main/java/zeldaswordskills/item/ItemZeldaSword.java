@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
@@ -205,10 +204,10 @@ public class ItemZeldaSword extends BaseModItemSword implements IBattlegearWeapo
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip." + getUnlocalizedName().substring(5) + ".desc.0"));
 		if (stack.getItem() == ZSSItems.swordTempered) {
 			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("zssHitCount")) {
-				list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.sword_tempered.desc.1",stack.getTagCompound().getInteger("zssHitCount")));
+				list.add(StatCollector.translateToLocalFormatted("tooltip.zss.sword_tempered.desc.1",stack.getTagCompound().getInteger("zssHitCount")));
 			}
 		} else if (stack.getItem() == ZSSItems.swordGolden) {
 			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("SacredFlames")) {
@@ -216,7 +215,7 @@ public class ItemZeldaSword extends BaseModItemSword implements IBattlegearWeapo
 				for (int i = 1; i < 5; ++i) { // bits 1, 2, and 4
 					if (i != 3 && (level & i) != 0) {
 						BlockSacredFlame.EnumType flame = BlockSacredFlame.EnumType.byMetadata((level & i));
-						list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocalFormatted("tooltip.zss.sword_golden.desc.1", StatCollector.translateToLocal("tile.zss.sacred_flame." + flame.getName() + ".name")));
+						list.add(StatCollector.translateToLocalFormatted("tooltip.zss.sword_golden.desc.1", StatCollector.translateToLocal("tile.zss.sacred_flame." + flame.getName() + ".name")));
 					}
 				}
 			}

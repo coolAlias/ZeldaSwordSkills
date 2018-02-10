@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -177,12 +176,11 @@ public class ItemDungeonBlock extends ItemBlockUnbreakable implements IDynamicIt
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
 		if (stack.getItemDamage() > 7) {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.unbreakable.desc"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.block.unbreakable.desc"));
 		} else {
-			list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block." +
-					(block == ZSSBlocks.dungeonCore ? "core" : "dungeon") + ".desc.0"));
+			list.add(StatCollector.translateToLocal("tooltip.zss.block." + (block == ZSSBlocks.dungeonCore ? "core" : "dungeon") + ".desc.0"));
 		}
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.block.dungeon.desc.1"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.block.dungeon.desc.1"));
 	}
 
 	@Override

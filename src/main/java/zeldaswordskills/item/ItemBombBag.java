@@ -140,9 +140,9 @@ public class ItemBombBag extends BaseModItem implements ISwapModel, IUnenchantab
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, EntityPlayer player, List<String> list, boolean advanced) {
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.0"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.1"));
-		list.add(EnumChatFormatting.ITALIC + StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.2"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.0"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.1"));
+		list.add(StatCollector.translateToLocal("tooltip.zss.bomb_bag.desc.2"));
 		int held = getBombsHeld(stack);
 		int i = getBagBombType(stack);
 		BombType type = (held > 0 && i > 0) ? BombType.values()[i % BombType.values().length] : BombType.BOMB_STANDARD;
