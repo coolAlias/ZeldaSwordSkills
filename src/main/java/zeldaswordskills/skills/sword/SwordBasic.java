@@ -32,6 +32,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import zeldaswordskills.api.damage.IComboDamage;
 import zeldaswordskills.api.damage.IComboDamage.IComboDamageFull;
+import zeldaswordskills.api.damage.IDamageAoE;
 import zeldaswordskills.entity.DirtyEntityAccessor;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.EndComboPacket;
@@ -360,6 +361,8 @@ public class SwordBasic extends SkillActive implements ICombo, ILockOnTarget
 	private boolean isValidComboDamage(EntityPlayer player, DamageSource source) {
 		if (source instanceof IComboDamage) {
 			return ((IComboDamage) source).isComboDamage(player);
+		} else if (source instanceof IDamageAoE && ((IDamageAoE) source).isAoEDamage()) {
+			return false;
 		}
 		return !source.isProjectile();
 	}
