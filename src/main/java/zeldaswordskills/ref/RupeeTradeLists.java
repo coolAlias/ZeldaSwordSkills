@@ -24,8 +24,9 @@ import net.minecraftforge.common.config.Property;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
-import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
+import zeldaswordskills.api.entity.merchant.RupeeTradeListRandom;
+import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.entity.VanillaRupeeMerchant;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.item.ZSSItems;
@@ -49,27 +50,28 @@ public class RupeeTradeLists
 	 * Creates the default trading lists for Zelda NPCs
 	 */
 	private static void createDefaultNpcTradeFiles() {
-		RupeeTradeList<RupeeTrade> buys = new RupeeTradeList<RupeeTrade>(RupeeTradeList.WILL_BUY);
-		RupeeTradeList<RupeeTrade> sells = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
+		RupeeTradeListRandom buys = new RupeeTradeListRandom(RupeeTradeList.WILL_BUY);
+		RupeeTradeListRandom sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
 		// BARNES
-		sells.add(new RupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), 8));
-		RupeeMerchantHelper.writeTradesToFile(null, sells, EntityNpcBarnes.DEFAULT_RUPEE_TRADES);
+		buys.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.gunpowder), 1));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), 8));
+		RupeeMerchantHelper.writeTradesToFile(buys, sells, EntityNpcBarnes.DEFAULT_RUPEE_TRADES);
 	}
 
 	/**
 	 * Creates the default trading lists for Vanilla Villagers
 	 */
 	private static void createDefaultVanillaTradeFiles() {
-		RupeeTradeList<RupeeTrade> buys = new RupeeTradeList<RupeeTrade>(RupeeTradeList.WILL_BUY);
-		RupeeTradeList<RupeeTrade> sells = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
+		RupeeTradeListRandom buys = new RupeeTradeListRandom(RupeeTradeList.WILL_BUY);
+		RupeeTradeListRandom sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
 		// BLACKSMITH
-		sells.add(new RupeeTrade(new ItemStack(Items.arrow, 10), 15));
-		sells.add(new RupeeTrade(new ItemStack(ZSSItems.swordKokiri), 50));
-		sells.add(new RupeeTrade(new ItemStack(ZSSItems.shieldDeku), 100));
-		sells.add(new RupeeTrade(new ItemStack(ZSSItems.tunicHeroHelm), 15));
-		sells.add(new RupeeTrade(new ItemStack(ZSSItems.tunicHeroChest), 50));
-		sells.add(new RupeeTrade(new ItemStack(ZSSItems.tunicHeroLegs), 20));
-		sells.add(new RupeeTrade(new ItemStack(ZSSItems.tunicHeroBoots), 15));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.arrow, 10), 15));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.swordKokiri), 50));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.shieldDeku), 100));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.tunicHeroHelm), 15));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.tunicHeroChest), 50));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.tunicHeroLegs), 20));
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.tunicHeroBoots), 15));
 		RupeeMerchantHelper.writeTradesToFile(buys, sells, VanillaRupeeMerchant.getDefaultTradeLocation(EnumVillager.BLACKSMITH));
 	}
 }
