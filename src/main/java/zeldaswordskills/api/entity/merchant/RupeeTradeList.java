@@ -37,8 +37,9 @@ import zeldaswordskills.api.entity.merchant.RupeeTradePredicate.RupeeTradeUpgrad
 /**
  * 
  * Serves the same purpose as vanilla's MerchantRecipeList class, but for {@link RupeeTrade RupeeTrades}.
+ * 
  */
-public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerializable
+public class RupeeTradeList<T extends RupeeTrade> extends ArrayList<T> implements IJsonSerializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -68,7 +69,7 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	/**
 	 * Copy constructor
 	 */
-	public RupeeTradeList(RupeeTradeList original) {
+	public RupeeTradeList(RupeeTradeList<T> original) {
 		this.tagName = original.tagName;
 		this.clear();
 		this.addAll(original);
@@ -82,7 +83,7 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	 * Adds the trade to the list if not already present according to the {@link RupeeTrade#DEFAULT default} comparator
 	 * @return true if the trade was added
 	 */
-	public boolean addTrade(RupeeTrade trade) {
+	public boolean addTrade(T trade) {
 		return this.addOrUpdateTrade(trade, RupeeTrade.DEFAULT, null);
 	}
 
@@ -91,7 +92,7 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	 * @param comparator Used to determine whether the new trade matches any of the existing trades
 	 * @return true if the trade was added
 	 */
-	public boolean addTrade(RupeeTrade trade, Comparator<RupeeTrade> comparator) {
+	public boolean addTrade(T trade, Comparator<RupeeTrade> comparator) {
 		return this.addOrUpdateTrade(trade, comparator, null);
 	}
 
@@ -99,21 +100,21 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	 * Calls {@link #addOrUpdateTrade(RupeeTrade, Comparator, Predicate)} with the {@link RupeeTrade#DEFAULT default}
 	 * comparator and a {@link RupeeTradeUpgradePredicate} predicate
 	 */
-	public boolean addOrUpdateTrade(RupeeTrade trade) {
+	public boolean addOrUpdateTrade(T trade) {
 		return this.addOrUpdateTrade(trade, RupeeTrade.DEFAULT, new RupeeTradeUpgradePredicate(trade));
 	}
 
 	/**
 	 * Calls {@link #addOrUpdateTrade(RupeeTrade, Comparator, Predicate)} with a {@link RupeeTradeUpgradePredicate} predicate
 	 */
-	public boolean addOrUpdateTrade(RupeeTrade trade, Comparator<RupeeTrade> comparator) {
+	public boolean addOrUpdateTrade(T trade, Comparator<RupeeTrade> comparator) {
 		return this.addOrUpdateTrade(trade, comparator, new RupeeTradeUpgradePredicate(trade));
 	}
 
 	/**
 	 * Calls {@link #addOrUpdateTrade(RupeeTrade, Comparator, Predicate)} with the {@link RupeeTrade#DEFAULT default} comparator
 	 */
-	public boolean addOrUpdateTrade(RupeeTrade trade, Predicate<RupeeTrade> predicate) {
+	public boolean addOrUpdateTrade(T trade, Predicate<RupeeTrade> predicate) {
 		return this.addOrUpdateTrade(trade, RupeeTrade.DEFAULT, predicate);
 	}
 
@@ -124,9 +125,9 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	 * @param predicate Used to determine whether the new trade should replace an existing trade when a match is found
 	 * @return true if the trade was added or replaced
 	 */
-	public boolean addOrUpdateTrade(RupeeTrade trade, Comparator<RupeeTrade> comparator, Predicate<RupeeTrade> predicate) {
+	public boolean addOrUpdateTrade(T trade, Comparator<RupeeTrade> comparator, Predicate<RupeeTrade> predicate) {
 		boolean match = false;
-		for (ListIterator<RupeeTrade> iterator = this.listIterator(); iterator.hasNext();) {
+		for (ListIterator<T> iterator = this.listIterator(); iterator.hasNext();) {
 			RupeeTrade listTrade = iterator.next();
 			if (listTrade.matches(trade, comparator)) {
 				if (predicate == null) {
@@ -146,13 +147,20 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	}
 
 	/**
-	 * Adds or removes (all instances) of the trade from this list
+	 * Adds or removes (all instances) of the trade from this list using the {@link RupeeTrade#DEFAULT default} comparator
 	 */
-	public void addOrRemoveTrade(RupeeTrade trade, boolean add) {
+	public void addOrRemoveTrade(T trade, boolean add) {
+		this.addOrRemoveTrade(trade, RupeeTrade.DEFAULT, add);
+	}
+
+	/**
+	 * Adds or removes (all instances) of the trade from this list using the specified Comparator
+	 */
+	public void addOrRemoveTrade(T trade, Comparator<RupeeTrade> comparator, boolean add) {
 		if (add) {
-			this.addTrade(trade);
+			this.addTrade(trade, comparator);
 		} else {
-			this.removeTrade(trade, true);
+			this.removeTrade(trade, comparator, true);
 		}
 	}
 
@@ -229,7 +237,7 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	/**
 	 * Removes the trade using the {@link RupeeTrade#DEFAULT default} comparator to search for matches
 	 */
-	public boolean removeTrade(RupeeTrade trade, boolean removeAll) {
+	public boolean removeTrade(T trade, boolean removeAll) {
 		return this.removeTrade(trade, RupeeTrade.DEFAULT, removeAll);
 	}
 
@@ -239,9 +247,9 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	 * @param removeAll true to remove all matching trades, or false to remove only one
 	 * @return true if at least one trade was removed
 	 */
-	public boolean removeTrade(RupeeTrade trade, Comparator<RupeeTrade> comparator, boolean removeAll) {
+	public boolean removeTrade(T trade, Comparator<RupeeTrade> comparator, boolean removeAll) {
 		boolean found = false;
-		Iterator<RupeeTrade> iterator = this.iterator();
+		Iterator<T> iterator = this.iterator();
 		while (iterator.hasNext()) {
 			RupeeTrade listTrade = iterator.next();
 			if (listTrade.matches(trade, comparator)) {
@@ -263,7 +271,7 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 	 */
 	public boolean removeTrade(Predicate<RupeeTrade> predicate, boolean removeAll) {
 		boolean found = false;
-		Iterator<RupeeTrade> iterator = this.iterator();
+		Iterator<T> iterator = this.iterator();
 		while (iterator.hasNext()) {
 			if (predicate.apply(iterator.next())) {
 				iterator.remove();
@@ -292,8 +300,16 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 		this.tagName = compound.getString("tag_name");
 		NBTTagList trades = compound.getTagList(this.tagName, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < trades.tagCount(); ++i) {
-			this.add(new RupeeTrade(trades.getCompoundTagAt(i)));
+			this.add(this.getTradeFromNBT(trades.getCompoundTagAt(i)));
 		}
+	}
+
+	/**
+	 * @return A new RupeeTrade instance created using the data from the tag compound
+	 */
+	@SuppressWarnings("unchecked")
+	protected T getTradeFromNBT(NBTTagCompound compound) {
+		return (T) new RupeeTrade(compound);
 	}
 
 	public void fromJson(JsonElement json) {
@@ -308,8 +324,16 @@ public class RupeeTradeList extends ArrayList<RupeeTrade> implements IJsonSerial
 		this.tagName = json.getAsJsonObject().get("tag_name").getAsString();
 		JsonArray trades = json.getAsJsonObject().get("trades").getAsJsonArray();
 		for (JsonElement e : trades) {
-			this.add(new RupeeTrade(e));
+			this.add(this.getTradeFromJson(e));
 		}
+	}
+
+	/**
+	 * @return A new RupeeTrade instance created using the data from the JSON element
+	 */
+	@SuppressWarnings("unchecked")
+	protected T getTradeFromJson(JsonElement json) {
+		return (T) new RupeeTrade(json);
 	}
 
 	@Override

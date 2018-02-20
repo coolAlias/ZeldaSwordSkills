@@ -75,8 +75,8 @@ public abstract class ContainerRupeeMerchant extends AbstractContainer
 	public ContainerRupeeMerchant(EntityPlayer player, IRupeeMerchant merchant, boolean getItemsToSell) {
 		this.merchant = merchant;
 		this.getItemsToSell = getItemsToSell;
-		RupeeTradeList trades = this.merchant.getRupeeTrades(getItemsToSell);
-		RupeeTradeList other = this.merchant.getRupeeTrades(!getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(getItemsToSell);
+		RupeeTradeList<RupeeTrade> other = this.merchant.getRupeeTrades(!getItemsToSell);
 		this.showTab = (other != null && !other.isEmpty());
 		this.tradeSlot = new SlotRupeeMerchant(new InventoryBasic("", true, 1), 0, 152, 62);
 		if (!player.worldObj.isRemote) {
@@ -131,7 +131,7 @@ public abstract class ContainerRupeeMerchant extends AbstractContainer
 	 * @param slotIndex The selected slot index, if any, is given priority match-making
 	 */
 	public RupeeTrade findMatchingTrade(int slotIndex) {
-		RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 		if (trades == null || !this.tradeSlot.getHasStack()) {
 			return null;
 		}
@@ -171,7 +171,7 @@ public abstract class ContainerRupeeMerchant extends AbstractContainer
 	 * @return -1 or the validated RupeeTrade index
 	 */
 	public int convertSlotIndex(int slotIndex) {
-		RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 		if (trades == null || slotIndex < WARES_START || slotIndex > WARES_END) {
 			return -1;
 		}
@@ -184,7 +184,7 @@ public abstract class ContainerRupeeMerchant extends AbstractContainer
 	 * @return the current index value
 	 */
 	public int setCurrentIndex(int index) {
-		RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 		int prev = this.currentIndex;
 		int max = (trades == null ? 0 : trades.size() - 4);
 		max += (max > 0 ? 4 - (max % 4) : 0);
@@ -269,7 +269,7 @@ public abstract class ContainerRupeeMerchant extends AbstractContainer
 		@Override
 		public void useTrade(EntityPlayer player, int slotIndex) {
 			int index = this.convertSlotIndex(slotIndex);
-			RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+			RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 			if (trades == null || index < 0 || index > trades.size() - 1) {
 				return; // nothing to do
 			}

@@ -41,6 +41,7 @@ import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import zeldaswordskills.api.entity.NpcHelper;
 import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
 import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
+import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.IRightClickEntity;
@@ -194,7 +195,7 @@ public class ZSSEntityEvents
 			}
 			if (result == Result.ALLOW && !event.entityPlayer.worldObj.isRemote) {
 				// TODO any way to allow player to control which interface (buying or selling) opens?
-				RupeeTradeList trades = RupeeMerchantHelper.getRupeeTrades(merchant, true, event.entityPlayer);
+				RupeeTradeList<RupeeTrade> trades = RupeeMerchantHelper.getRupeeTrades(merchant, true, event.entityPlayer);
 				boolean getItemsToSell = trades != null && !trades.isEmpty();
 				if (!RupeeMerchantHelper.openRupeeMerchantGui(merchant, event.entityPlayer, getItemsToSell)) {
 					// Otherwise merchant becomes stuck thinking they already have a customer, and

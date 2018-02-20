@@ -19,6 +19,7 @@ package zeldaswordskills.api.entity.merchant;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -57,7 +58,7 @@ public class RupeeMerchantHelper
 	private static final String BASE_PATH = Config.config.getConfigFile().getParentFile().getAbsolutePath() + "/rupee_trades/";
 
 	/** May contain null values for invalid ResourceLocations - this prevents potential redundant file requests */
-	private static final Map<ResourceLocation, Pair<RupeeTradeList, RupeeTradeList>> tradeLists = new HashMap<ResourceLocation, Pair<RupeeTradeList, RupeeTradeList>>();
+	private static final Map<ResourceLocation, Pair<RupeeTradeList<RupeeTrade>, RupeeTradeList<RupeeTrade>>> tradeLists = new HashMap<ResourceLocation, Pair<RupeeTradeList<RupeeTrade>, RupeeTradeList<RupeeTrade>>>();
 
 	private RupeeMerchantHelper() {}
 
@@ -76,7 +77,7 @@ public class RupeeMerchantHelper
 	/**
 	 * Returns {@link RupeeMerchantHelper#getRupeeTrades(Object, boolean, EntityPlayer)} using a null EntityPlayer
 	 */
-	public static RupeeTradeList getRupeeTrades(Object object, boolean getItemsToSell) {
+	public static RupeeTradeList<RupeeTrade> getRupeeTrades(Object object, boolean getItemsToSell) {
 		return RupeeMerchantHelper.getRupeeTrades(object, getItemsToSell, null);
 	}
 
@@ -86,14 +87,14 @@ public class RupeeMerchantHelper
 	 * @param player If not null and the merchant doesn't currently have a customer, trade lists will be retrieved using {@link IRupeeMerchant#getCustomizedRupeeTrades(EntityPlayer, boolean)}  
 	 * @return null if unable to get the RupeeTradeList
 	 */
-	public static RupeeTradeList getRupeeTrades(Object object, boolean getItemsToSell, EntityPlayer player) {
+	public static RupeeTradeList<RupeeTrade> getRupeeTrades(Object object, boolean getItemsToSell, EntityPlayer player) {
 		IRupeeMerchant merchant = RupeeMerchantHelper.getRupeeMerchant(object);
 		if (merchant == null) {
 			return null;
 		} else if (player == null || merchant.getRupeeCustomer() != null) {
 			return merchant.getRupeeTrades(getItemsToSell);
 		}
-		RupeeTradeList trades = merchant.getCustomizedRupeeTrades(player, getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = merchant.getCustomizedRupeeTrades(player, getItemsToSell);
 		return trades;
 	}
 
@@ -104,7 +105,7 @@ public class RupeeMerchantHelper
 	 * @param trades The trade list to be refreshed
 	 * @param rand Required to increase the trade's max uses by a random amount
 	 */
-	public static void refreshTradingList(RupeeTradeList trades, Random rand) {
+	public static void refreshTradingList(RupeeTradeList<RupeeTrade> trades, Random rand) {
 		for (Iterator<RupeeTrade> iterator = trades.iterator(); iterator.hasNext();) {
 			RupeeTrade trade = iterator.next();
 			if (trade.isDisabled()) {
@@ -128,7 +129,7 @@ public class RupeeMerchantHelper
 	public static boolean openRupeeMerchantGui(IRupeeMerchant merchant, EntityPlayer player, boolean getItemsToSell) {
 		if (player instanceof EntityPlayerMP) {
 			// Trade lists should already have been populated by this point by e.g. IRupeeMerchant#onInteract
-			RupeeTradeList trades = merchant.getRupeeTrades(getItemsToSell);
+			RupeeTradeList<RupeeTrade> trades = merchant.getRupeeTrades(getItemsToSell);
 			if (trades != null && !trades.isEmpty()) {
 				merchant.setRupeeCustomer(player);
 				merchant.openRupeeGui(player, getItemsToSell);
@@ -143,25 +144,27 @@ public class RupeeMerchantHelper
 	 * Sets the merchant's rupee trade lists to those found at the given ResourceLocation
 	 */
 	public static void setDefaultTrades(IRupeeMerchant merchant, ResourceLocation location) {
+		Pair<RupeeTradeList<RupeeTrade>, RupeeTradeList<RupeeTrade>> trades = null;
 		if (tradeLists.containsKey(location)) {
 			LOGGER.info("Fetching default trades from CACHE for " + location.toString());
-			Pair<RupeeTradeList, RupeeTradeList> trades = tradeLists.get(location);
-			if (trades != null) {
-				merchant.setRupeeTrades(new RupeeTradeList(trades.getLeft()), false);
-				merchant.setRupeeTrades(new RupeeTradeList(trades.getRight()), true);
-			}
+			trades = tradeLists.get(location);
 		} else {
 			LOGGER.info("Fetching default trades from FILE for " + location.toString());
-			Pair<RupeeTradeList, RupeeTradeList> trades = RupeeMerchantHelper.readTradesFromFile(merchant, location);
+			trades = RupeeMerchantHelper.readTradesFromFile(location);
 			tradeLists.put(location, trades);
-			if (trades != null) {
-				merchant.setRupeeTrades(new RupeeTradeList(trades.getLeft()), false);
-				merchant.setRupeeTrades(new RupeeTradeList(trades.getRight()), true);
+		}
+		// Make a copy to prevent the stored lists from being modified
+		if (trades != null) {
+			if (trades.getLeft() != null) {
+				merchant.setRupeeTrades(new RupeeTradeList<RupeeTrade>(trades.getLeft()), false);
+			}
+			if (trades.getRight() != null) {
+				merchant.setRupeeTrades(new RupeeTradeList<RupeeTrade>(trades.getRight()), true);
 			}
 		}
 	}
 
-	private static Pair<RupeeTradeList, RupeeTradeList> readTradesFromFile(IRupeeMerchant merchant, ResourceLocation location) {
+	private static Pair<RupeeTradeList<RupeeTrade>, RupeeTradeList<RupeeTrade>> readTradesFromFile(ResourceLocation location) {
 		String filename = RupeeMerchantHelper.getResourcePath(location);
 		if (filename == null) {
 			return null;
@@ -172,39 +175,51 @@ public class RupeeMerchantHelper
 			JsonElement json = parser.parse(new FileReader(path.toFile()));
 			if (json.isJsonObject()) {
 				JsonObject object = json.getAsJsonObject();
-				Pair<RupeeTradeList, RupeeTradeList> trades = null;
+				Pair<RupeeTradeList<RupeeTrade>, RupeeTradeList<RupeeTrade>> trades = null;
 				if (object.has("parent")) {
 					ResourceLocation parent = new ResourceLocation(object.get("parent").getAsString());
 					if (tradeLists.containsKey(parent)) {
 						ZSSMain.logger.info("Parent found in stored lists");
 						trades = tradeLists.get(parent);
 					} else {
-						trades = RupeeMerchantHelper.readTradesFromFile(merchant, parent);
+						trades = RupeeMerchantHelper.readTradesFromFile(parent);
+						tradeLists.put(parent, trades);
 						if (trades != null) {
 							ZSSMain.logger.info("Parent loaded from file: " + parent.toString());
-							ZSSMain.logger.info(String.format("Parent list sizes: sales (%d) | shop (%d)", trades.getLeft().size(), trades.getRight().size()));
 							tradeLists.put(parent, trades);
+							// TODO this is throwing NPE since one or both trade lists may be null!!!
+							//ZSSMain.logger.info(String.format("Parent list sizes: sales (%d) | shop (%d)", trades.getLeft().size(), trades.getRight().size()));
 						} else {
 							ZSSMain.logger.error("Error loading parent: " + parent.toString());
 						}
 					}
-					// Make a copy to prevent the stored lists from being modified
-					if (trades != null) {
-						ZSSMain.logger.info("Making a copy of the parent trade lists");
-						trades = new ImmutablePair<RupeeTradeList, RupeeTradeList>(new RupeeTradeList(trades.getLeft()), new RupeeTradeList(trades.getRight()));
-					}
-					// trades = readTradesFromFile(merchant, parent);
 				}
-				RupeeTradeList buys = new RupeeTradeList(object.get("buys"));
-				RupeeTradeList sells = new RupeeTradeList(object.get("sells"));
+				RupeeTradeList<RupeeTrade> buys = (object.has("buys") ? new RupeeTradeList<RupeeTrade>(object.get("buys")) : null);
+				RupeeTradeList<RupeeTrade> sells = (object.has("sells") ? new RupeeTradeList<RupeeTrade>(object.get("sells")) : null);
 				if (trades != null) {
-					int n = trades.getLeft().size();
-					trades.getLeft().addAll(buys);
-					trades.getRight().addAll(sells);
-					ZSSMain.logger.info(String.format("Added to existing trade Pair; sales size before = %d, size after = %d", n, trades.getLeft().size()));
+					// Make a copy to prevent the stored parent lists from being modified
+					RupeeTradeList<RupeeTrade> left = (trades.getLeft() == null ? null : new RupeeTradeList<RupeeTrade>(trades.getLeft()));
+					RupeeTradeList<RupeeTrade> right = (trades.getRight() == null ? null : new RupeeTradeList<RupeeTrade>(trades.getRight()));
+					int n = (right == null ? 0 : right.size());
+					if (buys != null) {
+						if (left == null) {
+							left = buys;
+						} else {
+							left.addAll(buys);
+						}
+					}
+					if (sells != null) {
+						if (right == null) {
+							right = sells;
+						} else {
+							right.addAll(sells);
+						}
+					}
+					trades = new ImmutablePair<RupeeTradeList<RupeeTrade>, RupeeTradeList<RupeeTrade>>(left, right);
+					ZSSMain.logger.info(String.format("Added to existing trade Pair; sales size before = %d, size after = %d", n, (right == null ? 0 : right.size())));
 				} else {
 					ZSSMain.logger.info("Creating new trade Pair");
-					trades = new ImmutablePair<RupeeTradeList, RupeeTradeList>(buys, sells);
+					trades = new ImmutablePair<RupeeTradeList<RupeeTrade>, RupeeTradeList<RupeeTrade>>(buys, sells);
 				}
 				return trades;
 			} else {
@@ -212,8 +227,10 @@ public class RupeeMerchantHelper
 			}
 		} catch (InvalidPathException e) {
 			LOGGER.error(String.format("Invalid resource path: %s", filename));
-		} catch (NullPointerException e) {
+		}/* catch (NullPointerException e) {
 			LOGGER.error(String.format("Could not read file %s: file does not exist", filename));
+		}*/ catch (FileNotFoundException e) {
+			LOGGER.error(String.format("System could not find file %s", filename));
 		} catch (Exception e) {
 			LOGGER.error(String.format("Error reading from file %s: %s", filename, e.getMessage()));
 			e.printStackTrace();
@@ -232,7 +249,7 @@ public class RupeeMerchantHelper
 	/**
 	 * Calls {@link #writeTradesToFile(RupeeTradeList, RupeeTradeList, ResourceLocation, ResourceLocation) writeTradesToFile} with a NULL parent location.
 	 */
-	public static void writeTradesToFile(RupeeTradeList buys, RupeeTradeList sells, ResourceLocation location) {
+	public static <T extends RupeeTradeList<? extends RupeeTrade>> void writeTradesToFile(T buys, T sells, ResourceLocation location) {
 		RupeeMerchantHelper.writeTradesToFile(buys, sells, location, null);
 	}
 
@@ -242,7 +259,7 @@ public class RupeeMerchantHelper
 	 * @param location e.g. villager_blacksmith or /villager/blacksmith
 	 * @param parent The trade list to inherit from, if any
 	 */
-	public static void writeTradesToFile(RupeeTradeList buys, RupeeTradeList sells, ResourceLocation location, ResourceLocation parent) {
+	public static <T extends RupeeTradeList<? extends RupeeTrade>> void writeTradesToFile(T buys, T sells, ResourceLocation location, ResourceLocation parent) {
 		JsonObject json = new JsonObject();
 		if (parent != null) {
 			json.addProperty("parent", parent.toString());

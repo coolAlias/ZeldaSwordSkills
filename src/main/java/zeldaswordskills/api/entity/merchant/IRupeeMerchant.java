@@ -52,7 +52,7 @@ public interface IRupeeMerchant {
 	 * @param getItemsToSell whether to fetch the list of trades the merchant is selling (true) or buying (false)
 	 * @return the list of RupeeTrades this merchant has available given the current context
 	 */
-	RupeeTradeList getRupeeTrades(boolean getItemsToSell);
+	RupeeTradeList<RupeeTrade> getRupeeTrades(boolean getItemsToSell);
 
 	/**
 	 * Requests the merchant's rupee trading list for either buying or selling, customized
@@ -64,13 +64,13 @@ public interface IRupeeMerchant {
 	 * @param getItemsToSell getItemsToSell whether to fetch the list of trades the merchant is selling (true) or buying (false)
 	 * @return the list of RupeeTrades this merchant has available given the current context, customized for the player
 	 */
-	RupeeTradeList getCustomizedRupeeTrades(EntityPlayer player, boolean getItemsToSell);
+	RupeeTradeList<RupeeTrade> getCustomizedRupeeTrades(EntityPlayer player, boolean getItemsToSell);
 
 	/**
 	 * Used client side when opening the trading interface and server side when loading default trade lists.
 	 * @param getItemsToSell whether to fetch the list of trades the merchant is selling (true) or buying (false)
 	 */
-	void setRupeeTrades(RupeeTradeList trades, boolean getItemsToSell);
+	void setRupeeTrades(RupeeTradeList<RupeeTrade> trades, boolean getItemsToSell);
 
 	/**
 	 * Called when the current customer buys or sells an item for rupees; client side calls are

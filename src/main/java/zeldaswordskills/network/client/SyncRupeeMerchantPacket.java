@@ -29,6 +29,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.util.Constants;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
+import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.client.gui.GuiRupeeMerchant;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
@@ -43,8 +44,8 @@ public class SyncRupeeMerchantPacket extends AbstractClientMessage<SyncRupeeMerc
 
 	public SyncRupeeMerchantPacket(EntityPlayerMP player, IRupeeMerchant merchant) {
 		this.windowId = player.currentWindowId;
-		RupeeTradeList buys = merchant.getRupeeTrades(false);
-		RupeeTradeList sells = merchant.getRupeeTrades(true);
+		RupeeTradeList<RupeeTrade> buys = merchant.getRupeeTrades(false);
+		RupeeTradeList<RupeeTrade> sells = merchant.getRupeeTrades(true);
 		this.compound = new NBTTagCompound();
 		if (buys != null) {
 			this.compound.setTag("buys", buys.writeToNBT());
@@ -72,11 +73,11 @@ public class SyncRupeeMerchantPacket extends AbstractClientMessage<SyncRupeeMerc
 		if (gui instanceof GuiRupeeMerchant && this.windowId == player.openContainer.windowId) {
 			IRupeeMerchant merchant = ((GuiRupeeMerchant) gui).getMerchant();
 			if (this.compound.hasKey("buys", Constants.NBT.TAG_COMPOUND)) {
-				RupeeTradeList buys = new RupeeTradeList((NBTTagCompound) this.compound.getTag("buys"));
+				RupeeTradeList<RupeeTrade> buys = new RupeeTradeList<RupeeTrade>((NBTTagCompound) this.compound.getTag("buys"));
 				merchant.setRupeeTrades(buys, false);
 			}
 			if (this.compound.hasKey("sells", Constants.NBT.TAG_COMPOUND)) {
-				RupeeTradeList sells = new RupeeTradeList((NBTTagCompound) this.compound.getTag("sells"));
+				RupeeTradeList<RupeeTrade> sells = new RupeeTradeList<RupeeTrade>((NBTTagCompound) this.compound.getTag("sells"));
 				merchant.setRupeeTrades(sells, true);
 			}
 		} else {

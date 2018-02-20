@@ -40,10 +40,10 @@ import zeldaswordskills.handler.GuiHandler;
 public abstract class EntityNpcRupeeMerchant extends EntityNpcBase implements IRupeeMerchant
 {
 	/** List of RupeeTrades this merchant is willing to buy */
-	protected RupeeTradeList waresToBuy;
+	protected RupeeTradeList<RupeeTrade> waresToBuy;
 
 	/** List of RupeeTrades this merchant has for sale */
-	protected RupeeTradeList waresToSell;
+	protected RupeeTradeList<RupeeTrade> waresToSell;
 
 	/** The merchant's current customer */
 	protected EntityPlayer customer;
@@ -85,12 +85,12 @@ public abstract class EntityNpcRupeeMerchant extends EntityNpcBase implements IR
 	}
 
 	@Override
-	public RupeeTradeList getRupeeTrades(boolean getItemsToSell) {
+	public RupeeTradeList<RupeeTrade> getRupeeTrades(boolean getItemsToSell) {
 		return (getItemsToSell ? this.waresToSell : this.waresToBuy);
 	}
 
 	@Override
-	public RupeeTradeList getCustomizedRupeeTrades(EntityPlayer player, boolean getItemsToSell) {
+	public RupeeTradeList<RupeeTrade> getCustomizedRupeeTrades(EntityPlayer player, boolean getItemsToSell) {
 		if (!this.worldObj.isRemote && !this.hasRupeeTrades()) {
 			this.populateRupeeTradeLists(player);
 		}
@@ -99,7 +99,7 @@ public abstract class EntityNpcRupeeMerchant extends EntityNpcBase implements IR
 	}
 
 	@Override
-	public void setRupeeTrades(RupeeTradeList trades, boolean getItemsToSell) {
+	public void setRupeeTrades(RupeeTradeList<RupeeTrade> trades, boolean getItemsToSell) {
 		if (getItemsToSell) {
 			this.waresToSell = trades;
 		} else {
@@ -227,10 +227,10 @@ public abstract class EntityNpcRupeeMerchant extends EntityNpcBase implements IR
 	public void readEntityFromNBT(NBTTagCompound compound) {
 		super.readEntityFromNBT(compound);
 		if (compound.hasKey(RupeeTradeList.WILL_BUY, Constants.NBT.TAG_COMPOUND)) {
-			this.waresToBuy = new RupeeTradeList(compound.getCompoundTag(RupeeTradeList.WILL_BUY));
+			this.waresToBuy = new RupeeTradeList<RupeeTrade>(compound.getCompoundTag(RupeeTradeList.WILL_BUY));
 		}
 		if (compound.hasKey(RupeeTradeList.FOR_SALE, Constants.NBT.TAG_COMPOUND)) {
-			this.waresToSell = new RupeeTradeList(compound.getCompoundTag(RupeeTradeList.FOR_SALE));
+			this.waresToSell = new RupeeTradeList<RupeeTrade>(compound.getCompoundTag(RupeeTradeList.FOR_SALE));
 		}
 	}
 }

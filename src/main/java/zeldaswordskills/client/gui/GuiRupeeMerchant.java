@@ -143,7 +143,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 		super.drawScreen(mouseX, mouseY, partialRenderTick);
 		this.xSize_lo = mouseX;
 		this.ySize_lo = mouseY;
-		RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 		if (trades != null && trades.size() > 4) {
 			this.canScroll = this.isMouseInRegion(mouseX, mouseY, this.guiLeft + 61, this.guiLeft + 168, this.guiTop + 8, this.guiTop + 44);
 		} else {
@@ -155,7 +155,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 	public void updateScreen() {
 		super.updateScreen();
 		this.trade.enabled = this.isTradeEnabled();
-		RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 		if (trades != null && trades.size() > 4) {
 			this.first.enabled = this.currentIndex > 0;
 			this.last.enabled = this.currentIndex < (trades.size() - 4);
@@ -180,7 +180,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 	 * Switch shop mode from buying to selling or vice versa
 	 */
 	protected void switchShopMode() {
-		RupeeTradeList list = this.merchant.getRupeeTrades(!this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> list = this.merchant.getRupeeTrades(!this.getItemsToSell);
 		if (list != null && !list.isEmpty()) {
 			PacketDispatcher.sendToServer(new RupeeMerchantTogglePacket(this.getItemsToSell));
 		}
@@ -191,7 +191,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 		if (button == this.trade) {
 			this.useTrade();
 		}
-		RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 		int size = (trades == null ? 0 : trades.size());
 		int prevIndex = this.currentIndex;
 		if (button == this.prev) {
@@ -221,7 +221,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 		super.handleMouseClick(slot, slotIndex, keyCode, action);
 		if (slotIndex > 0 && slot instanceof SlotRupeeWares && slot.getHasStack()) {
 			int index = ((ContainerRupeeMerchant) this.inventorySlots).convertSlotIndex(slotIndex);
-			RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+			RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 			if (trades != null && index > -1 && index < trades.size()) {
 				RupeeTrade trade = trades.get(index);
 				if (trade != null && !trade.isDisabled()) {
@@ -237,7 +237,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 		if (this.canScroll) {
 			int i = Mouse.getEventDWheel();
 			boolean indexChanged = false;
-			RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+			RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 			if (trades == null || trades.isEmpty()) {
 				// nothing to do
 			} else if (i < 0 && this.currentIndex < trades.size() - 4) {
@@ -257,7 +257,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-		RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+		RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 		if (trades == null || trades.isEmpty()) {
 			return;
 		}
@@ -312,7 +312,7 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 
 		private RupeeTrade getCurrentTrade() {
 			int index = this.getCurrentIndex() + this.selectedIndex - ContainerRupeeMerchant.WARES_START;
-			RupeeTradeList trades = this.merchant.getRupeeTrades(this.getItemsToSell);
+			RupeeTradeList<RupeeTrade> trades = this.merchant.getRupeeTrades(this.getItemsToSell);
 			if (trades != null && index > -1 && index < trades.size()) {
 				return trades.get(index);
 			}
