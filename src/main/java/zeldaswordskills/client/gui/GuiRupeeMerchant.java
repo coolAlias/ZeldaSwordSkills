@@ -29,6 +29,7 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.EnumChatFormatting;
@@ -36,6 +37,7 @@ import net.minecraft.util.ResourceLocation;
 import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
+import zeldaswordskills.entity.VanillaRupeeMerchant;
 import zeldaswordskills.entity.player.ZSSPlayerWallet;
 import zeldaswordskills.inventory.ContainerRupeeMerchant;
 import zeldaswordskills.inventory.ContainerRupeeMerchant.SlotRupeeWares;
@@ -72,6 +74,9 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 
 	/** Button for changing the shop mode from buying to selling or vice versa */
 	private ButtonToggleMode toggleMode;
+
+	/** Button for switching to vanilla IMerchant interface */
+	private GuiButton toggleShop;
 
 	/** Index of currently selected RupeeTrade slot used for rendering the selector box */
 	protected int selectedIndex = -1;
@@ -136,6 +141,11 @@ public abstract class GuiRupeeMerchant extends GuiContainer
 		this.buttonList.add(this.next);
 		this.toggleMode = new GuiRupeeMerchant.ButtonToggleMode(5, this.guiLeft + this.xSize, this.guiTop, this.getItemsToSell);
 		this.buttonList.add(this.toggleMode);
+		if (this.merchant instanceof IMerchant || this.merchant instanceof VanillaRupeeMerchant) {
+			// No way to determine if IMerchant has any trades from here, so just add the button
+			this.toggleShop = new GuiButtonToggleTradeInterface(6, true, this.guiLeft + this.xSize, this.guiTop + 20);
+			this.buttonList.add(this.toggleShop);
+		}
 	}
 
 	@Override

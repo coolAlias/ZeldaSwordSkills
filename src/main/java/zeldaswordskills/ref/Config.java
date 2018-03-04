@@ -130,6 +130,10 @@ public class Config
 	public static int magicMeterWidth;
 	/** [Magic Meter][Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1-10] */
 	public static int magicMeterIncrements;
+	/** [Rupee GUI Button][Offset: X] Adjusts the X position of the GUI toggle button that displays to the top right of the vanilla merchant trading screen */
+	public static int toggleTradeGuiButtonOffsetX;
+	/** [Rupee GUI Button][Offset: Y] Adjusts the Y position of the GUI toggle button that displays to the top right of the vanilla merchant trading screen */
+	public static int toggleTradeGuiButtonOffsetY;
 	/** [Song GUI] Number of ticks allowed between notes before played notes are cleared [5 - 100] */
 	public static int resetNotesInterval;
 	/** [Sound] Whether to play the 'itembreak' sound when the hookshot misses */
@@ -657,6 +661,8 @@ public class Config
 		isMagicBarLeft = clientConfig.get("Magic Meter", "[Orientation: Mana] True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", true).getBoolean(true);
 		magicMeterWidth = clientConfig.get("Magic Meter", "[Width: Max] Maximum width of the magic meter [25 - 100]", 75).getInt();
 		magicMeterIncrements = clientConfig.get("Magic Meter", "[Width: Increment] Number of increments required to max out the magic meter, where each increment is 50 magic points [1 - 10]", 2).getInt();
+		toggleTradeGuiButtonOffsetX = clientConfig.get("Rupee GUI Button", "[Offset: X] Adjusts the X position of the GUI toggle button that displays to the top right of the vanilla merchant trading screen", 0).getInt();
+		toggleTradeGuiButtonOffsetY = clientConfig.get("Rupee GUI Button", "[Offset: Y] Adjusts the Y position of the GUI toggle button that displays to the top right of the vanilla merchant trading screen", 0).getInt();
 		targetMobs = clientConfig.get("Targeting", "Prioritize mobs over other entity types when targeting", true).getBoolean(true);
 		enableAutoTarget = clientConfig.get("Targeting", "Whether auto-targeting is enabled or not (toggle in game: '.')", true).getBoolean(true);
 		canTargetPlayers = clientConfig.get("Targeting", "Whether players can be targeted (toggle in game: '.' while sneaking)", true).getBoolean(true);

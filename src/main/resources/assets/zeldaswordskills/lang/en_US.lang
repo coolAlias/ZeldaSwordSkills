@@ -1056,6 +1056,8 @@ gui.zss.mask_trader.name=Welcome to the Happy Mask Shop!
 gui.zss.mask_trader.borrow.text=Borrow
 gui.zss.button.purchase.text=Purchase
 gui.zss.button.sell.text=Sell
+gui.zss.button.toggle_merchant_gui.tooltip=Switch to rupee trading GUI
+gui.zss.button.toggle_rupee_gui.tooltip=Switch to vanilla trading GUI
 
 itemGroup.zss.blocks=Zelda Blocks
 itemGroup.zss.combat=Zelda Combat

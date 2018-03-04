@@ -97,6 +97,7 @@ public class PacketDispatcher
 		registerMessage(RupeeMerchantTransactionPacket.class);
 		registerMessage(SetGossipStoneMessagePacket.class);
 		registerMessage(TargetIdPacket.class);
+		registerMessage(ToggleTradeInterfacePacket.class);
 		registerMessage(ZeldaSongPacket.class);
 	}
 

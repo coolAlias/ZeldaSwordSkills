@@ -31,6 +31,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mods.battlegear2.client.gui.BattleEquipGUI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiMerchant;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
@@ -54,6 +55,7 @@ import zeldaswordskills.api.item.IZoom;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.client.gui.ComboOverlay;
 import zeldaswordskills.client.gui.GuiBuffBar;
+import zeldaswordskills.client.gui.GuiButtonToggleTradeInterface;
 import zeldaswordskills.client.gui.GuiButtonWallet;
 import zeldaswordskills.client.gui.GuiEndingBlowOverlay;
 import zeldaswordskills.client.gui.GuiItemModeOverlay;
@@ -320,6 +322,15 @@ public class ZSSClientEvents
 				guiLeft -= 18;
 			}
 			GuiButtonWallet button = new GuiButtonWallet(id, guiLeft, guiTop);
+			event.buttonList.add(button);
+		} else if (event.gui instanceof GuiMerchant) {
+			// GuiMerchant is created client side using a `new NPCMerchant`, not the actual EntityVillager entity.
+			// As such, there isn't any way to determine if the merchant is a rupee merchant or has any trades from here.
+			// Since the button checks these things server side before opening the GUI, always add the button.
+			int id = event.buttonList.size();
+			int guiLeft = ZSSClientEvents.getGuiLeft((GuiContainer)event.gui) + 176 + Config.toggleTradeGuiButtonOffsetX;
+			int guiTop = ZSSClientEvents.getGuiTop((GuiContainer)event.gui) + Config.toggleTradeGuiButtonOffsetY;
+			GuiButtonToggleTradeInterface button = new GuiButtonToggleTradeInterface(id, false, guiLeft, guiTop);
 			event.buttonList.add(button);
 		}
 	}
