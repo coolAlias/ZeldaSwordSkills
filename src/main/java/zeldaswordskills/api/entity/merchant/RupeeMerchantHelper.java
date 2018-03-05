@@ -19,6 +19,7 @@ package zeldaswordskills.api.entity.merchant;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -80,6 +81,24 @@ public class RupeeMerchantHelper
 			return ZSSVillagerInfo.get((EntityVillager) object).getRupeeMerchant();
 		}
 		return null;
+	}
+
+	/**
+	 * Checks if the object can be converted to an IRupeeMerchant and if the merchant has at least one rupee trade
+	 * @param object Passed to {@link #getRupeeMerchant(Object)} to retrieve corresponding IRupeeMerchant
+	 * @param player If not null, trade lists will be retrieved using {@link IRupeeMerchant#getCustomizedRupeeTrades(EntityPlayer, boolean)}
+	 * @return true if the object has any non-empty rupee trading list
+	 */
+	public static boolean hasRupeeTrades(Object object, EntityPlayer player) {
+		RupeeTradeList<RupeeTrade> sell = RupeeMerchantHelper.getRupeeTrades(object, true, player);
+		if (sell != null && !sell.isEmpty()) {
+			return true;
+		}
+		RupeeTradeList<RupeeTrade> buys = RupeeMerchantHelper.getRupeeTrades(object, false, player);
+		if (buys != null && !buys.isEmpty()) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -172,6 +191,8 @@ public class RupeeMerchantHelper
 				}
 			}
 		}
+		// TODO if IRupeeMerchant available, could check for additional trades
+		//	- would also need ResourceLocation and getItemsToSell flag
 	}
 
 	/**
@@ -295,10 +316,9 @@ public class RupeeMerchantHelper
 					} else {
 						trades = RupeeMerchantHelper.readRandomTradesFromFile(parent);
 						randomTradeLists.put(parent, trades);
+						// TODO remove debugging
 						if (trades != null) {
 							ZSSMain.logger.info("Parent loaded from file: " + parent.toString());
-							// TODO this is throwing NPE since one or both trade lists may be null!!!
-							// ZSSMain.logger.info(String.format("Parent random list sizes: sales (%d) | shop (%d)", trades.getLeft().size(), trades.getRight().size()));
 						} else {
 							ZSSMain.logger.error("Error loading parent: " + parent.toString());
 						}
@@ -337,8 +357,8 @@ public class RupeeMerchantHelper
 			}
 		} catch (InvalidPathException e) {
 			LOGGER.error(String.format("Invalid resource path: %s", filename));
-		} catch (NullPointerException e) {
-			LOGGER.error(String.format("Could not read file %s: file does not exist", filename));
+		} catch (FileNotFoundException e) {
+			LOGGER.error(String.format("System could not find file %s", filename));
 		} catch (Exception e) {
 			LOGGER.error(String.format("Error reading from file %s: %s", filename, e.getMessage()));
 			e.printStackTrace();
