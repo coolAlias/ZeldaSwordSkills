@@ -17,8 +17,10 @@
 
 package zeldaswordskills.ref;
 
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import zeldaswordskills.api.entity.BombType;
@@ -29,6 +31,7 @@ import zeldaswordskills.api.entity.merchant.RupeeTradeListRandom;
 import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.entity.VanillaRupeeMerchant;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
+import zeldaswordskills.item.ItemBrokenSword;
 import zeldaswordskills.item.ZSSItems;
 
 public class RupeeTradeLists
@@ -65,6 +68,8 @@ public class RupeeTradeLists
 		RupeeTradeListRandom buys = new RupeeTradeListRandom(RupeeTradeList.WILL_BUY);
 		RupeeTradeListRandom sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
 		// BLACKSMITH
+		// TODO tested - working
+		buys.add(RupeeValueRegistry.getRupeeTradeTemplate(ItemBrokenSword.getBrokenStack(ZSSItems.swordKokiri), 20));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.arrow, 10), 15));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.swordKokiri), 50));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.shieldDeku), 100));
@@ -73,5 +78,36 @@ public class RupeeTradeLists
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.tunicHeroLegs), 20));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.tunicHeroBoots), 15));
 		RupeeMerchantHelper.writeTradesToFile(buys, sells, VanillaRupeeMerchant.getDefaultTradeLocation(EnumVillager.BLACKSMITH));
+		// Test cases for randomized additional trades:
+		// 1. Non-existent parent file
+		ResourceLocation parent = new ResourceLocation("minecraft", "villager/missing");
+		sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		// a. Random enchantments
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.swordOrdon), 150, 0, 15, 0, 0.3F).setEnchanted());
+		ItemStack stack = new ItemStack(Items.iron_sword);
+		// b. Random enchantments on top of specified enchantment
+		stack.addEnchantment(Enchantment.sharpness, 2);
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(stack, 150, 0, 15, 0, 0.3F).setEnchanted());
+		RupeeMerchantHelper.writeTradesToFile(null, sells, VanillaRupeeMerchant.getDefaultRandomTradeLocation(EnumVillager.BUTCHER), parent);
+		// 2. Valid parent file
+		parent = new ResourceLocation("minecraft", "villager/generic_random");
+		sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		// a. Random price only; fixed stack size, no enchantments
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.cookie), 4, 0, 0.9F));
+		// b. Enchanted not-usually-enchantable item; will it work? it shouldn't
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.iron_ingot), 15, 30, 30, 0, 0.6F));
+		// c. Randomized stack size with scaling price
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.carrot), 4, 1, 4, 0, 0.6F));
+		// d. Randomized stack size with absolute price; single use trade
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.apple), 4, 1, 4, 1, 0.3F).setPriceAbsolute());
+		// Write parent file
+		RupeeMerchantHelper.writeTradesToFile(null, sells, parent);
+		// 3. Child file with no trades other than what is in parent
+		RupeeMerchantHelper.writeTradesToFile(null, null, VanillaRupeeMerchant.getDefaultRandomTradeLocation(EnumVillager.FARMER), parent);
+		// 4. Child file with valid parent and at least one trade of its own
+		sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		// a. Unenchantable sword with random enchantments - does this break the interface?
+		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.swordMaster), 200, 50, 50, 1, 0.9F).setEnchanted());
+		RupeeMerchantHelper.writeTradesToFile(null, sells, VanillaRupeeMerchant.getDefaultRandomTradeLocation(EnumVillager.PRIEST), parent);
 	}
 }
