@@ -765,10 +765,11 @@ public class Config
 		String[] defaultRupeeValues = ZSSItems.getDefaultRupeeValues();
 		rupeeValues = rupeeRegistryConfig.get("Rupee Value Registry", "Item Rupee Values", defaultRupeeValues, "Standard cost to purchase an item, in rupees [min=0, max=9999].\nThis is only used for prices that might otherwise be hard-coded, such as trades added as part of a quest.\nFormat is 'mod_id:item_registry_name=value' or 'mod_id:item_registry_name@damage=value' if item damage changes the price.").getStringList();
 		Arrays.sort(rupeeValues);
+		RupeeValueRegistry.INSTANCE.registerItems(rupeeValues, "Config");
+		RupeeTradeLists.postInit(rupeeRegistryConfig);
 		if (rupeeRegistryConfig.hasChanged()) {
 			rupeeRegistryConfig.save();
 		}
-		RupeeValueRegistry.INSTANCE.registerItems(rupeeValues, "Config");
 		/*================== WEAPON REGISTRY =====================*/
 		// This doesn't modify the weapon registry config, so no need to save
 		WeaponRegistry.INSTANCE.registerItems(swords, "Config", true);

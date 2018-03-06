@@ -43,13 +43,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import zeldaswordskills.ZSSMain;
+import zeldaswordskills.api.entity.EnumVillager;
+import zeldaswordskills.entity.ZSSVillagerInfo;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.client.SyncRupeeMerchantPacket;
 import zeldaswordskills.ref.Config;
+import zeldaswordskills.util.PlayerUtils;
 
 public class RupeeMerchantHelper
 {
@@ -64,12 +68,14 @@ public class RupeeMerchantHelper
 
 	/**
 	 * Fetches the object as an IRupeeMerchant if possible
-	 * @param object Currently supports null and any IRupeeMerchant
+	 * @param object Currently supports null and any IRupeeMerchant or EntityVillager
 	 * @return the IRupeeMerchant for the object, or null
 	 */
 	public static IRupeeMerchant getRupeeMerchant(Object object) {
 		if (object instanceof IRupeeMerchant) {
 			return (IRupeeMerchant) object;
+		} else if (object instanceof EntityVillager) {
+			return ZSSVillagerInfo.get((EntityVillager) object).getRupeeMerchant();
 		}
 		return null;
 	}
@@ -96,6 +102,54 @@ public class RupeeMerchantHelper
 		}
 		RupeeTradeList<RupeeTrade> trades = merchant.getCustomizedRupeeTrades(player, getItemsToSell);
 		return trades;
+	}
+
+	/**
+	 * Calls {@link RupeeMerchantHelper#addVillagerRupeeTrade(EntityPlayer, RupeeTrade, EntityVillager, EnumVillager, boolean, float)}
+	 * with no profession or strict class requirements
+	 */
+	public static void addVillagerRupeeTrade(EntityPlayer player, RupeeTrade trade, EntityVillager villager, float chance) {
+		RupeeMerchantHelper.addVillagerRupeeTrade(player, trade, villager, null, null, chance);
+	}
+
+	/**
+	 * Attempts to add or update the RupeeTrade to the villager's list of items to buy, sending appropriate
+	 * generic chat messages depending on the villager and whether the trade is added or not.
+	 * If the villager has special profession or strict class requirements, check them beforehand.
+	 * @param player
+	 * @param trade See {@link RupeeTradeList#addOrUpdateTrade(RupeeTrade)}
+	 * @param villager
+	 * @param profession Required villager profession, or null if none required
+	 * @param clazz If not null, the villager entity's class must match exactly (i.e. sub-classes do not match)
+	 * @param chance A value between 0.0F and 1.0F, inclusive, where 1.0F means always add if possible
+	 */
+	public static void addVillagerRupeeTrade(EntityPlayer player, RupeeTrade trade, EntityVillager villager, EnumVillager profession, Class<? extends EntityVillager> clazz, float chance) {
+		IRupeeMerchant merchant = RupeeMerchantHelper.getRupeeMerchant(villager);
+		if (merchant == null) {
+			return;
+		}
+		RupeeTradeList<RupeeTrade> trades = RupeeMerchantHelper.getRupeeTrades(villager, false, player);
+		if (trades == null) {
+			merchant.setRupeeTrades(new RupeeTradeList<RupeeTrade>(RupeeTradeList.WILL_BUY), false);
+			trades = merchant.getRupeeTrades(false);
+		}
+		if (merchant.getRupeeCustomer() != null) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.merchant.busy");
+		} else if (villager.isChild()) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.child");
+		} else if (clazz != null && villager.getClass() != clazz) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
+		} else if (profession != null && !profession.is(villager)) {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
+		} else if (trades != null) {
+			if (player.worldObj.rand.nextFloat() < chance && trades.addOrUpdateTrade(trade)) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sell." + player.worldObj.rand.nextInt(2));
+			} else {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
+			}
+		} else {
+			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
+		}
 	}
 
 	/**

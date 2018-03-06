@@ -51,26 +51,6 @@ public class TradeHandler implements IVillageTradeHandler
 			}
 			return;
 		}
-		switch(EnumVillager.values()[villager.getProfession()]) {
-		case FARMER:
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroBoots)));
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroHelm)));
-			break;
-		case LIBRARIAN:
-			break;
-		case PRIEST:
-			break;
-		case BLACKSMITH:
-			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.swordKokiri)));
-			addTrade(trades, rand, 0.2F, new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.shieldDeku)));
-			break;
-		case BUTCHER:
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 20), new ItemStack(ZSSItems.tunicHeroChest)));
-			addTrade(trades, rand, 0.3F, new MerchantRecipe(new ItemStack(Items.emerald, 10), new ItemStack(ZSSItems.tunicHeroLegs)));
-			break;
-		default:
-			break;
-		}
 	}
 
 	/**

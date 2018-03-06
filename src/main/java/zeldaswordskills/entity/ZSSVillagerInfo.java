@@ -34,6 +34,7 @@ import net.minecraft.village.Village;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import zeldaswordskills.api.entity.EnumVillager;
+import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
 import zeldaswordskills.entity.mobs.EntityChu.ChuType;
 import zeldaswordskills.entity.player.quests.QuestMaskSales;
 import zeldaswordskills.item.ItemTreasure.Treasures;
@@ -57,6 +58,9 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	/** The villager to which these properties belong */
 	private final EntityVillager villager;
+
+	/** The IRupeeMerchant handler for vanilla villagers */
+	private final VanillaRupeeMerchant rupeeMerchant;
 
 	/** Additional save data for villager trading */
 	private NBTTagCompound data;
@@ -84,6 +88,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	public ZSSVillagerInfo(EntityVillager villager) {
 		this.villager = villager;
+		this.rupeeMerchant = new VanillaRupeeMerchant(villager);
 		data = new NBTTagCompound();
 		desiredMask = QuestMaskSales.MASKS.size();
 	}
@@ -94,6 +99,13 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 
 	public static final ZSSVillagerInfo get(EntityVillager villager) {
 		return (ZSSVillagerInfo) villager.getExtendedProperties(SAVE_KEY);
+	}
+
+	/**
+	 * Returns this villager's IRupeeMerchant handler
+	 */
+	public IRupeeMerchant getRupeeMerchant() {
+		return this.rupeeMerchant;
 	}
 
 	/**
@@ -266,6 +278,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 */
 	public void onUpdate() {
 		updateMating();
+		this.rupeeMerchant.onUpdate();
 	}
 
 	@Override
@@ -276,6 +289,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		compound.setTag(SAVE_KEY, data);
 		compound.setInteger("desiredMask", desiredMask);
 		compound.setLong("NextSkulltulaReward", nextSkulltulaReward);
+		this.rupeeMerchant.writeToNBT(compound);
 	}
 
 	@Override
@@ -283,6 +297,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 		data = (compound.hasKey(SAVE_KEY) ? compound.getCompoundTag(SAVE_KEY) : new NBTTagCompound());
 		desiredMask = compound.getInteger("desiredMask");
 		nextSkulltulaReward = compound.getLong("NextSkulltulaReward");
+		this.rupeeMerchant.readFromNBT(compound);
 	}
 
 	/**
