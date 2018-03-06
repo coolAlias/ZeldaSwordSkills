@@ -414,6 +414,12 @@ public class Config
 	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
 	/*================== RUPEE VALUE REGISTRY =====================*/
 	private static Configuration rupeeRegistryConfig;
+	/** Multiplier used to determine lower price bound for {@link RupeeValueRegistry#getDefaultPriceRange(ItemStack, int)} */
+	public static float getMinRupeePriceMultiplier() { return minRupeePriceMultiplier; }
+	private static float minRupeePriceMultiplier;
+	/** Multiplier used to determine upper price bound for {@link RupeeValueRegistry#getDefaultPriceRange(ItemStack, int)} */
+	public static float getMaxRupeePriceMultiplier() { return maxRupeePriceMultiplier; }
+	private static float maxRupeePriceMultiplier;
 	/** Rupee value entries for items. Format is "mod_id:item_registry_name@damage=value" */
 	private static String[] rupeeValues = new String[0];
 	/*================== MOBS =====================*/
@@ -771,6 +777,8 @@ public class Config
 			mobConfig.save();
 		}
 		/*================== RUPEE VALUE REGISTRY =====================*/
+		minRupeePriceMultiplier = rupeeRegistryConfig.getFloat("Min Rupee Price Multiplier", "Rupee Value Registry", 0.8F, 0.0F, 100.0F, "Multiplier used to determine the minimum possible price for rupee trades using default randomized pricing");
+		maxRupeePriceMultiplier = rupeeRegistryConfig.getFloat("Max Rupee Price Multiplier", "Rupee Value Registry", 1.5F, 0.0F, 100.0F, "Multiplier used to determine the maximum possible price for rupee trades using default randomized pricing");
 		String[] defaultRupeeValues = ZSSItems.getDefaultRupeeValues();
 		rupeeValues = rupeeRegistryConfig.get("Rupee Value Registry", "Item Rupee Values", defaultRupeeValues, "Standard cost to purchase an item, in rupees [min=0, max=9999].\nThis is only used for prices that might otherwise be hard-coded, such as trades added as part of a quest.\nFormat is 'mod_id:item_registry_name=value' or 'mod_id:item_registry_name@damage=value' if item damage changes the price.").getStringList();
 		Arrays.sort(rupeeValues);

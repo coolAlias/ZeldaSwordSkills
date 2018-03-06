@@ -29,10 +29,12 @@ import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.oredict.OreDictionary;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.item.IRupeeValue;
+import zeldaswordskills.ref.Config;
 
 /**
  * 
@@ -80,6 +82,31 @@ public class RupeeValueRegistry
 	 */
 	public static RupeeTrade getRupeeTrade(ItemStack stack, int backup, int maxUses) {
 		return new RupeeTrade(stack, RupeeValueRegistry.getRupeeValue(stack, backup), maxUses);
+	}
+
+	/**
+	 * Generates the minimum and maximum price for the random rupee trade based on the configured default price
+	 * (or the backup price) using {@link Config#getMinRupeePriceMultiplier} and {@link Config#getMaxRupeePriceMultiplier}.
+	 * See {@link #getDefaultPriceRange(ItemStack, int, float, float)}
+	 */
+	public static Pair<Integer, Integer> getDefaultPriceRange(ItemStack stack, int backup) {
+		return RupeeValueRegistry.getDefaultPriceRange(stack, backup, Config.getMinRupeePriceMultiplier(), Config.getMaxRupeePriceMultiplier());
+	}
+
+	/**
+	 * Generates the minimum and maximum price for the random rupee trade based on the configured
+	 * default price (or the backup price).
+	 * @param stack
+	 * @param backup Price if no configured value found
+	 * @param min Multiplier to determine the minimum price
+	 * @param max Multiplier to determine the maximum price
+	 * @return
+	 */
+	public static Pair<Integer, Integer> getDefaultPriceRange(ItemStack stack, int backup, float min, float max) {
+		int price = RupeeValueRegistry.getRupeeValue(stack, backup);
+		int lower = Math.max(1, MathHelper.floor_float((min > max ? max : min) * price));
+		int upper = Math.max(1, MathHelper.ceiling_float_int((max > min ? max : min) * price));
+		return Pair.of(lower, upper);
 	}
 
 	/**
