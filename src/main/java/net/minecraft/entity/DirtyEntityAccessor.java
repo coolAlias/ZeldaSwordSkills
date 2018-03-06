@@ -20,16 +20,21 @@ package net.minecraft.entity;
 import java.lang.reflect.Field;
 
 import cpw.mods.fml.relauncher.ReflectionHelper;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.village.Village;
 import zeldaswordskills.ZSSMain;
 
 public class DirtyEntityAccessor
 {
 	/** Accessible reference to {@code EntityThrowable#thrower */
 	private static Field throwableThrower;
+
+	/** Accessible reference to {@code EntityVillager#villageObj */
+	private static Field villageObject;
 
 	/** Damages the target for the amount of damage using the vanilla method; posts LivingHurtEvent */
 	public static void damageEntity(EntityLivingBase target, DamageSource source, float amount) {
@@ -97,5 +102,20 @@ public class DirtyEntityAccessor
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Returns the villager's village object if possible
+	 */
+	public static Village getVillageObject(EntityVillager villager) {
+		if (villageObject == null) {
+			villageObject = ReflectionHelper.findField(EntityVillager.class, "field_70954_d", "villageObj");
+		}
+		try {
+			return (Village) villageObject.get(villager);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

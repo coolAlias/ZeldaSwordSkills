@@ -20,6 +20,7 @@ package zeldaswordskills.entity;
 import java.util.EnumMap;
 import java.util.Map;
 
+import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,7 +29,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.MathHelper;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
@@ -212,7 +212,7 @@ public class ZSSVillagerInfo implements IExtendedEntityProperties
 	 */
 	public void setMating() {
 		if (villager.getGrowingAge() == 0 && !isMating()) {
-			village = villager.worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(villager.posX), MathHelper.floor_double(villager.posY), MathHelper.floor_double(villager.posZ), 0);
+			village = DirtyEntityAccessor.getVillageObject(this.villager);
 			if (areSufficientDoors()) {
 				Entity e = villager.worldObj.findNearestEntityWithinAABB(EntityVillager.class, villager.boundingBox.expand(8.0D, 3.0D, 8.0D), villager);
 				if (e != null && ((EntityVillager) e).getGrowingAge() == 0) {
