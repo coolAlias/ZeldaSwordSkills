@@ -53,9 +53,11 @@ import zeldaswordskills.util.PlayerUtils;
  * 
  * An instance of this class should be added to each vanilla villager's additional data
  * to allow them to use the rupee trading interface.
- * 
- * Villagers use the trade lists located at /rupee_trades/zeldaswordskills/villager_{profession}
- * as their default trades.
+ * <br><br>
+ * Villagers use the trade lists located at /rupee_trades/minecraft/{profession_name}
+ * as their default trade lists, and {profession_name}_random for random trade lists.
+ * <br><br>
+ * See {@link #getDefaultTradeLocation(EntityVillager)} and {@link #getDefaultRandomTradeLocation(EntityVillager)} for non-vanilla villagers.
  *
  */
 public class VanillaRupeeMerchant implements IRupeeMerchant
@@ -78,6 +80,26 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 	 */
 	public static ResourceLocation getDefaultTradeLocation(EnumVillager villager) {
 		return (villager == null ? null : new ResourceLocation("minecraft", "villager/" + villager.unlocalizedName));
+	}
+
+	/**
+	 * Returns the default random rupee trade list location for the villager based on profession
+	 * @param villager Non-vanilla villager professions are supported as "minecraft:villager/profession_{n}_random",
+	 * 		  where n is the value returned from {@link EntityVillager#getProfession()}
+	 */
+	public static ResourceLocation getDefaultRandomTradeLocation(EntityVillager villager) {
+		EnumVillager profession = EnumVillager.get(villager);
+		if (profession == null) {
+			new ResourceLocation("minecraft", "villager/profession_" + villager.getProfession() + "_random");
+		}
+		return new ResourceLocation("minecraft", "villager/" + profession.unlocalizedName + "_random");
+	}
+
+	/**
+	 * Returns the default random rupee trade list location for the villager type (used when generating default trade lists)
+	 */
+	public static ResourceLocation getDefaultRandomTradeLocation(EnumVillager villager) {
+		return (villager == null ? null : new ResourceLocation("minecraft", "villager/" + villager.unlocalizedName + "_random"));
 	}
 
 	/** The vanilla villager that is also a rupee trader */
@@ -217,7 +239,14 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 		ResourceLocation location = VanillaRupeeMerchant.getDefaultTradeLocation(this.villager);
 		if (location != null) {
 			ZSSMain.logger.info("Attempting to populate villager rupee trades: " + location.toString());
-			RupeeMerchantHelper.setDefaultTrades(this, location);
+			RupeeMerchantHelper.setDefaultTrades(this, location, this.rand);
+		}
+		// Try to add a random trade if no default list was found
+		if (this.waresToBuy == null || this.waresToBuy.isEmpty()) {
+			this.addRandomTrades(1, false);
+		}
+		if (this.waresToSell == null || this.waresToSell.isEmpty()) {
+			this.addRandomTrades(1, true);
 		}
 	}
 
@@ -274,6 +303,9 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 			if (this.refreshTimer < 1) {
 				if (this.refreshTrades) {
 					this.refreshTradingList();
+					if (this.rand.nextFloat() < Config.getVillagerRandomRupeeTradeChance()) {
+						this.addRandomTrades(1, true);
+					}
 					this.refreshTrades = false;
 					Village village = DirtyEntityAccessor.getVillageObject(this.villager);
 					if (village != null && this.lastCustomer != null) {
@@ -297,6 +329,14 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 		if (this.waresToSell != null) {
 			RupeeMerchantHelper.refreshTradingList(this.waresToSell, this.rand);
 		}
+	}
+
+	/**
+	 * Adds n number of random trades to the list of items to buy or sell
+	 */
+	protected void addRandomTrades(int n, boolean getItemsToSell) {
+		ResourceLocation location = VanillaRupeeMerchant.getDefaultRandomTradeLocation(this.villager);
+		RupeeMerchantHelper.addRandomTrades(this, location, getItemsToSell, this.rand, n);
 	}
 
 	/**

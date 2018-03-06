@@ -414,6 +414,9 @@ public class Config
 	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
 	/*================== RUPEE VALUE REGISTRY =====================*/
 	private static Configuration rupeeRegistryConfig;
+	/** Chance (as a percent) that vanilla villagers with rupee trades attempt to add a new random trade when the list refreshes [0-100] */
+	public static float getVillagerRandomRupeeTradeChance() { return villagerRandomRupeeTradeChance; }
+	private static float villagerRandomRupeeTradeChance;
 	/** Multiplier used to determine lower price bound for {@link RupeeValueRegistry#getDefaultPriceRange(ItemStack, int)} */
 	public static float getMinRupeePriceMultiplier() { return minRupeePriceMultiplier; }
 	private static float minRupeePriceMultiplier;
@@ -777,6 +780,7 @@ public class Config
 			mobConfig.save();
 		}
 		/*================== RUPEE VALUE REGISTRY =====================*/
+		villagerRandomRupeeTradeChance = 0.01F * (float)rupeeRegistryConfig.getInt("Villager Random Trade Chance", "Rupee Value Registry", 100, 0, 100, "Chance (as a percent) that vanilla villagers with rupee trades attempt to add a new random trade when the list refreshes [0-100]");
 		minRupeePriceMultiplier = rupeeRegistryConfig.getFloat("Min Rupee Price Multiplier", "Rupee Value Registry", 0.8F, 0.0F, 100.0F, "Multiplier used to determine the minimum possible price for rupee trades using default randomized pricing");
 		maxRupeePriceMultiplier = rupeeRegistryConfig.getFloat("Max Rupee Price Multiplier", "Rupee Value Registry", 1.5F, 0.0F, 100.0F, "Multiplier used to determine the maximum possible price for rupee trades using default randomized pricing");
 		String[] defaultRupeeValues = ZSSItems.getDefaultRupeeValues();
