@@ -87,7 +87,7 @@ public class RupeeValueRegistry
 
 	/**
 	 * Creates a non-variable rupee trade template with no use limit and a weight of 1.0F
-	 * @param backup Price if no configured value found
+	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 */
 	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup) {
 		return RupeeValueRegistry.getRupeeTradeTemplate(stack, backup, 0, false);
@@ -95,7 +95,7 @@ public class RupeeValueRegistry
 
 	/**
 	 * Creates a non-variable rupee trade template with the specified use limit and a weight of 1.0F
-	 * @param backup Price if no configured value found
+	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 */
 	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses) {
 		return RupeeValueRegistry.getRupeeTradeTemplate(stack, backup, maxUses, false);
@@ -103,7 +103,7 @@ public class RupeeValueRegistry
 
 	/**
 	 * Creates a rupee trade template with a fixed or variable price, the specified use limit, and a weight of 1.0F
-	 * @param backup Price if no configured value found
+	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 * @param varPrice If true, {@link #getDefaultPriceRange(ItemStack, int)} is used to determine the price range
 	 */
 	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses, boolean varPrice) {
@@ -116,6 +116,7 @@ public class RupeeValueRegistry
 
 	/**
 	 * Calls {@link #getRupeeTradeTemplate(ItemStack, int, int, int, int, float)} with a fixed stack size and no random enchantments.
+	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 */
 	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses, float weight) {
 		return RupeeValueRegistry.getRupeeTradeTemplate(stack, backup, 0, 0, maxUses, weight);
@@ -124,7 +125,7 @@ public class RupeeValueRegistry
 	/**
 	 * Creates a RupeeTradeRandom using the {@link #getDefaultPriceRange(ItemStack, int) default price range}.
 	 * @param stack
-	 * @param backup Price if no configured value found
+	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 * @param rng_min Lower bound for random distribution of either stack size or enchantability
 	 * @param rng_max Upper bound for random distribution of either stack size or enchantability
 	 * @param maxUses See {@link RupeeTrade#getMaxUses()}
@@ -147,7 +148,7 @@ public class RupeeValueRegistry
 	 * Generates the minimum and maximum price for the random rupee trade based on the configured
 	 * default price (or the backup price).
 	 * @param stack
-	 * @param backup Price if no configured value found
+	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 * @param min Multiplier to determine the minimum price
 	 * @param max Multiplier to determine the maximum price
 	 * @return
