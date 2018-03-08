@@ -61,10 +61,6 @@ import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.EnumVillager;
-import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
-import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
-import zeldaswordskills.api.entity.merchant.RupeeTrade;
-import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.api.item.ArmorIndex;
 import zeldaswordskills.api.item.ICyclableItem;
 import zeldaswordskills.api.item.IFairyUpgrade;
@@ -254,49 +250,22 @@ public class ItemHeroBow extends ItemBow implements ICyclableItem, IFairyUpgrade
 		if (Config.areArrowTradesEnabled() && entity instanceof EntityVillager && !player.worldObj.isRemote) {
 			EntityVillager villager = (EntityVillager) entity;
 			if (EnumVillager.PRIEST.is(villager)) {
-				IRupeeMerchant merchant = RupeeMerchantHelper.getRupeeMerchant(villager);
-				if (merchant.getRupeeCustomer() != null) {
+				if (villager.getCustomer() != null) {
 					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.merchant.busy");
 				} else {
-					this.addArrowTrades(stack, player, merchant);
+					if (PlayerUtils.hasAchievement(player, ZSSAchievements.fairyBowMax)) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.arrow.max");
+					} else if (PlayerUtils.hasAchievement(player, ZSSAchievements.fairyBow)) {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.arrow.magic");
+					} else {
+						PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.arrow.mundane");
+					}
 				}
 			} else {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * Adds special arrow trades if appropriate for the merchant
-	 */
-	private void addArrowTrades(ItemStack stack, EntityPlayer player, IRupeeMerchant merchant) {
-		// Fetch the merchant's list of goods for sale to the current player
-		RupeeTradeList trades = RupeeMerchantHelper.getRupeeTrades(merchant, true, player);
-		if (trades == null) {
-			merchant.setRupeeTrades(new RupeeTradeList(RupeeTradeList.FOR_SALE), true);
-			trades = merchant.getRupeeTrades(true);
-		}
-		if (trades != null) {
-			int level = this.getLevel(stack);
-			RupeeTrade trade = null;
-			if (level > 1) {
-				trade = new RupeeTrade(new ItemStack(ZSSItems.arrowFire, 4), 20);
-				if (trades.containsTrade(trade)) {
-					trade = new RupeeTrade(new ItemStack(ZSSItems.arrowIce, 4), 20);
-					if (level > 2 && trades.containsTrade(trade)) {
-						trade = new RupeeTrade(new ItemStack(ZSSItems.arrowLight, 4), 50);
-					}
-				}
-			}
-			if (trade != null && trades.addOrUpdateTrade(trade)) {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.arrow");
-			} else {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.1");
-			}
-		} else {
-			PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.generic.sorry.0");
-		}
 	}
 
 	@Override

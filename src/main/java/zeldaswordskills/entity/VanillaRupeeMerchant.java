@@ -23,19 +23,24 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.entity.DirtyEntityAccessor;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.village.Village;
 import net.minecraftforge.common.util.Constants;
+import zeldaswordskills.ZSSAchievements;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.entity.merchant.IRupeeMerchant;
 import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
+import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.handler.GuiHandler;
+import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.PlayerUtils;
 
 /**
@@ -222,6 +227,21 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 		// Customize items the merchant will sell
 		if (this.waresToSell == null) {
 			this.waresToSell = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
+		}
+		if (EnumVillager.PRIEST.is(this.villager)) {
+			// Add or remove magic arrow trades based on config settings and player achievements
+			int level = 0;
+			if (Config.areArrowTradesEnabled()) {
+				if (PlayerUtils.hasAchievement(player, ZSSAchievements.fairyBowMax)) {
+					level = 3;
+				} else {
+					level = (PlayerUtils.hasAchievement(player, ZSSAchievements.fairyBow) ? 2 : 1);
+				}
+			}
+			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.arrowFire), -1), RupeeTrade.SIMPLE, level > 1);
+			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.arrowIce), -1), RupeeTrade.SIMPLE, level > 1);
+			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.arrowSilver), -1), RupeeTrade.SIMPLE, level > 2);
+			this.waresToSell.addOrRemoveTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.arrowLight), -1), RupeeTrade.SIMPLE, level > 2);
 		}
 	}
 
