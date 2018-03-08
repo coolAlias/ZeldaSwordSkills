@@ -22,6 +22,7 @@ import java.util.UUID;
 import mods.battlegear2.api.core.IBattlePlayer;
 import mods.battlegear2.api.core.InventoryPlayerBattle;
 import mods.battlegear2.api.shield.IShield;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -31,6 +32,8 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.stats.Achievement;
+import net.minecraft.stats.StatFileWriter;
 import net.minecraft.util.ChatComponentTranslation;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.IReflective;
@@ -50,6 +53,19 @@ public class PlayerUtils
 {
 	/** Copy of Item#field_111210_e which is the UUID used to store weapon damage modifiers */
 	public static final UUID itemDamageUUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
+
+	/**
+	 * Returns true if the player has unlocked the achievement
+	 */
+	public static boolean hasAchievement(EntityPlayer player, Achievement achievement) {
+		StatFileWriter stats = null;
+		if (player instanceof EntityPlayerMP) {
+			stats = ((EntityPlayerMP) player).func_147099_x();
+		} else if (player instanceof EntityClientPlayerMP) {
+			stats = ((EntityClientPlayerMP) player).getStatFileWriter();
+		}
+		return (stats != null && stats.hasAchievementUnlocked(achievement));
+	}
 
 	/**
 	 * Returns whether the player is blocking with the currently held item, accounting for possibility of Battlegear2 offhand shield use
