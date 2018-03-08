@@ -233,6 +233,15 @@ public class Config
 	private static boolean enableHookableOnly;
 	/** [Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass */
 	private static boolean enableHookshotBreakBlocks;
+	/** [Magic Armor] Number of rupees consumed per second while equipped [1-999] */
+	public static int getMagicArmorTickCost() { return magicArmorTickCost; }
+	private static int magicArmorTickCost;
+	/** [Magic Armor] Number of rupees consumed to prevent one attack [1-999] */
+	public static int getMagicArmorShieldCost() { return magicArmorShieldCost; }
+	private static int magicArmorShieldCost;
+	/** [Magic Armor] True to consume rupees per heart of damage rather than per attack */
+	public static boolean doesMagicArmorCostScale() { return magicArmorEnableScaling; }
+	private static boolean magicArmorEnableScaling;
 	/** [Magic Medallions] True if Ether and Quake medallions can affect players */
 	private static boolean medallionsAffectPlayers;
 	/** [Magic Rods] Cost (in rupees) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280] */
@@ -515,6 +524,9 @@ public class Config
 		hookshotRange = MathHelper.clamp_int(config.get("Item","[Hookshot] Max range of non-extended hookshots [4-16]", 8).getInt(), 4, 16);
 		enableHookableOnly = config.get("Item", "[Hookshot] Whether hookshots are allowed to interact ONLY with IHookable blocks - great for adventure maps!", false).getBoolean(false);
 		enableHookshotBreakBlocks = config.get("Item", "[Hookshot] Whether hookshots are allowed to destroy certain blocks such as glass", true).getBoolean(true);
+		magicArmorTickCost = MathHelper.clamp_int(config.get("Item", "[Magic Armor] Number of rupees consumed per second while equipped [1-999]", 2).getInt(), 1, 999);
+		magicArmorShieldCost = MathHelper.clamp_int(config.get("Item", "[Magic Armor] Number of rupees consumed to prevent one attack [1-999]", 15).getInt(), 1, 999);
+		magicArmorEnableScaling = config.get("Item", "[Magic Armor] True to consume rupees per heart of damage rather than per attack", true).getBoolean(true);
 		medallionsAffectPlayers = config.get("Item", "[Magic Medallions] True if Ether and Quake medallions can affect players", true).getBoolean(true);
 		rodUpgradeCost = MathHelper.clamp_int(config.get("Item", "[Magic Rods] Cost (in rupees) to upgrade (note that the Tornado Rod costs 3/4 this value) [128-1280]", 768).getInt(), 128, 1280);
 		rodFireGriefing = config.get("Item", "[Magic Rods] Enable fire rod to set blocks on fire", true).getBoolean(true);

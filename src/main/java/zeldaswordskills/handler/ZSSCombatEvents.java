@@ -58,6 +58,7 @@ import zeldaswordskills.entity.ZSSEntityInfo;
 import zeldaswordskills.entity.buff.Buff;
 import zeldaswordskills.entity.player.ZSSPlayerInfo;
 import zeldaswordskills.entity.player.ZSSPlayerSkills;
+import zeldaswordskills.item.ItemArmorMagic;
 import zeldaswordskills.item.ItemArmorTunic;
 import zeldaswordskills.item.ItemFairyBottle;
 import zeldaswordskills.item.ItemZeldaShield;
@@ -363,14 +364,8 @@ public class ZSSCombatEvents
 		// apply magic armor and combo onHurt last, after other resistances
 		if (event.ammount > 0.0F && event.entity instanceof EntityPlayer) {
 			EntityPlayer player = (EntityPlayer) event.entity;
-			/* TODO magic armor:
-				if (player.getCurrentArmor(3) != null && player.getCurrentArmor(3).getItem() == ZSSItems.tunicGoronChest) {
-					while (event.ammount > 0 && player.inventory.consumeInventoryItem(Item.emerald.itemID)) {
-						event.ammount -= 1.0F;
-					}
-					event.setCanceled(event.ammount < 0.1F);
-				}
-			 */
+			event.ammount = ItemArmorMagic.onPlayerHurt(player, event.ammount);
+			event.setCanceled(event.ammount < 0.1F);
 			if (event.isCanceled()) {
 				return;
 			}

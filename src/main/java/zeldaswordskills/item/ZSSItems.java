@@ -239,7 +239,12 @@ public class ZSSItems
 	tunicZoraHelm,
 	tunicZoraChest,
 	tunicZoraLegs,
-	tunicZoraBoots;
+	tunicZoraBoots,
+
+	armorMagicHelm,
+	armorMagicChest,
+	armorMagicLegs,
+	armorMagicBoots;
 
 	/** Special Boots */
 	public static Item
@@ -715,6 +720,10 @@ public class ZSSItems
 		rupee = new ItemRupee();
 		rupoor = new ItemPickupOnly.ItemRupoor("rupoor");
 		walletUpgrade = new ItemWalletUpgrade();
+		armorMagicHelm = new ItemArmorMagic(ZSSMain.proxy.addArmor("magic_armor"), ArmorIndex.TYPE_HELM).setUnlocalizedName("zss.magic_armor_helm");
+		armorMagicChest = new ItemArmorMagic.Chest(ZSSMain.proxy.addArmor("magic_armor")).setUnlocalizedName("zss.magic_armor_chest");
+		armorMagicLegs = new ItemArmorMagic(ZSSMain.proxy.addArmor("magic_armor"), ArmorIndex.TYPE_LEGS).setUnlocalizedName("zss.magic_armor_legs");
+		armorMagicBoots = new ItemArmorMagic(ZSSMain.proxy.addArmor("magic_armor"), ArmorIndex.TYPE_BOOTS).setUnlocalizedName("zss.magic_armor_boots");
 	}
 
 	/**
@@ -836,6 +845,9 @@ public class ZSSItems
 		GameRegistry.addRecipe(new ItemStack(ZSSBlocks.ceramicJar,8), "c c","c c"," c ", 'c', Items.brick);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.skillOrb, 1, SkillBase.bonusHeart.getId()), "HH","HH", 'H', heartPiece);
 		GameRegistry.addRecipe(new ItemStack(ZSSItems.instrument, 1, ItemInstrument.Instrument.OCARINA_FAIRY.ordinal()), " c ","crc", 'c', Items.clay_ball, 'r', Items.reeds);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.armorMagicBoots), "rrr","rar", "rrr", 'r', new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), 'a', Items.iron_boots);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.armorMagicHelm), "rrr","rar", "rrr", 'r', new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), 'a', Items.iron_helmet);
+		GameRegistry.addRecipe(new ItemStack(ZSSItems.armorMagicLegs), "rrr","rar", "rrr", 'r', new ItemStack(ZSSItems.rupee, 1, ItemRupee.Rupee.GREEN_RUPEE.ordinal()), 'a', Items.iron_leggings);
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicHeroLegs, new ItemStack(Items.dye, 1, 1));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicGoronLegs), tunicZoraLegs, new ItemStack(Items.dye, 1, 1));
 		GameRegistry.addShapelessRecipe(new ItemStack(tunicHeroLegs), tunicGoronLegs, new ItemStack(Items.dye, 1, 2));
