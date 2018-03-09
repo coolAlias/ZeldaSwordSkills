@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2015> <coolAlias>
+    Copyright (C) <2018> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,6 @@ import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import zeldaswordskills.api.item.ArmorIndex;
-import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.AbstractMessage.AbstractClientMessage;
 import cpw.mods.fml.relauncher.Side;
 
@@ -32,9 +30,13 @@ import cpw.mods.fml.relauncher.Side;
  * Getting around derpiness of Minecraft: client-side world.getMaterial returns
  * incorrect value and is unable to detect liquids until player is submerged,
  * regardless of position parameters passed.
- * 
+ * <br><br>
  * This packet should be received on the client side when the player is standing
- * in liquid wearing Heavy Boots; use to increase velocity.
+ * in liquid wearing Heavy Boots or something with an equivalent effect. Client
+ * will trust that the server sent the packet in good faith.
+ * <br><br>
+ * Causes player to sink quickly and struggle to swim upward, as well as to have
+ * increased movement speed when in liquid but touching the ground.
  *
  */
 public class InLiquidPacket extends AbstractClientMessage<InLiquidPacket>
@@ -60,17 +62,17 @@ public class InLiquidPacket extends AbstractClientMessage<InLiquidPacket>
 
 	@Override
 	protected void process(EntityPlayer player, Side side) {
-		if (player.getCurrentArmor(ArmorIndex.WORN_BOOTS) != null && player.getCurrentArmor(ArmorIndex.WORN_BOOTS).getItem() == ZSSItems.bootsHeavy) {
-			double d = (inLava ? 1.75D : 1.125D);
-			if (player.onGround) {
-				player.motionX *= d;
-				player.motionZ *= d;
-			} else if (player.motionY < 0 && !Minecraft.getMinecraft().gameSettings.keyBindJump.getIsKeyPressed()) {
-				player.motionY *= 1.5;
-				if (player.motionY < -0.35D) {
-					player.motionY = -0.35D;
-				}
+		if (player.onGround) {
+			double d = (this.inLava ? 1.75D : 1.125D);
+			player.motionX *= d;
+			player.motionZ *= d;
+		} else if (player.motionY < 0 && !Minecraft.getMinecraft().gameSettings.keyBindJump.getIsKeyPressed()) {
+			player.motionY *= 1.5D;
+			if (player.motionY < -0.35D) {
+				player.motionY = -0.35D;
 			}
+		} else {
+			player.motionY *= 0.7D;
 		}
 	}
 }
