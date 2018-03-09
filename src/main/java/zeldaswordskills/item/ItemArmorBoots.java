@@ -45,6 +45,7 @@ import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.api.item.IEquipTrigger;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.ZSSEntityInfo;
@@ -75,7 +76,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * Rubber Boots: Handy for reducing the wearer's conductivity.
  *
  */
-public class ItemArmorBoots extends ItemArmor implements IUnenchantable
+public class ItemArmorBoots extends ItemArmor implements IEquipTrigger, IUnenchantable
 {
 	/** Armor model texture resource location */
 	private final String resourceLocation;
@@ -121,30 +122,10 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 	}
 
 	@Override
-	public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
-		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_BOOTS)) {
-			info.setWearingBoots(stack);
-		}
-	}
+	public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {}
 
-	/**
-	 * Applies modifiers for boots when equipped, calling {@link #removeModifiers} followed by {@link #applyCustomModifiers}
-	 */
-	public final void applyModifiers(ItemStack stack, EntityPlayer player) {
-		removeModifiers(stack, player);
-		applyCustomModifiers(stack, player);
-	}
-
-	/**
-	 * Called from {@link #applyModifiers} to add any special modifiers when equipped
-	 */
-	protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {}
-
-	/**
-	 * Called when a pair of boots is unequipped to remove any modifiers
-	 */
-	public void removeModifiers(ItemStack stack, EntityPlayer player) {}
+	@Override
+	public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {}
 
 	/**
 	 * Undoes whatever acceleration has been applied by materials such as flowing water
@@ -261,14 +242,14 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 		}
 
 		@Override
-		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).applyModifier(heavyBootsKnockbackModifier);
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(heavyBootsMovePenalty);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_DOWN, Integer.MAX_VALUE, 50);
 		}
 
 		@Override
-		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			player.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).removeModifier(heavyBootsKnockbackModifier);
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(heavyBootsMovePenalty);
 			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_DOWN);
@@ -318,14 +299,14 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 		}
 
 		@Override
-		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(pegasusBootsMoveBonus);
 			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
 		}
 
 		@Override
-		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(pegasusBootsMoveBonus);
 			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, false);
 			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
@@ -339,12 +320,12 @@ public class ItemArmorBoots extends ItemArmor implements IUnenchantable
 		}
 
 		@Override
-		protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_SHOCK, Integer.MAX_VALUE, 50);
 		}
 
 		@Override
-		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_SHOCK);
 		}
 	}

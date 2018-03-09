@@ -39,6 +39,7 @@ import net.minecraft.world.World;
 import zeldaswordskills.api.entity.CustomExplosion;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.item.ArmorIndex;
+import zeldaswordskills.api.item.IEquipTrigger;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.api.item.IZoomHelper;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
@@ -65,7 +66,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * All types of Masks should use or extend class
  *
  */
-public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
+public class ItemMask extends ItemArmor implements IEquipTrigger, IUnenchantable, IZoomHelper
 {
 	/** Effect to add every 50 ticks */
 	protected PotionEffect tickingEffect = null;
@@ -123,10 +124,6 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 
 	@Override
 	public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
-		ZSSPlayerInfo info = ZSSPlayerInfo.get(player);
-		if (!info.getFlag(ZSSPlayerInfo.IS_WEARING_HELM)) {
-			info.setWearingHelm(stack);
-		}
 		if (tickingEffect != null && world.getTotalWorldTime() % 50 == 0) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
 		}
@@ -204,6 +201,16 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 	}
 
 	@Override
+	public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
+		if (tickingEffect != null) {
+			player.addPotionEffect(new PotionEffect(tickingEffect));
+		}
+	}
+
+	@Override
+	public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister register) {
 		itemIcon = register.registerIcon(ModInfo.ID + ":" + getUnlocalizedName().substring(9));
@@ -216,28 +223,6 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 	}
 
 	/**
-	 * Applies modifiers for masks when equipped, first calling {@link #removeModifiers},
-	 * then adding any potion effect, and finally calling {@link #applyCustomModifiers}
-	 */
-	public final void applyModifiers(ItemStack stack, EntityPlayer player) {
-		removeModifiers(stack, player);
-		if (tickingEffect != null) {
-			player.addPotionEffect(new PotionEffect(tickingEffect));
-		}
-		applyCustomModifiers(stack, player);
-	}
-
-	/**
-	 * Called from {@link ItemMask#applyModifiers} to add any special modifiers when equipped
-	 */
-	protected void applyCustomModifiers(ItemStack stack, EntityPlayer player) {}
-
-	/**
-	 * Called when a mask is unequipped to remove any modifiers
-	 */
-	public void removeModifiers(ItemStack stack, EntityPlayer player) {}
-
-	/**
 	 * Used by the Blast Mask to cause an explosion; sets a short cooldown on the stack
 	 */
 	public void explode(EntityPlayer player, ItemStack stack, World world, double x, double y, double z) {}
@@ -245,10 +230,12 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 	//======================================================================//
 	//	Static inner classes for Masks with custom behaviors				//
 	//======================================================================//
-	public static class ItemMaskBlast extends ItemMask {
+	public static class ItemMaskBlast extends ItemMask
+	{
 		public ItemMaskBlast(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void explode(EntityPlayer player, ItemStack stack, World world, double x, double y, double z) {
 			if (player.capabilities.isCreativeMode || !isCooling(world, stack)) {
@@ -258,12 +245,14 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 				world.playSoundEffect(x, y, z, Sounds.CLICK, 0.3F, 0.6F);
 			}
 		}
+
 		/**
 		 * Returns true if this Mask is cooling down
 		 */
 		private boolean isCooling(World world, ItemStack stack) {
 			return (stack.hasTagCompound() && world.getTotalWorldTime() < stack.getTagCompound().getInteger("nextUse"));
 		}
+
 		/**
 		 * Sets the time, in ticks, which must pass before the stack may be used again
 		 */
@@ -272,6 +261,7 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 			stack.getTagCompound().setLong("nextUse", world.getTotalWorldTime() + time);
 		}
 	}
+
 	public static class ItemMaskBunny extends ItemMask
 	{
 		/** Movement bonus for wearing the Bunny Hood */
@@ -281,23 +271,29 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 		public ItemMaskBunny(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
-		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
+			super.onArmorEquipped(stack, player, equipSlot);
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(bunnyHoodMoveBonus);
 			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
 		}
+
 		@Override
-		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(bunnyHoodMoveBonus);
 			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
 			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
 		}
 	}
-	public static class ItemMaskCouples extends ItemMask {
+
+	public static class ItemMaskCouples extends ItemMask
+	{
 		public ItemMaskCouples(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 			super.onArmorTick(world, player, stack);
@@ -311,19 +307,24 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 			}
 		}
 	}
-	public static class ItemMaskGiants extends ItemMask {
+
+	public static class ItemMaskGiants extends ItemMask
+	{
 		public ItemMaskGiants(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
-		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
+			super.onArmorEquipped(stack, player, equipSlot);
 			DirtyEntityAccessor.setSize(player, player.width * 3.0F, player.height * 3.0F);
 			if (player.worldObj.isRemote) {
 				player.stepHeight += 1.0F;
 			}
 		}
+
 		@Override
-		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			if (player.getEntityData().hasKey("origWidth")) {
 				DirtyEntityAccessor.restoreOriginalSize(player);
 				if (player.worldObj.isRemote) {
@@ -332,39 +333,52 @@ public class ItemMask extends ItemArmor implements IUnenchantable, IZoomHelper
 			}
 		}
 	}
-	public static class ItemMaskGoron extends ItemMask {
+
+	public static class ItemMaskGoron extends ItemMask
+	{
 		public ItemMaskGoron(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
-		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
+			super.onArmorEquipped(stack, player, equipSlot);
 			ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 		}
+
 		@Override
-		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_FIRE);
 		}
 	}
-	public static class ItemMaskHawkeye extends ItemMask {
+
+	public static class ItemMaskHawkeye extends ItemMask
+	{
 		public ItemMaskHawkeye(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		@SideOnly(Side.CLIENT)
 		public float getMagnificationFactor() {
 			return 3.0F;
 		}
 	}
-	public static class ItemMaskMajora extends ItemMask {
+
+	public static class ItemMaskMajora extends ItemMask
+	{
 		public ItemMaskMajora(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
-		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorEquipped(ItemStack stack, EntityPlayer player, int equipSlot) {
+			super.onArmorEquipped(stack, player, equipSlot);
 			ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
 		}
+
 		@Override
-		public void removeModifiers(ItemStack stack, EntityPlayer player) {
+		public void onArmorUnequipped(ItemStack stack, EntityPlayer player, int equipSlot) {
 			ZSSEntityInfo.get(player).removeBuff(Buff.ATTACK_UP);
 		}
 	}
