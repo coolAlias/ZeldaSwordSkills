@@ -33,7 +33,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraftforge.oredict.OreDictionary;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
-import zeldaswordskills.api.entity.merchant.RupeeTradeRandom;
+import zeldaswordskills.api.entity.merchant.RupeeTradeTemplate;
 import zeldaswordskills.item.IRupeeValue;
 import zeldaswordskills.ref.Config;
 
@@ -89,7 +89,7 @@ public class RupeeValueRegistry
 	 * Creates a non-variable rupee trade template with no use limit and a weight of 1.0F
 	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 */
-	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup) {
+	public static RupeeTradeTemplate getRupeeTradeTemplate(ItemStack stack, int backup) {
 		return RupeeValueRegistry.getRupeeTradeTemplate(stack, backup, 0, false);
 	}
 
@@ -97,7 +97,7 @@ public class RupeeValueRegistry
 	 * Creates a non-variable rupee trade template with the specified use limit and a weight of 1.0F
 	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 */
-	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses) {
+	public static RupeeTradeTemplate getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses) {
 		return RupeeValueRegistry.getRupeeTradeTemplate(stack, backup, maxUses, false);
 	}
 
@@ -106,33 +106,33 @@ public class RupeeValueRegistry
 	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 * @param varPrice If true, {@link #getDefaultPriceRange(ItemStack, int)} is used to determine the price range
 	 */
-	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses, boolean varPrice) {
+	public static RupeeTradeTemplate getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses, boolean varPrice) {
 		//Pair<Integer, Integer> price = (varPrice ? RupeeValueRegistry.getDefaultPriceRange(stack, backup) : Pair.of(0, RupeeValueRegistry.getRupeeValue(stack, backup)));
 		// TODO use -1 so price is randomized based on config values at time of trade generation
 		Pair<Integer, Integer> price = (varPrice ? Pair.of(-1, backup) : Pair.of(0, RupeeValueRegistry.getRupeeValue(stack, backup)));
 		// Disable price scaling since stack size is not variable
-		return new RupeeTradeRandom(stack, price, 0, 0, maxUses, 1.0F).setPriceAbsolute();
+		return new RupeeTradeTemplate(stack, price, 0, 0, maxUses, 1.0F).setPriceAbsolute();
 	}
 
 	/**
 	 * Calls {@link #getRupeeTradeTemplate(ItemStack, int, int, int, int, float)} with a fixed stack size and no random enchantments.
 	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 */
-	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses, float weight) {
+	public static RupeeTradeTemplate getRupeeTradeTemplate(ItemStack stack, int backup, int maxUses, float weight) {
 		return RupeeValueRegistry.getRupeeTradeTemplate(stack, backup, 0, 0, maxUses, weight);
 	}
 
 	/**
-	 * Creates a RupeeTradeRandom using the {@link #getDefaultPriceRange(ItemStack, int) default price range}.
+	 * Creates a RupeeTradeTemplate using the {@link #getDefaultPriceRange(ItemStack, int) default price range}.
 	 * @param stack
 	 * @param backup Price if no configured value found (see {@link #getRupeeValue(ItemStack, int)})
 	 * @param rng_min Lower bound for random distribution of either stack size or enchantability
 	 * @param rng_max Upper bound for random distribution of either stack size or enchantability
 	 * @param maxUses See {@link RupeeTrade#getMaxUses()}
 	 */
-	public static RupeeTradeRandom getRupeeTradeTemplate(ItemStack stack, int backup, int rng_min, int rng_max, int maxUses, float weight) {
-		Pair<Integer, Integer> price = RupeeValueRegistry.getDefaultPriceRange(stack, backup);
-		return new RupeeTradeRandom(stack, price, rng_min, rng_max, maxUses, weight);
+	public static RupeeTradeTemplate getRupeeTradeTemplate(ItemStack stack, int backup, int rng_min, int rng_max, int maxUses, float weight) {
+		// Pair<Integer, Integer> price = RupeeValueRegistry.getDefaultPriceRange(stack, backup);
+		return new RupeeTradeTemplate(stack, -1, backup, rng_min, rng_max, maxUses, weight);
 	}
 
 	/**

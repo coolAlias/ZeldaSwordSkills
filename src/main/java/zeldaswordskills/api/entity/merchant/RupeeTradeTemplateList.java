@@ -27,27 +27,27 @@ import net.minecraft.util.MathHelper;
 
 /**
  * 
- * List of {@link RupeeTradeRandom} for building either an ordered list of
+ * List of {@link RupeeTradeTemplate} for building either an ordered list of
  * individually randomized trades or a completley randomized list of trades.
  * 
  */
-public class RupeeTradeListRandom extends RupeeTradeList<RupeeTradeRandom>
+public class RupeeTradeTemplateList extends RupeeTradeList<RupeeTradeTemplate>
 {
 	private static final long serialVersionUID = 1L;
 
-	public RupeeTradeListRandom(String tagName) {
+	public RupeeTradeTemplateList(String tagName) {
 		super(tagName);
 	}
 
-	public RupeeTradeListRandom(NBTTagCompound tag) {
+	public RupeeTradeTemplateList(NBTTagCompound tag) {
 		super(tag);
 	}
 
-	public RupeeTradeListRandom(JsonElement json) {
+	public RupeeTradeTemplateList(JsonElement json) {
 		super(json);
 	}
 
-	public RupeeTradeListRandom(RupeeTradeListRandom original) {
+	public RupeeTradeTemplateList(RupeeTradeTemplateList original) {
 		super(original);
 	}
 
@@ -60,7 +60,7 @@ public class RupeeTradeListRandom extends RupeeTradeList<RupeeTradeRandom>
 	public RupeeTradeList<RupeeTrade> getRandomizedTradeList(Random rand) {
 		RupeeTradeList<RupeeTrade> trades = new RupeeTradeList<RupeeTrade>(this.getTagName());
 		for (int i = 0; i < this.size(); ++i) {
-			RupeeTradeRandom trade = this.get(i);
+			RupeeTradeTemplate trade = this.get(i);
 			if (rand.nextFloat() < trade.getWeight()) {
 				trades.add(trade.getRandomizedTrade(rand));
 			}
@@ -78,7 +78,7 @@ public class RupeeTradeListRandom extends RupeeTradeList<RupeeTradeRandom>
 	public RupeeTradeList<RupeeTrade> getRandomizedTradeList(Random rand, float mod) {
 		RupeeTradeList<RupeeTrade> trades = new RupeeTradeList<RupeeTrade>(this.getTagName());
 		for (int i = 0; i < this.size(); ++i) {
-			RupeeTradeRandom trade = this.get(i);
+			RupeeTradeTemplate trade = this.get(i);
 			if (rand.nextFloat() < this.adjustProbability(trade.getWeight() + mod)) {
 				trades.add(trade.getRandomizedTrade(rand));
 			}
@@ -103,12 +103,12 @@ public class RupeeTradeListRandom extends RupeeTradeList<RupeeTradeRandom>
 	}
 
 	@Override
-	protected RupeeTradeRandom getTradeFromNBT(NBTTagCompound compound) {
-		return new RupeeTradeRandom(compound);
+	protected RupeeTradeTemplate getTradeFromNBT(NBTTagCompound compound) {
+		return new RupeeTradeTemplate(compound);
 	}
 
 	@Override
-	protected RupeeTradeRandom getTradeFromJson(JsonElement json) {
-		return new RupeeTradeRandom(json);
+	protected RupeeTradeTemplate getTradeFromJson(JsonElement json) {
+		return new RupeeTradeTemplate(json);
 	}
 }

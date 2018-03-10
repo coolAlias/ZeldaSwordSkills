@@ -39,10 +39,10 @@ import zeldaswordskills.api.item.RupeeValueRegistry;
  * <br>
  * For non-variable stack size / enchantability, set {@link #rng_max} to 0.
  * <br><br>
- * See also {@link RupeeTradeListRandom} for generating randomized trade lists.
+ * See also {@link RupeeTradeTemplateList} for generating randomized trade lists.
  *
  */
-public class RupeeTradeRandom extends RupeeTrade
+public class RupeeTradeTemplate extends RupeeTrade
 {
 	/** The minimum price; price will not be variable if this value is less than 1 */
 	protected int price_min;
@@ -63,46 +63,46 @@ public class RupeeTradeRandom extends RupeeTrade
 	protected boolean scale_price;
 
 	/**
-	 * Creates a {@link #RupeeTradeRandom(ItemStack, int, int, int, int, int, float) RupeeTradeRandom} with no variability of any kind and a weight of 1.0F.
+	 * Creates a {@link #RupeeTradeTemplate(ItemStack, int, int, int, int, int, float) RupeeTradeTemplate} with no variability of any kind and a weight of 1.0F.
 	 * @param tradeStack
 	 * @param price Fixed trade price
 	 * @param maxUses Number of times this trade may be used; 0 or less implies no limit
 	 */
-	public RupeeTradeRandom(ItemStack tradeStack, int price, int maxUses) {
+	public RupeeTradeTemplate(ItemStack tradeStack, int price, int maxUses) {
 		this(tradeStack, 0, price, 0, 0, maxUses, 1.0F);
 	}
 
 	/**
-	 * Creates a {@link #RupeeTradeRandom(ItemStack, int, int, int, int, int, float) RupeeTradeRandom} with no variability of any kind.
+	 * Creates a {@link #RupeeTradeTemplate(ItemStack, int, int, int, int, int, float) RupeeTradeTemplate} with no variability of any kind.
 	 * @param tradeStack
 	 * @param price Fixed trade price
 	 * @param maxUses Number of times this trade may be used; 0 or less implies no limit
-	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeListRandom#getRandomizedTradeList}
+	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeTemplateList#getRandomizedTradeList}
 	 */
-	public RupeeTradeRandom(ItemStack tradeStack, int price, int maxUses, float weight) {
+	public RupeeTradeTemplate(ItemStack tradeStack, int price, int maxUses, float weight) {
 		this(tradeStack, 0, price, 0, 0, maxUses, weight);
 	}
 
 	/**
-	 * Creates a {@link #RupeeTradeRandom(ItemStack, int, int, int, int, int, float) RupeeTradeRandom} with a fixed stack size and no random enchantments.
+	 * Creates a {@link #RupeeTradeTemplate(ItemStack, int, int, int, int, int, float) RupeeTradeTemplate} with a fixed stack size and no random enchantments.
 	 * @param tradeStack
 	 * @param price_range Pair containing the upper (right) and lower (left) bounds for the trade price
 	 * @param maxUses Number of times this trade may be used; 0 or less implies no limit
-	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeListRandom#getRandomizedTradeList}
+	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeTemplateList#getRandomizedTradeList}
 	 */
-	public RupeeTradeRandom(ItemStack tradeStack, Pair<Integer, Integer> price_range, int maxUses, float weight) {
+	public RupeeTradeTemplate(ItemStack tradeStack, Pair<Integer, Integer> price_range, int maxUses, float weight) {
 		this(tradeStack, price_range.getLeft(), price_range.getRight(), 0, 0, maxUses, weight);
 	}
 
 	/**
-	 * Creates a {@link #RupeeTradeRandom(ItemStack, int, int, int, int, float) RupeeTradeRandom} with no enchantability
+	 * Creates a {@link #RupeeTradeTemplate(ItemStack, int, int, int, int, float) RupeeTradeTemplate} with no enchantability
 	 * @param tradeStack
 	 * @param min The minimum price; if less than 0, the price will be randomized using {@link RupeeValueRegistry#getDefaultPriceRange(ItemStack, int)}
 	 * @param max The maximum price
 	 * @param maxUses Number of times this trade may be used; 0 or less implies no limit
-	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeListRandom#getRandomizedTradeList}
+	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeTemplateList#getRandomizedTradeList}
 	 */
-	public RupeeTradeRandom(ItemStack tradeStack, int min, int max, int maxUses, float weight) {
+	public RupeeTradeTemplate(ItemStack tradeStack, int min, int max, int maxUses, float weight) {
 		this(tradeStack, min, max, 0, 0, maxUses, weight);
 	}
 
@@ -112,9 +112,9 @@ public class RupeeTradeRandom extends RupeeTrade
 	 * @param rng_min Lower bound for random distribution of either stack size or enchantability
 	 * @param rng_max Upper bound for random distribution of either stack size or enchantability
 	 * @param maxUses Number of times this trade may be used; 0 or less implies no limit
-	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeListRandom#getRandomizedTradeList}
+	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeTemplateList#getRandomizedTradeList}
 	 */
-	public RupeeTradeRandom(ItemStack tradeStack, Pair<Integer, Integer> price_range, int rng_min, int rng_max, int maxUses, float weight) {
+	public RupeeTradeTemplate(ItemStack tradeStack, Pair<Integer, Integer> price_range, int rng_min, int rng_max, int maxUses, float weight) {
 		this(tradeStack, price_range.getLeft(), price_range.getRight(), rng_min, rng_max, maxUses, weight);
 	}
 
@@ -125,9 +125,9 @@ public class RupeeTradeRandom extends RupeeTrade
 	 * @param rng_min Lower bound for random distribution of either stack size or enchantability
 	 * @param rng_max Upper bound for random distribution of either stack size or enchantability
 	 * @param maxUses Number of times this trade may be used; 0 or less implies no limit
-	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeListRandom#getRandomizedTradeList}
+	 * @param weight Chance (0.0F to 1.0F) that this trade will be included in a randomized trade list; see {@link RupeeTradeTemplateList#getRandomizedTradeList}
 	 */
-	public RupeeTradeRandom(ItemStack tradeStack, int min, int max, int rng_min, int rng_max, int maxUses, float weight) {
+	public RupeeTradeTemplate(ItemStack tradeStack, int min, int max, int rng_min, int rng_max, int maxUses, float weight) {
 		super(tradeStack, max, maxUses);
 		this.price_min = min;
 		this.rng_min = rng_min;
@@ -137,12 +137,12 @@ public class RupeeTradeRandom extends RupeeTrade
 		this.scale_price = true;
 	}
 
-	public RupeeTradeRandom(NBTTagCompound tag) {
+	public RupeeTradeTemplate(NBTTagCompound tag) {
 		super(tag);
 		this.readAdditionalNbtFields(tag);
 	}
 
-	public RupeeTradeRandom(JsonElement json) {
+	public RupeeTradeTemplate(JsonElement json) {
 		super(json);
 		this.readAdditionalJsonFields(json.getAsJsonObject());
 	}
@@ -157,7 +157,7 @@ public class RupeeTradeRandom extends RupeeTrade
 	/**
 	 * Sets the trade to add random enchantments instead of randomizing stack size
 	 */
-	public RupeeTradeRandom setEnchanted() {
+	public RupeeTradeTemplate setEnchanted() {
 		this.enchant = true;
 		return this;
 	}
@@ -165,7 +165,7 @@ public class RupeeTradeRandom extends RupeeTrade
 	/**
 	 * Set the price as absolute, i.e. it will not scale based on stack size when stack size is randomized
 	 */
-	public RupeeTradeRandom setPriceAbsolute() {
+	public RupeeTradeTemplate setPriceAbsolute() {
 		this.scale_price = false;
 		return this;
 	}

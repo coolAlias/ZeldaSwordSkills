@@ -62,10 +62,10 @@ public class RupeeMerchantHelper
 	private static final String BASE_PATH = Config.config.getConfigFile().getParentFile().getAbsolutePath() + "/rupee_trades/";
 
 	/** Default initial trade lists; may contain null values for invalid ResourceLocations - this prevents potential redundant file requests */
-	private static final Map<ResourceLocation, Pair<RupeeTradeListRandom, RupeeTradeListRandom>> tradeLists = new HashMap<ResourceLocation, Pair<RupeeTradeListRandom, RupeeTradeListRandom>>();
+	private static final Map<ResourceLocation, Pair<RupeeTradeTemplateList, RupeeTradeTemplateList>> tradeLists = new HashMap<ResourceLocation, Pair<RupeeTradeTemplateList, RupeeTradeTemplateList>>();
 
 	/** Default trade lists typically used for adding new trades; may contain null values for invalid ResourceLocations - this prevents potential redundant file requests */
-	private static final Map<ResourceLocation, Pair<RupeeTradeListRandom, RupeeTradeListRandom>> randomTradeLists = new HashMap<ResourceLocation, Pair<RupeeTradeListRandom, RupeeTradeListRandom>>();
+	private static final Map<ResourceLocation, Pair<RupeeTradeTemplateList, RupeeTradeTemplateList>> randomTradeLists = new HashMap<ResourceLocation, Pair<RupeeTradeTemplateList, RupeeTradeTemplateList>>();
 
 	private RupeeMerchantHelper() {}
 
@@ -196,7 +196,7 @@ public class RupeeMerchantHelper
 	}
 
 	/**
-	 * Calls {@link #addRandomTrades(RupeeTradeList, RupeeTradeListRandom, Random, int)} for the
+	 * Calls {@link #addRandomTrades(RupeeTradeList, RupeeTradeTemplateList, Random, int)} for the
 	 * merchant using the random trade list found for the resource location, if any.
 	 * @param merchant
 	 * @param location Used to fetch random trade list from {@link #getRandomTradeList(ResourceLocation, boolean)}
@@ -205,7 +205,7 @@ public class RupeeMerchantHelper
 	 * @param n
 	 */
 	public static void addRandomTrades(IRupeeMerchant merchant, ResourceLocation location, boolean getItemsToSell, Random rand, int n) {
-		RupeeTradeListRandom randomTrades = RupeeMerchantHelper.getRandomTradeList(location, getItemsToSell);
+		RupeeTradeTemplateList randomTrades = RupeeMerchantHelper.getRandomTradeList(location, getItemsToSell);
 		ZSSMain.logger.info(String.format("Random trade list for %s is %s", location.toString(), randomTrades));
 		RupeeMerchantHelper.addRandomTrades(merchant.getRupeeTrades(getItemsToSell), randomTrades, rand, n);
 	}
@@ -217,11 +217,11 @@ public class RupeeMerchantHelper
 	 * @param rand
 	 * @param n Maximum number of random trades to add
 	 */
-	public static void addRandomTrades(RupeeTradeList<RupeeTrade> trades, RupeeTradeListRandom randomTrades, Random rand, int n) {
+	public static void addRandomTrades(RupeeTradeList<RupeeTrade> trades, RupeeTradeTemplateList randomTrades, Random rand, int n) {
 		if (trades == null || randomTrades == null || randomTrades.isEmpty()) {
 			return;
 		}
-		RupeeTradeList<RupeeTrade> shuffled = randomTrades.getRandomizedTradeList(rand, RupeeTradeListRandom.getDefaultModifier(trades));
+		RupeeTradeList<RupeeTrade> shuffled = randomTrades.getRandomizedTradeList(rand, RupeeTradeTemplateList.getDefaultModifier(trades));
 		if (shuffled != null && !shuffled.isEmpty()) {
 			for (int i = 0; i < n && i < shuffled.size(); i++) {
 				trades.addOrUpdateTrade(shuffled.get(i));
@@ -255,7 +255,7 @@ public class RupeeMerchantHelper
 	 * Sets the merchant's rupee trade lists to those found at the given ResourceLocation
 	 */
 	public static void setDefaultTrades(IRupeeMerchant merchant, ResourceLocation location, Random rand) {
-		Pair<RupeeTradeListRandom, RupeeTradeListRandom> trades = null;
+		Pair<RupeeTradeTemplateList, RupeeTradeTemplateList> trades = null;
 		if (tradeLists.containsKey(location)) {
 			LOGGER.info("Fetching default trades from CACHE for " + location.toString());
 			trades = tradeLists.get(location);
@@ -278,8 +278,8 @@ public class RupeeMerchantHelper
 	/**
 	 * Returns the random trade list for the given ResourceLocation, if any
 	 */
-	public static RupeeTradeListRandom getRandomTradeList(ResourceLocation location, boolean getItemsToSell) {
-		Pair<RupeeTradeListRandom, RupeeTradeListRandom> trades = null;
+	public static RupeeTradeTemplateList getRandomTradeList(ResourceLocation location, boolean getItemsToSell) {
+		Pair<RupeeTradeTemplateList, RupeeTradeTemplateList> trades = null;
 		if (randomTradeLists.containsKey(location)) {
 			LOGGER.info("Fetching default random trades from CACHE for " + location.toString());
 			trades = randomTradeLists.get(location);
@@ -290,13 +290,13 @@ public class RupeeMerchantHelper
 		}
 		// Return a copy so modifications don't affect the stored list
 		if (trades != null) {
-			RupeeTradeListRandom list = (getItemsToSell ? trades.getLeft() : trades.getRight());
-			return (list == null ? null : new RupeeTradeListRandom(list));
+			RupeeTradeTemplateList list = (getItemsToSell ? trades.getLeft() : trades.getRight());
+			return (list == null ? null : new RupeeTradeTemplateList(list));
 		}
 		return null;
 	}
 
-	private static Pair<RupeeTradeListRandom, RupeeTradeListRandom> readRandomTradesFromFile(ResourceLocation location) {
+	private static Pair<RupeeTradeTemplateList, RupeeTradeTemplateList> readRandomTradesFromFile(ResourceLocation location) {
 		String filename = RupeeMerchantHelper.getResourcePath(location);
 		if (filename == null) {
 			return null;
@@ -307,7 +307,7 @@ public class RupeeMerchantHelper
 			JsonElement json = parser.parse(new FileReader(path.toFile()));
 			if (json.isJsonObject()) {
 				JsonObject object = json.getAsJsonObject();
-				Pair<RupeeTradeListRandom, RupeeTradeListRandom> trades = null;
+				Pair<RupeeTradeTemplateList, RupeeTradeTemplateList> trades = null;
 				if (object.has("parent")) {
 					ResourceLocation parent = new ResourceLocation(object.get("parent").getAsString());
 					if (randomTradeLists.containsKey(parent)) {
@@ -324,12 +324,12 @@ public class RupeeMerchantHelper
 						}
 					}
 				}
-				RupeeTradeListRandom buys = (object.has("buys") ? new RupeeTradeListRandom(object.get("buys")) : null);
-				RupeeTradeListRandom sells = (object.has("sells") ? new RupeeTradeListRandom(object.get("sells")) : null);
+				RupeeTradeTemplateList buys = (object.has("buys") ? new RupeeTradeTemplateList(object.get("buys")) : null);
+				RupeeTradeTemplateList sells = (object.has("sells") ? new RupeeTradeTemplateList(object.get("sells")) : null);
 				if (trades != null) {
 					// Make a copy to prevent the stored parent lists from being modified
-					RupeeTradeListRandom left = (trades.getLeft() == null ? null : new RupeeTradeListRandom(trades.getLeft()));
-					RupeeTradeListRandom right = (trades.getRight() == null ? null : new RupeeTradeListRandom(trades.getRight()));
+					RupeeTradeTemplateList left = (trades.getLeft() == null ? null : new RupeeTradeTemplateList(trades.getLeft()));
+					RupeeTradeTemplateList right = (trades.getRight() == null ? null : new RupeeTradeTemplateList(trades.getRight()));
 					int n = (right == null ? 0 : right.size());
 					if (buys != null) {
 						if (left == null) {
@@ -345,11 +345,11 @@ public class RupeeMerchantHelper
 							right.addAll(sells);
 						}
 					}
-					trades = new ImmutablePair<RupeeTradeListRandom, RupeeTradeListRandom>(left, right);
+					trades = new ImmutablePair<RupeeTradeTemplateList, RupeeTradeTemplateList>(left, right);
 					ZSSMain.logger.info(String.format("Added to existing random trade Pair; sales size before = %d, size after = %d", n, (right == null ? 0 : right.size())));
 				} else {
 					ZSSMain.logger.info("Creating new random trade Pair");
-					trades = new ImmutablePair<RupeeTradeListRandom, RupeeTradeListRandom>(buys, sells);
+					trades = new ImmutablePair<RupeeTradeTemplateList, RupeeTradeTemplateList>(buys, sells);
 				}
 				return trades;
 			} else {
