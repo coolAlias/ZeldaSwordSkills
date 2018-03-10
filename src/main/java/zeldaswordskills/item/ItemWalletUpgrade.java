@@ -70,6 +70,8 @@ public class ItemWalletUpgrade extends Item
 			}
 		} else {
 			PlayerUtils.sendTranslatedChat(player, "chat.zss.wallet_upgrade.fail");
+			// TODO remove:
+			wallet.reset();
 		}
 		return stack;
 	}
