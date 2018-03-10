@@ -127,6 +127,16 @@ public class ItemArmorMagic extends ItemArmor
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, String type) {
 		String name = this.getUnlocalizedName().substring(9, this.getUnlocalizedName().lastIndexOf("_"));
+		if (this == ZSSItems.armorMagicChest) {
+			int i = (entity.ticksExisted % 100) / 20;
+			switch (i) {
+			case 0: break;
+			case 1: name = "hero_tunic"; break;
+			case 2: name = "goron_tunic"; break;
+			case 3: name = "hero_tunic"; break;
+			case 4: name = "zora_tunic"; break;
+			}
+		}
 		return String.format("%s:textures/armor/%s_layer_%d.png", ModInfo.ID, name, (slot == 2 ? 2 : 1));
 	}
 
