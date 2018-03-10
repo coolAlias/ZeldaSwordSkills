@@ -219,6 +219,9 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 			if (!this.villager.worldObj.isRemote) {
 				this.populateRupeeTradeLists(player);
 			}
+		} else if (!this.villager.worldObj.isRemote) {
+			// TODO remove random rupee trade test
+			this.addRandomTrades(1, true);
 		}
 		if (this.getRupeeCustomer() == null && !this.villager.worldObj.isRemote) {
 			this.customizeRupeeTradesForPlayer(player);
