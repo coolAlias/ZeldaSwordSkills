@@ -27,7 +27,7 @@ import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.EnumVillager;
 import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
-import zeldaswordskills.api.entity.merchant.RupeeTradeListRandom;
+import zeldaswordskills.api.entity.merchant.RupeeTradeTemplateList;
 import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.entity.VanillaRupeeMerchant;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
@@ -53,8 +53,8 @@ public class RupeeTradeLists
 	 * Creates the default trading lists for Zelda NPCs
 	 */
 	private static void createDefaultNpcTradeFiles() {
-		RupeeTradeListRandom buys = new RupeeTradeListRandom(RupeeTradeList.WILL_BUY);
-		RupeeTradeListRandom sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		RupeeTradeTemplateList buys = new RupeeTradeTemplateList(RupeeTradeList.WILL_BUY);
+		RupeeTradeTemplateList sells = new RupeeTradeTemplateList(RupeeTradeList.FOR_SALE);
 		// BARNES
 		buys.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.gunpowder), 1));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), 8));
@@ -65,8 +65,8 @@ public class RupeeTradeLists
 	 * Creates the default trading lists for Vanilla Villagers
 	 */
 	private static void createDefaultVanillaTradeFiles() {
-		RupeeTradeListRandom buys = new RupeeTradeListRandom(RupeeTradeList.WILL_BUY);
-		RupeeTradeListRandom sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		RupeeTradeTemplateList buys = new RupeeTradeTemplateList(RupeeTradeList.WILL_BUY);
+		RupeeTradeTemplateList sells = new RupeeTradeTemplateList(RupeeTradeList.FOR_SALE);
 		// BLACKSMITH
 		// TODO tested - working
 		buys.add(RupeeValueRegistry.getRupeeTradeTemplate(ItemBrokenSword.getBrokenStack(ZSSItems.swordKokiri), 20));
@@ -81,7 +81,7 @@ public class RupeeTradeLists
 		// Test cases for randomized additional trades:
 		// 1. Non-existent parent file
 		ResourceLocation parent = new ResourceLocation("minecraft", "villager/missing");
-		sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		sells = new RupeeTradeTemplateList(RupeeTradeList.FOR_SALE);
 		// a. Random enchantments
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.swordOrdon), 150, 0, 15, 0, 0.3F).setEnchanted());
 		ItemStack stack = new ItemStack(Items.iron_sword);
@@ -91,7 +91,7 @@ public class RupeeTradeLists
 		RupeeMerchantHelper.writeTradesToFile(null, sells, VanillaRupeeMerchant.getDefaultRandomTradeLocation(EnumVillager.BUTCHER), parent);
 		// 2. Valid parent file
 		parent = new ResourceLocation("minecraft", "villager/generic_random");
-		sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		sells = new RupeeTradeTemplateList(RupeeTradeList.FOR_SALE);
 		// a. Random price only; fixed stack size, no enchantments
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.cookie), 4, 0, 0.9F));
 		// b. Enchanted not-usually-enchantable item; will it work? it shouldn't
@@ -105,7 +105,7 @@ public class RupeeTradeLists
 		// 3. Child file with no trades other than what is in parent
 		RupeeMerchantHelper.writeTradesToFile(null, null, VanillaRupeeMerchant.getDefaultRandomTradeLocation(EnumVillager.FARMER), parent);
 		// 4. Child file with valid parent and at least one trade of its own
-		sells = new RupeeTradeListRandom(RupeeTradeList.FOR_SALE);
+		sells = new RupeeTradeTemplateList(RupeeTradeList.FOR_SALE);
 		// a. Unenchantable sword with random enchantments - does this break the interface?
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.swordMaster), 200, 50, 50, 1, 0.9F).setEnchanted());
 		RupeeMerchantHelper.writeTradesToFile(null, sells, VanillaRupeeMerchant.getDefaultRandomTradeLocation(EnumVillager.PRIEST), parent);
