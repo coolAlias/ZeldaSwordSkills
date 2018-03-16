@@ -219,3 +219,5 @@ pip-log.txt
 
 /eclipse
 /gradlew.bat
+/.nb-gradle/
+/libs/

@@ -14,30 +14,24 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-/*
-// for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
-}
-*/
-
-version = "3.4"
+version = "3.4.1"
 group = "com.google.coolalias.zeldaswordskills"
 archivesBaseName = "1.8.9-zeldaswordskills"
 
-sourceCompatibility = targetCompatibility = "1.7"
+sourceCompatibility = targetCompatibility = "1.8"
 
 dependencies {
-	compile files (
-		"eclipse/libs/antiqueatlas-1.8.9-4.2.10.jar",
-		"eclipse/mods/1.8.9-Battlegear-Bin-1.0.10.2.jar",
-	)
+    compile files (
+		//TODO make these auto-download from a "maven" instead of requiring the developer to download and set these up manually
+		"libs/antiqueatlas-1.8.9-4.4.0.jar",
+		"libs/1.8.9-Battlegear-Bin-1.0.10.2.jar",
+    )
 }
 
 minecraft {
-    version = "1.8.9-11.15.1.1902-1.8.9"
-    runDir = "eclipse"
-    mappings = "snapshot_20160301"
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_22"
 }
 
 processResources
@@ -63,6 +57,6 @@ task deobfJar(type: Jar) {
 }
 
 artifacts {
-	archives deobfJar
-	archives sourceJar
+    archives deobfJar
+    archives sourceJar
 }
