@@ -161,7 +161,7 @@ public class DungeonLootLists
 		stack = room.getBossType().getRandomSpecialItem(rand);
 		if (stack != null && rand.nextFloat() < 0.2F) {
 			WorldUtils.addItemToInventoryAtRandom(rand, stack, chest, 3);
-		} else {
+		} else if (skillOrbLootList.length > 0) {
 			WorldUtils.generateRandomChestContents(rand, skillOrbLootList, chest, 1, false);
 		}
 	}

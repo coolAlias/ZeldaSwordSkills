@@ -560,6 +560,11 @@ public class Config
 		bigKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Big [1-10]", 4).getInt(), 1, 10);
 		smallKeyWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Key, Small [1-10]", 4).getInt(), 1, 10);
 		lockedLootWeight = MathHelper.clamp_int(config.get("Loot", "Weight: Locked Chest Content [1-10]", 3).getInt(), 1, 10);
+		for (SkillBase skill : SkillBase.getSkills()) {
+			if (skill.isLoot() && config.get("Loot", "[Skill Orbs] Whether " + skill.getDisplayName() + " orbs may appear as random loot, such as in Boss chests", true).getBoolean(true)) {
+				lootableOrbs.add(skill.getId());
+			}
+		}
 		/*================== TRADES =====================*/
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
 		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [32-64]", 64).getInt(), 32, 64);
