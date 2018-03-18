@@ -31,7 +31,6 @@ import zeldaswordskills.api.entity.merchant.RupeeTradeTemplateList;
 import zeldaswordskills.api.item.RupeeValueRegistry;
 import zeldaswordskills.entity.VanillaRupeeMerchant;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
-import zeldaswordskills.item.ItemBrokenSword;
 import zeldaswordskills.item.ZSSItems;
 
 public class RupeeTradeLists
@@ -69,7 +68,6 @@ public class RupeeTradeLists
 		RupeeTradeTemplateList sells = new RupeeTradeTemplateList(RupeeTradeList.FOR_SALE);
 		// BLACKSMITH
 		// TODO tested - working
-		buys.add(RupeeValueRegistry.getRupeeTradeTemplate(ItemBrokenSword.getBrokenStack(ZSSItems.swordKokiri), 20));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.arrow, 10), 15));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.swordKokiri), 50));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.shieldDeku), 100));
