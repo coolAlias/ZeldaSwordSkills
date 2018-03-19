@@ -20,6 +20,7 @@ package zeldaswordskills.entity.projectile;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockButton;
 import net.minecraft.block.BlockLever;
@@ -388,6 +389,18 @@ public class EntityBoomerang extends EntityMobThrowable
 			// func_147480_a is destroyBlock
 			worldObj.func_147480_a(i, j, k, true);
 		}
+	}
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		super.writeSpawnData(buffer);
+		buffer.writeInt(this.distance);
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		super.readSpawnData(buffer);
+		this.distance = buffer.readInt();
 	}
 
 	@Override
