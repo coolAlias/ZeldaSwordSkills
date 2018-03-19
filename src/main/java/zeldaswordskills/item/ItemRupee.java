@@ -36,6 +36,7 @@ import net.minecraft.util.StatCollector;
 import zeldaswordskills.api.item.IHandlePickup;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.player.ZSSPlayerWallet;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 
 public class ItemRupee extends Item implements IHandlePickup
@@ -90,7 +91,8 @@ public class ItemRupee extends Item implements IHandlePickup
 
 	@Override
 	public boolean onPickupItem(ItemStack stack, EntityPlayer player) {
-		stack.stackSize = ZSSPlayerWallet.get(player).addRupees(stack).stackSize;
+		int n = ZSSPlayerWallet.get(player).addRupees(stack).stackSize;
+		stack.stackSize = (Config.alwaysPickUpRupees() ? 0 : n);
 		return true;
 	}
 

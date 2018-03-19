@@ -176,6 +176,8 @@ public class Config
 	private static boolean enableVanillaLift;
 	/** [SYNC] Whether vanilla blocks can be smashed using appropriate items (e.g. hammers) */
 	private static boolean enableVanillaSmash;
+	/** Always pick up rupees regardless of current wallet capacity */
+	private static boolean alwaysPickupRupees;
 	/** Always pick up small hearts regardless of health */
 	private static boolean alwaysPickupHearts;
 	/** [Boss] Boss health multiplier, as a percent increase per difficulty level (will not apply to real bosses) [100-500] */
@@ -494,6 +496,7 @@ public class Config
 		enableSecretStoneLift = config.get("General", "Whether regular (i.e. breakable) secret stone blocks can be picked up using appropriate items (e.g. gauntlets)", false).getBoolean(false);
 		enableVanillaLift = config.get("General", "Whether vanilla blocks can be picked up using appropriate items (e.g. gauntlets)", true).getBoolean(true);
 		enableVanillaSmash = config.get("General", "Whether vanilla blocks can be smashed using appropriate items (e.g. hammers)", true).getBoolean(true);
+		alwaysPickupRupees = config.get("General", "Always pick up rupees regardless of current wallet capacity", false).getBoolean(false);
 		alwaysPickupHearts = config.get("General", "Always pick up small hearts regardless of health", false).getBoolean(false);
 		enableHardcoreZeldaFanMode = config.get("General", "Hardcore Zelda Fan: Start with only 3 hearts (applies a -14 max health modifier, so it can be enabled or disabled at any time)", false).getBoolean(false);
 		bossHealthFactor = 0.01F * (float) MathHelper.clamp_int(config.get("General", "[Boss] Boss health multiplier, as a percent increase per difficulty level (does not apply to real bosses) [100-500]", 250).getInt(), 100, 500);
@@ -820,6 +823,7 @@ public class Config
 	public static boolean canLiftSecretStone() { return enableSecretStoneLift; }
 	public static boolean canLiftVanilla() { return enableVanillaLift; }
 	public static boolean canSmashVanilla() { return enableVanillaSmash; }
+	public static boolean alwaysPickUpRupees() { return alwaysPickupRupees; }
 	public static boolean alwaysPickupHearts() { return alwaysPickupHearts; }
 	public static boolean isHardcoreZeldaFan() { return enableHardcoreZeldaFanMode; }
 	public static float getBossHealthFactor() { return bossHealthFactor; }
