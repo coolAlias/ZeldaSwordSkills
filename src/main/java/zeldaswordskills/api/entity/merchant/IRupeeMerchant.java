@@ -93,10 +93,11 @@ public interface IRupeeMerchant {
 
 	/**
 	 * Called after processing {@link #onInteract(EntityPlayer)} to determine whether the EntityInteractEvent should be canceled
+	 * @param player the player for whom the GUI may have opened
 	 * @param result the Result from {@link #onInteract(EntityPlayer)}; note that the Result may
 	 *               have been changed to e.g. DENY by the interaction Event if the GUI did not open.
 	 * @return true to cancel the interaction event; false to allow it to continue to e.g. Entity#interact 
 	 */
-	boolean wasInteractionHandled(Result result);
+	boolean wasInteractionHandled(EntityPlayer player, Result result);
 
 }

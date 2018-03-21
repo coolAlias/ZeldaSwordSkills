@@ -32,7 +32,8 @@ import zeldaswordskills.api.item.RupeeValueRegistry;
 public interface IRupeeValue
 {
 	/**
-	 * The default value of this item, in rupees. Used for setting the default config values.
+	 * The default value of this item, in rupees. Used for setting the default config values
+	 * and as a backup in some cases when the rupee value config is missing.
 	 * <br>Use {@link RupeeValueRegistry#getRupeeValue(ItemStack)} to retrieve user-configured pricing.
 	 * @param stack Only Item and damage values are relevant; stack size and NBT are ignored
 	 * @return The default price a player should expect to pay for this item, in rupees
@@ -41,7 +42,7 @@ public interface IRupeeValue
 
 	/**
 	 * 
-	 * Use this interface for Items that have subtypes-dependent default rupee values.
+	 * Use this interface for Items whose default rupee values depend on the item's subtype.
 	 *
 	 */
 	public static interface IMetaRupeeValue extends IRupeeValue

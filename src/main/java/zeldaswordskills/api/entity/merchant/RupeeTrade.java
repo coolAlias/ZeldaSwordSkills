@@ -143,6 +143,14 @@ public class RupeeTrade implements IJsonSerializable
 	}
 
 	/**
+	 * Sets the number of times this trade may be used; 0 implies no limit
+	 */
+	public RupeeTrade setMaxUses(int maxUses) {
+		this.maxUses = Math.max(0, maxUses);
+		return this;
+	}
+
+	/**
 	 * Increases (or decreases) the number of times this trade may be used by n.
 	 * <br>Check {@link #getMaxUses()} before calling this if you don't want to alter an unlimited trade.
 	 */
@@ -156,6 +164,13 @@ public class RupeeTrade implements IJsonSerializable
 
 	public void incrementTimesUsed() {
 		++this.timesUsed;
+	}
+
+	/**
+	 * Set the number of times this trade has been used
+	 */
+	public void setTimesUsed(int n) {
+		this.timesUsed = Math.max(0, n);
 	}
 
 	/**

@@ -205,7 +205,7 @@ public class ZSSEntityEvents
 					result = Result.DENY; // gui was not opened
 				}
 			}
-			event.setCanceled(merchant.wasInteractionHandled(result));
+			event.setCanceled(merchant.wasInteractionHandled(event.entityPlayer, result));
 		}
 	}
 
