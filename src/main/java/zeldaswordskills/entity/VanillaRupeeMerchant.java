@@ -230,7 +230,7 @@ public class VanillaRupeeMerchant implements IRupeeMerchant
 	}
 
 	@Override
-	public boolean wasInteractionHandled(Result result) {
+	public boolean wasInteractionHandled(EntityPlayer player, Result result) {
 		return result == Result.ALLOW;
 	}
 
