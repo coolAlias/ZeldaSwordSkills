@@ -35,14 +35,17 @@ import zeldaswordskills.util.WorldUtils;
  */
 public enum BombType {
 	/** Applies vanilla explosion rules */
-	BOMB_STANDARD("standard", 5, IgnoreLiquid.NONE, true),
+	BOMB_STANDARD(1, "standard", 5, IgnoreLiquid.NONE, true),
 	/** Ignores water when determining which blocks to destroy; less effective in the Nether */
-	BOMB_WATER("water", 8, IgnoreLiquid.WATER, false),
+	BOMB_WATER(2, "water", 8, IgnoreLiquid.WATER, false),
 	/** Ignores lava when determining which blocks to destroy */
-	BOMB_FIRE("fire", 10, IgnoreLiquid.LAVA, false),
+	BOMB_FIRE(4, "fire", 10, IgnoreLiquid.LAVA, false),
 	/** Same as BOMB_STANDARD, except some bomb flower seeds may be dispersed */
-	BOMB_FLOWER("flower", 5, IgnoreLiquid.NONE, true);
+	BOMB_FLOWER(8, "flower", 5, IgnoreLiquid.NONE, true);
 
+	/** Bit mask for this bomb type */
+	public final byte bitMask;
+	
 	/** The unlocalized name of the bomb type, e.g. 'standard', 'fire', etc. */
 	public final String unlocalizedName;
 
@@ -55,7 +58,8 @@ public enum BombType {
 	/** Whether this bomb type immediately explodes when in the Nether */
 	public final boolean explodesInHell;
 
-	private BombType(String name, int defaultRupeeValue, IgnoreLiquid ignoreLiquidType, boolean explodesInHell) {
+	private BombType(int bitMask, String name, int defaultRupeeValue, IgnoreLiquid ignoreLiquidType, boolean explodesInHell) {
+		this.bitMask = (byte) bitMask;
 		this.unlocalizedName = name;
 		this.defaultRupeeValue = defaultRupeeValue;
 		this.ignoreLiquidType = ignoreLiquidType;

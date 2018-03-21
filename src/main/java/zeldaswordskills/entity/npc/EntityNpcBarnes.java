@@ -38,6 +38,10 @@ import zeldaswordskills.api.entity.merchant.RupeeMerchantHelper;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.api.entity.merchant.RupeeTradeList;
 import zeldaswordskills.api.item.RupeeValueRegistry;
+import zeldaswordskills.entity.player.quests.IQuest;
+import zeldaswordskills.entity.player.quests.QuestBombBagTrade;
+import zeldaswordskills.entity.player.quests.QuestBombTrades;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.handler.GuiHandler;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -46,14 +50,26 @@ import zeldaswordskills.ref.Sounds;
 import zeldaswordskills.util.MerchantRecipeHelper;
 import zeldaswordskills.util.PlayerUtils;
 
+/**
+ * 
+ * Barnes sells regular bombs by default unless otherwise configured.
+ * 
+ * Water and Fire bombs can be achieved by bringing him an appropriate item, in no particular order.
+ * 
+ * Bomb backs can be unlocked by buying the single version of the bomb X number of times.
+ * 
+ * A single bomb bag trade can be unlocked by talking to him with a live bomb in your hand.
+ * 
+ * An unlimited bomb bag trade can be unlocked after unlocking all bomb and bomb pack trades.
+ * 
+ * All unlockable trades are on a per player basis and can be disabled via the config.
+ *
+ */
 public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillager, IRupeeMerchant
 {
 	public static final ResourceLocation DEFAULT_RUPEE_TRADES = new ResourceLocation(ModInfo.ID, "npc/barnes");
 
 	// Remove merchant recipes after giving some time to convert old NPC's trades
-	private static final MerchantRecipe standardBomb = new MerchantRecipe(new ItemStack(Items.emerald, 8), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()));
-	private static final MerchantRecipe waterBomb = new MerchantRecipe(new ItemStack(Items.emerald, 12), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()));
-	private static final MerchantRecipe fireBomb = new MerchantRecipe(new ItemStack(Items.emerald, 16), new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FIRE.ordinal()));
 	private static final RupeeTrade BOMB_STANDARD = new RupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), 8);
 	private static final RupeeTrade BOMB_STANDARD_PACK = new RupeeTrade(new ItemStack(ZSSItems.bomb, 3, BombType.BOMB_STANDARD.ordinal()), 20);
 	private static final RupeeTrade BOMB_WATER = new RupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 12);
@@ -67,6 +83,12 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 
 	/** List of RupeeTrades this merchant has for sale */
 	protected RupeeTradeList<RupeeTrade> waresToSell;
+
+	/** The rupee merchant's current customer */
+	protected EntityPlayer rupeeCustomer;
+
+	/** The rupee merchant's last customer, used for adding to that player's reputation */
+	protected String lastRupeeCustomer;
 
 	/** True when the merchant has added some new wares */
 	protected boolean hasNewWares;
@@ -97,18 +119,25 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 
 	@Override
 	public EntityPlayer getRupeeCustomer() {
-		return this.customer;
+		return this.rupeeCustomer;
 	}
 
 	@Override
 	public void setRupeeCustomer(EntityPlayer player) {
-		this.customer = player;
+		this.rupeeCustomer = player;
 	}
 
 	@Override
 	public void openRupeeGui(EntityPlayer player, boolean getItemsToSell) {
 		int gui_id = (getItemsToSell ? GuiHandler.GUI_RUPEE_SHOP : GuiHandler.GUI_RUPEE_SALES);
 		player.openGui(ZSSMain.instance, gui_id, player.worldObj, this.getEntityId(), 0, 0);
+	}
+
+	/**
+	 * @return True if the merchant has at least one rupee trade to either buy or sell
+	 */
+	public boolean hasRupeeTrades() {
+		return (this.waresToSell != null && !this.waresToSell.isEmpty()) || (this.waresToBuy != null && !this.waresToBuy.isEmpty());
 	}
 
 	@Override
@@ -118,7 +147,55 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 
 	@Override
 	public RupeeTradeList<RupeeTrade> getCustomizedRupeeTrades(EntityPlayer player, boolean getItemsToSell) {
+		if (!this.worldObj.isRemote && !this.hasRupeeTrades()) {
+			this.populateRupeeTradeLists(player);
+		}
+		this.customizeRupeeTradesForPlayer(player);
 		return this.getRupeeTrades(getItemsToSell);
+	}
+
+	/**
+	 * Called from {@link IRupeeMerchant#onInteract(EntityPlayer) onInteract} to modify the trade lists based on the current player
+	 */
+	protected void customizeRupeeTradesForPlayer(EntityPlayer player) {
+		// Customize items the merchant will purchase
+		if (this.waresToBuy == null) {
+			this.waresToBuy = new RupeeTradeList<RupeeTrade>(RupeeTradeList.WILL_BUY);
+		}
+		// Customize items the merchant will sell
+		if (this.waresToSell == null) {
+			this.waresToSell = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
+		}
+		// Customize items the merchant will sell if bomb trading quest is enabled
+		if (Config.enableBarnesTradeSequence()) {
+			// Barnes always sells standard bombs when trade sequence is enabled
+			this.waresToSell.addOrUpdateTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), -1));
+			QuestBombTrades quest = (QuestBombTrades) ZSSQuests.get(player).add(new QuestBombTrades());
+			for (BombType type : BombType.values()) {
+				ItemStack stack = new ItemStack(ZSSItems.bomb, 1, type.ordinal());
+				RupeeTrade trade = RupeeValueRegistry.getRupeeTrade(stack, -1);
+				trade.setTimesUsed(quest.getTradeUses(type));
+				this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_QTY, quest.isTradeUnlocked(type, false));
+				// Pack of 5 bombs for the price of 4
+				stack.stackSize = 5;
+				trade = new RupeeTrade(stack, trade.getPrice() * 4);
+				this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_QTY, quest.isTradeUnlocked(type, true));
+			}
+			// Add or remove single-use bomb bag trade
+			this.addOrRemoveBombBagTrade(player);
+			// Add or remove unlimited use bomb bag trade
+			RupeeTrade trade = RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bombBag), -1);
+			// TODO && Config.enableBombBagTrade()
+			this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_MAX_USES, quest.isComplete(player));
+		}
+	}
+
+	private void addOrRemoveBombBagTrade(EntityPlayer player) {
+		IQuest quest = ZSSQuests.get(player).get(QuestBombBagTrade.class);
+		boolean flag = (quest != null && !quest.isComplete(player));
+		ItemStack stack = new ItemStack(ZSSItems.bombBag);
+		RupeeTrade trade = new RupeeTrade(stack, RupeeValueRegistry.getRupeeValue(stack, -1), 1, true, false);
+		this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_MAX_USES, flag);
 	}
 
 	@Override
@@ -137,32 +214,46 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 		this.playSound("mob.villager.yes", this.getSoundVolume(), this.getSoundPitch());
 		// Refresh every 5 trade uses or when a trade runs out of stock
 		if (trade.isDisabled() || trade.getTimesUsed() % 5 == 0) {
+			EntityPlayer customer = this.getRupeeCustomer();
+			if (trade.getTradeItem().getItem() == ZSSItems.bombBag && customer != null) {
+				IQuest quest = ZSSQuests.get(customer).get(QuestBombBagTrade.class);
+				if (quest != null && !quest.isComplete(customer)) {
+					quest.complete(customer);
+				}
+			}
 			this.refreshTimer = 40;
 			this.refreshTrades = true;
-			this.lastCustomer = (this.customer == null ? null : this.customer.getCommandSenderName());
+			this.lastRupeeCustomer = (customer == null ? null : customer.getCommandSenderName());
 		}
 	}
 
 	@Override
 	public Result onInteract(EntityPlayer player) {
-		if (!this.isEntityAlive() || !player.isSneaking()) {
-			return Result.DENY;
-		} else if (this.getRupeeCustomer() != null) {
-			if (!worldObj.isRemote) {
-				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.merchant.busy");
-			}
+		// Check for quest updates and stop interaction if something changed
+		IQuest quest = ZSSQuests.get(player).add(new QuestBombTrades());
+		if (quest.update(player, this)) {
 			return Result.DENY;
 		}
-		if (this.waresToBuy == null || this.waresToBuy.isEmpty() || this.waresToSell == null || this.waresToSell.isEmpty()) {
-			if (!this.worldObj.isRemote) {
+		if (!this.worldObj.isRemote) {
+			// Ensure trade list populated
+			if (!this.hasRupeeTrades()) {
 				this.populateRupeeTradeLists(player);
 			}
+			// Customize rupee trades for the potential customer if not already trading
+			if (this.getRupeeCustomer() == null && this.getCustomer() == null) {
+				// TODO no point doing this here since customization occurs when opening the GUI
+				// this.getCustomizedRupeeTrades(player, true);
+				//this.customizeRupeeTradesForPlayer(player);
+			}
 		}
+		return Result.DEFAULT;
+		/*
 		ItemStack stack = player.getHeldItem();
 		// TODO this greeting is now getting played twice...
 		String chat = "chat.zss.npc.barnes.greeting";
 		// Vanilla IMerchants require player to be holding a rupee to access the interface
 		boolean openGui = true; // (stack != null && stack.getItem() == ZSSItems.rupee);
+		// TODO change to updating quest status; use quests to determine what additional items Barnes has when trading
 		if (this.hasNewWares) {
 			chat = "chat.zss.npc.barnes.trade.new";
 			this.hasNewWares = false;
@@ -200,11 +291,18 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 			}
 		}
 		return Result.DENY;
+		 */
 	}
 
 	@Override
-	public boolean wasInteractionHandled(Result result) {
-		return result == Result.ALLOW;
+	public boolean wasInteractionHandled(EntityPlayer player, Result result) {
+		if (result == Result.ALLOW) {
+			if (!this.worldObj.isRemote) {
+				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.greeting");
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -213,50 +311,22 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	 */
 	protected void populateRupeeTradeLists(EntityPlayer player) {
 		RupeeMerchantHelper.setDefaultTrades(this, DEFAULT_RUPEE_TRADES, this.rand);
-		this.transferTrades();
+		this.removeOldTrades();
 	}
 
 	/**
-	 * Temporary method to transfer MerchantRecipe trades over to RupeeTrades
+	 * Temporary method to remove old MerchantRecipe trades that have been replaced by per-player rupee trades
 	 */
-	private void transferTrades() {
+	private void removeOldTrades() {
 		if (this.trades == null || this.waresToSell == null) {
 			return;
 		}
-		// Transfer old MerchantRecipes to RupeeTrades
-		if (MerchantRecipeHelper.removeTrade(this.trades, EntityNpcBarnes.standardBomb, false, true)) {
-			ItemStack stack = new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal());
-			Integer price = RupeeValueRegistry.getRupeeValue(stack);
-			if (price != null) {
-				this.waresToSell.add(new RupeeTrade(stack, price));
-				stack.stackSize = 5;
-				this.waresToSell.add(new RupeeTrade(stack, price * 4));
-			}
+		ItemStack emerald = new ItemStack(Items.emerald, 8);
+		for (BombType bomb : BombType.values()) {
+			MerchantRecipe trade = new MerchantRecipe(emerald, new ItemStack(ZSSItems.bomb, 1, bomb.ordinal()));
+			MerchantRecipeHelper.removeTrade(this.trades, trade, false, true);
 		}
-		if (MerchantRecipeHelper.removeTrade(this.trades, EntityNpcBarnes.waterBomb, false, true)) {
-			ItemStack stack = new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal());
-			Integer price = RupeeValueRegistry.getRupeeValue(stack);
-			if (price != null) {
-				this.waresToSell.add(new RupeeTrade(stack, price));
-				stack.stackSize = 5;
-				this.waresToSell.add(new RupeeTrade(stack, price * 4));
-			}
-		}
-		if (MerchantRecipeHelper.removeTrade(this.trades, EntityNpcBarnes.fireBomb, false, true)) {
-			ItemStack stack = new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FIRE.ordinal());
-			Integer price = RupeeValueRegistry.getRupeeValue(stack);
-			if (price != null) {
-				this.waresToSell.add(new RupeeTrade(stack, price));
-				stack.stackSize = 5;
-				this.waresToSell.add(new RupeeTrade(stack, price * 4));
-			}
-		}
-		if (Config.enableTradeBombBag()) {
-			MerchantRecipe bag = new MerchantRecipe(new ItemStack(Items.emerald, Config.getBombBagPrice()), new ItemStack(ZSSItems.bombBag));
-			if (MerchantRecipeHelper.removeTrade(this.trades, bag, false, true)) {
-				this.addBombBagTrade();
-			}
-		}
+		MerchantRecipeHelper.removeTrade(this.trades, new MerchantRecipe(emerald, new ItemStack(ZSSItems.bombBag)), false, true);
 	}
 
 	@Override
@@ -293,6 +363,8 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 		if (this.waresToSell == null) {
 			return;
 		}
+		// TODO move to #useRupeeTrade and complete quest stages for current player there
+
 		// Add bomb pack trades after enough of the singles are purchased
 		for (ListIterator<RupeeTrade> iterator = this.waresToSell.listIterator(); iterator.hasNext();) {
 			RupeeTrade trade = iterator.next();
@@ -336,6 +408,8 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 
 	@Override
 	public boolean interact(EntityPlayer player) {
+		// TODO this is displaying on client side when opening rupee trading interface directly
+		// ZSSMain.logger.info("Interacting with Barnes as a vanilla IMerchant");
 		if (!this.isEntityAlive()) {
 			return false;
 		} else if (this.getCustomer() != null) {
@@ -376,20 +450,6 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 		this.populateTradingList();
 		RupeeMerchantHelper.setDefaultTrades(this, DEFAULT_RUPEE_TRADES, this.rand);
 		PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.open");
-	}
-
-	/**
-	 * Returns true if a Bomb Bag trade was added (must be enabled in Config)
-	 */
-	public boolean addBombBagTrade() {
-		if (Config.enableTradeBombBag() && this.waresToSell != null) {
-			RupeeTrade bag = new RupeeTrade(new ItemStack(ZSSItems.bombBag), Config.getBombBagPrice(), 1);
-			if (!this.waresToSell.containsTrade(bag, RupeeTrade.SIMPLE)) {
-				this.waresToSell.add(0, bag);
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override

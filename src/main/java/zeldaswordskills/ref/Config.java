@@ -411,8 +411,8 @@ public class Config
 	/*================== TRADES =====================*/
 	/** [Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb) */
 	private static boolean enableTradeBombBag;
-	/** [Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) */
-	private static int bombBagPrice;
+	/** [Barnes] Enable the standard bomb and bomb bag trading sequence (if disabled, Barnes' trades will depend entirely on his .json file) */
+	private static boolean enableBarnesTrades;
 	/** [Bombs] Enable random villager trades for bombs */
 	private static boolean enableTradeBomb;
 	/** [Hero's Bow] Enable vanilla priest mini-quest to unlock magic arrow trades (fire, ice, light, silver) */
@@ -620,7 +620,7 @@ public class Config
 		}
 		/*================== TRADES =====================*/
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
-		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [1-9999]", 100).getInt(), 1, 99999);
+		enableBarnesTrades = config.get("Trade", "[Barnes] Enable the standard bomb and bomb bag trading sequence (if disabled, Barnes' trades will depend entirely on his .json file)", true).getBoolean(true);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Enable vanilla priest mini-quest to unlock magic arrow trades (fire, ice, light, silver)", true).getBoolean(true);
 		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-100]", 15).getInt(), 1, 100);
@@ -965,7 +965,7 @@ public class Config
 	/*================== TRADES =====================*/
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
-	public static int getBombBagPrice() { return bombBagPrice; }
+	public static boolean enableBarnesTradeSequence() { return enableBarnesTrades; }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return maskBuyChance; }
 

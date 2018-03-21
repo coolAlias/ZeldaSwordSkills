@@ -44,6 +44,8 @@ import zeldaswordskills.api.item.INbtComparable;
 import zeldaswordskills.api.item.IUnenchantable;
 import zeldaswordskills.creativetab.ZSSCreativeTabs;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
+import zeldaswordskills.entity.player.quests.QuestBombBagTrade;
+import zeldaswordskills.entity.player.quests.ZSSQuests;
 import zeldaswordskills.entity.projectile.EntityBomb;
 import zeldaswordskills.network.PacketDispatcher;
 import zeldaswordskills.network.server.BombTickPacket;
@@ -113,12 +115,19 @@ public class ItemBomb extends Item implements IHandlePickup, IHandleToss, INbtCo
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-		if (entity instanceof EntityNpcBarnes) {
+		if (Config.enableBarnesTradeSequence() && entity instanceof EntityNpcBarnes) {
 			if (!player.worldObj.isRemote) {
-				if (((EntityNpcBarnes) entity).addBombBagTrade()) {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.add");
+				ZSSQuests quests = ZSSQuests.get(player);
+				QuestBombBagTrade quest = new QuestBombBagTrade();
+				if (quests.hasBegun(quest.getClass())) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.trade.bomb_bag.pending");
+				} else if (quests.hasCompleted(quest.getClass())) {
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.trade.bomb_bag.complete");
+				} else if (quest.begin(player)) {
+					quests.add(quest);
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.trade.bomb_bag.new");
 				} else {
-					PlayerUtils.sendTranslatedChat(player, "chat.zss.trade.bomb.careful");
+					PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.trade.bomb_bag.careful");
 				}
 			}
 			return true;
