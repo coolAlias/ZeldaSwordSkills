@@ -415,7 +415,7 @@ public class Config
 	private static int bombBagPrice;
 	/** [Bombs] Enable random villager trades for bombs */
 	private static boolean enableTradeBomb;
-	/** [Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased */
+	/** [Hero's Bow] Enable vanilla priest mini-quest to unlock magic arrow trades (fire, ice, light, silver) */
 	private static boolean enableArrowTrades;
 	/** [Masks] Chance that a villager will be interested in purchasing a random mask */
 	private static float maskBuyChance;
@@ -622,7 +622,7 @@ public class Config
 		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
 		bombBagPrice = MathHelper.clamp_int(config.get("Trade", "[Bomb Bag] Cost of a bomb bag at Barnes' shop (only applied to new trades) [1-9999]", 100).getInt(), 1, 99999);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
-		enableArrowTrades = config.get("Trade", "[Hero's Bow] Whether magic arrows (fire, ice, light) can be purchased", true).getBoolean(true);
+		enableArrowTrades = config.get("Trade", "[Hero's Bow] Enable vanilla priest mini-quest to unlock magic arrow trades (fire, ice, light, silver)", true).getBoolean(true);
 		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-100]", 15).getInt(), 1, 100);
 		/*================== MAP MAKING =====================*/
 		config.addCustomCategoryComment("Map Making", "Configuration settings related to map making; none of these have any impact on normal play.");
