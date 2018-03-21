@@ -402,6 +402,19 @@ public class RupeeTrade implements IJsonSerializable
 	};
 
 	/**
+	 * Same as the {@link RupeeTrade#DEFAULT} comparator with additional trade use limit comparison.
+	 */
+	public static final Comparator<RupeeTrade> DEFAULT_MAX_USES = new DefaultRupeeTradeComparator() {
+		@Override
+		public int compare(RupeeTrade a, RupeeTrade b) {
+			if (a.getMaxUses() != b.getMaxUses()) {
+				return (a.getMaxUses() < b.getMaxUses() ? -1 : 1);
+			}
+			return super.compare(a, b);
+		}
+	};
+
+	/**
 	 * Strict comparator considers two trades 'equal' if the itemstacks to sell are
 	 * identical in every way, including NBT, and sell for the same price.
 	 * <br>Items implementing {@link INbtComparable} will use that for comparing NBT.
