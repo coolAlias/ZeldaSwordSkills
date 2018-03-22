@@ -65,7 +65,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  * bag, it will simply be removed rather than dropping to the ground. This is vanilla behavior.
  * 
  */
-public class ItemBombBag extends Item implements INbtComparable, IUnenchantable
+public class ItemBombBag extends Item implements INbtComparable, IRupeeValue, IUnenchantable
 {
 	private static final int BASE_CAPACITY = 10, MAX_CAPACITY = 50;
 
@@ -140,6 +140,11 @@ public class ItemBombBag extends Item implements INbtComparable, IUnenchantable
 				}
 			}
 		}
+	}
+
+	@Override
+	public int getDefaultRupeeValue(ItemStack stack) {
+		return 100;
 	}
 
 	@Override
