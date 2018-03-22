@@ -118,7 +118,7 @@ public class RupeeMerchantHelper
 		IRupeeMerchant merchant = RupeeMerchantHelper.getRupeeMerchant(object);
 		if (merchant == null) {
 			return null;
-		} else if (player == null || merchant.getRupeeCustomer() != null) {
+		} else if (player == null || (merchant.getRupeeCustomer() != null && merchant.getRupeeCustomer() != player)) {
 			return merchant.getRupeeTrades(getItemsToSell);
 		}
 		RupeeTradeList<RupeeTrade> trades = merchant.getCustomizedRupeeTrades(player, getItemsToSell);
