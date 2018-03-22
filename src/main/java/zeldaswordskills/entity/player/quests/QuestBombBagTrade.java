@@ -22,10 +22,7 @@ import net.minecraft.util.IChatComponent;
 
 /**
  * 
- * Simple 'quest' to have Barnes offer a single-use bomb bag trade to the player
- * after the player carelessly waves a ticking bomb in his face.
- * 
- * Quest begins when player shows bomb to Barnes and ends when they purchase the bag.
+ * Quest begins when player shows any bomb to Barnes and ends when they purchase the bag.
  *
  */
 public final class QuestBombBagTrade extends QuestBase

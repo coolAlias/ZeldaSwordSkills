@@ -18,7 +18,6 @@
 package zeldaswordskills.entity.npc;
 
 import java.util.Iterator;
-import java.util.ListIterator;
 
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import net.minecraft.entity.passive.EntityVillager;
@@ -52,7 +51,11 @@ import zeldaswordskills.util.PlayerUtils;
 
 /**
  * 
- * Barnes sells regular bombs by default unless otherwise configured.
+ * By default, Barnes sells regular bombs, and all bomb-related trades are locked behind
+ * mini quests on a per-player basis; any such trades in the .json will be overridden.
+ * 
+ * If Barnes' trading quests are disabled via config, his trades will be determined solely
+ * by the contents of his .json file(s).
  * 
  * Water and Fire bombs can be achieved by bringing him an appropriate item, in no particular order.
  * 
@@ -62,21 +65,10 @@ import zeldaswordskills.util.PlayerUtils;
  * 
  * An unlimited bomb bag trade can be unlocked after unlocking all bomb and bomb pack trades.
  * 
- * All unlockable trades are on a per player basis and can be disabled via the config.
- *
  */
 public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillager, IRupeeMerchant
 {
 	public static final ResourceLocation DEFAULT_RUPEE_TRADES = new ResourceLocation(ModInfo.ID, "npc/barnes");
-
-	// Remove merchant recipes after giving some time to convert old NPC's trades
-	private static final RupeeTrade BOMB_STANDARD = new RupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), 8);
-	private static final RupeeTrade BOMB_STANDARD_PACK = new RupeeTrade(new ItemStack(ZSSItems.bomb, 3, BombType.BOMB_STANDARD.ordinal()), 20);
-	private static final RupeeTrade BOMB_WATER = new RupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 12);
-	private static final RupeeTrade BOMB_WATER_PACK = new RupeeTrade(new ItemStack(ZSSItems.bomb, 3, BombType.BOMB_WATER.ordinal()), 30);
-	private static final RupeeTrade BOMB_FIRE = new RupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FIRE.ordinal()), 16);
-	private static final RupeeTrade BOMB_FIRE_PACK = new RupeeTrade(new ItemStack(ZSSItems.bomb, 3, BombType.BOMB_FIRE.ordinal()), 40);
-	private static final RupeeTrade BOMB_SEEDS = new RupeeTrade(new ItemStack(ZSSItems.bombFlowerSeed), 4);
 
 	/** List of RupeeTrades this merchant is willing to buy */
 	protected RupeeTradeList<RupeeTrade> waresToBuy;
@@ -158,44 +150,52 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	 * Called from {@link IRupeeMerchant#onInteract(EntityPlayer) onInteract} to modify the trade lists based on the current player
 	 */
 	protected void customizeRupeeTradesForPlayer(EntityPlayer player) {
-		// Customize items the merchant will purchase
-		if (this.waresToBuy == null) {
-			this.waresToBuy = new RupeeTradeList<RupeeTrade>(RupeeTradeList.WILL_BUY);
-		}
 		// Customize items the merchant will sell
 		if (this.waresToSell == null) {
 			this.waresToSell = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
 		}
-		// Customize items the merchant will sell if bomb trading quest is enabled
 		if (Config.enableBarnesTradeSequence()) {
 			// Barnes always sells standard bombs when trade sequence is enabled
-			this.waresToSell.addOrUpdateTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), -1));
-			QuestBombTrades quest = (QuestBombTrades) ZSSQuests.get(player).add(new QuestBombTrades());
-			for (BombType type : BombType.values()) {
-				ItemStack stack = new ItemStack(ZSSItems.bomb, 1, type.ordinal());
-				RupeeTrade trade = RupeeValueRegistry.getRupeeTrade(stack, -1);
-				trade.setTimesUsed(quest.getTradeUses(type));
-				this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_QTY, quest.isTradeUnlocked(type, false));
-				// Pack of 5 bombs for the price of 4
-				stack.stackSize = 5;
-				trade = new RupeeTrade(stack, trade.getPrice() * 4);
-				this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_QTY, quest.isTradeUnlocked(type, true));
-			}
-			// Add or remove single-use bomb bag trade
-			this.addOrRemoveBombBagTrade(player);
-			// Add or remove unlimited use bomb bag trade
-			RupeeTrade trade = RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bombBag), -1);
-			// TODO && Config.enableBombBagTrade()
-			this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_MAX_USES, quest.isComplete(player));
-		}
-	}
+			// TODO this is already taken care of by the loop below
+			// this.waresToSell.addOrUpdateTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), -1));
 
-	private void addOrRemoveBombBagTrade(EntityPlayer player) {
-		IQuest quest = ZSSQuests.get(player).get(QuestBombBagTrade.class);
-		boolean flag = (quest != null && !quest.isComplete(player));
-		ItemStack stack = new ItemStack(ZSSItems.bombBag);
-		RupeeTrade trade = new RupeeTrade(stack, RupeeValueRegistry.getRupeeValue(stack, -1), 1, true, false);
-		this.waresToSell.addOrRemoveTrade(trade, RupeeTrade.DEFAULT_MAX_USES, flag);
+			// Remove all quest-related trades, then re-add so that player's trade uses are correct
+			ZSSQuests quests = ZSSQuests.get(player);
+			QuestBombTrades questMain = (QuestBombTrades) quests.add(new QuestBombTrades());
+			// Remove all bomb bag trades
+			RupeeTrade trade = RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bombBag), -1);
+			this.waresToSell.removeTrade(trade, true);
+			// Bomb bag trades do not track number of times used (single-use version may only be used once)
+			if (Config.enableTradeBombBag()) {
+				IQuest questBag = quests.get(QuestBombBagTrade.class);
+				// Re-add unlimited or single use bomb bag trade if applicable
+				if (questMain.isComplete(player)) {
+					this.waresToSell.add(0, trade);
+				} else if (questBag != null && !questBag.isComplete(player)) {
+					ItemStack stack = new ItemStack(ZSSItems.bombBag);
+					trade = new RupeeTrade(stack, RupeeValueRegistry.getRupeeValue(stack, -1), 1, true, false);
+					this.waresToSell.add(0, trade);
+				}
+			}
+			// Add bomb and bomb pack trades (in reverse order) based on player's quests status
+			for (int i = BombType.values().length; i > 0; i--) {
+				BombType type = BombType.values()[i - 1];
+				RupeeTrade single = RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bomb, 1, type.ordinal()), -1);
+				// Pack of 5 bombs for the price of 4 singles
+				RupeeTrade pack = new RupeeTrade(new ItemStack(ZSSItems.bomb, 5, type.ordinal()), single.getPrice() * 4);
+				this.waresToSell.removeTrade(pack, RupeeTrade.DEFAULT_QTY, true);
+				if (questMain.isTradeUnlocked(type, true)) {
+					pack.setTimesUsed(questMain.getTradeUses(type, true));
+					this.waresToSell.add(0, pack);
+				}
+				// Add single after so it shows up before
+				this.waresToSell.removeTrade(single, RupeeTrade.DEFAULT_QTY, true);
+				if (questMain.isTradeUnlocked(type, false)) {
+					single.setTimesUsed(questMain.getTradeUses(type, false));
+					this.waresToSell.add(0, single);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -212,18 +212,27 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 		trade.incrementTimesUsed();
 		this.livingSoundTime = -this.getTalkInterval();
 		this.playSound("mob.villager.yes", this.getSoundVolume(), this.getSoundPitch());
+		// Update bomb trading quest trade usage
+		EntityPlayer customer = this.getRupeeCustomer();
+		ZSSQuests quests = (customer == null ? null : ZSSQuests.get(customer));
+		if (quests != null) {
+			IQuest quest = quests.get(QuestBombTrades.class);
+			if (quest != null) {
+				((QuestBombTrades) quest).useTrade(trade);
+			}
+		}
 		// Refresh every 5 trade uses or when a trade runs out of stock
 		if (trade.isDisabled() || trade.getTimesUsed() % 5 == 0) {
-			EntityPlayer customer = this.getRupeeCustomer();
-			if (trade.getTradeItem().getItem() == ZSSItems.bombBag && customer != null) {
-				IQuest quest = ZSSQuests.get(customer).get(QuestBombBagTrade.class);
+			this.refreshTimer = 40;
+			this.refreshTrades = true;
+			this.lastRupeeCustomer = (customer == null ? null : customer.getCommandSenderName());
+			// Complete single-use bomb bag trade quest
+			if (quests != null && trade.getTradeItem().getItem() == ZSSItems.bombBag) {
+				IQuest quest = quests.get(QuestBombBagTrade.class);
 				if (quest != null && !quest.isComplete(customer)) {
 					quest.complete(customer);
 				}
 			}
-			this.refreshTimer = 40;
-			this.refreshTrades = true;
-			this.lastRupeeCustomer = (customer == null ? null : customer.getCommandSenderName());
 		}
 	}
 
@@ -231,8 +240,11 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	public Result onInteract(EntityPlayer player) {
 		// Check for quest updates and stop interaction if something changed
 		IQuest quest = ZSSQuests.get(player).add(new QuestBombTrades());
-		if (quest.update(player, this)) {
-			return Result.DENY;
+		if (!quest.isComplete(player)) {
+			if (quest.update(player, this)) {
+				return Result.DENY;
+			}
+			// TODO getHint once in a while instead of opening trading GUI
 		}
 		if (!this.worldObj.isRemote) {
 			// Ensure trade list populated
@@ -363,8 +375,8 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 		if (this.waresToSell == null) {
 			return;
 		}
-		// TODO move to #useRupeeTrade and complete quest stages for current player there
-
+		// TODO check for and add random trades?
+		/*
 		// Add bomb pack trades after enough of the singles are purchased
 		for (ListIterator<RupeeTrade> iterator = this.waresToSell.listIterator(); iterator.hasNext();) {
 			RupeeTrade trade = iterator.next();
@@ -404,6 +416,7 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 				}
 			}
 		}
+		 */
 	}
 
 	@Override

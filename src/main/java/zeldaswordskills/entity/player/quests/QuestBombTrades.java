@@ -25,12 +25,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import zeldaswordskills.api.entity.BombType;
+import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
+import zeldaswordskills.item.ItemBomb;
+import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.util.PlayerUtils;
-import zeldaswordskills.util.TimedChatDialogue;
 
 /**
  * 
@@ -39,8 +40,11 @@ import zeldaswordskills.util.TimedChatDialogue;
  */
 public final class QuestBombTrades extends QuestBase
 {
-	/** Track number of times each trade has been used by the player */
+	/** Track number of times each single-stack bomb trade has been used by the player */
 	private final EnumMap<BombType, Integer> tradeUses = Maps.newEnumMap(BombType.class);
+
+	/** Track number of times each bomb pack trade has been used by the player */
+	private final EnumMap<BombType, Integer> packUses = Maps.newEnumMap(BombType.class);
 
 	/**
 	 * Tracks current progress; apply BombType's bitMask to determine if that trade
@@ -72,7 +76,7 @@ public final class QuestBombTrades extends QuestBase
 	 * @param pack True to check if the bomb pack trade has been unlocked
 	 * @return True if the trade was newly unlocked, or false if it was already unlocked
 	 */
-	public boolean unlockTrade(BombType type, boolean pack) {
+	protected boolean unlockTrade(BombType type, boolean pack) {
 		int flag = (pack ? (type.bitMask << BombType.values().length) : type.bitMask);
 		boolean unlocked = (this.stage & flag) != flag;
 		this.stage |= flag;
@@ -80,11 +84,30 @@ public final class QuestBombTrades extends QuestBase
 	}
 
 	/**
-	 * Returns the number of times this player has used the standard trade for the bomb type
+	 * Returns the number of times this player has used the standard or pack trade for the bomb type
+	 * @param type The type of bomb for which to get the number of trades
+	 * @param pack True to check if the bomb pack trade has been unlocked
 	 */
-	public int getTradeUses(BombType type) {
-		Integer uses = this.tradeUses.get(type);
+	public int getTradeUses(BombType type, boolean pack) {
+		Integer uses = (pack ? this.packUses.get(type) : this.tradeUses.get(type));
 		return (uses == null ? 0 : uses);
+	}
+
+	/**
+	 * Call each time a trade is used to allow quest to track number of times
+	 * the standard or pack bomb trades have been used.
+	 * @param trade
+	 */
+	public void useTrade(RupeeTrade trade) {
+		ItemStack stack = trade.getTradeItem();
+		if (stack.getItem() == ZSSItems.bomb) {
+			BombType type = ItemBomb.getType(stack);
+			if (stack.stackSize > 1) {
+				this.packUses.put(type, this.getTradeUses(type, true) + 1);
+			} else {
+				this.tradeUses.put(type, this.getTradeUses(type, false) + 1);
+			}
+		}
 	}
 
 	@Override
@@ -98,23 +121,9 @@ public final class QuestBombTrades extends QuestBase
 		return (super.canComplete(player) && (this.stage & max) == max);
 	}
 
-	/**
-	 * @param data Expects data[0] to be an EntityNpcBarnes
-	 */
 	@Override
 	protected boolean onComplete(EntityPlayer player, Object... data) {
-		if (data == null || data.length < 1 || !(data[0] instanceof EntityNpcBarnes)) {
-			return false;
-		}
-		// TODO different chat
-		new TimedChatDialogue(player,
-				new ChatComponentTranslation("chat.zss.npc.mask_salesman.sales.complete.0"),
-				new ChatComponentTranslation("chat.zss.npc.mask_salesman.sales.complete.1"),
-				new ChatComponentTranslation("chat.zss.npc.mask_salesman.sales.complete.2"),
-				new ChatComponentTranslation("chat.zss.npc.mask_salesman.sales.complete.3"));
-		// new TimedAddItem(player, new ItemStack(ZSSItems.maskTruth), 4000);
-		this.completeBombBagTradingQuest(player);
-		return true;
+		return false; // completed via #update and #forceComplete
 	}
 
 	@Override
@@ -143,7 +152,7 @@ public final class QuestBombTrades extends QuestBase
 	}
 
 	/**
-	 * @param data Expects data[0] to be set to either an EntityNpcBarnes
+	 * @param data Expects data[0] to be an instance of EntityNpcBarnes
 	 */
 	@Override
 	public boolean update(EntityPlayer player, Object... data) {
@@ -163,6 +172,21 @@ public final class QuestBombTrades extends QuestBase
 				chat = "chat.zss.npc.barnes.trade.fire";
 			}
 		}
+		// Check if any bomb packs can be unlocked and inform the player
+		if (chat == null) {
+			for (BombType type : BombType.values()) {
+				int required = 10; // TODO config?
+				if (this.getTradeUses(type, false) >= required && this.unlockTrade(type, true)) {
+					chat = "chat.zss.npc.barnes.trade." + type.unlocalizedName + ".pack";
+					break;
+				}
+			}
+		}
+		// Check if quest can be completed when no other notifications pending
+		if (chat == null && this.canComplete(player)) {
+			this.forceComplete(player);
+			chat = "chat.zss.npc.barnes.trade.complete";
+		}
 		if (chat != null) {
 			PlayerUtils.sendTranslatedChat(player, chat);
 			return true;
@@ -172,8 +196,7 @@ public final class QuestBombTrades extends QuestBase
 
 	@Override
 	public IChatComponent getHint(EntityPlayer player, Object... data) {
-		// TODO ?
-		return null;
+		return null; // hints handled externally
 	}
 
 	@Override
@@ -190,6 +213,10 @@ public final class QuestBombTrades extends QuestBase
 			if (uses != null) {
 				compound.setInteger(type.unlocalizedName, uses);
 			}
+			uses = this.packUses.get(type);
+			if (uses != null) {
+				compound.setInteger(type.unlocalizedName + "_pack", uses);
+			}
 		}
 	}
 
@@ -201,6 +228,10 @@ public final class QuestBombTrades extends QuestBase
 			int uses = compound.getInteger(type.unlocalizedName);
 			if (uses > 0) {
 				this.tradeUses.put(type, uses);
+			}
+			uses = compound.getInteger(type.unlocalizedName + "_pack");
+			if (uses > 0) {
+				this.packUses.put(type, uses);
 			}
 		}
 	}
