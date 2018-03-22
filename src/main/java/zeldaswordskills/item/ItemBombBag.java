@@ -130,7 +130,8 @@ public class ItemBombBag extends Item implements INbtComparable, IUnenchantable
 			for (int i = 0; i < player.inventory.getSizeInventory(); ++i) {
 				ItemStack invStack = player.inventory.getStackInSlot(i);
 				if (invStack != null && areMatchingTypes(stack, invStack, true)) {
-					if (addBombs(stack, invStack) < 1) {
+					invStack.stackSize = addBombs(stack, invStack);
+					if (invStack.stackSize < 1) {
 						player.inventory.setInventorySlotContents(i, null);
 						if (getBombsHeld(stack) == getCapacity(stack)) {
 							return;
@@ -198,7 +199,7 @@ public class ItemBombBag extends Item implements INbtComparable, IUnenchantable
 
 	/**
 	 * ItemStack sensitive version for setting bag's type when adding bombs
-	 * @return the number of bombs that wouldn't fit, if any (usually returns a negative value)
+	 * @return the number of bombs that wouldn't fit, if any (entire stack if the wrong type)
 	 */
 	public int addBombs(ItemStack bag, ItemStack bombs) {
 		if (ItemBomb.getType(bombs) == BombType.BOMB_FLOWER) {
