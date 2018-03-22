@@ -137,7 +137,7 @@ class SlotWallet extends Slot
 		if (stack == null || !(stack.getItem() instanceof ItemRupee)) {
 			return false;
 		}
-		return ItemRupee.Rupee.byDamage(stack.getItemDamage()).ordinal() == this.getSlotIndex();
+		return ItemRupee.Rupee.byDamage(stack.getItemDamage()).ordinal() == this.getSlotIndex() && this.getSlotStackLimit() > 0;
 	}
 
 	@Override
