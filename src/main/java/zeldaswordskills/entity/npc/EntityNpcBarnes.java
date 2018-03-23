@@ -25,6 +25,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.world.World;
@@ -82,8 +83,11 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	/** The rupee merchant's last customer, used for adding to that player's reputation */
 	protected String lastRupeeCustomer;
 
-	/** True when the merchant has added some new wares */
-	protected boolean hasNewWares;
+	/** Tracks whether the last trade used was an item sold to the player or purchased from the merchant */
+	protected boolean lastTradeWasSold;
+
+	/** Flag which may be set during {@link #onInteract(EntityPlayer)} for {@link #wasInteractionHandled(EntityPlayer, Result)} */
+	protected boolean wasInteractionHandled;
 
 	public EntityNpcBarnes(World world) {
 		super(world);
@@ -155,10 +159,6 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 			this.waresToSell = new RupeeTradeList<RupeeTrade>(RupeeTradeList.FOR_SALE);
 		}
 		if (Config.enableBarnesTradeSequence()) {
-			// Barnes always sells standard bombs when trade sequence is enabled
-			// TODO this is already taken care of by the loop below
-			// this.waresToSell.addOrUpdateTrade(RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), -1));
-
 			// Remove all quest-related trades, then re-add so that player's trade uses are correct
 			ZSSQuests quests = ZSSQuests.get(player);
 			QuestBombTrades questMain = (QuestBombTrades) quests.add(new QuestBombTrades());
@@ -210,11 +210,12 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	@Override
 	public void useRupeeTrade(RupeeTrade trade, boolean getItemsToSell) {
 		trade.incrementTimesUsed();
+		this.lastTradeWasSold = getItemsToSell;
 		this.livingSoundTime = -this.getTalkInterval();
 		this.playSound("mob.villager.yes", this.getSoundVolume(), this.getSoundPitch());
 		// Update bomb trading quest trade usage
 		EntityPlayer customer = this.getRupeeCustomer();
-		ZSSQuests quests = (customer == null ? null : ZSSQuests.get(customer));
+		ZSSQuests quests = (customer == null || !Config.enableBarnesTradeSequence() ? null : ZSSQuests.get(customer));
 		if (quests != null) {
 			IQuest quest = quests.get(QuestBombTrades.class);
 			if (quest != null) {
@@ -239,12 +240,21 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	@Override
 	public Result onInteract(EntityPlayer player) {
 		// Check for quest updates and stop interaction if something changed
-		IQuest quest = ZSSQuests.get(player).add(new QuestBombTrades());
-		if (!quest.isComplete(player)) {
-			if (quest.update(player, this)) {
-				return Result.DENY;
+		if (Config.enableBarnesTradeSequence()) {
+			IQuest quest = ZSSQuests.get(player).add(new QuestBombTrades());
+			if (!quest.isComplete(player)) {
+				if (quest.update(player, this)) {
+					this.wasInteractionHandled = true;
+					return Result.DENY;
+				}
+				// Chat may return different values on client and server due to Random
+				IChatComponent chat = quest.getHint(player);
+				if (chat != null && !this.worldObj.isRemote) {
+					player.addChatMessage(chat);
+					this.wasInteractionHandled = true;
+					return Result.DENY;
+				}
 			}
-			// TODO getHint once in a while instead of opening trading GUI
 		}
 		if (!this.worldObj.isRemote) {
 			// Ensure trade list populated
@@ -259,51 +269,6 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 			}
 		}
 		return Result.DEFAULT;
-		/*
-		ItemStack stack = player.getHeldItem();
-		// TODO this greeting is now getting played twice...
-		String chat = "chat.zss.npc.barnes.greeting";
-		// Vanilla IMerchants require player to be holding a rupee to access the interface
-		boolean openGui = true; // (stack != null && stack.getItem() == ZSSItems.rupee);
-		// TODO change to updating quest status; use quests to determine what additional items Barnes has when trading
-		if (this.hasNewWares) {
-			chat = "chat.zss.npc.barnes.trade.new";
-			this.hasNewWares = false;
-		} else if (stack != null) {
-			if (stack.getItem() == ZSSItems.bombFlowerSeed && this.waresToBuy != null) {
-				if (this.waresToBuy.addTrade(BOMB_SEEDS)) {
-					chat = "chat.zss.npc.barnes.trade.bombseeds.new";
-				} else {
-					chat = "chat.zss.npc.barnes.trade.bombseeds.old";
-				}
-			} else if (this.waresToSell == null) {
-				// null trade list, nothing to do
-			} else if (stack.getItem() == Items.fish) {
-				RupeeTrade trade = RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()), 12);
-				if (trade != null && this.waresToSell.addTrade(trade)) {
-					--stack.stackSize;
-					chat = "chat.zss.npc.barnes.trade.water";
-				}
-			} else if (stack.getItem() == Items.magma_cream) {
-				RupeeTrade trade = RupeeValueRegistry.getRupeeTrade(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FIRE.ordinal()), 16);
-				if (trade != null && this.waresToSell.addTrade(trade)) {
-					--stack.stackSize;
-					chat = "chat.zss.npc.barnes.trade.fire";
-				}
-			} else if (!this.waresToSell.containsTrade(BOMB_WATER)) {
-				chat = "chat.zss.npc.barnes.material.water";
-			} else if (!this.waresToSell.containsTrade(BOMB_FIRE)) {
-				chat = "chat.zss.npc.barnes.material.fire";
-			}
-		}
-		if (!this.worldObj.isRemote) {
-			PlayerUtils.sendTranslatedChat(player, chat);
-			if (openGui) {
-				return Result.ALLOW;
-			}
-		}
-		return Result.DENY;
-		 */
 	}
 
 	@Override
@@ -312,6 +277,9 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 			if (!this.worldObj.isRemote) {
 				PlayerUtils.sendTranslatedChat(player, "chat.zss.npc.barnes.greeting");
 			}
+			return true;
+		} else if (this.wasInteractionHandled) {
+			this.wasInteractionHandled = false;
 			return true;
 		}
 		return false;
@@ -323,7 +291,22 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	 */
 	protected void populateRupeeTradeLists(EntityPlayer player) {
 		RupeeMerchantHelper.setDefaultTrades(this, DEFAULT_RUPEE_TRADES, this.rand);
+		// Try to add a random trade if no default list was found
+		if (this.waresToBuy == null || this.waresToBuy.isEmpty()) {
+			this.addRandomTrades(1, false);
+		}
+		if (this.waresToSell == null || this.waresToSell.isEmpty()) {
+			this.addRandomTrades(1, true);
+		}
 		this.removeOldTrades();
+	}
+
+	/**
+	 * Adds n number of random trades to the list of items to buy or sell
+	 */
+	protected void addRandomTrades(int n, boolean getItemsToSell) {
+		ResourceLocation location = new ResourceLocation(ModInfo.ID, "npc/barnes_random");
+		RupeeMerchantHelper.addRandomTrades(this, location, getItemsToSell, this.rand, n);
 	}
 
 	/**
@@ -372,51 +355,7 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 
 	@Override
 	protected void updateTradingList() {
-		if (this.waresToSell == null) {
-			return;
-		}
-		// TODO check for and add random trades?
-		/*
-		// Add bomb pack trades after enough of the singles are purchased
-		for (ListIterator<RupeeTrade> iterator = this.waresToSell.listIterator(); iterator.hasNext();) {
-			RupeeTrade trade = iterator.next();
-			// Predicate<RupeeTrade> predicate = new RupeeTradeStackPredicate(trade, true, false, true);
-			// TODO config for # times used before pack added?
-			if (trade.getTimesUsed() < 3) {
-				// need to use more to add bomb pack
-			} else if (trade.matches(BOMB_STANDARD, RupeeTrade.DEFAULT_QTY)) {
-				ZSSMain.logger.info("Standard bomb trade used more than 3 times");
-				// TODO retrieve current pricing from registry? or use price of existing trade?
-				ItemStack stack = new ItemStack(ZSSItems.bomb, 5, BombType.BOMB_STANDARD.ordinal());
-				RupeeTrade newTrade = new RupeeTrade(stack, trade.getPrice() * 4);
-				if (!this.waresToSell.containsTrade(newTrade, RupeeTrade.DEFAULT_QTY)) {
-					ZSSMain.logger.info("Added bomb pack trade");
-					iterator.add(newTrade);
-					this.hasNewWares = true;
-				} else {
-					ZSSMain.logger.info("Already had bomb pack trade");
-				}
-			} else if (trade.matches(BOMB_WATER, RupeeTrade.DEFAULT_QTY)) {
-				ZSSMain.logger.info("Water bomb trade used more than 3 times");
-				if (!this.waresToSell.containsTrade(BOMB_WATER_PACK, RupeeTrade.DEFAULT_QTY)) {
-					ZSSMain.logger.info("Added bomb pack trade");
-					iterator.add(BOMB_WATER_PACK.copy());
-					this.hasNewWares = true;
-				} else {
-					ZSSMain.logger.info("Already had bomb pack trade");
-				}
-			} else if (trade.matches(BOMB_FIRE, RupeeTrade.DEFAULT_QTY)) {
-				ZSSMain.logger.info("Fire bomb trade used more than 3 times");
-				if (!this.waresToSell.containsTrade(BOMB_FIRE_PACK, RupeeTrade.DEFAULT_QTY)) {
-					ZSSMain.logger.info("Added bomb pack trade");
-					iterator.add(BOMB_FIRE_PACK.copy());
-					this.hasNewWares = true;
-				} else {
-					ZSSMain.logger.info("Already had bomb pack trade");
-				}
-			}
-		}
-		 */
+		this.addRandomTrades(1, this.lastTradeWasSold);
 	}
 
 	@Override

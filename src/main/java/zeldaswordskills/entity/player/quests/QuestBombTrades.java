@@ -25,12 +25,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
 import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.util.PlayerUtils;
 
 /**
@@ -156,28 +158,35 @@ public final class QuestBombTrades extends QuestBase
 	 */
 	@Override
 	public boolean update(EntityPlayer player, Object... data) {
-		if (data == null || data.length < 1 || !(data[0] instanceof EntityNpcBarnes)) {
+		if (!Config.enableBarnesTradeSequence()) {
+			return false;
+		} else if (data == null || data.length < 1 || !(data[0] instanceof EntityNpcBarnes)) {
 			return false;
 		}
 		String chat = null;
 		ItemStack stack = player.getHeldItem();
+		// Additional chat argument
+		Object arg = null;
 		if (stack == null) {
 			// nothing to do
 		} else if (stack.getItem() == Items.fish) {
 			if (this.unlockTrade(BombType.BOMB_WATER, false)) {
 				chat = "chat.zss.npc.barnes.trade.water";
+				PlayerUtils.addItemToInventory(player, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_WATER.ordinal()));
 			}
 		} else if (stack.getItem() == Items.magma_cream) {
-			if (!this.unlockTrade(BombType.BOMB_FIRE, false)) {
+			if (this.unlockTrade(BombType.BOMB_FIRE, false)) {
 				chat = "chat.zss.npc.barnes.trade.fire";
+				PlayerUtils.addItemToInventory(player, new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_FIRE.ordinal()));
 			}
 		}
 		// Check if any bomb packs can be unlocked and inform the player
 		if (chat == null) {
 			for (BombType type : BombType.values()) {
-				int required = 10; // TODO config?
+				int required = Config.getBombTradesRequired();
 				if (this.getTradeUses(type, false) >= required && this.unlockTrade(type, true)) {
-					chat = "chat.zss.npc.barnes.trade." + type.unlocalizedName + ".pack";
+					chat = "chat.zss.npc.barnes.trade.pack";
+					arg = new ChatComponentTranslation("item.zss.bomb." + type.unlocalizedName + ".name");
 					break;
 				}
 			}
@@ -188,7 +197,7 @@ public final class QuestBombTrades extends QuestBase
 			chat = "chat.zss.npc.barnes.trade.complete";
 		}
 		if (chat != null) {
-			PlayerUtils.sendTranslatedChat(player, chat);
+			PlayerUtils.sendTranslatedChat(player, chat, arg);
 			return true;
 		}
 		return false;
@@ -196,7 +205,17 @@ public final class QuestBombTrades extends QuestBase
 
 	@Override
 	public IChatComponent getHint(EntityPlayer player, Object... data) {
-		return null; // hints handled externally
+		// Possible to get any hint at any time - no required order
+		if (!Config.enableBarnesTradeSequence()) {
+			return null;
+		} else if (!this.isTradeUnlocked(BombType.BOMB_WATER, false) && QuestBase.rand.nextInt(4) == 0) {
+			return new ChatComponentTranslation("chat.zss.npc.barnes.trade.water.hint");
+		} else if (!this.isTradeUnlocked(BombType.BOMB_FIRE, false) && QuestBase.rand.nextInt(4) == 0) {
+			return new ChatComponentTranslation("chat.zss.npc.barnes.trade.fire.hint");
+		} else if (!this.isTradeUnlocked(BombType.BOMB_STANDARD, true) && QuestBase.rand.nextInt(4) == 0) {
+			return new ChatComponentTranslation("chat.zss.npc.barnes.trade.standard.pack.hint");
+		}
+		return null;
 	}
 
 	@Override

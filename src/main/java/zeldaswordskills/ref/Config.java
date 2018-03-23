@@ -409,10 +409,12 @@ public class Config
 	/** [Skill Orbs] Whether this skill may appear as random loot, such as in Boss chests */
 	private static Set<Byte> lootableOrbs = new HashSet<Byte>();
 	/*================== TRADES =====================*/
-	/** [Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb) */
+	/** [Barnes] Enable Barnes to sell bomb bags once unlocked */
 	private static boolean enableTradeBombBag;
-	/** [Barnes] Enable the standard bomb and bomb bag trading sequence (if disabled, Barnes' trades will depend entirely on his .json file) */
+	/** [Barnes] Enable unlockable bomb and bomb bag trades for Barnes (if disabled, Barnes' trades will depend entirely on his .json file) */
 	private static boolean enableBarnesTrades;
+	/** [Barnes] Number of bomb purchases required to unlock the package deal (0 to disable)[0-100] */
+	private static int bombPackTrades;
 	/** [Bombs] Enable random villager trades for bombs */
 	private static boolean enableTradeBomb;
 	/** [Hero's Bow] Enable vanilla priest mini-quest to unlock magic arrow trades (fire, ice, light, silver) */
@@ -619,8 +621,9 @@ public class Config
 			}
 		}
 		/*================== TRADES =====================*/
-		enableTradeBombBag = config.get("Trade", "[Bomb Bag] Allow Barnes to sell bomb bags (checked each time Barnes is shown a bomb)", true).getBoolean(true);
-		enableBarnesTrades = config.get("Trade", "[Barnes] Enable the standard bomb and bomb bag trading sequence (if disabled, Barnes' trades will depend entirely on his .json file)", true).getBoolean(true);
+		enableTradeBombBag = config.get("Trade", "[Barnes] Enable Barnes to sell bomb bags once unlocked", true).getBoolean(true);
+		enableBarnesTrades = config.get("Trade", "[Barnes] Enable unlockable bomb and bomb bag trades for Barnes (if disabled, Barnes' trades will depend entirely on his .json file)", true).getBoolean(true);
+		bombPackTrades = MathHelper.clamp_int(config.get("Trade", "[Barnes] Number of bomb purchases required to unlock the package deal (0 to disable)[0-100]", 25).getInt(), 0, 100);
 		enableTradeBomb = config.get("Trade", "[Bombs] Enable random villager trades for bombs", true).getBoolean(true);
 		enableArrowTrades = config.get("Trade", "[Hero's Bow] Enable vanilla priest mini-quest to unlock magic arrow trades (fire, ice, light, silver)", true).getBoolean(true);
 		maskBuyChance = 0.01F * (float) MathHelper.clamp_int(config.get("Trade", "[Masks] Chance that a villager will be interested in purchasing a random mask [1-100]", 15).getInt(), 1, 100);
@@ -966,6 +969,7 @@ public class Config
 	public static boolean enableTradeBomb() { return enableTradeBomb; }
 	public static boolean enableTradeBombBag() { return enableTradeBombBag; }
 	public static boolean enableBarnesTradeSequence() { return enableBarnesTrades; }
+	public static int getBombTradesRequired() { return bombPackTrades; }
 	public static boolean areArrowTradesEnabled() { return enableArrowTrades; }
 	public static float getMaskBuyChance() { return maskBuyChance; }
 
