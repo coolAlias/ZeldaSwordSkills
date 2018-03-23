@@ -29,7 +29,6 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import zeldaswordskills.api.entity.BombType;
 import zeldaswordskills.api.entity.merchant.RupeeTrade;
-import zeldaswordskills.entity.npc.EntityNpcBarnes;
 import zeldaswordskills.item.ItemBomb;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.ref.Config;
@@ -153,14 +152,9 @@ public final class QuestBombTrades extends QuestBase
 		return i;
 	}
 
-	/**
-	 * @param data Expects data[0] to be an instance of EntityNpcBarnes
-	 */
 	@Override
 	public boolean update(EntityPlayer player, Object... data) {
 		if (!Config.enableBarnesTradeSequence()) {
-			return false;
-		} else if (data == null || data.length < 1 || !(data[0] instanceof EntityNpcBarnes)) {
 			return false;
 		}
 		String chat = null;

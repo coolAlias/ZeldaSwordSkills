@@ -392,12 +392,6 @@ public class EntityNpcBarnes extends EntityNpcMerchantBase implements INpcVillag
 	}
 
 	@Override
-	public void onUpdate() {
-		super.onUpdate();
-		// this.setDead();
-	}
-
-	@Override
 	public void onConverted(EntityPlayer player) {
 		this.populateTradingList();
 		RupeeMerchantHelper.setDefaultTrades(this, DEFAULT_RUPEE_TRADES, this.rand);
