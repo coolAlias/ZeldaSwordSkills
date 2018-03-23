@@ -56,6 +56,7 @@ public class RupeeTradeLists
 		RupeeTradeTemplateList sells = new RupeeTradeTemplateList(RupeeTradeList.FOR_SALE);
 		// BARNES
 		buys.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(Items.gunpowder), 1));
+		buys.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.bombFlowerSeed), 2));
 		sells.add(RupeeValueRegistry.getRupeeTradeTemplate(new ItemStack(ZSSItems.bomb, 1, BombType.BOMB_STANDARD.ordinal()), 8));
 		RupeeMerchantHelper.writeTradesToFile(buys, sells, EntityNpcBarnes.DEFAULT_RUPEE_TRADES);
 	}
