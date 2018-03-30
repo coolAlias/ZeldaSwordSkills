@@ -376,7 +376,7 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 			updateNayru();
 		}
 		// Check for changes to equipped armor for IEquipTrigger items before updating
-		if (hasWornArmorChanged()) {
+		if (!player.worldObj.isRemote && hasWornArmorChanged()) {
 			updateWornArmor();
 		}
 		if (getFlag(MOBILITY) && !player.onGround && Math.abs(player.motionY) > 0.05D
@@ -461,9 +461,9 @@ public class ZSSPlayerInfo implements IExtendedEntityProperties
 	public void onPlayerLoggedIn() {
 		if (player instanceof EntityPlayerMP) {
 			verifyStartingGear();
+			// Make sure all modifiers are applied from equipped armor
+			updateWornArmor();
 		}
-		// Make sure all modifiers are applied from equipped armor
-		updateWornArmor();
 	}
 
 	/**
