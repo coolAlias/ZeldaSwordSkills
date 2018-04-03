@@ -22,6 +22,7 @@ import java.util.List;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -39,6 +40,7 @@ import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -301,8 +303,6 @@ public class ZSSClientEvents
 		}
 	}
 
-	/*
-	// TODO
 	@SubscribeEvent
 	public void onRenderPlayer(RenderPlayerEvent.Pre event) {
 		ItemStack mask = event.entityPlayer.getCurrentArmor(ArmorIndex.WORN_HELM);
@@ -310,35 +310,10 @@ public class ZSSClientEvents
 			GlStateManager.pushMatrix();
 			needsPop = true;
 			if (event.entityPlayer == mc.thePlayer) {
-				if (mc.inGameHasFocus) {
-					GlStateManager.translate(0.0F, -6.325F, 0.0F);
+				if (!(mc.currentScreen instanceof GuiContainer)) {
 					GlStateManager.scale(3.0F, 3.0F, 3.0F);
 				}
-			} else {
-				GlStateManager.scale(3.0F, 3.0F, 3.0F);
 			}
-			/*
-			if (fakePlayer == null) {
-				fakePlayer = new FakeClientPlayer(event.entityPlayer.worldObj);
-			}
-			Vec3 vec3 = event.entityPlayer.getLookVec();
-			double dx = (Minecraft.getMinecraft().gameSettings.thirdPersonView > 0 ? 0.0D : vec3.xCoord);
-			double dz = (Minecraft.getMinecraft().gameSettings.thirdPersonView > 0 ? 0.0D : vec3.zCoord);
-			fakePlayer.setLocationAndAngles(event.entityPlayer.posX + dx, event.entityPlayer.posY, event.entityPlayer.posZ + dz, event.entityPlayer.rotationYaw, event.entityPlayer.rotationPitch);
-			fakePlayer.renderYawOffset = event.entityPlayer.renderYawOffset;
-			//fakePlayer.prevCameraPitch = event.entityPlayer.prevCameraPitch;
-			//fakePlayer.prevRotationPitch = event.entityPlayer.prevRotationPitch;
-			fakePlayer.prevRotationYaw = event.entityPlayer.prevRotationYaw;
-			fakePlayer.rotationYawHead = event.entityPlayer.rotationYawHead;
-			fakePlayer.prevPosX = event.entityPlayer.prevPosX + dx;
-			fakePlayer.prevPosY = event.entityPlayer.prevPosY;
-			fakePlayer.prevPosZ = event.entityPlayer.prevPosZ + dz;
-			Minecraft.getMinecraft().renderViewEntity = fakePlayer;
-		}
-
-		else if (fakePlayer != null) {
-			fakePlayer = null;
-		}*
 		}
 	}
 
@@ -349,5 +324,4 @@ public class ZSSClientEvents
 			needsPop = false;
 		}
 	}
-	 */
 }

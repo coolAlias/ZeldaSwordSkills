@@ -206,7 +206,6 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 	 * then adding any potion effect, and finally calling {@link #applyCustomModifiers}
 	 */
 	public final void applyModifiers(ItemStack stack, EntityPlayer player) {
-		removeModifiers(stack, player);
 		if (tickingEffect != null) {
 			player.addPotionEffect(new PotionEffect(tickingEffect));
 		}
@@ -231,10 +230,13 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 	//======================================================================//
 	//	Static inner classes for Masks with custom behaviors				//
 	//======================================================================//
+	
 	public static class ItemMaskBlast extends ItemMask {
+
 		public ItemMaskBlast(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void explode(EntityPlayer player, ItemStack stack, World world, double x, double y, double z) {
 			if (player.capabilities.isCreativeMode || !isCooling(world, stack)) {
@@ -244,12 +246,14 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 				world.playSoundEffect(x, y, z, Sounds.CLICK, 0.3F, 0.6F);
 			}
 		}
+
 		/**
 		 * Returns true if this Mask is cooling down
 		 */
 		private boolean isCooling(World world, ItemStack stack) {
 			return (stack.hasTagCompound() && world.getTotalWorldTime() < stack.getTagCompound().getInteger("nextUse"));
 		}
+
 		/**
 		 * Sets the time, in ticks, which must pass before the stack may be used again
 		 */
@@ -258,8 +262,9 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 			stack.getTagCompound().setLong("nextUse", world.getTotalWorldTime() + time);
 		}
 	}
-	public static class ItemMaskBunny extends ItemMask
-	{
+
+	public static class ItemMaskBunny extends ItemMask {
+
 		/** Movement bonus for wearing the Bunny Hood */
 		private static final UUID bunnyHoodMoveBonusUUID = UUID.fromString("8412C9F7-9645-4C24-8FD1-6EFB8282E822");
 		private static final AttributeModifier bunnyHoodMoveBonus = (new AttributeModifier(bunnyHoodMoveBonusUUID, "Bunny Hood Speed Bonus", 0.3D, 2)).setSaved(false);
@@ -267,12 +272,14 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 		public ItemMaskBunny(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).applyModifier(bunnyHoodMoveBonus);
 			ZSSPlayerInfo.get(player).setFlag(ZSSPlayerInfo.MOBILITY, true);
 			ZSSEntityInfo.get(player).applyBuff(Buff.EVADE_UP, Integer.MAX_VALUE, 25);
 		}
+
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
 			player.getEntityAttribute(SharedMonsterAttributes.movementSpeed).removeModifier(bunnyHoodMoveBonus);
@@ -280,10 +287,13 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 			ZSSEntityInfo.get(player).removeBuff(Buff.EVADE_UP);
 		}
 	}
+
 	public static class ItemMaskCouples extends ItemMask {
+
 		public ItemMaskCouples(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void onArmorTick(World world, EntityPlayer player, ItemStack stack) {
 			super.onArmorTick(world, player, stack);
@@ -297,20 +307,21 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 			}
 		}
 	}
+
 	public static class ItemMaskGiants extends ItemMask {
+
 		public ItemMaskGiants(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
-			/*
-			// TODO
 			DirtyEntityAccessor.setSize(player, player.width * 3.0F, player.height * 3.0F);
 			if (player.worldObj.isRemote) {
 				player.stepHeight += 1.0F;
 			}
-			 */
 		}
+
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
 			if (player.getEntityData().hasKey("origWidth")) {
@@ -321,37 +332,48 @@ public class ItemMask extends ItemModArmor implements IUnenchantable, IZoomHelpe
 			}
 		}
 	}
+
 	public static class ItemMaskGoron extends ItemMask {
+
 		public ItemMaskGoron(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
 			ZSSEntityInfo.get(player).applyBuff(Buff.RESIST_FIRE, Integer.MAX_VALUE, 100);
 		}
+
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
 			ZSSEntityInfo.get(player).removeBuff(Buff.RESIST_FIRE);
 		}
 	}
+
 	public static class ItemMaskHawkeye extends ItemMask {
+
 		public ItemMaskHawkeye(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		@SideOnly(Side.CLIENT)
 		public float getMagnificationFactor() {
 			return 3.0F;
 		}
 	}
+
 	public static class ItemMaskMajora extends ItemMask {
+
 		public ItemMaskMajora(ArmorMaterial material, int renderIndex) {
 			super(material, renderIndex);
 		}
+
 		@Override
 		public void applyCustomModifiers(ItemStack stack, EntityPlayer player) {
 			ZSSEntityInfo.get(player).applyBuff(Buff.ATTACK_UP, Integer.MAX_VALUE, 100);
 		}
+
 		@Override
 		public void removeModifiers(ItemStack stack, EntityPlayer player) {
 			ZSSEntityInfo.get(player).removeBuff(Buff.ATTACK_UP);
