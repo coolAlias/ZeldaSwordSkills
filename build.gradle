@@ -12,26 +12,37 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
+repositories {
+    maven {
+        name = "CurseForge"
+        url = "https://minecraft.curseforge.com/api/maven/"
+    }
+}
 apply plugin: 'net.minecraftforge.gradle.forge'
 
+// Minecraft, Forge, and Java versions
+sourceCompatibility = targetCompatibility = "1.8"
+ext.mcversion = "1.8.9"
+ext.forgeversion = "11.15.1.2318"
+
+// Mod version
 version = "3.4.1"
 group = "com.google.coolalias.zeldaswordskills"
-archivesBaseName = "1.8.9-zeldaswordskills"
-
-sourceCompatibility = targetCompatibility = "1.8"
+archivesBaseName = "zeldaswordskills-$mcversion"
 
 dependencies {
-    compile files (
-		//TODO make these auto-download from a "maven" instead of requiring the developer to download and set these up manually
-		"libs/antiqueatlas-1.8.9-4.4.0.jar",
-		"libs/1.8.9-Battlegear-Bin-1.0.10.2.jar",
-    )
+    compileOnly "antique-atlas:antiqueatlas:1.8.9:4.4.0"
+    compileOnly "mb-battlegear-2:1.8.9-MB_Battlegear2:Bullseye:1.0.10.2"
 }
 
 minecraft {
-    version = "1.8.9-11.15.1.2318-1.8.9"
+    version = "$mcversion-$forgeversion-$mcversion"
     runDir = "run"
     mappings = "stable_22"
+}
+
+jar {
+    archiveName = archivesBaseName + "-" + version + "-universal.jar"
 }
 
 processResources

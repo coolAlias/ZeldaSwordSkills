@@ -221,3 +221,11 @@ pip-log.txt
 /gradlew.bat
 /.nb-gradle/
 /libs/
+/run/
+
+#IntelliJ
+/.idea/
+/out/
+ZeldaSwordSkills.iml
+ZeldaSwordSkills.ipr
+ZeldaSwordSkills.iws
