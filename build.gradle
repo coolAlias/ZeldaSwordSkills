@@ -26,7 +26,7 @@ ext.mcversion = "1.8.9"
 ext.forgeversion = "11.15.1.2318"
 
 // Mod version
-version = "3.4.1"
+version = "3.4"
 group = "com.google.coolalias.zeldaswordskills"
 archivesBaseName = "zeldaswordskills-$mcversion"
 
