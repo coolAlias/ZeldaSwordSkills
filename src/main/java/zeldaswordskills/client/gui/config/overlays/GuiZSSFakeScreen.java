@@ -24,6 +24,7 @@ import java.util.List;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -47,16 +48,13 @@ import zeldaswordskills.util.StringUtils;
  */
 public final class GuiZSSFakeScreen extends GuiScreen {
 
-	protected int previousWidth = 0;
-
 	/** The background image for this screen */
 	public static final ResourceLocation ZSS_FAKE_GUI = new ResourceLocation(ModInfo.ID, "textures/gui/fake_gui.png");
 
-	/** The parent screen. The only time this Screen is constructed is from {@link GuiConfigZeldaSwordSkills} or {@link GuiHUDPanel} */
+	/** The parent screen. The only time this Screen is constructed is from {@link GuiConfigZeldaSwordSkills} */
 	protected GuiConfigZeldaSwordSkills parent;
 
 	protected final List<IOverlayButton> overlays = new ArrayList<IOverlayButton>();
-
 	private IOverlayButton activeElement;
 	private OverlayToggleList toggleList;
 
@@ -130,7 +128,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 			int width = mc.fontRendererObj.getStringWidth(help);
 			int textPadding = 5;
 
-			this.drawRect(this.width / 2 - (width / 2 + textPadding), this.height / 2 - (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), this.width / 2 + (width / 2 + textPadding), this.height / 2 + (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), 0x80000000);
+			Gui.drawRect(this.width / 2 - (width / 2 + textPadding), this.height / 2 - (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), this.width / 2 + (width / 2 + textPadding), this.height / 2 + (mc.fontRendererObj.FONT_HEIGHT / 2 + textPadding), 0x80000000);
 			this.drawCenteredString(mc.fontRendererObj, help, this.width / 2, this.height / 2 - mc.fontRendererObj.FONT_HEIGHT / 2, 0xFFFFFFFF);
 		}
 		// Clean up my mess
@@ -179,14 +177,18 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 			if (keyCode == Keyboard.KEY_H) {
 				mc.displayGuiScreen(new ZSSOverlayHelpScreen(this, activeElement));
 			}
-			activeElement.adjustOverlay(typedChar, keyCode);
+			else {
+				activeElement.adjustOverlay(typedChar, keyCode);
+			}
 		}
 		else {
 			super.keyTyped(typedChar, keyCode);
 		}
 	}
 
-	/** Used to designate the overlay focus of the {@code GuiZSSFakeScreen} */
+	/**
+	 * Used to designate the overlay focus of the {@code GuiZSSFakeScreen}
+	 */
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		for (IOverlayButton o : overlays) {
@@ -200,7 +202,9 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 
-	/** Called when the done button is pressed. Posts a {@link OnConfigChangedEvent} */
+	/**
+	 * Called when the done button is pressed. Posts a {@link OnConfigChangedEvent}
+	 */
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if (button.id == 1) {

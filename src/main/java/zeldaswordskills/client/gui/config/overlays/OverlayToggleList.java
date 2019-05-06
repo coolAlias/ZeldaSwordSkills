@@ -6,6 +6,7 @@ import java.util.List;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiUtils;
@@ -43,7 +44,7 @@ public class OverlayToggleList extends GuiScreen {
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.parent.drawScreen(mouseX, mouseY, partialTicks);
-		this.drawRect(0, 0, this.width, this.height, 0xA0000000);
+		Gui.drawRect(0, 0, this.width, this.height, 0xA0000000);
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 

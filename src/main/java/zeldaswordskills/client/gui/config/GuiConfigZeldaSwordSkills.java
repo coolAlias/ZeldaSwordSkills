@@ -1,5 +1,5 @@
 /**
-    Copyright (C) <2017> <coolAlias>
+    Copyright (C) <2019> <coolAlias>
 
     This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
     you can redistribute it and/or modify it under the terms of the GNU
@@ -18,19 +18,18 @@
 package zeldaswordskills.client.gui.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.DummyConfigElement;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
-import scala.actors.threadpool.Arrays;
 import zeldaswordskills.client.gui.config.overlays.GuiZSSFakeScreen;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
@@ -70,7 +69,7 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 			String title = EnumChatFormatting.GREEN + fakeScreen.displayString;
 			String key = "config.zss.parent.overlays.tooltip";
 			String tooltip = EnumChatFormatting.YELLOW + StringUtils.translateKey(key);
-			this.drawToolTip(Arrays.asList((title + "\n" + tooltip).split("\n")), mouseX, mouseY);
+			this.drawToolTip(Arrays.asList(title, tooltip), mouseX, mouseY);
 		}
 	}
 
@@ -80,11 +79,6 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 			this.mc.displayGuiScreen(new GuiZSSFakeScreen(this));
 		}
 		super.actionPerformed(button);
-	}
-
-	@Override
-	public void onGuiClosed() {
-		super.onGuiClosed();
 	}
 
 	/**

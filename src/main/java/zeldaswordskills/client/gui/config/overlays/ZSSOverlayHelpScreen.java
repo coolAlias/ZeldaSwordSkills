@@ -1,3 +1,20 @@
+/**
+    Copyright (C) <2019> <coolAlias>
+
+    This file is part of coolAlias' Zelda Sword Skills Minecraft Mod; as such,
+    you can redistribute it and/or modify it under the terms of the GNU
+    General Public License as published by the Free Software Foundation,
+    either version 3 of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package zeldaswordskills.client.gui.config.overlays;
 
 import java.util.ArrayList;
@@ -5,6 +22,7 @@ import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.config.Property;
@@ -34,7 +52,7 @@ public class ZSSOverlayHelpScreen extends GuiScreen {
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.parentScreen.drawScreen(mouseX, mouseY, partialTicks);// Otherwise the background comes out solid black
-		this.drawRect(0, 0,this.width, this.height, 0x80000000);
+		Gui.drawRect(0, 0,this.width, this.height, 0x80000000);
 		GlStateManager.enableAlpha();
 		int startY = this.height / 2 - this.getSize() * SLOT_SIZE / 2;
 		for(int i = 0; i < this.getSize(); i++) {
