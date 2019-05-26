@@ -18,21 +18,16 @@
 package zeldaswordskills.client.gui.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.DummyConfigElement;
-import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
-import zeldaswordskills.client.gui.config.overlays.GuiZSSFakeScreen;
 import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.util.StringUtils;
@@ -48,39 +43,8 @@ import zeldaswordskills.util.StringUtils;
  */
 public class GuiConfigZeldaSwordSkills extends GuiConfig {
 
-	private GuiButtonExt fakeScreen;
-
 	public GuiConfigZeldaSwordSkills(GuiScreen parentScreen) {
 		super(parentScreen, getElements(), ModInfo.ID, GuiConfig.getAbridgedConfigPath(Config.config.toString()), false, false, StringUtils.translateKey("config.zss.parent.title"));
-		String key = "config.zss.parent.overlays";
-		String overlayTitle = StringUtils.translateKey(key);
-		fakeScreen = new GuiButtonExt(26, 0, 50, 300, 18, overlayTitle);
-	}
-
-	@Override
-	public void initGui() {
-		buttonList.add(this.fakeScreen);
-		super.initGui();
-	}
-
-	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		this.fakeScreen.xPosition = this.entryList.width / 2 - fakeScreen.width / 2;
-		super.drawScreen(mouseX, mouseY, partialTicks);
-		if (this.fakeScreen.isMouseOver()) {
-			String title = EnumChatFormatting.GREEN + fakeScreen.displayString;
-			String key = "config.zss.parent.overlays.tooltip";
-			String tooltip = EnumChatFormatting.YELLOW + StringUtils.translateKey(key);
-			this.drawToolTip(Arrays.asList(title, tooltip), mouseX, mouseY);
-		}
-	}
-
-	@Override
-	public void actionPerformed(GuiButton button) {
-		if (button.id == 26) {
-			this.mc.displayGuiScreen(new GuiZSSFakeScreen(this));
-		}
-		super.actionPerformed(button);
 	}
 
 	/**
