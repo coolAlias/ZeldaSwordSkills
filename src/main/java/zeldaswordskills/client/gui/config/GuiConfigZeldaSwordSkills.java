@@ -19,11 +19,13 @@ package zeldaswordskills.client.gui.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.DummyConfigElement;
@@ -49,7 +51,7 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 	private GuiButtonExt fakeScreen;
 
 	public GuiConfigZeldaSwordSkills(GuiScreen parentScreen) {
-		super(parentScreen, getElements(), ModInfo.ID, GuiConfig.getAbridgedConfigPath(Config.config.toString()), false, false, I18n.format("config.zss.parent.title"));
+		super(parentScreen, getElements(), ModInfo.ID, GuiConfig.getAbridgedConfigPath(Config.config.toString()), false, false, StringUtils.translateKey("config.zss.parent.title"));
 		String key = "config.zss.parent.overlays";
 		String overlayTitle = StringUtils.translateKey(key);
 		fakeScreen = new GuiButtonExt(26, 0, 50, 300, 18, overlayTitle);
@@ -107,25 +109,22 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 		 * Utilizing this versus a ConfigElement of the category type allows for capitalizing the name in the button, and lets you set the lang key
 		 * Very Gui-friendly method
 		 */
-		categories.add(new DummyConfigElement.DummyCategoryElement("General", "config.zss.general.title", general));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Client", "config.zss.client.title", client));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Weapon Registry", "config.zss.weapon_registry.title", weaponRegistry).setRequiresMcRestart(true));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Items", "config.zss.item.title", items));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Bonus Gear", "config.zss.bonus_gear.title", bonusGear));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Skills", "config.zss.skills.title", skills));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Dungeon Generation", "config.zss.dun_gen.title", dunGen));
-		categories.add(new DummyConfigElement.DummyCategoryElement("World Generation", "config.zss.world_gen.title", worldGen));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Loot", "config.zss.loot.title", loot));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Trades", "config.zss.trade.title", trades));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Mob Spawns", "config.zss.mob_spawns.title", mobSpawning).setRequiresMcRestart(true));
-		categories.add(new DummyConfigElement.DummyCategoryElement("Recipes", "config.zss.recipes.title", recipes).setRequiresMcRestart(true));
+		Collections.addAll(categories,
+				new DummyConfigElement.DummyCategoryElement("General", "config.zss.general.title", general),
+				new DummyConfigElement.DummyCategoryElement("Client", "config.zss.client.title", client),
+				new DummyConfigElement.DummyCategoryElement("Weapon Registry", "config.zss.weapon_registry.title", weaponRegistry).setRequiresMcRestart(true),
+				new DummyConfigElement.DummyCategoryElement("Items", "config.zss.item.title", items),
+				new DummyConfigElement.DummyCategoryElement("Bonus Gear", "config.zss.bonus_gear.title", bonusGear),
+				new DummyConfigElement.DummyCategoryElement("Skills", "config.zss.skills.title", skills),
+				new DummyConfigElement.DummyCategoryElement("Dungeon Generation", "config.zss.dun_gen.title", dunGen),
+				new DummyConfigElement.DummyCategoryElement("World Generation", "config.zss.world_gen.title", worldGen),
+				new DummyConfigElement.DummyCategoryElement("Loot", "config.zss.loot.title", loot),
+				new DummyConfigElement.DummyCategoryElement("Trades", "config.zss.trade.title", trades),
+				new DummyConfigElement.DummyCategoryElement("Mob Spawns", "config.zss.mob_spawns.title", mobSpawning).setRequiresMcRestart(true),
+				new DummyConfigElement.DummyCategoryElement("Recipes", "config.zss.recipes.title", recipes).setRequiresMcRestart(true),
+				// Individual property not yet categorized
+				new ConfigElement(Config.config.get("mod support", "Can Offhand Master Swords", false, "[BattleGear2] Allow Master Swords to be held in the off-hand")));
 
-		//This config is the only one of its category. Add to the main GuiConfig screen as its own element, since it is an independent Property
-		categories.add(new ConfigElement(Config.config.get("mod support", "Can Offhand Master Swords", false, "[BattleGear2] Allow Master Swords to be held in the off-hand")));
-
-		List<IConfigElement> list = new ArrayList<>();
-		list.add(new DummyConfigElement.DummyCategoryElement("Configurations", "config.zss.parent.configs", categories));
-
-		return list;
+		return Lists.<IConfigElement>newArrayList(new DummyConfigElement.DummyCategoryElement("Configurations", "config.zss.parent.configs", categories));
 	}
 }
