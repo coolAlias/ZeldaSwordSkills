@@ -46,10 +46,10 @@ import zeldaswordskills.util.StringUtils;
  * 
  * @author Spitfyre03
  */
-public final class GuiZSSFakeScreen extends GuiScreen {
+public final class GuiOverlayConfigurator extends GuiScreen {
 
 	/** The background image for this screen */
-	public static final ResourceLocation ZSS_FAKE_GUI = new ResourceLocation(ModInfo.ID, "textures/gui/fake_gui.png");
+	public static final ResourceLocation ZSS_DUMMY_SCREEN = new ResourceLocation(ModInfo.ID, "textures/gui/dummy_screen.png");
 
 	/** The parent screen. The only time this Screen is constructed is from {@link GuiConfigZeldaSwordSkills} */
 	protected GuiConfigZeldaSwordSkills parent;
@@ -62,7 +62,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	private final int DISPLAY_TIME = 3000;
 	private static boolean hasDisplayedHelp = false;
 
-	public GuiZSSFakeScreen(GuiConfigZeldaSwordSkills parent) {
+	public GuiOverlayConfigurator(GuiConfigZeldaSwordSkills parent) {
 		this.parent = parent;
 		this.mc = Minecraft.getMinecraft();
 
@@ -104,7 +104,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		// Draws the background
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		this.mc.getTextureManager().bindTexture(ZSS_FAKE_GUI);
+		this.mc.getTextureManager().bindTexture(ZSS_DUMMY_SCREEN);
 		GuiScreen.drawModalRectWithCustomSizedTexture(0, 0, 0.0F, 0.0F, mc.currentScreen.width, mc.currentScreen.height, mc.currentScreen.width, mc.currentScreen.height);
 
 		// Render the overlays
@@ -187,7 +187,7 @@ public final class GuiZSSFakeScreen extends GuiScreen {
 	}
 
 	/**
-	 * Used to designate the overlay focus of the {@code GuiZSSFakeScreen}
+	 * Used to designate the overlay focus of the {@code GuiOverlayConfigurator}
 	 */
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
