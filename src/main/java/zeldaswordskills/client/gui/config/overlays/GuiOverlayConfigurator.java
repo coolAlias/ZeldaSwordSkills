@@ -31,6 +31,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import zeldaswordskills.client.gui.IGuiOverlay;
@@ -52,9 +53,9 @@ public final class GuiOverlayConfigurator extends GuiScreen {
 	public static final ResourceLocation ZSS_DUMMY_SCREEN = new ResourceLocation(ModInfo.ID, "textures/gui/dummy_screen.png");
 
 	/** The parent screen. The only time this Screen is constructed is from {@link GuiConfigZeldaSwordSkills} */
-	protected GuiConfigZeldaSwordSkills parent;
+	protected GuiConfig parent;
 
-	protected final List<IOverlayButton> overlays = new ArrayList<IOverlayButton>();
+	protected final List<IOverlayButton> overlays = new ArrayList<>();
 	private IOverlayButton activeElement;
 	private OverlayToggleList toggleList;
 
@@ -62,9 +63,9 @@ public final class GuiOverlayConfigurator extends GuiScreen {
 	private final int DISPLAY_TIME = 3000;
 	private static boolean hasDisplayedHelp = false;
 
-	public GuiOverlayConfigurator(GuiConfigZeldaSwordSkills parent) {
+	public GuiOverlayConfigurator(GuiConfig parent) {
 		this.parent = parent;
-		this.mc = Minecraft.getMinecraft();
+		this.mc = parent.mc;
 
 		// TODO perhaps draw a hotbar and experience bar above all these to prevent them from rendering in that space
 		FakeGuiMagicMeter magicMeterDummy = new FakeGuiMagicMeter(mc);
@@ -111,7 +112,7 @@ public final class GuiOverlayConfigurator extends GuiScreen {
 		GlStateManager.enableAlpha();
 		GlStateManager.enableBlend();
 		ScaledResolution res = new ScaledResolution(this.mc);
-		List<IGuiOverlay> rendered = new ArrayList<IGuiOverlay>();
+		List<IGuiOverlay> rendered = new ArrayList<>();
 		for (IOverlayButton overlay : this.overlays) {
 			if (overlay.shouldRender() && this.renderElement(overlay, res, rendered, overlay.equals(this.activeElement))) {
 				rendered.add(overlay);
