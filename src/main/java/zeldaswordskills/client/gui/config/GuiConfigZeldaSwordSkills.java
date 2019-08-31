@@ -17,15 +17,12 @@
 
 package zeldaswordskills.client.gui.config;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
-import net.minecraftforge.fml.client.config.DummyConfigElement;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
 import zeldaswordskills.ref.Config;
@@ -52,43 +49,22 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 	 * and contains the categories of ZSS configurations that open into child screens.
 	 */
 	private static List<IConfigElement> getElements() {
-		List<IConfigElement> categories = new ArrayList<>();
-
-		//Create the hierarchy of elements to be displayed to the ConfigGui screen
-		List<IConfigElement> general = new ConfigElement(Config.config.getCategory("general")).getChildElements();
-		List<IConfigElement> client = new ConfigElement(Config.config.getCategory("client")).getChildElements();
-		List<IConfigElement> weaponRegistry = new ConfigElement(Config.config.getCategory("weapon registry")).getChildElements();
-		List<IConfigElement> items = new ConfigElement(Config.config.getCategory("item")).getChildElements();
-		List<IConfigElement> bonusGear = new ConfigElement(Config.config.getCategory("bonus gear")).getChildElements();
-		List<IConfigElement> skills = new ConfigElement(Config.config.getCategory("skills")).getChildElements();
-		List<IConfigElement> dunGen = new ConfigElement(Config.config.getCategory("dungeon generation")).getChildElements();
-		List<IConfigElement> worldGen = new ConfigElement(Config.config.getCategory("world generation")).getChildElements();
-		List<IConfigElement> loot = new ConfigElement(Config.config.getCategory("loot")).getChildElements();
-		List<IConfigElement> trades = new ConfigElement(Config.config.getCategory("trade")).getChildElements();
-		List<IConfigElement> mobSpawning = new ConfigElement(Config.config.getCategory("mob spawns")).getChildElements();
-		List<IConfigElement> recipes = new ConfigElement(Config.config.getCategory("recipes")).getChildElements();
-
-		/*
-		 * Add each category to the list to display
-		 * Utilizing this versus a ConfigElement of the category type allows for capitalizing the name in the button, and lets you set the lang key
-		 * Very Gui-friendly method
-		 */
-		Collections.addAll(categories,
-				new DummyConfigElement.DummyCategoryElement("General", "config.zss.general.title", general),
-				new DummyConfigElement.DummyCategoryElement("Client", "config.zss.client.title", client),
-				new DummyConfigElement.DummyCategoryElement("Weapon Registry", "config.zss.weapon_registry.title", weaponRegistry).setRequiresMcRestart(true),
-				new DummyConfigElement.DummyCategoryElement("Items", "config.zss.item.title", items),
-				new DummyConfigElement.DummyCategoryElement("Bonus Gear", "config.zss.bonus_gear.title", bonusGear),
-				new DummyConfigElement.DummyCategoryElement("Skills", "config.zss.skills.title", skills),
-				new DummyConfigElement.DummyCategoryElement("Dungeon Generation", "config.zss.dun_gen.title", dunGen),
-				new DummyConfigElement.DummyCategoryElement("World Generation", "config.zss.world_gen.title", worldGen),
-				new DummyConfigElement.DummyCategoryElement("Loot", "config.zss.loot.title", loot),
-				new DummyConfigElement.DummyCategoryElement("Trades", "config.zss.trade.title", trades),
-				new DummyConfigElement.DummyCategoryElement("Mob Spawns", "config.zss.mob_spawns.title", mobSpawning).setRequiresMcRestart(true),
-				new DummyConfigElement.DummyCategoryElement("Recipes", "config.zss.recipes.title", recipes).setRequiresMcRestart(true),
-				// Individual property not yet categorized
-				new ConfigElement(Config.config.get("mod support", "Can Offhand Master Swords", false, "[BattleGear2] Allow Master Swords to be held in the off-hand")));
-
-		return Lists.<IConfigElement>newArrayList(new DummyConfigElement.DummyCategoryElement("Configurations", "config.zss.parent.configs", categories));
+		return Lists.<IConfigElement>newArrayList(
+				new ConfigElement(Config.config.getCategory("general")),
+				new ConfigElement(Config.config.getCategory("client")),
+				new ConfigElement(Config.config.getCategory("mod support")),
+				new ConfigElement(Config.config.getCategory("weapon registry").setRequiresMcRestart(true)),
+				new ConfigElement(Config.config.getCategory("item")),
+				new ConfigElement(Config.config.getCategory("bonus gear")),
+				new ConfigElement(Config.config.getCategory("skills")),
+				new ConfigElement(Config.config.getCategory("dungeon generation")),
+				new ConfigElement(Config.config.getCategory("world generation")),
+				new ConfigElement(Config.config.getCategory("loot")),
+				new ConfigElement(Config.config.getCategory("drops")),
+				new ConfigElement(Config.config.getCategory("trade")),
+				new ConfigElement(Config.config.getCategory("mob spawns").setRequiresMcRestart(true)),
+				new ConfigElement(Config.config.getCategory("recipes").setRequiresMcRestart(true))
+			);
 	}
+
 }
