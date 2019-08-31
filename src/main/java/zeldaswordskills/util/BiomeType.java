@@ -17,6 +17,8 @@
 
 package zeldaswordskills.util;
 
+import static zeldaswordskills.ref.Config.MOB_SPAWNS;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -79,7 +81,7 @@ public enum BiomeType {
 	 */
 	public static void postInit(Configuration config) {
 		for (BiomeType type : BiomeType.values()) {
-			addBiomes(type, config.getStringList("[Biome Types] " + type.getCapName() + " Biomes", "mob spawns", type.defaultBiomes, "List of " + type.name() + " type biomes - certain mobs spawn differently depending on the biome type", (String[]) null, type.getLangKey()));
+			addBiomes(type, config.getStringList("[Biome Types] " + type.getCapName() + " Biomes", MOB_SPAWNS, type.defaultBiomes, "List of " + type.name() + " type biomes - certain mobs spawn differently depending on the biome type", (String[]) null, type.getLangKey()));
 		}
 	}
 

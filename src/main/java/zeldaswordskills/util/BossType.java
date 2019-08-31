@@ -142,7 +142,7 @@ public enum BossType implements IStringSerializable
 	 * Loads biome lists from config file during post initialization
 	 */
 	public static void postInit(Configuration config) {
-		String category = "dungeon generation";
+		String category = Config.DUNGEON_GEN;
 		for (BossType type : BossType.values()) {
 			addBiomes(type, config.getStringList("[Boss Dungeon] " + type.title + " Dungeon Biomes", category, type.defaultBiomes, "[Boss Dungeon] List of biomes in which " + type.title + "s can generate", (String[]) null, type.getLangKey()));
 		}
