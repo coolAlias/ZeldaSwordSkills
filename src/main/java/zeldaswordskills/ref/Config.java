@@ -694,31 +694,31 @@ public class Config
 		lockedLootWeight = config.getInt("[Loot Weight] Locked Chest Content Weight", LOOT, 3, 1, 10, "The maximum weight of the contents in a Locked Chest", "config.zss.loot.locked_loot_weight");
 
 		/*================== DROPS =====================*/
-		//TODO add to GuiConfig in a later commit
-		category = "drops";
+		config.setCategoryLanguageKey(DROPS, "config.zss.drops");
 
-		grassDropChance = 0.01F * config.getFloat("Grass Loot Drop Chance", category, 15, 0, 100, "Chance (as a percent) of loot dropping from grass (0 to disable)", "");
-		jarDropChance = 0.01F * config.getFloat("Jar Loot Drop Chance", category, 20, 0, 100, "Chance (as a percent) of loot dropping from empty jars when broken (0 to disable)", "");
-		creeperDrop = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "Chance (as a percent) for creepers to drop bombs", 10).getInt(), 0, 100);
-		mobConsumableFrequency = MathHelper.clamp_int(config.get("Drops", "Frequency of small heart and magic jar drops from mobs [zero to disable; 1 = rare, 10 = very common]", 5).getInt(), 0, 10);
-		enableOrbDrops = config.get("Drops", "[Skill Orbs] Enable skill orbs to drop as loot from mobs", true).getBoolean(true);
-		randomDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb [0-100]", 10).getInt(), 0, 100);
-		genericMobDropChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb [0-100]", 1).getInt(), 0, 100);
+		grassDropChance = 0.01F * config.getInt("Grass Loot Drop Chance", DROPS, 15, 0, 100, "Chance (as a percent) of loot dropping from grass (0 to disable)", "config.zss.drops.grass_drop_chance");
+		jarDropChance = 0.01F * config.getInt("Jar Loot Drop Chance", DROPS, 20, 0, 100, "Chance (as a percent) of loot dropping from empty jars when broken (0 to disable)", "config.zss.drops.jar_drop_chance");
+		creeperDrop = 0.01F * config.getInt("Creeper Bomb Drop Chance", DROPS, 10, 0, 100, "Chance (as a percent) for creepers to drop bombs", "config.zss.drops.creeper_drop");
+		mobConsumableFrequency = config.getInt("Mob Consumables Drop Frequency", DROPS, 5, 0, 10, "Frequency of small heart and magic jar drops from mobs [0 to disable; 1 = rare, 10 = very common]", "config.zss.drops.mob_consumable_frequency");
+		enableOrbDrops = config.getBoolean("Orbs Drop as Loot", DROPS, true, "[Skill Orbs] Enable skill orbs to drop as loot from mobs", "config.zss.drops.enable_orb_drops");
+		randomDropChance = 0.01F * config.getInt("Specific Mob Drop Chance", DROPS, 10, 0, 100, "[Skill Orbs] Chance (as a percent) for specified mobs to drop a random orb", "config.zss.drops.random_drop_chance");
+		genericMobDropChance = 0.01F * config.getInt("Generic Mob Drop Chance", DROPS, 1, 0, 100, "[Skill Orbs] Chance (as a percent) for random mobs to drop a random orb", "config.zss.drops.generic_mob_drop_chance");
 		orbDropChance = new HashMap<Byte, Float>(SkillBase.getNumSkills());
 		for (SkillBase skill : SkillBase.getSkills()) {
 			if (skill.canDrop()) {
-				int i = MathHelper.clamp_int(config.get("drops", "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable)", 5).getInt(), 0, 10);
+				int i = config.getInt(skill.getDisplayName() + " Drop Chance", DROPS, 5, 0, 10, "Chance (in tenths of a percent) for " + skill.getDisplayName() + " (0 to disable)", "config.zss.drops." + skill.getUnlocalizedName() + "_drop_chance");
 				orbDropChance.put(skill.getId(), (0.001F * (float) i));
 			}
-			if (skill.isLoot() && config.getBoolean("[Skill Orbs] " + skill.getDisplayName() + " Orbs are Lootable", "loot", true, "Whether " + skill.getDisplayName() + " orbs may appear as random loot, such as in Boss chests", skill.getTranslationString() + ".loot")) {
+			/*============= ORBS LOOT =============*/
+			if (skill.isLoot() && config.getBoolean("[Skill Orbs] " + skill.getDisplayName() + " Orbs are Lootable", LOOT, true, "Whether " + skill.getDisplayName() + " orbs may appear as random loot, such as in Boss chests", skill.getTranslationString() + ".loot")) {
 				lootableOrbs.add(skill.getId());
 			}
 		}
-		powerDropRate = Math.max(config.get("Drops", "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops [minimum 20]", 50).getInt(), 20);
-		// TODO playerWhipLootChance = config.get("Drops", "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)[0-100]", 15).getInt();
-		vanillaWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)[0-100]", 15).getInt(), 0, 100);
-		globalWhipLootChance = 0.01F * (float) MathHelper.clamp_int(config.get("Drops", "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)[0-500]", 100).getInt(), 0, 500);
-		hurtOnSteal = config.get("Drops", "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", true).getBoolean(true);
+		powerDropRate = config.getInt("Piece of Power Drop Rate", DROPS, 50, 20, Integer.MAX_VALUE, "[Piece of Power] Approximate number of enemies you need to kill before a piece of power drops", "config.zss.drops.power_drop_rate");
+		// TODO playerWhipLootChance = config.get("Whip Player Loot Chance", 15, 0, 100, DROPS, "[Whip] Chance that a random item may be stolen from players, using a whip (0 to disable)", null);
+		vanillaWhipLootChance = 0.01F * config.getInt("Vanilla Whip Loot Chance", DROPS, 15, 0, 100, "[Whip] Chance that loot may be snatched from various vanilla mobs, using a whip (0 to disable)", "config.zss.drops.vanilla_whip_loot_chance");
+		globalWhipLootChance = 0.01F * config.getInt("Global Whip Loot Chance", DROPS, 100, 0, 500, "[Whip] All whip-stealing chances are multiplied by this value, as a percentage, including any added by other mods (0 disables ALL whip stealing!)", "config.zss.drops.global_whip_loot_chance");
+		hurtOnSteal = config.getBoolean("Hurt on Whip Steal", DROPS, true, "[Whip] Whether to inflict damage to entities when stealing an item (IEntityLootable entities determine this separately)", "config.zss.drops.hurt_on_steal");
 
 		/*================== TRADES =====================*/
 		config.setCategoryLanguageKey(TRADES, "config.zss.trade");

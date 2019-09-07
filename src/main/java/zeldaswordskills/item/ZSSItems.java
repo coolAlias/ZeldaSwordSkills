@@ -17,6 +17,7 @@
 
 package zeldaswordskills.item;
 
+import static zeldaswordskills.ref.Config.DROPS;
 import static zeldaswordskills.ref.Config.LOOT;
 import static zeldaswordskills.ref.Config.RECIPES;
 
@@ -307,10 +308,9 @@ public class ZSSItems
 	 */
 	public static void initConfig(Configuration config) {
 		/*================== GRASS DROPS =====================*/
-		//TODO add keys when Drops is added to ConfigGui
-		enableGrassArrowDrop = config.getBoolean("Grass Can Drop Arrows", "drops", true, "Enable arrow drops from grass (must use sword)", "config.zss.drops.enable_grass_arrow_drop");
-		enableGrassBombDrop = config.getBoolean("Grass Can Drop Bombs", "drops", false, "Enable bomb drops from grass (must use sword)", "config.zss.drops.enable_grass_bomb_drop");
-		enableGrassEmeraldDrop = config.getBoolean("Bombs Can Drop Emeralds", "drops", true, "Enable emerald drops from grass (must use sword)", "config.zss.drops.enable_grass_emerald_drop");
+		enableGrassArrowDrop = config.getBoolean("Grass Can Drop Arrows", DROPS, true, "Enable arrow drops from grass (must use sword)", "config.zss.drops.enable_grass_arrow_drop");
+		enableGrassBombDrop = config.getBoolean("Grass Can Drop Bombs", DROPS, false, "Enable bomb drops from grass (must use sword)", "config.zss.drops.enable_grass_bomb_drop");
+		enableGrassEmeraldDrop = config.getBoolean("Bombs Can Drop Emeralds", DROPS, true, "Enable emerald drops from grass (must use sword)", "config.zss.drops.enable_grass_emerald_drop");
 
 		/*================== LOOT IN VANILLA CHESTS =====================*/
 		enableBombLoot = config.getBoolean("Bombs in Chests", LOOT, false, "Enable bombs in vanilla chests", "config.zss.loot.enable_bomb_loot");
