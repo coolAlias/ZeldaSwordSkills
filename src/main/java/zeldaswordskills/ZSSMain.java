@@ -84,7 +84,7 @@ public class ZSSMain
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		Config.preInit(event);
+		Config.preInit(proxy, event);
 		isAtlasEnabled = Loader.isModLoaded("antiqueatlas");
 		isBG2Enabled = Loader.isModLoaded("battlegear2");
 		ZSSBlocks.preInit();
@@ -143,7 +143,7 @@ public class ZSSMain
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event){
 		if(event.modID.equals(ModInfo.ID)){
-			Config.init();
+			proxy.initConfig();
 			//Has no effect yet
 			Config.postPropInit();
 		}

@@ -27,6 +27,7 @@ import java.util.Set;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import zeldaswordskills.CommonProxy;
 import zeldaswordskills.ZSSMain;
 import zeldaswordskills.api.item.WeaponRegistry;
 import zeldaswordskills.block.BlockWarpStone;
@@ -455,13 +456,16 @@ public class Config
 	/** [Warp Stone] Default warp locations */
 	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
 
-	public static void preInit(FMLPreInitializationEvent event) {
+	public static void preInit(CommonProxy proxy, FMLPreInitializationEvent event) {
 		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
 		config.load();
-		init();
+		proxy.initConfig();
 	}
 
-	public static void init(){
+	/**
+	 * Settings that both dedicated and integrated servers should have are generated here.
+	 */
+	public static void commonInit() {
 		ZSSItems.initConfig(config);
 
 		/*================== GENERAL =====================*/
@@ -487,71 +491,6 @@ public class Config
 		naviRange = config.getInt("[NPC][Navi] Navi Sense Range", GENERAL, 4, 0, 10, "Range at which Navi can sense secret rooms, in blocks (0 to disable)", "config.zss.general.navi_range");
 		naviFrequency = config.getInt("[NPC][Navi] Navi Sense Frequency", GENERAL, 50, 20, 200, "Frequency with which Navi checks the proximity for secret rooms, in ticks", "config.zss.general.navi_frequency");
 
-		/*================== CLIENT SIDE SETTINGS  =====================*/
-		config.setCategoryLanguageKey(CLIENT, "config.zss.client");
-
-		showSecretMessage = config.getBoolean("[Chat] Alert When Striking Secret Blocks", CLIENT, false, "Whether to show a chat message when striking secret blocks", "config.zss.client.show_secret_message");
-		allowVanillaControls = config.getBoolean("[Controls] Use Vanilla Movement Keys for Skills", CLIENT, true, "Whether to use vanilla movement keys to activate skills such as Dodge and Parry", "config.zss.client.allow_vanilla_controls");
-		requireDoubleTap = config.getBoolean("[Controls] Double-tap for Movement Skills", CLIENT, true, "Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", "config.zss.client.require_double_tap");
-		resetNotesInterval = config.getInt("[Song GUI] Ticks Between Notes Before Clear", CLIENT, 30, 5, 100, "Number of ticks allowed between notes before played notes are cleared", "config.zss.client.reset_notes_interval");
-		enableHookshotSound = config.getBoolean("[Sound] Hookshot Miss Plays Item-Break Sound", CLIENT, true, "Whether to play the 'itembreak' sound when the hookshot misses", "config.zss.client.enable_hookshot_sound");
-		targetMobs = config.getBoolean("[Targeting] Prioritize mobs", CLIENT, true, "Prioritize mobs over other entity types when targeting", "config.zss.client.target_mobs");
-		enableAutoTarget = config.getBoolean("[Targeting] Enable Auto-Targeting", CLIENT, true, "Whether auto-targeting is enabled or not (toggle in game: '.')", "config.zss.client.enable_auto_target");
-		canTargetPlayers = config.getBoolean("[Targeting] Can Target Players", CLIENT, true, "Whether players can be targeted (toggle in game: '.' while sneaking)", "config.zss.client.can_target_players");
-
-		/*=================== BUFF BAR HUD ===================*/
-		config.setCategoryLanguageKey(BUFF_BAR, "config.zss.buff_bar");
-		
-		buffBarMaxIcons = config.getInt("Number of Buffs per Row/Column", BUFF_BAR, 5, 1, 10, "Maximum number of icons to display per row or column", "config.zss.buff_bar.buff_bar_max_icons");
-		isBuffBarEnabled = config.getBoolean("Buff Bar Displays at All Times", BUFF_BAR, true, "Whether the buff bar should be displayed at all times");
-		isBuffBarHorizontal = config.getBoolean("Display Buff Bar Horizontally", BUFF_BAR, true, "Whether the buff bar should be displayed horizontally", "config.zss.buff_bar.is_buff_bar_horizontal");
-		buffBarHAlign = HALIGN.fromString(config.getString("Buff HUD X Alignment", BUFF_BAR, "right", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.buff_bar.buff_bar_halign"));
-		buffBarVAlign = VALIGN.fromString(config.getString("Buff HUD Y Alignment", BUFF_BAR, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.buff_bar.buff_bar_valign"));
-		buffBarOffsetX = config.get(BUFF_BAR, "Buff HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.buff_bar.buff_bar_offset_x").getInt();
-		buffBarOffsetY = config.get(BUFF_BAR, "Buff HUD Y Offset", 0,"Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.buff_bar.buff_bar_offset_y").getInt();
-		
-		/*=================== COMBO HUD ===================*/
-		config.setCategoryLanguageKey(COMBO, "config.zss.combo_hud");
-		
-		isComboHudEnabled = config.getBoolean("Display Combo Counter", COMBO, true, "Whether the combo hit counter will display by default (toggle in game: 'v')");
-		hitsToDisplay = config.getInt("Hits to Display in Combo HUD", COMBO, 3, 0, 12, "Max hits to display in Combo HUD", "config.zss.combo_hud.hits_to_display");
-		comboHudHAlign = HALIGN.fromString(config.getString("Combo HUD X Alignment", COMBO, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.combo_hud.combo_hud_halign"));
-		comboHudVAlign = VALIGN.fromString(config.getString("Combo HUD Y Alignment", COMBO, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.combo_hud.combo_hud_valign"));
-		comboHudOffsetX = config.get(COMBO, "Combo HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_x").getInt();
-		comboHudOffsetY = config.get(COMBO, "Combo HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_y").getInt();
-
-		/*================== ENDING BLOW HUD =====================*/
-		config.setCategoryLanguageKey(ENDING_BLOW, "config.zss.ending_blow");
-
-		isEndingBlowHudEnabled = config.getBoolean("Display Ending Blow HUD", ENDING_BLOW, true, "Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use)");
-		endingBlowHudHAlign = HALIGN.fromString(config.getString("Ending Blow HUD X Alignment", ENDING_BLOW, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.ending_blow.ending_blow_hud_halign"));
-		endingBlowHudVAlign = VALIGN.fromString(config.getString("Ending Blow HUD Y Alignment", ENDING_BLOW, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.ending_blow.ending_blow_hud_valign"));
-		endingBlowHudOffsetX = config.get(ENDING_BLOW, "Ending Blow HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_x").getInt();
-		endingBlowHudOffsetY = config.get(ENDING_BLOW, "Ending Blow HUD Y Offset", 30, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_y").getInt();
-
-		/*================== ITEM MODE HUD =====================*/
-		config.setCategoryLanguageKey(ITEM_MODE, "config.zss.item_mode");
-
-		isItemModeEnabled = config.getBoolean("Display Item Mode HUD", ITEM_MODE, true, "Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)");
-		itemModeHAlign = HALIGN.fromString(config.getString("Item Mode HUD X Alignment", ITEM_MODE, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.item_mode.item_mode_halign"));
-		itemModeVAlign = VALIGN.fromString(config.getString("Item Mode HUD Y Alignment", ITEM_MODE, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.item_mode.item_mode_valign"));
-		itemModeOffsetX = config.get(ITEM_MODE, "Item Mode HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_x").getInt();
-		itemModeOffsetY = config.get(ITEM_MODE, "Item Mode HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_y").getInt();
-
-		/*================== MAGIC METER (CLIENT SIDE) =====================*/
-		config.setCategoryLanguageKey(MAGIC_METER, "config.zss.magic_meter");
-		
-		magicMeterHAlign = HALIGN.fromString(config.getString("Magic Meter X Alignment", MAGIC_METER, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.magic_meter.magic_meter_halign"));
-		magicMeterVAlign = VALIGN.fromString(config.getString("Magic Meter Y Alignment", MAGIC_METER, "bottom", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.magic_meter.magic_meter_valign"));
-		isMagicMeterTextEnabled = config.getBoolean("Display Current Magic Points", MAGIC_METER, false, "Enable text display of current Magic Points");
-		isMagicMeterEnabled = config.getBoolean("Display Magic Meter", MAGIC_METER, true, "Enable the Magic Meter HUD display");
-		magicMeterOffsetX = config.get(MAGIC_METER, "Magic Meter X Offset", 47, "Moves the Meter left (-) or right (+) this number of pixels").setLanguageKey("config.zss.magic_meter.magic_meter_offset_x").getInt();
-		magicMeterOffsetY = config.get(MAGIC_METER, "Magic Meter Y Offset", -40, "Moves the Meter up (-) or down (+) this number of pixels").setLanguageKey("config.zss.magic_meter.magic_meter_offset_y").getInt();
-		isMagicMeterHorizontal = config.getBoolean("Magic Meter Displays Horizontally", MAGIC_METER, true,"True for a horizontal magic meter, or false for a vertical one", "config.zss.magic_meter.is_magic_meter_horizontal");
-		isMagicBarLeft = config.getBoolean("Drain Magic Bar To the Bottom/Left", MAGIC_METER, true, "True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", "config.zss.magic_meter.is_magic_bar_left");
-		magicMeterWidth = config.getInt("Magic Meter Width", MAGIC_METER, 75, 25, 100, "Maximum width of the magic meter", "config.zss.magic_meter.magic_meter_width");
-		magicMeterIncrements = config.getInt("Number of Meter Increments", MAGIC_METER, 2, 1, 10, "Number of increments required to max out the magic meter, where each increment is 50 magic points", "config.zss.magic_meter.magic_meter_increments");
-		
 		/*================== MOD INTER-COMPATIBILITY =====================*/
 		config.setCategoryLanguageKey(MOD_SUPPORT, "config.zss.mod_support");
 
@@ -742,6 +681,86 @@ public class Config
 		if (config.hasChanged()) {
 			config.save();
 		}
+	}
+
+	/**
+	 * Creates configurations for the physical client side
+	 */
+	public static void clientInit() {
+		commonInit();
+
+		/*================== CLIENT SIDE SETTINGS  =====================*/
+		config.setCategoryLanguageKey(CLIENT, "config.zss.client");
+
+		showSecretMessage = config.getBoolean("[Chat] Alert When Striking Secret Blocks", CLIENT, false, "Whether to show a chat message when striking secret blocks", "config.zss.client.show_secret_message");
+		allowVanillaControls = config.getBoolean("[Controls] Use Vanilla Movement Keys for Skills", CLIENT, true, "Whether to use vanilla movement keys to activate skills such as Dodge and Parry", "config.zss.client.allow_vanilla_controls");
+		requireDoubleTap = config.getBoolean("[Controls] Double-tap for Movement Skills", CLIENT, true, "Whether Dodge and Parry require double-tap or not (double-tap always required with vanilla control scheme)", "config.zss.client.require_double_tap");
+		resetNotesInterval = config.getInt("[Song GUI] Ticks Between Notes Before Clear", CLIENT, 30, 5, 100, "Number of ticks allowed between notes before played notes are cleared", "config.zss.client.reset_notes_interval");
+		enableHookshotSound = config.getBoolean("[Sound] Hookshot Miss Plays Item-Break Sound", CLIENT, true, "Whether to play the 'itembreak' sound when the hookshot misses", "config.zss.client.enable_hookshot_sound");
+		targetMobs = config.getBoolean("[Targeting] Prioritize mobs", CLIENT, true, "Prioritize mobs over other entity types when targeting", "config.zss.client.target_mobs");
+		enableAutoTarget = config.getBoolean("[Targeting] Enable Auto-Targeting", CLIENT, true, "Whether auto-targeting is enabled or not (toggle in game: '.')", "config.zss.client.enable_auto_target");
+		canTargetPlayers = config.getBoolean("[Targeting] Can Target Players", CLIENT, true, "Whether players can be targeted (toggle in game: '.' while sneaking)", "config.zss.client.can_target_players");
+
+		/*=================== BUFF BAR HUD ===================*/
+		config.setCategoryLanguageKey(BUFF_BAR, "config.zss.buff_bar");
+
+		buffBarMaxIcons = config.getInt("Number of Buffs per Row/Column", BUFF_BAR, 5, 1, 10, "Maximum number of icons to display per row or column", "config.zss.buff_bar.buff_bar_max_icons");
+		isBuffBarEnabled = config.getBoolean("Buff Bar Displays at All Times", BUFF_BAR, true, "Whether the buff bar should be displayed at all times");
+		isBuffBarHorizontal = config.getBoolean("Display Buff Bar Horizontally", BUFF_BAR, true, "Whether the buff bar should be displayed horizontally", "config.zss.buff_bar.is_buff_bar_horizontal");
+		buffBarHAlign = HALIGN.fromString(config.getString("Buff HUD X Alignment", BUFF_BAR, "right", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.buff_bar.buff_bar_halign"));
+		buffBarVAlign = VALIGN.fromString(config.getString("Buff HUD Y Alignment", BUFF_BAR, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.buff_bar.buff_bar_valign"));
+		buffBarOffsetX = config.get(BUFF_BAR, "Buff HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.buff_bar.buff_bar_offset_x").getInt();
+		buffBarOffsetY = config.get(BUFF_BAR, "Buff HUD Y Offset", 0,"Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.buff_bar.buff_bar_offset_y").getInt();
+
+		/*=================== COMBO HUD ===================*/
+		config.setCategoryLanguageKey(COMBO, "config.zss.combo_hud");
+
+		isComboHudEnabled = config.getBoolean("Display Combo Counter", COMBO, true, "Whether the combo hit counter will display by default (toggle in game: 'v')");
+		hitsToDisplay = config.getInt("Hits to Display in Combo HUD", COMBO, 3, 0, 12, "Max hits to display in Combo HUD", "config.zss.combo_hud.hits_to_display");
+		comboHudHAlign = HALIGN.fromString(config.getString("Combo HUD X Alignment", COMBO, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.combo_hud.combo_hud_halign"));
+		comboHudVAlign = VALIGN.fromString(config.getString("Combo HUD Y Alignment", COMBO, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.combo_hud.combo_hud_valign"));
+		comboHudOffsetX = config.get(COMBO, "Combo HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_x").getInt();
+		comboHudOffsetY = config.get(COMBO, "Combo HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.combo_hud.combo_hud_offset_y").getInt();
+
+		/*================== ENDING BLOW HUD =====================*/
+		config.setCategoryLanguageKey(ENDING_BLOW, "config.zss.ending_blow");
+
+		isEndingBlowHudEnabled = config.getBoolean("Display Ending Blow HUD", ENDING_BLOW, true, "Enable Ending Blow HUD display (if disabled, there is not any indication that the skill is ready to use)");
+		endingBlowHudHAlign = HALIGN.fromString(config.getString("Ending Blow HUD X Alignment", ENDING_BLOW, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.ending_blow.ending_blow_hud_halign"));
+		endingBlowHudVAlign = VALIGN.fromString(config.getString("Ending Blow HUD Y Alignment", ENDING_BLOW, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.ending_blow.ending_blow_hud_valign"));
+		endingBlowHudOffsetX = config.get(ENDING_BLOW, "Ending Blow HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_x").getInt();
+		endingBlowHudOffsetY = config.get(ENDING_BLOW, "Ending Blow HUD Y Offset", 30, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.ending_blow.ending_blow_hud_offset_y").getInt();
+
+		/*================== ITEM MODE HUD =====================*/
+		config.setCategoryLanguageKey(ITEM_MODE, "config.zss.item_mode");
+
+		isItemModeEnabled = config.getBoolean("Display Item Mode HUD", ITEM_MODE, true, "Enable item mode HUD display (if disabled, mode may still be viewed in the item's tooltip)");
+		itemModeHAlign = HALIGN.fromString(config.getString("Item Mode HUD X Alignment", ITEM_MODE, "left", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.item_mode.item_mode_halign"));
+		itemModeVAlign = VALIGN.fromString(config.getString("Item Mode HUD Y Alignment", ITEM_MODE, "top", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.item_mode.item_mode_valign"));
+		itemModeOffsetX = config.get(ITEM_MODE, "Item Mode HUD X Offset", 0, "Moves the HUD element left (-) or right (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_x").getInt();
+		itemModeOffsetY = config.get(ITEM_MODE, "Item Mode HUD Y Offset", 0, "Moves the HUD element up (-) or down (+) this number of pixels").setLanguageKey("config.zss.item_mode.item_mode_offset_y").getInt();
+
+		/*================== MAGIC METER (CLIENT SIDE) =====================*/
+		config.setCategoryLanguageKey(MAGIC_METER, "config.zss.magic_meter");
+
+		magicMeterHAlign = HALIGN.fromString(config.getString("Magic Meter X Alignment", MAGIC_METER, "center", "Alignment on the X axis [left|center|right]", new String[]{"left", "center", "right"}, "config.zss.magic_meter.magic_meter_halign"));
+		magicMeterVAlign = VALIGN.fromString(config.getString("Magic Meter Y Alignment", MAGIC_METER, "bottom", "Alignment on the Y axis [top|center|bottom]", new String[]{"top", "center", "bottom"}, "config.zss.magic_meter.magic_meter_valign"));
+		isMagicMeterTextEnabled = config.getBoolean("Display Current Magic Points", MAGIC_METER, false, "Enable text display of current Magic Points");
+		isMagicMeterEnabled = config.getBoolean("Display Magic Meter", MAGIC_METER, true, "Enable the Magic Meter HUD display");
+		magicMeterOffsetX = config.get(MAGIC_METER, "Magic Meter X Offset", 47, "Moves the Meter left (-) or right (+) this number of pixels").setLanguageKey("config.zss.magic_meter.magic_meter_offset_x").getInt();
+		magicMeterOffsetY = config.get(MAGIC_METER, "Magic Meter Y Offset", -40, "Moves the Meter up (-) or down (+) this number of pixels").setLanguageKey("config.zss.magic_meter.magic_meter_offset_y").getInt();
+		isMagicMeterHorizontal = config.getBoolean("Magic Meter Displays Horizontally", MAGIC_METER, true,"True for a horizontal magic meter, or false for a vertical one", "config.zss.magic_meter.is_magic_meter_horizontal");
+		isMagicBarLeft = config.getBoolean("Drain Magic Bar To the Bottom/Left", MAGIC_METER, true, "True to drain mana from right-to-left or top-to-bottom depending on orientation; false for the opposite", "config.zss.magic_meter.is_magic_bar_left");
+		magicMeterWidth = config.getInt("Magic Meter Width", MAGIC_METER, 75, 25, 100, "Maximum width of the magic meter", "config.zss.magic_meter.magic_meter_width");
+		magicMeterIncrements = config.getInt("Number of Meter Increments", MAGIC_METER, 2, 1, 10, "Number of increments required to max out the magic meter, where each increment is 50 magic points", "config.zss.magic_meter.magic_meter_increments");
+	}
+
+	/**
+	 * Creates configurations for the physical server side
+	 */
+	public static void serverInit() {
+		commonInit();
+		// Nothing to put here yet
 	}
 
 	public static void postInit(){

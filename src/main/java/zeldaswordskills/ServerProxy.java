@@ -20,6 +20,7 @@ package zeldaswordskills;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.IThreadListener;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import zeldaswordskills.ref.Config;
 
 /**
  * 
@@ -30,6 +31,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
  *
  */
 public class ServerProxy extends CommonProxy {
+
+	@Override
+	public void initConfig() {
+		Config.serverInit();
+	}
 
 	@Override
 	public EntityPlayer getPlayerEntity(MessageContext ctx) {
