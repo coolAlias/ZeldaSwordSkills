@@ -37,6 +37,8 @@ public class CommonProxy
 		return 0;
 	}
 
+	public void initConfig() {}
+
 	/**
 	 * Returns a side-appropriate EntityPlayer for use during message handling
 	 */

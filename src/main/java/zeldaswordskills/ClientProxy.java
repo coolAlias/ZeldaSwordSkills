@@ -47,6 +47,7 @@ import zeldaswordskills.entity.ZSSEntities;
 import zeldaswordskills.item.IModItem;
 import zeldaswordskills.item.ZSSItems;
 import zeldaswordskills.network.client.UnpressKeyPacket;
+import zeldaswordskills.ref.Config;
 import zeldaswordskills.ref.ModInfo;
 import zeldaswordskills.world.gen.AntiqueAtlasHelper;
 
@@ -84,6 +85,11 @@ public class ClientProxy extends CommonProxy
 	@Override
 	public int addArmor(String armor) {
 		return 0;// TODO is this even necessary any longer? RenderingRegistry.addNewArmourRendererPrefix(armor);
+	}
+
+	@Override
+	public void initConfig() {
+		Config.clientInit();
 	}
 
 	/**

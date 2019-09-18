@@ -17,6 +17,10 @@
 
 package zeldaswordskills.item;
 
+import static zeldaswordskills.ref.Config.DROPS;
+import static zeldaswordskills.ref.Config.LOOT;
+import static zeldaswordskills.ref.Config.RECIPES;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -304,21 +308,22 @@ public class ZSSItems
 	 */
 	public static void initConfig(Configuration config) {
 		/*================== GRASS DROPS =====================*/
-		//TODO add keys when Drops is added to ConfigGui
-		enableGrassArrowDrop = config.getBoolean("Grass Can Drop Arrows", "drops", true, "Enable arrow drops from grass (must use sword)", "config.zss.drops.enable_grass_arrow_drop");
-		enableGrassBombDrop = config.getBoolean("Grass Can Drop Bombs", "drops", false, "Enable bomb drops from grass (must use sword)", "config.zss.drops.enable_grass_bomb_drop");
-		enableGrassEmeraldDrop = config.getBoolean("Bombs Can Drop Emeralds", "drops", true, "Enable emerald drops from grass (must use sword)", "config.zss.drops.enable_grass_emerald_drop");
+		enableGrassArrowDrop = config.getBoolean("Grass Can Drop Arrows", DROPS, true, "Enable arrow drops from grass (must use sword)", "config.zss.drops.enable_grass_arrow_drop");
+		enableGrassBombDrop = config.getBoolean("Grass Can Drop Bombs", DROPS, false, "Enable bomb drops from grass (must use sword)", "config.zss.drops.enable_grass_bomb_drop");
+		enableGrassEmeraldDrop = config.getBoolean("Bombs Can Drop Emeralds", DROPS, true, "Enable emerald drops from grass (must use sword)", "config.zss.drops.enable_grass_emerald_drop");
 
 		/*================== LOOT IN VANILLA CHESTS =====================*/
-		enableBombLoot = config.getBoolean("Bombs in Chests", "loot", false, "Enable bombs in vanilla chests", "config.zss.loot.enable_bomb_loot");
-		enableBombBagLoot = config.getBoolean("Bomb Bags in Chests", "loot", false, "Enable bomb bags in vanilla chests", "config.zss.loot.enable_bomb_bag_loot");
-		enableHeartLoot = config.getBoolean("Heart Pieces in Chests", "loot", false, "Enable heart pieces in vanilla chests", "config.zss.loot.enable_heart_loot");
+		enableBombLoot = config.getBoolean("Bombs in Chests", LOOT, false, "Enable bombs in vanilla chests", "config.zss.loot.enable_bomb_loot");
+		enableBombBagLoot = config.getBoolean("Bomb Bags in Chests", LOOT, false, "Enable bomb bags in vanilla chests", "config.zss.loot.enable_bomb_bag_loot");
+		enableHeartLoot = config.getBoolean("Heart Pieces in Chests", LOOT, false, "Enable heart pieces in vanilla chests", "config.zss.loot.enable_heart_loot");
 
 		/*================== RECIPES =====================*/
-		allowGoldSmelting = config.getBoolean("Can Smelt Pigmen Swords", "recipes", false, "Smelt all those disarmed pigmen swords into gold ingots", "config.zss.recipes.allow_gold_smelting");
-		enableCraftingHammer = config.getBoolean("Can Craft the Wooden Hammer", "recipes", true, "Enable crafting of the Wooden Hammer used to bypass wooden pegs", "config.zss.recipes.enable_crafting_hammer");
-		enableCraftingMudora = config.getBoolean("Can Copy Book of Mudora by Crafting", "recipes", true, "Enable crafting recipe to make copies of the Book of Mudora", "config.zss.recipes.enable_crafting_mudora");
-		enableCraftingThrowingRock = config.getBoolean("Can Craft Throwing Rocks", "recipes", false, "Enable crafting throwing rocks from cobblestone and back", "config.zss.recipes.enable_crafting_throwing_rock");
+		config.setCategoryLanguageKey(RECIPES, "config.zss.recipes");
+
+		allowGoldSmelting = config.getBoolean("Can Smelt Pigmen Swords", RECIPES, false, "Smelt all those disarmed pigmen swords into gold ingots", "config.zss.recipes.allow_gold_smelting");
+		enableCraftingHammer = config.getBoolean("Can Craft the Wooden Hammer", RECIPES, true, "Enable crafting of the Wooden Hammer used to bypass wooden pegs", "config.zss.recipes.enable_crafting_hammer");
+		enableCraftingMudora = config.getBoolean("Can Copy Book of Mudora by Crafting", RECIPES, true, "Enable crafting recipe to make copies of the Book of Mudora", "config.zss.recipes.enable_crafting_mudora");
+		enableCraftingThrowingRock = config.getBoolean("Can Craft Throwing Rocks", RECIPES, false, "Enable crafting throwing rocks from cobblestone and back", "config.zss.recipes.enable_crafting_throwing_rock");
 	}
 
 	/**
