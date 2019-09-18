@@ -63,7 +63,8 @@ public class GuiConfigZeldaSwordSkills extends GuiConfig {
 				new ConfigElement(Config.config.getCategory("drops")),
 				new ConfigElement(Config.config.getCategory("trade")),
 				new ConfigElement(Config.config.getCategory("mob spawns").setRequiresMcRestart(true)),
-				new ConfigElement(Config.config.getCategory("recipes").setRequiresMcRestart(true))
+				new ConfigElement(Config.config.getCategory("recipes").setRequiresMcRestart(true)),
+				new ConfigElement(Config.config.getCategory("songs"))
 			);
 	}
 

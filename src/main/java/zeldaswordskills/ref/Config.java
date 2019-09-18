@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -74,7 +73,8 @@ public class Config
 			DROPS = "drops",
 			TRADES = "trade",
 			MOB_SPAWNS = "mob spawns",
-			RECIPES = "recipes";
+			RECIPES = "recipes",
+			SONGS = "songs";
 	/*================== GENERAL =====================*/
 	/** [SYNC] Whether players can be stunned; if false, item use is still interrupted */
 	private static boolean enableStunPlayer;
@@ -766,10 +766,10 @@ public class Config
 	public static void postPropInit() {
 		/*================== SONGS =====================*/
 		//TODO add to GuiConfig
-		minSongIntervalStorm = MathHelper.clamp_int(config.get("Songs", "[Song of Storms] Time required between each use of the song (by anybody) [0-24000]", 600).getInt(), 0, 24000);
-		minSongIntervalSun = MathHelper.clamp_int(config.get("Songs", "[Sun's Song] Time required between each use of the song (by anybody) [0-24000]", 1200).getInt(), 0, 24000);
+		minSongIntervalStorm = config.getInt("Song of Storms Cooldown", SONGS, 600, 0, 24000, "[Song of Storms] Time required between each use of the song (by anybody)", "config.zss.songs.min_song_interval_storm");
+		minSongIntervalSun = config.getInt("Sun's Song Cooldown", SONGS, 1200, 0, 24000, "[Sun's Song] Time required between each use of the song (by anybody)", "config.zss.songs.min_song_interval_sun");
 		for (AbstractZeldaSong song : ZeldaSongs.getRegisteredSongs()) {
-			if (!config.get("Songs", "Whether " + song.getDisplayName() + "'s main effect is enabled (does not affect notification of Song Blocks or Entities)", true).getBoolean(true)) {
+			if (!config.getBoolean(song.getDisplayName() + " Effect is Enabled", SONGS, true, "Whether " + song.getDisplayName() + "'s main effect is enabled (does not affect notification of Song Blocks or Entities)", "config.zss.songs." + song.getUnlocalizedName())) {
 				song.setIsEnabled(false);
 			}
 		}
