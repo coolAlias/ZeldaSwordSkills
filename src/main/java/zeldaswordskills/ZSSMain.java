@@ -144,7 +144,6 @@ public class ZSSMain
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event){
 		if(event.modID.equals(ModInfo.ID)){
 			proxy.initConfig();
-			//Has no effect yet
 			Config.postPropInit();
 		}
 	}

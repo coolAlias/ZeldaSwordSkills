@@ -55,6 +55,7 @@ import zeldaswordskills.util.WarpPoint;
 public class Config
 {
 	public static Configuration config;
+	public static final String VERSION = "1.0";
 	/*================== CATEGORIES =====================*/
 	public static final String GENERAL = "general",
 			CLIENT = "client",
@@ -457,8 +458,12 @@ public class Config
 	private static Map<AbstractZeldaSong, WarpPoint> warp_defaults = new HashMap<AbstractZeldaSong, WarpPoint>();
 
 	public static void preInit(CommonProxy proxy, FMLPreInitializationEvent event) {
-		config = new Configuration(new File(event.getModConfigurationDirectory().getAbsolutePath() + ModInfo.CONFIG_PATH));
-		config.load();
+		File configFile = event.getSuggestedConfigurationFile();
+		Configuration oldConfig = new Configuration(configFile);
+		if (!Config.VERSION.equals(oldConfig.getLoadedConfigVersion())) {
+			configFile.delete();
+		}
+		config = new Configuration(configFile, Config.VERSION);
 		proxy.initConfig();
 	}
 
