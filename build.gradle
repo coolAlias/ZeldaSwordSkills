@@ -12,32 +12,37 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
     }
 }
+repositories {
+    maven {
+        name = "CurseForge"
+        url = "https://minecraft.curseforge.com/api/maven/"
+    }
+}
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-/*
-// for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
-}
-*/
+// Minecraft, Forge, and Java versions
+sourceCompatibility = targetCompatibility = "1.8"
+ext.mcversion = "1.8.9"
+ext.forgeversion = "11.15.1.2318"
 
+// Mod version
 version = "3.4"
 group = "com.google.coolalias.zeldaswordskills"
-archivesBaseName = "1.8.9-zeldaswordskills"
-
-sourceCompatibility = targetCompatibility = "1.7"
+archivesBaseName = "zeldaswordskills-$mcversion"
 
 dependencies {
-	compile files (
-		"eclipse/libs/antiqueatlas-1.8.9-4.2.10.jar",
-		"eclipse/mods/1.8.9-Battlegear-Bin-1.0.10.2.jar",
-	)
+    compileOnly "antique-atlas:antiqueatlas:1.8.9:4.4.0"
+    compileOnly "mb-battlegear-2:1.8.9-MB_Battlegear2:Bullseye:1.0.10.2"
 }
 
 minecraft {
-    version = "1.8.9-11.15.1.1902-1.8.9"
-    runDir = "eclipse"
-    mappings = "snapshot_20160301"
+    version = "$mcversion-$forgeversion-$mcversion"
+    runDir = "run"
+    mappings = "stable_22"
+}
+
+jar {
+    archiveName = archivesBaseName + "-" + version + "-universal.jar"
 }
 
 processResources
@@ -63,6 +68,6 @@ task deobfJar(type: Jar) {
 }
 
 artifacts {
-	archives deobfJar
-	archives sourceJar
+    archives deobfJar
+    archives sourceJar
 }
